@@ -1,0 +1,11 @@
+diff --git a/app.py b/app.py
+index 1111111..2222222 100644
+--- a/app.py
++++ b/app.py
+@@ -10,6 +10,7 @@
+ import secrets
+ from datetime import datetime
++print("### TEST PATCH ÇALIŞTI ###")
+ 
+ # ===================== Yapılandırma =====================
+ def env_bool(name: str, default: bool = False) -> bool:

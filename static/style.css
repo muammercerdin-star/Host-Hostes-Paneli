@@ -1,0 +1,11 @@
+.page { max-width: 420px; margin: 12px auto; background:#2f353a; padding:16px; border-radius:12px; color:#fff; }
+.row { display:flex; align-items:center; justify-content:space-between; margin:8px 0; }
+.left, .right { display:flex; gap:10px; }
+.seat { width:48px; height:48px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:600; }
+.empty { background:#2e7d32; }   /* BOŞ = yeşil */
+.block { background:#b71c1c; }   /* KORİDOR/BLOK */
+.label { margin-top:4px; font-size:11px; opacity:.9; text-align:center; }
+.col { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.header { margin-bottom:8px; font-weight:700; }
+.footer { margin-top:12px; text-align:center; opacity:.8; }
+.occupied { background:#455a64 !important; } /* dolu koltuk rengi (geçici) */

@@ -1,0 +1,462 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .coach{width:560px;margin:16px auto;background:#2f353a;padding:18px;border-radius:16px;color:#fff}
+  .head{font-weight:700;margin-bottom:10px}
+
+  .deck{display:grid;grid-template-columns:70px 70px 70px 70px;grid-template-rows:repeat(14,70px);gap:14px 22px;align-items:center;justify-content:center}
+  .seat{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;background:#1f6b2d;cursor:pointer;transition:filter .15s}
+  .seat:hover{filter:brightness(1.08)}
+  .seat.selected{outline:3px solid #9ad1ff}
+  .cell{display:flex;flex-direction:column;align-items:center;position:relative}
+  .label{font-size:11px;color:#e6d48a;margin-top:4px;min-height:12px}
+  .door{grid-column:3/5;grid-row:8;height:28px;border-radius:10px;background:#7a6431;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .corr{grid-column:2;grid-row:1/15;width:56px;border-radius:12px;background:#912727;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;writing-mode:vertical-rl;text-orientation:upright;justify-self:center}
+
+  #seatForm{display:none;position:absolute;left:0;top:0;transform:translate(-50%,-100%);background:#1e2327;border-radius:12px;padding:14px;color:#fff;z-index:1000;width:270px;box-shadow:0 12px 28px rgba(0,0,0,.35);border:1px solid #3b4248}
+  #seatForm h3{margin:0 0 10px 0}
+  #seatForm .row{margin:8px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .btn{background:#1f6b2d;color:#fff;border:none;padding:8px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+  .btn.secondary{background:#444}
+  .btn.danger{background:#8a3a3a}
+  select,input[type="number"],input[type="text"],textarea{background:#2a2f34;color:#fff;border:1px solid #3b4248;border-radius:8px;padding:6px 8px}
+
+  .bulkbar{max-width:920px;margin:16px auto;padding:12px;background:#2f353a;border-radius:14px;color:#fff;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center}
+  .bulkbar .field{display:flex;flex-direction:column;gap:6px;min-width:160px}
+  .bulkbar label{font-size:12px;opacity:.9}
+  .bulkbar .stat{font-weight:700}
+  .toggle{background:#3a4550}
+  .muted{opacity:.8;font-size:13px}
+
+  .stats-floating{max-width:560px;margin:20px auto;background:#2f353a;color:#fff;border:1px solid #3b4248;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.5}
+  .stats-floating h4{margin:0 0 8px 0;font-size:15px}
+  .stats-floating .row{display:flex;justify-content:space-between}
+
+  #walkonForm{
+    display:none; position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+    background:#1e2327; color:#fff; border:1px solid #3b4248; border-radius:14px; padding:16px; z-index:1200; width:360px;
+    box-shadow:0 20px 40px rgba(0,0,0,.45);
+  }
+  #walkonForm h3{margin:0 0 10px 0}
+  #walkonForm .row{display:flex; gap:10px; margin:8px 0; align-items:center; flex-wrap:wrap}
+  #walkonForm .row > label{display:flex; flex-direction:column; gap:6px; flex:1}
+  #walkonBackdrop{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1100;
+  }
+</style>
+
+<div class="coach">
+  <div class="head">
+    Sefer: {{ trip['route'] }} — Plaka: {{ trip['plate'] or '-' }} —
+    1. Kaptan: {{ trip['captain1'] or '-' }} —
+    2. Kaptan: {{ trip['captain2'] or '-' }} —
+    Muavin: {{ trip['attendant'] or '-' }}
+  </div>
+
+  <div class="deck" id="deck">
+    <div class="corr">KORİDOR</div>
+
+    {% set seats_map = {
+      1:[1,1],3:[1,3],4:[1,4], 5:[2,1],7:[2,3],8:[2,4],
+      9:[3,1],11:[3,3],12:[3,4], 13:[4,1],15:[4,3],16:[4,4],
+      17:[5,1],19:[5,3],20:[5,4], 21:[6,1],23:[6,3],24:[6,4],
+      25:[7,1],27:[7,3],28:[7,4],
+      29:[8,1],
+      31:[9,1],33:[9,3],34:[9,4],
+      35:[10,1],37:[10,3],38:[10,4],
+      39:[11,1],41:[11,3],42:[11,4],
+      43:[12,1],45:[12,3],46:[12,4],
+      49:[13,3],50:[13,4],
+      51:[14,1],52:[14,2],53:[14,3],54:[14,4]
+    } %}
+    {% for n, pos in seats_map.items() %}
+      {% if n == 29 %}<div class="door">KAPI</div>{% endif %}
+      <div class="cell" style="grid-row:{{pos[0]}};grid-column:{{pos[1]}}">
+        <div class="seat" onclick="handleSeatClick({{n}})" id="seat-{{n}}" data-seat="{{n}}">{{n}}</div>
+        <div class="label" id="label-{{n}}"></div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Ana Sayfa / Seferi Sonlandır -->
+<div style="margin-top:20px;display:flex;gap:12px;justify-content:center;">
+  <a href="{{ url_for('index') }}" class="btn" style="background:#3498db;color:#fff;padding:10px 20px;text-decoration:none;border-radius:8px;font-weight:700;">Ana Sayfaya Dön</a>
+  <form method="post" action="{{ url_for('end_trip') }}" onsubmit="return confirm('Seferi sonlandırmak istediğinize emin misiniz?');">
+    <!-- CSRF ekledik -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="btn danger" style="padding:10px 20px;border-radius:8px;font-weight:700;">Seferi Sonlandır</button>
+  </form>
+</div>
+
+<!-- Çoklu Seçim Araç Çubuğu -->
+<div class="bulkbar" id="bulkBar">
+  <button class="btn toggle" id="toggleBulk">Çoklu Seçim: KAPALI</button>
+
+  <div class="field">
+    <label>İneceği Durak</label>
+    <select id="bulkStop"><option value="">—</option></select>
+  </div>
+  <div class="field">
+    <label>Bilet</label>
+    <select id="bulkTicket">
+      <option value="biletsiz">Biletsiz</option>
+      <option value="biletli">Biletli</option>
+      <option value="ucretsiz">Ücretsiz</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Ödeme</label>
+    <select id="bulkPay">
+      <option value="nakit">Nakit</option><option value="iban">IBAN</option>
+      <option value="online">Online</option><option value="pos">POS</option>
+      <option value="ucretsiz">Ücretsiz</option>
+    </select>
+  </div>
+  <div class="field" style="max-width:120px">
+    <label>Tutar (TL)</label>
+    <input type="number" id="bulkAmount" step="0.01" min="0" value="">
+  </div>
+
+  <button class="btn" id="bulkSave" disabled>Toplu Kaydet</button>
+  <button class="btn danger" id="bulkDelete" disabled>Toplu İndir</button>
+
+  <div class="muted"><span class="stat" id="selCount">0</span> koltuk seçili: <span id="selList">-</span></div>
+
+  <button class="btn" id="openWalkon" style="margin-left:auto;">+ Hızlı Tahsilat</button>
+</div>
+
+<!-- Footer istatistik kutusu -->
+<div class="stats-floating" id="statsBox">
+  <h4>İstatistik</h4>
+  <div class="row"><span>Doluluk Oranı</span><strong id="statRate">0%</strong></div>
+  <div class="row"><span>Toplam Yolcu</span><strong id="statReserved">0</strong></div>
+  <div class="row"><span>Boş Koltuk</span><strong id="statEmpty">0</strong></div>
+  <div class="row"><span>Toplam Koltuk</span><strong id="statTotal">0</strong></div>
+  <hr style="border:none;border-top:1px solid #3b4248;margin:10px 0">
+  <div class="row"><span>Walk-on Yolcu</span><strong id="statWalkonPax">0</strong></div>
+  <div class="row"><span>Walk-on Gelir</span><strong id="statWalkonRevenue">₺0</strong></div>
+  <div class="row"><span>Toplam Gelir</span><strong id="statTotalRevenue">₺0</strong></div>
+</div>
+
+<!-- Pop-up form (tek koltuk) -->
+<div id="seatForm">
+  <h3 id="seatTitle">Koltuk</h3>
+  <div class="row">
+    <label>İniş Yeri:
+      <select id="dropoff"><option value="">—</option></select>
+    </label>
+  </div>
+  <div class="row">
+    <label>Bilet Durumu:</label>
+    <label><input type="radio" name="ticket" value="biletli" checked> Biletli</label>
+    <label><input type="radio" name="ticket" value="biletsiz"> Biletsiz</label>
+  </div>
+  <div class="row">
+    <label>Ödeme:</label>
+    <label><input type="radio" name="pay" value="nakit" checked> Nakit</label>
+    <label><input type="radio" name="pay" value="iban"> IBAN</label>
+    <label><input type="radio" name="pay" value="online"> Online</label>
+    <label><input type="radio" name="pay" value="ucretsiz"> Ücretsiz</label>
+  </div>
+  <div class="row">
+    <label>Tutar (₺): <input type="number" id="price" value="0" min="0" step="1"></label>
+  </div>
+  <div class="row" style="justify-content:flex-end;">
+    <button class="btn" onclick="saveSeat()">Kaydet</button>
+    <button class="btn danger" onclick="offloadSeat()">İndir</button>
+    <button class="btn secondary" onclick="closeForm()">Kapat</button>
+  </div>
+</div>
+
+<!-- Hızlı Tahsilat (Walk-on) Modal -->
+<div id="walkonBackdrop"></div>
+<div id="walkonForm">
+  <h3>Hızlı Tahsilat</h3>
+  <div class="row">
+    <label>Biniş
+      <select id="woFrom"><option value="">—</option></select>
+    </label>
+    <label>İniş
+      <select id="woTo"><option value="">—</option></select>
+    </label>
+  </div>
+  <div class="row">
+    <label>Kişi Sayısı
+      <input type="number" id="woPax" min="1" step="1" value="1">
+    </label>
+    <label>Birim Fiyat (₺)
+      <input type="number" id="woUnit" min="0" step="1" value="0">
+    </label>
+  </div>
+  <div class="row">
+    <label>Toplam (₺)
+      <input type="number" id="woTotal" min="0" step="1" value="0">
+    </label>
+    <label>Ödeme
+      <select id="woPay">
+        <option value="nakit">Nakit</option>
+        <option value="iban">IBAN</option>
+        <option value="online">Online</option>
+        <option value="pos">POS</option>
+        <option value="ucretsiz">Ücretsiz</option>
+      </select>
+    </label>
+  </div>
+  <div class="row">
+    <label>Not
+      <input type="text" id="woNote" placeholder="ayakta / bagajlı ...">
+    </label>
+  </div>
+  <div class="row" style="justify-content:flex-end;">
+    <button class="btn secondary" id="woCancel">Kapat</button>
+    <button class="btn" id="woSave">Kaydet</button>
+  </div>
+</div>
+
+<script>
+  // ---- CSRF Token (şablondan gelir) ----
+  const csrf = "{{ csrf_token }}";
+
+  const assigned = {{ assigned | tojson | safe }};
+  let currentSeat = null, cachedStops = null;
+
+  let bulkMode = false;
+  const selected = new Set();
+
+  function clearSelected(){ selected.clear(); document.querySelectorAll('.seat.selected').forEach(s=>s.classList.remove('selected')); renderBulkSummary(); }
+
+  async function fetchStops(){
+    if (cachedStops) return cachedStops;
+    const r = await fetch('/api/stops'); const j = await r.json();
+    if(!j.ok) throw new Error(j.msg || 'Duraklar alınamadı');
+    cachedStops = j.stops || []; return cachedStops;
+  }
+
+  function positionFormOnSeat(seatEl){
+    const form = document.getElementById('seatForm'); const rect = seatEl.getBoundingClientRect();
+    const formW = form.offsetWidth || 270, formH = form.offsetHeight || 180;
+    let left = rect.left + rect.width/2 + window.scrollX, top = rect.top + window.scrollY - 8;
+    form.style.transform = 'translate(-50%,-100%)';
+    if (rect.top - formH - 16 < 0){ form.style.transform = 'translate(-50%, 10px)'; top = rect.bottom + window.scrollY; }
+    const minL = 8 + window.scrollX, maxR = (document.documentElement.clientWidth - 8) + window.scrollX;
+    left = Math.max(minL + formW/2, Math.min(maxR - formW/2, left));
+    form.style.left = left + 'px'; form.style.top  = top  + 'px';
+  }
+
+  async function openFormWithSeat(num){
+    clearSelected(); currentSeat = num;
+    const seatEl = document.getElementById('seat-'+num);
+    if (seatEl){ seatEl.classList.add('selected'); const form = document.getElementById('seatForm'); form.style.display = 'block'; positionFormOnSeat(seatEl); }
+    document.getElementById('seatTitle').innerText = 'Koltuk ' + num;
+    const stopSelect = document.getElementById('dropoff'); stopSelect.innerHTML = '<option value="">—</option>';
+    try{ const stops = await fetchStops(); for(const s of stops){ const opt = document.createElement('option'); opt.value = s; opt.textContent = s; stopSelect.appendChild(opt);} }catch(e){ alert(e.message || 'Duraklar yüklenemedi'); }
+    const prevStop = assigned[String(num)] || ''; if (prevStop) stopSelect.value = prevStop;
+    document.querySelector('input[name="ticket"][value="biletli"]').checked = true;
+    document.querySelector('input[name="pay"][value="nakit"]').checked = true;
+    document.getElementById('price').value = 0;
+  }
+
+  function handleSeatClick(num){ if(bulkMode){ toggleSelect(num); } else { openFormWithSeat(num); } }
+
+  function toggleSelect(num){
+    const el = document.getElementById('seat-'+num); if(!el) return;
+    if(selected.has(num)){ selected.delete(num); el.classList.remove('selected'); }
+    else{ selected.add(num); el.classList.add('selected'); }
+    renderBulkSummary();
+  }
+
+  function renderBulkSummary(){
+    const arr = Array.from(selected).sort((a,b)=>a-b);
+    document.getElementById('selCount').textContent = String(arr.length);
+    document.getElementById('selList').textContent = arr.length ? arr.join(', ') : '-';
+    document.getElementById('bulkSave').disabled = arr.length === 0 || !(document.getElementById('bulkStop').value);
+    document.getElementById('bulkDelete').disabled = arr.length === 0;
+  }
+
+  async function initBulkStops(){
+    const bulkStop = document.getElementById('bulkStop'); bulkStop.innerHTML = '<option value="">—</option>';
+    try{ const stops = await fetchStops(); for(const s of stops){ const opt = document.createElement('option'); opt.value = s; opt.textContent = s; bulkStop.appendChild(opt);} }catch(e){}
+  }
+
+  // === İstatistikler ===
+  async function updateStats(){
+    const totalSeats = document.querySelectorAll('.seat').length;
+    const reservedSeats = Object.keys(assigned||{}).length;
+    const emptySeats = Math.max(0, totalSeats - reservedSeats);
+    const rate = totalSeats ? Math.round(reservedSeats/totalSeats*100) : 0;
+    document.getElementById('statRate').textContent = rate + '%';
+    document.getElementById('statReserved').textContent = reservedSeats;
+    document.getElementById('statEmpty').textContent = emptySeats;
+    document.getElementById('statTotal').textContent = totalSeats;
+
+    try{
+      const r = await fetch('/api/stats');
+      const j = await r.json();
+      if(j.ok){
+        document.getElementById('statWalkonPax').textContent = j.walkon_pax ?? 0;
+        document.getElementById('statWalkonRevenue').textContent = '₺' + (j.walkon_revenue ?? 0);
+        document.getElementById('statTotalRevenue').textContent = '₺' + (j.total_revenue ?? 0);
+      }
+    }catch(e){}
+  }
+
+  // ==== Tekli işlemler (CSRF header eklendi) ====
+  async function saveSeat(){
+    if(!currentSeat) return;
+    const stop = document.getElementById('dropoff').value || "";
+    const ticket = document.querySelector('input[name="ticket"]:checked')?.value || 'biletsiz';
+    const pay = document.querySelector('input[name="pay"]:checked')?.value || 'nakit';
+    const amount = parseFloat(document.getElementById('price').value || 0);
+    try{
+      const res = await fetch('/api/seat',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRF-Token': csrf},
+        body:JSON.stringify({seat_no: currentSeat, stop, ticket_type: ticket, payment: pay, amount})
+      });
+      const j = await res.json(); if(!j.ok) throw new Error(j.msg || 'Kayıt başarısız');
+      assigned[String(currentSeat)] = stop;
+      const l=document.getElementById('label-'+currentSeat); if(l) l.textContent = stop;
+      const s=document.getElementById('seat-'+currentSeat); if(s) s.style.background = '#4a6177';
+      closeForm(); updateStats();
+    }catch(e){ alert(e.message || 'Kaydetme hatası'); }
+  }
+
+  async function offloadSeat(){
+    if(!currentSeat) return;
+    try{
+      const res = await fetch('/api/seat?seat_no='+currentSeat,{method:'DELETE', headers:{'X-CSRF-Token': csrf}});
+      const j = await res.json(); if(!j.ok) throw new Error(j.msg || 'Silme başarısız');
+      delete assigned[String(currentSeat)];
+      const l=document.getElementById('label-'+currentSeat); if(l) l.textContent = '';
+      const s=document.getElementById('seat-'+currentSeat); if(s) s.style.background = '#1f6b2d';
+      closeForm(); updateStats();
+    }catch(e){ alert(e.message || 'İndirme hatası'); }
+  }
+
+  function closeForm(){ const f=document.getElementById('seatForm'); f.style.display='none'; document.querySelectorAll('.seat.selected').forEach(el=>el.classList.remove('selected')); currentSeat=null; }
+
+  // ==== Çoklu seçim (CSRF header eklendi) ====
+  document.getElementById('toggleBulk').addEventListener('click', ()=>{ bulkMode=!bulkMode; document.getElementById('toggleBulk').textContent='Çoklu Seçim: ' + (bulkMode?'AÇIK':'KAPALI'); if(!bulkMode) clearSelected(); });
+  document.getElementById('bulkStop').addEventListener('change', renderBulkSummary);
+
+  document.getElementById('bulkSave').addEventListener('click', async ()=>{
+    const seats = Array.from(selected).sort((a,b)=>a-b); if(!seats.length) return;
+    const payload = {
+      stop: document.getElementById('bulkStop').value || "",
+      ticket_type: document.getElementById('bulkTicket').value || "biletsiz",
+      payment: document.getElementById('bulkPay').value || "nakit",
+      amount: document.getElementById('bulkAmount').value || 0,
+      seats
+    };
+    try{
+      const res = await fetch('/api/seats/bulk',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRF-Token': csrf},
+        body:JSON.stringify(payload)
+      });
+      const j = await res.json(); if(!j.ok) throw new Error(j.msg || 'Toplu kayıt başarısız');
+      for(const s of seats){
+        assigned[String(s)] = payload.stop;
+        const l=document.getElementById('label-'+s); if(l) l.textContent = payload.stop;
+        const el=document.getElementById('seat-'+s); if(el) el.style.background = '#4a6177';
+      }
+      clearSelected(); updateStats(); alert('Toplu kayıt tamam (adet: ' + (j.count ?? seats.length) + ')');
+    }catch(e){ alert(e.message || 'Toplu kaydetme hatası'); }
+  });
+
+  document.getElementById('bulkDelete').addEventListener('click', async ()=>{
+    const seats = Array.from(selected).sort((a,b)=>a-b); if(!seats.length) return;
+    if(!confirm(seats.length + ' koltuk indirilsin mi?')) return;
+    const qs = encodeURIComponent(seats.join(','));
+    try{
+      const res = await fetch('/api/seats/bulk?seats='+qs,{method:'DELETE', headers:{'X-CSRF-Token': csrf}});
+      const j = await res.json(); if(!j.ok) throw new Error(j.msg || 'Toplu indirme başarısız');
+      for(const s of seats){
+        delete assigned[String(s)];
+        const l=document.getElementById('label-'+s); if(l) l.textContent='';
+        const el=document.getElementById('seat-'+s); if(el) el.style.background='#1f6b2d';
+      }
+      clearSelected(); updateStats(); alert('Toplu indirme tamam (adet: ' + (j.deleted?.length ?? seats.length) + ')');
+    }catch(e){ alert(e.message || 'Toplu indirme hatası'); }
+  });
+
+  // === Hızlı Tahsilat (Walk-on) ===
+  function openWalkon(){
+    document.getElementById('walkonBackdrop').style.display='block';
+    document.getElementById('walkonForm').style.display='block';
+  }
+  function closeWalkon(){
+    document.getElementById('walkonBackdrop').style.display='none';
+    document.getElementById('walkonForm').style.display='none';
+  }
+  document.getElementById('openWalkon').addEventListener('click', async ()=>{
+    const fromSel = document.getElementById('woFrom');
+    const toSel = document.getElementById('woTo');
+    fromSel.innerHTML = '<option value="">—</option>';
+    toSel.innerHTML = '<option value="">—</option>';
+    try{
+      const stops = await fetchStops();
+      for(const s of stops){
+        const o1=document.createElement('option'); o1.value=s; o1.textContent=s; fromSel.appendChild(o1);
+        const o2=document.createElement('option'); o2.value=s; o2.textContent=s; toSel.appendChild(o2);
+      }
+    }catch(e){}
+    document.getElementById('woPax').value = 1;
+    document.getElementById('woUnit').value = 0;
+    document.getElementById('woTotal').value = 0;
+    document.getElementById('woPay').value = 'nakit';
+    document.getElementById('woNote').value = '';
+    openWalkon();
+  });
+  document.getElementById('woCancel').addEventListener('click', closeWalkon);
+  document.getElementById('walkonBackdrop').addEventListener('click', closeWalkon);
+
+  function recalcWoTotal(){
+    const pax = parseInt(document.getElementById('woPax').value || '0', 10);
+    const unit = parseFloat(document.getElementById('woUnit').value || '0');
+    document.getElementById('woTotal').value = Math.max(0, Math.round((pax*unit)));
+  }
+  document.getElementById('woPax').addEventListener('input', recalcWoTotal);
+  document.getElementById('woUnit').addEventListener('input', recalcWoTotal);
+
+  document.getElementById('woSave').addEventListener('click', async ()=>{
+    const from_stop = document.getElementById('woFrom').value || '';
+    const to_stop = document.getElementById('woTo').value || '';
+    const pax = parseInt(document.getElementById('woPax').value || '1', 10);
+    const unit_price = parseFloat(document.getElementById('woUnit').value || '0');
+    const total_amount = parseFloat(document.getElementById('woTotal').value || (pax*unit_price));
+    const payment = document.getElementById('woPay').value || 'nakit';
+    const note = document.getElementById('woNote').value || '';
+
+    if(!from_stop || !to_stop){ alert('Biniş ve iniş seçin.'); return; }
+
+    try{
+      const res = await fetch('/api/walkon', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRF-Token': csrf},
+        body: JSON.stringify({from_stop, to_stop, pax, unit_price, total_amount, payment, note})
+      });
+      const j = await res.json();
+      if(!j.ok) throw new Error(j.msg || 'Kaydetme başarısız');
+      closeWalkon();
+      await updateStats();
+      alert('Hızlı tahsilat kaydedildi (₺' + total_amount + ', ' + pax + ' yolcu).');
+    }catch(e){
+      alert(e.message || 'Hızlı tahsilat hatası');
+    }
+  });
+
+  // Başlat
+  (async function init(){
+    await initBulkStops();
+    for(const [seat, stop] of Object.entries(assigned||{})){
+      const l=document.getElementById('label-'+seat); if(l) l.textContent = stop;
+      const el=document.getElementById('seat-'+seat); if(el) el.style.background = '#4a6177';
+    }
+    renderBulkSummary();
+    updateStats();
+  })();
+</script>
+{% endblock %}

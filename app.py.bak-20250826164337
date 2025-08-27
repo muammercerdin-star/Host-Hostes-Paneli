@@ -1,0 +1,817 @@
+import os
+from flask import (
+    Flask, render_template, request, redirect, url_for,
+    jsonify, g, session, abort
+)
+import sqlite3
+import json
+import secrets
+from datetime import datetime
+
+# ===================== Yapılandırma =====================
+def env_bool(name: str, default: bool = False) -> bool:
+    v = os.getenv(name)
+    if v is None:
+        return default
+    return v.lower() in ("1", "true", "yes", "on")
+
+app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "degistir-beni")  # prod: zorunlu değiştir
+DB_PATH = os.getenv("DB_PATH", "db.sqlite3")
+DEBUG = env_bool("FLASK_DEBUG", True)
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123-change")  # prod: değiştir
+
+# Bilet/ödeme whitelist ve normalize yardımcıları
+TICKET_TYPES = {"biletli", "biletsiz", "ucretsiz"}
+PAYMENT_TYPES = {"nakit", "iban", "online", "pos", "ucretsiz"}
+
+def norm_ticket_type(val: str) -> str:
+    v = (val or "").strip().lower()
+    return v if v in TICKET_TYPES else "biletsiz"
+
+def norm_payment(val: str) -> str:
+    v = (val or "").strip().lower()
+    return v if v in PAYMENT_TYPES else "nakit"
+
+# ---------------- DB yardımcıları ----------------
+def get_db():
+    if "db" not in g:
+        g.db = sqlite3.connect(DB_PATH)
+        g.db.row_factory = sqlite3.Row
+        # Veri bütünlüğü
+        g.db.execute("PRAGMA foreign_keys=ON;")
+        g.db.execute("PRAGMA journal_mode=WAL;")
+    return g.db
+
+@app.teardown_appcontext
+def close_db(exc):
+    db = g.pop("db", None)
+    if db is not None:
+        db.close()
+
+def ensure_schema():
+    """
+    Not: CHECK ve FK'lar yeni kurulumlarda devreye girer.
+    Var olan eski tablolar için uygulama katmanında doğrulama yapıyoruz.
+    """
+    db = get_db()
+    db.executescript(
+        """
+        PRAGMA journal_mode=WAL;
+
+        CREATE TABLE IF NOT EXISTS trips(
+            id INTEGER PRIMARY KEY,
+            date TEXT,
+            route TEXT,
+            departure_time TEXT,
+            plate TEXT,
+            captain1 TEXT,
+            captain2 TEXT,
+            attendant TEXT,
+            note TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS app_state(
+            id INTEGER PRIMARY KEY CHECK(id=1),
+            active_trip_id INTEGER
+        );
+        INSERT OR IGNORE INTO app_state(id, active_trip_id) VALUES (1, NULL);
+
+        CREATE TABLE IF NOT EXISTS seats(
+            trip_id INTEGER,
+            seat_no INTEGER,
+            stop TEXT,
+            ticket_type TEXT,   -- 'biletli' | 'biletsiz' | 'ucretsiz'
+            payment TEXT,       -- 'nakit' | 'iban' | 'online' | 'pos' | 'ucretsiz'
+            amount REAL,
+            PRIMARY KEY(trip_id, seat_no)
+            -- FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE -- eski kurulumlardan dolayı runtime'da foreign_keys=ON
+        );
+
+        CREATE TABLE IF NOT EXISTS routes(
+            id INTEGER PRIMARY KEY,
+            name TEXT UNIQUE,
+            stops TEXT           -- JSON list (["Durak1","Durak2",...])
+        );
+
+        CREATE TABLE IF NOT EXISTS walk_on_sales(
+            id INTEGER PRIMARY KEY,
+            trip_id INTEGER NOT NULL,
+            from_stop TEXT NOT NULL,
+            to_stop TEXT NOT NULL,
+            pax INTEGER NOT NULL DEFAULT 1,
+            unit_price REAL NOT NULL DEFAULT 0,
+            total_amount REAL NOT NULL DEFAULT 0,
+            payment TEXT NOT NULL DEFAULT 'nakit',
+            note TEXT,
+            created_at TEXT DEFAULT (datetime('now','localtime'))
+            -- FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_walkon_trip ON walk_on_sales(trip_id);
+        CREATE INDEX IF NOT EXISTS idx_seats_trip ON seats(trip_id);
+        CREATE INDEX IF NOT EXISTS idx_seats_trip_payment ON seats(trip_id, payment);
+        CREATE INDEX IF NOT EXISTS idx_seats_trip_stop ON seats(trip_id, stop);
+        CREATE INDEX IF NOT EXISTS idx_trips_date ON trips(date);
+        """
+    )
+    db.commit()
+
+def set_active_trip(trip_id: int | None):
+    db = get_db()
+    db.execute("UPDATE app_state SET active_trip_id=?", (trip_id,))
+    db.commit()
+
+def get_active_trip():
+    db = get_db()
+    row = db.execute("SELECT active_trip_id FROM app_state WHERE id=1").fetchone()
+    return row["active_trip_id"] if row else None
+
+# ---------------- Rotalar & Duraklar (sabitler) ----------------
+ROUTE_STOPS = {
+    "Denizli – İstanbul": [
+        "Denizli otogar","Sarayköy","Buldan","Bozalan","Derbent(Denizli)",
+        "Kadıköy","İl Sınırı(Manisa)","Dindarlı","Dadağlı","Sarıgöl Garaj","Afşar",
+        "Bereketli","Hacıaliler","Ortahan","Belenyaka","Alaşehir Otogar",
+        "Alaşehir Stadyum","Akkeçili","Piyadeler","Kavaklıdere","Salihli Garaj",
+        "Sart","Ahmetli","Gökkaya","Akçapınar","Derbent(Turgutlu)","Turgutlu Garaj",
+        "Özdilek(Turgutlu)","Manisa Otogar","Akhisar","Saruhanlı","Soma","Kırkağaç",
+        "Balıkesir","Susurluk","Mustafa K.P(Bursa)","Bursa Otogar","Gebze Garaj",
+        "Harem","Alibeyköy","Esenler Otogar"
+    ],
+    "Denizli – İzmir": [
+        "Denizli otogar","Sarayköy","Alaşehir","Salihli Garaj","Turgutlu",
+        "Manisa Otogar","Bornova","İzmir Otogar"
+    ],
+    "İstanbul – Denizli": [
+        "Esenler Otogar","Alibeyköy","Harem","Gebze Garaj","Bursa Otogar",
+        "Susurluk","Balıkesir","Kırkağaç","Soma","Akhisar","Manisa Otogar",
+        "Turgutlu Garaj","Salihli Garaj","Alaşehir Otogar","Denizli otogar"
+    ],
+    "İzmir – Denizli": [
+        "İzmir Otogar","Bornova","Manisa Otogar","Turgutlu Garaj","Salihli Garaj",
+        "Alaşehir Otogar","Sarayköy","Denizli otogar"
+    ],
+    "İstanbul – Antalya": [
+        "Esenler","Alibeyköy","Harem","Gebze","Bursa","Korkuteli","Antalya Otogar"
+    ],
+    "Antalya – İstanbul": [
+        "Antalya Otogar","Korkuteli","Bursa","Gebze","Harem","Alibeyköy","Esenler"
+    ],
+}
+
+def get_stops(route_name: str):
+    # Önce sabitlerde ara
+    if route_name in ROUTE_STOPS:
+        return ROUTE_STOPS[route_name]
+    # DB'de var mı?
+    db = get_db()
+    row = db.execute("SELECT stops FROM routes WHERE name=?", (route_name,)).fetchone()
+    if row:
+        try:
+            return json.loads(row["stops"]) or []
+        except Exception:
+            return []
+    # Asgari default (beklenmedik durumda güvenli fallback)
+    return ROUTE_STOPS["Denizli – İstanbul"]
+
+# ---------------- CSRF ve Kimlik ----------------
+def issue_csrf():
+    token = secrets.token_urlsafe(32)
+    session["csrf_token"] = token
+    return token
+
+def get_csrf():
+    tok = session.get("csrf_token")
+    if not tok:
+        tok = issue_csrf()
+    return tok
+
+def check_csrf():
+    # Form POST: form alanı "csrf_token"
+    form_tok = request.form.get("csrf_token")
+    # JSON: header "X-CSRF-Token" ya da body "csrf_token"
+    header_tok = request.headers.get("X-CSRF-Token")
+    json_tok = None
+    if request.is_json:
+        try:
+            data = request.get_json(silent=True) or {}
+            json_tok = data.get("csrf_token")
+        except Exception:
+            json_tok = None
+    supplied = form_tok or header_tok or json_tok
+    if not supplied or supplied != session.get("csrf_token"):
+        abort(403, description="CSRF doğrulaması başarısız")
+
+# Giriş zorunluluğu: health ve login/logout hariç
+PROTECTED_PREFIXES = ("/",)  # kökten itibaren koru; aşağıda istisna veriyoruz
+EXCLUDE_PATHS = {
+    "/login", "/logout", "/health"
+}
+
+@app.before_request
+def require_login_and_csrf():
+    # Şema hazırla (ilk istekten önce bir kez)
+    # Flask 3.0+: before_app_first_request var; ancak güvenli tarafta kalıp bayrakla tetikliyoruz
+    if not app.config.get("_schema_ready"):
+        ensure_schema()
+        app.config["_schema_ready"] = True
+
+    # Giriş kontrolü
+    p = request.path
+    if any(p.startswith(pref) for pref in PROTECTED_PREFIXES) and p not in EXCLUDE_PATHS:
+        if not session.get("auth_ok"):
+            return redirect(url_for("login", next=p))
+
+        # CSRF kontrolü (sadece yazma işlemleri)
+        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+            check_csrf()
+
+# ---------------- Global şablon değişkeni ----------------
+@app.context_processor
+def inject_globals():
+    try:
+        tid = get_active_trip()
+        if not tid:
+            return dict(active_trip=None, csrf_token=get_csrf())
+        db = get_db()
+        trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+        return dict(active_trip=trip, csrf_token=get_csrf())
+    except Exception:
+        return dict(active_trip=None, csrf_token=get_csrf())
+
+# ---------------- Kimlik sayfaları ----------------
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        pwd = (request.form.get("password") or "").strip()
+        if pwd == ADMIN_PASSWORD:
+            session["auth_ok"] = True
+            issue_csrf()
+            nxt = request.args.get("next") or url_for("index")
+            return redirect(nxt)
+        return render_template("login.html", error="Hatalı şifre", csrf_token=get_csrf())
+    return render_template("login.html", csrf_token=get_csrf())
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+# ---------------- Sayfalar ----------------
+@app.route("/")
+def index():
+    db = get_db()
+    dyn = [r["name"] for r in db.execute("SELECT name FROM routes ORDER BY name").fetchall()]
+    # Sabitler + dinamikler (duplicate isim varsa tekilleştir)
+    all_routes = list(dict.fromkeys(list(ROUTE_STOPS.keys()) + dyn))
+    current_route = session.get("route", all_routes[0] if all_routes else "Denizli – İstanbul")
+    return render_template("index.html", current_route=current_route, all_routes=all_routes)
+
+@app.route("/hizli-koltuk")
+def quick_seat():
+    return redirect(url_for("seats"))
+
+@app.route("/set-route", methods=["POST"])
+def set_route():
+    payload = request.get_json(silent=True) or {}
+    route = request.form.get("route") or payload.get("route")
+    if not route:
+        return jsonify({"ok": False, "msg": "route gerekli"}), 400
+    session["route"] = route
+    return jsonify({"ok": True, "route": route})
+
+# --------- Hat Ekle ----------
+@app.route("/hat-ekle", methods=["GET", "POST"])
+def add_route():
+    if request.method == "POST":
+        name = (request.form.get("name") or "").strip()
+        stops_text = (request.form.get("stops") or "").strip()
+        if not name or not stops_text:
+            return "Hat adı ve duraklar zorunludur", 400
+        stops = [s.strip() for s in stops_text.split(",") if s.strip()]
+        db = get_db()
+        db.execute(
+            "INSERT OR REPLACE INTO routes(name, stops) VALUES(?, ?)",
+            (name, json.dumps(stops, ensure_ascii=False))
+        )
+        db.commit()
+        session["route"] = name
+        return redirect(url_for("index"))
+    return render_template("add_route.html")
+
+@app.route("/sefer-baslat", methods=["GET", "POST"])
+def trip_start():
+    if request.method == "POST":
+        db = get_db()
+        date_val = request.form.get("date") or datetime.now().strftime("%Y-%m-%d")
+        time_val = request.form.get("departure_time") or datetime.now().strftime("%H:%M")
+        db.execute(
+            """
+            INSERT INTO trips (date, route, departure_time, plate,
+                               captain1, captain2, attendant, note)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                date_val,
+                session.get("route", "Denizli – İstanbul"),
+                time_val,
+                request.form.get("plate"),
+                request.form.get("captain1"),
+                request.form.get("captain2"),
+                request.form.get("attendant"),
+                request.form.get("note"),
+            ),
+        )
+        trip_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+        db.commit()
+        set_active_trip(trip_id)
+        return redirect(url_for("seats"))
+
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    return render_template(
+        "start_trip.html",
+        now=now_str,
+        current_route=session.get("route", "Denizli – İstanbul")
+    )
+
+@app.route("/continue-trip")
+def continue_trip():
+    tid = get_active_trip()
+    if tid:
+        return redirect(url_for("seats"))
+    return redirect(url_for("trip_start"))
+
+@app.route("/seats")
+def seats():
+    tid = get_active_trip()
+    if not tid:
+        return redirect(url_for("trip_start"))
+
+    db = get_db()
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        set_active_trip(None)
+        return redirect(url_for("trip_start"))
+
+    route_name = trip["route"]
+    stops = get_stops(route_name)
+
+    rows = db.execute(
+        "SELECT seat_no, stop FROM seats WHERE trip_id=? ORDER BY seat_no", (tid,)
+    ).fetchall()
+    assigned_map = {r["seat_no"]: r["stop"] for r in rows}
+
+    return render_template("seats.html", trip=trip, stops=stops, assigned=assigned_map)
+
+# ---------- Yardımcı: metinden durak listesi üret ----------
+def parse_stops(text: str) -> list[str]:
+    if not text:
+        return []
+    parts = []
+    for line in text.splitlines():
+        parts.extend(x.strip() for x in line.split(","))
+    return [p for p in (x.strip() for x in parts) if p]
+
+# ---------- Hatlar listesi (/hatlar) ----------
+@app.route("/hatlar")
+def routes_list():
+    db = get_db()
+    rows = db.execute("SELECT id, name FROM routes ORDER BY name").fetchall()
+    builtins = [{"name": k} for k in ROUTE_STOPS.keys()]
+    return render_template("routes_list.html", routes=rows, builtin_routes=builtins)
+
+# ---------- Hat düzenle (/hat/<id>/duzenle) ----------
+@app.route("/hat/<int:rid>/duzenle", methods=["GET", "POST"])
+def route_edit(rid):
+    db = get_db()
+    row = db.execute("SELECT * FROM routes WHERE id=?", (rid,)).fetchone()
+    if not row:
+        return "Hat bulunamadı", 404
+
+    if request.method == "POST":
+        name = (request.form.get("name") or "").strip()
+        stops_text = request.form.get("stops") or ""
+        stops = parse_stops(stops_text)
+        if not name or not stops:
+            return "Hat adı ve en az bir durak gerekli", 400
+
+        db.execute("UPDATE routes SET name=?, stops=? WHERE id=?",
+                   (name, json.dumps(stops, ensure_ascii=False), rid))
+        db.commit()
+        session["route"] = name
+        return redirect(url_for("routes_list"))
+
+    try:
+        stops_text = "\n".join(json.loads(row["stops"]) or [])
+    except Exception:
+        stops_text = ""
+    return render_template("route_edit.html", route=row, stops_text=stops_text)
+
+# ---------- Hat sil (/hat/<id>/sil) ----------
+@app.route("/hat/<int:rid>/sil", methods=["POST"])
+def route_delete(rid):
+    db = get_db()
+    cur_name = session.get("route")
+    row = db.execute("SELECT name FROM routes WHERE id=?", (rid,)).fetchone()
+    db.execute("DELETE FROM routes WHERE id=?", (rid,))
+    db.commit()
+    if row and cur_name == row["name"]:
+        session.pop("route", None)
+    return redirect(url_for("routes_list"))
+
+# ---- Durak doğrulama yardımcıları ----
+def validate_stop_for_active_trip(stop: str) -> bool:
+    tid = get_active_trip()
+    if not tid:
+        return False
+    db = get_db()
+    trip = db.execute("SELECT route FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return False
+    allowed = set(get_stops(trip["route"]))
+    return (stop or "").strip() in allowed
+
+# ---- Koltuk kayıt/sil API (tekli) ----
+@app.route("/api/seat", methods=["POST", "DELETE"])
+def api_seat():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
+    db = get_db()
+
+    if request.method == "DELETE":
+        try:
+            seat_no = int(request.args.get("seat_no"))
+        except (TypeError, ValueError):
+            return jsonify({"ok": False, "msg": "seat_no geçersiz"}), 400
+        db.execute("DELETE FROM seats WHERE trip_id=? AND seat_no=?", (tid, seat_no))
+        db.commit()
+        return jsonify({"ok": True})
+
+    data = request.get_json(force=True) or {}
+    try:
+        seat_no = int(data.get("seat_no"))
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "msg": "seat_no gerekli"}), 400
+
+    stop = (data.get("stop") or "").strip()
+    if stop and not validate_stop_for_active_trip(stop):
+        return jsonify({"ok": False, "msg": "Durak bu hat üzerinde değil"}), 400
+
+    ticket_type = norm_ticket_type(data.get("ticket_type") or "biletsiz")
+    payment = norm_payment(data.get("payment") or "nakit")
+
+    raw_amount = data.get("amount", 0)
+    try:
+        amount = float(raw_amount or 0)
+    except (TypeError, ValueError):
+        amount = 0.0
+
+    db.execute(
+        """
+        INSERT INTO seats(trip_id, seat_no, stop, ticket_type, payment, amount)
+        VALUES(?, ?, ?, ?, ?, ?)
+        ON CONFLICT(trip_id, seat_no) DO UPDATE SET
+            stop=excluded.stop,
+            ticket_type=excluded.ticket_type,
+            payment=excluded.payment,
+            amount=excluded.amount
+        """,
+        (tid, seat_no, stop, ticket_type, payment, amount),
+    )
+    db.commit()
+    return jsonify({"ok": True})
+
+# ---- Koltuk çoklu kayıt/sil API ----
+@app.route("/api/seats/bulk", methods=["POST", "DELETE"])
+def api_seats_bulk():
+    """
+    POST body örnekleri:
+      {"stop":"Harem","seats":[3,4,7,8]}
+      {"stop":"Harem","ticket_type":"biletli","payment":"nakit",
+       "seats":[{"seat_no":3,"amount":150},{"seat_no":4},{"seat_no":7},{"seat_no":8}]}
+
+    DELETE query örnekleri:
+      /api/seats/bulk?seats=3,4,7,8
+    """
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
+    db = get_db()
+
+    if request.method == "DELETE":
+        raw = (request.args.get("seats") or "").strip()
+        if not raw:
+            return jsonify({"ok": False, "msg": "seats parametresi gerekli"}), 400
+        try:
+            seat_list = [int(x) for x in raw.split(",") if x.strip()]
+        except ValueError:
+            return jsonify({"ok": False, "msg": "seats geçersiz"}), 400
+
+        db.executemany(
+            "DELETE FROM seats WHERE trip_id=? AND seat_no=?",
+            [(tid, s) for s in seat_list]
+        )
+        db.commit()
+        return jsonify({"ok": True, "deleted": seat_list})
+
+    # POST
+    data = request.get_json(force=True) or {}
+    seats = data.get("seats")
+    if not seats or not isinstance(seats, list):
+        return jsonify({"ok": False, "msg": "seats listesi gerekli"}), 400
+
+    # Ortak alanlar (varsayılanlar)
+    stop = (data.get("stop") or "").strip()
+    if stop and not validate_stop_for_active_trip(stop):
+        return jsonify({"ok": False, "msg": "Durak bu hat üzerinde değil"}), 400
+
+    ticket_type = norm_ticket_type(data.get("ticket_type") or "biletsiz")
+    payment = norm_payment(data.get("payment") or "nakit")
+    default_amount = data.get("amount", 0)
+
+    try:
+        default_amount = float(default_amount or 0)
+    except (TypeError, ValueError):
+        default_amount = 0.0
+
+    rows = []
+    try:
+        for item in seats:
+            if isinstance(item, dict):
+                s_no = int(item.get("seat_no"))
+                stp = (item.get("stop") or stop).strip()
+                if stp and not validate_stop_for_active_trip(stp):
+                    return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {stp}"}), 400
+                ttype = norm_ticket_type(item.get("ticket_type") or ticket_type)
+                pay = norm_payment(item.get("payment") or payment)
+                amt_raw = item.get("amount", default_amount)
+                try:
+                    amt = float(amt_raw or 0)
+                except (TypeError, ValueError):
+                    amt = 0.0
+            else:
+                s_no = int(item)
+                stp, ttype, pay, amt = stop, ticket_type, payment, default_amount
+            rows.append((tid, s_no, stp, ttype, pay, amt))
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "msg": "seats içeriği geçersiz"}), 400
+
+    db.executemany(
+        """
+        INSERT INTO seats(trip_id, seat_no, stop, ticket_type, payment, amount)
+        VALUES(?, ?, ?, ?, ?, ?)
+        ON CONFLICT(trip_id, seat_no) DO UPDATE SET
+            stop=excluded.stop,
+            ticket_type=excluded.ticket_type,
+            payment=excluded.payment,
+            amount=excluded.amount
+        """,
+        rows
+    )
+    db.commit()
+    return jsonify({"ok": True, "count": len(rows)})
+
+# ---- Kısa yol: Form üzerinden toplu kayıt ----
+@app.route("/reserve", methods=["POST"])
+def reserve():
+    """
+    seats.html tarafında:
+      <input type="hidden" name="selectedSeats" id="selectedSeats">
+      <input name="stop">   # örn: Harem
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    """
+    tid = get_active_trip()
+    if not tid:
+        return redirect(url_for("trip_start"))
+
+    payload = request.get_json(silent=True) or {}
+    selected_str = request.form.get("selectedSeats") or payload.get("selectedSeats")
+    stop = (request.form.get("stop") or payload.get("stop") or "").strip()
+    if stop and not validate_stop_for_active_trip(stop):
+        return jsonify({"ok": False, "msg": "Durak bu hat üzerinde değil"}), 400
+
+    ticket_type = norm_ticket_type(request.form.get("ticket_type") or payload.get("ticket_type") or "biletsiz")
+    payment = norm_payment(request.form.get("payment") or payload.get("payment") or "nakit")
+    amount_val = request.form.get("amount") or payload.get("amount") or 0
+
+    try:
+        seats = json.loads(selected_str) if isinstance(selected_str, str) else selected_str
+    except Exception:
+        seats = None
+
+    if not seats or not isinstance(seats, list):
+        return jsonify({"ok": False, "msg": "selectedSeats listesi gerekli"}), 400
+
+    db = get_db()
+    rows = []
+    try:
+        amount = float(amount_val or 0)
+    except (TypeError, ValueError):
+        amount = 0.0
+
+    for s in seats:
+        s_no = int(s) if not isinstance(s, dict) else int(s.get("seat_no"))
+        stp = stop if not isinstance(s, dict) else (s.get("stop") or stop or "").strip()
+        if stp and not validate_stop_for_active_trip(stp):
+            return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {stp}"}), 400
+        ttype = ticket_type if not isinstance(s, dict) else norm_ticket_type(s.get("ticket_type") or ticket_type)
+        pay = payment if not isinstance(s, dict) else norm_payment(s.get("payment") or payment)
+        try:
+            amt = amount if not isinstance(s, dict) else float(s.get("amount") or amount or 0)
+        except (TypeError, ValueError):
+            amt = 0.0
+        rows.append((tid, s_no, stp, ttype, pay, amt))
+
+    db.executemany(
+        """
+        INSERT INTO seats(trip_id, seat_no, stop, ticket_type, payment, amount)
+        VALUES(?, ?, ?, ?, ?, ?)
+        ON CONFLICT(trip_id, seat_no) DO UPDATE SET
+            stop=excluded.stop,
+            ticket_type=excluded.ticket_type,
+            payment=excluded.payment,
+            amount=excluded.amount
+        """,
+        rows
+    )
+    db.commit()
+    return redirect(url_for("seats"))
+
+# ---- Aktif seferin duraklarını ver ----
+@app.route("/api/stops")
+def api_stops():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok", "stops": []}), 400
+
+    db = get_db()
+    trip = db.execute("SELECT route FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "msg": "Sefer bulunamadı", "stops": []}), 404
+
+    route_name = trip["route"]
+    stops = get_stops(route_name)
+    return jsonify({"ok": True, "stops": stops, "route": route_name})
+
+# ---- Hızlı Tahsilat / Walk-on API ----
+@app.route("/api/walkon", methods=["GET", "POST", "DELETE"])
+def api_walkon():
+    """
+    GET:
+      /api/walkon                -> liste
+      /api/walkon?aggregate=1    -> toplam pax ve toplam tutar
+    POST JSON örneği:
+      {
+        "from_stop": "Salihli Garaj",
+        "to_stop": "Alaşehir Otogar",
+        "pax": 8,
+        "unit_price": 100,
+        "total_amount": 800,
+        "payment": "nakit",
+        "note": "ayakta"
+      }
+    DELETE:
+      /api/walkon?id=12
+      /api/walkon?ids=12,13,14
+    """
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
+    db = get_db()
+
+    if request.method == "GET":
+        aggregate = request.args.get("aggregate")
+        if aggregate:
+            row = db.execute(
+                "SELECT COALESCE(SUM(total_amount),0) AS total_amount, COALESCE(SUM(pax),0) AS pax "
+                "FROM walk_on_sales WHERE trip_id=?", (tid,)
+            ).fetchone()
+            return jsonify({"ok": True, "pax": int(row["pax"]), "total_amount": float(row["total_amount"])})
+        rows = db.execute(
+            "SELECT * FROM walk_on_sales WHERE trip_id=? ORDER BY id DESC", (tid,)
+        ).fetchall()
+        return jsonify({"ok": True, "items": [dict(r) for r in rows]})
+
+    if request.method == "POST":
+        data = request.get_json(force=True) or {}
+        from_stop = (data.get("from_stop") or data.get("from") or "").strip()
+        to_stop = (data.get("to_stop") or data.get("to") or "").strip()
+        if not from_stop or not to_stop:
+            return jsonify({"ok": False, "msg": "from_stop ve to_stop gerekli"}), 400
+
+        # Hat uyumu (opsiyonel ama faydalı)
+        if not validate_stop_for_active_trip(from_stop):
+            return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {from_stop}"}), 400
+        if not validate_stop_for_active_trip(to_stop):
+            return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
+
+        try:
+            pax = int(data.get("pax") or data.get("count") or 1)
+        except (TypeError, ValueError):
+            pax = 1
+        try:
+            unit_price = float(data.get("unit_price") or data.get("price") or 0)
+        except (TypeError, ValueError):
+            unit_price = 0.0
+        try:
+            total_amount = float(data.get("total_amount") or pax * unit_price)
+        except (TypeError, ValueError):
+            total_amount = pax * unit_price
+
+        payment = norm_payment(data.get("payment") or "nakit")
+        note = (data.get("note") or "").strip()
+
+        db.execute(
+            """
+            INSERT INTO walk_on_sales(trip_id, from_stop, to_stop, pax, unit_price, total_amount, payment, note)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (tid, from_stop, to_stop, pax, unit_price, total_amount, payment, note)
+        )
+        db.commit()
+        new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+        return jsonify({"ok": True, "id": new_id, "pax": pax, "total_amount": total_amount})
+
+    # DELETE
+    ids_param = request.args.get("ids")
+    id_param = request.args.get("id")
+    if ids_param:
+        try:
+            id_list = [int(x) for x in ids_param.split(",") if x.strip()]
+        except ValueError:
+            return jsonify({"ok": False, "msg": "ids geçersiz"}), 400
+        db.executemany("DELETE FROM walk_on_sales WHERE trip_id=? AND id=?", [(tid, i) for i in id_list])
+        db.commit()
+        return jsonify({"ok": True, "deleted": id_list})
+    if id_param:
+        try:
+            i = int(id_param)
+        except ValueError:
+            return jsonify({"ok": False, "msg": "id geçersiz"}), 400
+        db.execute("DELETE FROM walk_on_sales WHERE trip_id=? AND id=?", (tid, i))
+        db.commit()
+        return jsonify({"ok": True, "deleted": [i]})
+    return jsonify({"ok": False, "msg": "id veya ids gerekli"}), 400
+
+# ---- Özet istatistik (gelir dahil) ----
+@app.route("/api/stats")
+def api_stats():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
+    db = get_db()
+
+    seat_row = db.execute(
+        "SELECT COUNT(*) AS c, COALESCE(SUM(amount),0) AS s FROM seats WHERE trip_id=?", (tid,)
+    ).fetchone()
+    seats_reserved = int(seat_row["c"])
+    seats_revenue = float(seat_row["s"])
+
+    walk_row = db.execute(
+        "SELECT COALESCE(SUM(pax),0) AS pax, COALESCE(SUM(total_amount),0) AS tot FROM walk_on_sales WHERE trip_id=?",
+        (tid,)
+    ).fetchone()
+    walkon_pax = int(walk_row["pax"])
+    walkon_revenue = float(walk_row["tot"])
+
+    by_pay = {}
+    for r in db.execute("SELECT payment, COALESCE(SUM(amount),0) AS s FROM seats WHERE trip_id=? GROUP BY payment", (tid,)).fetchall():
+        by_pay[r["payment"]] = by_pay.get(r["payment"], 0.0) + float(r["s"])
+    for r in db.execute("SELECT payment, COALESCE(SUM(total_amount),0) AS s FROM walk_on_sales WHERE trip_id=? GROUP BY payment", (tid,)).fetchall():
+        by_pay[r["payment"]] = by_pay.get(r["payment"], 0.0) + float(r["s"])
+
+    return jsonify({
+        "ok": True,
+        "seats_reserved": seats_reserved,
+        "seats_revenue": seats_revenue,
+        "walkon_pax": walkon_pax,
+        "walkon_revenue": walkon_revenue,
+        "total_revenue": seats_revenue + walkon_revenue,
+        "by_payment": by_pay
+    })
+
+# ---- Seferi sonlandır ----
+@app.route("/end-trip", methods=["POST"])
+def end_trip():
+    db = get_db()
+    db.execute("UPDATE app_state SET active_trip_id=NULL WHERE id=1")
+    db.commit()
+    return redirect(url_for("index"))
+
+# ---- Sağlık ----
+@app.route("/health")
+def health():
+    return {"ok": True, "active_trip": get_active_trip()}
+
+# ---------------- Çalıştırma ----------------
+if __name__ == "__main__":
+    # Lokal/Termux doğrudan çalıştırmada yine de şemayı garantiye al
+    with app.app_context():
+        ensure_schema()
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")), debug=DEBUG)

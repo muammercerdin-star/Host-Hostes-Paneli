@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .page { max-width: 780px; margin: 24px auto; background:#161b22;
+          border-radius:14px; padding:26px; box-shadow:0 4px 10px rgba(0,0,0,0.3); color:#e6edf3; }
+  h1 { margin:0 0 18px; font-size:34px; font-weight:800; }
+  .grid { display:grid; grid-template-columns: 1fr 2fr; gap:12px; }
+  label { font-weight:600; color:#cfd7de; align-self:center; }
+  input, select, textarea { width:100%; background:#1f2429; color:#e6edf3;
+                  border:1px solid #30363d; border-radius:10px; padding:11px 12px; }
+  input::placeholder { color:#9aa5ae; }
+  .row { grid-column: 1 / -1; }
+  .actions { display:flex; gap:12px; margin-top:16px; }
+  .btn   { background:#3a9ad9; color:#fff; border:none; padding:12px 16px; border-radius:10px;
+           font-weight:700; cursor:pointer; text-decoration:none; display:inline-block; }
+  .btn:hover { filter:brightness(1.05); }
+  .btn-secondary { background:#535e67; }
+</style>
+
+<div class="page">
+  <h1>Yeni Sefer Başlat</h1>
+
+  <!-- Form: /sefer-baslat (trip_start) -->
+  <form id="startForm" method="post" action="{{ url_for('trip_start') }}">
+
+    <div class="grid">
+      <label for="dt">Tarih & Saat</label>
+      <input id="dt" name="dt" type="datetime-local" required>
+
+      <label for="plate">Plaka</label>
+      <input id="plate" name="plate" type="text" placeholder="Örn: 35 ABC 123">
+
+      <label for="captain1">1. Kaptan</label>
+      <input id="captain1" name="captain1" type="text">
+
+      <label for="captain2">2. Kaptan</label>
+      <input id="captain2" name="captain2" type="text">
+
+      <label for="attendant">Muavin</label>
+      <input id="attendant" name="attendant" type="text">
+
+      <!-- İsteğe bağlı not / açıklama -->
+      <label for="note">Not</label>
+      <input id="note" name="note" type="text" placeholder="(Opsiyonel)">
+
+      <!-- gizli alanlar: app.py 'date' ve 'departure_time' bekliyor -->
+      <input type="hidden" id="date" name="date">
+      <input type="hidden" id="departure_time" name="departure_time">
+    </div>
+
+    <!-- CSRF koruması -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <div class="actions">
+      <button class="btn" type="submit">Seferi Başlat</button>
+      <a href="{{ url_for('index') }}" class="btn btn-secondary">Vazgeç</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Sunucudan 'now' geldiyse onu kullan; yoksa cihaz saatini kullan.
+  (function presetDateTime(){
+    const dt = document.getElementById('dt');
+    // base.html'den gelen now yoksa boş string olur
+    const srvNow = "{{ now|default('', true) }}"; // "YYYY-MM-DD HH:MM" bekleniyor
+    const pad = n => String(n).padStart(2,'0');
+
+    function toLocalValue(d) {
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    if (srvNow && srvNow.includes(' ')) {
+      const [dPart, tPart] = srvNow.split(' ');
+      // YYYY-MM-DD HH:MM → local Date oluştur
+      const [Y,M,D] = dPart.split('-').map(x=>parseInt(x,10));
+      const [h,m] = tPart.split(':').map(x=>parseInt(x,10));
+      const local = new Date(Y, (M-1), D, h, m);
+      dt.value = toLocalValue(local);
+    } else {
+      const now = new Date();
+      dt.value = toLocalValue(now);
+    }
+  })();
+
+  // Gönderirken date ve departure_time alanlarını doldur
+  document.getElementById('startForm').addEventListener('submit', function(){
+    const raw = document.getElementById('dt').value; // "YYYY-MM-DDTHH:MM"
+    if(!raw) return;
+    const [d,t] = raw.split('T');
+    document.getElementById('date').value = d;               // app.py -> request.form['date']
+    document.getElementById('departure_time').value = t;     // app.py -> request.form['departure_time']
+  });
+</script>
+
+{% endblock %}

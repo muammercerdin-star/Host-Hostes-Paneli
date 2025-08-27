@@ -1,0 +1,80 @@
+diff --git a/.gitattributes b/.gitattributes
+new file mode 100644
+index 0000000..a15b5f4
+--- /dev/null
++++ b/.gitattributes
+@@ -0,0 +1,6 @@
++# Satır sonlarını normalize et
++* text=auto
++*.sh text eol=lf
++*.py text eol=lf
++*.html text eol=lf
++*.css text eol=lf
+diff --git a/.editorconfig b/.editorconfig
+new file mode 100644
+index 0000000..1b6d4c3
+--- /dev/null
++++ b/.editorconfig
+@@ -0,0 +1,14 @@
++root = true
++
++[*]
++charset = utf-8
++end_of_line = lf
++insert_final_newline = true
++indent_style = space
++indent_size = 2
++trim_trailing_whitespace = true
++
++[*.py]
++indent_size = 4
++
++[Makefile]
+diff --git a/README_PATCH_TEST.md b/README_PATCH_TEST.md
+new file mode 100644
+index 0000000..b1f3c2d
+--- /dev/null
++++ b/README_PATCH_TEST.md
+@@ -0,0 +1,14 @@
++# Muavin Asistanı — Patch Test
++
++Bu dosya, `git apply` akışının çalıştığını doğrulamak için eklendi.
++
++## Kontrol Listesi
++- [x] `git apply --check setup-test.patch` sorunsuz
++- [x] `git apply setup-test.patch` sorunsuz
++- [x] `git status` yeni dosyaları gösteriyor
++- [x] `git add . && git commit` ile fotoğraf alındı
++
++## Not
++Bu test yaması **mevcut dosyaları değiştirmez**; yalnızca yeni yardımcı dosyalar ekler.
++Gerçek geliştirme yamaları bundan sonra gelecek.
++
+diff --git a/tools/apply_patch.sh b/tools/apply_patch.sh
+new file mode 100755
+index 0000000..b7a9c0a
+--- /dev/null
++++ b/tools/apply_patch.sh
+@@ -0,0 +1,34 @@
++#!/usr/bin/env bash
++set -euo pipefail
++
++patch_file="${1:-}"
++if [[ -z "$patch_file" || ! -f "$patch_file" ]]; then
++  echo "Kullanım: tools/apply_patch.sh <patch-dosyası>"
++  exit 2
++fi
++
++echo "[1/3] Kontrol: git apply --check"
++git apply --check "$patch_file"
++
++echo "[2/3] Uygula: git apply"
++git apply "$patch_file"
++
++echo "[3/3] Aşama: git add -A"
++git add -A
++
++echo "Tamam. İsterseniz commit atın:"
++echo "  git commit -m \"apply: $(basename "$patch_file")\""
++
++exit 0

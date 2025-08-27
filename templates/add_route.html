@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Yeni Hat Ekle</title>
+  <style>
+    body{background:#0f141a;color:#e6edf3;font-family:sans-serif}
+    .card{max-width:720px;margin:28px auto;background:#161b22;
+          padding:20px 30px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.3)}
+    label{display:block;margin:10px 0 6px}
+    input,textarea{width:100%;padding:10px;border-radius:6px;
+          border:1px solid #30363d;background:#0d1117;color:#e6edf3}
+    .row{display:flex;gap:8px;margin-top:14px}
+    .btn{background:#1f6feb;color:#fff;border:none;padding:10px 16px;
+         border-radius:6px;cursor:pointer;text-decoration:none;text-align:center}
+    .btn.secondary{background:#3a4750}
+    .btn:hover{opacity:0.9}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Yeni Hat Ekle</h2>
+    <form method="post">
+      <label>Hat Adı</label>
+      <input type="text" name="name" placeholder="Örn: Alaşehir – İzmir">
+
+      <label>Duraklar (virgülle ayır)</label>
+      <textarea name="stops" rows="5" placeholder="Esenler, Harem, Gebze, ..."></textarea>
+
+      <!-- CSRF token buraya eklendi -->
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <div class="row">
+        <button class="btn" type="submit">Kaydet</button>
+        <a class="btn secondary" href="{{ url_for('index') }}">Vazgeç</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

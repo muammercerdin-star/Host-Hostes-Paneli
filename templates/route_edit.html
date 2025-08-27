@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .panel{max-width:760px;margin:24px auto;background:#2b3036;color:#e6edf3;
+         border-radius:14px;padding:26px;box-shadow:0 4px 10px rgba(0,0,0,0.35)}
+  input,textarea{width:100%;background:#2a2f34;color:#e6edf3;border:1px solid #3a4046;
+                 border-radius:10px;padding:11px 12px}
+  label{display:block;margin:10px 0 6px;font-weight:600}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{padding:10px 14px;border-radius:10px;background:#3a9ad9;border:1px solid #2f89c2;
+       color:#fff;text-decoration:none;cursor:pointer;display:inline-block}
+  .btn:hover{filter:brightness(1.05)}
+  .secondary{background:#3a4046;border-color:#4b5259}
+  .danger{background:#d9534f;border-color:#c23e3a}
+  .hint{color:#9aa5ae;font-size:13px;margin-top:6px}
+  .card{background:#262b30;border-radius:12px;padding:16px;margin-top:16px}
+</style>
+
+<div class="panel">
+  <h2>Hattı Düzenle</h2>
+
+  <!-- Güncelleme formu -->
+  <form method="post" action="{{ url_for('route_edit', rid=route.id) }}">
+    <label>Hat Adı</label>
+    <input type="text" name="name" value="{{ route.name }}" required>
+
+    <label>Duraklar (her satır bir durak veya virgülle ayır)</label>
+    <textarea name="stops" rows="12" required>{{ stops_text }}</textarea>
+    <div class="hint">Örn: Esenler Otogar, Harem, Gebze Garaj …</div>
+
+    <!-- CSRF -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <div class="row" style="margin-top:12px">
+      <button class="btn" type="submit">Kaydet</button>
+      <a class="btn secondary" href="{{ url_for('routes_list') }}">Listeye Dön</a>
+    </div>
+  </form>
+
+  <!-- Silme bölümü -->
+  <div class="card">
+    <form method="post" action="{{ url_for('route_delete', rid=route.id) }}"
+          onsubmit="return confirm('Bu hattı silmek istediğine emin misin?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="btn danger" type="submit">Hattı Sil</button>
+      <span class="hint">Not: Yerleşik (sabit) hatlar bu ekrandan silinemez.</span>
+    </form>
+  </div>
+</div>
+{% endblock %}

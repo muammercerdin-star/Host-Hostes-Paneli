@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title or "Muavin Asistanı" }}</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  {% block content %}{% endblock %}
+<div class="lock-btn">
+  <form method="post" action="{{ url_for('logout') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" title="Kilitle">Kilitle</button>
+  </form>
+</div>
+</body>
+</html>
