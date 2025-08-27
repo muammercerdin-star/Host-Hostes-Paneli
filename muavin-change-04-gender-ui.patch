@@ -1,0 +1,121 @@
+diff --git a/app.py b/app.py
+index 3333333..4444444 100644
+--- a/app.py
++++ b/app.py
+@@ -287,6 +287,7 @@ def api_seat():
+         if not row:
+             return jsonify({
+                 "ok": True, "exists": False,
+-                "seat": {"stop":"", "ticket_type":"biletsiz", "payment":"nakit", "amount":0}
++                "seat": {"stop":"", "ticket_type":"biletsiz", "payment":"nakit", "amount":0, "gender":""}
+             })
+         return jsonify({
+             "ok": True, "exists": True,
+             "seat": {
+                 "stop": row["stop"] or "",
+                 "ticket_type": row["ticket_type"] or "biletsiz",
+                 "payment": row["payment"] or "nakit",
+-                "amount": float(row["amount"] or 0)
++                "amount": float(row["amount"] or 0),
++                "gender": (row["gender"] or "")
+             }})
+diff --git a/templates/seats.html b/templates/seats.html
+index 0000001..0000002 100644
+--- a/templates/seats.html
++++ b/templates/seats.html
+@@ -120,16 +120,25 @@
+   <div class="row">
+     <label>Bilet Durumu:</label>
+     <label><input type="radio" name="ticket" value="biletli" checked> Biletli</label>
+     <label><input type="radio" name="ticket" value="biletsiz"> Biletsiz</label>
++    <label><input type="radio" name="ticket" value="ucretsiz"> Ücretsiz</label>
+   </div>
+   <div class="row">
+     <label>Ödeme:</label>
+     <label><input type="radio" name="pay" value="nakit" checked> Nakit</label>
+     <label><input type="radio" name="pay" value="iban"> IBAN</label>
+     <label><input type="radio" name="pay" value="online"> Online</label>
+-    <label><input type="radio" name="pay" value="ucretsiz"> Ücretsiz</label>
++    <label><input type="radio" name="pay" value="pos"> POS</label>
++    <label><input type="radio" name="pay" value="ucretsiz"> Ücretsiz</label>
++  </div>
++  <div class="row">
++    <label>Cinsiyet:</label>
++    <label><input type="radio" name="gender" value="bay"> Bay</label>
++    <label><input type="radio" name="gender" value="bayan"> Bayan</label>
++    <label><input type="radio" name="gender" value=""> Boş</label>
+   </div>
+   <div class="row">
+     <label>Tutar (₺): <input type="number" id="price" value="0" min="0" step="1"></label>
+   </div>
+@@ -214,6 +223,9 @@
+     const prevStop = assigned[String(num)] || ''; if (prevStop) stopSelect.value = prevStop;
+     document.querySelector('input[name="ticket"][value="biletli"]').checked = true;
+     document.querySelector('input[name="pay"][value="nakit"]').checked = true;
++    // cinsiyet default
++    const gDefault = document.querySelector('input[name="gender"][value=""]'); if (gDefault) gDefault.checked = true;
++
+     document.getElementById('price').value = 0;
+     // Mevcut koltuk verilerini getir (varsa doldur)
+     try{
+@@ -227,6 +239,12 @@
+         const p = j.seat.payment || 'nakit';
+         const pEl = document.querySelector('input[name="pay"][value="'+p+'"]');
+         if (pEl) pEl.checked = true;
++        // gender
++        const g = j.seat.gender || "";
++        const gEl = document.querySelector('input[name="gender"][value="'+g+'"]');
++        if (gEl) gEl.checked = true;
++        const sEl = document.getElementById('seat-'+num);
++        applySeatColor(sEl, g);
+         // amount
+         if (typeof j.seat.amount !== 'undefined'){
+           document.getElementById('price').value = Number(j.seat.amount) || 0;
+@@ -270,9 +288,12 @@
+     const ticket = document.querySelector('input[name="ticket"]:checked')?.value || 'biletsiz';
+     const pay = document.querySelector('input[name="pay"]:checked')?.value || 'nakit';
+     const amount = parseFloat(document.getElementById('price').value || 0);
++    const gender = document.querySelector('input[name="gender"]:checked')?.value || "";
++    const s=document.getElementById('seat-'+currentSeat);
+     try{
+       const res = await fetch('/api/seat',{
+         method:'POST',
+         headers:{'Content-Type':'application/json','X-CSRF-Token': csrf},
+-        body:JSON.stringify({seat_no: currentSeat, stop, ticket_type: ticket, payment: pay, amount})
++        body:JSON.stringify({seat_no: currentSeat, stop, ticket_type: ticket, payment: pay, amount, gender})
+       });
+       const j = await res.json(); if(!j.ok) throw new Error(j.msg || 'Kayıt başarısız');
+       assigned[String(currentSeat)] = stop;
+-      const l=document.getElementById('label-'+currentSeat); if(l) l.textContent = stop;
+-      const s=document.getElementById('seat-'+currentSeat); if(s) s.style.background = '#4a6177';
++      const l=document.getElementById('label-'+currentSeat); if(l) l.textContent = stop;
++      applySeatColor(s, gender);
+       closeForm(); updateStats();
+     }catch(e){ alert(e.message || 'Kaydetme hatası'); }
+   }
+@@ -294,6 +315,7 @@
+       const j = await res.json(); if(!j.ok) throw new Error(j.msg || 'Silme başarısız');
+       delete assigned[String(currentSeat)];
+       const l=document.getElementById('label-'+currentSeat); if(l) l.textContent = '';
+-      const s=document.getElementById('seat-'+currentSeat); if(s) s.style.background = '#1f6b2d';
++      const s=document.getElementById('seat-'+currentSeat); if(s) applySeatColor(s, "");
+       closeForm(); updateStats();
+     }catch(e){ alert(e.message || 'İndirme hatası'); }
+   }
+@@ -430,6 +452,17 @@
+     updateStats();
+   })();
++
++  // ---- Renk mantığı (bay/bayan) ----
++  function applySeatColor(el, gender){
++    if(!el) return;
++    if(gender === 'bay'){
++      el.style.background = '#2d6cdf';   // mavi
++    }else if(gender === 'bayan'){
++      el.style.background = '#e75480';   // pembe
++    }else{
++      el.style.background = assigned[el.dataset.seat] ? '#4a6177' : '#1f6b2d';
++    }
++  }
+ </script>
+ {% endblock %}
