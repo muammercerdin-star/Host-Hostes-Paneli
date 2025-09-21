@@ -1,0 +1,1166 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  :root{
+    --bg:#2f353a; --card:#1e2327; --muted:#3b4248; --text:#fff;
+    --brand:#1f6b2d; --danger:#8a3a3a; --primary:#3498db; --warn:#d4a100;
+  }
+  body{color:var(--text)}
+  .coach{width:560px;max-width:96vw;margin:16px auto;background:var(--bg);padding:18px;border-radius:16px}
+  .head{font-weight:700;margin-bottom:10px}
+  .deck{display:grid;grid-template-columns:70px 70px 70px 70px;grid-template-rows:repeat(14,70px);gap:14px 22px;align-items:center;justify-content:center}
+  .seat{position:relative;width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;background:var(--brand);cursor:pointer;transition:filter .15s}
+  .seat:hover{filter:brightness(1.08)}
+  .seat.selected{outline:3px solid #9ad1ff}
+  .cell{display:flex;flex-direction:column;align-items:center;position:relative}
+  .label{font-size:11px;color:#e6d48a;margin-top:4px;min-height:12px;text-align:center}
+  .door{grid-column:3/5;grid-row:8;height:28px;border-radius:10px;background:#7a6431;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .corr{grid-column:2;grid-row:1/15;width:56px;border-radius:12px;background:#912727;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;writing-mode:vertical-rl;text-orientation:upright;justify-self:center}
+  .svc-badge{position:absolute;right:-6px;top:-6px;background:#34495e;border:2px solid var(--bg);color:#fff;width:20px;height:20px;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:12px;line-height:1}
+  .seat.has-service .svc-badge{display:flex}
+
+  /* Popup: tek koltuk formu */
+  #seatForm{display:none;position:absolute;left:0;top:0;transform:translate(-50%,-100%);background:var(--card);border-radius:12px;padding:14px;color:#fff;z-index:1000;width:320px;box-shadow:0 12px 28px rgba(0,0,0,.35);border:1px solid var(--muted)}
+  #seatForm h3{margin:0 0 10px 0}
+  #seatForm .row{margin:8px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+
+  .btn{background:var(--brand);color:#fff;border:none;padding:8px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+  .btn.secondary{background:#444}
+  .btn.danger{background:var(--danger)}
+  .btn.primary{background:var(--primary)}
+  .btn.warn{background:var(--warn);color:#242424}
+  select,input[type="number"],input[type="text"],textarea{background:#2a2f34;color:#fff;border:1px solid var(--muted);border-radius:8px;padding:6px 8px}
+
+  /* Uyarı / geofence barı */
+  .alertbar{max-width:980px;margin:16px auto;padding:12px;background:var(--bg);border-radius:14px;color:#fff;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .alertbar .field{display:flex;flex-direction:column;gap:6px;min-width:160px}
+  .alertbar .spacer{flex:1}
+  .muted{opacity:.8;font-size:13px}
+
+  /* Yaklaşma paneli */
+  #approachBackdrop{display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1300}
+  #approachPanel{display:none; position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); background:var(--card); color:#fff; border:1px solid var(--muted); border-radius:14px; padding:16px; z-index:1400; width:420px; max-width:96vw; box-shadow:0 20px 40px rgba(0,0,0,.45)}
+  #approachPanel h3{margin:0 0 10px 0}
+  #approachPanel .list{max-height:240px; overflow:auto; border:1px dashed var(--muted); border-radius:10px; padding:8px}
+  #approachPanel .hint{font-size:12px; opacity:.85}
+
+  /* Toast */
+  #toast{position:fixed; right:16px; top:16px; background:#111c; color:#fff; padding:10px 14px; border-radius:10px; display:none; z-index:2000; backdrop-filter: blur(6px); border:1px solid #444}
+
+/* === İstatistik FAB + Panel (yeni) === */
+.stats-fab-wrap{position:fixed; right:18px; bottom:96px; z-index:1600}
+.stats-fab{background:#1f6b2d; color:#fff; border:none; padding:10px 14px;
+  border-radius:999px; font-weight:700; box-shadow:0 8px 20px rgba(0,0,0,.35); cursor:pointer}
+.stats-panel{display:none; position:fixed; right:18px; bottom:160px; width:280px;
+  max-width:92vw; background:#1e2327; color:#fff; border:1px solid #3b4248;
+  border-radius:14px; box-shadow:0 20px 40px rgba(0,0,0,.45); z-index:1650}
+.stats-panel.open{display:block}
+.stats-panel .panel-head{display:flex; align-items:center; justify-content:space-between;
+  padding:10px 12px; border-bottom:1px solid #3b4248}
+.stats-panel .panel-body{padding:10px 12px}
+.stats-panel .row{display:flex; justify-content:space-between; padding:4px 0}
+.stats-panel .close-x{background:#444; border:none; color:#fff; border-radius:8px; padding:4px 8px; cursor:pointer}
+
+</style>
+
+<!-- === Yüzen Çoklu Giriş === -->
+<style>
+  .bulk-fab{position:fixed; right:16px; bottom:16px; z-index:1200;
+    background:var(--primary); color:#fff; border:none; padding:10px 14px;
+    border-radius:999px; font-weight:700; box-shadow:0 8px 24px rgba(0,0,0,.35);
+  }
+  #bulkPanel{display:none; position:fixed; right:16px; bottom:84px; z-index:1300;
+    width:92vw; max-width:560px; background:var(--bg); color:#fff;
+    border:1px solid var(--muted); border-radius:16px; padding:12px;
+    box-shadow:0 16px 40px rgba(0,0,0,.45)
+  }
+  #bulkPanel.open{display:block}
+  #bulkHead{display:flex; align-items:center; justify-content:space-between; gap:8px;
+    margin-bottom:8px; cursor:move}
+  #bulkClose{background:#444; color:#fff; border:none; padding:6px 10px; border-radius:10px; font-weight:700}
+  .seat.multi-selected{outline:3px dashed #ffd166; filter:brightness(1.05)}
+</style>
+
+<button class="bulk-fab" id="bulkFab">Toplu Giriş</button>
+
+<div id="bulkPanel" role="dialog" aria-modal="true" aria-labelledby="bulkTitle">
+  <div id="bulkHead">
+    <strong id="bulkTitle">Toplu Giriş</strong>
+    <button id="bulkClose">×</button>
+  </div>
+
+  <!-- Mevcut çoklu giriş barının içeriği BURADA kalsın: id’ler aynı -->
+  <div class="alertbar" id="bulkBar" style="margin:0">
+    <label style="min-width:140px">
+      <input type="checkbox" id="multiMode"> Çoklu Giriş
+    </label>
+
+    <div class="field" style="min-width:220px">
+      <label for="bulkStop">İniş Yeri</label>
+      <select id="bulkStop"><option value="">—</option></select>
+    </div>
+
+    <div class="field" style="min-width:200px">
+      <label>Bilet</label>
+      <div>
+        <label><input type="radio" name="bt" value="biletli"> Biletli</label>
+        <label><input type="radio" name="bt" value="biletsiz" checked> Biletsiz</label>
+        <label><input type="radio" name="bt" value="ucretsiz"> Ücretsiz</label>
+      </div>
+    </div>
+
+    <div class="field" style="min-width:220px">
+      <label>Ödeme</label>
+      <div>
+        <label><input type="radio" name="bp" value="nakit" checked> Nakit</label>
+        <label><input type="radio" name="bp" value="iban"> IBAN</label>
+        <label><input type="radio" name="bp" value="online"> Online</label>
+        <label><input type="radio" name="bp" value="pos"> POS</label>
+        <label><input type="radio" name="bp" value="ucretsiz"> Ücretsiz</label>
+      </div>
+    </div>
+
+    <div class="field" style="max-width:120px">
+      <label for="bulkAmount">Tutar (₺)</label>
+      <input type="number" id="bulkAmount" step="0.01" min="0" value="0">
+    </div>
+
+    <div class="field" style="min-width:160px">
+      <label for="bulkGender">Cinsiyet (ops.)</label>
+      <select id="bulkGender">
+        <option value="">Karışık/Boş</option>
+        <option value="bay">Bay</option>
+        <option value="bayan">Bayan</option>
+      </select>
+    </div>
+
+    <div class="field" style="min-width:180px">
+      <label><input type="checkbox" id="bulkPairOk"> Aile/yan yana istisna</label>
+    </div>
+
+    <button class="btn primary" id="bulkSaveBtn" disabled>Toplu Kaydet</button>
+    <button class="btn secondary" id="bulkClearBtn" disabled>Seçimi Temizle</button>
+
+    <div class="spacer"></div>
+    <div class="muted">Seçili: <span id="bulkCount">0</span> koltuk</div>
+  </div>
+</div>
+
+<script>
+  // Aç/Kapat
+  const bulkFab = document.getElementById('bulkFab');
+  const bulkPanel = document.getElementById('bulkPanel');
+  const bulkClose = document.getElementById('bulkClose');
+  bulkFab?.addEventListener('click', ()=> bulkPanel.classList.add('open'));
+  bulkClose?.addEventListener('click', ()=> bulkPanel.classList.remove('open'));
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape') bulkPanel.classList.remove('open');
+  });
+
+  // Sürükle (header’dan tut)
+  (function makeDraggable(){
+    const head = document.getElementById('bulkHead');
+    let drag=false, sx=0, sy=0, sl=0, st=0, pid=null;
+    head.addEventListener('pointerdown', e=>{
+      drag=true; pid=e.pointerId; head.setPointerCapture(pid);
+      const r=bulkPanel.getBoundingClientRect();
+      sl=r.left; st=r.top; sx=e.clientX; sy=e.clientY;
+      // mutlak konuma geç
+      bulkPanel.style.left=sl+'px'; bulkPanel.style.top=st+'px';
+      bulkPanel.style.right='auto'; bulkPanel.style.bottom='auto';
+      bulkPanel.style.position='fixed';
+    });
+    head.addEventListener('pointermove', e=>{
+      if(!drag) return;
+      const nx = sl + (e.clientX - sx);
+      const ny = st + (e.clientY - sy);
+      bulkPanel.style.left = Math.max(8, Math.min(window.innerWidth-8- bulkPanel.offsetWidth, nx))+'px';
+      bulkPanel.style.top  = Math.max(8, Math.min(window.innerHeight-8- bulkPanel.offsetHeight, ny))+'px';
+    });
+    head.addEventListener('pointerup', ()=>{ drag=false; if(pid){head.releasePointerCapture(pid); pid=null;} });
+  })();
+</script>
+
+<div class="coach" aria-label="Otobüs Koltuk Planı">
+  <div class="head">
+    Sefer: {{ trip['route'] }} — Plaka: {{ trip['plate'] or '-' }} —
+    1. Kaptan: {{ trip['captain1'] or '-' }} —
+    2. Kaptan: {{ trip['captain2'] or '-' }} —
+    Muavin: {{ trip['attendant'] or '-' }}
+  </div>
+
+  <div class="deck" id="deck">
+    <div class="corr">KORİDOR</div>
+
+    {% set seats_map = {
+      1:[1,1],3:[1,3],4:[1,4], 5:[2,1],7:[2,3],8:[2,4],
+      9:[3,1],11:[3,3],12:[3,4], 13:[4,1],15:[4,3],16:[4,4],
+      17:[5,1],19:[5,3],20:[5,4], 21:[6,1],23:[6,3],24:[6,4],
+      25:[7,1],27:[7,3],28:[7,4],
+      29:[8,1],
+      31:[9,1],33:[9,3],34:[9,4],
+      35:[10,1],37:[10,3],38:[10,4],
+      39:[11,1],41:[11,3],42:[11,4],
+      43:[12,1],45:[12,3],46:[12,4],
+      49:[13,3],50:[13,4],
+      51:[14,1],52:[14,2],53:[14,3],54:[14,4]
+    } %}
+
+    {% for n, pos in seats_map.items() %}
+      {% if n == 29 %}<div class="door">KAPI</div>{% endif %}
+      <div class="cell" style="grid-row:{{pos[0]}};grid-column:{{pos[1]}}">
+        <div class="seat" onclick="handleSeatClick({{n}})" id="seat-{{n}}" data-seat="{{n}}" role="button" aria-label="Koltuk {{n}}">
+          {{n}}
+          <span class="svc-badge" title="Servis">🚌</span>
+        </div>
+        <div class="label" id="label-{{n}}"></div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- === İstatistik FAB + Panel (DÜZGÜN) === -->
+<div class="stats-fab-wrap" id="statsWrap" aria-expanded="false">
+  <button id="statsFab" class="stats-fab" aria-controls="statsPanel" aria-expanded="false">
+    İstatistik
+  </button>
+
+  <div id="statsPanel" class="stats-panel" role="dialog" aria-label="Sefer İstatistikleri">
+    <div class="panel-head">
+      <strong>İstatistik</strong>
+      <button class="close-x" aria-label="Kapat" id="statsClose">×</button>
+    </div>
+    <div class="panel-body">
+      <div class="row"><span>Doluluk Oranı</span><strong id="statRate">0%</strong></div>
+      <div class="row"><span>Toplam Yolcu</span><strong id="statTotal">0</strong></div>
+      <div class="row"><span>Boş Koltuk</span><strong id="statEmpty">0</strong></div>
+      <div class="row"><span>Koltuklu Yolcu</span><strong id="statSeated">0</strong></div>
+      <div class="row"><span>Ayakta Yolcu</span><strong id="statWalkon">0</strong></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const wrap     = document.getElementById('statsWrap');
+  const fab      = document.getElementById('statsFab');
+  const panel    = document.getElementById('statsPanel');
+  const closeBtn = document.getElementById('statsClose');
+
+  if(!wrap || !fab || !panel) return;
+
+  // /api/stats -> panel alanlarını doldur
+  async function refreshStatsPanel(){
+    try{
+      const res = await fetch('/api/stats');
+      if(!res.ok) return;
+      const j   = await res.json();
+      if(!j.ok)  return;
+
+      const totalSeats = document.querySelectorAll('.seat').length;
+      const seatPax    = Number(j.seats_reserved || 0);
+      const walkPax    = Number(j.walkon_pax     || 0);
+      const totalPax   = seatPax + walkPax;
+      const emptySeats = Math.max(0, totalSeats - seatPax);
+      const rate       = totalSeats ? Math.round(seatPax / totalSeats * 100) : 0;
+
+      const setText = (id, v)=>{ const el = document.getElementById(id); if(el) el.textContent = v; };
+      setText('statRate',   rate + '%');
+      setText('statTotal',  totalPax);
+      setText('statEmpty',  emptySeats);
+      setText('statSeated', seatPax);
+      setText('statWalkon', walkPax);
+    }catch(_){ /* sessiz geç */ }
+  }
+
+  let timer = null;
+  function openPanel(open){
+    if(open){
+      panel.classList.add('open');
+      fab.setAttribute('aria-expanded','true');
+      wrap.setAttribute('aria-expanded','true');
+      refreshStatsPanel();
+      if(!timer) timer = setInterval(refreshStatsPanel, 20000); // 20 sn
+    }else{
+      panel.classList.remove('open');
+      fab.setAttribute('aria-expanded','false');
+      wrap.setAttribute('aria-expanded','false');
+      if(timer){ clearInterval(timer); timer = null; }
+    }
+  }
+
+  fab.addEventListener('click', ()=> openPanel(!panel.classList.contains('open')));
+  closeBtn?.addEventListener('click', ()=> openPanel(false));
+  document.addEventListener('click', (e)=>{ if(!wrap.contains(e.target)) openPanel(false); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') openPanel(false); });
+
+  // Sayfa açılışında bir kez veriyi çek (panel kapalıyken de hazır olsun)
+  refreshStatsPanel();
+})();
+</script>
+
+<!-- Ana Sayfa / Seferi Sonlandır -->
+<div style="margin-top:20px;display:flex;gap:12px;justify-content:center">
+  <a class="btn" href="{{ url_for('index') }}">Ana Sayfa</a>
+  <form method="post" action="{{ url_for('end_trip') }}"
+        onsubmit="return confirm('Sefer sonlandırılsın mı?');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="btn danger">Seferi Sonlandır</button>
+  </form>
+</div>
+
+  <div class="muted">Bu sefer için biriken ayakta tahsilat</div>
+
+<!-- 1) Geofence / uyarı barı -->
+<div class="alertbar" id="alertBar">
+  <!-- Sıradaki Durak -->
+  <div class="field" style="min-width:220px">
+    <label for="alertStop">Sıradaki Durak</label>
+    <select id="alertStop">
+      <option value="">—</option>
+    </select>
+  </div>
+
+  <!-- Eşik (km) -->
+  <div class="field" style="max-width:140px">
+    <label for="alertRadius">Eşik (km)</label>
+    <input type="number" id="alertRadius" step="0.1" min="0.1" value="3">
+  </div>
+
+  <!-- Sesli Uyarı -->
+  <div class="field" style="min-width:140px">
+    <label for="soundToggle">Sesli Uyarı</label>
+    <label style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="soundToggle" checked> Açık
+    </label>
+  </div>
+
+  <!-- Konumu izle / Manuel uyar -->
+  <button class="btn primary" id="btnGeoWatch">Konumu İzle: KAPALI</button>
+  <button class="btn warn" id="btnTriggerNow" title="Manuel uyarı tetikle">Şimdi Uyar</button>
+
+  <div class="spacer"></div>
+  <div class="muted" id="geoHint">Durak seç.</div>
+</div>
+
+<!-- 2) Hızlı Tahsilat (Ayakta) butonu -->
+<div class="alertbar" id="walkonBar">
+  <button class="btn primary" id="btnWalkonOpen">Hızlı Tahsilat (Ayakta)</button>
+  <div class="spacer"></div>
+  <div class="muted">Ayakta yolcu eklemek için tıkla.</div>
+</div>
+
+<!-- 3) Ayakta toplam özeti -->
+<div class="alertbar" id="walkonAggBar" style="display:none">
+  <div>
+    <strong>Ayakta Toplam:</strong>
+    <span id="walkPax">0</span> yolcu — <strong id="walkTot">₺0.00</strong>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn danger" id="walkonReset" title="Ayakta tahsilat kayıtlarını sıfırla">Sıfırla</button>
+  <div class="muted">Bu sefer için biriken ayakta tahsilat</div>
+</div>
+
+<!-- 4) Walk-on mini form -->
+<div id="walkonBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1500"></div>
+<div id="walkonPanel" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#1e2327;color:#fff;border:1px solid #3b4248;border-radius:14px;padding:14px;z-index:1600;width:420px;max-width:96vw;box-shadow:0 20px 40px rgba(0,0,0,.45)">
+  <h3 style="margin:0 0 10px 0">Hızlı Tahsilat (Ayakta)</h3>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <label style="flex:1;min-width:180px">Nereden
+      <select id="wFrom"><option value="">—</option></select>
+    </label>
+    <label style="flex:1;min-width:180px">Nereye
+      <select id="wTo"><option value="">—</option></select>
+    </label>
+    <label style="width:110px">Adet
+      <input type="number" id="wPax" value="1" min="1" step="1">
+    </label>
+    <label style="width:130px">Birim ₺
+      <input type="number" id="wUnit" value="0" min="0" step="0.01">
+    </label>
+
+<!-- 5) Durak Logu (manuel kayıt) -->
+<div class="alertbar" id="stopLogBar">
+  <div class="field" style="min-width:220px">
+    <label>Durak</label>
+    <!-- Burada mevcut #alertStop değerini kullanacağız; sadece bilgi amaçlı gösterim -->
+    <input type="text" id="stopLogName" readonly placeholder="Sıradaki durak seçin (#alertStop)">
+  </div>
+
+  <div class="field" style="max-width:140px">
+    <label for="stopLogDistance">Mesafe (km)</label>
+    <input type="number" id="stopLogDistance" step="0.01" min="0">
+  </div>
+
+  <button class="btn secondary" id="btnLogApproach" title="Yaklaşma kaydı">Yaklaşıyor</button>
+  <button class="btn primary"   id="btnLogArrive"   title="Varış/İniş-Biniş kaydı">Varış</button>
+  <button class="btn warn"      id="btnLogDepart"   title="Çıkış/Ayrılış kaydı">Çıkış</button>
+
+  <div class="spacer"></div>
+  <div class="muted">Not: Durak adını #alertStop seçiminden alır.</div>
+</div>
+
+    <!-- Canlı toplam -->
+    <div style="width:100%; display:flex; align-items:center; gap:10px; margin-top:6px">
+      <strong>Toplam:</strong>
+      <span id="wTotal">₺0.00</span>
+    </div>
+
+    <div style="width:100%">
+      <span>Ödeme:</span>
+      <label><input type="radio" name="wPay" value="nakit" checked> Nakit</label>
+      <label><input type="radio" name="wPay" value="iban"> IBAN</label>
+      <label><input type="radio" name="wPay" value="online"> Online</label>
+      <label><input type="radio" name="wPay" value="pos"> POS</label>
+      <label><input type="radio" name="wPay" value="ucretsiz"> Ücretsiz</label>
+    </div>
+    <label style="flex:1">Not
+      <input type="text" id="wNote" placeholder="opsiyonel">
+    </label>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+    <button class="btn secondary" id="wClose">Kapat</button>
+    <button class="btn" id="wSave">Kaydet</button>
+  </div>
+</div>
+
+<!-- 5) Koordinat girme mini paneli -->
+<div class="alertbar" id="coordPanel" style="display:none">
+  <div class="field" style="min-width:200px">
+    <label>Seçili Durak</label>
+    <input type="text" id="coordStopName" readonly>
+  </div>
+  <div class="field">
+    <label>Lat</label>
+    <input type="number" id="coordLat" step="0.000001" placeholder="37.xxxxxx">
+  </div>
+  <div class="field">
+    <label>Lng</label>
+    <input type="number" id="coordLng" step="0.000001" placeholder="29.xxxxxx">
+  </div>
+  <button class="btn" id="btnSaveCoord">Koordinatı Kaydet</button>
+  <div class="spacer"></div>
+  <div class="muted">Koordinat kaydı: Sunucuya yazılır (route_stop_coords).</div>
+</div>
+
+<!-- Yaklaşma Paneli -->
+<div id="approachBackdrop"></div>
+<div id="approachPanel" role="dialog" aria-modal="true">
+  <h3 id="approachTitle">Durak Yaklaşıyor</h3>
+  <div class="hint" id="approachInfo">—</div>
+  <div class="list" id="approachList"></div>
+  <div class="row" style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px">
+    <button class="btn secondary" id="approachClose">Kapat</button>
+    <button class="btn warn" id="approachBulk">Toplu İndir → Sonraki Durak</button>
+  </div>
+</div>
+
+<!-- Pop-up form (tek koltuk) -->
+<div id="seatForm" role="dialog" aria-modal="true" aria-labelledby="seatTitle">
+  <h3 id="seatTitle">Koltuk</h3>
+
+  <div class="row">
+    <label>İniş Yeri:
+      <select id="dropoff"><option value="">—</option></select>
+    </label>
+  </div>
+
+  <div class="row">
+    <label>Bilet:</label>
+    <label><input type="radio" name="ticket" value="biletli"> Biletli</label>
+    <label><input type="radio" name="ticket" value="biletsiz" checked> Biletsiz</label>
+    <label><input type="radio" name="ticket" value="ucretsiz"> Ücretsiz</label>
+  </div>
+
+  <div class="row">
+    <label>Ödeme:</label>
+    <label><input type="radio" name="pay" value="nakit" checked> Nakit</label>
+    <label><input type="radio" name="pay" value="iban"> IBAN</label>
+    <label><input type="radio" name="pay" value="online"> Online</label>
+    <label><input type="radio" name="pay" value="pos"> POS</label>
+    <label><input type="radio" name="pay" value="ucretsiz"> Ücretsiz</label>
+  </div>
+
+  <div class="row">
+    <label>Tutar (₺): <input type="number" id="price" value="0.00" min="0" step="0.01"></label>
+  </div>
+
+  <div class="row">
+    <label>Cinsiyet:</label>
+    <label><input type="radio" name="gender" value="bay"> Bay</label>
+    <label><input type="radio" name="gender" value="bayan"> Bayan</label>
+    <label><input type="radio" name="gender" value="" checked> Boş</label>
+  </div>
+
+  <div class="row"><label><input type="checkbox" id="pairOk"> Yan yana istisna (eş/kardeş)</label></div>
+  <div class="row"><label><input type="checkbox" id="serviceChk"> Servis kullanacak</label></div>
+  <div class="row">
+    <label style="flex:1">Servis notu
+      <input type="text" id="serviceNote" placeholder="Mahalle / konum (opsiyonel)">
+    </label>
+  </div>
+
+  <div class="row" style="justify-content:flex-end;">
+    <button class="btn" onclick="saveSeat()">Kaydet</button>
+    <button class="btn danger" onclick="offloadSeat()">İniş (Boşalt)</button>
+    <button class="btn secondary" onclick="closeForm()">Kapat (ESC)</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" aria-live="polite"></div>
+
+<script>
+/* ===================== GLOBALS ===================== */
+const csrf = "{{ csrf_token }}";
+const assigned     = {{ assigned | tojson | safe }};
+const stopsMap     = {{ stops_map | tojson | safe }};
+const genders      = {{ genders | tojson | safe }};
+const serviceMap   = {{ service_map | tojson | safe }};
+const serviceNotes = {{ service_notes | tojson | safe }};
+let cachedStops = null;   // [{name, lat, lng}]
+let currentSeat = null;
+let geoWatchId = null;
+let lastAlertAt = 0;
+const ALERT_COOLDOWN_MS = 3 * 60 * 1000;
+
+/* ===================== HELPERS ===================== */
+const $  = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+function toast(msg, ms=2500){ const t=$('#toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none', ms); }
+const fmtTL = (n)=>'₺'+(Number(n||0).toFixed(2));
+function parseMoney(v){ if(typeof v==='number') return v; const s=(v||'').toString().replace(',', '.'); const x=parseFloat(s); return isNaN(x)?0:x; }
+function distKm(a,b){ const R=6371, toRad=d=>d*Math.PI/180; const dLat=toRad(b.lat-a.lat), dLon=toRad(b.lng-a.lng); const la1=toRad(a.lat), la2=toRad(b.lat); const h=Math.sin(dLat/2)**2 + Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+async function safeJsonFetch(url, options){
+  const res = await fetch(url, options || {});
+  const ct = res.headers.get('content-type') || '';
+  if(!ct.includes('application/json')){
+    const txt = await res.text();
+    throw new Error('JSON bekleniyordu, oturum/404 olabilir.');
+  }
+  return res.json();
+}
+
+/* ===================== DURAK/KOORD İŞLEMLERİ ===================== */
+async function fetchStops(){
+  // 1) Tüm durak isimleri
+  const j = await safeJsonFetch('/api/stops');
+  if(!j.ok) throw new Error(j.msg || 'Duraklar alınamadı');
+  let stops = (j.stops || []).map(name => ({name, lat:null, lng:null}));
+
+  // 2) Koordinatlar
+  try{
+    const cj = await safeJsonFetch('/api/coords');
+    if(cj.ok){
+      const byName = new Map((cj.items||[]).map(i => [i.stop, {lat:i.lat, lng:i.lng}]));
+      stops = stops.map(s => byName.has(s.name) ? {...s, ...byName.get(s.name)} : s);
+    }
+  }catch(e){ /* koordinat tablosu boş olabilir */ }
+
+  cachedStops = stops;
+  return cachedStops;
+}
+async function populateStopsToSelects(){
+  if(!cachedStops) await fetchStops();
+  const lists = ['dropoff','alertStop'];
+  for(const id of lists){
+    const el = $('#'+id); if(!el) continue;
+    const prev = el.value;
+    el.innerHTML = '<option value="">—</option>';
+    for(const s of cachedStops){
+      const o=document.createElement('option');
+      o.value=s.name; o.textContent=s.name + (s.lat!=null ? ' •' : '');
+      el.appendChild(o);
+    }
+    if(prev && [...el.options].some(o=>o.value===prev)) el.value=prev;
+  }
+  updateGeoHint();
+}
+function findStopByName(name){ return (cachedStops||[]).find(x=>x.name===name) || null; }
+function updateCoordPanel(){
+  const stopName = $('#alertStop').value;
+  if(!stopName){ $('#coordPanel').style.display='none'; return; }
+  const s = findStopByName(stopName);
+  $('#coordStopName').value = stopName || '';
+  if(s && s.lat!=null && s.lng!=null){ $('#coordPanel').style.display='none'; }
+  else { $('#coordPanel').style.display='flex'; }
+}
+function updateGeoHint(){
+  const stopName = $('#alertStop').value;
+  if(!stopName){ $('#geoHint').textContent = 'Durak seç.'; updateCoordPanel(); return; }
+  const s = findStopByName(stopName);
+  if(s && s.lat!=null && s.lng!=null){ $('#geoHint').textContent = 'Koordinat hazır.'; }
+  else { $('#geoHint').textContent = 'Koordinat yok — aşağıdan ekleyin.'; }
+  updateCoordPanel();
+}
+$('#btnSaveCoord')?.addEventListener('click', async ()=>{
+  const stopName = $('#alertStop').value;
+  if(!stopName){ toast('Önce durak seç.'); return; }
+  const lat = parseFloat($('#coordLat').value);
+  const lng = parseFloat($('#coordLng').value);
+  if(Number.isNaN(lat)||Number.isNaN(lng)){ toast('Lat/Lng geçersiz'); return; }
+  try{
+    const j = await safeJsonFetch('{{ url_for("api_coords") }}',{
+      method:'POST', headers:{'Content-Type':'application/json','X-CSRF-Token': csrf},
+      body: JSON.stringify({stop: stopName, lat, lng})
+    });
+    if(!j.ok) throw new Error(j.msg || 'Kayıt başarısız');
+    toast('Koordinat kaydedildi.');
+    cachedStops=null; await fetchStops(); await populateStopsToSelects();
+    $('#coordLat').value=''; $('#coordLng').value='';
+  }catch(e){ toast(e.message || 'Kayıt hatası'); }
+});
+
+/* ===================== KOLTUK UI/FORM ===================== */
+function setServiceBadge(seatEl, on){ if(!seatEl) return; if(on){ seatEl.classList.add('has-service'); } else { seatEl.classList.remove('has-service'); } }
+function applySeatColor(el, gender, isAssigned){
+  if(!el) return;
+  if(gender === 'bay'){ el.style.background = '#2d6cdf'; }
+  else if(gender === 'bayan'){ el.style.background = '#e75480'; }
+  else{ el.style.background = isAssigned ? '#4a6177' : '#1f6b2d'; }
+}
+function positionFormOnSeat(seatEl){
+  const form = $('#seatForm');
+  const rect = seatEl.getBoundingClientRect();
+  const formW = form.offsetWidth || 320, formH = form.offsetHeight || 240;
+  let left = rect.left + rect.width/2 + window.scrollX;
+  let top  = rect.top  + window.scrollY - 8;
+  form.style.transform = 'translate(-50%,-100%)';
+  if (rect.top - formH - 16 < 0){ form.style.transform = 'translate(-50%, 10px)'; top = rect.bottom + window.scrollY; }
+  const minL = 8 + window.scrollX, maxR = (document.documentElement.clientWidth - 8) + window.scrollX;
+  left = Math.max(minL + formW/2, Math.min(maxR - formW/2, left));
+  form.style.left = left + 'px'; form.style.top  = top  + 'px';
+}
+function handleSeatClick(num){ openFormWithSeat(num); }
+async function openFormWithSeat(num){
+  currentSeat = num;
+  $$('.seat.selected').forEach(el=>el.classList.remove('selected'));
+  const seatEl = document.getElementById('seat-'+num);
+  if (seatEl){ seatEl.classList.add('selected'); const form = $('#seatForm'); form.style.display = 'block'; positionFormOnSeat(seatEl); }
+  $('#seatTitle').innerText = 'Koltuk ' + num;
+
+  // dropoff/alert listeleri
+  try{ await populateStopsToSelects(); }catch(e){ toast(e.message || 'Duraklar yüklenemedi'); }
+  const prevStop = stopsMap[String(num)] || '';
+  if (prevStop) $('#dropoff').value = prevStop;
+
+  // defaults
+  document.querySelector('input[name="ticket"][value="biletsiz"]').checked = true;
+  document.querySelector('input[name="pay"][value="nakit"]').checked = true;
+  $('#price').value = '0.00';
+
+  // gender
+  const prevGender = genders[String(num)] || "";
+  const gEl = document.querySelector('input[name="gender"][value="'+prevGender+'"]');
+  if(gEl) gEl.checked = true; else (document.querySelector('input[name="gender"][value=""]')||{}).checked = true;
+
+  // service
+  $('#serviceChk').checked = !!serviceMap[String(num)];
+  $('#serviceNote').value = serviceNotes[String(num)] || "";
+  $('#pairOk').checked = false;
+}
+function closeForm(){ const f=$('#seatForm'); f.style.display='none'; $$('.seat.selected').forEach(el=>el.classList.remove('selected')); currentSeat=null; }
+async function saveSeat(){
+  if(!currentSeat) return;
+  const stop   = $('#dropoff').value || "";
+  const ticket = document.querySelector('input[name="ticket"]:checked')?.value || 'biletsiz';
+  const pay    = document.querySelector('input[name="pay"]:checked')?.value || 'nakit';
+  const amount = parseMoney($('#price').value || 0);
+  const gender = document.querySelector('input[name="gender"]:checked')?.value || "";
+  const pair_ok = $('#pairOk')?.checked ? 1 : 0;
+  const service = $('#serviceChk').checked;
+  const service_note = $('#serviceNote').value || "";
+  try{
+    const j = await safeJsonFetch('/api/seat',{
+      method:'POST', headers:{'Content-Type':'application/json','X-CSRF-Token': csrf},
+      body:JSON.stringify({seat_no: currentSeat, stop, ticket_type: ticket, payment: pay, amount, gender, pair_ok, service, service_note})
+    });
+    if(!j.ok) throw new Error(j.msg || 'Kayıt başarısız');
+    assigned[String(currentSeat)] = true;
+    stopsMap[String(currentSeat)] = stop;
+    genders[String(currentSeat)] = gender;
+    serviceMap[String(currentSeat)] = !!service;
+    serviceNotes[String(currentSeat)] = service_note;
+    const l=$('#label-'+currentSeat); if(l) l.textContent = stop || '';
+    const s=$('#seat-'+currentSeat); applySeatColor(s, gender, true); setServiceBadge(s, !!service);
+    closeForm();
+  }catch(e){ toast(e.message || 'Kaydetme hatası'); }
+}
+async function offloadSeat(){
+  if(!currentSeat) return;
+  try{
+    const j = await safeJsonFetch('/api/seat?seat_no='+currentSeat,{method:'DELETE', headers:{'X-CSRF-Token': csrf}});
+    if(!j.ok) throw new Error(j.msg || 'Silme başarısız');
+    delete assigned[String(currentSeat)];
+    delete stopsMap[String(currentSeat)];
+    delete genders[String(currentSeat)];
+    delete serviceMap[String(currentSeat)];
+    delete serviceNotes[String(currentSeat)];
+    const l=$('#label-'+currentSeat); if(l) l.textContent = '';
+    const s=$('#seat-'+currentSeat); applySeatColor(s, "", false); setServiceBadge(s, false);
+    closeForm();
+  }catch(e){ toast(e.message || 'İniş/boşaltma hatası'); }
+}
+
+/* ===================== YAKLAŞMA & GEO ===================== */
+function seatsForStop(stop){
+  const out=[]; for(const [seat, st] of Object.entries(stopsMap||{})){ if(st===stop) out.push(Number(seat)); }
+  return out.sort((a,b)=>a-b);
+}
+function speak(text){
+  if(!$('#soundToggle').checked) return;
+  try{ const u = new SpeechSynthesisUtterance(text); u.lang='tr-TR'; window.speechSynthesis.speak(u); }catch(e){}
+  if(navigator.vibrate) navigator.vibrate([150, 70, 150]);
+}
+function openApproachPanel(stop, seats){
+  $('#approachTitle').textContent = stop + ' yaklaşıyor';
+  $('#approachInfo').textContent = seats.length ? (seats.length+' yolcu inecek') : 'Bu durakta iniş yok.';
+  const listEl = $('#approachList');
+  listEl.innerHTML = '';
+  if(seats.length){
+    const ul = document.createElement('ul'); ul.style.margin='6px 0'; ul.style.paddingLeft='18px';
+    for(const s of seats){ const li=document.createElement('li'); li.textContent='Koltuk '+s; ul.appendChild(li); }
+    listEl.appendChild(ul);
+  }
+  $('#approachBackdrop').style.display='block';
+  $('#approachPanel').style.display='block';
+  speak(stop+' durağına yaklaşılıyor. '+seats.length+' yolcu inecek.');
+}
+function closeApproachPanel(){
+  $('#approachBackdrop').style.display='none';
+  $('#approachPanel').style.display='none';
+}
+$('#approachClose').addEventListener('click', closeApproachPanel);
+$('#approachBackdrop').addEventListener('click', closeApproachPanel);
+
+function pickNextStopName(cur){
+  const arr = cachedStops || [];
+  const idx = arr.findIndex(x=>x.name===cur);
+  for(let i=idx+1;i<arr.length;i++){ if(arr[i].lat!=null && arr[i].lng!=null) return arr[i].name; }
+  return arr[idx+1]?.name || null;
+}
+async function restartGeoWatchIfNeeded(){
+  const btn = $('#btnGeoWatch');
+  const isOn = (btn?.textContent||'').includes('AÇIK');
+  if(!isOn) return;
+  if(geoWatchId!=null){ navigator.geolocation.clearWatch(geoWatchId); geoWatchId=null; }
+  btn.click(); // mevcut handler yeniden başlatır
+}
+
+$('#approachBulk').addEventListener('click', async ()=>{
+  const stop = $('#alertStop').value; if(!stop){ toast('Durak seç.'); return; }
+  const seatList = seatsForStop(stop);
+  // Ayakta kayıtlar (to_stop==stop) – varsa sil
+  let walkIds=[];
+  try{
+    const w = await safeJsonFetch('/api/walkon');
+    if(w.ok && Array.isArray(w.items)){ walkIds = w.items.filter(x => x.to_stop === stop).map(x => x.id); }
+  }catch(e){}
+
+  try{
+    const jobs=[];
+    if(seatList.length) jobs.push(safeJsonFetch('/api/seats/bulk?seats='+seatList.join(','), {method:'DELETE', headers:{'X-CSRF-Token': csrf}}));
+    if(walkIds.length) jobs.push(safeJsonFetch('/api/walkon?ids='+walkIds.join(','), {method:'DELETE', headers:{'X-CSRF-Token': csrf}}));
+    await Promise.all(jobs);
+  }catch(e){ toast('Toplu indirmede hata: '+(e.message||'')); }
+
+  // UI senkronu
+  for(const s of seatList){
+    delete assigned[String(s)];
+    delete stopsMap[String(s)];
+    delete genders[String(s)];
+    delete serviceMap[String(s)];
+    delete serviceNotes[String(s)];
+    const l=$('#label-'+s); if(l) l.textContent='';
+    const el=$('#seat-'+s); applySeatColor(el,"",false); setServiceBadge(el,false);
+  }
+  toast(`✅ Toplu indirildi — Koltuk: ${seatList.length} • Ayakta: ${walkIds.length}`);
+  closeApproachPanel();
+
+  // Sonraki durağa otomatik geç
+  const next = pickNextStopName(stop);
+  if(next){
+    $('#alertStop').value = next;
+    await restartGeoWatchIfNeeded();
+  }else{
+    if(geoWatchId!=null){ navigator.geolocation.clearWatch(geoWatchId); geoWatchId=null; }
+    $('#btnGeoWatch').textContent='Konumu İzle: KAPALI';
+    toast('🛑 Son durak — otomatik geçiş bitti.');
+  }
+});
+
+$('#btnTriggerNow').addEventListener('click', ()=>{
+  const stop = $('#alertStop').value; if(!stop){ toast('Durak seç.'); return; }
+  const seats = seatsForStop(stop);
+  openApproachPanel(stop, seats);
+});
+
+$('#btnGeoWatch').addEventListener('click', async ()=>{
+  // kapat
+  if(geoWatchId){
+    navigator.geolocation.clearWatch(geoWatchId); geoWatchId=null;
+    $('#btnGeoWatch').textContent='Konumu İzle: KAPALI';
+    toast('Konum izleme kapatıldı.');
+    return;
+  }
+  if(!cachedStops) { try{ await fetchStops(); }catch(e){ toast(e.message); return; } }
+  const stopName = $('#alertStop').value;
+  if(!stopName){ toast('Önce durak seç.'); return; }
+  const s = findStopByName(stopName);
+  if(!s || s.lat==null || s.lng==null){ toast('Bu durak için koordinat yok. Aşağıdan ekleyin.'); return; }
+
+  const radiusKm = parseFloat($('#alertRadius').value || '3');
+  geoWatchId = navigator.geolocation.watchPosition(pos=>{
+    const p = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+    const d = distKm(p, {lat:s.lat, lng:s.lng});
+    $('#geoHint').textContent = 'Mesafe: '+d.toFixed(2)+' km (eşik '+radiusKm+' km)';
+    if(d <= radiusKm){
+      const now = Date.now();
+      if(now - lastAlertAt > ALERT_COOLDOWN_MS){
+        lastAlertAt = now;
+        const seats = seatsForStop(stopName);
+        openApproachPanel(stopName, seats);
+      }
+    }
+  }, err=> toast('Konum hatası: '+(err.message||'')), {enableHighAccuracy:true, timeout:10000, maximumAge:2000});
+  $('#btnGeoWatch').textContent='Konumu İzle: AÇIK';
+});
+
+/* ===================== KLAVYE & INIT ===================== */
+window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape'){ closeForm(); closeApproachPanel(); } });
+
+// İlk çizim
+(async function init(){
+  // Koltuk etiketleri/renkleri/servis rozetleri
+  for(const el of $$('.seat')){
+    const seatNo = el.dataset.seat;
+    const g = genders?.[seatNo] || "";
+    const isAssg = !!assigned?.[seatNo];
+    applySeatColor(el, g, isAssg);
+    const l=$('#label-'+seatNo); if(l) l.textContent = stopsMap?.[seatNo] || '';
+    const svc = !!serviceMap?.[seatNo]; setServiceBadge(el, svc);
+    if(svc){
+      const note = (serviceNotes?.[seatNo] || "").trim();
+      if(note) el.querySelector('.svc-badge').title = 'Servis: ' + note;
+    }
+  }
+  $('#alertStop').addEventListener('change', updateGeoHint);
+  await fetchStops();
+  await populateStopsToSelects();
+})();
+</script>
+
+<script>
+// Walk-on paneli aç/kapat
+function openWalkon(){ 
+  // durak listelerini doldur
+  (async ()=>{
+    if(!cachedStops) await fetchStops();
+    for(const id of ['wFrom','wTo']){
+      const el = document.getElementById(id);
+      if(!el) continue;
+      const prev = el.value;
+      el.innerHTML = '<option value="">—</option>';
+      for(const s of (cachedStops||[])){
+        const o = document.createElement('option');
+        o.value = s.name; o.textContent = s.name + (s.lat!=null ? ' •' : '');
+        el.appendChild(o);
+      }
+      if(prev && [...el.options].some(o=>o.value===prev)) el.value=prev;
+    }
+    // seçili “Sıradaki Durak”ı varsayılan “Nereye” yap
+    const alertVal = document.getElementById('alertStop')?.value || '';
+    if(alertVal) document.getElementById('wTo').value = alertVal;
+  })();
+  document.getElementById('walkonBackdrop').style.display='block';
+  document.getElementById('walkonPanel').style.display='block';
+}
+function closeWalkon(){
+  document.getElementById('walkonBackdrop').style.display='none';
+  document.getElementById('walkonPanel').style.display='none';
+}
+
+// Kaydet
+async function saveWalkon(){
+  const from = document.getElementById('wFrom').value.trim();
+  const to   = document.getElementById('wTo').value.trim();
+  const pax  = parseInt(document.getElementById('wPax').value || '1',10) || 1;
+  const unit = parseFloat(document.getElementById('wUnit').value || '0') || 0;
+  const pay  = document.querySelector('input[name="wPay"]:checked')?.value || 'nakit';
+  const note = document.getElementById('wNote').value.trim();
+  if(!from || !to){ toast('Nereden/Nereye gerekli'); return; }
+  try{
+    const j = await safeJsonFetch('/api/walkon',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRF-Token': csrf},
+      body: JSON.stringify({
+        from_stop: from, to_stop: to, pax,
+        unit_price: unit, total_amount: pax*unit, payment: pay, note
+      })
+    });
+    if(!j.ok) throw new Error(j.msg || 'Kayıt başarısız');
+    toast('Ayakta yolcu eklendi.');
+    closeWalkon();
+  }catch(e){ toast(e.message || 'Kayıt hatası'); }
+}
+
+// Event bağla
+document.getElementById('btnWalkonOpen')?.addEventListener('click', openWalkon);
+document.getElementById('wClose')?.addEventListener('click', closeWalkon);
+document.getElementById('walkonBackdrop')?.addEventListener('click', closeWalkon);
+document.getElementById('wSave')?.addEventListener('click', saveWalkon);
+</script>
+
+<script>
+function wRecalc(){
+  const pax  = parseInt(document.getElementById('wPax').value || '1',10) || 1;
+  const unit = parseFloat(document.getElementById('wUnit').value || '0') || 0;
+  const tot  = pax * unit;
+  document.getElementById('wTotal').textContent = '₺' + tot.toFixed(2);
+}
+document.getElementById('wPax')?.addEventListener('input', wRecalc);
+document.getElementById('wUnit')?.addEventListener('input', wRecalc);
+
+// openWalkon içinde panel açılırken bir kere de hesapla
+const _openWalkon_orig = openWalkon;
+openWalkon = function(){ _openWalkon_orig(); setTimeout(wRecalc, 50); }
+</script>
+
+<script>
+// ——— Panelde canlı toplam ₺ hesabı (Adet × Birim) ———
+function wRecalc(){
+  const pax  = parseInt(document.getElementById('wPax')?.value || '1',10) || 1;
+  const unit = parseFloat(document.getElementById('wUnit')?.value || '0') || 0;
+  const tot  = pax * unit;
+  const out  = document.getElementById('wTotal');
+  if(out) out.textContent = '₺' + tot.toFixed(2);
+}
+document.getElementById('wPax')?.addEventListener('input', wRecalc);
+document.getElementById('wUnit')?.addEventListener('input', wRecalc);
+
+// openWalkon açıldığında bir kez hesapla
+if (typeof openWalkon === 'function') {
+  const _openWalkon_orig = openWalkon;
+  openWalkon = function(){
+    _openWalkon_orig();
+    setTimeout(wRecalc, 50);
+  };
+}
+
+// ——— Ayakta toplam özetini sunucudan çek ———
+async function refreshWalkonAggregate(){
+  try{
+    const j = await safeJsonFetch('/api/walkon?aggregate=1');
+    if(j.ok){
+      document.getElementById('walkPax').textContent = (j.pax || 0);
+      document.getElementById('walkTot').textContent = '₺' + Number(j.total_amount || 0).toFixed(2);
+      document.getElementById('walkonAggBar').style.display = 'flex';
+    }
+  }catch(e){
+    // sessiz geç
+  }
+}
+
+// Kaydetten sonra otomatik yenile
+if (typeof saveWalkon === 'function') {
+  const _saveWalkon_orig = saveWalkon;
+  saveWalkon = async function(){
+    await _saveWalkon_orig();
+    await refreshWalkonAggregate();
+  };
+}
+
+// Sayfa açılışında bir kez yükle
+document.addEventListener('DOMContentLoaded', refreshWalkonAggregate);
+</script>
+
+<script>
+async function resetWalkon(){
+  if(!confirm('Ayakta yolcu tahsilatlarını sıfırlamak istiyor musunuz?')) return;
+  try{
+    const j = await safeJsonFetch('/api/walkon');
+    if(!j.ok){ toast(j.msg || 'Kayıtlar alınamadı'); return; }
+    const ids = (j.items || []).map(x => x.id);
+    if(ids.length === 0){ toast('Zaten sıfır.'); return; }
+
+    const del = await safeJsonFetch('/api/walkon?ids=' + ids.join(','), {
+      method: 'DELETE',
+      headers: {'X-CSRF-Token': csrf}
+    });
+    if(!del.ok){ toast(del.msg || 'Silme başarısız'); return; }
+
+    await refreshWalkonAggregate();
+    toast('Ayakta toplam sıfırlandı.');
+  }catch(e){
+    toast(e.message || 'Sıfırlama hatası');
+  }
+}
+
+document.getElementById('walkonReset')?.addEventListener('click', resetWalkon);
+</script>
+
+<script>
+  // ===== Çoklu giriş durumu =====
+  let multiMode = false;
+  const selectedSeats = new Set();
+
+  // Çoklu mod aç/kapa
+  const multiChk = document.getElementById('multiMode');
+  const bulkSaveBtn = document.getElementById('bulkSaveBtn');
+  const bulkClearBtn = document.getElementById('bulkClearBtn');
+  const bulkCountEl = document.getElementById('bulkCount');
+
+  function updateBulkButtons(){
+    const hasSel = selectedSeats.size > 0;
+    bulkSaveBtn.disabled = !hasSel;
+    bulkClearBtn.disabled = !hasSel;
+    bulkCountEl.textContent = String(selectedSeats.size);
+  }
+
+  multiChk?.addEventListener('change', ()=>{
+    multiMode = multiChk.checked;
+    // moda geçerken eski seçimi sıfırla
+    if(!multiMode){
+      for(const s of selectedSeats){
+        const el = document.getElementById('seat-'+s);
+        el?.classList.remove('multi-selected');
+      }
+      selectedSeats.clear();
+      updateBulkButtons();
+    }
+    toast(multiMode ? 'Çoklu giriş modu AÇIK' : 'Çoklu giriş modu KAPALI');
+  });
+
+  // Seat tık davranışını override et
+  // Var olan handleSeatClick(num) fonksiyonunu kullanıyorsan, en başına bunu ekle:
+  const _origHandleSeatClick = window.handleSeatClick;
+  window.handleSeatClick = function(num){
+    if(multiMode){
+      const el = document.getElementById('seat-'+num);
+      if(selectedSeats.has(num)){
+        selectedSeats.delete(num);
+        el?.classList.remove('multi-selected');
+      }else{
+        selectedSeats.add(num);
+        el?.classList.add('multi-selected');
+      }
+      updateBulkButtons();
+      return; // form açma!
+    }
+    // normal tekli davranış
+    _origHandleSeatClick ? _origHandleSeatClick(num) : openFormWithSeat(num);
+  };
+
+  // Seçimi temizle
+  bulkClearBtn?.addEventListener('click', ()=>{
+    for(const s of selectedSeats){
+      const el = document.getElementById('seat-'+s);
+      el?.classList.remove('multi-selected');
+    }
+    selectedSeats.clear();
+    updateBulkButtons();
+  });
+
+  // Toplu kaydet
+  async function bulkSave(){
+    if(selectedSeats.size === 0) return;
+
+    const stop = document.getElementById('bulkStop').value || '';
+    const ticket = document.querySelector('input[name="bt"]:checked')?.value || 'biletsiz';
+    const pay = document.querySelector('input[name="bp"]:checked')?.value || 'nakit';
+    const amount = parseMoney(document.getElementById('bulkAmount').value || 0);
+    const gender = document.getElementById('bulkGender').value || '';
+    const pair_ok = document.getElementById('bulkPairOk').checked ? 1 : 0;
+
+    if(!stop){ toast('İniş yeri seçin'); return; }
+
+    // seats listesi
+    const seats = Array.from(selectedSeats).map(n=>{
+      const item = { seat_no: n, stop, ticket_type: ticket, payment: pay, amount };
+      if(gender) item.gender = gender;
+      if(pair_ok) item.pair_ok = 1;
+      return item;
+    });
+
+    try{
+      const j = await safeJsonFetch('/api/seats/bulk', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRF-Token': csrf},
+        body: JSON.stringify({ seats, stop, ticket_type: ticket, payment: pay, amount })
+      });
+      if(!j.ok) throw new Error(j.msg || 'Toplu kayıt başarısız');
+
+      // UI güncell
+      for(const n of selectedSeats){
+        assigned[String(n)] = true;
+        stopsMap[String(n)] = stop;
+        if(gender) genders[String(n)] = gender;
+        const el = document.getElementById('seat-'+n);
+        el?.classList.remove('multi-selected');
+        applySeatColor(el, gender || "", true);
+        const lab = document.getElementById('label-'+n);
+        if(lab) lab.textContent = stop;
+      }
+      selectedSeats.clear();
+      updateBulkButtons();
+      toast('Toplu kayıt tamam.');
+    }catch(e){
+      toast(e.message || 'Toplu kayıt hatası');
+    }
+  }
+  bulkSaveBtn?.addEventListener('click', bulkSave);
+
+  // Çoklu barındaki durak listesini de dolduralım
+  async function populateBulkStops(){
+    const stops = await fetchStops();
+    const sel = document.getElementById('bulkStop');
+    if(!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">—</option>';
+    for(const s of stops){
+      const o = document.createElement('option');
+      o.value = s.name;
+      o.textContent = s.name + (s.lat!=null ? ' •' : '');
+      sel.appendChild(o);
+    }
+    if(cur && stops.some(x=>x.name===cur)) sel.value = cur;
+  }
+
+  // Zaten kullandığın populateAllStops bittikten sonra bunu da çağır:
+  (async ()=>{
+    try{ await populateBulkStops(); }catch(_){}
+  })();
+</script>
+
+<script>
+(function(){
+  const wrap  = document.getElementById('statsWrap');
+  const fab   = document.getElementById('statsFab');
+  const panel = document.getElementById('statsPanel');
+  const closeBtn = document.getElementById('statsClose');
+
+  if(!wrap || !fab || !panel) return; // güvenlik
+
+  function openPanel(open){
+    if(open){ panel.classList.add('open'); }
+    else{ panel.classList.remove('open'); }
+    fab.setAttribute('aria-expanded', open);
+    wrap.setAttribute('aria-expanded', open);
+  }
+
+  fab.addEventListener('click', () => openPanel(!panel.classList.contains('open')));
+  closeBtn?.addEventListener('click', () => openPanel(false));
+
+  // dışarı tıkla: kapat
+  document.addEventListener('click', (e)=>{
+    if(!wrap.contains(e.target)){ openPanel(false); }
+  });
+  // ESC ile kapat
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){ openPanel(false); }
+  });
+})();
+</script>
+
+{% endblock %}

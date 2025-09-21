@@ -9,3 +9,33 @@
 .header { margin-bottom:8px; font-weight:700; }
 .footer { margin-top:12px; text-align:center; opacity:.8; }
 .occupied { background:#455a64 !important; } /* dolu koltuk rengi (geçici) */
+
+/* === İstatistik Balonu (FAB + Panel) === */
+.stats-fab-wrap{ position:fixed; right:16px; bottom:16px; z-index:9999; }
+.stats-fab{
+  background:#2b3036; color:#fff; border:1px solid #40464d;
+  border-radius:999px; padding:10px 14px; box-shadow:0 4px 12px rgba(0,0,0,.35);
+  font-weight:700; cursor:pointer;
+}
+.stats-panel{
+  position:absolute; right:0; bottom:54px; background:#2b3036; color:#e6edf3;
+  border:1px solid #40464d; border-radius:16px; width:min(92vw,320px);
+  box-shadow:0 12px 28px rgba(0,0,0,.5); padding:10px 12px;
+  transform: translateY(8px) scale(.98); opacity:0; visibility:hidden; pointer-events:none;
+}
+.stats-panel::after{
+  content:""; position:absolute; right:18px; bottom:-8px; width:14px; height:14px;
+  background:#2b3036; border-left:1px solid #40464d; border-bottom:1px solid #40464d;
+  transform: rotate(45deg);
+}
+.stats-panel .panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.stats-panel .close-x{ background:transparent; color:#fff; border:none; font-size:20px; line-height:1; cursor:pointer; }
+.stats-panel .row{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #40464d; }
+.stats-panel .row:last-child{ border-bottom:none; }
+@media (prefers-reduced-motion: no-preference){
+  .stats-panel{ transition: transform .18s ease, opacity .18s ease, visibility 0s linear .18s; }
+  .stats-panel.open{
+    transform: translateY(0) scale(1); opacity:1; visibility:visible; pointer-events:auto;
+    transition: transform .18s ease, opacity .18s ease;
+  }
+}

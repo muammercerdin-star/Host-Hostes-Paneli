@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:500px;margin:20px auto;padding:20px;background:#2f353a;border-radius:12px;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.5);">
+
+  <!-- Tarih / Saat -->
+  <div style="text-align:center;margin-bottom:20px;">
+    <h3>{{ now.strftime("%d %B %Y") }}</h3>
+    <p>{{ now.strftime("%H:%M") }}</p>
+  </div>
+
+  <!-- Hat seçimi -->
+  <div style="margin-bottom:20px;">
+    <select style="width:100%;padding:10px;border-radius:8px;">
+      {% for r in routes %}
+        <option>{{ r }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- Menü Butonları -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+
+    <a href="{{ url_for('trip_start') }}" 
+       style="display:block;text-align:center;padding:16px;background:#007bff;color:white;text-decoration:none;border-radius:10px;">
+       <b>SEFER BAŞLAT</b><br><small>Yeni sefer başlat</small>
+    </a>
+
+    <a href="{{ url_for('seats') }}" 
+       style="display:block;text-align:center;padding:16px;background:#444;color:white;text-decoration:none;border-radius:10px;">
+       <b>DEVAM EDEN SEFER</b><br><small>Aktif sefer varsa koltuklara git</small>
+    </a>
+
+    <a href="{{ url_for('seats') }}" 
+       style="display:block;text-align:center;padding:16px;background:#444;color:white;text-decoration:none;border-radius:10px;">
+       <b>HIZLI KOLTUK</b><br><small>Koltuk ekranına git</small>
+    </a>
+
+    <div style="display:block;text-align:center;padding:16px;background:#444;border-radius:10px;opacity:0.6;">
+       <b>KASA / ÖDEME</b><br><small>Yakında</small>
+    </div>
+
+    <div style="display:block;text-align:center;padding:16px;background:#444;border-radius:10px;opacity:0.6;">
+       <b>MASRAF</b><br><small>Yakında</small>
+    </div>
+
+    <div style="display:block;text-align:center;padding:16px;background:#444;border-radius:10px;opacity:0.6;">
+       <b>DURAKLAR</b><br><small>Yakında</small>
+    </div>
+
+    <div style="display:block;text-align:center;padding:16px;background:#444;border-radius:10px;opacity:0.6;">
+       <b>RAPORLAR</b><br><small>Yakında</small>
+    </div>
+
+    <a href="{{ url_for('api_stops') }}" 
+       style="display:block;text-align:center;padding:16px;background:#007bff;color:white;text-decoration:none;border-radius:10px;">
+       <b>HAT EKLE</b><br><small>Yeni hat ve durakları tanımla</small>
+    </a>
+
+    <div style="grid-column:span 2;display:block;text-align:center;padding:16px;background:#444;border-radius:10px;opacity:0.6;">
+       <b>HATLAR</b><br><small>Hatları listele / düzenle</small>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

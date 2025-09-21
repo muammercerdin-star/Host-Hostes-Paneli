@@ -1,68 +1,82 @@
-<!doctype html>
-<html lang="tr">
-<head>
-  <meta charset="utf-8">
-  <title>Muavin Asistanı - Giriş</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    .login-box {
-      background: #fff;
-      padding: 20px 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      width: 300px;
-    }
-    h1 {
-      font-size: 20px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    input[type=password] {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    .error {
-      color: red;
-      font-size: 14px;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-  </style>
-</head>
-<body>
-  <div class="login-box">
-    <h1>Giriş Yap</h1>
-    {% if error %}
-      <div class="error">{{ error }}</div>
-    {% endif %}
-    <form method="post">
-      <input type="password" name="password" placeholder="Şifre">
-      <!-- CSRF koruması için -->
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <button type="submit">Giriş</button>
-    </form>
-  </div>
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<style>
+  body {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:100vh;
+    background:#f3f4f6;
+  }
+  .login-box {
+    background:#fff;
+    padding:24px;
+    border-radius:14px;
+    box-shadow:0 8px 24px rgba(0,0,0,.15);
+    width:100%;
+    max-width:360px;
+  }
+  .login-box h2 {
+    margin:0 0 18px 0;
+    text-align:center;
+  }
+  .input-wrap {
+    position:relative;
+    display:flex;
+    align-items:center;
+    margin-bottom:16px;
+  }
+  .input-wrap input {
+    width:100%;
+    padding:10px 40px 10px 12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:15px;
+  }
+  .toggle-eye {
+    position:absolute;
+    right:12px;
+    cursor:pointer;
+    font-size:18px;
+    user-select:none;
+  }
+  button {
+    width:100%;
+    background:#007bff;
+    border:none;
+    padding:10px;
+    border-radius:8px;
+    font-size:16px;
+    font-weight:700;
+    color:#fff;
+    cursor:pointer;
+  }
+  button:hover {
+    background:#0056b3;
+  }
+</style>
+
+<div class="login-box">
+  <h2>Giriş Yap</h2>
+  <form method="post">
+    <label for="password">Şifre</label>
+    <div class="input-wrap">
+      <input type="password" id="password" name="password" required>
+      <span id="togglePwd" class="toggle-eye">👁️</span>
+    </div>
+    <button type="submit">Giriş</button>
+  </form>
+</div>
+
+<script>
+  const pwd = document.getElementById('password');
+  const toggle = document.getElementById('togglePwd');
+  let visible = false;
+
+  toggle.addEventListener('click', ()=>{
+    visible = !visible;
+    pwd.type = visible ? 'text' : 'password';
+    toggle.textContent = visible ? '🙈' : '👁️';
+  });
+</script>
+{% endblock %}

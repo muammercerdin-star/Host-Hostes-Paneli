@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  :root{
+    --bg:#2f353a;--card:#1e2327;--muted:#3b4248;--text:#e8edf2;--primary:#2563eb;--ink:#0f1215
+  }
+  body{color:var(--text);background:var(--bg)}
+  .wrap{max-width:1100px;margin:8px auto;padding:0 10px}
+
+  .topbar{display:flex;align-items:center;gap:8px;margin:6px 0 10px}
+  .title{font-size:26px;font-weight:900;letter-spacing:.2px;flex:1}
+  .iconbtn{display:inline-flex;align-items:center;gap:8px;background:var(--ink);border:1px solid var(--muted);
+    color:#fff;padding:8px 10px;border-radius:12px;text-decoration:none;font-weight:800;white-space:nowrap}
+  .iconbtn.primary{background:var(--primary);border-color:#1f4ed6}
+  .iconbtn.warn{background:#ef4444;border-color:#7f1d1d}
+  .iconbtn svg{width:18px;height:18px}
+
+  .filters{display:grid;grid-template-columns:1.2fr 1fr auto auto auto;gap:8px;align-items:end}
+  .group{display:flex;flex-direction:column;gap:6px;font-weight:700}
+  .filters input,.filters select{background:var(--ink);color:#fff;border:1px solid var(--muted);
+    border-radius:12px;padding:10px}
+
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+  .card{background:var(--card);border:1px solid var(--muted);border-radius:14px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  .card .k{opacity:.9;font-size:12px}
+  .card .v{font-weight:900;font-size:20px;margin-top:4px}
+  .sub{opacity:.85;margin-top:6px;font-size:12px}
+
+  .grid{display:grid;grid-template-columns:1.02fr .98fr;gap:10px;margin-top:6px}
+  .panel{background:var(--card);border:1px solid var(--muted);border-radius:14px;padding:10px}
+  .head{font-weight:800;margin-bottom:6px}
+
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:8px 8px;border-bottom:1px solid var(--muted)}
+  th{background:var(--ink);text-align:left}
+  .right{text-align:right}
+  .scroll{max-height:280px;overflow:auto;border-radius:10px}
+
+  /* Heatmap */
+  .heat{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .seat{height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-weight:900;color:#fff;border:1px solid #2d353c;cursor:pointer;user-select:none}
+  .seat.dim{opacity:.45;filter:grayscale(.3)}
+  .legend{display:flex;gap:6px;align-items:center;margin-top:6px}
+  .box{width:18px;height:10px;border-radius:4px}
+
+  canvas{width:100%;height:200px}
+
+  @media (max-width:980px){
+    .filters{grid-template-columns:1fr 1fr}
+    .cards{grid-template-columns:1fr 1fr}
+    .grid{grid-template-columns:1fr}
+    .scroll{max-height:240px}
+    canvas{height:160px}
+  }
+
+  /* ---- Modal ---- */
+  .backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2400}
+  .modal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    background:var(--card);border:1px solid var(--muted);border-radius:14px;padding:12px;width:560px;max-width:96vw;
+    box-shadow:0 22px 44px rgba(0,0,0,.5);z-index:2500}
+  .modal .row{display:flex;gap:10px;align-items:center;justify-content:space-between}
+  .modal h3{margin:0 0 8px 0}
+  .closex{background:#222;border:1px solid var(--muted);color:#fff;padding:6px 10px;border-radius:10px;font-weight:800;cursor:pointer}
+  .pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#0f1215;border:1px solid var(--muted);font-weight:700}
+</style>
+
+<div class="wrap" id="rootWrap">
+  <div class="topbar">
+    <div class="title">Raporlama / Analiz</div>
+    <a class="iconbtn" href="{{ url_for('index') }}">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 3 11h2v9h6v-6h2v6h6v-9h2z"/></svg>
+      Ana sayfa
+    </a>
+    <button id="btnDownload" class="iconbtn">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 20h14v-2H5v2zM11 4v8H8l4 4 4-4h-3V4h-2z"/></svg>
+      İndir (CSV)
+    </button>
+    <button id="btnReset" class="iconbtn warn">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 6V3L7 8l5 5V9a5 5 0 1 1-5 5H5a7 7 0 1 0 7-8z"/></svg>
+      Verileri sıfırla
+    </button>
+    <button id="btnFetch" class="iconbtn primary">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 13h14v-2H5v2z"/></svg>
+      Raporu Görüntüle
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="group">
+      <span>Tarih Aralığı</span>
+      <div style="display:flex;gap:6px">
+        <input type="date" id="fStart" style="flex:1">
+        <input type="date" id="fEnd" style="flex:1">
+      </div>
+    </div>
+    <div class="group">
+      <span>Hat (opsiyonel)</span>
+      <select id="fRoute">
+        <option value="">— Hepsi —</option>
+        {% for r in all_routes %}
+          <option value="{{ r }}">{{ r }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div class="cards">
+    <div class="card"><div class="k">Toplam Yolcu</div><div class="v" id="mPax">0</div></div>
+    <div class="card"><div class="k">Toplam Gelir (₺)</div><div class="v" id="mRev">₺0.00</div></div>
+    <div class="card"><div class="k">Ortalama Gelir (₺ / kişi)</div><div class="v" id="mAvg">₺0.00</div></div>
+    <div class="card"><div class="k">Hiç Satılmayan Koltuk</div><div class="v" id="mUnsold">0</div><div class="sub" id="unsoldMini">—</div></div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="grid">
+    <div class="panel">
+      <div class="head">Koltuk Analizi</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div class="panel" style="padding:8px">
+          <div class="k" style="margin-bottom:6px">Satış Adedi (Top 10)</div>
+          <canvas id="chartTimes"></canvas>
+        </div>
+        <div class="panel" style="padding:8px">
+          <div class="k" style="margin-bottom:6px">Gelir (Top 10)</div>
+          <canvas id="chartRevenue"></canvas>
+        </div>
+      </div>
+      <div class="scroll">
+        <table id="seatTable">
+          <thead>
+            <tr><th style="width:90px">Koltuk</th><th class="right">Satış</th><th class="right">Ciro (₺)</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="head">Koltuk Kullanım Isı Haritası</div>
+      <div id="heat" class="heat scroll" style="padding:6px"></div>
+      <div class="legend">
+        <span class="k">Yoğunluk:</span>
+        <div class="box" style="background:#4caf50"></div>
+        <div class="box" style="background:#ffc107"></div>
+        <div class="box" style="background:#ff5722"></div>
+        <div class="box" style="background:#d32f2f"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="mdBack" class="backdrop"></div>
+<div id="mdSeat" class="modal" role="dialog" aria-modal="true" aria-labelledby="mdTitle">
+  <div class="row">
+    <h3 id="mdTitle">Koltuk</h3>
+    <button class="closex" onclick="closeModal()">Kapat</button>
+  </div>
+  <div id="mdInfo" class="sub">—</div>
+  <div class="scroll" style="margin-top:8px">
+    <table style="width:100%" id="mdTable">
+      <thead><tr><th>Durak</th><th class="right">Satış</th><th class="right">Ciro (₺)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div style="margin-top:8px">
+    <span class="pill" id="mdTotal">Toplam: 0 satış • ₺0.00</span>
+  </div>
+</div>
+
+<script>
+  const $ = s => document.querySelector(s);
+  const fmtTL = n => '₺' + (Number(n||0).toFixed(2));
+  let lastReport = null;
+
+  const SEATS = [1,3,4,5,7,8,9,11,12,13,15,16,17,19,20,21,23,24,25,27,28,29,31,33,34,35,37,38,39,41,42,43,45,46,49,50,51,52,53,54];
+
+  function applyCompact(){
+    const h = window.innerHeight || document.documentElement.clientHeight;
+    const root = document.getElementById('rootWrap');
+    if (h && h < 720) root.classList.add('compact');
+    else root.classList.remove('compact');
+  }
+  window.addEventListener('resize', applyCompact);
+  applyCompact();
+
+  function filtersQS(){
+    const p = new URLSearchParams();
+    const r = $('#fRoute').value || '';
+    const d1 = $('#fStart').value || '';
+    const d2 = $('#fEnd').value || '';
+    if (r) p.set('route', r);
+    if (d1) p.set('date_from', d1);
+    if (d2) p.set('date_to', d2);
+    return p.toString();
+  }
+
+  async function fetchData(){
+    const url = '/api/report/seat-stats' + (filtersQS()?('?'+filtersQS()):'');
+    const r = await fetch(url); const j = await r.json();
+    if(!j.ok) throw new Error('Rapor alınamadı');
+    lastReport = j;
+
+    const pax = (j.totals.seated_count||0) + (j.totals.walk_pax||0);
+    const rev = Number(j.totals.overall_revenue||0);
+    const avg = pax ? rev / pax : 0;
+    $('#mPax').textContent = pax;
+    $('#mRev').textContent = fmtTL(rev);
+    $('#mAvg').textContent = fmtTL(avg);
+    $('#mUnsold').textContent = (j.never_sold||[]).length;
+    $('#unsoldMini').innerHTML = (j.never_sold||[]).slice(0,6).map(n=>`<span class="tag">${n}</span>`).join('') || '—';
+
+    renderSeatTable(j.per_seat, j.never_sold);
+    drawCharts(j.per_seat);
+    drawHeat(j.per_seat);
+  }
+
+  function renderSeatTable(per, neverSold){
+    const tbody = $('#seatTable tbody'); tbody.innerHTML = '';
+    per.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r.seat_no}</td><td class="right">${r.times}</td><td class="right">${fmtTL(r.revenue)}</td>`;
+      tbody.appendChild(tr);
+    });
+    (neverSold||[]).forEach(n=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${n}</td><td class="right">0</td><td class="right">₺0.00</td>`;
+      tbody.appendChild(tr);
+    });
+    const rows=[...tbody.querySelectorAll('tr')];
+    rows.sort((a,b)=>Number(a.children[0].textContent)-Number(b.children[0].textContent));
+    rows.forEach(tr=>tbody.appendChild(tr));
+  }
+
+  // Basit bar
+  function drawBar(canvas, labels, values){
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width = canvas.clientWidth;
+    const H = canvas.height = canvas.clientHeight;
+    ctx.clearRect(0,0,W,H);
+    const P={t:6,r:8,b:22,l:28}; const x0=P.l,y0=H-P.b,x1=W-P.r,y1=P.t;
+    const w=x1-x0,h=y0-y1; const max=Math.max(1, ...values);
+    const step=w/values.length; const bw=Math.max(6, step*0.66);
+    ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y0); ctx.stroke();
+    ctx.fillStyle='#4aa3ff';
+    values.forEach((v,i)=>{ const x=x0+i*step+(step-bw)/2; const bh=h*(v/max); ctx.fillRect(x, y0-bh, bw, bh); });
+    ctx.fillStyle='rgba(255,255,255,.8)'; ctx.font='11px system-ui, Roboto';
+    labels.forEach((lb,i)=>{ const x=x0+i*step+step/2; ctx.save(); ctx.translate(x,y0+12); ctx.rotate(-Math.PI/6);
+      ctx.textAlign='center'; ctx.fillText(lb,0,0); ctx.restore(); });
+  }
+  function drawCharts(per){
+    const topTimes=[...per].sort((a,b)=>b.times-a.times).slice(0,10);
+    drawBar($('#chartTimes'), topTimes.map(x=>String(x.seat_no)), topTimes.map(x=>x.times));
+    const topRev=[...per].sort((a,b)=>b.revenue-a.revenue).slice(0,10);
+    drawBar($('#chartRevenue'), topRev.map(x=>String(x.seat_no)), topRev.map(x=>x.revenue));
+  }
+
+  // Yeşil -> Kırmızı skala (0 => gri)
+  function colorFromGreenToRed(t){ // t: 0..1
+    const h = 120*(1-t); // 120 yeşil -> 0 kırmızı
+    const s = 75; const l = 45;
+    return `hsl(${h} ${s}% ${l}%)`;
+  }
+
+  function drawHeat(per){
+    const by = new Map(per.map(r=>[Number(r.seat_no), Number(r.times)]));
+    const max = Math.max(1, ...per.map(r=>r.times));
+    const cont = $('#heat'); cont.innerHTML='';
+    SEATS.forEach(n=>{
+      const v = by.get(n) || 0;
+      const div = document.createElement('div');
+      div.className = 'seat' + (v===0 ? ' dim':'' );
+      div.textContent = n;
+      div.dataset.seat = n;
+      div.style.background = (v===0) ? '#3b4248' : colorFromGreenToRed(v/max);
+      div.addEventListener('click', ()=> openSeatDetail(n));
+      cont.appendChild(div);
+    });
+  }
+
+  // ---- Modal ----
+  function openModal(){ $('#mdBack').style.display='block'; $('#mdSeat').style.display='block'; }
+  function closeModal(){ $('#mdBack').style.display='none'; $('#mdSeat').style.display='none'; }
+  $('#mdBack').addEventListener('click', closeModal);
+
+  async function openSeatDetail(seatNo){
+    // ayrıntı verisini çek
+    const p = new URLSearchParams(filtersQS());
+    p.set('seat_no', seatNo);
+    const r = await fetch('/api/report/seat-detail?'+p.toString());
+    const j = await r.json();
+    if(!j.ok){ return; }
+
+    // başlık & özet
+    $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
+    $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+
+    // tablo
+    const tb = $('#mdTable tbody'); tb.innerHTML='';
+    (j.items||[]).forEach(it=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
+      tb.appendChild(tr);
+    });
+    $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+
+    openModal();
+  }
+
+  // CSV & Reset
+  function makeCSV(j){
+    const L=[]; const qs = new URLSearchParams(filtersQS());
+    L.push(`Hat;${qs.get('route')||'Hepsi'}`);
+    L.push(`Başlangıç;${qs.get('date_from')||'-'}`); L.push(`Bitiş;${qs.get('date_to')||'-'}`); L.push('');
+    const t=j.totals; const pax=(t.seated_count||0)+(t.walk_pax||0);
+    L.push('Toplamlar'); L.push(`Toplam Yolcu;${pax}`); L.push(`Toplam Gelir;${t.overall_revenue}`);
+    L.push(`Ortalama Gelir;${pax? (t.overall_revenue/pax).toFixed(2):0}`); L.push('');
+    L.push('Koltuk;Satış;Ciro');
+    L.push(...j.per_seat.map(r=>`${r.seat_no};${r.times};${r.revenue}`));
+    L.push(...(j.never_sold||[]).map(n=>`${n};0;0`));
+    return L.join('\n');
+  }
+  function downloadCSV(){
+    if(!lastReport) return;
+    const blob = new Blob([makeCSV(lastReport)], {type:'text/csv;charset=utf-8;'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='rapor.csv';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),800);
+  }
+  function resetView(){
+    $('#fRoute').value = ''; $('#fStart').value = ''; $('#fEnd').value   = '';
+    lastReport = null;
+    $('#mPax').textContent='0'; $('#mRev').textContent='₺0.00'; $('#mAvg').textContent='₺0.00';
+    $('#mUnsold').textContent='0'; $('#unsoldMini').textContent='—';
+    $('#seatTable tbody').innerHTML=''; $('#heat').innerHTML='';
+  }
+
+  // events
+  $('#btnFetch').addEventListener('click', fetchData);
+  $('#btnDownload').addEventListener('click', downloadCSV);
+  $('#btnReset').addEventListener('click', resetView);
+
+  // ilk yükleme
+  fetchData().catch(()=>{});
+</script>
+{% endblock %}

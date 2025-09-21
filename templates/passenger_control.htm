@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+
+<style>
+/* ——— sayfa kabı ——— */
+.coach{width:960px;max-width:96vw;margin:16px auto;color:#e8edf2}
+
+/* başlık & bar */
+.topbar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.topbar .sp{flex:1}
+.kit{display:flex;gap:8px;flex-wrap:wrap}
+.btn{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer}
+.btn.gray{background:#475569}
+.btn.red{background:#b91c1c}
+.badge{padding:3px 8px;border-radius:999px;background:#334155;font-size:12px}
+
+/* ——— seats.html ile aynı ızgara ——— */
+.deck{position:relative;display:grid;grid-template-columns:70px 70px 70px 70px;grid-auto-rows:70px;
+      gap:24px;justify-content:center;margin-top:8px}
+.cell{display:flex;flex-direction:column;align-items:center}
+.seat{position:relative;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+      color:#fff;font-weight:900;box-shadow:0 8px 22px rgba(0,0,0,.35);user-select:none}
+.label{font-size:11px;color:#e6d48a;margin-top:4px;min-height:14px;text-align:center}
+
+/* koridor & kapı (seats.html’deki yer/ölçülerle) */
+.corr{grid-column:2;grid-row:1/15;width:56px;border-radius:12px;background:#8a2b2b;display:flex;align-items:center;justify-content:center;
+      color:#fff;font-weight:900;writing-mode:vertical-rl;text-orientation:mixed;letter-spacing:4px}
+.door{grid-column:3/5;grid-row:8;height:28px;border-radius:10px;background:#7d602b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900}
+
+/* görünüm durumları */
+.seat.empty{background:#475569}               /* boş: gri */
+.seat.pending{background:#d4a100;color:#1e293b} /* kontrol bekliyor: sarı */
+.seat.ok{background:#1f6b2d}                 /* kontrol edildi: yeşil */
+.seat.block{background:#4a6177}              /* dolu ama cinsiyete göre boyalı kullanmak istersen */
+
+/* sarı yanıp sönme */
+@keyframes blinkY{0%,100%{filter:brightness(1)}50%{filter:brightness(1.15);box-shadow:0 0 0 8px rgba(212,161,0,.25)}}
+.seat.pending.blink{animation:blinkY 1s linear infinite}
+
+/* ilerleme */
+.prog{margin:10px 0 4px 0;height:8px;background:#0f172a;border-radius:999px;overflow:hidden}
+.prog>i{display:block;height:100%;width:0;background:#1f6b2d}
+
+/* min bilgiler satırı */
+.info{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px;font-size:13px;opacity:.9}
+.info b{font-weight:800}
+</style>
+
+<div class="coach">
+  <div class="topbar">
+    <a class="btn gray" href="{{ url_for('index') }}">← Ana sayfa</a>
+    <div class="sp"></div>
+    <div class="kit">
+      <button id="btnStart" class="btn">Kontrole başla</button>
+      <button id="btnReset" class="btn red">Kontrolü sıfırla</button>
+    </div>
+  </div>
+
+  <h2 style="margin:0 0 6px">Yolcu Kontrolü</h2>
+  <div class="info">
+    <span class="badge">Sefer: {{ trip['route'] }}</span>
+    <span class="badge">Plaka: {{ trip['plate'] }}</span>
+    <span class="badge">1. Kaptan: {{ trip['captain1'] or '-' }}</span>
+    <span class="badge">2. Kaptan: {{ trip['captain2'] or '-' }}</span>
+    <span class="badge">Muavin: {{ trip['attendant'] or '-' }}</span>
+  </div>
+
+  <!-- ilerleme -->
+  <div class="prog"><i id="pbar"></i></div>
+  <div class="info">
+    <div><b>Toplam dolu:</b> <span id="m_total">0</span></div>
+    <div><b>Kontrol edilen:</b> <span id="m_ok">0</span></div>
+    <div><b>Kalan:</b> <span id="m_left">0</span></div>
+  </div>
+
+  <!-- koltuk planı: seats.html ile aynı yerleşim -->
+  <div class="deck" id="deck">
+    <div class="corr">KORİDOR</div>
+    {% set seats_map = {
+      1:[1,1],3:[1,3],4:[1,4], 5:[2,1],7:[2,3],8:[2,4],
+      9:[3,1],11:[3,3],12:[3,4], 13:[4,1],15:[4,3],16:[4,4],
+      17:[5,1],19:[5,3],20:[5,4], 21:[6,1],23:[6,3],24:[6,4],
+      25:[7,1],27:[7,3],28:[7,4],
+      29:[8,1],
+      31:[9,1],33:[9,3],34:[9,4],
+      35:[10,1],37:[10,3],38:[10,4],
+      39:[11,1],41:[11,3],42:[11,4],
+      43:[12,1],45:[12,3],46:[12,4],
+      49:[13,3],50:[13,4],
+      51:[14,1],52:[14,2],53:[14,3],54:[14,4]
+    } %}
+    {% for n, pos in seats_map.items() %}
+      {% if n == 29 %}<div class="door">KAPI</div>{% endif %}
+      <div class="cell" style="grid-row:{{pos[0]}};grid-column:{{pos[1]}};">
+        <div class="seat" id="seat-{{n}}" data-seat="{{n}}">{{n}}</div>
+        <div class="label" id="label-{{n}}"></div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="info" style="margin-top:12px">
+    <b>Not:</b> Sarı yanan koltuklar kontrol bekliyor. Dokundukça yeşile döner. Boş koltuklar gri gösterilir.
+  </div>
+</div>
+
+<script>
+/* ——— seats.html’den gelen veri haritaları ——— */
+const assigned = {{ assigned | tojson | safe }};     // { "12": true, ... } → dolu mu
+const stopsMap = {{ stops_map | tojson | safe }};    // { "12": "Bursa Otogar", ... } → iniş
+const boardsMap = {{ boards_map or {} | tojson | safe }}; // { "12": "Denizli otogar", ... } → biniş
+const genders  = {{ genders | tojson | safe }};      // "bay" | "bayan" | ""
+const SERVICE  = {{ service_map | tojson | safe }};  // bool
+
+/* ——— localStorage anahtarları ——— */
+const KEY = 'pax_check:' + "{{ (trip['route'] ~ '|' ~ trip['plate'])|replace(' ', '_') }}";
+let checked = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); // kontrol edilmiş koltuklar
+
+/* ——— yardımcılar ——— */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+function saveChecked(){ localStorage.setItem(KEY, JSON.stringify([...checked])); }
+
+function labelText(no){
+  const from = boardsMap?.[no] || '';
+  const to   = stopsMap?.[no]  || '';
+  if(!from && !to) return '';
+  return from ? `${from} → ${to||''}` : `${to}`;
+}
+
+/* ——— UI boyama ——— */
+function paintSeat(no){
+  const el = $('#seat-'+no);
+  if(!el) return;
+  const isFull = !!assigned?.[no];
+  el.classList.remove('empty','pending','ok','blink');
+  if(!isFull){                         // boş
+    el.classList.add('empty');
+  }else if(checked.has(no)){           // kontrol edildi
+    el.classList.add('ok');
+  }else{                               // dolu fakat kontrol bekliyor
+    el.classList.add('pending','blink');
+  }
+  // alt etiket
+  const L = $('#label-'+no);
+  if(L) L.textContent = labelText(no);
+}
+
+function refreshAll(){
+  Object.keys({{ seats_map | tojson | safe }}).forEach(k => paintSeat(String(k)));
+  // metrik/çubuk
+  const total = Object.values(assigned||{}).filter(Boolean).length;
+  const done  = [...checked].filter(no => assigned?.[no]).length;
+  const left  = Math.max(0, total - done);
+  $('#m_total').textContent = total;
+  $('#m_ok').textContent    = done;
+  $('#m_left').textContent  = left;
+  const pct = total ? Math.round(done*100/total) : 0;
+  $('#pbar').style.width = pct + '%';
+}
+
+/* ——— etkileşim ——— */
+function onSeatClick(e){
+  const el = e.currentTarget;
+  const no = el.dataset.seat;
+  if(!assigned?.[no]) return;      // boşsa işlem yok
+  // toggle “kontrol edildi”
+  if(checked.has(no)) checked.delete(no);
+  else checked.add(no);
+  saveChecked();
+  paintSeat(no);
+  refreshAll();
+}
+
+function startControl(){
+  // sadece boyama/yanıp sönme tetikle
+  $$('[id^="seat-"]').forEach(el => {
+    const no = el.dataset.seat;
+    if(assigned?.[no] && !checked.has(no)){
+      el.classList.add('pending','blink');
+    }
+  });
+  refreshAll();
+}
+
+function resetControl(){
+  checked = new Set();
+  saveChecked();
+  refreshAll();
+}
+
+/* ——— init ——— */
+(function init(){
+  // koltuk click
+  $$('[id^="seat-"]').forEach(el => el.addEventListener('click', onSeatClick));
+  // butonlar
+  $('#btnStart').addEventListener('click', startControl);
+  $('#btnReset').addEventListener('click', resetControl);
+  // ilk boyama
+  refreshAll();
+})();
+</script>
+{% endblock %}

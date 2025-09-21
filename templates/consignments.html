@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+
+<style>
+/* ===== Layout ===== */
+.page { max-width: 980px; margin: 16px auto; padding: 0 10px; }
+.head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.title { margin:0; font-size: 28px; line-height: 1.1; }
+
+/* ===== Card ===== */
+.card { background:#1f2429; color:#e6edf3; border:1px solid #343b42; border-radius:14px; padding:14px; }
+.card + .card { margin-top:12px; }
+
+/* ===== Controls ===== */
+.row { display:flex; flex-wrap:wrap; gap:10px; }
+input, select, button {
+  font: inherit; border-radius:12px; border:1px solid #3a4046; background:#12171b; color:#e6edf3;
+  padding:12px 14px; min-width:0;
+}
+input, select { flex: 1 1 220px; }
+button { border:none; cursor:pointer; }
+.btn { background:#0d6efd; color:#fff; }
+.btn.gray { background:#6c757d; }
+.btn.green { background:#28a745; }
+.btn.red { background:#dc3545; }
+.btn.small { padding:8px 10px; border-radius:10px; }
+.note { color:#aab4be; font-size:.92rem; margin-top:8px }
+
+/* ===== Consignment card ===== */
+.c-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.c-code { font-weight:700; font-size:1rem; opacity:.9; }
+.c-body { display:grid; grid-template-columns: 1fr; gap:10px; margin-top:10px; }
+.c-line { display:grid; grid-template-columns: 120px 1fr; gap:8px; }
+.c-key { color:#9aa4af; letter-spacing:.05em; text-transform:uppercase; font-size:.82rem; }
+.c-val { line-height:1.35; overflow-wrap:anywhere; word-break:break-word; }
+.actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+
+/* ===== Modal (photos) ===== */
+.mback { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:50; }
+.modal { width:min(680px,94vw); max-height:90vh; overflow:auto; background:#1f2429; border:1px solid #343b42; border-radius:14px; padding:14px; }
+.mhead { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(120px,1fr)); gap:10px; margin-top:10px; }
+.thumb { border:1px solid #333; border-radius:10px; overflow:hidden; background:#0f1316; }
+.thumb img { width:100%; height:110px; object-fit:cover; display:block; }
+
+/* ===== Wide screens ===== */
+@media (min-width: 720px) {
+  .title { font-size: 32px; }
+  .c-body { grid-template-columns: 1fr 1fr; }
+  .c-line { grid-template-columns: 140px 1fr; }
+}
+</style>
+
+<div class="page">
+  <div class="head">
+    <a class="btn gray small" href="{{ url_for('index') }}">← Ana sayfa</a>
+    <h2 class="title">Emanetler</h2>
+  </div>
+
+  <!-- Yeni emanet formu -->
+  <div class="card" style="margin-top:12px">
+    <div class="row">
+      <input id="f_item" placeholder="Eşya adı">
+      <input id="f_from" placeholder="Gönderen">
+      <input id="f_to"   placeholder="Alıcı">
+      <select id="f_from_stop">
+        <option value="">Çıkış durağı…</option>
+        {% for s in stops %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+      </select>
+      <select id="f_to_stop">
+        <option value="">Varış durağı…</option>
+        {% for s in stops %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+      </select>
+      <input id="f_amount" type="number" step="0.01" placeholder="Tutar">
+      <select id="f_payment">
+        <option value="nakit">Nakit</option>
+        <option value="pos">POS</option>
+        <option value="iban">IBAN</option>
+        <option value="online">Online</option>
+        <option value="ucretsiz">Ücretsiz</option>
+      </select>
+      <button class="btn green" onclick="createCons()">Ekle</button>
+    </div>
+    <div class="note">Fotoğrafları “Görüntüle / Yükle” ile yönet. Durumu butonlardan hızlıca güncelleyebilirsin.</div>
+  </div>
+
+  <!-- Emanet listesi (kartlar) -->
+  {% for r in items %}
+  <div class="card">
+    <div class="c-head">
+      <div class="c-code">KOD: {{ r.code }}</div>
+      <span class="btn gray small" onclick="openPhotos({{ r.id }}, '{{ r.code }}')">Görüntüle / Yükle</span>
+    </div>
+
+    <div class="c-body">
+      <div class="c-line"><div class="c-key">Eşya</div>          <div class="c-val">{{ r.item_name }}</div></div>
+      <div class="c-line"><div class="c-key">Kimden → Kime</div> <div class="c-val">{{ r.from_name }} → {{ r.to_name }}</div></div>
+      <div class="c-line"><div class="c-key">Durak</div>         <div class="c-val">{{ r.from_stop or '-' }} → {{ r.to_stop or '-' }}</div></div>
+      <div class="c-line"><div class="c-key">Tutar</div>         <div class="c-val">₺{{ '%.2f'|format(r.amount or 0) }}</div></div>
+      <div class="c-line"><div class="c-key">Durum</div>         <div class="c-val">{{ r.status }}</div></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn"       onclick="setStatus({{ r.id }}, 'yüklendi')">Yüklendi</button>
+      <button class="btn green" onclick="setStatus({{ r.id }}, 'teslim')">Teslim</button>
+      <button class="btn gray"  onclick="setStatus({{ r.id }}, 'bekliyor')">Bekliyor</button>
+      <button class="btn red"   onclick="delCons({{ r.id }})">Sil</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Fotoğraf Modalı -->
+<div id="mback" class="mback" onclick="if(event.target.id==='mback') hideModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="mhead">
+      <h3 id="mtitle" style="margin:0">Emanet Fotoğrafları</h3>
+      <button class="btn red small" onclick="hideModal()">Kapat</button>
+    </div>
+    <div class="row">
+      <input id="fileInput" type="file" accept="image/*" capture="environment" style="flex:1 1 260px">
+      <button class="btn green" onclick="uploadSelected()">Yükle</button>
+      <span id="mmsg" style="align-self:center"></span>
+    </div>
+    <div id="grid" class="grid"></div>
+  </div>
+</div>
+
+<script>
+const csrf = {{ csrf_token|tojson }};
+let currentConsId = null, currentCode = '';
+
+async function createCons(){
+  const payload = {
+    item_name:  document.getElementById('f_item').value.trim(),
+    from_name:  document.getElementById('f_from').value.trim(),
+    to_name:    document.getElementById('f_to').value.trim(),
+    from_stop:  document.getElementById('f_from_stop').value,
+    to_stop:    document.getElementById('f_to_stop').value,
+    amount:     document.getElementById('f_amount').value,
+    payment:    document.getElementById('f_payment').value
+  };
+  const res = await fetch('{{ url_for("api_consignments") }}', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+    body:JSON.stringify(payload)
+  });
+  const j = await res.json();
+  if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+}
+
+async function setStatus(id, status){
+  const res = await fetch(`/api/consignments/${id}/status`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+    body:JSON.stringify({status})
+  });
+  const j = await res.json();
+  if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+}
+
+async function delCons(id){
+  if(!confirm('Silinsin mi?')) return;
+  const res = await fetch(`/api/consignments/${id}`, {
+    method:'DELETE', headers:{'X-CSRF-Token':csrf}
+  });
+  const j = await res.json();
+  if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+}
+
+/* -------- Photos Modal -------- */
+function showModal(){ document.getElementById('mback').style.display='flex'; }
+function hideModal(){ document.getElementById('mback').style.display='none'; }
+
+async function openPhotos(cid, code){
+  currentConsId = cid; currentCode = code;
+  document.getElementById('mtitle').innerText = `Emanet ${code} – Fotoğraflar`;
+  document.getElementById('grid').innerHTML = '';
+  document.getElementById('mmsg').innerText = 'Yükleniyor…';
+  showModal();
+
+  const res = await fetch(`/api/consignments/${cid}/photos`, {headers:{'X-CSRF-Token':csrf}});
+  const j = await res.json();
+  document.getElementById('mmsg').innerText = '';
+  if(!j.ok){ document.getElementById('mmsg').innerText = j.msg || 'Hata'; return; }
+  if(j.items.length === 0){
+    document.getElementById('grid').innerHTML = '<div style="color:#aab4be">Henüz fotoğraf yok.</div>';
+    return;
+  }
+  const grid = document.getElementById('grid');
+  j.items.forEach(p=>{
+    const d = document.createElement('div');
+    d.className = 'thumb';
+    d.innerHTML = `<a href="${p.url}" target="_blank"><img src="${p.url}" alt="foto"></a>`;
+    grid.appendChild(d);
+  });
+}
+
+async function uploadSelected(){
+  const f = document.getElementById('fileInput').files[0];
+  if(!f || !currentConsId) return;
+  document.getElementById('mmsg').innerText = 'Yükleniyor…';
+  const fd = new FormData();
+  fd.append('file', f); fd.append('role','pickup');
+  const res = await fetch(`/api/consignments/${currentConsId}/photos`, {
+    method:'POST', headers:{'X-CSRF-Token':csrf}, body: fd
+  });
+  const j = await res.json();
+  if(j.ok){ openPhotos(currentConsId, currentCode); }
+  else { document.getElementById('mmsg').innerText = j.msg || 'Yükleme hatası'; }
+}
+</script>
+{% endblock %}

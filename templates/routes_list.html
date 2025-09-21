@@ -2,14 +2,12 @@
 {% block content %}
 <link rel="stylesheet" href="/static/style.css">
 <style>
-  .panel{max-width:760px;margin:24px auto;background:#2b3036;color:#e6edf3;
-         border-radius:16px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+  .panel{max-width:760px;margin:24px auto;background:#2b3036;color:#e6edf3;border-radius:16px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
   table{width:100%;border-collapse:collapse;margin-top:12px}
   th,td{padding:12px 10px;border-bottom:1px solid #40464d}
   th{color:#f1f1f1;text-align:left}
   td{color:#eaeaea}
-  a.btn, button.btn{padding:8px 14px;border-radius:8px;font-weight:bold;color:#fff;
-    text-decoration:none;margin-left:4px;margin-right:4px;display:inline-block;border:none;cursor:pointer}
+  a.btn,button.btn{padding:8px 14px;border-radius:8px;font-weight:700;color:#fff;text-decoration:none;margin:0 4px;display:inline-block;border:none;cursor:pointer}
   .btn.red{background:#d9534f}
   .btn.blue{background:#0275d8}
   .btn.green{background:#5cb85c}
@@ -18,33 +16,35 @@
   form.inline{display:inline}
   h2{font-size:24px;color:#fff;margin:0}
   h3{font-size:20px;color:#5bc0de;margin-top:20px}
+  .actions{width:280px;text-align:right}
+  .pill{font-size:.85em;background:#4b5563;color:#fff;padding:2px 6px;border-radius:6px;margin-left:6px}
 </style>
 
 <div class="panel">
   <div class="row">
     <a class="btn gray" href="{{ url_for('index') }}">← Ana Sayfa</a>
     <h2>Hatlar</h2>
-    <a class="btn blue" href="{{ url_for('add_route') }}">+ Yeni Hat</a>
+    <a class="btn blue" href="{{ url_for('add_route') }}" aria-label="Yeni hat ekle">+ Yeni Hat</a>
   </div>
 
   <h3>Dinamik Hatlar</h3>
-  <table>
+  <table role="table" aria-label="Dinamik hatlar">
     <tr>
-      <th>Ad</th>
-      <th style="width:280px;text-align:right">İşlem</th>
+      <th scope="col">Ad</th>
+      <th scope="col" class="actions">İşlem</th>
     </tr>
     {% for r in routes %}
       <tr>
         <td>{{ r.name }}</td>
-        <td style="text-align:right">
+        <td class="actions">
           <a class="btn blue" href="{{ url_for('route_edit', rid=r.id) }}">Düzenle</a>
           <form class="inline" method="post" action="{{ url_for('route_delete', rid=r.id) }}"
                 onsubmit="return confirm('Bu hattı silmek istiyor musun?')">
-            <!-- CSRF -->
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <button class="btn red" type="submit">Sil</button>
           </form>
-          <a class="btn green" href="#" onclick="setRoute('{{ r.name }}');return false;">Seç</a>
+          <button class="btn green" type="button"
+                  onclick="setRoute({{ r.name | tojson }})">Seç</button>
         </td>
       </tr>
     {% else %}
@@ -53,16 +53,21 @@
   </table>
 
   <h3>Sabit Hatlar</h3>
-  <table>
+  <table role="table" aria-label="Sabit hatlar">
     <tr>
-      <th>Ad</th>
-      <th style="width:140px;text-align:right">İşlem</th>
+      <th scope="col">Ad</th>
+      <th scope="col" class="actions">İşlem</th>
     </tr>
     {% for r in builtin_routes %}
       <tr>
-        <td>{{ r.name }}</td>
-        <td style="text-align:right">
-          <a class="btn green" href="#" onclick="setRoute('{{ r.name }}');return false;">Seç</a>
+        <td>
+          {{ r.name }}
+          {% if r.overridden %}<span class="pill">ÖZEL</span>{% endif %}
+        </td>
+        <td class="actions">
+          <a class="btn blue" href="{{ url_for('builtin_route_edit', name=r.name) }}">Düzenle</a>
+          <button class="btn green" type="button"
+                  onclick="setRoute({{ r.name | tojson }})">Seç</button>
         </td>
       </tr>
     {% endfor %}
@@ -70,26 +75,23 @@
 </div>
 
 <script>
-  // Şablondan CSRF token'ı al
-  const csrf = "{{ csrf_token }}";
+  const csrf = {{ csrf_token | tojson }};
 
   async function setRoute(route){
     try{
       const res = await fetch('{{ url_for("set_route") }}', {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
           'X-CSRF-Token': csrf
         },
-        body: JSON.stringify({route})
+        body: JSON.stringify({ route })
       });
       const j = await res.json();
-      if(j.ok){
-        alert('Seçildi: ' + route);
-        // İstersen anasayfaya dön:
-        // location.href = '{{ url_for("index") }}';
+      if (j.ok){
+        window.location = '{{ url_for("index") }}';
       }else{
-        alert('Hata: ' + (j.msg||''));
+        alert('Hata: ' + (j.msg || 'Bilinmeyen hata'));
       }
     }catch(e){
       alert('Bağlantı hatası');

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+<div class="coach" style="max-width:1100px">
+  <h2 style="margin:10px 0">Olay Görüntüleyici</h2>
+
+  <form class="alertbar" onsubmit="return false;">
+    <div class="field"><label>Hat</label><input id="route" placeholder="(opsiyonel)"></div>
+    <div class="field"><label>Başlangıç</label><input type="date" id="d1"></div>
+    <div class="field"><label>Bitiş</label><input type="date" id="d2"></div>
+    <button class="btn primary" id="run">Getir</button>
+    <div class="spacer"></div>
+    <div id="count" class="muted">—</div>
+  </form>
+
+  <div class="nsbox" style="overflow:auto; max-height:70vh">
+    <table style="width:100%; border-collapse:collapse">
+      <thead>
+        <tr>
+          <th style="text-align:left; padding:6px">Zaman</th>
+          <th style="text-align:left; padding:6px">Hat</th>
+          <th style="text-align:left; padding:6px">Durak</th>
+          <th style="text-align:left; padding:6px">Olay</th>
+          <th style="text-align:right; padding:6px">Mesafe (km)</th>
+          <th style="text-align:right; padding:6px">İnecek</th>
+        </tr>
+      </thead>
+      <tbody id="tb"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+function fmt(n){return (Number(n??0)).toFixed(2)}
+$('#run').addEventListener('click', async ()=>{
+  const qs = new URLSearchParams();
+  const r=$('#route').value.trim(); if(r) qs.set('route', r);
+  const d1=$('#d1').value; if(d1) qs.set('date_from', d1);
+  const d2=$('#d2').value; if(d2) qs.set('date_to', d2);
+  const j = await (await fetch('/api/events?'+qs.toString())).json();
+  if(!j.ok){ alert('Alınamadı'); return; }
+  const tb=$('#tb'); tb.innerHTML='';
+  j.items.forEach(it=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td style="padding:6px">${it.ts}</td>
+      <td style="padding:6px">${it.route}</td>
+      <td style="padding:6px">${it.stop_name}</td>
+      <td style="padding:6px">${it.event}</td>
+      <td style="padding:6px; text-align:right">${it.distance_km==null?'—':fmt(it.distance_km)}</td>
+      <td style="padding:6px; text-align:right">${it.seats_for_stop ?? 0}</td>`;
+    tb.appendChild(tr);
+  });
+  $('#count').textContent = `${j.items.length} kayıt`;
+});
+</script>
+{% endblock %}

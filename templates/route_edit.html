@@ -1,50 +1,44 @@
 {% extends "base.html" %}
 {% block content %}
+<link rel="stylesheet" href="/static/style.css">
 <style>
   .panel{max-width:760px;margin:24px auto;background:#2b3036;color:#e6edf3;
-         border-radius:14px;padding:26px;box-shadow:0 4px 10px rgba(0,0,0,0.35)}
-  input,textarea{width:100%;background:#2a2f34;color:#e6edf3;border:1px solid #3a4046;
-                 border-radius:10px;padding:11px 12px}
-  label{display:block;margin:10px 0 6px;font-weight:600}
-  .row{display:flex;gap:10px;flex-wrap:wrap}
-  .btn{padding:10px 14px;border-radius:10px;background:#3a9ad9;border:1px solid #2f89c2;
-       color:#fff;text-decoration:none;cursor:pointer;display:inline-block}
-  .btn:hover{filter:brightness(1.05)}
-  .secondary{background:#3a4046;border-color:#4b5259}
-  .danger{background:#d9534f;border-color:#c23e3a}
-  .hint{color:#9aa5ae;font-size:13px;margin-top:6px}
-  .card{background:#262b30;border-radius:12px;padding:16px;margin-top:16px}
+         border-radius:16px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{background:#0275d8;color:#fff;border:none;border-radius:10px;
+       padding:10px 16px;font-weight:800;cursor:pointer;text-decoration:none}
+  .btn.gray{background:#6c757d}
+  input, textarea{width:100%;background:#2a2f34;color:#fff;border:1px solid #4b5259;
+                  border-radius:10px;padding:10px}
+  label{font-size:12px;opacity:.9}
+  .error{background:#8a3a3a;color:#fff;padding:10px;border-radius:8px;margin:10px 0}
 </style>
 
 <div class="panel">
-  <h2>Hattı Düzenle</h2>
+  <div class="row" style="justify-content:space-between">
+    <a class="btn gray" href="{{ url_for('routes_list') }}">← Hatlar</a>
+    <h2 style="margin:0">Hattı Düzenle</h2>
+  </div>
 
-  <!-- Güncelleme formu -->
-  <form method="post" action="{{ url_for('route_edit', rid=route.id) }}">
-    <label>Hat Adı</label>
-    <input type="text" name="name" value="{{ route.name }}" required>
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
 
-    <label>Duraklar (her satır bir durak veya virgülle ayır)</label>
-    <textarea name="stops" rows="12" required>{{ stops_text }}</textarea>
-    <div class="hint">Örn: Esenler Otogar, Harem, Gebze Garaj …</div>
-
-    <!-- CSRF -->
+  <form method="post" action="{{ url_for('route_edit', rid=route['id']) }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-    <div class="row" style="margin-top:12px">
+    <div class="row" style="flex-direction:column">
+      <label>Hat adı</label>
+      <input type="text" name="name" value="{{ route['name'] if route else '' }}" required>
+    </div>
+
+    <div class="row" style="flex-direction:column">
+      <label>Duraklar (her satıra bir durak)</label>
+      <textarea name="stops" rows="12" placeholder="Durak 1&#10;Durak 2&#10;...">{{ stops_text or '' }}</textarea>
+    </div>
+
+    <div class="row" style="justify-content:flex-end">
+      <a class="btn gray" href="{{ url_for('routes_list') }}">Vazgeç</a>
       <button class="btn" type="submit">Kaydet</button>
-      <a class="btn secondary" href="{{ url_for('routes_list') }}">Listeye Dön</a>
     </div>
   </form>
-
-  <!-- Silme bölümü -->
-  <div class="card">
-    <form method="post" action="{{ url_for('route_delete', rid=route.id) }}"
-          onsubmit="return confirm('Bu hattı silmek istediğine emin misin?')">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <button class="btn danger" type="submit">Hattı Sil</button>
-      <span class="hint">Not: Yerleşik (sabit) hatlar bu ekrandan silinemez.</span>
-    </form>
-  </div>
 </div>
 {% endblock %}

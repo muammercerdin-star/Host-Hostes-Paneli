@@ -1,0 +1,338 @@
+{% extends "base.html" %}{% block content %}
+<link rel="stylesheet" href="/static/style.css"/>
+
+<style>
+  :root{--bg:#2f353a;--card:#1e2327;--muted:#3b4248;--text:#e8edf2;--ok:#1f6b2d;--m:#2d6cdf;--f:#e75480;--warn:#d4a100;--good:#16a34a;--bad:#dc2626}
+  body{background:var(--bg);color:var(--text)}
+  .coach{width:960px;max-width:96vw;margin:16px auto}
+  .head{font-weight:700;margin-bottom:12px}
+
+  /* üst kontrol barı */
+  .toolbar{
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+    background:var(--card);border:1px solid var(--muted);border-radius:12px;
+    padding:10px;margin-bottom:10px
+  }
+  .tool-right{margin-left:auto;display:flex;gap:10px;align-items:baseline}
+  .btn{border:none;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer;color:#fff}
+  .btn.primary{background:#2563eb}.btn.green{background:var(--good)}.btn.gray{background:#475569}.btn.red{background:#dc2626}
+  .chip{background:#0f172a;border:1px solid #334155;border-radius:999px;padding:6px 10px;display:inline-flex;gap:6px}
+  .chip b{font-variant-numeric:tabular-nums}
+
+  /* istatistik karolar */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0}
+  .stat{background:var(--card);border:1px solid var(--muted);border-radius:12px;padding:10px}
+  .stat .k{font-size:12px;opacity:.8}.stat .v{font-weight:900;font-size:20px}
+
+  /* koltuk ızgarası — seats.html ile birebir */
+  .deck{position:relative;display:grid;grid-template-columns:70px 70px 70px 70px;grid-auto-rows:70px;gap:24px;justify-content:center;margin-top:8px}
+  .cell{display:flex;flex-direction:column;align-items:center}
+  .seat{position:relative;width:56px;height:56px;border-radius:14px;background:var(--ok);display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 8px 22px rgba(0,0,0,.35)}
+  .seat.isAssigned{filter:saturate(1)}
+  .label{font-size:11px;color:#e6d48a;margin-top:4px;min-height:14px;text-align:center}
+  .corr{grid-column:2;grid-row:1/15;width:56px;border-radius:12px;background:#8a2b2b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;writing-mode:vertical-rl;letter-spacing:4px}
+  .door{grid-column:3/5;grid-row:8;height:28px;border-radius:10px;background:#7d602b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900}
+  .svc-badge{position:absolute;right:-6px;top:-6px;background:#0ea5e9;color:#fff;font-size:12px;border-radius:999px;padding:2px 6px;display:none}
+  .seat.has-service .svc-badge{display:flex}
+
+  /* Uyarı animasyonu */
+  @keyframes lampBlink{
+    0%,100%{background:#f59e0b;box-shadow:0 0 0 0 rgba(245,158,11,.25);filter:none}
+    50%{background:#fde047;box-shadow:0 0 20px 8px rgba(234,179,8,.45);filter:brightness(1.05)}
+  }
+  .seat.blink{animation:lampBlink 1s ease-in-out infinite;background:#f59e0b!important;color:#1f2937}
+
+  /* Kontrol sabit renkleri */
+  .seat.present{animation:none;background:#16a34a!important;box-shadow:0 0 0 2px rgba(22,163,74,.45) inset}
+  .seat.missing{animation:none;background:#dc2626!important;box-shadow:0 0 0 2px rgba(220,38,38,.45) inset}
+
+  /* --- Kalan yolcu modalı --- */
+  #leftBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:3000}
+  #leftModal{
+    display:none;position:fixed;z-index:3010;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:520px;max-width:94vw;max-height:70vh;overflow:auto;
+    background:var(--card);color:var(--text);
+    border:1px solid var(--muted);border-radius:14px;box-shadow:0 22px 44px rgba(0,0,0,.5);padding:14px
+  }
+  #leftModal h3{margin:0 0 10px 0}
+  #leftList .row{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.08)}
+  #leftList .row:last-child{border-bottom:none}
+  #leftList .no{min-width:52px;height:32px;border-radius:10px;background:#f59e0b;color:#1f2937;font-weight:900;display:flex;align-items:center;justify-content:center}
+  #leftClose{margin-left:auto}
+</style>
+
+<!-- Kalan yolcu modalı -->
+<div id="leftBackdrop"></div>
+<div id="leftModal" role="dialog" aria-modal="true" aria-labelledby="leftTitle">
+  <h3 id="leftTitle">Kalan Yolcular</h3>
+  <div id="leftInfo" class="muted">—</div>
+  <div id="leftList"></div>
+  <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+    <button class="btn gray" id="leftClose">Kapat</button>
+  </div>
+</div>
+
+<div class="coach">
+  <div class="head">
+    Sefer: {{ trip['route'] }} — Plaka: {{ trip['plate'] }} —
+    1. Kaptan: {{ trip['captain1'] or '-' }} — 2. Kaptan: {{ trip['captain2'] or '-' }} — Muavin: {{ trip['attendant'] or '-' }}
+  </div>
+
+  <div class="toolbar">
+    <button id="btnStart" class="btn primary">Kontrolü Başlat</button>
+    <button id="btnStop"  class="btn gray" disabled>Bitir</button>
+    <button id="btnReset" class="btn red"  disabled>Sıfırla</button>
+    <button id="btnLeft"  class="btn green" disabled>Kalanları Vurgula</button>
+    <button onclick="window.location.href='{{ url_for('index') }}'" class="btn gray">Ana Sayfa</button>
+    <div class="tool-right">
+      <span class="chip">Toplam <b id="chipTotal">0</b></span>
+      <span class="chip">Yoklanan <b id="chipDone">0</b></span>
+      <span class="chip">Kalan <b id="chipLeft">0</b></span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="k">Toplam Yolcu</div><div class="v" id="st_totalPax">0</div></div>
+    <div class="stat"><div class="k">Boş Koltuk</div><div class="v" id="st_empty">0</div></div>
+    <div class="stat"><div class="k">Doluluk</div><div class="v" id="st_occupancy">0%</div></div>
+    <div class="stat"><div class="k">Ayakta</div><div class="v" id="st_standing">0</div></div>
+  </div>
+
+  <div class="legend" style="margin:6px 0 2px 2px">
+    <span><span class="swatch sw-blink"></span>Sarı yanıp sönüyor: kontrol bekliyor</span>
+    <span><span class="swatch sw-ok"></span>Yeşil çerçeve: yerinde</span>
+    <span><span class="swatch sw-miss"></span>Kırmızı çerçeve: eksik</span>
+  </div>
+
+  <div class="deck" id="deck">
+    <div class="corr">KORİDOR</div>
+    {% set seats_map = {
+      1:[1,1],3:[1,3],4:[1,4], 5:[2,1],7:[2,3],8:[2,4],
+      9:[3,1],11:[3,3],12:[3,4], 13:[4,1],15:[4,3],16:[4,4],
+      17:[5,1],19:[5,3],20:[5,4], 21:[6,1],23:[6,3],24:[6,4],
+      25:[7,1],27:[7,3],28:[7,4], 29:[8,1],
+      31:[9,1],33:[9,3],34:[9,4],
+      35:[10,1],37:[10,3],38:[10,4],
+      39:[11,1],41:[11,3],42:[11,4],
+      43:[12,1],45:[12,3],46:[12,4],
+      49:[13,3],50:[13,4],
+      51:[14,1],52:[14,2],53:[14,3],54:[14,4]
+    } %}
+    {% for n, pos in seats_map.items() %}
+      {% if n == 29 %}<div class="door">KAPI</div>{% endif %}
+      <div class="cell" style="grid-row:{{pos[0]}};grid-column:{{pos[1]}};">
+        <div class="seat" id="seat-{{n}}" data-seat="{{n}}">{{n}}<span class="svc-badge">🚌</span></div>
+        <div class="label" id="label-{{n}}"></div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  /* ----- temel boyama ----- */
+  function paintSeatBase(el, gender, assigned){
+    if(!el) return;
+    if(gender==='bay') el.style.background='#2d6cdf';
+    else if(gender==='bayan') el.style.background='#e75480';
+    else el.style.background = assigned ? '#4a6177' : '#1f6b2d';
+    el.classList.toggle('isAssigned', !!assigned);
+  }
+  function setSvc(el, has){ if(!el) return; el.classList.toggle('has-service', !!has); }
+
+  /* ----- kontrol state ----- */
+  const TRIP_ID = "{{ (trip['route'] ~ '|' ~ trip['plate'])|replace(' ', '_') }}";
+  const LSKEY   = 'paxcheck:'+TRIP_ID;
+  const seatMeta = new Map();     // seat -> {from,to}
+  let controlActive = false;
+  let assignedSet   = new Set();
+  let presentSet    = new Set();
+
+  function saveState(){
+    try{ localStorage.setItem(LSKEY, JSON.stringify({active:controlActive, present:[...presentSet]})); }catch(_){}
+  }
+  function loadState(){
+    try{
+      const obj = JSON.parse(localStorage.getItem(LSKEY)||'null');
+      if(obj){ controlActive = !!obj.active; presentSet = new Set(obj.present||[]); }
+    }catch(_){}
+  }
+
+  /* ----- sayaçlar ----- */
+  function refreshChips(){
+    const total = assignedSet.size;
+    const done  = presentSet.size;
+    const left  = Math.max(0, total-done);
+    document.getElementById('chipTotal').textContent = total;
+    document.getElementById('chipDone').textContent  = done;
+    document.getElementById('chipLeft').textContent  = left;
+  }
+
+  /* ----- kontrol akışları ----- */
+  function startControl(){
+    controlActive = true;
+    assignedSet.forEach(n=>{
+      const el = document.getElementById('seat-'+n);
+      el.classList.remove('missing','present');
+      if(presentSet.has(n)) el.classList.add('present'); else el.classList.add('blink');
+    });
+    document.getElementById('btnStart').disabled = true;
+    document.getElementById('btnStop').disabled  = false;
+    document.getElementById('btnReset').disabled = false;
+    document.getElementById('btnLeft').disabled  = false;
+    saveState(); refreshChips();
+  }
+  function stopControl(){
+    if(!controlActive) return;
+    controlActive = false;
+    assignedSet.forEach(n=>{
+      const el = document.getElementById('seat-'+n);
+      el.classList.remove('blink');
+      if(!presentSet.has(n)) el.classList.add('missing');
+    });
+    document.getElementById('btnStart').disabled = false;
+    document.getElementById('btnStop').disabled  = true;
+    saveState(); refreshChips();
+  }
+  function resetControl(){
+    presentSet.clear();
+    assignedSet.forEach(n=>{
+      const el = document.getElementById('seat-'+n);
+      el.classList.remove('present','missing','blink');
+    });
+    controlActive = false;
+    document.getElementById('btnStart').disabled = false;
+    document.getElementById('btnStop').disabled  = true;
+    document.getElementById('btnReset').disabled = true;
+    document.getElementById('btnLeft').disabled  = true;
+    saveState(); refreshChips();
+  }
+  function highlightLeft(){
+    if(!controlActive) return;
+    assignedSet.forEach(n=>{
+      const el = document.getElementById('seat-'+n);
+      if(!presentSet.has(n)){ el.classList.add('blink'); el.classList.remove('present','missing'); }
+    });
+  }
+
+  document.getElementById('btnStart').addEventListener('click', startControl);
+  document.getElementById('btnStop').addEventListener('click',  stopControl);
+  document.getElementById('btnReset').addEventListener('click', resetControl);
+  document.getElementById('btnLeft').addEventListener('click',  highlightLeft);
+
+  /* ----- koltuk tıklama ----- */
+  document.getElementById('deck').addEventListener('click', (e)=>{
+    const el = e.target.closest('.seat'); if(!el) return;
+    const n = Number(el.dataset.seat); if(!assignedSet.has(n)) return;
+    if(!controlActive) return;
+
+    if(presentSet.has(n)){ presentSet.delete(n); el.classList.remove('present'); el.classList.add('blink'); }
+    else{ presentSet.add(n); el.classList.remove('blink','missing'); el.classList.add('present'); }
+    saveState(); refreshChips();
+  });
+
+  /* ----- veriyi yükle + boyama ----- */
+  async function loadSeats(){
+    const r = await fetch('/api/seats/list');
+    const j = await r.json();
+    if(!j.ok) return;
+
+    assignedSet.clear(); seatMeta.clear();
+    let filled = 0;
+
+    j.items.forEach(row=>{
+      const n = Number(row.seat_no);
+      const el = document.getElementById('seat-'+n);
+      const lb = document.getElementById('label-'+n);
+
+      const assigned = !!row.stop;
+      if(assigned){ assignedSet.add(n); filled++; }
+
+      paintSeatBase(el, row.gender || '', assigned);
+      setSvc(el, !!row.service);
+
+      const from = row.from || row.board || row.pickup || '';
+      const to   = row.stop || '';
+      if(lb) lb.textContent = assigned ? ((from ? from + ' → ' : '') + to) : '';
+
+      seatMeta.set(n, { from, to });             // modal için meta
+    });
+
+    // üst istatistikler
+    const total = {{ seats_map|length }};
+    document.getElementById('st_totalPax').textContent = filled;
+    document.getElementById('st_empty').textContent    = total - filled;
+    document.getElementById('st_occupancy').textContent= total ? Math.round(filled/total*100)+'%' : '0%';
+    document.getElementById('st_standing').textContent = '0';
+
+    refreshChips();
+
+    // önceki state'i uygula
+    loadState();
+    if(controlActive){
+      document.getElementById('btnStart').disabled = true;
+      document.getElementById('btnStop').disabled  = false;
+      document.getElementById('btnReset').disabled = false;
+      document.getElementById('btnLeft').disabled  = false;
+
+      assignedSet.forEach(n=>{
+        const el = document.getElementById('seat-'+n);
+        el.classList.remove('missing','present','blink');
+        if(presentSet.has(n)) el.classList.add('present'); else el.classList.add('blink');
+      });
+    }else{
+      // KONTROL KAPALI: nötr görünüm
+      document.getElementById('btnStart').disabled = false;
+      document.getElementById('btnStop').disabled  = true;
+      document.getElementById('btnReset').disabled = assignedSet.size>0 ? false : true;
+      document.getElementById('btnLeft').disabled  = true;
+
+      assignedSet.forEach(n=>{
+        const el = document.getElementById('seat-'+n);
+        el.classList.remove('blink','present','missing');
+      });
+    }
+  }
+
+  /* ----- Kalan yolcular modalı ----- */
+  function getRemainingSeats(){
+    const arr = [];
+    assignedSet.forEach(n=>{ if(!presentSet.has(n)) arr.push(n); });
+    return arr.sort((a,b)=>a-b);
+  }
+  function openLeftModal(){
+    const left = getRemainingSeats();
+    const backdrop = document.getElementById('leftBackdrop');
+    const modal    = document.getElementById('leftModal');
+    const info     = document.getElementById('leftInfo');
+    const list     = document.getElementById('leftList');
+
+    info.textContent = left.length ? `${left.length} yolcu kaldı:` : 'Kalan yolcu yok.';
+    list.innerHTML = '';
+
+    left.forEach(n=>{
+      const meta = seatMeta.get(n) || {from:'', to:''};
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <div class="no">${n}</div>
+        <div style="display:flex;flex-direction:column;flex:1">
+          <div style="text-align:right">${(meta.from ? meta.from + ' → ' : '') + (meta.to || '—')}</div>
+        </div>`;
+      list.appendChild(row);
+    });
+
+    backdrop.style.display = 'block';
+    modal.style.display = 'block';
+  }
+  function closeLeftModal(){
+    document.getElementById('leftBackdrop').style.display = 'none';
+    document.getElementById('leftModal').style.display    = 'none';
+  }
+  document.getElementById('leftClose')?.addEventListener('click', closeLeftModal);
+  document.getElementById('leftBackdrop')?.addEventListener('click', closeLeftModal);
+  document.getElementById('chipLeft')?.parentElement.addEventListener('click', openLeftModal);
+
+  // ilk yükleme
+  loadSeats();
+</script>
+{% endblock %}
