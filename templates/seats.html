@@ -863,22 +863,31 @@ function computeStandingCountsByStop(){
   return out;
 }
 
-// Ayakta yolcuları indirmek için güncellenmiş fonksiyon
+// ... diğer kodlarının arasına (mevcut yerindeki fonksiyonun yerine) yapıştır ...
+
+function idsForStandingStop(stopName){
+  const t = norm(stopName);
+  return (standingItems || [])
+    .filter(it => norm(it?.to || '') === t)
+    .map(it => it?.id)
+    .filter(Boolean);
+}
+
 async function offloadStandingForStop(stopName){
   const t = norm(stopName);
   let removed = 0;
 
-  // 1) Sunucuya bildir
+  // 1) Sunucudan sil (to veya to_stop parametresiyle)
   try{
     await safeJsonFetch('/api/standing?to=' + encodeURIComponent(stopName), {
       method: 'DELETE',
       headers: { 'X-CSRF-Token': csrf }
     });
-  }catch(_){
-    // sunucuya ulaşılamazsa sessizce devam
+  }catch(e){
+    // ağ hatası olursa UI yine de güncellensin
   }
 
-  // 2) Local listeden sil
+  // 2) Frontend listeden düş
   for (let i = standingItems.length - 1; i >= 0; i--){
     const it = standingItems[i];
     if (norm(it?.to || '') === t){
@@ -887,6 +896,7 @@ async function offloadStandingForStop(stopName){
     }
   }
 
+  // 3) Sayaç/ekranları güncelle
   if (removed > 0){
     standingCount = Math.max(0, standingCount - removed);
     persistStandingItems();
@@ -894,7 +904,6 @@ async function offloadStandingForStop(stopName){
     updateStats();
     refreshStopBadges();
   }
-
   return removed;
 }
 

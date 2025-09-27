@@ -28,7 +28,7 @@ app.secret_key = os.getenv("SECRET_KEY", "degistir-beni")
 
 DB_PATH = os.getenv("DB_PATH", "db.sqlite3")
 DEBUG = env_bool("FLASK_DEBUG", True)
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "adminyusuf")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "volkan")
 
 # ============== Emanet/Foto Ayarları ==============
 UPLOAD_DIR = os.getenv(
@@ -1292,45 +1292,61 @@ def api_walkon():
         new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
         return jsonify({"ok": True, "id": new_id, "pax": pax, "total_amount": total_amount})
 
-    # DELETE
-    ids_param = request.args.get("ids")
-    id_param = request.args.get("id")
-    if ids_param:
-        try:
-            id_list = [int(x) for x in ids_param.split(",") if x.strip()]
-        except ValueError:
-            return jsonify({"ok": False, "msg": "ids geçersiz"}), 400
-        db.executemany("DELETE FROM walk_on_sales WHERE trip_id=? AND id=?", [(tid, i) for i in id_list])
-        db.commit()
-        return jsonify({"ok": True, "deleted": id_list})
-    if id_param:
-        try:
-            i = int(id_param)
-        except ValueError:
-            return jsonify({"ok": False, "msg": "id geçersiz"}), 400
-        db.execute("DELETE FROM walk_on_sales WHERE trip_id=? AND id=?", (tid, i))
-        db.commit()
-        return jsonify({"ok": True, "deleted": [i]})
-    return jsonify({"ok": False, "msg": "id veya ids gerekli"}), 400
-
 # === ALIAS: /api/standing ve /api/standing/list (frontend uyumu) ===
-@app.route("/api/standing", methods=["GET", "POST"])  # ALIAS
+@app.route("/api/standing", methods=["GET", "POST", "DELETE"])  # ALIAS
 def api_standing_alias():
     """
-    GET (aggregate): { ok, count, revenue }
-    POST: {count, price, payment, from, to, note} -> walk_on_sales'e yazar
+    GET:     { ok, count, revenue }                       -> walk_on_sales toplamları
+    POST:    { from, to, count, price, payment, note }    -> walk_on_sales'e ekler
+    DELETE:  ?to=<Durak> (veya ?to_stop=<Durak>)           -> bu durağa inen ayakta satışları siler
     """
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
     db = get_db()
+
+    # ---- GET: özet ----
     if request.method == "GET":
         row = db.execute(
-            "SELECT COALESCE(SUM(total_amount),0) AS total_amount, COALESCE(SUM(pax),0) AS pax "
-            "FROM walk_on_sales WHERE trip_id=?", (tid,)
+            "SELECT COALESCE(SUM(total_amount),0) AS total_amount, "
+            "       COALESCE(SUM(pax),0)          AS pax "
+            "FROM walk_on_sales WHERE trip_id=?",
+            (tid,)
         ).fetchone()
-        return jsonify({"ok": True, "count": int(row["pax"]), "revenue": float(row["total_amount"])})
-    # POST
+        return jsonify({
+            "ok": True,
+            "count":   int(row["pax"] or 0),
+            "revenue": float(row["total_amount"] or 0.0),
+        })
+
+    # ---- DELETE: to/to_stop'a göre bu durağa inenleri sil ----
+    if request.method == "DELETE":
+        to_param = (request.args.get("to_stop") or request.args.get("to") or "").strip()
+        if not to_param:
+            return jsonify({"ok": False, "msg": "to veya to_stop gerekli"}), 400
+
+        # Durak doğrulaması
+        if not validate_stop_for_active_trip(to_param):
+            return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_param}"}), 400
+
+        # Büyük/küçük harfe duyarsız eşleştir ve sil
+        rows = db.execute(
+            "SELECT id FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
+            (tid, to_param)
+        ).fetchall()
+        ids = [r["id"] for r in rows]
+
+        if ids:
+            db.executemany(
+                "DELETE FROM walk_on_sales WHERE trip_id=? AND id=?",
+                [(tid, i) for i in ids]
+            )
+            db.commit()
+
+        return jsonify({"ok": True, "deleted": ids, "count": len(ids)})
+
+    # ---- POST: yeni ayakta satış ekle ----
     data = request.get_json(force=True) or {}
     from_stop = (data.get("from_stop") or data.get("from") or "").strip()
     to_stop   = (data.get("to_stop")   or data.get("to")   or "").strip()
@@ -1340,6 +1356,7 @@ def api_standing_alias():
         return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {from_stop}"}), 400
     if not validate_stop_for_active_trip(to_stop):
         return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
+
     try:
         pax = int(data.get("pax") or data.get("count") or 1)
     except (TypeError, ValueError):
@@ -1348,9 +1365,11 @@ def api_standing_alias():
         unit_price = float(data.get("unit_price") or data.get("price") or 0)
     except (TypeError, ValueError):
         unit_price = 0.0
+
     total_amount = pax * unit_price
     payment = norm_payment(data.get("payment") or "nakit")
     note = (data.get("note") or "").strip()
+
     db.execute(
         "INSERT INTO walk_on_sales(trip_id, from_stop, to_stop, pax, unit_price, total_amount, payment, note) "
         "VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
@@ -1367,23 +1386,24 @@ def api_standing_list_alias():
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok", "items": []}), 400
+
     rows = get_db().execute(
         "SELECT id, from_stop, to_stop, pax, unit_price, payment, note, created_at "
         "FROM walk_on_sales WHERE trip_id=? ORDER BY id DESC",
         (tid,)
     ).fetchall()
-    items = []
-    for r in rows:
-        items.append({
-            "id": r["id"],
-            "from": r["from_stop"],
-            "to": r["to_stop"],
-            "count": r["pax"],
-            "price": r["unit_price"],
-            "payment": r["payment"],
-            "note": r["note"],
-            "ts": r["created_at"],
-        })
+
+    items = [{
+        "id": r["id"],
+        "from": r["from_stop"],
+        "to": r["to_stop"],
+        "count": r["pax"],
+        "price": r["unit_price"],
+        "payment": r["payment"],
+        "note": r["note"],
+        "ts": r["created_at"],
+    } for r in rows]
+
     return jsonify({"ok": True, "items": items})
 
 # ===================== API: İstatistik =====================
