@@ -1,3 +1,4 @@
+# app.py
 import os
 import json
 import sqlite3
@@ -12,8 +13,9 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 
-# === Hız limiti (OSM) blueprint'i ===
-from speedlimit import bp_speed  # NEW
+# === Hız limiti (OSM) için blueprint (harici modülde url_prefix ayarlı olmalı) ===
+# Örn: speedlimit.py içinde: bp_speed = Blueprint("speed", __name__, url_prefix="/api/speedlimit")
+from speedlimit import bp_speed
 
 # ===================== Ayarlar =====================
 
@@ -32,18 +34,14 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "volkan")
 
 # ============== Emanet/Foto Ayarları ==============
 UPLOAD_DIR = os.getenv(
-    "UPLOAD_DIR",
-    os.path.join(os.getcwd(), "uploads", "consignments")
+    "UPLOAD_DIR", os.path.join(os.getcwd(), "uploads", "consignments")
 )
-
 ALLOWED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 ALLOWED_IMAGE_MIMES = {"image/jpeg", "image/png", "image/webp"}
-
 MAX_UPLOAD_MB = int(os.getenv("MAX_UPLOAD_MB", "10"))
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
 
 def ensure_upload_dir():
-    """Upload klasörünü garantiye al."""
     Path(UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
 
 def _allowed_file(filename: str) -> bool:
@@ -98,9 +96,7 @@ def close_db(exc):
         db.close()
 
 def ensure_schema():
-    """
-    Tabloları oluşturur. Eski kurulumlardaki eksik kolonları ekler.
-    """
+    """İlk açılışta tablo ve indeksleri hazırla; eksik kolonları ekle."""
     db = get_db()
     db.executescript(
         """
@@ -228,20 +224,20 @@ def ensure_schema():
         CREATE INDEX IF NOT EXISTS idx_cphotos_cons    ON consignment_photos(consignment_id);
         CREATE INDEX IF NOT EXISTS idx_cphotos_created ON consignment_photos(created_at);
 
-        -- Fiyatlar (hat adı + durak adları ile)
+        -- Fiyatlar
         CREATE TABLE IF NOT EXISTS fares(
-        route      TEXT    NOT NULL,
-        from_stop  TEXT    NOT NULL,
-        to_stop    TEXT    NOT NULL,
-        price      REAL    NOT NULL,
-        updated_at TEXT    DEFAULT (datetime('now','localtime')),
-        PRIMARY KEY(route, from_stop, to_stop)
+            route      TEXT    NOT NULL,
+            from_stop  TEXT    NOT NULL,
+            to_stop    TEXT    NOT NULL,
+            price      REAL    NOT NULL,
+            updated_at TEXT    DEFAULT (datetime('now','localtime')),
+            PRIMARY KEY(route, from_stop, to_stop)
         );
         CREATE INDEX IF NOT EXISTS idx_fares_route ON fares(route);
         """
     )
 
-    # Eski tablolarda eksik kolonlar (güvenlik için)
+    # Eski tablolarda eksik kolonlar
     cols = [r["name"] for r in db.execute("PRAGMA table_info(seats)").fetchall()]
     if "gender" not in cols:
         db.execute("ALTER TABLE seats ADD COLUMN gender TEXT DEFAULT ''")
@@ -267,34 +263,26 @@ def get_active_trip() -> Optional[int]:
 
 ROUTE_STOPS = {
     "Denizli – İstanbul": [
-        "Denizli otogar","Sarayköy","Buldan","Bozalan","Derbent(Denizli)",
-        "Kadıköy","İl Sınırı(Manisa)","Dindarlı","Dadağlı","Sarıgöl Garaj","Afşar",
-        "Bereketli","Hacıaliler","Ortahan","Belenyaka","Alaşehir Otogar",
-        "Alaşehir Stadyum","Akkeçili","Piyadeler","Kavaklıdere","Salihli Garaj",
-        "Sart","Ahmetli","Gökkaya","Akçapınar","Derbent(Turgutlu)","Turgutlu Garaj",
-        "Özdilek(Turgutlu)","Manisa Otogar","Akhisar","Saruhanlı","Soma","Kırkağaç",
-        "Balıkesir","Susurluk","Mustafa K.P(Bursa)","Bursa Otogar","Gebze Garaj",
-        "Harem","Alibeyköy","Esenler Otogar"
+        "Denizli otogar","Sarayköy","Buldan","Bozalan","Derbent(Denizli)","Kadıköy",
+        "İl Sınırı(Manisa)","Dindarlı","Dadağlı","Sarıgöl Garaj","Afşar","Bereketli",
+        "Hacıaliler","Ortahan","Belenyaka","Alaşehir Otogar","Alaşehir Stadyum",
+        "Akkeçili","Piyadeler","Kavaklıdere","Salihli Garaj","Sart","Ahmetli",
+        "Gökkaya","Akçapınar","Derbent(Turgutlu)","Turgutlu Garaj","Özdilek(Turgutlu)",
+        "Manisa Otogar","Akhisar","Saruhanlı","Soma","Kırkağaç","Balıkesir","Susurluk",
+        "Mustafa K.P(Bursa)","Bursa Otogar","Gebze Garaj","Harem","Alibeyköy","Esenler Otogar"
     ],
     "Denizli – İzmir": [
-        "Denizli otogar","Sarayköy","Alaşehir","Salihli Garaj","Turgutlu",
-        "Manisa Otogar","Bornova","İzmir Otogar"
+        "Denizli otogar","Sarayköy","Alaşehir","Salihli Garaj","Turgutlu","Manisa Otogar","Bornova","İzmir Otogar"
     ],
     "İstanbul – Denizli": [
-        "Esenler Otogar","Alibeyköy","Harem","Gebze Garaj","Bursa Otogar",
-        "Susurluk","Balıkesir","Kırkağaç","Soma","Akhisar","Manisa Otogar",
-        "Turgutlu Garaj","Salihli Garaj","Alaşehir Otogar","Denizli otogar"
+        "Esenler Otogar","Alibeyköy","Harem","Gebze Garaj","Bursa Otogar","Susurluk","Balıkesir",
+        "Kırkağaç","Soma","Akhisar","Manisa Otogar","Turgutlu Garaj","Salihli Garaj","Alaşehir Otogar","Denizli otogar"
     ],
     "İzmir – Denizli": [
-        "İzmir Otogar","Bornova","Manisa Otogar","Turgutlu Garaj","Salihli Garaj",
-        "Alaşehir Otogar","Sarayköy","Denizli otogar"
+        "İzmir Otogar","Bornova","Manisa Otogar","Turgutlu Garaj","Salihli Garaj","Alaşehir Otogar","Sarayköy","Denizli otogar"
     ],
-    "İstanbul – Antalya": [
-        "Esenler","Alibeyköy","Harem","Gebze","Bursa","Korkuteli","Antalya Otogar"
-    ],
-    "Antalya – İstanbul": [
-        "Antalya Otogar","Korkuteli","Bursa","Gebze","Harem","Alibeyköy","Esenler"
-    ],
+    "İstanbul – Antalya": ["Esenler","Alibeyköy","Harem","Gebze","Bursa","Korkuteli","Antalya Otogar"],
+    "Antalya – İstanbul": ["Antalya Otogar","Korkuteli","Bursa","Gebze","Harem","Alibeyköy","Esenler"],
 }
 
 def get_stops(route_name: str):
@@ -361,28 +349,26 @@ def check_csrf():
     if not supplied or supplied != session.get("csrf_token"):
         abort(403, description="CSRF doğrulaması başarısız")
 
-PROTECTED_PREFIXES = ("/",)
-EXCLUDE_PATHS = {"/login", "/logout", "/health", "/api/speedlimit"}  # NEW (speedlimit dışarı açık)
+PROTECTED_PREFIXES = ("/",)  # Tam koruma; istersen daraltabilirsin
+EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit")  # Gerekirse "/u" ekle
 
+def is_excluded_path(p: str) -> bool:
+    return any(p == x or p.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+
+# ---- Tek before_request: hem schema+upload hazırlar, hem kimlik/CSRF kontrol eder ----
 @app.before_request
-def require_login_and_csrf():
-    if not app.config.get("_schema_ready"):
-        ensure_schema()
-        app.config["_schema_ready"] = True
-
-    p = request.path
-    if any(p.startswith(pref) for pref in PROTECTED_PREFIXES) and p not in EXCLUDE_PATHS:
-        if not session.get("auth_ok"):
-            return redirect(url_for("login", next=p))
-        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
-            check_csrf()
-
-@app.before_request
-def before_req():
+def bootstrap_and_guard():
     if not app.config.get("_schema_ready"):
         ensure_schema()
         ensure_upload_dir()
         app.config["_schema_ready"] = True
+
+    p = request.path
+    if any(p.startswith(pref) for pref in PROTECTED_PREFIXES) and not is_excluded_path(p):
+        if not session.get("auth_ok"):
+            return redirect(url_for("login", next=p))
+        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+            check_csrf()
 
 @app.context_processor
 def inject_globals():
@@ -539,7 +525,6 @@ def passenger_control():
     tid = get_active_trip()
     if not tid:
         return redirect(url_for("trip_start"))
-    # Hattın duraklarını ve aktif sefer bilgisini başlıkta gösterebilmek için
     db = get_db()
     trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
     stops = get_stops(trip["route"])
@@ -549,9 +534,7 @@ def passenger_control():
 @app.route("/fiyat", methods=["GET"])
 def fare_query():
     routes = all_route_names()
-    # URL'den gelsin, yoksa listenin ilki
     route = (request.args.get("route") or (routes[0] if routes else "")).strip()
-
     stops = list_stops_for_route(route)
     from_stop = (request.args.get("from") or "").strip()
     to_stop   = (request.args.get("to") or "").strip()
@@ -570,11 +553,13 @@ def fare_query():
                 msg = "Durak(lar) bu hatta yok."
             else:
                 msg = "Fiyat bulunamadı."
+        elif method == "same-stop":
+            msg = "Aynı durak seçildi (0 TL)."
 
     return render_template(
         "fare_query.html",
         routes=routes,
-        current_route=route,     # <-- ÖNEMLİ
+        current_route=route,
         stops=stops,
         from_stop=from_stop,
         to_stop=to_stop,
@@ -589,7 +574,6 @@ def fare_query():
 def fare_admin():
     routes = all_route_names()
 
-    # POST ise formdan, GET ise querystring’den al
     if request.method == "POST":
         route = (request.form.get("route") or (routes[0] if routes else "")).strip()
         from_stop = (request.form.get("from") or "").strip()
@@ -599,7 +583,6 @@ def fare_admin():
             price = float(price_val)
         except (TypeError, ValueError):
             price = None
-        # hat değiştiyse sadece sayfayı o hatla yeniden yükle
         if not from_stop or not to_stop or price is None:
             stops = list_stops_for_route(route)
             fare_list = get_db().execute(
@@ -609,7 +592,7 @@ def fare_admin():
             return render_template(
                 "fare_admin.html",
                 routes=routes,
-                current_route=route,   # <-- ÖNEMLİ
+                current_route=route,
                 stops=stops,
                 from_stop=from_stop,
                 to_stop=to_stop,
@@ -617,7 +600,6 @@ def fare_admin():
                 fare_list=fare_list,
                 csrf_token=get_csrf(),
             )
-        # kayıt / güncelle
         db = get_db()
         db.execute("""
             INSERT INTO fares(route, from_stop, to_stop, price)
@@ -627,7 +609,6 @@ def fare_admin():
                 updated_at=datetime('now','localtime')
         """, (route, from_stop, to_stop, price))
         db.commit()
-        # aşağıda sayfayı aynı hatla göster
     else:
         route = (request.args.get("route") or (routes[0] if routes else "")).strip()
         from_stop = (request.args.get("from") or "").strip()
@@ -648,7 +629,7 @@ def fare_admin():
     return render_template(
         "fare_admin.html",
         routes=routes,
-        current_route=route,     # <-- ÖNEMLİ
+        current_route=route,
         stops=stops,
         from_stop=from_stop,
         to_stop=to_stop,
@@ -656,6 +637,7 @@ def fare_admin():
         fare_list=fare_list,
         csrf_token=get_csrf(),
     )
+
 # ===================== Raporlar & Olay Görüntüleyici =====================
 
 def _parse_date(s: Optional[str]) -> Optional[str]:
@@ -683,14 +665,11 @@ def api_report_seat_stats():
     sql_where = ["1=1"]
     args: list = []
     if route:
-        sql_where.append("t.route = ?")
-        args.append(route)
+        sql_where.append("t.route = ?"); args.append(route)
     if d1:
-        sql_where.append("t.date >= ?")
-        args.append(d1)
+        sql_where.append("t.date >= ?"); args.append(d1)
     if d2:
-        sql_where.append("t.date <= ?")
-        args.append(d2)
+        sql_where.append("t.date <= ?"); args.append(d2)
     where = " AND ".join(sql_where)
 
     db = get_db()
@@ -774,14 +753,11 @@ def api_events():
     """
     args = []
     if route:
-        sql += " AND t.route=?"
-        args.append(route)
+        sql += " AND t.route=?"; args.append(route)
     if d1:
-        sql += " AND t.date >= ?"
-        args.append(d1)
+        sql += " AND t.date >= ?"; args.append(d1)
     if d2:
-        sql += " AND t.date <= ?"
-        args.append(d2)
+        sql += " AND t.date <= ?"; args.append(d2)
     sql += " ORDER BY l.ts DESC, l.id DESC LIMIT 500"
 
     rows = get_db().execute(sql, args).fetchall()
@@ -868,7 +844,6 @@ def route_edit(rid):
     return render_template("route_edit.html", route=row, stops_text=stops_text)
 
 def materialize_builtin_route(name: str) -> Optional[int]:
-    """Sabit hatı (ROUTE_STOPS) DB'ye yazıp id'yi döner."""
     stops = ROUTE_STOPS.get(name)
     if not stops:
         return None
@@ -904,13 +879,11 @@ def route_delete(rid):
     return redirect(url_for("routes_list"))
 
 def all_route_names() -> list[str]:
-    """DB + built-in hat isimleri (senin index’te yaptığın gibi)"""
     db = get_db()
     dyn = [r["name"] for r in db.execute("SELECT name FROM routes ORDER BY name").fetchall()]
     return list(dict.fromkeys(list(ROUTE_STOPS.keys()) + dyn))
 
 def list_stops_for_route(route_name: str) -> list[str]:
-    """Var olan get_stops zaten var; sadece kısa isim."""
     return get_stops(route_name)
 
 def fetch_fare_exact(route: str, from_stop: str, to_stop: str) -> Optional[float]:
@@ -921,27 +894,17 @@ def fetch_fare_exact(route: str, from_stop: str, to_stop: str) -> Optional[float
     return float(row["price"]) if row else None
 
 def quote_price_segmented(route: str, from_stop: str, to_stop: str) -> tuple[Optional[float], str]:
-    """
-    1) Doğrudan kayıt varsa onu döner (method='direct')
-    2) Yoksa ardışık segmentleri toplayıp döner (method='summed')
-       Her bir ardışık parça için fares tablosunda kayıt arar.
-    """
     stops = list_stops_for_route(route)
     if not stops or from_stop not in stops or to_stop not in stops:
         return None, "missing-stops"
-
     i, j = stops.index(from_stop), stops.index(to_stop)
     if i == j:
         return 0.0, "same-stop"
     if i > j:
         return None, "wrong-order"
-
-    # 1) doğrudan
     exact = fetch_fare_exact(route, from_stop, to_stop)
     if exact is not None:
         return exact, "direct"
-
-    # 2) ardışık parçaları topla
     total = 0.0
     db = get_db()
     for k in range(i, j):
@@ -951,7 +914,7 @@ def quote_price_segmented(route: str, from_stop: str, to_stop: str) -> tuple[Opt
             (route, a, b)
         ).fetchone()
         if not row:
-            return None, "segment-missing"   # Eksik halka
+            return None, "segment-missing"
         total += float(row["price"])
     return total, "summed"
 
@@ -975,7 +938,6 @@ def api_seat():
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
     db = get_db()
 
     if request.method == "DELETE":
@@ -1041,7 +1003,6 @@ def api_seats_bulk():
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
     db = get_db()
 
     if request.method == "DELETE":
@@ -1052,9 +1013,8 @@ def api_seats_bulk():
             seat_list = [int(x) for x in raw.split(",") if x.strip()]
         except ValueError:
             return jsonify({"ok": False, "msg": "seats geçersiz"}), 400
-
         db.executemany(
-            "DELETE FROM seats WHERE trip_id=? AND seat_no=?",  # bulk delete
+            "DELETE FROM seats WHERE trip_id=? AND seat_no=?",
             [(tid, s) for s in seat_list]
         )
         db.commit()
@@ -1127,13 +1087,9 @@ def api_seats_bulk():
     db.commit()
     return jsonify({"ok": True, "count": len(rows)})
 
-# === ALIAS: /api/seats/offload (frontend'in beklediği) ===
-@app.route("/api/seats/offload", methods=["POST"])  # ALIAS
+# === ALIAS: /api/seats/offload (frontend uyumu) ===
+@app.route("/api/seats/offload", methods=["POST"])
 def api_seats_offload_alias():
-    """
-    Body: { "seats": [..] }
-    seats listesini aktif seferden topluca siler.
-    """
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
@@ -1200,8 +1156,7 @@ def api_coords():
         data = request.get_json(force=True) or {}
         stop = (data.get("stop") or "").strip()
         try:
-            lat = float(data.get("lat"))
-            lng = float(data.get("lng"))
+            lat = float(data.get("lat")); lng = float(data.get("lng"))
         except (TypeError, ValueError):
             return jsonify({"ok": False, "msg": "lat/lng geçersiz"}), 400
         if not stop:
@@ -1237,7 +1192,6 @@ def api_walkon():
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
     db = get_db()
 
     if request.method == "GET":
@@ -1292,61 +1246,58 @@ def api_walkon():
         new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
         return jsonify({"ok": True, "id": new_id, "pax": pax, "total_amount": total_amount})
 
-# === ALIAS: /api/standing ve /api/standing/list (frontend uyumu) ===
-@app.route("/api/standing", methods=["GET", "POST", "DELETE"])  # ALIAS
+    # DELETE
+    to_param = (request.args.get("to_stop") or request.args.get("to") or "").strip()
+    if not to_param:
+        return jsonify({"ok": False, "msg": "to veya to_stop gerekli"}), 400
+    if not validate_stop_for_active_trip(to_param):
+        return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_param}"}), 400
+    rows = db.execute(
+        "SELECT id FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
+        (tid, to_param)
+    ).fetchall()
+    ids = [r["id"] for r in rows]
+    if ids:
+        db.executemany(
+            "DELETE FROM walk_on_sales WHERE trip_id=? AND id=?",
+            [(tid, i) for i in ids]
+        )
+        db.commit()
+    return jsonify({"ok": True, "deleted": ids, "count": len(ids)})
+
+# === ALIAS: /api/standing & /api/standing/list ===
+
+@app.route("/api/standing", methods=["GET", "POST", "DELETE"])
 def api_standing_alias():
-    """
-    GET:     { ok, count, revenue }                       -> walk_on_sales toplamları
-    POST:    { from, to, count, price, payment, note }    -> walk_on_sales'e ekler
-    DELETE:  ?to=<Durak> (veya ?to_stop=<Durak>)           -> bu durağa inen ayakta satışları siler
-    """
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
     db = get_db()
 
-    # ---- GET: özet ----
     if request.method == "GET":
         row = db.execute(
-            "SELECT COALESCE(SUM(total_amount),0) AS total_amount, "
-            "       COALESCE(SUM(pax),0)          AS pax "
-            "FROM walk_on_sales WHERE trip_id=?",
-            (tid,)
+            "SELECT COALESCE(SUM(total_amount),0) AS total_amount, COALESCE(SUM(pax),0) AS pax "
+            "FROM walk_on_sales WHERE trip_id=?", (tid,)
         ).fetchone()
-        return jsonify({
-            "ok": True,
-            "count":   int(row["pax"] or 0),
-            "revenue": float(row["total_amount"] or 0.0),
-        })
+        return jsonify({"ok": True, "count": int(row["pax"] or 0), "revenue": float(row["total_amount"] or 0.0)})
 
-    # ---- DELETE: to/to_stop'a göre bu durağa inenleri sil ----
     if request.method == "DELETE":
         to_param = (request.args.get("to_stop") or request.args.get("to") or "").strip()
         if not to_param:
             return jsonify({"ok": False, "msg": "to veya to_stop gerekli"}), 400
-
-        # Durak doğrulaması
         if not validate_stop_for_active_trip(to_param):
             return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_param}"}), 400
-
-        # Büyük/küçük harfe duyarsız eşleştir ve sil
         rows = db.execute(
             "SELECT id FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
             (tid, to_param)
         ).fetchall()
         ids = [r["id"] for r in rows]
-
         if ids:
-            db.executemany(
-                "DELETE FROM walk_on_sales WHERE trip_id=? AND id=?",
-                [(tid, i) for i in ids]
-            )
+            db.executemany("DELETE FROM walk_on_sales WHERE trip_id=? AND id=?", [(tid, i) for i in ids])
             db.commit()
-
         return jsonify({"ok": True, "deleted": ids, "count": len(ids)})
 
-    # ---- POST: yeni ayakta satış ekle ----
+    # POST
     data = request.get_json(force=True) or {}
     from_stop = (data.get("from_stop") or data.get("from") or "").strip()
     to_stop   = (data.get("to_stop")   or data.get("to")   or "").strip()
@@ -1356,7 +1307,6 @@ def api_standing_alias():
         return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {from_stop}"}), 400
     if not validate_stop_for_active_trip(to_stop):
         return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
-
     try:
         pax = int(data.get("pax") or data.get("count") or 1)
     except (TypeError, ValueError):
@@ -1365,7 +1315,6 @@ def api_standing_alias():
         unit_price = float(data.get("unit_price") or data.get("price") or 0)
     except (TypeError, ValueError):
         unit_price = 0.0
-
     total_amount = pax * unit_price
     payment = norm_payment(data.get("payment") or "nakit")
     note = (data.get("note") or "").strip()
@@ -1378,32 +1327,21 @@ def api_standing_alias():
     db.commit()
     return jsonify({"ok": True, "pax": pax, "total_amount": total_amount})
 
-@app.route("/api/standing/list")  # ALIAS
+@app.route("/api/standing/list")
 def api_standing_list_alias():
-    """
-    items: [{id, from, to, count, price, payment, note, ts}]
-    """
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok", "items": []}), 400
-
     rows = get_db().execute(
         "SELECT id, from_stop, to_stop, pax, unit_price, payment, note, created_at "
         "FROM walk_on_sales WHERE trip_id=? ORDER BY id DESC",
         (tid,)
     ).fetchall()
-
     items = [{
-        "id": r["id"],
-        "from": r["from_stop"],
-        "to": r["to_stop"],
-        "count": r["pax"],
-        "price": r["unit_price"],
-        "payment": r["payment"],
-        "note": r["note"],
-        "ts": r["created_at"],
+        "id": r["id"], "from": r["from_stop"], "to": r["to_stop"],
+        "count": r["pax"], "price": r["unit_price"], "payment": r["payment"],
+        "note": r["note"], "ts": r["created_at"],
     } for r in rows]
-
     return jsonify({"ok": True, "items": items})
 
 # ===================== API: İstatistik =====================
@@ -1413,7 +1351,6 @@ def api_stats():
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
     db = get_db()
 
     seat_row = db.execute(
@@ -1463,7 +1400,6 @@ def api_stoplog():
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
     db = get_db()
 
     if request.method == "GET":
@@ -1484,14 +1420,9 @@ def api_stoplog():
             except Exception:
                 meta = None
             items.append({
-                "id": r["id"],
-                "trip_id": r["trip_id"],
-                "stop_name": r["stop_name"],
-                "event": r["event"],
-                "distance_km": r["distance_km"],
-                "seats_for_stop": r["seats_for_stop"],
-                "meta": meta,
-                "ts": r["ts"],
+                "id": r["id"], "trip_id": r["trip_id"], "stop_name": r["stop_name"],
+                "event": r["event"], "distance_km": r["distance_km"],
+                "seats_for_stop": r["seats_for_stop"], "meta": meta, "ts": r["ts"],
             })
         return jsonify({"ok": True, "items": items})
 
@@ -1512,7 +1443,6 @@ def api_stoplog():
         return jsonify({"ok": False, "msg": "distance_km geçersiz"}), 400
 
     seats_for_stop = _seats_count_for_stop(tid, stop_name)
-
     meta = data.get("meta")
     try:
         meta_json = json.dumps(meta, ensure_ascii=False) if isinstance(meta, (dict, list)) else None
@@ -1527,7 +1457,6 @@ def api_stoplog():
         (tid, stop_name, event, distance_km, seats_for_stop, meta_json)
     )
     db.commit()
-
     return jsonify({
         "ok": True,
         "stop_name": stop_name,
@@ -1552,6 +1481,8 @@ def end_trip():
         db.commit()
     return redirect(url_for("index"))
 
+# ===================== Upload Serve =====================
+
 @app.route("/u/<path:filename>")
 def serve_uploaded(filename):
     safe = secure_filename(filename)
@@ -1564,30 +1495,21 @@ def consignments_page():
     tid = get_active_trip()
     if not tid:
         return redirect(url_for("trip_start"))
-
     db = get_db()
     trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
     stops = get_stops(trip["route"])
-
     rows = db.execute(
         "SELECT * FROM consignments WHERE trip_id=? ORDER BY created_at DESC",
         (tid,)
     ).fetchall()
-
     items = [dict(r) for r in rows]
-    return render_template(
-        "consignments.html",
-        trip=trip,
-        stops=stops,
-        items=items
-    )
+    return render_template("consignments.html", trip=trip, stops=stops, items=items)
 
 @app.route("/api/consignments", methods=["GET", "POST"])
 def api_consignments():
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
     db = get_db()
 
     if request.method == "GET":
@@ -1617,10 +1539,8 @@ def api_consignments():
         return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {from_stop}"}), 400
     if to_stop and not validate_stop_for_active_trip(to_stop):
         return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
-
     if not item_name:
         return jsonify({"ok": False, "msg": "Eşya adı gerekli"}), 400
-
     if not code:
         code = secrets.token_hex(3).upper()
 
@@ -1639,41 +1559,14 @@ def api_consignments():
     new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
     return jsonify({"ok": True, "id": new_id, "code": code})
 
-@app.route("/api/consignments/<int:cid>/status", methods=["POST"])
-def api_cons_status(cid):
-    tid = get_active_trip()
-    if not tid:
-        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
-    data = request.get_json(force=True) or {}
-    status = (data.get("status") or "").strip().lower()
-    if status not in ("bekliyor", "yüklendi", "teslim", "iptal"):
-        return jsonify({"ok": False, "msg": "Geçersiz durum"}), 400
-
-    db = get_db()
-    if status == "teslim":
-        db.execute(
-            "UPDATE consignments SET status=?, delivered_at=datetime('now','localtime') WHERE id=? AND trip_id=?",
-            (status, cid, tid)
-        )
-    else:
-        db.execute(
-            "UPDATE consignments SET status=?, delivered_at=NULL WHERE id=? AND trip_id=?",
-            (status, cid, tid)
-        )
-    db.commit()
-    return jsonify({"ok": True})
-
 # --- Emanet sayacı (durak bazında) ---
 @app.get("/api/parcels")
 def api_parcels():
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok", "items": []}), 400
-
     status = (request.args.get("status") or "bekliyor").strip().lower()
     db = get_db()
-
     rows = db.execute(
         """
         SELECT COALESCE(to_stop,'') AS to_stop, COUNT(*) AS cnt
@@ -1683,17 +1576,15 @@ def api_parcels():
         """,
         (tid, status)
     ).fetchall()
-
     items = [{"to": r["to_stop"], "count": int(r["cnt"])} for r in rows if r["to_stop"]]
     return jsonify({"ok": True, "items": items})
 
-# --- YENİ: GET + POST ---
+# --- Emanet fotoğrafları: GET + POST ---
 @app.route("/api/consignments/<int:cid>/photos", methods=["GET", "POST"])
 def api_cons_photos(cid):
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
     db = get_db()
 
     if request.method == "GET":
@@ -1702,31 +1593,28 @@ def api_cons_photos(cid):
             "FROM consignment_photos WHERE consignment_id=? ORDER BY id DESC",
             (cid,)
         ).fetchall()
-        items = []
-        for r in rows:
-            items.append({
-                "id": r["id"],
-                "role": r["role"],
-                "file": r["file_path"],
-                "mime": r["mime"],
-                "size": r["size_bytes"],
-                "created_at": r["created_at"],
-                "url": url_for("serve_uploaded", filename=r["file_path"])
-            })
+        items = [{
+            "id": r["id"], "role": r["role"], "file": r["file_path"], "mime": r["mime"],
+            "size": r["size_bytes"], "created_at": r["created_at"],
+            "url": url_for("serve_uploaded", filename=r["file_path"])
+        } for r in rows]
         return jsonify({"ok": True, "items": items})
 
-    # --- POST (yükleme) ---
+    # POST (yükleme)
     role = (request.form.get("role") or "").strip().lower()  # 'pickup' | 'delivery' | ''
     f = request.files.get("file")
     if not f or f.filename == "":
         return jsonify({"ok": False, "msg": "Dosya gerekli"}), 400
     if not _allowed_file(f.filename):
         return jsonify({"ok": False, "msg": "İzin verilmeyen dosya türü"}), 400
+    if f.mimetype not in ALLOWED_IMAGE_MIMES:
+        return jsonify({"ok": False, "msg": "Desteklenmeyen MIME türü"}), 400
 
     ext = f.filename.rsplit(".", 1)[1].lower()
-    fname = secure_filename(f"c{cid}_{int(datetime.now().timestamp())}.{ext}")
+    rid = secrets.token_hex(3)
+    fname = secure_filename(f"c{cid}_{int(datetime.now().timestamp())}_{rid}.{ext}")
     save_path = Path(UPLOAD_DIR) / fname
-    ensure_upload_dir()  # NEW: emniyet
+    ensure_upload_dir()
     f.save(save_path)
     size_bytes = save_path.stat().st_size
 
@@ -1749,7 +1637,6 @@ def api_cons_delete(cid):
     tid = get_active_trip()
     if not tid:
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
     db = get_db()
     photos = db.execute(
         "SELECT file_path FROM consignment_photos WHERE consignment_id=?",
@@ -1760,7 +1647,6 @@ def api_cons_delete(cid):
             (Path(UPLOAD_DIR) / r["file_path"]).unlink(missing_ok=True)
         except Exception:
             pass
-
     db.execute("DELETE FROM consignment_photos WHERE consignment_id=?", (cid,))
     db.execute("DELETE FROM consignments WHERE id=? AND trip_id=?", (cid, tid))
     db.commit()
@@ -1773,7 +1659,7 @@ def health():
     return "ok"
 
 # === Blueprint kayıtları ===
-app.register_blueprint(bp_speed)  # NEW (OSM hız limiti /api/speedlimit)
+app.register_blueprint(bp_speed)
 
 # ===================== Çalıştır =====================
 if __name__ == "__main__":
