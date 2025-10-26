@@ -1,58 +1,160 @@
-{% extends "base.html" %}
-{% block content %}
-<link rel="stylesheet" href="/static/style.css">
-<div class="coach" style="max-width:1100px">
-  <h2 style="margin:10px 0">Olay Görüntüleyici</h2>
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hesap — Sefer Kasa</title>
+<style>
+body{font-family:system-ui,-apple-system,Roboto;background:#0b1115;color:#e6edf3;margin:0}
+.container{max-width:920px;margin:auto;padding:16px}
+.card{background:#11171c;border:1px solid #22303a;border-radius:12px;padding:14px;margin:10px 0}
+h1{font-size:20px;font-weight:700;margin:6px 0 10px}
+label{font-size:12px;opacity:.8}
+input,select,button,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #2a3946;background:#0b1217;color:#e6edf3}
+textarea{min-height:80px;resize:vertical}
+button.primary{background:#1f6b2d;border-color:#2a7b3a;font-weight:700}
+button.danger{background:#7b1f1f;border-color:#8a2a2a}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kasa{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.kasa .box{background:#0f161b;border:1px solid #22303a;border-radius:10px;padding:8px;text-align:center}
+.kasa .num{font-size:18px;font-weight:700}
+.badge{display:inline-block;background:#25313b;border:1px solid #33414d;color:#c8d1d9;padding:4px 8px;border-radius:999px;font-size:12px;margin-right:6px}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{border-bottom:1px solid #22303a;padding:6px;text-align:left}
+.footerbar{position:sticky;bottom:0;background:#0b1115;border-top:1px solid #22303a;padding:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.small{font-size:12px;opacity:.75}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🧾 Hesap / Aktif Sefer</h1>
 
-  <form class="alertbar" onsubmit="return false;">
-    <div class="field"><label>Hat</label><input id="route" placeholder="(opsiyonel)"></div>
-    <div class="field"><label>Başlangıç</label><input type="date" id="d1"></div>
-    <div class="field"><label>Bitiş</label><input type="date" id="d2"></div>
-    <button class="btn primary" id="run">Getir</button>
-    <div class="spacer"></div>
-    <div id="count" class="muted">—</div>
+  <div class="card">
+    <div class="kasa">
+      <div class="box"><div>Başlangıç (Devir)</div><div class="num">{{ sums.devir|tl }}</div></div>
+      <div class="box"><div>Toplam Giriş</div><div class="num">{{ sums.giris|tl }}</div></div>
+      <div class="box"><div>Toplam Çıkış</div><div class="num">{{ sums.cikis|tl }}</div></div>
+      <div class="box"><div>Kalan</div><div class="num">{{ sums.kalan|tl }}</div></div>
+    </div>
+    <div class="small">
+      {% if trip.route %}<span class="badge">Hat: {{ trip.route }}</span>{% endif %}
+      {% if trip.date %}<span class="badge">Tarih: {{ trip.date }}</span>{% endif %}
+      {% if trip.departure_time %}<span class="badge">Kalkış: {{ trip.departure_time }}</span>{% endif %}
+    </div>
+  </div>
+
+  <div class="grid3">
+    <!-- DEVİR -->
+    <form class="card" method="post" action="{{ url_for('hesap_devir') }}">
+      <h1>⬆️ Devir (Başlangıç)</h1>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div>
+        <label>Tutar (TL)</label>
+        <input type="number" name="amount" inputmode="numeric" min="0" placeholder="örn. 5000" required>
+      </div>
+      <div>
+        <label>Not (opsiyonel)</label>
+        <input type="text" name="note" placeholder="Garaj avansı">
+      </div>
+      <button class="primary" style="margin-top:8px">Kaydet</button>
+      <div class="small" style="margin-top:6px">Not: Devir giriş olarak kaydedilir.</div>
+    </form>
+
+    <!-- GİRİŞ -->
+    <form class="card" method="post" action="{{ url_for('hesap_giris') }}">
+      <h1>➕ Giriş</h1>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div>
+        <label>Kategori</label>
+        <select name="category">
+          {% for k in categories_in %}<option value="{{k}}">{{k}}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Tutar (TL)</label>
+        <input type="number" name="amount" inputmode="numeric" min="0" required>
+      </div>
+      <div>
+        <label>Açıklama (opsiyonel)</label>
+        <input type="text" name="note" placeholder="örn. Harem hesabı">
+      </div>
+      <button class="primary" style="margin-top:8px">Kaydet</button>
+    </form>
+
+    <!-- ÇIKIŞ -->
+    <form class="card" method="post" action="{{ url_for('hesap_cikis') }}">
+      <h1>➖ Çıkış</h1>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div>
+        <label>Kategori</label>
+        <select name="category">
+          {% for k in categories_out %}<option value="{{k}}">{{k}}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Tutar (TL)</label>
+        <input type="number" name="amount" inputmode="numeric" min="0" required>
+      </div>
+      <div>
+        <label>Açıklama (opsiyonel)</label>
+        <input type="text" name="note" placeholder="örn. Yıkama">
+      </div>
+      <button class="primary" style="margin-top:8px">Kaydet</button>
+    </form>
+  </div>
+
+  <!-- KATEGORİLERİ DÜZENLE -->
+  <form class="card" method="post" action="{{ url_for('hesap_kategoriler_kaydet') }}">
+    <h1>⚙️ Kategoriler</h1>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="grid2">
+      <div>
+        <label>Giriş Kategorileri (virgül veya satır satır)</label>
+        <textarea name="cats_in" placeholder="Devir, Garaj, Harem, Eşya, Nakit Bilet, Avans, Diğer">{{ categories_in|join(', ') }}</textarea>
+      </div>
+      <div>
+        <label>Çıkış Kategorileri (virgül veya satır satır)</label>
+        <textarea name="cats_out" placeholder="Yıkama, Sigara, Yemek, Otoyol, Otogar, İkram, Temizlik, Su/Çay, Bakım, Diğer">{{ categories_out|join(', ') }}</textarea>
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <button class="primary">Kaydet</button>
+      <span class="small" style="margin-left:8px">Boş bırakırsan varsayılana döner.</span>
+    </div>
   </form>
 
-  <div class="nsbox" style="overflow:auto; max-height:70vh">
-    <table style="width:100%; border-collapse:collapse">
+  <div class="card">
+    <h1>📋 Son Hareketler</h1>
+    <table class="table">
       <thead>
-        <tr>
-          <th style="text-align:left; padding:6px">Zaman</th>
-          <th style="text-align:left; padding:6px">Hat</th>
-          <th style="text-align:left; padding:6px">Durak</th>
-          <th style="text-align:left; padding:6px">Olay</th>
-          <th style="text-align:right; padding:6px">Mesafe (km)</th>
-          <th style="text-align:right; padding:6px">İnecek</th>
-        </tr>
+        <tr><th>Saat</th><th>Yön</th><th>Kategori</th><th>Açıklama</th><th>Tutar</th></tr>
       </thead>
-      <tbody id="tb"></tbody>
+      <tbody>
+        {% for m in moves %}
+          <tr>
+            <td>{{ m.created_at }}</td>
+            <td>{{ '+' if m.direction == '+' else '-' }}</td>
+            <td>{{ m.category }}</td>
+            <td>{{ m.note }}</td>
+            <td>{{ m.amount|tl }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="small">Henüz hareket yok.</td></tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
-</div>
 
-<script>
-const $=s=>document.querySelector(s);
-function fmt(n){return (Number(n??0)).toFixed(2)}
-$('#run').addEventListener('click', async ()=>{
-  const qs = new URLSearchParams();
-  const r=$('#route').value.trim(); if(r) qs.set('route', r);
-  const d1=$('#d1').value; if(d1) qs.set('date_from', d1);
-  const d2=$('#d2').value; if(d2) qs.set('date_to', d2);
-  const j = await (await fetch('/api/events?'+qs.toString())).json();
-  if(!j.ok){ alert('Alınamadı'); return; }
-  const tb=$('#tb'); tb.innerHTML='';
-  j.items.forEach(it=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML = `
-      <td style="padding:6px">${it.ts}</td>
-      <td style="padding:6px">${it.route}</td>
-      <td style="padding:6px">${it.stop_name}</td>
-      <td style="padding:6px">${it.event}</td>
-      <td style="padding:6px; text-align:right">${it.distance_km==null?'—':fmt(it.distance_km)}</td>
-      <td style="padding:6px; text-align:right">${it.seats_for_stop ?? 0}</td>`;
-    tb.appendChild(tr);
-  });
-  $('#count').textContent = `${j.items.length} kayıt`;
-});
-</script>
-{% endblock %}
+  <div class="footerbar">
+    <a href="{{ url_for('seats') }}"><button>Biletler</button></a>
+    <a href="{{ url_for('consignments_page') }}"><button>Emanet</button></a>
+    <a href="{{ url_for('hesap_page') }}"><button class="primary">Hesap</button></a>
+    <form method="post" action="{{ url_for('end_trip') }}" style="margin:0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="danger">Seferi Bitir</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

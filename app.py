@@ -32,6 +32,14 @@ DB_PATH = os.getenv("DB_PATH", "db.sqlite3")
 DEBUG = env_bool("FLASK_DEBUG", True)
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "volkan")
 
+# ========== TL Format Filtresi ==========
+@app.template_filter("tl")
+def format_tl(value):
+    try:
+        value = float(value)
+        return f"{value:,.2f} ₺".replace(",", ".")
+    except (TypeError, ValueError):
+        return f"{value or 0} ₺"
 # ============== Emanet/Foto Ayarları ==============
 UPLOAD_DIR = os.getenv(
     "UPLOAD_DIR", os.path.join(os.getcwd(), "uploads", "consignments")
@@ -234,7 +242,28 @@ def ensure_schema():
             PRIMARY KEY(route, from_stop, to_stop)
         );
         CREATE INDEX IF NOT EXISTS idx_fares_route ON fares(route);
-        """
+
+        -- Genel ayarlar (key/value) - kategori listelerini burada tutacağız
+        CREATE TABLE IF NOT EXISTS settings(
+        key   TEXT PRIMARY KEY,
+        value TEXT
+        );
+
+    -- Sefer kasa hareketleri
+    CREATE TABLE IF NOT EXISTS cash_moves(
+    id        INTEGER PRIMARY KEY,
+    trip_id   INTEGER NOT NULL,
+    direction TEXT    NOT NULL CHECK(direction IN ('+','-')), -- +: giriş, -: çıkış
+    category  TEXT    NOT NULL,
+    amount    INTEGER NOT NULL DEFAULT 0,  -- TL integer
+    note      TEXT,
+    created_at TEXT   DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY(trip_id) REFERENCES trips(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_cash_moves_trip ON cash_moves(trip_id);
+CREATE INDEX IF NOT EXISTS idx_cash_moves_time ON cash_moves(created_at);
+    """
     )
 
     # Eski tablolarda eksik kolonlar
@@ -258,6 +287,55 @@ def get_active_trip() -> Optional[int]:
     db = get_db()
     row = db.execute("SELECT active_trip_id FROM app_state WHERE id=1").fetchone()
     return row["active_trip_id"] if row else None
+
+# ================ Kasa kategorileri: yükle/kaydet ================
+import json
+
+DEFAULT_CATS_IN  = ["Devir","Garaj","Harem","Eşya","Nakit Bilet","Avans","Diğer"]
+DEFAULT_CATS_OUT = ["Yıkama","Sigara","Yemek","Otoyol","Otogar","İkram","Temizlik","Su/Çay","Bakım","Diğer"]
+
+def _settings_get(key: str, default=None):
+    row = get_db().execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+    if not row or row["value"] is None:
+        return default
+    try:
+        return json.loads(row["value"])
+    except Exception:
+        return row["value"]
+
+def _settings_set(key: str, value):
+    s = json.dumps(value, ensure_ascii=False) if not isinstance(value, str) else value
+    db = get_db()
+    db.execute("INSERT OR REPLACE INTO settings(key, value) VALUES(?, ?)", (key, s))
+    db.commit()
+
+def _ensure_list(x):
+    if isinstance(x, list):
+        return x
+    if isinstance(x, str):
+        parts = [p.strip() for p in x.replace("\n", ",").split(",")]
+        return [p for p in parts if p]
+    return []
+
+def get_cash_categories():
+    cats_in  = _ensure_list(_settings_get("cash_cat_in"))
+    cats_out = _ensure_list(_settings_get("cash_cat_out"))
+    if not cats_in:
+        cats_in = DEFAULT_CATS_IN
+    if not cats_out:
+        cats_out = DEFAULT_CATS_OUT
+    # normalize ederek DB'ye LISTE olarak geri yaz
+    _settings_set("cash_cat_in", cats_in)
+    _settings_set("cash_cat_out", cats_out)
+    return cats_in, cats_out
+
+def save_cash_categories(text_in: str, text_out: str):
+    def parse_lines(s: str):
+        return [x.strip() for x in (s or "").replace("\n", ",").split(",") if x.strip()]
+    new_in  = parse_lines(text_in)  or DEFAULT_CATS_IN
+    new_out = parse_lines(text_out) or DEFAULT_CATS_OUT
+    _settings_set("cash_cat_in", new_in)
+    _settings_set("cash_cat_out", new_out)
 
 # ===================== Rotalar & Duraklar =====================
 
@@ -637,6 +715,144 @@ def fare_admin():
         fare_list=fare_list,
         csrf_token=get_csrf(),
     )
+
+def cash_sums(trip_id: int) -> dict:
+    db = get_db()
+    r_in  = db.execute("SELECT COALESCE(SUM(amount),0) FROM cash_moves WHERE trip_id=? AND direction='+'", (trip_id,)).fetchone()
+    r_out = db.execute("SELECT COALESCE(SUM(amount),0) FROM cash_moves WHERE trip_id=? AND direction='-'", (trip_id,)).fetchone()
+    r_dev = db.execute("SELECT COALESCE(SUM(amount),0) FROM cash_moves WHERE trip_id=? AND direction='+' AND lower(category)='devir'", (trip_id,)).fetchone()
+    total_in  = int(r_in[0] or 0)
+    total_out = int(r_out[0] or 0)
+    devir     = int(r_dev[0] or 0)
+    return {
+        "devir": devir,
+        "giris": total_in - devir,
+        "cikis": total_out,
+        "kalan": total_in - total_out
+    }
+
+# ===================== HESAP (sefer kasa) =====================
+
+@app.route("/hesap")
+def hesap_page():
+    tid = get_active_trip()
+    if not tid:
+        return redirect(url_for("trip_start"))
+    db = get_db()
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    sums = cash_sums(tid)
+    moves = db.execute(
+        "SELECT id, created_at, direction, category, amount, COALESCE(note,'') AS note "
+        "FROM cash_moves WHERE trip_id=? ORDER BY id DESC LIMIT 100",
+        (tid,)
+    ).fetchall()
+    cats_in, cats_out = get_cash_categories()
+    return render_template(
+        "hesap.html",
+        trip=trip,
+        sums=sums,
+        moves=moves,
+        categories_in=cats_in,
+        categories_out=cats_out,
+        csrf_token=get_csrf(),
+    )
+
+@app.post("/hesap/devir")
+def hesap_devir():
+    check_csrf()
+    tid = get_active_trip()
+    if not tid: return redirect(url_for("trip_start"))
+    db = get_db()
+    try: amount = int(request.form.get("amount") or 0)
+    except: amount = 0
+    note = (request.form.get("note") or "").strip()
+    if amount > 0:
+        db.execute("INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
+                   (tid, '+', 'Devir', amount, note))
+        db.commit()
+    return redirect(url_for("hesap_page"))
+
+@app.post("/hesap/giris")
+def hesap_giris():
+    check_csrf()
+    tid = get_active_trip()
+    if not tid: return redirect(url_for("trip_start"))
+    db = get_db()
+    cat = (request.form.get("category") or "Diğer").strip()
+    try: amount = int(request.form.get("amount") or 0)
+    except: amount = 0
+    note = (request.form.get("note") or "").strip()
+    if amount > 0:
+        db.execute("INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
+                   (tid, '+', cat, amount, note))
+        db.commit()
+    return redirect(url_for("hesap_page"))
+
+@app.post("/hesap/cikis")
+def hesap_cikis():
+    check_csrf()
+    tid = get_active_trip()
+    if not tid: return redirect(url_for("trip_start"))
+    db = get_db()
+    cat = (request.form.get("category") or "Diğer").strip()
+    try: amount = int(request.form.get("amount") or 0)
+    except: amount = 0
+    note = (request.form.get("note") or "").strip()
+    if amount > 0:
+        db.execute("INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
+                   (tid, '-', cat, amount, note))
+        db.commit()
+    return redirect(url_for("hesap_page"))
+
+@app.post("/hesap/kategoriler")
+def hesap_kategoriler_kaydet():
+    check_csrf()
+    save_cash_categories(
+        request.form.get("cats_in")  or "",
+        request.form.get("cats_out") or ""
+    )
+    return redirect(url_for("hesap_page"))
+
+@app.route("/hesap/moves.csv")
+def hesap_moves_csv():
+    tid = get_active_trip()
+    if not tid:
+        return redirect(url_for("trip_start"))
+
+    import csv
+    from io import StringIO
+    from flask import make_response
+
+    db = get_db()
+    rows = db.execute(
+        "SELECT created_at, direction, category, note, amount "
+        "FROM cash_moves WHERE trip_id=? ORDER BY id DESC",
+        (tid,)
+    ).fetchall()
+
+    # 💡 Row nesnelerini dict'e dönüştür (Excel uyumlu)
+    rows = [dict(r) for r in rows]
+
+    buf = StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["Zaman", "Yön", "Kategori", "Açıklama", "Tutar (TL)"])
+
+    for r in rows:
+        writer.writerow([
+            r["created_at"],
+            "+" if r["direction"] == "+" else "-",
+            r["category"],
+            r["note"] or "",
+            r["amount"]
+        ])
+
+    # ✅ UTF-8 BOM ekle → Excel’de Türkçe karakterler düzgün çıkar
+    out = buf.getvalue().encode("utf-8-sig")
+
+    resp = make_response(out)
+    resp.headers["Content-Type"] = "text/csv; charset=utf-8"
+    resp.headers["Content-Disposition"] = 'attachment; filename="son_hareketler.csv"'
+    return resp
 
 # ===================== Raporlar & Olay Görüntüleyici =====================
 

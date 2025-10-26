@@ -2,16 +2,28 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>{{ title or "Muavin Asistanı" }}</title>
-<link rel="stylesheet" href="/static/style.css">
+
+  <!-- ✅ Yerel CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/icons.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='3') }}">
 </head>
+
 <body>
+
   {% block content %}{% endblock %}
-<div class="lock-btn">
-  <form method="post" action="{{ url_for('logout') }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-  </form>
-</div>
+
+  <!-- ✅ Yerel JS (sırası önemli) -->
+  <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+
+  <!-- Sayfa bazlı ek script alanı -->
+  {% block scripts %}{% endblock %}
+
 </body>
 </html>

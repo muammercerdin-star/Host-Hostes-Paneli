@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hesap — Sefer Kasa</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Roboto;background:#0b1115;color:#e6edf3;margin:0}
+    .container{max-width:940px;margin:auto;padding:18px}
+    .card{background:#11171c;border:1px solid #22303a;border-radius:12px;padding:14px;margin:12px 0;box-shadow:0 0 8px #0003}
+    h1{font-size:20px;margin:6px 0 10px}
+    label{font-size:12px;opacity:.8}
+    input,select,textarea,button{
+      width:100%;padding:10px;border-radius:10px;
+      border:1px solid #2a3946;background:#0b1217;color:#e6edf3
+    }
+    button.primary{background:#1f6b2d;border-color:#2a7b3a;font-weight:700;cursor:pointer;transition:.2s}
+    button.primary:hover{background:#2a8d3d}
+    button.danger{background:#7b1f1f;border-color:#8a2a2a;cursor:pointer}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+    .kasa{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+    .box{background:#0f161b;border:1px solid #22303a;border-radius:10px;padding:8px;text-align:center;transition:.3s}
+    .num{font-size:18px;font-weight:700}
+    .num.pos{color:#29d884}.num.neg{color:#ff5454}
+    .badge{display:inline-block;background:#25313b;border:1px solid #33414d;color:#c8d1d9;padding:4px 8px;border-radius:999px;font-size:12px;margin-right:6px}
+    .table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid #22303a;padding:6px;text-align:left;font-size:13px}
+    tr.in td{color:#44d38f} tr.out td{color:#d44c4c}
+    .footerbar{position:sticky;bottom:0;background:#0b1115;border-top:1px solid #22303a;padding:8px;
+               display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .footerbar button{font-size:15px;padding:10px}
+    .small{font-size:12px;opacity:.75}
+    .fadeIn{animation:fadein .4s ease}
+    @keyframes fadein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+<div class="container fadeIn">
+  <h1>🧾 Hesap / Aktif Sefer</h1>
+
+  <div class="card">
+    <div class="kasa">
+      <div class="box"><div>Başlangıç (Devir)</div><div class="num">{{ sums.devir|tl }}</div></div>
+      <div class="box"><div>Toplam Giriş</div><div class="num pos">{{ sums.giris|tl }}</div></div>
+      <div class="box"><div>Toplam Çıkış</div><div class="num neg">{{ sums.cikis|tl }}</div></div>
+      <div class="box"><div>Kalan</div>
+        <div class="num {{ 'pos' if sums.kalan >= 0 else 'neg' }}">{{ sums.kalan|tl }}</div>
+      </div>
+    </div>
+    <div class="small">
+      {% if trip.route %}<span class="badge">Hat: {{ trip.route }}</span>{% endif %}
+      {% if trip.date %}<span class="badge">Tarih: {{ trip.date }}</span>{% endif %}
+      {% if trip.departure_time %}<span class="badge">Kalkış: {{ trip.departure_time }}</span>{% endif %}
+    </div>
+  </div>
+
+  <div class="grid3">
+    <!-- DEVİR -->
+    <form class="card" method="post" action="{{ url_for('hesap_devir') }}">
+      <h1>⬆️ Devir (Başlangıç)</h1>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Tutar (TL)</label>
+      <input type="number" name="amount" min="0" required>
+      <label>Not (opsiyonel)</label>
+      <input type="text" name="note" placeholder="Garaj avansı">
+      <button class="primary" style="margin-top:8px">Kaydet</button>
+      <div class="small" style="margin-top:6px">Devir giriş olarak kaydedilir.</div>
+    </form>
+
+    <!-- GİRİŞ -->
+    <form class="card" method="post" action="{{ url_for('hesap_giris') }}">
+      <h1>➕ Giriş</h1>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Kategori</label>
+      <select name="category" id="cat_in">
+        {% for k in categories_in %}<option value="{{k}}">{{k}}</option>{% endfor %}
+      </select>
+      <label>Tutar (TL)</label>
+      <input type="number" name="amount" min="0" required>
+      <label>Açıklama</label>
+      <input type="text" name="note" placeholder="örn. Harem hesabı">
+      <button class="primary" style="margin-top:8px">Kaydet</button>
+    </form>
+
+    <!-- ÇIKIŞ -->
+    <form class="card" method="post" action="{{ url_for('hesap_cikis') }}">
+      <h1>➖ Çıkış</h1>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Kategori</label>
+      <select name="category" id="cat_out">
+        {% for k in categories_out %}<option value="{{k}}">{{k}}</option>{% endfor %}
+      </select>
+      <label>Tutar (TL)</label>
+      <input type="number" name="amount" min="0" required>
+      <label>Açıklama</label>
+      <input type="text" name="note" placeholder="örn. Yıkama">
+      <button class="primary" style="margin-top:8px">Kaydet</button>
+    </form>
+  </div>
+
+  <!-- KATEGORİLER -->
+  <form class="card" method="post" action="{{ url_for('hesap_kategoriler_kaydet') }}">
+    <h1>⚙️ Kategoriler</h1>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="grid2">
+      <div>
+        <label>Giriş Kategorileri</label>
+        <textarea name="cats_in" rows="5">{{ categories_in|join(', ') }}</textarea>
+      </div>
+      <div>
+        <label>Çıkış Kategorileri</label>
+        <textarea name="cats_out" rows="5">{{ categories_out|join(', ') }}</textarea>
+      </div>
+    </div>
+    <div style="margin-top:8px"><button class="primary">Kaydet</button></div>
+  </form>
+
+<div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+  <h1>📋 Son Hareketler</h1>
+  <div style="display:flex;gap:8px">
+    <button type="button" class="primary" onclick="shareWhatsapp()">WhatsApp’a gönder</button>
+    <a href="{{ url_for('hesap_moves_csv') }}"><button type="button">CSV indir</button></a>
+    <button type="button" onclick="window.print()">Yazdır / PDF</button>
+  </div>
+</div>
+
+  <div class="card">
+    <h1>📋 Son Hareketler</h1>
+    <table class="table">
+      <thead>
+        <tr><th>Zaman</th><th>Yön</th><th>Kategori</th><th>Açıklama</th><th>Tutar</th></tr>
+      </thead>
+      <tbody>
+        {% for m in moves %}
+          <tr class="{{ 'in' if m.direction == '+' else 'out' }}">
+            <td>{{ m.created_at }}</td>
+            <td>{{ '+' if m.direction == '+' else '-' }}</td>
+            <td>{{ m.category }}</td>
+            <td>{{ m.note }}</td>
+            <td>{{ m.amount|tl }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="small">Henüz hareket yok.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footerbar">
+    <a href="{{ url_for('seats') }}"><button>Biletler</button></a>
+    <a href="{{ url_for('consignments_page') }}"><button>Emanet</button></a>
+    <a href="{{ url_for('hesap_page') }}"><button class="primary">Hesap</button></a>
+    <form method="post" action="{{ url_for('end_trip') }}" style="margin:0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="danger">Seferi Bitir</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // ✅ Son seçilen kategori hatırlatma
+  const catIn = document.getElementById("cat_in");
+  const catOut = document.getElementById("cat_out");
+  if(catIn){catIn.value = localStorage.getItem("cat_in") || catIn.value;}
+  if(catOut){catOut.value = localStorage.getItem("cat_out") || catOut.value;}
+  catIn?.addEventListener("change", e => localStorage.setItem("cat_in", e.target.value));
+  catOut?.addEventListener("change", e => localStorage.setItem("cat_out", e.target.value));
+
+  // Sunucudan gelen hareketleri JS tarafına da alalım:
+  function tl(n){ return (new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY'})).format(n||0); }
+  function shareWhatsapp(){
+    if(!Array.isArray(MOVES) || MOVES.length===0){
+      alert("Paylaşılacak hareket yok.");
+      return;
+    }
+    // Başlık + satırlar (sondan başa değilse reverse etme)
+    const lines = [];
+    lines.push("🧾 SEFER KASA – Son Hareketler");
+    lines.push(`Hat: {{ trip.route or '' }}  Tarih: {{ trip.date or '' }}  Kalkış: {{ trip.departure_time or '' }}`);
+    lines.push("--------------------------------------------------");
+    MOVES.forEach(m=>{
+      const dir = m.direction === '+' ? '+' : '-';
+      lines.push(`${m.created_at}  ${dir}  ${m.category}  ${m.note||''}  ${tl(m.amount)}`);
+    });
+    lines.push("--------------------------------------------------");
+    lines.push(`Devir:  ${tl({{ sums.devir or 0 }})}`);
+    lines.push(`Giriş:  ${tl({{ sums.giris or 0 }})}`);
+    lines.push(`Çıkış:  ${tl({{ sums.cikis or 0 }})}`);
+    lines.push(`Kalan:  ${tl({{ sums.kalan or 0 }})}`);
+
+    const text = encodeURIComponent(lines.join("\n"));
+    // Mobilde WhatsApp’ı açar (masaüstünde web.whatsapp açılır)
+    window.open("https://wa.me/?text=" + text, "_blank");
+  }
+</script>
+</body>
+</html>

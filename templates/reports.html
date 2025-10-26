@@ -1,73 +1,174 @@
 {% extends "base.html" %}
+
 {% block content %}
 <style>
+  /* =========================
+     Tema Değişkenleri
+     ========================= */
   :root{
-    --bg:#2f353a;--card:#1e2327;--muted:#3b4248;--text:#e8edf2;--primary:#2563eb;--ink:#0f1215
+    /* Light (default) */
+    --bg:#f6f7fb;           /* sayfa zemini */
+    --card:#ffffff;         /* kart/panel zemini */
+    --ink:#f3f4f6;          /* input arka planı */
+    --border:#e5e7eb;       /* sınırlar */
+    --muted:#cbd5e1;        /* yumuşak sınır/ayraç */
+    --text:#111827;         /* ana metin */
+    --sub:#4b5563;          /* ikincil metin */
+    --primary:#2563eb;      /* vurgu */
+    --primary-d:#1d4ed8;    /* vurgu koyu */
+    --ok:#22c55e; --warn:#f59e0b; --hot:#f97316; --danger:#ef4444;
+    --shadow:0 8px 24px rgba(15,23,42,.08);
+    --seat-zero:#94a3b8;    /* 0 satış koltuk rengi */
+    --btn-text:#111827;
+    --chart-bar:#2563eb;
+    --backdrop: rgba(0,0,0,.35);
+    --toast-bg:#b91c1c; --toast-border:#7f1d1d; --toast-text:#fff;
+    --busy-bg:#111827; --busy-text:#fff;
   }
-  body{color:var(--text);background:var(--bg)}
-  .wrap{max-width:1100px;margin:8px auto;padding:0 10px}
 
-  .topbar{display:flex;align-items:center;gap:8px;margin:6px 0 10px}
-  .title{font-size:26px;font-weight:900;letter-spacing:.2px;flex:1}
-  .iconbtn{display:inline-flex;align-items:center;gap:8px;background:var(--ink);border:1px solid var(--muted);
-    color:#fff;padding:8px 10px;border-radius:12px;text-decoration:none;font-weight:800;white-space:nowrap}
-  .iconbtn.primary{background:var(--primary);border-color:#1f4ed6}
-  .iconbtn.warn{background:#ef4444;border-color:#7f1d1d}
+  html[data-theme="dark"]{
+    --bg:#101114;
+    --card:#16181c;
+    --ink:#0f1215;
+    --border:#2a2f36;
+    --muted:#3b4248;
+    --text:#e8edf2;
+    --sub:#9aa4b2;
+    --primary:#3b82f6;
+    --primary-d:#2563eb;
+    --ok:#22c55e; --warn:#f59e0b; --hot:#f97316; --danger:#ef4444;
+    --shadow:0 10px 28px rgba(0,0,0,.45);
+    --seat-zero:#3b4248;
+    --btn-text:#e8edf2;
+    --chart-bar:#4aa3ff;
+    --backdrop: rgba(0,0,0,.5);
+    --toast-bg:#7f1d1d; --toast-border:#5f1313; --toast-text:#fff;
+    --busy-bg:#0f1215; --busy-text:#e8edf2;
+  }
+
+  /* =========================
+     Genel Stil
+     ========================= */
+  html,body{
+    background:var(--bg); color:var(--text);
+    -webkit-text-size-adjust:100%; text-size-adjust:100%;
+  }
+  *{ box-sizing:border-box }
+  .wrap{max-width:1180px;margin:14px auto;padding:0 14px; transition: background .2s,color .2s }
+  .fade{ transition: background-color .2s, color .2s, border-color .2s, box-shadow .2s }
+
+  /* Topbar */
+  .topbar{display:flex;gap:10px;align-items:center;margin:8px 0 14px}
+  .title{flex:1;font-size:28px;font-weight:800;letter-spacing:.2px}
+
+  .iconbtn{
+    display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+    background:var(--card);border:1px solid var(--border);color:var(--btn-text);
+    padding:10px 12px;border-radius:12px;text-decoration:none;font-weight:700;
+    box-shadow:var(--shadow); transition:transform .15s ease, box-shadow .15s ease, background .2s;
+  }
+  .iconbtn:hover{transform:translateY(-1px)}
+  .iconbtn.primary{background:var(--primary);border-color:var(--primary-d);color:#fff}
+  .iconbtn.warn{background:var(--card);border-color:#fecaca;color:#b91c1c}
   .iconbtn svg{width:18px;height:18px}
 
-  .filters{display:grid;grid-template-columns:1.2fr 1fr auto auto auto;gap:8px;align-items:end}
-  .group{display:flex;flex-direction:column;gap:6px;font-weight:700}
-  .filters input,.filters select{background:var(--ink);color:#fff;border:1px solid var(--muted);
-    border-radius:12px;padding:10px}
+  .toggler{display:inline-flex;align-items:center;gap:8px}
+  .toggler input{appearance:none;width:44px;height:26px;border-radius:999px;background:var(--ink);border:1px solid var(--border);position:relative;cursor:pointer;outline:none;box-shadow:var(--shadow)}
+  .toggler input::after{
+    content:""; position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%;
+    background:#fff; border:1px solid var(--border); transition:left .18s ease, background .2s
+  }
+  .toggler input:checked{background:var(--primary);border-color:var(--primary-d)}
+  .toggler input:checked::after{left:22px; background:#fff}
 
-  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
-  .card{background:var(--card);border:1px solid var(--muted);border-radius:14px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
-  .card .k{opacity:.9;font-size:12px}
-  .card .v{font-weight:900;font-size:20px;margin-top:4px}
-  .sub{opacity:.85;margin-top:6px;font-size:12px}
+  /* Filtreler */
+  .filters{display:grid;grid-template-columns:1.4fr 1fr auto auto auto;gap:10px;align-items:end}
+  .group{display:flex;flex-direction:column;gap:6px;font-weight:700;color:var(--sub)}
+  .filters input,.filters select{
+    background:var(--ink);color:var(--text);
+    border:1px solid var(--border);border-radius:12px;padding:10px;outline:none
+  }
 
-  .grid{display:grid;grid-template-columns:1.02fr .98fr;gap:10px;margin-top:6px}
-  .panel{background:var(--card);border:1px solid var(--muted);border-radius:14px;padding:10px}
-  .head{font-weight:800;margin-bottom:6px}
+  /* Kartlar */
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:var(--shadow)}
+  .card .k{color:var(--sub);font-size:12px}
+  .card .v{font-weight:900;font-size:22px;margin-top:6px}
+  .sub{color:var(--sub);margin-top:6px;font-size:12px}
+  .tag{display:inline-block;background:var(--card);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:999px;font-size:12px;margin:2px}
 
+  /* Grid & Panel */
+  .grid{display:grid;grid-template-columns:1.02fr .98fr;gap:12px;margin-top:8px}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:var(--shadow)}
+  .head{font-weight:800;margin-bottom:8px}
+
+  /* Tablo */
   table{width:100%;border-collapse:collapse}
-  th,td{padding:8px 8px;border-bottom:1px solid var(--muted)}
+  th,td{padding:10px;border-bottom:1px solid var(--border)}
   th{background:var(--ink);text-align:left}
   .right{text-align:right}
-  .scroll{max-height:280px;overflow:auto;border-radius:10px}
+  .scroll{max-height:300px;overflow:auto;border-radius:10px}
 
   /* Heatmap */
-  .heat{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-  .seat{height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;
-    font-weight:900;color:#fff;border:1px solid #2d353c;cursor:pointer;user-select:none}
-  .seat.dim{opacity:.45;filter:grayscale(.3)}
-  .legend{display:flex;gap:6px;align-items:center;margin-top:6px}
-  .box{width:18px;height:10px;border-radius:4px}
+  .heat{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .seat{
+    position:relative;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-weight:900;color:#fff;border:1px solid rgba(0,0,0,.05);user-select:none;cursor:pointer;box-shadow:var(--shadow)
+  }
+  .seat.dim{opacity:.58;filter:grayscale(.2)}
+  .seat .label{pointer-events:none}
+  .seat .cnt{
+    position:absolute;top:-6px;right:-6px;min-width:22px;text-align:center;
+    background:#111827;color:#fff;border:1px solid rgba(0,0,0,.1);
+    font-size:11px;line-height:1;padding:4px 6px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.15)
+  }
+  .legend{display:flex;gap:8px;align-items:center;margin-top:8px;color:var(--sub)}
+  .box{width:18px;height:10px;border-radius:4px;border:1px solid rgba(0,0,0,.08)}
 
-  canvas{width:100%;height:200px}
+  /* Canvas (grafik) */
+  canvas{width:100%;height:210px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow)}
 
+  /* Responsive */
   @media (max-width:980px){
     .filters{grid-template-columns:1fr 1fr}
     .cards{grid-template-columns:1fr 1fr}
     .grid{grid-template-columns:1fr}
     .scroll{max-height:240px}
-    canvas{height:160px}
+    canvas{height:180px}
   }
+  .compact .cards{grid-template-columns:1fr 1fr}
+  .compact .grid{grid-template-columns:1fr}
+  .compact .scroll{max-height:220px}
 
-  /* ---- Modal ---- */
-  .backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2400}
-  .modal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-    background:var(--card);border:1px solid var(--muted);border-radius:14px;padding:12px;width:560px;max-width:96vw;
-    box-shadow:0 22px 44px rgba(0,0,0,.5);z-index:2500}
-  .modal .row{display:flex;gap:10px;align-items:center;justify-content:space-between}
-  .modal h3{margin:0 0 8px 0}
-  .closex{background:#222;border:1px solid var(--muted);color:#fff;padding:6px 10px;border-radius:10px;font-weight:800;cursor:pointer}
-  .pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#0f1215;border:1px solid var(--muted);font-weight:700}
+  /* Modal & Overlay */
+  .backdrop{display:none;position:fixed;inset:0;background:var(--backdrop);z-index:2400}
+  .modal{
+    display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;width:620px;max-width:96vw;
+    box-shadow:0 22px 44px rgba(15,23,42,.25);z-index:2500
+  }
+  .modal .row{display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .modal h3{margin:0 0 10px 0}
+  .closex{background:var(--card);border:1px solid var(--border);color:var(--btn-text);padding:8px 12px;border-radius:10px;font-weight:800;cursor:pointer;box-shadow:var(--shadow)}
+
+  .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--ink);border:1px solid var(--border);font-weight:700;color:var(--text)}
+
+  /* Busy & Toast */
+  #busy{display:none;position:fixed;right:12px;bottom:12px;z-index:2600;background:var(--busy-bg);color:var(--busy-text);border:1px solid rgba(0,0,0,.2);padding:8px 12px;border-radius:10px;font-weight:800;box-shadow:var(--shadow)}
+  #toast{display:none;position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2700;background:var(--toast-bg);color:var(--toast-text);border:1px solid var(--toast-border);padding:10px 14px;border-radius:10px;font-weight:800;box-shadow:var(--shadow)}
 </style>
 
-<div class="wrap" id="rootWrap">
+<div class="wrap fade" id="rootWrap">
   <div class="topbar">
     <div class="title">Raporlama / Analiz</div>
+
+    <!-- Tema Toggler -->
+    <label class="toggler" title="Tema">
+      <svg id="iconSun" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M6.76 4.84 5.34 3.42 3.92 4.84l1.42 1.42 1.42-1.42zM1 13h3v-2H1v2zm10-9h2V1h-2v3zm7.66 1.84 1.42-1.42-1.42-1.42-1.42 1.42 1.42 1.42zM20 13h3v-2h-3v2zm-7 7h2v-3h-2v3zM6.76 19.16l-1.42 1.42 1.42 1.42 1.42-1.42-1.42-1.42zM17.24 19.16l1.42 1.42 1.42-1.42-1.42-1.42-1.42 1.42zM12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+      <input id="themeToggle" type="checkbox" />
+      <svg id="iconMoon" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M20.742 13.045A8 8 0 1 1 10.955 3.258a8.002 8.002 0 1 0 9.787 9.787z"/></svg>
+    </label>
+
     <a class="iconbtn" href="{{ url_for('index') }}">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 3 11h2v9h6v-6h2v6h6v-9h2z"/></svg>
       Ana sayfa
@@ -86,11 +187,11 @@
     </button>
   </div>
 
-  <!-- Filters -->
+  <!-- Filtreler -->
   <div class="filters">
     <div class="group">
       <span>Tarih Aralığı</span>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:8px">
         <input type="date" id="fStart" style="flex:1">
         <input type="date" id="fEnd" style="flex:1">
       </div>
@@ -106,28 +207,33 @@
     </div>
   </div>
 
-  <!-- Cards -->
+  <!-- Kartlar -->
   <div class="cards">
-    <div class="card"><div class="k">Toplam Yolcu</div><div class="v" id="mPax">0</div></div>
-    <div class="card"><div class="k">Toplam Gelir (₺)</div><div class="v" id="mRev">₺0.00</div></div>
-    <div class="card"><div class="k">Ortalama Gelir (₺ / kişi)</div><div class="v" id="mAvg">₺0.00</div></div>
-    <div class="card"><div class="k">Hiç Satılmayan Koltuk</div><div class="v" id="mUnsold">0</div><div class="sub" id="unsoldMini">—</div></div>
+    <div class="card fade"><div class="k">Toplam Yolcu</div><div class="v" id="mPax">0</div></div>
+    <div class="card fade"><div class="k">Toplam Gelir (₺)</div><div class="v" id="mRev">₺0.00</div></div>
+    <div class="card fade"><div class="k">Ortalama Gelir (₺/kişi)</div><div class="v" id="mAvg">₺0.00</div></div>
+    <div class="card fade">
+      <div class="k">Hiç Satılmayan Koltuk</div>
+      <div class="v" id="mUnsold">0</div>
+      <div class="sub" id="unsoldMini">—</div>
+    </div>
   </div>
 
-  <!-- Main grid -->
+  <!-- Ana grid -->
   <div class="grid">
-    <div class="panel">
+    <div class="panel fade">
       <div class="head">Koltuk Analizi</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-        <div class="panel" style="padding:8px">
-          <div class="k" style="margin-bottom:6px">Satış Adedi (Top 10)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="panel fade" style="padding:10px">
+          <div class="k" style="margin-bottom:6px;color:var(--sub)">Satış Adedi (Top 10)</div>
           <canvas id="chartTimes"></canvas>
         </div>
-        <div class="panel" style="padding:8px">
-          <div class="k" style="margin-bottom:6px">Gelir (Top 10)</div>
+        <div class="panel fade" style="padding:10px">
+          <div class="k" style="margin-bottom:6px;color:var(--sub)">Gelir (Top 10)</div>
           <canvas id="chartRevenue"></canvas>
         </div>
       </div>
+
       <div class="scroll">
         <table id="seatTable">
           <thead>
@@ -138,55 +244,83 @@
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel fade">
       <div class="head">Koltuk Kullanım Isı Haritası</div>
-      <div id="heat" class="heat scroll" style="padding:6px"></div>
+      <div id="heat" class="heat scroll" style="padding:8px"></div>
       <div class="legend">
         <span class="k">Yoğunluk:</span>
-        <div class="box" style="background:#4caf50"></div>
-        <div class="box" style="background:#ffc107"></div>
-        <div class="box" style="background:#ff5722"></div>
-        <div class="box" style="background:#d32f2f"></div>
+        <div class="box" style="background:var(--ok)"></div>
+        <div class="box" style="background:var(--warn)"></div>
+        <div class="box" style="background:var(--hot)"></div>
+        <div class="box" style="background:var(--danger)"></div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Busy/Toast -->
+<div id="busy">Yükleniyor…</div>
+<div id="toast">Hata</div>
+
 <!-- Modal -->
 <div id="mdBack" class="backdrop"></div>
-<div id="mdSeat" class="modal" role="dialog" aria-modal="true" aria-labelledby="mdTitle">
+<div id="mdSeat" class="modal fade" role="dialog" aria-modal="true" aria-labelledby="mdTitle">
   <div class="row">
     <h3 id="mdTitle">Koltuk</h3>
     <button class="closex" onclick="closeModal()">Kapat</button>
   </div>
   <div id="mdInfo" class="sub">—</div>
-  <div class="scroll" style="margin-top:8px">
+  <div class="scroll" style="margin-top:10px">
     <table style="width:100%" id="mdTable">
       <thead><tr><th>Durak</th><th class="right">Satış</th><th class="right">Ciro (₺)</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
-  <div style="margin-top:8px">
+  <div style="margin-top:10px">
     <span class="pill" id="mdTotal">Toplam: 0 satış • ₺0.00</span>
   </div>
 </div>
 
 <script>
+  // ====== Yardımcılar ======
   const $ = s => document.querySelector(s);
   const fmtTL = n => '₺' + (Number(n||0).toFixed(2));
   let lastReport = null;
 
+  // Koltuk şablonu (gerekirse değiştir)
   const SEATS = [1,3,4,5,7,8,9,11,12,13,15,16,17,19,20,21,23,24,25,27,28,29,31,33,34,35,37,38,39,41,42,43,45,46,49,50,51,52,53,54];
 
+  // Tema yükle/uygula
+  function loadTheme(){
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = saved || (prefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+    const isDark = theme === 'dark';
+    $('#themeToggle').checked = isDark;
+    $('#iconSun').style.opacity = isDark ? .5 : 1;
+    $('#iconMoon').style.opacity = isDark ? 1 : .5;
+  }
+  function setTheme(dark){
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+    $('#iconSun').style.opacity = dark ? .5 : 1;
+    $('#iconMoon').style.opacity = dark ? 1 : .5;
+    // grafikleri yeniden çiz, renkler değişsin
+    if (lastReport && lastReport.per_seat) drawCharts(lastReport.per_seat);
+  }
+  $('#themeToggle').addEventListener('change', e => setTheme(e.target.checked));
+  loadTheme();
+
+  // Kısa ekranlarda kompakt
   function applyCompact(){
     const h = window.innerHeight || document.documentElement.clientHeight;
     const root = document.getElementById('rootWrap');
-    if (h && h < 720) root.classList.add('compact');
-    else root.classList.remove('compact');
+    if (h && h < 720) root.classList.add('compact'); else root.classList.remove('compact');
   }
-  window.addEventListener('resize', applyCompact);
-  applyCompact();
+  window.addEventListener('resize', applyCompact); applyCompact();
 
+  // Filtreleri QS'e çevir
   function filtersQS(){
     const p = new URLSearchParams();
     const r = $('#fRoute').value || '';
@@ -198,26 +332,54 @@
     return p.toString();
   }
 
+  // Varsayılan: son 7 gün
+  function setDefaultDates(){
+    const today = new Date();
+    const d2 = today.toISOString().slice(0,10);
+    const d1 = new Date(today.getTime() - 6*86400000).toISOString().slice(0,10);
+    if (!$('#fStart').value) $('#fStart').value = d1;
+    if (!$('#fEnd').value)   $('#fEnd').value   = d2;
+  }
+  setDefaultDates();
+
+  // Busy/Toast
+  function showBusy(on=true){ $('#busy').style.display = on ? 'block' : 'none'; }
+  function showToast(msg){ const t=$('#toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none', 2800); }
+
+  // Veri çek
   async function fetchData(){
-    const url = '/api/report/seat-stats' + (filtersQS()?('?'+filtersQS()):'');
-    const r = await fetch(url); const j = await r.json();
-    if(!j.ok) throw new Error('Rapor alınamadı');
-    lastReport = j;
+    try{
+      showBusy(true);
+      const qs = filtersQS();
+      const url = '/api/report/seat-stats' + (qs ? ('?'+qs) : '');
+      const r = await fetch(url, {cache:'no-store'});
+      if(!r.ok) throw new Error('Ağ hatası');
+      const j = await r.json();
+      if(!j.ok) throw new Error('Rapor alınamadı');
+      lastReport = j;
 
-    const pax = (j.totals.seated_count||0) + (j.totals.walk_pax||0);
-    const rev = Number(j.totals.overall_revenue||0);
-    const avg = pax ? rev / pax : 0;
-    $('#mPax').textContent = pax;
-    $('#mRev').textContent = fmtTL(rev);
-    $('#mAvg').textContent = fmtTL(avg);
-    $('#mUnsold').textContent = (j.never_sold||[]).length;
-    $('#unsoldMini').innerHTML = (j.never_sold||[]).slice(0,6).map(n=>`<span class="tag">${n}</span>`).join('') || '—';
+      const pax = Number(j.totals.seated_count||0) + Number(j.totals.walk_pax||0);
+      const rev = Number(j.totals.overall_revenue||0);
+      const avg = pax ? rev / pax : 0;
 
-    renderSeatTable(j.per_seat, j.never_sold);
-    drawCharts(j.per_seat);
-    drawHeat(j.per_seat);
+      $('#mPax').textContent = String(pax);
+      $('#mRev').textContent = fmtTL(rev);
+      $('#mAvg').textContent = fmtTL(avg);
+      $('#mUnsold').textContent = (j.never_sold||[]).length;
+      $('#unsoldMini').innerHTML = (j.never_sold||[]).slice(0,6).map(n=>`<span class="tag">${n}</span>`).join('') || '—';
+
+      renderSeatTable(j.per_seat||[], j.never_sold||[]);
+      drawCharts(j.per_seat||[]);
+      drawHeat(j.per_seat||[]);
+    }catch(err){
+      console.error(err);
+      showToast('Rapor alınamadı. Bağlantıyı kontrol et.');
+    }finally{
+      showBusy(false);
+    }
   }
 
+  // Tablo render
   function renderSeatTable(per, neverSold){
     const tbody = $('#seatTable tbody'); tbody.innerHTML = '';
     per.forEach(r=>{
@@ -235,22 +397,52 @@
     rows.forEach(tr=>tbody.appendChild(tr));
   }
 
-  // Basit bar
+  // CSS değişkenlerini oku
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  // Yüksek DPI için net bar grafik (tema uyumlu)
   function drawBar(canvas, labels, values){
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth || 320;
+    const cssH = canvas.clientHeight || 210;
+    canvas.width  = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
     const ctx = canvas.getContext('2d');
-    const W = canvas.width = canvas.clientWidth;
-    const H = canvas.height = canvas.clientHeight;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const W = cssW, H = cssH;
     ctx.clearRect(0,0,W,H);
-    const P={t:6,r:8,b:22,l:28}; const x0=P.l,y0=H-P.b,x1=W-P.r,y1=P.t;
-    const w=x1-x0,h=y0-y1; const max=Math.max(1, ...values);
-    const step=w/values.length; const bw=Math.max(6, step*0.66);
-    ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y0); ctx.stroke();
-    ctx.fillStyle='#4aa3ff';
-    values.forEach((v,i)=>{ const x=x0+i*step+(step-bw)/2; const bh=h*(v/max); ctx.fillRect(x, y0-bh, bw, bh); });
-    ctx.fillStyle='rgba(255,255,255,.8)'; ctx.font='11px system-ui, Roboto';
-    labels.forEach((lb,i)=>{ const x=x0+i*step+step/2; ctx.save(); ctx.translate(x,y0+12); ctx.rotate(-Math.PI/6);
-      ctx.textAlign='center'; ctx.fillText(lb,0,0); ctx.restore(); });
+    const P={t:10,r:10,b:26,l:36};
+    const x0=P.l,y0=H-P.b,x1=W-P.r,y1=P.t;
+    const w=x1-x0,h=y0-y1;
+    const max=Math.max(1, ...values.map(Number));
+    const step=w/Math.max(1, values.length);
+    const bw=Math.max(8, step*0.64);
+
+    // eksen
+    ctx.strokeStyle='rgba(2,6,23,.18)'; // açık temada grid; koyuda da hafif kalsın
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y0); ctx.stroke();
+
+    // barlar
+    ctx.fillStyle = cssVar('--chart-bar') || '#2563eb';
+    values.forEach((v,i)=>{
+      const x=x0+i*step+(step-bw)/2;
+      const bh=h*(Number(v)/max);
+      ctx.fillRect(x, y0-bh, bw, bh);
+    });
+
+    // etiketler
+    ctx.fillStyle = cssVar('--text') || 'rgba(17,24,39,.9)';
+    ctx.globalAlpha = .9;
+    ctx.font='11px system-ui, Roboto';
+    labels.forEach((lb,i)=>{
+      const x=x0+i*step+step/2;
+      ctx.save(); ctx.translate(x,y0+14); ctx.rotate(-Math.PI/6);
+      ctx.textAlign='center'; ctx.fillText(lb,0,0); ctx.restore();
+    });
+    ctx.globalAlpha = 1;
   }
+
   function drawCharts(per){
     const topTimes=[...per].sort((a,b)=>b.times-a.times).slice(0,10);
     drawBar($('#chartTimes'), topTimes.map(x=>String(x.seat_no)), topTimes.map(x=>x.times));
@@ -258,91 +450,102 @@
     drawBar($('#chartRevenue'), topRev.map(x=>String(x.seat_no)), topRev.map(x=>x.revenue));
   }
 
-  // Yeşil -> Kırmızı skala (0 => gri)
-  function colorFromGreenToRed(t){ // t: 0..1
-    const h = 120*(1-t); // 120 yeşil -> 0 kırmızı
-    const s = 75; const l = 45;
-    return `hsl(${h} ${s}% ${l}%)`;
-  }
-
+  // Isı haritası (satış rozeti dahil)
+  function colorFromGreenToRed(t){ const h = 120*(1-t); const s = 85; const l = 45; return `hsl(${h} ${s}% ${l}%)`; }
   function drawHeat(per){
     const by = new Map(per.map(r=>[Number(r.seat_no), Number(r.times)]));
-    const max = Math.max(1, ...per.map(r=>r.times));
+    const max = Math.max(1, ...per.map(r=>r.times||0));
     const cont = $('#heat'); cont.innerHTML='';
     SEATS.forEach(n=>{
       const v = by.get(n) || 0;
       const div = document.createElement('div');
       div.className = 'seat' + (v===0 ? ' dim':'' );
-      div.textContent = n;
       div.dataset.seat = n;
-      div.style.background = (v===0) ? '#3b4248' : colorFromGreenToRed(v/max);
+      div.style.background = (v===0) ? getComputedStyle(document.documentElement).getPropertyValue('--seat-zero').trim() : colorFromGreenToRed(v/max);
+      div.title = `${n}. koltuk — satış: ${v}`;
+      // rozet her zaman göster: (istersen v>0 koşulu ile gizleyebilirsin)
+      div.innerHTML = `<span class="label">${n}</span><span class="cnt">${v}</span>`;
       div.addEventListener('click', ()=> openSeatDetail(n));
       cont.appendChild(div);
     });
   }
 
-  // ---- Modal ----
+  // Modal
   function openModal(){ $('#mdBack').style.display='block'; $('#mdSeat').style.display='block'; }
   function closeModal(){ $('#mdBack').style.display='none'; $('#mdSeat').style.display='none'; }
   $('#mdBack').addEventListener('click', closeModal);
 
   async function openSeatDetail(seatNo){
-    // ayrıntı verisini çek
-    const p = new URLSearchParams(filtersQS());
-    p.set('seat_no', seatNo);
-    const r = await fetch('/api/report/seat-detail?'+p.toString());
-    const j = await r.json();
-    if(!j.ok){ return; }
+    try{
+      showBusy(true);
+      const p = new URLSearchParams(filtersQS()); p.set('seat_no', seatNo);
+      const r = await fetch('/api/report/seat-detail?'+p.toString(), {cache:'no-store'});
+      if(!r.ok) throw new Error('Ağ hatası');
+      const j = await r.json(); if(!j.ok) throw new Error('Detay alınamadı');
 
-    // başlık & özet
-    $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
-    $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+      $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
+      $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
 
-    // tablo
-    const tb = $('#mdTable tbody'); tb.innerHTML='';
-    (j.items||[]).forEach(it=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
-      tb.appendChild(tr);
-    });
-    $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
-
-    openModal();
+      const tb = $('#mdTable tbody'); tb.innerHTML='';
+      (j.items||[]).forEach(it=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
+        tb.appendChild(tr);
+      });
+      $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+      openModal();
+    }catch(e){
+      console.error(e); showToast('Detay alınamadı.');
+    }finally{
+      showBusy(false);
+    }
   }
 
-  // CSV & Reset
+  // CSV
   function makeCSV(j){
     const L=[]; const qs = new URLSearchParams(filtersQS());
     L.push(`Hat;${qs.get('route')||'Hepsi'}`);
-    L.push(`Başlangıç;${qs.get('date_from')||'-'}`); L.push(`Bitiş;${qs.get('date_to')||'-'}`); L.push('');
-    const t=j.totals; const pax=(t.seated_count||0)+(t.walk_pax||0);
-    L.push('Toplamlar'); L.push(`Toplam Yolcu;${pax}`); L.push(`Toplam Gelir;${t.overall_revenue}`);
-    L.push(`Ortalama Gelir;${pax? (t.overall_revenue/pax).toFixed(2):0}`); L.push('');
+    L.push(`Başlangıç;${qs.get('date_from')||'-'}`);
+    L.push(`Bitiş;${qs.get('date_to')||'-'}`);
+    L.push('');
+    const t=j.totals||{}; const pax=(Number(t.seated_count||0)+Number(t.walk_pax||0));
+    L.push('Toplamlar');
+    L.push(`Toplam Yolcu;${pax}`);
+    L.push(`Toplam Gelir;${Number(t.overall_revenue||0).toFixed(2)}`);
+    L.push(`Ortalama Gelir;${pax? (Number(t.overall_revenue||0)/pax).toFixed(2):'0.00'}`);
+    L.push('');
     L.push('Koltuk;Satış;Ciro');
-    L.push(...j.per_seat.map(r=>`${r.seat_no};${r.times};${r.revenue}`));
-    L.push(...(j.never_sold||[]).map(n=>`${n};0;0`));
+    L.push(...(j.per_seat||[]).map(r=>`${r.seat_no};${r.times};${Number(r.revenue||0).toFixed(2)}`));
+    L.push(...(j.never_sold||[]).map(n=>`${n};0;0.00`));
     return L.join('\n');
   }
   function downloadCSV(){
     if(!lastReport) return;
     const blob = new Blob([makeCSV(lastReport)], {type:'text/csv;charset=utf-8;'});
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='rapor.csv';
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),800);
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),800);
   }
-  function resetView(){
-    $('#fRoute').value = ''; $('#fStart').value = ''; $('#fEnd').value   = '';
-    lastReport = null;
+
+  // Events
+  $('#btnFetch').addEventListener('click', fetchData);
+  $('#btnDownload').addEventListener('click', downloadCSV);
+  $('#btnReset').addEventListener('click', ()=>{
+    $('#fRoute').value=''; $('#fStart').value=''; $('#fEnd').value='';
+    lastReport=null;
     $('#mPax').textContent='0'; $('#mRev').textContent='₺0.00'; $('#mAvg').textContent='₺0.00';
     $('#mUnsold').textContent='0'; $('#unsoldMini').textContent='—';
     $('#seatTable tbody').innerHTML=''; $('#heat').innerHTML='';
-  }
+  });
 
-  // events
-  $('#btnFetch').addEventListener('click', fetchData);
-  $('#btnDownload').addEventListener('click', downloadCSV);
-  $('#btnReset').addEventListener('click', resetView);
+  // Enter ile rapor çek
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Enter' && (document.activeElement.id==='fStart' || document.activeElement.id==='fEnd' || document.activeElement.id==='fRoute')){
+      fetchData().catch(()=>{});
+    }
+  });
 
-  // ilk yükleme
+  // İlk yükleme
   fetchData().catch(()=>{});
 </script>
 {% endblock %}
