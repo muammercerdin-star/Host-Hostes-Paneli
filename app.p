@@ -12,6 +12,7 @@ from flask import (
     jsonify, g, session, abort, send_from_directory
 )
 from werkzeug.utils import secure_filename
+
 # === Hız limiti (OSM) için blueprint (harici modülde url_prefix ayarlı olmalı) ===
 # Örn: speedlimit.py içinde: bp_speed = Blueprint("speed", __name__, url_prefix="/api/speedlimit")
 from speedlimit import bp_speed
@@ -30,8 +31,7 @@ app.secret_key = os.getenv("SECRET_KEY", "degistir-beni")
 DB_PATH = os.getenv("DB_PATH", "db.sqlite3")
 DEBUG = env_bool("FLASK_DEBUG", True)
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "volkan")
-from modules.bags import bp as bags_bp
-app.register_blueprint(bags_bp)
+
 # ========== TL Format Filtresi ==========
 @app.template_filter("tl")
 def format_tl(value):
@@ -991,18 +991,12 @@ def api_events():
     return jsonify({"ok": True, "items": items})
 
 # ===================== Rapor: Koltuk Segment Detayı =====================
-# Amaç:
-# - seats + trips üzerinden seat_no için biletleri bulur
-# - fares tablosundaki segment fiyatlarına göre varış durağını tahmin eder
-# - Her biletin geçtiği segmentleri sayar; ciroyu segmentlere oranlayarak dağıtır
-# - Fiyat veya durak bilgisi eksikse mantıklı "fallback" ile en az bir segment üretir
 
 def _segment_price_map(route: str) -> dict[tuple[str, str], float]:
     """
-    Verilen hat için (from_stop, to_stop) -> price eşlemesini döndürür.
-    Kaynak: fares (route, from_stop, to_stop, price)
+    fares tablosundan (route, from_stop, to_stop) -> price sözlüğü üretir.
     """
-    mp: dict[tuple[str, str], float] = {}
+    mp = {}
     db = get_db()
     for r in db.execute(
         "SELECT from_stop, to_stop, price FROM fares WHERE route=?",
@@ -1013,11 +1007,10 @@ def _segment_price_map(route: str) -> dict[tuple[str, str], float]:
 
 def _best_destination_by_amount(route: str, from_stop: str, amount: float) -> tuple[str, list[tuple[str,str,float]]]:
     """
-    from_stop'tan başlar; ardışık tüm varışlara kadar (toplam ücret) hesaplar.
-    amount'a en yakın olan varışı seçer.
+    from_stop'tan başlayıp olası varışlar için (toplam ücret) hesaplar, tutara en yakın olanı seçer.
     Dönüş:
       (to_stop, [(seg_from, seg_to, seg_price), ...])
-    Hiçbir eşleşme bulunamazsa: biniş->sonraki durak tek segment olarak döndürür.
+    Eğer hiçbir eşleşme yoksa, biniş->sonraki durak + eşit bölüştürme yapılır.
     """
     stops = list_stops_for_route(route)
     if from_stop not in stops:
@@ -1025,17 +1018,18 @@ def _best_destination_by_amount(route: str, from_stop: str, amount: float) -> tu
     i = stops.index(from_stop)
     seg_prices = _segment_price_map(route)
 
+    # Aday yolları topla
     best = None
     best_diff = 1e18
-    best_path: list[tuple[str, str, float]] = []
+    best_path = []
 
     # En az bir segment (i -> i+1)
-    for j in range(i + 1, len(stops)):
-        path: list[tuple[str, str, float]] = []
+    for j in range(i+1, len(stops)):
+        path = []
         ok = True
         total = 0.0
         for k in range(i, j):
-            a, b = stops[k], stops[k + 1]
+            a, b = stops[k], stops[k+1]
             p = seg_prices.get((a, b))
             if p is None:
                 ok = False
@@ -1050,36 +1044,19 @@ def _best_destination_by_amount(route: str, from_stop: str, amount: float) -> tu
             best = stops[j]
             best_path = path
 
-    # Tolerans: ±0.5 TL
+    # Tolerans: ±0.5 TL kabul
     if best is not None and best_diff <= 0.5:
         return best, best_path
 
-    # Eşleşme yoksa: en az bir segment üret (biniş -> sonraki durak)
-    if i + 1 < len(stops):
-        a, b = stops[i], stops[i + 1]
+    # Eşleşme yoksa: en az bir segment üret (eşit bölüşüm fallback)
+    if i+1 < len(stops):
+        a, b = stops[i], stops[i+1]
         price_each = float(amount or 0)  # tek segmente tüm fiyat (ya da 0)
         return b, [(a, b, price_each)]
     return from_stop, []
 
 @app.get("/api/report/seat-detail")
 def api_report_seat_detail():
-    """
-    Sorgu parametreleri:
-      - seat_no (int)   : zorunlu
-      - route           : opsiyonel (filtre)
-      - date_from/date_to (YYYY-MM-DD) : opsiyonel (filtre)
-    Dönüş:
-      {
-        ok: true,
-        seat_no: 7,
-        total_times: 3,
-        total_revenue: 450.0,
-        items: [
-          {segment:"Antalya → Denizli", from:"Antalya", to:"Denizli", times:2, revenue:300.0},
-          {segment:"Denizli → Alaşehir", times:1, revenue:150.0}
-        ]
-      }
-    """
     seat_no = request.args.get("seat_no", type=int)
     if not seat_no:
         return jsonify(ok=False, error="seat_no gerekli"), 400
@@ -1110,70 +1087,60 @@ def api_report_seat_detail():
         return jsonify(ok=True, seat_no=seat_no, total_times=0, total_revenue=0.0, items=[])
 
     # Segment toplayıcı
-    agg: dict[tuple[str, str], list] = {}  # (from,to) -> [times, revenue]
+    agg = {}  # (from,to) -> [times, revenue]
     total_times = 0
     total_rev = 0.0
 
     for r in rows:
         route_name = r["route"]
-        frm = (r["from_stop"] or "").strip()
+        frm = r["from_stop"] or ""
         amt = float(r["amount"] or 0.0)
 
-        stops = list_stops_for_route(route_name)
-
-        if frm in stops:
-            # Normal akış: fiyatlardan varış tahmini
-            _to_stop, path = _best_destination_by_amount(route_name, frm, amt)
-        else:
-            # Fallback: biniş durak bilinmiyor → hattın ilk iki durağına varsayım
-            path = []
-            if len(stops) >= 2:
-                a, b = stops[0], stops[1]
-                path = [(a, b, amt)]  # tek segmente tüm fiyat (0 olabilir)
+        to_stop, path = _best_destination_by_amount(route_name, frm, amt)
 
         if path:
-            # Segment fiyat oranında paylaştır
-            seg_sum = sum(max(0.0, p) for (_, _, p) in path) or 1.0
-            for a, b, p in path:
-                share = amt * ((p / seg_sum) if seg_sum > 0 else 0)
-                k = (a, b)
-                if k not in agg:
-                    agg[k] = [0, 0.0]
+            # segment fiyat oranında pay
+            seg_sum = sum(max(0.0, p) for (_,_,p) in path) or 1.0
+            for a,b,p in path:
+                # oran: p / seg_sum  (fallback: eşit bölüşüm için p zaten toplam)
+                share = amt * ( (p/seg_sum) if seg_sum>0 else 0 )
+                k = (a,b)
+                if k not in agg: agg[k] = [0, 0.0]
                 agg[k][0] += 1
                 agg[k][1] += share
             total_times += 1
-            total_rev += amt
+            total_rev   += amt
         else:
-            # Hiçbir segment çıkarılamadıysa yine de toplamı say
+            # hiçbir şey çıkarılamadı, yine de en az bir satır üretmeyelim; sadece toplama yaz
             total_times += 1
-            total_rev += amt
+            total_rev   += amt
 
     # Çıkış listesi
     items = []
-    route_for_order = route or rows[0]["route"]
+    # Sıra korumak için hattın stop sırasını okumamız yararlı
+    route_for_order = route or (rows[0]["route"])
     order_stops = list_stops_for_route(route_for_order)
-    ord_idx = {s: i for i, s in enumerate(order_stops)}
+    ord_idx = {s:i for i,s in enumerate(order_stops)}
 
-    for (a, b), (cnt, rev) in agg.items():
+    for (a,b),(cnt,rev) in agg.items():
         items.append({
             "segment": f"{a} → {b}",
             "from": a,
             "to": b,
             "times": int(cnt),
             "revenue": round(rev, 2),
-            "_ord": (ord_idx.get(a, 10_000), ord_idx.get(b, 10_000)),
+            "_ord": (ord_idx.get(a, 10_000), ord_idx.get(b, 10_000))
         })
 
-    # Önce çok satan, sonra hat sırası
+    # Görsel olarak önce en çok satılan, sonra hat sırasına göre
     items.sort(key=lambda x: (-x["times"], x["_ord"]))
-    for it in items:
-        it.pop("_ord", None)
+    for it in items: it.pop("_ord", None)
 
     return jsonify(
         ok=True,
         seat_no=seat_no,
         total_times=total_times,
-        total_revenue=round(total_rev, 2),
+        total_revenue=round(total_rev,2),
         items=items
     )
 

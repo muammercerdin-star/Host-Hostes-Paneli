@@ -95,12 +95,23 @@
     background:#7d602b; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900;
   }
 
-  /* Servis rozeti */
-  .svc-badge{
-    position:absolute; right:-6px; top:-6px; background:var(--accent); color:#fff;
-    font-size:12px; border-radius:999px; padding:2px 6px; display:none;
-  }
-  .seat.has-service .svc-badge{display:flex}
+/* Servis rozeti (sol üst) */
+.svc-badge{
+  position:absolute; left:-6px; top:-6px;
+  background:var(--accent); color:#fff;
+  font-size:12px; border-radius:999px; padding:2px 6px; display:none;
+}
+.seat.has-service .svc-badge{ display:flex; }
+
+/* Bagaj rozeti (sağ üst): 🧳 + sayı */
+.bag-badge{
+  position:absolute; right:-6px; top:-6px;
+  background:var(--primary); color:#fff;
+  font-size:11px; font-weight:800; border-radius:9999px;
+  padding:2px 6px; display:none; align-items:center; gap:4px;
+  box-shadow:0 6px 14px rgba(0,0,0,.35);
+}
+.seat.has-bag .bag-badge{ display:inline-flex; }
 
   /* Uyarı animasyonu */
   @keyframes blinkWarn{
@@ -502,12 +513,17 @@
       aria-label="Koltuk {{ n }}"
       onclick="handleSeatClick({{ n }})"
     >
-      {{ n }}
-      <span class="svc-badge" title="Servis">🚌</span>
-      <span class="stop-badge" title="Bu durakta inecek">🔔</span>
-    </div>
-    <div class="label" id="label-{{ n }}"></div>
-  </div>
+{{ n }}
+<span class="svc-badge" title="Servis">🚌</span>
+
+<span class="bag-badge" title="Bagaj">
+  <span>🧳</span><span class="bag-count">0</span>
+</span>
+
+<span class="stop-badge" title="Bu durakta inecek">🔔</span>
+</div>
+<div class="label" id="label-{{ n }}"></div>
+</div>
 {% endfor %}
 
     <!-- 43 (12,1) ile 51 (14,1) arasındaki sabit FAB sütunu -->
@@ -654,61 +670,90 @@
     <div class="muted">Koltuk ataması yapmaz; ayakta yolcu ve tahsilat toplamını artırır.</div>
   </div>
 
-  <!-- Tek koltuk formu -->
-  <div id="seatForm" role="dialog" aria-modal="true" aria-labelledby="seatTitle">
-    <h3 id="seatTitle">Koltuk</h3>
+<!-- Tek koltuk formu -->
+<div id="seatForm" role="dialog" aria-modal="true">
+  <h3 id="seatTitle">Koltuk</h3>
 
-    <div class="row">
-      <label>Biniş Yeri:
-        <select id="pickup"><option value="">—</option></select>
-      </label>
-    </div>
-
-    <div class="row">
-      <label>İniş Yeri:
-        <select id="dropoff"><option value="">—</option></select>
-      </label>
-    </div>
-
-    <div class="row">
-      <label>Bilet:</label>
-      <label><input type="radio" name="ticket" value="biletli"> Biletli</label>
-      <label><input type="radio" name="ticket" value="biletsiz" checked> Biletsiz</label>
-      <label><input type="radio" name="ticket" value="ucretsiz"> Ücretsiz</label>
-    </div>
-
-    <div class="row">
-      <label>Ödeme:</label>
-      <label><input type="radio" name="pay" value="nakit" checked> Nakit</label>
-      <label><input type="radio" name="pay" value="iban"> IBAN</label>
-      <label><input type="radio" name="pay" value="online"> Online</label>
-      <label><input type="radio" name="pay" value="pos"> POS</label>
-      <label><input type="radio" name="pay" value="ucretsiz"> Ücretsiz</label>
-    </div>
-
-    <div class="row">
-      <label>Tutar (₺):
-        <input type="number" id="price" value="0.00" min="0" step="0.01">
-      </label>
-    </div>
-
-    <div class="row">
-      <label>Cinsiyet:</label>
-      <label><input type="radio" name="gender" value="bay"> Bay</label>
-      <label><input type="radio" name="gender" value="bayan"> Bayan</label>
-      <label><input type="radio" name="gender" value="" checked> Boş</label>
-    </div>
-
-    <div class="row"><label><input type="checkbox" id="pairOk"> Yan yana istisna</label></div>
-    <div class="row"><label><input type="checkbox" id="serviceChk"> Servis kullanacak</label></div>
-    <div class="row"><label style="flex:1">Servis notu <input type="text" id="serviceNote" placeholder="Mahalle / konum (opsiyonel)"></label></div>
-
-    <div class="row" style="justify-content:flex-end;">
-      <button class="btn" onclick="saveSeat()">Kaydet</button>
-      <button class="btn danger" onclick="offloadSeat()">İniş (Boşalt)</button>
-      <button class="btn secondary" onclick="closeForm()">Kapat (ESC)</button>
-    </div>
+  <div class="row">
+    <label>Biniş Yeri:
+      <select id="pickup"><option value="">—</option></select>
+    </label>
   </div>
+
+  <div class="row">
+    <label>İniş Yeri:
+      <select id="dropoff"><option value="">—</option></select>
+    </label>
+  </div>
+
+  <div class="row">
+    <label>Bilet:</label>
+    <label><input type="radio" name="ticket" value="biletli"> Biletli</label>
+    <label><input type="radio" name="ticket" value="biletsiz"> Biletsiz</label>
+    <label><input type="radio" name="ticket" value="ucretsiz"> Ücretsiz</label>
+  </div>
+
+  <div class="row">
+    <label>Ödeme:</label>
+    <label><input type="radio" name="pay" value="nakit"> Nakit</label>
+    <label><input type="radio" name="pay" value="iban"> IBAN</label>
+    <label><input type="radio" name="pay" value="online"> Online</label>
+    <label><input type="radio" name="pay" value="pos"> POS</label>
+    <label><input type="radio" name="pay" value="ucretsiz"> Ücretsiz</label>
+  </div>
+
+  <div class="row">
+    <label>Tutar (₺):
+      <input type="number" id="price" value="0.00">
+    </label>
+  </div>
+
+  <div class="row">
+    <label>Cinsiyet:</label>
+    <label><input type="radio" name="gender" value="bay"> Bay</label>
+    <label><input type="radio" name="gender" value="bayan"> Bayan</label>
+    <label><input type="radio" name="gender" value="bos"> Boş</label>
+  </div>
+
+  <div class="row"><label><input type="checkbox" id="adjacent"> Yan yana istisna</label></div>
+  <div class="row"><label><input type="checkbox" id="service"> Servis kullanacak</label></div>
+  <div class="row"><label style="flex:1">Servis notu:
+    <input type="text" id="service_note" placeholder="Mahalle / konum (opsiyonel)">
+  </label></div>
+
+<!-- 🔹 BAGAJ BUTONLARI -->
+<div class="row" style="justify-content:flex-start; gap:8px;">
+  <!-- Bagaj Ekle -->
+  <button class="btn primary" id="btnBagAdd" type="button"
+    onclick="
+      const seat = document.getElementById('seatTitle').textContent.replace('Koltuk ', '').trim();
+      const trip = window.currentTrip || document.getElementById('tripName')?.textContent || 'Genel';
+      const drop = document.getElementById('dropoff')?.value || '';
+      const next = '/seats.html';
+      const url = `/bags/capture?trip_code=${encodeURIComponent(trip)}&seat=${encodeURIComponent(seat)}&to_stop=${encodeURIComponent(drop)}&next=${encodeURIComponent(next)}`;
+      window.location.href = url;
+    ">
+    🧳 Bagaj Ekle
+  </button>
+
+  <!-- Bagaj Gör -->
+  <button class="btn secondary" id="btnBagView" type="button"
+    onclick="
+      const seat = document.getElementById('seatTitle').textContent.replace('Koltuk ', '').trim();
+      const trip = window.currentTrip || document.getElementById('tripName')?.textContent || 'Genel';
+      const url = `/bags?trip=${encodeURIComponent(trip)}&seat=${encodeURIComponent(seat)}`;
+      window.location.href = url;
+    ">
+    📸 Bagaj Gör
+  </button>
+</div>
+
+<!-- 🔹 ALT BUTONLAR -->
+<div class="row" style="justify-content:flex-end; gap:8px;">
+  <button class="btn" onclick="saveSeat()">Kaydet</button>
+  <button class="btn danger" onclick="offloadSeat()">İniş (Boşalt)</button>
+  <button class="btn secondary" onclick="closeForm()">Kapat (ESC)</button>
+</div>
 
   <!-- Ayakta Yolcu popover -->
   <div id="standingBackdrop" onclick="closeStandingPopover()" aria-hidden="true"></div>
@@ -1723,6 +1768,7 @@ window.addEventListener('orientationchange', repositionSeatForm);
   await loadStandingTotals();
   await loadStandingItems();
   await loadParcelItems();   // ← yeni
+  refreshBagsAll();  // 🧳 bagaj ikonlarını koltuklara uygula
   refreshStopBadges();
   updateStopBadgesForSelected();
   updateStats();
@@ -2085,5 +2131,62 @@ function render(place, timings){
     boot(FALLBACK.lat, FALLBACK.lng, FALLBACK.place);
   }
 })();
+
+function openBagsForSeat(mode='add'){
+  const seat = currentSeat;
+  if(!seat){ toast('Önce koltuğu seç.'); return; }
+
+  const to = document.getElementById('dropoff')?.value || '';
+  const qs = new URLSearchParams({ seat: seat });
+
+  if (to) qs.set('to', to);
+  const route = "{{ trip['route']|default('', true) }}";
+  const plate = "{{ trip['plate']|default('', true) }}";
+  if (route || plate) qs.set('trip', `${route}|${plate}`);
+
+  const base = (mode === 'view') ? '/bags/seat' : '/bags';
+  window.open(`${base}?${qs.toString()}`, '_blank');
+}
+
+document.getElementById('btnBagAdd') ?.addEventListener('click', () => openBagsForSeat('add'));
+document.getElementById('btnBagView')?.addEventListener('click', () => openBagsForSeat('view'));
+
+// ==== Bagaj yardımcıları ====
+const BAG_TRIP = "{{ (trip['route'] ~ '|' ~ trip['plate'])|replace(' ', '_') }}"; // dosya klasörü anahtarı
+
+async function fetchBagCount(seatNo){
+  try{
+    const u = `/bags?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seatNo)}&format=json`;
+    const j = await safeJsonFetch(u);
+    return Number(j?.count || 0);
+  }catch(_){ return 0; }
+}
+
+async function refreshBagBadgeForSeat(seatNo){
+  const el = document.getElementById('seat-' + seatNo);
+  if (!el) return;
+  const cnt = await fetchBagCount(seatNo);
+  el.classList.toggle('has-bag', cnt > 0);
+  const bc = el.querySelector('.bag-badge .bag-count');
+  if (bc) bc.textContent = String(cnt || 0);
+}
+
+async function refreshBagsAll(){
+  const seats = Array.from(document.querySelectorAll('.seat'))
+                      .map(el => Number(el.dataset.seat));
+  for (const n of seats) await refreshBagBadgeForSeat(n);
+}
+
+// Rozete tıklandığında galeriye git
+document.addEventListener('click', (e)=>{
+  const badge = e.target.closest('.bag-badge');
+  if (!badge) return;
+  e.stopPropagation(); e.preventDefault();
+  const seatEl = badge.closest('.seat');
+  const n = seatEl?.dataset.seat;
+  if (!n) return;
+  const back = location.pathname; // geri dönüş için
+  location.href = `/bags?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(n)}&next=${encodeURIComponent(back)}`;
+}, true);
 </script>
 {% endblock %}
