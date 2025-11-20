@@ -1336,39 +1336,82 @@ def validate_stop_for_active_trip(stop: str) -> bool:
 
 # ===================== API: Bagaj meta (koltuk bazında) =====================
 
+from modules.bags import bag_root, safe  # dosyanın üst tarafına EKLE (importlar bölümüne)
+
 @app.get("/api/bags/meta")
 def api_bags_meta():
     """
     /api/bags/meta?trip=...&seat=...
-    JSON döner: { ok:true, count:2, eyes:["R","LF"] }
+    JSON döner: 
+      {
+        ok: true,
+        count: 3,
+        right: 2,
+        left_front: 1,
+        left_back: 0,
+        eyes: ["R","LF"]
+      }
+    storage/bags klasöründeki dosyalara göre hesaplar.
     """
-    trip_code = (request.args.get("trip") or "").strip()
-    seat_no   = request.args.get("seat", type=int)
+    trip_code = (request.args.get("trip") or request.args.get("trip_code") or "").strip()
+    seat_no   = (request.args.get("seat") or "").strip()
 
-    if not trip_code or seat_no is None:
+    if not trip_code or not seat_no:
         return jsonify({
             "ok": False,
             "msg": "trip ve seat gerekli",
             "count": 0,
+            "right": 0,
+            "left_front": 0,
+            "left_back": 0,
             "eyes": []
         }), 400
 
-    db = get_db()
-    try:
-        rows = db.execute(
-            "SELECT side FROM bags WHERE trip_code=? AND seat_no=?",
-            (trip_code, seat_no)
-        ).fetchall()
-    except Exception:
-        # bags tablosu yoksa / hata varsa boş dön
-        return jsonify({"ok": True, "count": 0, "eyes": []})
+    # storage/bags/<trip>/<seat>
+    d = bag_root() / safe(trip_code) / safe(seat_no)
 
-    sides = [r["side"] for r in rows if r["side"]]
-    eyes  = sorted(set(sides))  # örn: ["LF","R"]
+    right = left_front = left_back = 0
+    exts = (".jpg", ".jpeg", ".png", ".webp")
+
+    if d.exists():
+        for p in d.iterdir():
+            if not p.is_file():
+                continue
+            name = p.name
+            low  = name.lower()
+
+            # thumbnail'leri ve görsel olmayanları at
+            if ".thumb." in low:
+                continue
+            if not low.endswith(exts):
+                continue
+
+            if name.startswith("R_"):
+                right += 1
+            elif name.startswith("LF_"):
+                left_front += 1
+            elif name.startswith("LB_"):
+                left_back += 1
+            else:
+                # eski isimler → sağ göz say
+                right += 1
+
+    total = right + left_front + left_back
+
+    eyes = []
+    if right:
+        eyes.append("R")
+    if left_front:
+        eyes.append("LF")
+    if left_back:
+        eyes.append("LB")
 
     return jsonify({
         "ok": True,
-        "count": len(rows),
+        "count": int(total),
+        "right": int(right),
+        "left_front": int(left_front),
+        "left_back": int(left_back),
         "eyes": eyes
     })
 
