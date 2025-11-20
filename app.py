@@ -1334,6 +1334,44 @@ def validate_stop_for_active_trip(stop: str) -> bool:
     allowed = set(get_stops(trip["route"]))
     return (stop or "").strip() in allowed
 
+# ===================== API: Bagaj meta (koltuk bazında) =====================
+
+@app.get("/api/bags/meta")
+def api_bags_meta():
+    """
+    /api/bags/meta?trip=...&seat=...
+    JSON döner: { ok:true, count:2, eyes:["R","LF"] }
+    """
+    trip_code = (request.args.get("trip") or "").strip()
+    seat_no   = request.args.get("seat", type=int)
+
+    if not trip_code or seat_no is None:
+        return jsonify({
+            "ok": False,
+            "msg": "trip ve seat gerekli",
+            "count": 0,
+            "eyes": []
+        }), 400
+
+    db = get_db()
+    try:
+        rows = db.execute(
+            "SELECT side FROM bags WHERE trip_code=? AND seat_no=?",
+            (trip_code, seat_no)
+        ).fetchall()
+    except Exception:
+        # bags tablosu yoksa / hata varsa boş dön
+        return jsonify({"ok": True, "count": 0, "eyes": []})
+
+    sides = [r["side"] for r in rows if r["side"]]
+    eyes  = sorted(set(sides))  # örn: ["LF","R"]
+
+    return jsonify({
+        "ok": True,
+        "count": len(rows),
+        "eyes": eyes
+    })
+
 # ===================== API: Seat (tekli) =====================
 
 @app.route("/api/seat", methods=["POST", "DELETE"])

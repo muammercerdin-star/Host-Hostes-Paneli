@@ -517,7 +517,8 @@
 <span class="svc-badge" title="Servis">🚌</span>
 
 <span class="bag-badge" title="Bagaj">
-  <span>🧳</span><span class="bag-count">0</span>
+  <span class="bag-dir"></span>
+  <span class="bag-count">0</span>
 </span>
 
 <span class="stop-badge" title="Bu durakta inecek">🔔</span>
@@ -2153,23 +2154,44 @@ function render(place, timings){
   }
 })();
 
-// ==== Bagaj yardımcıları (temiz sürüm) ====
+// ==== Bagaj yardımcıları (yön + adet) ====
 
-// Bu sefer kodu tek yerden tanımlıyoruz
 const BAG_TRIP = "{{ (trip['route'] ~ '|' ~ trip['plate'])|replace(' ', '_') }}";
 window.BAG_TRIP = BAG_TRIP;  // diğer sayfalar da kullanabilsin
 
-// /bags?trip=...&seat=...&format=json → {ok:true,count:3}
-async function fetchBagCount(seatNo){
+// /bags?trip=...&seat=...&format=json
+// beklenen örnek cevap: { ok:true, count:3, eyes:["R","LF"] }
+async function fetchBagMeta(seatNo){
   try{
-    const u = `/bags?trip=${encodeURIComponent(BAG_TRIP)}`
-            + `&seat=${encodeURIComponent(seatNo)}`
-            + `&format=json`;
+
+const u = `/bags?trip=${encodeURIComponent(BAG_TRIP)}`
+        + `&seat=${encodeURIComponent(seatNo)}`
+        + `&format=json`;
+
     const j = await safeJsonFetch(u);
-    return Number(j?.count || 0);
+    return {
+      count: Number(j?.count || 0),
+      eyes : Array.isArray(j?.eyes) ? j.eyes : []
+    };
   }catch(_){
-    return 0;
+    return { count: 0, eyes: [] };
   }
+}
+
+// Koltuk üzerindeki yön ikonlarını üret
+// R  = sağ göz
+// LF = sol ön
+// LR = sol arka
+function eyesToIcons(eyes){
+  if (!eyes || !eyes.length) return "";
+  const set   = new Set(eyes);
+  const parts = [];
+
+  if (set.has("R"))  parts.push("➡️");     // sağ göz
+  if (set.has("LF")) parts.push("⬅️🔼");   // sol ÖN
+  if (set.has("LR")) parts.push("⬅️🔽");   // sol ARKA
+
+  return parts.join(" ");
 }
 
 // Belirli bir koltuktaki TÜM bagajı sil + rozeti sıfırla
@@ -2182,25 +2204,51 @@ async function clearBagsForSeat(seatNo){
       headers: { 'X-CSRF-Token': csrf }
     });
   }catch(_){
-    // ağ hatası olsa bile UI'yi temizleyelim
+    // ağ hatası olsa bile UI'yi temizlemeye devam
   }
 
   const el = document.getElementById('seat-' + seatNo);
   if (el){
     el.classList.remove('has-bag');
-    const bc = el.querySelector('.bag-badge .bag-count');
-    if (bc) bc.textContent = '0';
+    const bc  = el.querySelector('.bag-badge .bag-count');
+    const dir = el.querySelector('.bag-badge .bag-dir');
+    if (bc)  bc.textContent  = '0';
+    if (dir) dir.textContent = '';
   }
 }
 
-// Tek bir koltuğun rozetini yenile
+// Tek bir koltuğun bagaj rozetini yenile
 async function refreshBagBadgeForSeat(seatNo){
   const el = document.getElementById('seat-' + seatNo);
   if (!el) return;
-  const cnt = await fetchBagCount(seatNo);
+
+  const meta = await fetchBagMeta(seatNo);
+  const cnt  = meta.count;
+  const eyes = meta.eyes || [];
+
   el.classList.toggle('has-bag', cnt > 0);
-  const bc = el.querySelector('.bag-badge .bag-count');
-  if (bc) bc.textContent = String(cnt || 0);
+
+  const bc  = el.querySelector('.bag-badge .bag-count');
+  const dir = el.querySelector('.bag-badge .bag-dir');
+
+  // yön ikonları
+  let icons = eyesToIcons(eyes);
+
+  // Backend eyes göndermiyorsa ama bagaj varsa,
+  // en azından sağ oku göster (fallback)
+  if (!icons && cnt > 0) {
+    icons = "➡️";
+  }
+
+  if (bc)  bc.textContent  = String(cnt || 0);
+  if (dir) dir.textContent = icons || "";
+
+  // tooltip
+  const badge = el.querySelector('.bag-badge');
+  if (badge){
+    if (!cnt) badge.title = "Bagaj yok";
+    else      badge.title = `Bagaj: ${cnt} adet`;
+  }
 }
 
 // Tüm koltuklar için bagaj rozetlerini yenile
@@ -2212,7 +2260,7 @@ async function refreshBagsAll(){
   }
 }
 
-// Rozete tıklayınca galeriye git
+// Rozete tıklayınca doğrudan galeriye git
 document.addEventListener('click', (e)=>{
   const badge = e.target.closest('.bag-badge');
   if (!badge) return;
