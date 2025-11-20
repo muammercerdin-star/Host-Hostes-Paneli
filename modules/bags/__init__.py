@@ -94,12 +94,34 @@ def gallery():
 
     d = seat_dir(trip, seat)
 
+    # JSON mod: toplam + sağ / sol ön / sol arka sayıları
     if fmt == "json":
-        n = 0
+        right = left_front = left_back = 0
         if d.exists():
-            n = sum(1 for p in d.iterdir() if p.is_file() and _is_image(p))
-        return jsonify(ok=True, count=int(n))
+            for p in d.iterdir():
+                if not (p.is_file() and _is_image(p)):
+                    continue
+                name = p.name
+                if name.startswith("R_"):
+                    right += 1
+                elif name.startswith("LF_"):
+                    left_front += 1
+                elif name.startswith("LB_"):
+                    left_back += 1
+                else:
+                    # Eski dosyalar: varsayılan sağ göz
+                    right += 1
 
+        total = right + left_front + left_back
+        return jsonify(
+            ok=True,
+            count=int(total),
+            right=int(right),
+            left_front=int(left_front),
+            left_back=int(left_back),
+        )
+
+    # HTML galeri
     imgs: list[tuple[str, str]] = []
     if d.exists():
         for p in sorted(d.iterdir()):
@@ -190,6 +212,11 @@ def capture():
         to   = request.form.get("to_stop", "")
         nxt  = _normalize_next(request.form.get("next") or request.headers.get("Referer") or "/seats")
 
+        # Bagaj gözü: R (sağ), LF (sol ön), LB (sol arka)
+        side = request.form.get("side", "R").upper()
+        if side not in ("R", "LF", "LB"):
+            side = "R"
+
         files = request.files.getlist("files")  # input name=files multiple
         d = seat_dir(trip, seat)
         d.mkdir(parents=True, exist_ok=True)
@@ -200,7 +227,8 @@ def capture():
                 continue
             ext = (os.path.splitext(f.filename)[1] or ".jpg").lower()
             ts  = int(time.time() * 1000)
-            name = f"{ts}_{safe(to) or 'bag'}{ext}"
+            # Dosya adının başına side prefix'i ekliyoruz
+            name = f"{side}_{ts}_{safe(to) or 'bag'}{ext}"
             p = d / name
             f.save(p)
             try:
@@ -240,6 +268,23 @@ def capture():
       <input type="hidden" name="next" value="{{nxt}}">
 
       <label>İniş (opsiyonel): <input name="to_stop" value="{{to}}" style="width:100%"></label>
+
+      <div style="margin:8px 0 10px;">
+        <div style="margin-bottom:4px;font-weight:600;">Bagaj gözü:</div>
+        <label style="display:inline-flex;align-items:center;margin-right:10px;gap:4px;">
+          <input type="radio" name="side" value="R" checked>
+          <span>➡️ Sağ göz</span>
+        </label>
+        <label style="display:inline-flex;align-items:center;margin-right:10px;gap:4px;">
+          <input type="radio" name="side" value="LF">
+          <span>⬅️🔺 Sol ÖN</span>
+        </label>
+        <label style="display:inline-flex;align-items:center;gap:4px;">
+          <input type="radio" name="side" value="LB">
+          <span>⬅️🔻 Sol ARKA</span>
+        </label>
+      </div>
+
       <div style="margin:10px 0">
         <input type="file" name="files" accept=".jpg,.jpeg,.png,.webp,image/*" multiple>
       </div>
