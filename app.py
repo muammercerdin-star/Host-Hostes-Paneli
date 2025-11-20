@@ -1334,15 +1334,16 @@ def validate_stop_for_active_trip(stop: str) -> bool:
     allowed = set(get_stops(trip["route"]))
     return (stop or "").strip() in allowed
 
-# ===================== API: Bagaj meta (koltuk bazında) =====================
 
-from modules.bags import bag_root, safe  # dosyanın üst tarafına EKLE (importlar bölümüne)
+# ===================== API: Bagaj meta (koltuk bazlı) =====================
+
+from modules.bags import bag_root, safe   # dosyanın en üstlerinde zaten var
 
 @app.get("/api/bags/meta")
 def api_bags_meta():
     """
     /api/bags/meta?trip=...&seat=...
-    JSON döner: 
+    JSON döner:
       {
         ok: true,
         count: 3,
@@ -1373,10 +1374,11 @@ def api_bags_meta():
     right = left_front = left_back = 0
     exts = (".jpg", ".jpeg", ".png", ".webp")
 
-    if d.exists():
+    if d.exists() and d.is_dir():
         for p in d.iterdir():
             if not p.is_file():
                 continue
+
             name = p.name
             low  = name.lower()
 
@@ -1404,7 +1406,7 @@ def api_bags_meta():
     if left_front:
         eyes.append("LF")
     if left_back:
-        eyes.append("LB")
+        eyes.append("LR")   # 👈 sol arka için frontend kodu
 
     return jsonify({
         "ok": True,

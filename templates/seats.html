@@ -2159,13 +2159,12 @@ function render(place, timings){
 const BAG_TRIP = "{{ (trip['route'] ~ '|' ~ trip['plate'])|replace(' ', '_') }}";
 window.BAG_TRIP = BAG_TRIP;  // diğer sayfalar da kullanabilsin
 
-// /bags?trip=...&seat=...&format=json
+// /api/bags/meta?trip=...&seat=...
 // beklenen örnek cevap: { ok:true, count:3, eyes:["R","LF"] }
 async function fetchBagMeta(seatNo){
   try{
-    const u = `/bags?trip=${encodeURIComponent(BAG_TRIP)}`
-            + `&seat=${encodeURIComponent(seatNo)}`
-            + `&format=json`;
+    const u = `/api/bags/meta?trip=${encodeURIComponent(BAG_TRIP)}`
+            + `&seat=${encodeURIComponent(seatNo)}`;
 
     const j = await safeJsonFetch(u);
     return {
