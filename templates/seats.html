@@ -727,10 +727,15 @@
   <button class="btn primary" id="btnBagAdd" type="button"
     onclick="
       const seat = document.getElementById('seatTitle').textContent.replace('Koltuk ', '').trim();
-      const trip = window.currentTrip || document.getElementById('tripName')?.textContent || 'Genel';
       const drop = document.getElementById('dropoff')?.value || '';
-      const next = '/seats.html';
-      const url = `/bags/capture?trip_code=${encodeURIComponent(trip)}&seat=${encodeURIComponent(seat)}&to_stop=${encodeURIComponent(drop)}&next=${encodeURIComponent(next)}`;
+      const next = window.location.pathname;  // Koltuk ekranına geri dön
+      const trip = window.BAG_TRIP || '{{ (trip['route'] ~ '|' ~ trip['plate'])|replace(' ', '_') }}';
+
+      const url = `/bags/capture?trip_code=${encodeURIComponent(trip)}`
+                + `&seat=${encodeURIComponent(seat)}`
+                + `&to_stop=${encodeURIComponent(drop)}`
+                + `&next=${encodeURIComponent(next)}`;
+
       window.location.href = url;
     ">
     🧳 Bagaj Ekle
@@ -740,8 +745,13 @@
   <button class="btn secondary" id="btnBagView" type="button"
     onclick="
       const seat = document.getElementById('seatTitle').textContent.replace('Koltuk ', '').trim();
-      const trip = window.currentTrip || document.getElementById('tripName')?.textContent || 'Genel';
-      const url = `/bags?trip=${encodeURIComponent(trip)}&seat=${encodeURIComponent(seat)}`;
+      const next = window.location.pathname;
+      const trip = window.BAG_TRIP || '{{ (trip['route'] ~ '|' ~ trip['plate'])|replace(' ', '_') }}';
+
+      const url = `/bags?trip=${encodeURIComponent(trip)}`
+                + `&seat=${encodeURIComponent(seat)}`
+                + `&next=${encodeURIComponent(next)}`;
+
       window.location.href = url;
     ">
     📸 Bagaj Gör
@@ -798,7 +808,7 @@ const stopsMap     = {{ stops_map | tojson | safe }};
 const boardsMap    = {{ boards_map or {} | tojson | safe }};
 const genders      = {{ genders | tojson | safe }};
 const serviceMap   = {{ service_map | tojson | safe }};
-const serviceNotes = {{ service_notes | tojson | safe }};
+const service_notes = {{ service_notes | tojson | safe }};
 
 let cachedStops = null, currentSeat=null, geoWatchId=null, lastAlertAt=0;
 const ALERT_COOLDOWN_MS = 3*60*1000;
@@ -1231,8 +1241,8 @@ async function openFormWithSeat(n){
   const gEl = document.querySelector('input[name="gender"][value="'+prevGender+'"]');
   if (gEl) gEl.checked = true; else (document.querySelector('input[name="gender"][value=""]')||{}).checked = true;
 
-  $('#serviceChk').checked = !!serviceMap[String(n)];
-  $('#serviceNote').value   = serviceNotes[String(n)] || "";
+  $('#service').checked = !!serviceMap[String(n)];
+  $('#service_note').value   = service_notes[String(n)] || "";
   $('#pairOk').checked      = false;
 }
 function closeForm(){ $('#seatForm').style.display='none'; $$('.seat.selected').forEach(el=>el.classList.remove('selected')); currentSeat=null; }
@@ -1247,8 +1257,8 @@ async function saveSeat(){
   const amount = parseMoney($('#price')?.value || 0);
   const gender = document.querySelector('input[name="gender"]:checked')?.value || '';
   const pair_ok = $('#pairOk')?.checked ? 1 : 0;
-  const service = $('#serviceChk')?.checked || false;
-  const service_note = $('#serviceNote')?.value || '';
+  const service = $('#service')?.checked || false;
+  const service_note = $('#service_note')?.value || '';
   try{
     const j = await safeJsonFetch('/api/seat',{
       method:'POST',
@@ -1261,7 +1271,7 @@ async function saveSeat(){
     stopsMap[String(currentSeat)]    = stop;
     genders[String(currentSeat)]     = gender;
     serviceMap[String(currentSeat)]  = !!service;
-    serviceNotes[String(currentSeat)]= service_note;
+    service_notes[String(currentSeat)]= service_note;
     boardsMap[String(currentSeat)]   = from;
     persistBoardsMapToLS();
 
@@ -1282,6 +1292,9 @@ async function offloadSeat(){
     });
     if (!j.ok) throw new Error(j.msg || 'Silme başarısız');
 
+    // 🧳 Bu koltuğa bağlı tüm bagajları da sil
+    await clearBagsForSeat(currentSeat);
+
     // UI temizliği
     clearSeatUI(currentSeat);               // koltuğu boşalt (has-stop dahil)
     stopBlink([currentSeat]);               // varsa sarı yanıp sönmeyi durdur
@@ -1301,7 +1314,7 @@ function clearSeatUI(n){
   delete stopsMap[String(n)];
   delete genders[String(n)];
   delete serviceMap[String(n)];
-  delete serviceNotes[String(n)];
+  delete service_notes[String(n)];
   const l = $('#label-'+n); if (l) l.textContent = '';
   const s = $('#seat-'+n); if (s){ applySeatColor(s, "", false); setServiceBadge(s, false); s.classList.remove('isAssigned','multi-picked','blink-yellow'); }
 }
@@ -1432,22 +1445,19 @@ async function bulkOffload(seatNums){
       }
     }
 
-    // 2) UI
+// 2) UI + bagaj
     for (const n of seatNums){
-      clearSeatUI(n);                    // koltuğu sıfırla
+      await clearBagsForSeat(n);       // 🧳 önce bagajları temizle
+      clearSeatUI(n);                  // sonra koltuk bilgisini sıfırla
       const el = document.getElementById('seat-' + n);
-      el?.classList.remove('has-stop');  // 🔔 rozeti de kesin sök
+      el?.classList.remove('has-stop');
     }
     stopBlink(seatNums);
     updateStats();
-    refreshStopBadges();                 // select içindeki sayaçları güncelle
-    updateStopBadgesForSelected();       // seçili durak için 🔔 rozetlerini yeniden hesapla
+    refreshStopBadges();
+    updateStopBadgesForSelected();
     toast('✔ ' + seatNums.length + ' koltuk boşaltıldı');
     lastApproach = { stop:null, seats:[] };
-  }catch(e){
-    toast(e.message || 'Toplu boşaltma hatası');
-  }
-}
 
 // Saat kutusu: tek tık "İnecekleri indir"
   document.getElementById('btnOffloadNow')?.addEventListener('click', async () => {
@@ -1756,7 +1766,7 @@ window.addEventListener('orientationchange', repositionSeatForm);
     const svc = !!serviceMap?.[seatNo];
     setServiceBadge(el, svc);
     if (svc) {
-      const note = (serviceNotes?.[seatNo] || "").trim();
+      const note = (service_notes?.[seatNo] || "").trim();
       if (note) el.querySelector('.svc-badge').title = 'Servis: ' + note;
     }
   }
@@ -2132,27 +2142,10 @@ function render(place, timings){
   }
 })();
 
-function openBagsForSeat(mode='add'){
-  const seat = currentSeat;
-  if(!seat){ toast('Önce koltuğu seç.'); return; }
-
-  const to = document.getElementById('dropoff')?.value || '';
-  const qs = new URLSearchParams({ seat: seat });
-
-  if (to) qs.set('to', to);
-  const route = "{{ trip['route']|default('', true) }}";
-  const plate = "{{ trip['plate']|default('', true) }}";
-  if (route || plate) qs.set('trip', `${route}|${plate}`);
-
-  const base = (mode === 'view') ? '/bags/seat' : '/bags';
-  window.open(`${base}?${qs.toString()}`, '_blank');
-}
-
-document.getElementById('btnBagAdd') ?.addEventListener('click', () => openBagsForSeat('add'));
-document.getElementById('btnBagView')?.addEventListener('click', () => openBagsForSeat('view'));
-
 // ==== Bagaj yardımcıları ====
+
 const BAG_TRIP = "{{ (trip['route'] ~ '|' ~ trip['plate'])|replace(' ', '_') }}"; // dosya klasörü anahtarı
+window.BAG_TRIP = BAG_TRIP;  // 👈 global yapıyoruz
 
 async function fetchBagCount(seatNo){
   try{
@@ -2160,6 +2153,26 @@ async function fetchBagCount(seatNo){
     const j = await safeJsonFetch(u);
     return Number(j?.count || 0);
   }catch(_){ return 0; }
+}
+
+// Belirli bir koltuk için TÜM bagajları sil + rozeti sıfırla
+async function clearBagsForSeat(seatNo){
+  try{
+    const u = `/bags/clear?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seatNo)}`;
+    await safeJsonFetch(u, {
+      method: 'DELETE',
+      headers: { 'X-CSRF-Token': csrf }
+    });
+  }catch(_){
+    // ağ hatası olursa UI yine de temizlensin
+  }
+
+  const el = document.getElementById('seat-' + seatNo);
+  if (el){
+    el.classList.remove('has-bag');
+    const bc = el.querySelector('.bag-badge .bag-count');
+    if (bc) bc.textContent = '0';
+  }
 }
 
 async function refreshBagBadgeForSeat(seatNo){
@@ -2188,5 +2201,53 @@ document.addEventListener('click', (e)=>{
   const back = location.pathname; // geri dönüş için
   location.href = `/bags?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(n)}&next=${encodeURIComponent(back)}`;
 }, true);
+
+// ==== Bagaj yardımcıları (çakışmasız sürüm) ====
+(function(){
+  // Aynı kod iki kez yüklenirse yeniden kurma.
+  if (window.__bags_inited) return;
+  window.__bags_inited = true;
+
+  // const yerine korumalı atama: iki kez tanımlansa bile sorun çıkarmaz
+  window.BAG_TRIP = window.BAG_TRIP || "{{ (trip['route'] ~ '|' ~ trip['plate'])|replace(' ', '_') }}";
+
+  // Fonksiyonları da tek kez ata
+  window.fetchBagCount = window.fetchBagCount || (async function fetchBagCount(seatNo){
+    try{
+      const u = `/bags?trip=${encodeURIComponent(window.BAG_TRIP)}&seat=${encodeURIComponent(seatNo)}&format=json`;
+      const j = await safeJsonFetch(u);
+      return Number(j?.count || 0);
+    }catch(_){ return 0; }
+  });
+
+  window.refreshBagBadgeForSeat = window.refreshBagBadgeForSeat || (async function refreshBagBadgeForSeat(seatNo){
+    const el = document.getElementById('seat-' + seatNo);
+    if (!el) return;
+    const cnt = await window.fetchBagCount(seatNo);
+    el.classList.toggle('has-bag', cnt > 0);
+    const bc = el.querySelector('.bag-badge .bag-count');
+    if (bc) bc.textContent = String(cnt || 0);
+  });
+
+  window.refreshBagsAll = window.refreshBagsAll || (async function refreshBagsAll(){
+    const seats = Array.from(document.querySelectorAll('.seat')).map(el => Number(el.dataset.seat));
+    for (const n of seats) await window.refreshBagBadgeForSeat(n);
+  });
+
+  // Rozete tıklayınca galeriye git (aynı dinleyici bir kez eklensin)
+  if (!window.__bag_click_bound){
+    window.__bag_click_bound = true;
+    document.addEventListener('click', (e)=>{
+      const badge = e.target.closest('.bag-badge');
+      if (!badge) return;
+      e.stopPropagation(); e.preventDefault();
+      const seatEl = badge.closest('.seat');
+      const n = seatEl?.dataset.seat;
+      if (!n) return;
+      const back = location.pathname;
+      location.href = `/bags?trip=${encodeURIComponent(window.BAG_TRIP)}&seat=${encodeURIComponent(n)}&next=${encodeURIComponent(back)}`;
+    }, true);
+  }
+})();
 </script>
 {% endblock %}

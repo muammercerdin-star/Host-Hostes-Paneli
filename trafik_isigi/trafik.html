@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Trafik Işığı - Termux</title>
+  <style>
+    body{
+      margin:0;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:#111;
+      font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color:#eee;
+    }
+
+    .container{
+      text-align:center;
+    }
+
+    .traffic-box{
+      background:#222;
+      padding:16px;
+      border-radius:18px;
+      box-shadow:0 0 25px rgba(0,0,0,.8);
+      display:inline-flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:center;
+    }
+
+    .light{
+      width:70px;
+      height:70px;
+      border-radius:50%;
+      background:#333;
+      box-shadow:inset 0 0 12px rgba(0,0,0,.9);
+      opacity:.25;
+      transition:all .2s ease;
+    }
+
+    .light.red.on{
+      background:#ff3333;
+      box-shadow:0 0 25px #ff3333;
+      opacity:1;
+    }
+
+    .light.green.on{
+      background:#33ff55;
+      box-shadow:0 0 25px #33ff55;
+      opacity:1;
+    }
+
+    .btn{
+      margin-top:18px;
+      padding:10px 24px;
+      border:none;
+      border-radius:999px;
+      font-size:16px;
+      font-weight:600;
+      cursor:pointer;
+      background:#1f6b2d;
+      color:#f8f8f8;
+      box-shadow:0 4px 12px rgba(0,0,0,.6);
+      transition:transform .1s ease, box-shadow .1s ease, background .15s ease;
+    }
+
+    .btn:active{
+      transform:translateY(1px);
+      box-shadow:0 2px 6px rgba(0,0,0,.7);
+      background:#185223;
+    }
+
+    .label{
+      margin-bottom:10px;
+      font-size:18px;
+      letter-spacing:.03em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="label">Trafik Işığı</div>
+    <div class="traffic-box">
+      <div id="redLight" class="light red on"></div>
+      <div class="light" style="opacity:.1;"></div> <!-- sarı (pasif) -->
+      <div id="greenLight" class="light green"></div>
+    </div>
+
+    <button id="toggleBtn" class="btn">Yeşil Yak</button>
+  </div>
+
+  <script>
+    const redLight   = document.getElementById("redLight");
+    const greenLight = document.getElementById("greenLight");
+    const toggleBtn  = document.getElementById("toggleBtn");
+
+    function setState(state){
+      if(state === "red"){
+        redLight.classList.add("on");
+        greenLight.classList.remove("on");
+        toggleBtn.textContent = "Yeşil Yak";
+      }else{
+        redLight.classList.remove("on");
+        greenLight.classList.add("on");
+        toggleBtn.textContent = "Kırmızıya Çevir";
+      }
+    }
+
+    toggleBtn.addEventListener("click", () => {
+      const isRedOn = redLight.classList.contains("on");
+      setState(isRedOn ? "green" : "red");
+    });
+
+    // ilk durum: kırmızı yanık
+    setState("red");
+  </script>
+</body>
+</html>

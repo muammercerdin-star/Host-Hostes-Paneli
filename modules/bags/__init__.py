@@ -146,6 +146,38 @@ def gallery():
     """
     return render_template_string(tpl, trip=trip, seat=seat, imgs=imgs, nxt=nxt)
 
+@bp.route("/clear", methods=["DELETE"])
+def clear_bags():
+    """
+    Belirli bir trip + koltuk için TÜM bagaj dosyalarını sil.
+    İniş (boşalt) sırasında çağrılacak.
+    """
+    _check_csrf()
+
+    trip = request.args.get("trip", "") or request.args.get("trip_code", "")
+    seat = request.args.get("seat", "")
+    if not trip or not seat:
+        return jsonify(ok=False, msg="trip/seat gerekli"), 400
+
+    d = seat_dir(trip, seat)
+    removed = 0
+    if d.exists():
+        for p in d.iterdir():
+            try:
+                if p.is_file():
+                    p.unlink()
+                    removed += 1
+            except Exception:
+                # Tek dosya silinmese bile devam et
+                pass
+        # Klasör boş kaldıysa temizlemeye çalış
+        try:
+            d.rmdir()
+        except OSError:
+            pass
+
+    return jsonify(ok=True, removed=removed)
+
 # ------------- Yükleme ---------------
 @bp.route("/capture", methods=["GET","POST"])
 def capture():
