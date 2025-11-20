@@ -2163,10 +2163,9 @@ window.BAG_TRIP = BAG_TRIP;  // diğer sayfalar da kullanabilsin
 // beklenen örnek cevap: { ok:true, count:3, eyes:["R","LF"] }
 async function fetchBagMeta(seatNo){
   try{
-
-const u = `/bags?trip=${encodeURIComponent(BAG_TRIP)}`
-        + `&seat=${encodeURIComponent(seatNo)}`
-        + `&format=json`;
+    const u = `/bags?trip=${encodeURIComponent(BAG_TRIP)}`
+            + `&seat=${encodeURIComponent(seatNo)}`
+            + `&format=json`;
 
     const j = await safeJsonFetch(u);
     return {
@@ -2187,9 +2186,9 @@ function eyesToIcons(eyes){
   const set   = new Set(eyes);
   const parts = [];
 
-  if (set.has("R"))  parts.push("➡️");     // sağ göz
-  if (set.has("LF")) parts.push("⬅️🔼");   // sol ÖN
-  if (set.has("LR")) parts.push("⬅️🔽");   // sol ARKA
+  if (set.has("R"))  parts.push("➡️");   // sağ göz
+  if (set.has("LF")) parts.push("⬅️🔼"); // sol ÖN
+  if (set.has("LR")) parts.push("⬅️🔽"); // sol ARKA
 
   return parts.join(" ");
 }
@@ -2231,14 +2230,8 @@ async function refreshBagBadgeForSeat(seatNo){
   const bc  = el.querySelector('.bag-badge .bag-count');
   const dir = el.querySelector('.bag-badge .bag-dir');
 
-  // yön ikonları
-  let icons = eyesToIcons(eyes);
-
-  // Backend eyes göndermiyorsa ama bagaj varsa,
-  // en azından sağ oku göster (fallback)
-  if (!icons && cnt > 0) {
-    icons = "➡️";
-  }
+  // yön ikonları – sadece backend'in gönderdiği eyes'a göre
+  const icons = eyesToIcons(eyes);
 
   if (bc)  bc.textContent  = String(cnt || 0);
   if (dir) dir.textContent = icons || "";
