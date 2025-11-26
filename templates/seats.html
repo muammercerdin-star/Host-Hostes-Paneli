@@ -46,21 +46,75 @@
   }
   .stats::-webkit-scrollbar{ display:none }
 }
-  /* ===== Saat kutusu ===== */
-  .clock-tile{
-  position:relative;           /* sticky yerine normal akış */
-  bottom:auto; left:auto; right:auto;
+
+/* ===== Saat kutusu ===== */
+.clock-tile{
+  position:relative;
+  bottom:auto;
+  left:auto;
+  right:auto;
   z-index:1100;
-  display:flex; align-items:center; gap:12px; padding:10px 14px;
-  background:var(--card); border:1px solid var(--muted); border-radius:12px;
-  box-shadow:0 12px 28px rgba(0,0,0,.35); font-weight:700;
-  margin:8px 0 16px;           /* üst-alt boşluk */
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:52px 14px 10px;   /* üstte butonlar için boşluk */
+  background:var(--card);
+  border:1px solid var(--muted);
+  border-radius:12px;
+  box-shadow:0 12px 28px rgba(0,0,0,.35);
+  font-weight:700;
+  margin:8px 0 16px;
+}
+
+.clock-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:nowrap;
+}
+
+.clock-actions form{
+  display:inline-flex;
+  margin:0;
+}
+
+.clock-right{
+  margin-left:auto;
+  text-align:right;
+}
+
+.clock-tile .time{
+  font-size:24px;
+  letter-spacing:1px;
+  font-variant-numeric:tabular-nums;
+}
+
+.clock-tile .date{
+  font-size:13px;
+  opacity:.85;
+}
+
+/* Saatin ÜSTÜNDE yüzen butonlar */
+.clock-fabs{
+  position:absolute;
+  top:15px;
+  right:10px;
+  display:flex;
+  gap:8px;
+  z-index:1200;
+}
+
+.clock-fabs .circle-btn{
+  width:44px;
+  height:44px;
+}
+
+/* Telefonda üst padding biraz daha geniş */
+@media (max-width:720px){
+  .clock-tile{
+    padding-top:56px;
   }
-  .clock-actions{display:flex; align-items:center; gap:12px; flex-wrap:nowrap;}
-  .clock-actions form{display:inline-flex; margin:0}
-  .clock-right{margin-left:auto; text-align:right}
-  .clock-tile .time{font-size:24px; letter-spacing:1px; font-variant-numeric:tabular-nums}
-  .clock-tile .date{font-size:13px; opacity:.85}
+}
 
   /* ===== Koltuk ızgarası ===== */
   .deck{
@@ -440,48 +494,71 @@
   </div>
 </div>
 
-  <!-- Saat -->
-  <div id="clockTile" class="clock-tile" aria-live="polite">
-    <div class="clock-actions">
+<!-- Saat -->
+<div id="clockTile" class="clock-tile" aria-live="polite">
 
-<!-- Namaz vakti (tek satır + küçük liste) -->
-<div id="prayerTile">
-  <div class="pr-top">
-    <span id="pr-line">Konum alınıyor…</span>
+  <!-- Saatin üstündeki butonlar -->
+  <div class="clock-fabs">
+    <!-- Ana Sayfa -->
+    <a href="{{ url_for('index') }}"
+       class="circle-btn green"
+       title="Ana Sayfa"
+       aria-label="Ana Sayfa">
+      <svg xmlns="http://www.w3.org/2000/svg"
+           fill="currentColor"
+           viewBox="0 0 24 24">
+        <path d="M12 3l9 9h-3v9H6v-9H3z"/>
+      </svg>
+    </a>
+
+    <!-- Seferi Sonlandır -->
+    <form method="post"
+          action="{{ url_for('end_trip') }}"
+          onsubmit="try{localStorage.removeItem(LSK);localStorage.removeItem(LSK+':items');localStorage.removeItem(LSK+':boards');standingItems.length=0;standingCount=0;standingRevenue=0;persistStandingItems();persistStandingTotals();}catch(_){} return confirm('Sefer sonlandırılsın mı?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit"
+              class="circle-btn red"
+              title="Seferi Sonlandır"
+              aria-label="Seferi Sonlandır">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             fill="currentColor"
+             viewBox="0 0 24 24">
+          <path d="M6 6h12v12H6z"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+
+  <!-- Alttaki içerik -->
+  <div class="clock-actions">
+    <!-- Namaz vakti (tek satır) -->
+    <div id="prayerTile">
+      <div class="pr-top">
+        <span id="pr-line">Konum alınıyor…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hız / Limit + Ses -->
+  <div id="speedTile" class="speed-tile" aria-live="polite" title="Anlık hız / yol hızı">
+    <div class="sp-row">
+      <span id="spVal">0</span><span class="unit">km/h</span>
+    </div>
+    <div class="sp-sub" id="spLimit">—</div>
+    <!-- Ses (TTS) anahtarı -->
+    <button id="ttsToggle"
+            class="circle-btn"
+            type="button"
+            title="Sesli uyarı">
+      🔊
+    </button>
+  </div>
+
+  <div class="clock-right">
+    <div class="time" id="clockMain"></div>
+    <div class="date" id="clockSub"></div>
   </div>
 </div>
-    <!-- Ana Sayfa -->
-      <a href="{{ url_for('index') }}" class="circle-btn green" title="Ana Sayfa" aria-label="Ana Sayfa">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3l9 9h-3v9H6v-9H3z"/></svg>
-      </a>
-
-      <!-- Seferi Sonlandır -->
-      <form method="post" action="{{ url_for('end_trip') }}"
-            onsubmit="try{localStorage.removeItem(LSK);localStorage.removeItem(LSK+':items');localStorage.removeItem(LSK+':boards');standingItems.length=0;standingCount=0;standingRevenue=0;persistStandingItems();persistStandingTotals();}catch(_){} return confirm('Sefer sonlandırılsın mı?');">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button type="submit" class="circle-btn red" title="Seferi Sonlandır" aria-label="Seferi Sonlandır">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
-        </button>
-      </form>
-    </div>
-
-     <!-- Hız/Limit -->
-    <div id="speedTile" class="speed-tile" aria-live="polite" title="Anlık hız / yol hızı">
-      <div class="sp-row">
-    <span id="spVal">0</span><span class="unit">km/h</span>
-     </div>
-     <div class="sp-sub" id="spLimit">—</div>
-   <!-- Ses (TTS) anahtarı -->
-    <button id="ttsToggle" class="circle-btn" type="button" title="Sesli uyarı">
-    🔊
-   </button>
-  </div>
-
-    <div class="clock-right">
-      <div class="time" id="clockMain"></div>
-      <div class="date" id="clockSub"></div>
-    </div>
-  </div>
 
   <!-- Koltuk ızgarası -->
   <div class="deck" id="deck">
@@ -996,7 +1073,7 @@ function speakFinalStopSequence(name){
   speak(`Sıradaki Durak ${name}. Bu durakta ${cnt} yolcu inecek.`);
   // 2) Teşekkür mesajı (kısa gecikmeyle)
   setTimeout(()=>{
-    speak('Alââ Alaşehir Ailesini Tercih ettiğiniz için teşekkür ederiz. Bir sonraki yolculukta buluşmak dileğiyle.');
+    speak('Sarıkız Turizm Ailesini Tercih ettiğiniz için teşekkür ederiz. Bir sonraki yolculukta buluşmak dileğiyle.');
   }, 1800);
 }
 
