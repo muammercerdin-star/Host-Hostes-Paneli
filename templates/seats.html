@@ -2236,18 +2236,27 @@ function render(place, timings){
 const BAG_TRIP = "{{ (trip['route'] ~ '|' ~ trip['plate'])|replace(' ', '_') }}";
 window.BAG_TRIP = BAG_TRIP;  // diğer sayfalar da kullanabilsin
 
-// /api/bags/meta?trip=...&seat=...
-// beklenen örnek cevap: { ok:true, count:3, eyes:["R","LF"] }
+// /bags?trip=...&seat=...&format=json
+// beklenen cevap: { ok:true, count:5, right:3, left_front:2, left_back:0 }
 async function fetchBagMeta(seatNo){
   try{
-    const u = `/api/bags/meta?trip=${encodeURIComponent(BAG_TRIP)}`
-            + `&seat=${encodeURIComponent(seatNo)}`;
+    const u = `/bags?trip=${encodeURIComponent(BAG_TRIP)}`
+            + `&seat=${encodeURIComponent(seatNo)}`
+            + `&format=json`;
 
     const j = await safeJsonFetch(u);
-    return {
-      count: Number(j?.count || 0),
-      eyes : Array.isArray(j?.eyes) ? j.eyes : []
-    };
+
+    const right     = Number(j?.right       || 0);
+    const leftFront = Number(j?.left_front  || 0);
+    const leftBack  = Number(j?.left_back   || 0);
+    const total     = Number(j?.count || (right + leftFront + leftBack));
+
+    const eyes = [];
+    if (right     > 0) eyes.push("R");   // sağ göz
+    if (leftFront > 0) eyes.push("LF");  // sol ön
+    if (leftBack  > 0) eyes.push("LB");  // sol arka
+
+    return { count: total, eyes };
   }catch(_){
     return { count: 0, eyes: [] };
   }
@@ -2256,15 +2265,15 @@ async function fetchBagMeta(seatNo){
 // Koltuk üzerindeki yön ikonlarını üret
 // R  = sağ göz
 // LF = sol ön
-// LR = sol arka
+// LB = sol arka
 function eyesToIcons(eyes){
   if (!eyes || !eyes.length) return "";
   const set   = new Set(eyes);
   const parts = [];
 
-  if (set.has("R"))  parts.push("➡️");   // sağ göz
-  if (set.has("LF")) parts.push("⬅️🔼"); // sol ÖN
-  if (set.has("LR")) parts.push("⬅️🔽"); // sol ARKA
+  if (set.has("R"))  parts.push("➡️");     // sağ göz
+  if (set.has("LF")) parts.push("⬅️🔺");   // sol ÖN
+  if (set.has("LB")) parts.push("⬅️🔻");   // sol ARKA
 
   return parts.join(" ");
 }
@@ -2306,7 +2315,6 @@ async function refreshBagBadgeForSeat(seatNo){
   const bc  = el.querySelector('.bag-badge .bag-count');
   const dir = el.querySelector('.bag-badge .bag-dir');
 
-  // yön ikonları – sadece backend'in gönderdiği eyes'a göre
   const icons = eyesToIcons(eyes);
 
   if (bc)  bc.textContent  = String(cnt || 0);
@@ -2315,8 +2323,7 @@ async function refreshBagBadgeForSeat(seatNo){
   // tooltip
   const badge = el.querySelector('.bag-badge');
   if (badge){
-    if (!cnt) badge.title = "Bagaj yok";
-    else      badge.title = `Bagaj: ${cnt} adet`;
+    badge.title = cnt ? `Bagaj: ${cnt} adet` : "Bagaj yok";
   }
 }
 
