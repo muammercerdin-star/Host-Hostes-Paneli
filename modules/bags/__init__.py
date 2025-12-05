@@ -42,7 +42,6 @@ def _check_csrf() -> None:
 
 # ------------- Yardımcılar -----------
 def _normalize_next(url: str | None) -> str:
-    """Tam URL gelse bile sadece path'i al; .html uzantısını at; / ile başlat."""
     path = urlparse(url or "").path
     if not path:
         return "/seats"
@@ -54,7 +53,6 @@ def _normalize_next(url: str | None) -> str:
 
 
 def _back_url() -> str:
-    # Önce açıkça verilen next, yoksa Referer, en son /seats
     return _normalize_next(
         request.values.get("next") or request.headers.get("Referer") or "/seats"
     )
@@ -62,7 +60,6 @@ def _back_url() -> str:
 
 # ------------- Depo yolları ----------
 def bag_root() -> Path:
-    # proje kökünde storage/bags
     root = Path(current_app.root_path).parent / "storage" / "bags"
     root.mkdir(parents=True, exist_ok=True)
     return root
@@ -81,7 +78,6 @@ def thumb_path(img_path: Path) -> Path:
 
 
 def _is_image(p: Path) -> bool:
-    """Orijinal görsel mi? (thumb değil)"""
     return (
         p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}
         and ".thumb." not in p.name.lower()
@@ -89,7 +85,6 @@ def _is_image(p: Path) -> bool:
 
 
 def ensure_thumb(img_path: Path):
-    # Zaten thumbnail dosyasıysa dokunma
     name = img_path.name.lower()
     if ".thumb." in name:
         return
@@ -101,63 +96,166 @@ def ensure_thumb(img_path: Path):
             im.thumbnail((480, 480))
             im.convert("RGB").save(t, "JPEG", quality=82, optimize=True)
     except Exception:
-        # thumb üretilemese de akışı bozma
         pass
 
+def _scan_counts(d: Path) -> tuple[int, int, int]:
+    """Klasördeki dosyalardan sağ / sol ön / sol arka max bagaj adetini hesapla."""
+    right = left_front = left_back = 0
 
-# ------------- Görüntüleme -----------
-@bp.route("")
+    if d.exists():
+        for p in d.iterdir():
+            if not (p.is_file() and _is_image(p)):
+                continue
+
+            name = p.name
+            side_key = "R"
+            bag_count = 1
+
+            # Dosya adı: R3_..., LF2_..., LB10_...
+            if "_" in name:
+                prefix = name.split("_", 1)[0]
+                letters = "".join(ch for ch in prefix if ch.isalpha()).upper()
+                digits = "".join(ch for ch in prefix if ch.isdigit())
+
+                if digits:
+                    try:
+                        bag_count = max(1, int(digits))
+                    except ValueError:
+                        bag_count = 1
+
+                if letters in ("R", "LF", "LB"):
+                    side_key = letters
+
+            if side_key == "R":
+                right = max(right, bag_count)
+            elif side_key == "LF":
+                left_front = max(left_front, bag_count)
+            elif side_key == "LB":
+                left_back = max(left_back, bag_count)
+            else:
+                right = max(right, bag_count)
+
+    return right, left_front, left_back
+
+# ================== Galeri / Sayaç ==================
+
+def _scan_counts(d: Path) -> tuple[int, int, int]:
+    """
+    Klasördeki dosya adlarına bakarak
+    sağ / sol ön / sol arka için MAX bagaj adetlerini bulur.
+    Dosya adı formatı: R3_..., LF2_..., LB10_...
+    """
+    right = left_front = left_back = 0
+
+    if d.exists():
+        for p in d.iterdir():
+            if not (p.is_file() and _is_image(p)):
+                continue
+
+            name = p.name
+            side_key = "R"
+            bag_count = 1
+
+            if "_" in name:
+                prefix = name.split("_", 1)[0]      # R3, LF2, LB10...
+                letters = "".join(ch for ch in prefix if ch.isalpha()).upper()
+                digits  = "".join(ch for ch in prefix if ch.isdigit())
+
+                if digits:
+                    try:
+                        bag_count = max(1, int(digits))
+                    except ValueError:
+                        bag_count = 1
+
+                if letters in ("R", "LF", "LB"):
+                    side_key = letters
+
+            if side_key == "R":
+                right = max(right, bag_count)
+            elif side_key == "LF":
+                left_front = max(left_front, bag_count)
+            elif side_key == "LB":
+                left_back = max(left_back, bag_count)
+            else:
+                right = max(right, bag_count)
+
+    return right, left_front, left_back
+
+# ================== Galeri / Sayaç ==================
+
+def _scan_counts(d: Path) -> tuple[int, int, int]:
+    """
+    Klasördeki dosya adlarına bakarak
+    sağ / sol ön / sol arka için MAX bagaj adetlerini bulur.
+    Dosya adı formatı: R3_..., LF2_..., LB10_...
+    """
+    right = left_front = left_back = 0
+
+    if d.exists():
+        for p in d.iterdir():
+            if not (p.is_file() and _is_image(p)):
+                continue
+
+            name = p.name
+            side_key = "R"
+            bag_count = 1
+
+            if "_" in name:
+                prefix = name.split("_", 1)[0]      # R3, LF2, LB10...
+                letters = "".join(ch for ch in prefix if ch.isalpha()).upper()
+                digits  = "".join(ch for ch in prefix if ch.isdigit())
+
+                if digits:
+                    try:
+                        bag_count = max(1, int(digits))
+                    except ValueError:
+                        bag_count = 1
+
+                if letters in ("R", "LF", "LB"):
+                    side_key = letters
+
+            if side_key == "R":
+                right = max(right, bag_count)
+            elif side_key == "LF":
+                left_front = max(left_front, bag_count)
+            elif side_key == "LB":
+                left_back = max(left_back, bag_count)
+            else:
+                right = max(right, bag_count)
+
+    return right, left_front, left_back
+
+
+@bp.route("", methods=["GET", "POST"])
 def gallery():
     """
-    HTML galeri veya ?format=json ile sayaç döndürür.
+    - GET: galeri sayfası
+    - POST: aynı sayfadan fotoğraf yükleme
+    - ?format=json: sağ / sol ön / sol arka sayaç
     """
 
-    trip = request.args.get("trip", "") or request.args.get("trip_code", "")
-    seat = request.args.get("seat", "")
-    fmt  = request.args.get("format", "").lower()
-    nxt  = _back_url()
+    # Ortak alanlar (hem GET hem POST)
+    trip = request.values.get("trip", "") or request.values.get("trip_code", "")
+    seat = request.values.get("seat", "")
+    fmt = request.args.get("format", "").lower()
+
+    # Koltuk ekranından gelen yön & adet (oklarla oynuyor ya)
+    side = (request.values.get("side", "R") or "R").upper()
+    if side not in ("R", "LF", "LB"):
+        side = "R"
+
+    bag_raw = request.values.get("bag_count", "") or "1"
+    try:
+        bag_count_default = int(bag_raw)
+    except ValueError:
+        bag_count_default = 1
+    bag_count_default = max(1, min(bag_count_default, 10))
 
     d = seat_dir(trip, seat)
 
-    # ---- JSON sayaç: toplam + sağ / sol ön / sol arka bagaj adedi ----
-    if fmt == "json":
-        right = left_front = left_back = 0  # her göz için MAX değer
-
-        if d.exists():
-            for p in d.iterdir():
-                if not (p.is_file() and _is_image(p)):
-                    continue
-
-                name = p.name
-                # Varsayılanlar (eski dosyalar için)
-                side_key = "R"   # sağ göz
-                bag_count = 1    # sayı yoksa 1 kabul
-
-                # Yeni isim formatı: R3_..., LF2_..., LB10_...
-                if "_" in name:
-                    prefix  = name.split("_", 1)[0]  # "R3", "LF2", "LB10"...
-                    letters = "".join(ch for ch in prefix if ch.isalpha()).upper()
-                    digits  = "".join(ch for ch in prefix if ch.isdigit())
-
-                    if digits:
-                        try:
-                            bag_count = max(1, int(digits))
-                        except ValueError:
-                            bag_count = 1
-
-                    if letters in ("R", "LF", "LB"):
-                        side_key = letters
-
-                # Her göz için MAX sayıyı tut
-                if side_key == "R":
-                    right = max(right, bag_count)
-                elif side_key == "LF":
-                    left_front = max(left_front, bag_count)
-                elif side_key == "LB":
-                    left_back = max(left_back, bag_count)
-                else:
-                    right = max(right, bag_count)
-
+    # ================= JSON sayaç =================
+    if request.method == "GET" and fmt == "json":
+        right, left_front, left_back = _scan_counts(d)
         total = right + left_front + left_back
         return jsonify(
             ok=True,
@@ -167,18 +265,66 @@ def gallery():
             left_back=int(left_back),
         )
 
-    # ---- HTML galeri ----
+    # ================= POST: foto yükleme =================
+    if request.method == "POST":
+        _check_csrf()
+
+        if not (trip and seat):
+            # Güvenlik için: parametre yoksa koltuk ekranına at
+            return redirect("/seats")
+
+        files = request.files.getlist("files") or []
+        d.mkdir(parents=True, exist_ok=True)
+
+        # Mevcut sayaçları klasörden oku
+        right, left_front, left_back = _scan_counts(d)
+
+        if side == "R":
+            existing = right
+        elif side == "LF":
+            existing = left_front
+        else:
+            existing = left_back
+
+        # Eğer o gözde hiç kayıt yoksa, koltuktan gelen değeri (veya 1) kullan
+        if existing <= 0:
+            existing = bag_count_default or 1
+
+        # ÖNEMLİ: ekstra fotoğraflar da aynı adetle kaydedilecek,
+        # böylece koltuk ekranındaki sayaç artmıyor.
+        bag_count = existing
+
+        for f in files:
+            if not f or not f.filename:
+                continue
+            ext = (os.path.splitext(f.filename)[1] or ".jpg").lower()
+            ts = int(time.time() * 1000)
+
+            # yön + mevcut adet prefix
+            name = f"{side}{bag_count}_{ts}_{safe(seat) or 'bag'}{ext}"
+
+            p = d / name
+            f.save(p)
+            try:
+                ensure_thumb(p)
+            except Exception:
+                pass
+
+        # Aynı koltuğun galeri sayfasına dön (loop yok)
+        return redirect(url_for("bags.gallery", trip=trip, seat=seat))
+
+    # ================= GET: HTML galeri =================
+    nxt = "/seats"  # Koltuk ekranına dön
+
     imgs: list[tuple[str, str]] = []
-    if d.exists():
+    if trip and seat and d.exists():
         for p in sorted(d.iterdir()):
             if p.is_file() and _is_image(p):
                 ensure_thumb(p)
                 imgs.append((p.name, thumb_path(p).name))
 
-    csrf_token   = _get_csrf()
-    bag_options  = list(range(1, 11))  # 1–10
-    upload_action = url_for("bags.capture")
-    gallery_url   = url_for("bags.gallery", trip=trip, seat=seat)
+    csrf_token = _get_csrf()
+    gallery_url = url_for("bags.gallery", trip=trip, seat=seat)
 
     tpl = """
     <meta name=viewport content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -189,39 +335,16 @@ def gallery():
         font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
         margin:0;
       }
-      .wrap{max-width:940px;margin:auto;padding:10px}
-      .top-card{
-        background:#020617;
-        border-radius:18px;
-        padding:12px 14px 14px;
-        border:1px solid #111827;
-        margin-bottom:16px;
-      }
-      .top-row{
+      .wrap{max-width:960px;margin:auto;padding:10px}
+
+      .bar{
         display:flex;
-        flex-wrap:wrap;
-        gap:8px 10px;
-        align-items:flex-end;
+        gap:8px;
+        align-items:center;
+        margin:8px 0 14px;
+        justify-content:space-between;
       }
-      label{font-size:13px;opacity:.9;display:block;margin-bottom:2px;}
-      select,input[type="file"]{
-        padding:6px 8px;
-        border-radius:10px;
-        border:1px solid #1f2933;
-        background:#020617;
-        color:#e5e7eb;
-        font-size:13px;
-      }
-      .btn-main{
-        padding:9px 14px;
-        border-radius:999px;
-        border:none;
-        background:#22c55e;
-        color:#022c22;
-        font-weight:700;
-        font-size:14px;
-      }
-      .bar{display:flex;gap:8px;align-items:center;margin:8px 0 14px;justify-content:space-between}
+      .muted{opacity:.8;font-size:13px}
       a.btn{
         background:#2563eb;
         color:#fff;
@@ -231,7 +354,58 @@ def gallery():
         display:inline-block;
         font-size:14px;
       }
-      .muted{opacity:.8;font-size:13px}
+
+      .main-row{
+        display:flex;
+        gap:16px;
+        align-items:flex-start;
+        flex-wrap:wrap;
+      }
+      .gallery-col{
+        flex:1 1 220px;
+      }
+      .form-col{
+        flex:0 0 260px;
+        max-width:260px;
+      }
+
+      .top-card{
+        background:#020617;
+        border-radius:18px;
+        padding:14px 14px 18px;
+        border:1px solid #111827;
+      }
+      .top-card h2{
+        margin:0 0 10px;
+        font-size:16px;
+      }
+      label{
+        font-size:13px;
+        opacity:.9;
+        display:block;
+        margin-bottom:4px;
+      }
+      input[type="file"]{
+        width:100%;
+        padding:6px 8px;
+        border-radius:10px;
+        border:1px solid #1f2933;
+        background:#020617;
+        color:#e5e7eb;
+        font-size:13px;
+      }
+      .btn-main{
+        width:100%;
+        margin-top:10px;
+        padding:9px 14px;
+        border-radius:999px;
+        border:none;
+        background:#22c55e;
+        color:#022c22;
+        font-weight:700;
+        font-size:14px;
+      }
+
       .grid{
         display:grid;
         grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
@@ -264,87 +438,82 @@ def gallery():
         color:#fee2e2;
         font-weight:600;
       }
+
+      @media (max-width: 720px){
+        .main-row{flex-direction:column;}
+        .form-col{flex:1 1 auto;max-width:none;}
+      }
     </style>
+
     <div class="wrap">
 
       <div class="bar">
         <div class="muted">
-          Sefer: <b>{{trip}}</b> • Koltuk: <b>{{seat}}</b>
+          Sefer: <b>{{trip or "-"}}</b> • Koltuk: <b>{{seat or "-"}}</b>
         </div>
         <a class="btn" href="{{ nxt }}">Koltuk ekranına dön</a>
       </div>
 
-      <!-- Üstte hızlı fotoğraf ekleme formu -->
-      <div class="top-card">
-        <form method="post"
-              action="{{ upload_action }}"
-              enctype="multipart/form-data">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <input type="hidden" name="trip_code"  value="{{ trip }}">
-          <input type="hidden" name="seat"       value="{{ seat }}">
-          <input type="hidden" name="to_stop"    value="">
-          <!-- Başarılı olunca tekrar galeriye dön -->
-          <input type="hidden" name="next"       value="{{ gallery_url }}">
+      {% if not trip or not seat %}
+        <p class="muted">Önce koltuk ekranından bir koltuk seçip bagaj ekranına gel.</p>
+      {% else %}
 
-          <div class="top-row">
-            <div>
-              <label for="side">Göz</label>
-              <select name="side" id="side">
-                <option value="R">Sağ göz</option>
-                <option value="LF">Sol ön</option>
-                <option value="LB">Sol arka</option>
-              </select>
+      <div class="main-row">
+
+        <!-- SOL: FOTOĞRAFLAR -->
+        <div class="gallery-col">
+          {% if not imgs %}
+            <p class="muted">Bu koltuk için kayıtlı bagaj fotoğrafı yok.</p>
+          {% else %}
+            <div class="grid">
+              {% for fn,tn in imgs %}
+                <div class="card">
+                  <a href="{{ url_for('bags.raw', trip=trip, seat=seat, filename=fn) }}">
+                    <img loading="lazy"
+                         src="{{ url_for('bags.thumb', trip=trip, seat=seat, filename=tn) }}">
+                  </a>
+                  <div class="t">#{{ loop.index }}</div>
+                  <form class="del-form" method="post" action="{{ url_for('bags.delete_one') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="trip" value="{{ trip }}">
+                    <input type="hidden" name="seat" value="{{ seat }}">
+                    <input type="hidden" name="filename" value="{{ fn }}">
+                    <button type="submit" class="del-btn">🗑 Fotoğrafı sil</button>
+                  </form>
+                </div>
+              {% endfor %}
             </div>
+          {% endif %}
+        </div>
 
-            <div>
-              <label for="bag_count">Bagaj adedi</label>
-              <select name="bag_count" id="bag_count">
-                <option value="">- - -</option>
-                {% for i in bag_options %}
-                  <option value="{{ i }}">{{ i }}</option>
-                {% endfor %}
-              </select>
-            </div>
+        <!-- SAĞ: YENİ FOTOĞRAF EKLEME FORMU -->
+        <div class="form-col">
+          <div class="top-card">
+            <h2>Yeni fotoğraf ekle</h2>
+            <form method="post" action="{{ gallery_url }}" enctype="multipart/form-data">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="trip"  value="{{ trip }}">
+              <input type="hidden" name="seat"  value="{{ seat }}">
+              <!-- yön & adet koltuktan geliyor, kullanıcı görmüyor -->
+              <input type="hidden" name="side" value="{{ side }}">
+              <input type="hidden" name="bag_count" value="{{ bag_count }}">
 
-            <div style="flex:1;min-width:140px;">
-              <label for="files">Fotoğraf(lar)</label>
-              <input id="files" name="files"
+              <label for="files">Fotoğraf(lar):</label>
+              <input id="files"
+                     name="files"
                      type="file"
                      accept="image/*"
                      capture="environment"
                      multiple>
-            </div>
 
-            <div>
               <button type="submit" class="btn-main">
                 Fotoğraf ekle
               </button>
-            </div>
+            </form>
           </div>
-        </form>
-      </div>
-
-      {% if not imgs %}
-        <p class="muted">Bu koltuk için kayıtlı bagaj fotoğrafı yok.</p>
-      {% else %}
-        <div class="grid">
-          {% for fn,tn in imgs %}
-            <div class="card">
-              <a href="{{ url_for('bags.raw', trip=trip, seat=seat, filename=fn) }}">
-                <img loading="lazy"
-                     src="{{ url_for('bags.thumb', trip=trip, seat=seat, filename=tn) }}">
-              </a>
-              <div class="t">#{{ loop.index }}</div>
-              <form class="del-form" method="post" action="{{ url_for('bags.delete_one') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <input type="hidden" name="trip" value="{{ trip }}">
-                <input type="hidden" name="seat" value="{{ seat }}">
-                <input type="hidden" name="filename" value="{{ fn }}">
-                <button type="submit" class="del-btn">🗑 Fotoğrafı sil</button>
-              </form>
-            </div>
-          {% endfor %}
         </div>
+
+      </div>
       {% endif %}
     </div>
     """
@@ -356,17 +525,13 @@ def gallery():
         imgs=imgs,
         nxt=nxt,
         csrf_token=csrf_token,
-        bag_options=bag_options,
-        upload_action=upload_action,
         gallery_url=gallery_url,
+        side=side,
+        bag_count=bag_count_default,
     )
 
 @bp.route("/clear", methods=["DELETE"])
 def clear_bags():
-    """
-    Belirli bir trip + koltuk için TÜM bagaj dosyalarını sil.
-    İniş (boşalt) sırasında çağrılacak.
-    """
     _check_csrf()
 
     trip = request.args.get("trip", "") or request.args.get("trip_code", "")
@@ -383,9 +548,7 @@ def clear_bags():
                     p.unlink()
                     removed += 1
             except Exception:
-                # Tek dosya silinmese bile devam et
                 pass
-        # Klasör boş kaldıysa temizlemeye çalış
         try:
             d.rmdir()
         except OSError:
@@ -396,7 +559,6 @@ def clear_bags():
 
 @bp.route("/delete-one", methods=["POST"])
 def delete_one():
-    """Tek bir fotoğrafı (ve thumbnail'ini) sil."""
     _check_csrf()
 
     trip = request.form.get("trip", "")
@@ -409,14 +571,12 @@ def delete_one():
     d = seat_dir(trip, seat)
     p = d / filename
 
-    # Orijinal dosya
     try:
         if p.exists():
             p.unlink()
     except Exception:
         pass
 
-    # Thumb
     try:
         t = thumb_path(p)
         if t.exists():
@@ -424,18 +584,16 @@ def delete_one():
     except Exception:
         pass
 
-    # Aynı koltuğun galeri ekranına dön
     return redirect(url_for("bags.gallery", trip=trip, seat=seat))
 
 
-# ------------- Yükleme ---------------
+# ------------- Yükleme (tam ekran sayfa) ---------------
 @bp.route("/capture", methods=["GET", "POST"])
 def capture():
-    """Bagaj fotoğrafı yükleme formu (kamera/galeri)."""
+    """Eski tam ekran bagaj yükleme sayfası (ihtiyaç olursa dursun)."""
 
-    # === POST: fotoğraf(lar)ı kaydet ===
     if request.method == "POST":
-        _check_csrf()  # ✅ CSRF
+        _check_csrf()
 
         trip = request.form.get("trip_code", "")
         seat = request.form.get("seat", "")
@@ -444,12 +602,10 @@ def capture():
             request.form.get("next") or request.headers.get("Referer")
         )
 
-        # Bagaj gözü: R (sağ), LF (sol ön), LB (sol arka)
         side = (request.form.get("side", "R") or "R").upper()
         if side not in ("R", "LF", "LB"):
             side = "R"
 
-        # 🔢 Bagaj adedi (1–10) – foto sayısından bağımsız
         bag_raw = request.form.get("bag_count") or "1"
         try:
             bag_count = int(bag_raw)
@@ -468,9 +624,6 @@ def capture():
 
             ext = (os.path.splitext(f.filename)[1] or ".jpg").lower()
             ts = int(time.time() * 1000)
-
-            # 🔑 Dosya adı: R3_..., LF2_..., LB10_...
-            # Sayaç JSON tarafında bu sayıların MAX'ını kullanıyor.
             name = f"{side}{bag_count}_{ts}_{safe(to) or 'bag'}{ext}"
 
             p = d / name
@@ -481,7 +634,6 @@ def capture():
                 pass
             saved += 1
 
-        # Başarı ekranı + hızlı geri dönüş
         return render_template_string(
             """
             <!doctype html>
@@ -526,7 +678,6 @@ def capture():
             nxt=nxt,
         )
 
-    # === GET: tam ekran formu göster ===
     trip = request.args.get("trip_code", "") or request.args.get("trip", "")
     seat = request.args.get("seat", "")
     to = request.args.get("to_stop", "")
@@ -536,7 +687,7 @@ def capture():
     if side not in ("R", "LF", "LB"):
         side = "R"
 
-    bag_options = list(range(1, 11))  # 1–10
+    bag_options = list(range(1, 11))
 
     return render_template_string(
         """

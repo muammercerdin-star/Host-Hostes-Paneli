@@ -2034,7 +2034,7 @@ function setState(cls){
     if (ratio >= 1.0){
       if (ratio >= 1.10){
         if (now - lastWarnOverAt > 12_000){
-          speakOnce(`Tehlike. Limit ${L}, hız ${S}. Acil yavaşlayın.`);
+          speakOnce(`Recep bey dikkat. Limit ${L}, hız ${S}. Acil yavaşlayın.`);
           lastWarnOverAt = now;
         }
       } else {
@@ -2047,7 +2047,7 @@ function setState(cls){
     }
     // Yeşil
     if (ratio < 0.85 && now - lastSafeSaid > 45_000){
-      speakOnce("Limit dahilindesiniz. Teşekkürler.");
+      speakOnce("hızınız normal teşekkür ederim");
       lastSafeSaid = now;
     }
   }
