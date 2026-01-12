@@ -33,9 +33,7 @@ def _get_csrf() -> str:
 
 
 def _check_csrf() -> None:
-    token = request.form.get("csrf_token", "") or request.headers.get(
-        "X-CSRF-Token", ""
-    )
+    token = request.form.get("csrf_token", "") or request.headers.get("X-CSRF-Token", "")
     if token != session.get("csrf_token"):
         abort(403, description="CSRF doğrulaması başarısız")
 
@@ -85,8 +83,8 @@ def _is_image(p: Path) -> bool:
 
 
 def ensure_thumb(img_path: Path):
-    name = img_path.name.lower()
-    if ".thumb." in name:
+    """Var olmayan thumb'ı üret."""
+    if ".thumb." in img_path.name.lower():
         return
     t = thumb_path(img_path)
     if t.exists():
@@ -96,48 +94,9 @@ def ensure_thumb(img_path: Path):
             im.thumbnail((480, 480))
             im.convert("RGB").save(t, "JPEG", quality=82, optimize=True)
     except Exception:
+        # Thumb üretilemezse sessiz geç
         pass
 
-def _scan_counts(d: Path) -> tuple[int, int, int]:
-    """Klasördeki dosyalardan sağ / sol ön / sol arka max bagaj adetini hesapla."""
-    right = left_front = left_back = 0
-
-    if d.exists():
-        for p in d.iterdir():
-            if not (p.is_file() and _is_image(p)):
-                continue
-
-            name = p.name
-            side_key = "R"
-            bag_count = 1
-
-            # Dosya adı: R3_..., LF2_..., LB10_...
-            if "_" in name:
-                prefix = name.split("_", 1)[0]
-                letters = "".join(ch for ch in prefix if ch.isalpha()).upper()
-                digits = "".join(ch for ch in prefix if ch.isdigit())
-
-                if digits:
-                    try:
-                        bag_count = max(1, int(digits))
-                    except ValueError:
-                        bag_count = 1
-
-                if letters in ("R", "LF", "LB"):
-                    side_key = letters
-
-            if side_key == "R":
-                right = max(right, bag_count)
-            elif side_key == "LF":
-                left_front = max(left_front, bag_count)
-            elif side_key == "LB":
-                left_back = max(left_back, bag_count)
-            else:
-                right = max(right, bag_count)
-
-    return right, left_front, left_back
-
-# ================== Galeri / Sayaç ==================
 
 def _scan_counts(d: Path) -> tuple[int, int, int]:
     """
@@ -147,81 +106,39 @@ def _scan_counts(d: Path) -> tuple[int, int, int]:
     """
     right = left_front = left_back = 0
 
-    if d.exists():
-        for p in d.iterdir():
-            if not (p.is_file() and _is_image(p)):
-                continue
+    if not (d.exists() and d.is_dir()):
+        return right, left_front, left_back
 
-            name = p.name
-            side_key = "R"
-            bag_count = 1
+    for p in d.iterdir():
+        if not (p.is_file() and _is_image(p)):
+            continue
 
-            if "_" in name:
-                prefix = name.split("_", 1)[0]      # R3, LF2, LB10...
-                letters = "".join(ch for ch in prefix if ch.isalpha()).upper()
-                digits  = "".join(ch for ch in prefix if ch.isdigit())
+        name = p.name
+        side_key = "R"
+        bag_count = 1
 
-                if digits:
-                    try:
-                        bag_count = max(1, int(digits))
-                    except ValueError:
-                        bag_count = 1
+        if "_" in name:
+            prefix = name.split("_", 1)[0]  # R3, LF2, LB10...
+            letters = "".join(ch for ch in prefix if ch.isalpha()).upper()
+            digits = "".join(ch for ch in prefix if ch.isdigit())
 
-                if letters in ("R", "LF", "LB"):
-                    side_key = letters
+            if digits:
+                try:
+                    bag_count = max(1, int(digits))
+                except ValueError:
+                    bag_count = 1
 
-            if side_key == "R":
-                right = max(right, bag_count)
-            elif side_key == "LF":
-                left_front = max(left_front, bag_count)
-            elif side_key == "LB":
-                left_back = max(left_back, bag_count)
-            else:
-                right = max(right, bag_count)
+            if letters in ("R", "LF", "LB"):
+                side_key = letters
 
-    return right, left_front, left_back
-
-# ================== Galeri / Sayaç ==================
-
-def _scan_counts(d: Path) -> tuple[int, int, int]:
-    """
-    Klasördeki dosya adlarına bakarak
-    sağ / sol ön / sol arka için MAX bagaj adetlerini bulur.
-    Dosya adı formatı: R3_..., LF2_..., LB10_...
-    """
-    right = left_front = left_back = 0
-
-    if d.exists():
-        for p in d.iterdir():
-            if not (p.is_file() and _is_image(p)):
-                continue
-
-            name = p.name
-            side_key = "R"
-            bag_count = 1
-
-            if "_" in name:
-                prefix = name.split("_", 1)[0]      # R3, LF2, LB10...
-                letters = "".join(ch for ch in prefix if ch.isalpha()).upper()
-                digits  = "".join(ch for ch in prefix if ch.isdigit())
-
-                if digits:
-                    try:
-                        bag_count = max(1, int(digits))
-                    except ValueError:
-                        bag_count = 1
-
-                if letters in ("R", "LF", "LB"):
-                    side_key = letters
-
-            if side_key == "R":
-                right = max(right, bag_count)
-            elif side_key == "LF":
-                left_front = max(left_front, bag_count)
-            elif side_key == "LB":
-                left_back = max(left_back, bag_count)
-            else:
-                right = max(right, bag_count)
+        if side_key == "R":
+            right = max(right, bag_count)
+        elif side_key == "LF":
+            left_front = max(left_front, bag_count)
+        elif side_key == "LB":
+            left_back = max(left_back, bag_count)
+        else:
+            right = max(right, bag_count)
 
     return right, left_front, left_back
 
@@ -234,10 +151,9 @@ def gallery():
     - ?format=json: sağ / sol ön / sol arka sayaç
     """
 
-    # Ortak alanlar (hem GET hem POST)
     trip = request.values.get("trip", "") or request.values.get("trip_code", "")
     seat = request.values.get("seat", "")
-    fmt = request.args.get("format", "").lower()
+    fmt = (request.args.get("format", "") or "").lower()
 
     # Koltuk ekranından gelen yön & adet (oklarla oynuyor ya)
     side = (request.values.get("side", "R") or "R").upper()
@@ -253,7 +169,7 @@ def gallery():
 
     d = seat_dir(trip, seat)
 
-    # ================= JSON sayaç =================
+    # ---------------- JSON sayaç ----------------
     if request.method == "GET" and fmt == "json":
         right, left_front, left_back = _scan_counts(d)
         total = right + left_front + left_back
@@ -265,12 +181,11 @@ def gallery():
             left_back=int(left_back),
         )
 
-    # ================= POST: foto yükleme =================
+    # ---------------- POST: foto yükleme ----------------
     if request.method == "POST":
         _check_csrf()
 
         if not (trip and seat):
-            # Güvenlik için: parametre yoksa koltuk ekranına at
             return redirect("/seats")
 
         files = request.files.getlist("files") or []
@@ -278,45 +193,38 @@ def gallery():
 
         # Mevcut sayaçları klasörden oku
         right, left_front, left_back = _scan_counts(d)
+        existing = right if side == "R" else left_front if side == "LF" else left_back
 
-        if side == "R":
-            existing = right
-        elif side == "LF":
-            existing = left_front
-        else:
-            existing = left_back
-
-        # Eğer o gözde hiç kayıt yoksa, koltuktan gelen değeri (veya 1) kullan
+        # Eğer o gözde hiç kayıt yoksa, koltuktan gelen değeri kullan
         if existing <= 0:
             existing = bag_count_default or 1
 
-        # ÖNEMLİ: ekstra fotoğraflar da aynı adetle kaydedilecek,
-        # böylece koltuk ekranındaki sayaç artmıyor.
+        # Ekstra fotoğraflar da aynı adetle kaydedilecek (sayaç şişmesin)
         bag_count = existing
 
         for f in files:
             if not f or not f.filename:
                 continue
+
             ext = (os.path.splitext(f.filename)[1] or ".jpg").lower()
             ts = int(time.time() * 1000)
 
             # yön + mevcut adet prefix
             name = f"{side}{bag_count}_{ts}_{safe(seat) or 'bag'}{ext}"
-
             p = d / name
             f.save(p)
+
             try:
                 ensure_thumb(p)
             except Exception:
                 pass
 
-        # Aynı koltuğun galeri sayfasına dön (loop yok)
         return redirect(url_for("bags.gallery", trip=trip, seat=seat))
 
-    # ================= GET: HTML galeri =================
-    nxt = "/seats"  # Koltuk ekranına dön
-
+    # ---------------- GET: HTML galeri ----------------
+    nxt = "/seats"
     imgs: list[tuple[str, str]] = []
+
     if trip and seat and d.exists():
         for p in sorted(d.iterdir()):
             if p.is_file() and _is_image(p):
@@ -361,13 +269,8 @@ def gallery():
         align-items:flex-start;
         flex-wrap:wrap;
       }
-      .gallery-col{
-        flex:1 1 220px;
-      }
-      .form-col{
-        flex:0 0 260px;
-        max-width:260px;
-      }
+      .gallery-col{ flex:1 1 220px; }
+      .form-col{ flex:0 0 260px; max-width:260px; }
 
       .top-card{
         background:#020617;
@@ -494,7 +397,7 @@ def gallery():
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
               <input type="hidden" name="trip"  value="{{ trip }}">
               <input type="hidden" name="seat"  value="{{ seat }}">
-              <!-- yön & adet koltuktan geliyor, kullanıcı görmüyor -->
+              <!-- yön & adet koltuktan geliyor -->
               <input type="hidden" name="side" value="{{ side }}">
               <input type="hidden" name="bag_count" value="{{ bag_count }}">
 
@@ -530,6 +433,7 @@ def gallery():
         bag_count=bag_count_default,
     )
 
+
 @bp.route("/clear", methods=["DELETE"])
 def clear_bags():
     _check_csrf()
@@ -541,6 +445,7 @@ def clear_bags():
 
     d = seat_dir(trip, seat)
     removed = 0
+
     if d.exists():
         for p in d.iterdir():
             try:
@@ -598,9 +503,7 @@ def capture():
         trip = request.form.get("trip_code", "")
         seat = request.form.get("seat", "")
         to = request.form.get("to_stop", "")
-        nxt = _normalize_next(
-            request.form.get("next") or request.headers.get("Referer")
-        )
+        nxt = _normalize_next(request.form.get("next") or request.headers.get("Referer"))
 
         side = (request.form.get("side", "R") or "R").upper()
         if side not in ("R", "LF", "LB"):
@@ -644,12 +547,9 @@ def capture():
                          display:flex;flex-direction:column;
                          align-items:center;justify-content:center;
                          gap:10px;height:100vh;margin:0">
-              <h2 style="margin:0;font-size:22px">
-                ✅ {{ n }} fotoğraf kaydedildi
-              </h2>
+              <h2 style="margin:0;font-size:22px">✅ {{ n }} fotoğraf kaydedildi</h2>
               <p style="margin:0 16px 6px;text-align:center;opacity:.85">
-                Sefer: <b>{{ trip or '-' }}</b> •
-                Koltuk: <b>{{ seat or '-' }}</b>
+                Sefer: <b>{{ trip or '-' }}</b> • Koltuk: <b>{{ seat or '-' }}</b>
               </p>
               <div style="display:flex;gap:8px;">
                 <a href="{{ nxt }}"
@@ -658,11 +558,7 @@ def capture():
                           text-decoration:none;font-weight:700;">
                   ◀ Koltuk ekranına dön
                 </a>
-                <a href="{{ url_for('bags.capture',
-                                    trip_code=trip,
-                                    seat=seat,
-                                    to_stop=to,
-                                    next=nxt) }}"
+                <a href="{{ url_for('bags.capture', trip_code=trip, seat=seat, to_stop=to, next=nxt) }}"
                    style="padding:8px 14px;border-radius:999px;
                           background:#1f2937;color:#e5e7eb;
                           text-decoration:none;font-weight:500;">
@@ -697,69 +593,27 @@ def capture():
           <meta name="viewport" content="width=device-width,initial-scale=1">
           <title>Bagaj Yükle</title>
           <style>
-            body{
-              margin:0;
-              font-family:system-ui,sans-serif;
-              background:#020617;
-              color:#e5e7eb;
-            }
-            .page{
-              max-width:480px;
-              margin:0 auto;
-              padding:16px 16px 32px;
-            }
-            h1{
-              font-size:24px;
-              margin:0 0 16px;
-              display:flex;
-              align-items:center;
-              gap:8px;
-            }
+            body{ margin:0; font-family:system-ui,sans-serif; background:#020617; color:#e5e7eb; }
+            .page{ max-width:480px; margin:0 auto; padding:16px 16px 32px; }
+            h1{ font-size:24px; margin:0 0 16px; display:flex; align-items:center; gap:8px; }
             .card{
-              background:#020617;
-              border-radius:16px;
-              padding:16px 14px 20px;
-              box-shadow:0 18px 45px rgba(0,0,0,0.55);
-              border:1px solid #0f172a;
+              background:#020617; border-radius:16px; padding:16px 14px 20px;
+              box-shadow:0 18px 45px rgba(0,0,0,0.55); border:1px solid #0f172a;
             }
             .row{ margin-bottom:12px; }
-            label{
-              font-size:13px;
-              opacity:.8;
-              display:block;
-              margin-bottom:4px;
-            }
+            label{ font-size:13px; opacity:.8; display:block; margin-bottom:4px; }
             select,input[type="text"]{
-              width:100%;
-              padding:7px 10px;
-              border-radius:10px;
-              border:1px solid #1f2933;
-              background:#020617;
-              color:#e5e7eb;
-              font-size:15px;
+              width:100%; padding:7px 10px; border-radius:10px;
+              border:1px solid #1f2933; background:#020617; color:#e5e7eb; font-size:15px;
             }
-            input[type="file"]{
-              width:100%;
-              font-size:14px;
-            }
+            input[type="file"]{ width:100%; font-size:14px; }
             .btn-main{
-              width:100%;
-              padding:10px 14px;
-              border-radius:999px;
-              border:none;
-              background:#22c55e;
-              color:#022c22;
-              font-weight:700;
-              font-size:16px;
+              width:100%; padding:10px 14px; border-radius:999px; border:none;
+              background:#22c55e; color:#022c22; font-weight:700; font-size:16px;
             }
             .back{
-              margin-top:14px;
-              display:inline-flex;
-              align-items:center;
-              gap:6px;
-              color:#93c5fd;
-              text-decoration:none;
-              font-size:14px;
+              margin-top:14px; display:inline-flex; align-items:center; gap:6px;
+              color:#93c5fd; text-decoration:none; font-size:14px;
             }
           </style>
         </head>
@@ -801,23 +655,14 @@ def capture():
 
                 <div class="row">
                   <label for="files">Fotoğraf(lar):</label>
-                  <input id="files"
-                         name="files"
-                         type="file"
-                         accept="image/*"
-                         capture="environment"
-                         multiple>
+                  <input id="files" name="files" type="file" accept="image/*" capture="environment" multiple>
                 </div>
 
-                <button class="btn-main" type="submit">
-                  Kaydet
-                </button>
+                <button class="btn-main" type="submit">Kaydet</button>
               </form>
             </div>
 
-            <a class="back" href="{{ nxt }}">
-              ◀ Koltuk ekranına dön
-            </a>
+            <a class="back" href="{{ nxt }}">◀ Koltuk ekranına dön</a>
           </div>
         </body>
         </html>

@@ -29,7 +29,7 @@ app.secret_key = os.getenv("SECRET_KEY", "degistir-beni")
 
 DB_PATH = os.getenv("DB_PATH", "db.sqlite3")
 DEBUG = env_bool("FLASK_DEBUG", True)
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "volkan")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "yusuf")
 from modules.bags import bp as bags_bp
 app.register_blueprint(bags_bp)
 # ========== TL Format Filtresi ==========
