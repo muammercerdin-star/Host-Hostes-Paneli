@@ -2,21 +2,21 @@ from __future__ import annotations
 
 import json
 import os
-import time
 import secrets
+import time
 from pathlib import Path
 from urllib.parse import urlparse
 
 from flask import (
     Blueprint,
-    request,
-    render_template_string,
-    jsonify,
-    send_from_directory,
-    current_app,
     abort,
-    session,
+    current_app,
+    jsonify,
     redirect,
+    render_template_string,
+    request,
+    send_from_directory,
+    session,
     url_for,
 )
 from PIL import Image
@@ -39,7 +39,7 @@ def _check_csrf() -> None:
         abort(403, description="CSRF doğrulaması başarısız")
 
 
-# ------------- Yardımcılar -----------
+# ------------- URL yardımcılar ----------
 def _normalize_next(url: str | None) -> str:
     path = urlparse(url or "").path
     if not path:
@@ -52,9 +52,7 @@ def _normalize_next(url: str | None) -> str:
 
 
 def _back_url() -> str:
-    return _normalize_next(
-        request.values.get("next") or request.headers.get("Referer") or "/seats"
-    )
+    return _normalize_next(request.values.get("next") or request.headers.get("Referer") or "/seats")
 
 
 # ------------- Depo yolları ----------
@@ -77,13 +75,10 @@ def thumb_path(img_path: Path) -> Path:
 
 
 def _is_image(p: Path) -> bool:
-    return (
-        p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}
-        and ".thumb." not in p.name.lower()
-    )
+    return p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"} and ".thumb." not in p.name.lower()
 
 
-def ensure_thumb(img_path: Path) -> None:
+def ensure_thumb(img_path: Path):
     """Var olmayan thumb'ı üret."""
     if ".thumb." in img_path.name.lower():
         return
@@ -98,105 +93,134 @@ def ensure_thumb(img_path: Path) -> None:
         pass
 
 
-# ------------- META (foto olmasa bile sayacı tut) ----------
+# ------------- meta.json (adet kaydı) ----------
 def meta_path(trip: str, seat: str) -> Path:
     return seat_dir(trip, seat) / "meta.json"
 
 
 def read_meta(trip: str, seat: str) -> dict:
     p = meta_path(trip, seat)
-    if p.exists():
-        try:
-            return json.loads(p.read_text(encoding="utf-8"))
-        except Exception:
-            return {}
-    return {}
+    if not p.exists():
+        return {}
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
 
 
-def write_meta(trip: str, seat: str, data: dict) -> None:
+def write_meta(trip: str, seat: str, meta: dict) -> None:
     d = seat_dir(trip, seat)
     d.mkdir(parents=True, exist_ok=True)
     p = meta_path(trip, seat)
-    p.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    try:
+        p.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception:
+        # yazamazsa sessiz geç (uygulama çökmemeli)
+        pass
 
 
 def get_counts(trip: str, seat: str) -> tuple[int, int, int]:
-    """R / LF / LB sayaçlarını meta.json'dan oku."""
+    """
+    Önce meta.json -> counts.
+    Eğer meta yoksa klasörden scan ile MAX prefix'i yakala.
+    """
     meta = read_meta(trip, seat) or {}
-    counts = meta.get("counts") or {}
-    r = int(counts.get("R", 0) or 0)
-    lf = int(counts.get("LF", 0) or 0)
-    lb = int(counts.get("LB", 0) or 0)
-    return r, lf, lb
+    counts = meta.get("counts")
+    if isinstance(counts, dict):
+        try:
+            r = int(counts.get("R", 0) or 0)
+            lf = int(counts.get("LF", 0) or 0)
+            lb = int(counts.get("LB", 0) or 0)
+            return max(0, r), max(0, lf), max(0, lb)
+        except Exception:
+            pass
+
+    # fallback: klasörden tara
+    d = seat_dir(trip, seat)
+    return _scan_counts(d)
 
 
-def set_count(trip: str, seat: str, side: str, count: int, has_photos: bool) -> None:
-    """Seçilen side için bagaj adedini kaydet + event logla."""
-    side = (side or "R").upper()
-    if side not in ("R", "LF", "LB"):
-        side = "R"
+def _scan_counts(d: Path) -> tuple[int, int, int]:
+    """
+    Klasördeki dosya adlarına bakarak
+    sağ / sol ön / sol arka için MAX bagaj adetlerini bulur.
+    Dosya adı formatı: R3_..., LF2_..., LB10_...
+    """
+    right = left_front = left_back = 0
+    if not (d.exists() and d.is_dir()):
+        return right, left_front, left_back
 
-    count = int(count)
-    count = max(0, min(count, 10))
+    for p in d.iterdir():
+        if not (p.is_file() and _is_image(p)):
+            continue
 
-    meta = read_meta(trip, seat) or {}
-    meta.setdefault("trip", trip)
-    meta.setdefault("seat", seat)
-    meta.setdefault("counts", {"R": 0, "LF": 0, "LB": 0})
-    meta["counts"][side] = count
-    meta["updated_at"] = int(time.time())
+        name = p.name
+        side_key = "R"
+        bag_count = 1
 
-    meta.setdefault("events", [])
-    meta["events"].append(
-        {
-            "t": int(time.time()),
-            "type": "set_counts",
-            "side": side,
-            "count": int(count),
-            "has_photos": bool(has_photos),
-        }
-    )
+        if "_" in name:
+            prefix = name.split("_", 1)[0]  # R3, LF2, LB10...
+            letters = "".join(ch for ch in prefix if ch.isalpha()).upper()
+            digits = "".join(ch for ch in prefix if ch.isdigit())
 
-    write_meta(trip, seat, meta)
+            if digits:
+                try:
+                    bag_count = max(1, int(digits))
+                except ValueError:
+                    bag_count = 1
+
+            if letters in ("R", "LF", "LB"):
+                side_key = letters
+
+        if side_key == "R":
+            right = max(right, bag_count)
+        elif side_key == "LF":
+            left_front = max(left_front, bag_count)
+        elif side_key == "LB":
+            left_back = max(left_back, bag_count)
+        else:
+            right = max(right, bag_count)
+
+    return right, left_front, left_back
 
 
-# ================== GALERİ ==================
+def _pick_default_side(trip: str, seat: str, requested: str | None) -> str:
+    """
+    side gelirse onu kullan.
+    side gelmezse:
+      - meta/scan ile hangi göz doluysa onu seç
+      - karışık/boş ise R
+    """
+    s = (requested or "").upper().strip()
+    if s in ("R", "LF", "LB"):
+        return s
+
+    r, lf, lb = get_counts(trip, seat)
+    if r > 0 and lf == 0 and lb == 0:
+        return "R"
+    if lf > 0 and r == 0 and lb == 0:
+        return "LF"
+    if lb > 0 and r == 0 and lf == 0:
+        return "LB"
+    return "R"
+
+
+# =========================
+#        /bags  (GALERİ)
+# =========================
 @bp.route("", methods=["GET", "POST"])
 def gallery():
     """
     - GET: galeri sayfası
-    - POST: aynı sayfadan fotoğraf yükleme
-    - ?format=json: sağ / sol ön / sol arka sayaç (meta.json)
+    - POST: aynı sayfadan fotoğraf yükleme (foto olmasa bile adet kaydı)
+    - ?format=json: sağ / sol ön / sol arka sayaç
     """
 
     trip = request.values.get("trip", "") or request.values.get("trip_code", "")
     seat = request.values.get("seat", "")
     fmt = (request.args.get("format", "") or "").lower()
 
-# Koltuk ekranından gelen yön (side) - GELMEZSE otomatik tahmin et
-side_raw = (request.values.get("side") or "").upper().strip()
-
-d = seat_dir(trip, seat)
-
-if side_raw in ("R", "LF", "LB"):
-    side = side_raw
-else:
-    # side gelmediyse: mevcut kayıtlı göz hangisiyse onu seç
-    right, left_front, left_back = _scan_counts(d)
-
-    if right > 0 and left_front == 0 and left_back == 0:
-        side = "R"
-    elif left_front > 0 and right == 0 and left_back == 0:
-        side = "LF"
-    elif left_back > 0 and right == 0 and left_front == 0:
-        side = "LB"
-    else:
-        # karışık / boş ise default
-        side = "R"
-
+    # koltuktan gelen default adet
     bag_raw = request.values.get("bag_count", "") or "1"
     try:
         bag_count_default = int(bag_raw)
@@ -204,60 +228,82 @@ else:
         bag_count_default = 1
     bag_count_default = max(1, min(bag_count_default, 10))
 
+    # side (gelmezse tahmin)
+    side = _pick_default_side(trip, seat, request.values.get("side"))
+
     d = seat_dir(trip, seat)
 
-    # ---------------- JSON sayaç ----------------
+    # -------- JSON sayaç --------
     if request.method == "GET" and fmt == "json":
         if not (trip and seat):
             return jsonify(ok=False, msg="trip/seat gerekli"), 400
+        r, lf, lb = get_counts(trip, seat)
+        total = r + lf + lb
+        return jsonify(ok=True, count=int(total), right=int(r), left_front=int(lf), left_back=int(lb))
 
-        right, left_front, left_back = get_counts(trip, seat)
-        total = right + left_front + left_back
-        return jsonify(
-            ok=True,
-            count=int(total),
-            right=int(right),
-            left_front=int(left_front),
-            left_back=int(left_back),
-        )
-
-    # ---------------- POST: foto yükleme ----------------
+    # -------- POST: foto yükleme + adet kaydı --------
     if request.method == "POST":
         _check_csrf()
 
         if not (trip and seat):
             return redirect("/seats")
 
+        # side: formdan gelebilir, gelmezse tahmin
+        side = _pick_default_side(trip, seat, request.values.get("side"))
+
+        # formdan gelen bag_count (adet)
+        bag_raw2 = request.values.get("bag_count", "") or "1"
+        try:
+            bag_count_in = int(bag_raw2)
+        except ValueError:
+            bag_count_in = 1
+        bag_count_in = max(1, min(bag_count_in, 10))
+
         files = request.files.getlist("files") or []
         d.mkdir(parents=True, exist_ok=True)
 
-        # ✅ FOTO YOKSA BİLE BAGAJ ADEDİNİ KAYDET (meta.json)
-        set_count(trip, seat, side, bag_count_default, has_photos=bool(files))
+        # ✅ FOTO YOKSA BİLE ADEDİ KAYDET (meta.json)
+        meta = read_meta(trip, seat) or {}
+        meta.setdefault("trip", trip)
+        meta.setdefault("seat", seat)
+        meta.setdefault("counts", {"R": 0, "LF": 0, "LB": 0})
+        meta.setdefault("events", [])
 
-        # Foto varsa kaydet
-        if files:
-            # Dosya adında sayıyı gösterelim: R3_... LF2_...
-            bag_count = bag_count_default
+        meta["counts"][side] = int(bag_count_in)
+        meta["updated_at"] = int(time.time())
+        meta["events"].append(
+            {
+                "t": int(time.time()),
+                "type": "set_counts",
+                "side": side,
+                "count": int(bag_count_in),
+                "has_photos": bool(files),
+            }
+        )
+        write_meta(trip, seat, meta)
 
-            for f in files:
-                if not f or not f.filename:
-                    continue
+        # ✅ Foto isim prefix’i: "ok gibi artmasın"
+        # Foto eklemek "yeni adet" yaratmaz -> her zaman meta'daki sayı ile kaydet.
+        bag_count_for_files = int(bag_count_in)
 
-                ext = (os.path.splitext(f.filename)[1] or ".jpg").lower()
-                ts = int(time.time() * 1000)
-                name = f"{side}{bag_count}_{ts}_{safe(seat) or 'bag'}{ext}"
+        for f in files:
+            if not f or not f.filename:
+                continue
 
-                p = d / name
-                f.save(p)
+            ext = (os.path.splitext(f.filename)[1] or ".jpg").lower()
+            ts = int(time.time() * 1000)
 
-                try:
-                    ensure_thumb(p)
-                except Exception:
-                    pass
+            name = f"{side}{bag_count_for_files}_{ts}_{safe(seat) or 'bag'}{ext}"
+            p = d / name
+            f.save(p)
+            try:
+                ensure_thumb(p)
+            except Exception:
+                pass
 
         return redirect(url_for("bags.gallery", trip=trip, seat=seat))
 
-    # ---------------- GET: HTML galeri ----------------
+    # -------- GET: HTML galeri --------
     nxt = "/seats"
     imgs: list[tuple[str, str]] = []
 
@@ -273,37 +319,144 @@ else:
     tpl = """
     <meta name=viewport content="width=device-width, initial-scale=1, viewport-fit=cover">
     <style>
-      body{background:#101417;color:#eef;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;}
+      body{
+        background:#101417;
+        color:#eef;
+        font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+        margin:0;
+      }
       .wrap{max-width:960px;margin:auto;padding:10px}
-      .bar{display:flex;gap:8px;align-items:center;margin:8px 0 14px;justify-content:space-between;}
+
+      .bar{
+        display:flex;
+        gap:8px;
+        align-items:center;
+        margin:8px 0 14px;
+        justify-content:space-between;
+      }
       .muted{opacity:.8;font-size:13px}
-      a.btn{background:#2563eb;color:#fff;text-decoration:none;padding:8px 12px;border-radius:10px;display:inline-block;font-size:14px;}
-      .main-row{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;}
-      .gallery-col{flex:1 1 220px;}
-      .form-col{flex:0 0 260px;max-width:260px;}
-      .top-card{background:#020617;border-radius:18px;padding:14px 14px 18px;border:1px solid #111827;}
-      .top-card h2{margin:0 0 10px;font-size:16px;}
-      label{font-size:13px;opacity:.9;display:block;margin-bottom:4px;}
-      input[type="file"]{width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2933;background:#020617;color:#e5e7eb;font-size:13px;}
-      .btn-main{width:100%;margin-top:10px;padding:9px 14px;border-radius:999px;border:none;background:#22c55e;color:#022c22;font-weight:700;font-size:14px;}
-      .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
-      .card{background:#1b2126;border:1px solid #30363d;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;}
+      a.btn{
+        background:#2563eb;
+        color:#fff;
+        text-decoration:none;
+        padding:8px 12px;
+        border-radius:10px;
+        display:inline-block;
+        font-size:14px;
+      }
+
+      .main-row{
+        display:flex;
+        gap:16px;
+        align-items:flex-start;
+        flex-wrap:wrap;
+      }
+      .gallery-col{ flex:1 1 220px; }
+      .form-col{ flex:0 0 280px; max-width:280px; }
+
+      .top-card{
+        background:#020617;
+        border-radius:18px;
+        padding:14px 14px 18px;
+        border:1px solid #111827;
+      }
+      .top-card h2{
+        margin:0 0 10px;
+        font-size:16px;
+      }
+
+      label{font-size:13px;opacity:.9;display:block;margin-bottom:4px}
+      select{
+        width:100%;
+        padding:8px 10px;
+        border-radius:12px;
+        border:1px solid #1f2933;
+        background:#020617;
+        color:#e5e7eb;
+        font-size:14px;
+      }
+
+      /* Kamera / Galeri */
+      .pick-row{display:flex; gap:10px; margin-top:10px;}
+      .pick-btn{
+        flex:1;
+        text-align:center;
+        padding:10px 12px;
+        border-radius:999px;
+        border:1px solid #1f2933;
+        background:#0b1220;
+        color:#e5e7eb;
+        font-weight:700;
+        font-size:14px;
+        cursor:pointer;
+        user-select:none;
+      }
+      .pick-btn:active{transform:scale(.98)}
+      .hidden-file{display:none}
+
+      .btn-main{
+        width:100%;
+        margin-top:12px;
+        padding:10px 14px;
+        border-radius:999px;
+        border:none;
+        background:#22c55e;
+        color:#022c22;
+        font-weight:900;
+        font-size:15px;
+      }
+
+      .grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+        gap:10px;
+      }
+      .card{
+        background:#1b2126;
+        border:1px solid #30363d;
+        border-radius:14px;
+        overflow:hidden;
+        display:flex;
+        flex-direction:column;
+      }
       .t{text-align:center;padding:6px 6px 4px;font-weight:700;font-size:13px}
-      img{display:block;width:100%;height:160px;object-fit:cover;background:#0b0e10;}
+      img{
+        display:block;
+        width:100%;
+        height:160px;
+        object-fit:cover;
+        background:#0b0e10;
+      }
       .del-form{margin:4px 6px 10px;}
-      .del-btn{width:100%;padding:5px 8px;border-radius:999px;border:none;font-size:12px;background:#b91c1c;color:#fee2e2;font-weight:600;}
-      @media (max-width: 720px){.main-row{flex-direction:column;}.form-col{flex:1 1 auto;max-width:none;}}
+      .del-btn{
+        width:100%;
+        padding:6px 8px;
+        border-radius:999px;
+        border:none;
+        font-size:12px;
+        background:#b91c1c;
+        color:#fee2e2;
+        font-weight:800;
+      }
+
+      @media (max-width: 720px){
+        .main-row{flex-direction:column;}
+        .form-col{flex:1 1 auto;max-width:none;}
+      }
     </style>
 
     <div class="wrap">
       <div class="bar">
-        <div class="muted">Sefer: <b>{{trip or "-"}}</b> • Koltuk: <b>{{seat or "-"}}</b></div>
+        <div class="muted">
+          Sefer: <b>{{trip or "-"}}</b> • Koltuk: <b>{{seat or "-"}}</b>
+        </div>
         <a class="btn" href="{{ nxt }}">Koltuk ekranına dön</a>
       </div>
 
       {% if not trip or not seat %}
         <p class="muted">Önce koltuk ekranından bir koltuk seçip bagaj ekranına gel.</p>
       {% else %}
+
       <div class="main-row">
 
         <div class="gallery-col">
@@ -314,7 +467,8 @@ else:
               {% for fn,tn in imgs %}
                 <div class="card">
                   <a href="{{ url_for('bags.raw', trip=trip, seat=seat, filename=fn) }}">
-                    <img loading="lazy" src="{{ url_for('bags.thumb', trip=trip, seat=seat, filename=tn) }}">
+                    <img loading="lazy"
+                         src="{{ url_for('bags.thumb', trip=trip, seat=seat, filename=tn) }}">
                   </a>
                   <div class="t">#{{ loop.index }}</div>
                   <form class="del-form" method="post" action="{{ url_for('bags.delete_one') }}">
@@ -333,66 +487,46 @@ else:
         <div class="form-col">
           <div class="top-card">
             <h2>Yeni fotoğraf ekle</h2>
+
             <form method="post" action="{{ gallery_url }}" enctype="multipart/form-data">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
               <input type="hidden" name="trip"  value="{{ trip }}">
               <input type="hidden" name="seat"  value="{{ seat }}">
-              <input type="hidden" name="side" value="{{ side }}">
-              <input type="hidden" name="bag_count" value="{{ bag_count }}">
 
-<label>Fotoğraf:</label>
+              <label>Göz:</label>
+              <select name="side">
+                <option value="R"  {{ "selected" if side=="R"  else "" }}>Sağ göz</option>
+                <option value="LF" {{ "selected" if side=="LF" else "" }}>Sol ön</option>
+                <option value="LB" {{ "selected" if side=="LB" else "" }}>Sol arka</option>
+              </select>
 
-<!-- gizli inputlar -->
-<input id="files_cam"
-       name="files"
-       type="file"
-       accept="image/*"
-       capture="environment"
-       style="display:none"
-       multiple>
+              <label style="margin-top:10px;">Bagaj adedi:</label>
+              <select name="bag_count">
+                {% for i in range(1, 11) %}
+                  <option value="{{ i }}" {{ "selected" if bag_count==i else "" }}>{{ i }}</option>
+                {% endfor %}
+              </select>
 
-<input id="files_gallery"
-       name="files"
-       type="file"
-       accept="image/*"
-       style="display:none"
-       multiple>
+              <!-- Kamera / Galeri iki ayrı input -->
+              <input id="camFiles" class="hidden-file"
+                     name="files" type="file" accept="image/*"
+                     capture="environment" multiple>
 
-<!-- butonlar -->
-<div style="display:flex; gap:10px; margin-top:8px;">
-  <button type="button"
-          onclick="document.getElementById('files_cam').click()"
-          style="flex:1;padding:10px 12px;border-radius:999px;border:1px solid #1f2933;background:#0b1220;color:#e5e7eb;font-weight:700;">
-    📷 Kamera
-  </button>
+              <input id="galFiles" class="hidden-file"
+                     name="files" type="file" accept="image/*"
+                     multiple>
 
-  <button type="button"
-          onclick="document.getElementById('files_gallery').click()"
-          style="flex:1;padding:10px 12px;border-radius:999px;border:1px solid #1f2933;background:#0b1220;color:#e5e7eb;font-weight:700;">
-    🖼️ Galeri
-  </button>
-</div>
+              <div class="pick-row">
+                <label class="pick-btn" for="camFiles">📷 Kamera</label>
+                <label class="pick-btn" for="galFiles">🖼️ Galeri</label>
+              </div>
 
-<div id="picked_info" style="margin-top:8px; opacity:.8; font-size:13px;">
-  Seçim yapılmadı.
-</div>
-
-<script>
-  function updatePickedInfo(){
-    const cam = document.getElementById('files_cam').files.length;
-    const gal = document.getElementById('files_gallery').files.length;
-    const total = cam + gal;
-    document.getElementById('picked_info').textContent =
-      total ? (total + " dosya seçildi") : "Seçim yapılmadı.";
-  }
-  document.getElementById('files_cam').addEventListener('change', updatePickedInfo);
-  document.getElementById('files_gallery').addEventListener('change', updatePickedInfo);
-</script>
               <button type="submit" class="btn-main">Kaydet</button>
+
+              <p class="muted" style="margin:10px 0 0;">
+                Not: Fotoğraf seçmesen bile bagaj adedi kaydedilir.
+              </p>
             </form>
-            <p class="muted" style="margin:10px 0 0;">
-              Not: Fotoğraf seçmesen bile bagaj adedi kaydedilir.
-            </p>
           </div>
         </div>
 
@@ -414,6 +548,9 @@ else:
     )
 
 
+# =========================
+#      /bags/clear
+# =========================
 @bp.route("/clear", methods=["DELETE"])
 def clear_bags():
     _check_csrf()
@@ -442,6 +579,9 @@ def clear_bags():
     return jsonify(ok=True, removed=removed)
 
 
+# =========================
+#    /bags/delete-one
+# =========================
 @bp.route("/delete-one", methods=["POST"])
 def delete_one():
     _check_csrf()
@@ -472,7 +612,9 @@ def delete_one():
     return redirect(url_for("bags.gallery", trip=trip, seat=seat))
 
 
-# ------------- Yükleme (tam ekran sayfa) ---------------
+# =========================
+#     /bags/capture  (ESKİ)
+# =========================
 @bp.route("/capture", methods=["GET", "POST"])
 def capture():
     """Eski tam ekran bagaj yükleme sayfası (ihtiyaç olursa dursun)."""
@@ -480,14 +622,12 @@ def capture():
     if request.method == "POST":
         _check_csrf()
 
-        trip = request.form.get("trip_code", "")
+        trip = request.form.get("trip_code", "") or request.form.get("trip", "")
         seat = request.form.get("seat", "")
         to = request.form.get("to_stop", "")
         nxt = _normalize_next(request.form.get("next") or request.headers.get("Referer"))
 
-        side = (request.form.get("side", "R") or "R").upper()
-        if side not in ("R", "LF", "LB"):
-            side = "R"
+        side = _pick_default_side(trip, seat, request.form.get("side"))
 
         bag_raw = request.form.get("bag_count") or "1"
         try:
@@ -500,9 +640,26 @@ def capture():
         d = seat_dir(trip, seat)
         d.mkdir(parents=True, exist_ok=True)
 
-        # ✅ FOTO YOKSA BİLE SAYACI KAYDET
-        set_count(trip, seat, side, bag_count, has_photos=bool(files))
+        # ✅ meta kaydı (foto olmasa bile)
+        meta = read_meta(trip, seat) or {}
+        meta.setdefault("trip", trip)
+        meta.setdefault("seat", seat)
+        meta.setdefault("counts", {"R": 0, "LF": 0, "LB": 0})
+        meta.setdefault("events", [])
+        meta["counts"][side] = int(bag_count)
+        meta["updated_at"] = int(time.time())
+        meta["events"].append(
+            {
+                "t": int(time.time()),
+                "type": "set_counts",
+                "side": side,
+                "count": int(bag_count),
+                "has_photos": bool(files),
+            }
+        )
+        write_meta(trip, seat, meta)
 
+        # Foto isim prefix'i sabit: bag_count
         saved = 0
         for f in files:
             if not f or not f.filename:
@@ -530,9 +687,9 @@ def capture():
                          display:flex;flex-direction:column;
                          align-items:center;justify-content:center;
                          gap:10px;height:100vh;margin:0">
-              <h2 style="margin:0;font-size:22px">✅ Kaydedildi</h2>
+              <h2 style="margin:0;font-size:22px">✅ {{ n }} fotoğraf kaydedildi</h2>
               <p style="margin:0 16px 6px;text-align:center;opacity:.85">
-                Sefer: <b>{{ trip or '-' }}</b> • Koltuk: <b>{{ seat or '-' }}</b> • Foto: <b>{{ n }}</b>
+                Sefer: <b>{{ trip or '-' }}</b> • Koltuk: <b>{{ seat or '-' }}</b>
               </p>
               <div style="display:flex;gap:8px;">
                 <a href="{{ nxt }}"
@@ -544,7 +701,7 @@ def capture():
                 <a href="{{ url_for('bags.capture', trip_code=trip, seat=seat, to_stop=to, next=nxt) }}"
                    style="padding:8px 14px;border-radius:999px;
                           background:#1f2937;color:#e5e7eb;
-                          text-decoration:none;font-weight:500;">
+                          text-decoration:none;font-weight:600;">
                   Yeni fotoğraf ekle
                 </a>
               </div>
@@ -562,9 +719,7 @@ def capture():
     to = request.args.get("to_stop", "")
     nxt = _back_url()
 
-    side = (request.args.get("side", "R") or "R").upper()
-    if side not in ("R", "LF", "LB"):
-        side = "R"
+    side = _pick_default_side(trip, seat, request.args.get("side"))
 
     bag_options = list(range(1, 11))
 
@@ -579,17 +734,33 @@ def capture():
             body{ margin:0; font-family:system-ui,sans-serif; background:#020617; color:#e5e7eb; }
             .page{ max-width:480px; margin:0 auto; padding:16px 16px 32px; }
             h1{ font-size:24px; margin:0 0 16px; display:flex; align-items:center; gap:8px; }
-            .card{ background:#020617; border-radius:16px; padding:16px 14px 20px;
-                   box-shadow:0 18px 45px rgba(0,0,0,0.55); border:1px solid #0f172a; }
+            .card{
+              background:#020617; border-radius:16px; padding:16px 14px 20px;
+              box-shadow:0 18px 45px rgba(0,0,0,0.55); border:1px solid #0f172a;
+            }
             .row{ margin-bottom:12px; }
             label{ font-size:13px; opacity:.8; display:block; margin-bottom:4px; }
-            select{ width:100%; padding:7px 10px; border-radius:10px;
-                    border:1px solid #1f2933; background:#020617; color:#e5e7eb; font-size:15px; }
-            input[type="file"]{ width:100%; font-size:14px; }
-            .btn-main{ width:100%; padding:10px 14px; border-radius:999px; border:none;
-                       background:#22c55e; color:#022c22; font-weight:700; font-size:16px; }
-            .back{ margin-top:14px; display:inline-flex; align-items:center; gap:6px;
-                   color:#93c5fd; text-decoration:none; font-size:14px; }
+            select,input[type="text"]{
+              width:100%; padding:8px 10px; border-radius:12px;
+              border:1px solid #1f2933; background:#020617; color:#e5e7eb; font-size:15px;
+            }
+            .pick-row{display:flex; gap:10px; margin-top:10px;}
+            .pick-btn{
+              flex:1; text-align:center; padding:10px 12px;
+              border-radius:999px; border:1px solid #1f2933;
+              background:#0b1220; color:#e5e7eb;
+              font-weight:800; font-size:14px; cursor:pointer; user-select:none;
+            }
+            .hidden-file{display:none}
+            .btn-main{
+              width:100%; padding:12px 14px; border-radius:999px; border:none;
+              background:#22c55e; color:#022c22; font-weight:900; font-size:16px;
+              margin-top:12px;
+            }
+            .back{
+              margin-top:14px; display:inline-flex; align-items:center; gap:6px;
+              color:#93c5fd; text-decoration:none; font-size:14px;
+            }
           </style>
         </head>
         <body>
@@ -628,65 +799,27 @@ def capture():
                   </select>
                 </div>
 
-<div class="row">
-  <label>Fotoğraf:</label>
+                <!-- Kamera/Galeri ayrı -->
+                <input id="camFiles" class="hidden-file"
+                       name="files" type="file" accept="image/*"
+                       capture="environment" multiple>
 
-  <!-- GİZLİ INPUTLAR -->
-  <input id="files_cam"
-         name="files"
-         type="file"
-         accept="image/*"
-         capture="environment"
-         style="display:none"
-         multiple>
+                <input id="galFiles" class="hidden-file"
+                       name="files" type="file" accept="image/*" multiple>
 
-  <input id="files_gallery"
-         name="files"
-         type="file"
-         accept="image/*"
-         style="display:none"
-         multiple>
+                <div class="row">
+                  <label>Fotoğraf:</label>
+                  <div class="pick-row">
+                    <label class="pick-btn" for="camFiles">📷 Kamera</label>
+                    <label class="pick-btn" for="galFiles">🖼️ Galeri</label>
+                  </div>
+                </div>
 
-  <!-- BUTONLAR -->
-  <div style="display:flex; gap:10px; margin-top:6px;">
-    <button type="button"
-            onclick="document.getElementById('files_cam').click()"
-            style="flex:1; padding:10px 12px; border-radius:999px;
-                   border:1px solid #1f2933; background:#0b1220;
-                   color:#e5e7eb; font-weight:700;">
-      📷 Kamera
-    </button>
-
-    <button type="button"
-            onclick="document.getElementById('files_gallery').click()"
-            style="flex:1; padding:10px 12px; border-radius:999px;
-                   border:1px solid #1f2933; background:#0b1220;
-                   color:#e5e7eb; font-weight:700;">
-      🖼️ Galeri
-    </button>
-  </div>
-
-  <div id="picked_info" style="margin-top:8px; opacity:.8; font-size:13px">
-    Seçim yapılmadı.
-  </div>
-</div>
-
-<script>
-  function updatePickedInfo(){
-    const cam = document.getElementById('files_cam').files.length;
-    const gal = document.getElementById('files_gallery').files.length;
-    const total = cam + gal;
-    document.getElementById('picked_info').textContent =
-      total ? (total + " dosya seçildi") : "Seçim yapılmadı.";
-  }
-  document.getElementById('files_cam').addEventListener('change', updatePickedInfo);
-  document.getElementById('files_gallery').addEventListener('change', updatePickedInfo);
-</script>
                 <button class="btn-main" type="submit">Kaydet</button>
+                <p style="margin:10px 0 0;opacity:.8;font-size:13px">
+                  Not: Fotoğraf seçmesen bile bagaj adedi kaydedilir.
+                </p>
               </form>
-              <p style="margin:10px 0 0;opacity:.8;font-size:13px">
-                Fotoğraf seçmesen bile bagaj adedi kaydedilir.
-              </p>
             </div>
 
             <a class="back" href="{{ nxt }}">◀ Koltuk ekranına dön</a>

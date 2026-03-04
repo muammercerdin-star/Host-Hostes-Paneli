@@ -738,15 +738,30 @@ def hesap_page():
     tid = get_active_trip()
     if not tid:
         return redirect(url_for("trip_start"))
+
     db = get_db()
-    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+
+    # trip: Row -> dict (tojson için şart)
+    trip_row = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    trip = dict(trip_row) if trip_row else {}
+
+    # sums: cash_sums ne döndürürse döndürsün, mümkünse dict yap
     sums = cash_sums(tid)
-    moves = db.execute(
+    try:
+        sums = dict(sums)
+    except Exception:
+        pass
+
+    # moves: Row list -> dict list (tojson için şart)
+    moves_rows = db.execute(
         "SELECT id, created_at, direction, category, amount, COALESCE(note,'') AS note "
         "FROM cash_moves WHERE trip_id=? ORDER BY id DESC LIMIT 100",
         (tid,)
     ).fetchall()
+    moves = [dict(r) for r in moves_rows]
+
     cats_in, cats_out = get_cash_categories()
+
     return render_template(
         "hesap.html",
         trip=trip,
@@ -757,61 +772,98 @@ def hesap_page():
         csrf_token=get_csrf(),
     )
 
+
 @app.post("/hesap/devir")
 def hesap_devir():
     check_csrf()
     tid = get_active_trip()
-    if not tid: return redirect(url_for("trip_start"))
+    if not tid:
+        return redirect(url_for("trip_start"))
+
     db = get_db()
-    try: amount = int(request.form.get("amount") or 0)
-    except: amount = 0
+
+    try:
+        amount = int(request.form.get("amount") or 0)
+    except Exception:
+        amount = 0
+
     note = (request.form.get("note") or "").strip()
+
     if amount > 0:
-        db.execute("INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
-                   (tid, '+', 'Devir', amount, note))
+        db.execute(
+            "INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
+            (tid, '+', 'Devir', amount, note)
+        )
         db.commit()
+
     return redirect(url_for("hesap_page"))
+
 
 @app.post("/hesap/giris")
 def hesap_giris():
     check_csrf()
     tid = get_active_trip()
-    if not tid: return redirect(url_for("trip_start"))
+    if not tid:
+        return redirect(url_for("trip_start"))
+
     db = get_db()
+
     cat = (request.form.get("category") or "Diğer").strip()
-    try: amount = int(request.form.get("amount") or 0)
-    except: amount = 0
+
+    try:
+        amount = int(request.form.get("amount") or 0)
+    except Exception:
+        amount = 0
+
     note = (request.form.get("note") or "").strip()
+
     if amount > 0:
-        db.execute("INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
-                   (tid, '+', cat, amount, note))
+        db.execute(
+            "INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
+            (tid, '+', cat, amount, note)
+        )
         db.commit()
+
     return redirect(url_for("hesap_page"))
+
 
 @app.post("/hesap/cikis")
 def hesap_cikis():
     check_csrf()
     tid = get_active_trip()
-    if not tid: return redirect(url_for("trip_start"))
+    if not tid:
+        return redirect(url_for("trip_start"))
+
     db = get_db()
+
     cat = (request.form.get("category") or "Diğer").strip()
-    try: amount = int(request.form.get("amount") or 0)
-    except: amount = 0
+
+    try:
+        amount = int(request.form.get("amount") or 0)
+    except Exception:
+        amount = 0
+
     note = (request.form.get("note") or "").strip()
+
     if amount > 0:
-        db.execute("INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
-                   (tid, '-', cat, amount, note))
+        db.execute(
+            "INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
+            (tid, '-', cat, amount, note)
+        )
         db.commit()
+
     return redirect(url_for("hesap_page"))
+
 
 @app.post("/hesap/kategoriler")
 def hesap_kategoriler_kaydet():
     check_csrf()
     save_cash_categories(
-        request.form.get("cats_in")  or "",
+        request.form.get("cats_in") or "",
         request.form.get("cats_out") or ""
     )
     return redirect(url_for("hesap_page"))
+
 
 @app.route("/hesap/moves.csv")
 def hesap_moves_csv():
@@ -824,13 +876,14 @@ def hesap_moves_csv():
     from flask import make_response
 
     db = get_db()
+
     rows = db.execute(
         "SELECT created_at, direction, category, note, amount "
         "FROM cash_moves WHERE trip_id=? ORDER BY id DESC",
         (tid,)
     ).fetchall()
 
-    # 💡 Row nesnelerini dict'e dönüştür (Excel uyumlu)
+    # Row -> dict (Excel uyumlu)
     rows = [dict(r) for r in rows]
 
     buf = StringIO()
@@ -839,14 +892,14 @@ def hesap_moves_csv():
 
     for r in rows:
         writer.writerow([
-            r["created_at"],
-            "+" if r["direction"] == "+" else "-",
-            r["category"],
-            r["note"] or "",
-            r["amount"]
+            r.get("created_at", ""),
+            "+" if r.get("direction") == "+" else "-",
+            r.get("category", ""),
+            r.get("note") or "",
+            r.get("amount", 0)
         ])
 
-    # ✅ UTF-8 BOM ekle → Excel’de Türkçe karakterler düzgün çıkar
+    # UTF-8 BOM → Excel’de Türkçe karakterler düzgün
     out = buf.getvalue().encode("utf-8-sig")
 
     resp = make_response(out)

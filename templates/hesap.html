@@ -2,197 +2,550 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Hesap — Sefer Kasa</title>
   <style>
-    body{font-family:system-ui,-apple-system,Roboto;background:#0b1115;color:#e6edf3;margin:0}
-    .container{max-width:940px;margin:auto;padding:18px}
-    .card{background:#11171c;border:1px solid #22303a;border-radius:12px;padding:14px;margin:12px 0;box-shadow:0 0 8px #0003}
-    h1{font-size:20px;margin:6px 0 10px}
-    label{font-size:12px;opacity:.8}
-    input,select,textarea,button{
-      width:100%;padding:10px;border-radius:10px;
-      border:1px solid #2a3946;background:#0b1217;color:#e6edf3
+    :root{
+      --bg:#0b1115;
+      --card:#11171c;
+      --card2:#0f161b;
+      --border:#22303a;
+      --border2:#2a3946;
+      --text:#e6edf3;
+      --muted:#a8b3bd;
+      --muted2:#7f8b96;
+      --primary:#1f6b2d;
+      --primary2:#2a8d3d;
+      --danger:#7b1f1f;
+      --danger2:#9a2a2a;
+      --warn:#d4a100;
+      --shadow:0 0 12px #0004;
+      --radius:14px;
+      --radius2:12px;
+      --pad:14px;
+      --tap:44px;
     }
-    button.primary{background:#1f6b2d;border-color:#2a7b3a;font-weight:700;cursor:pointer;transition:.2s}
-    button.primary:hover{background:#2a8d3d}
-    button.danger{background:#7b1f1f;border-color:#8a2a2a;cursor:pointer}
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Roboto,Segoe UI,Arial;
+      background:var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      padding-bottom:92px; /* fixed footer için */
+    }
+
+    a{color:inherit;text-decoration:none}
+
+    .container{max-width:980px;margin:auto;padding:18px}
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .title{
+      display:flex;gap:10px;align-items:center;
+      margin:6px 0 14px;
+    }
+    .title h1{font-size:18px;margin:0}
+    .title .pill{
+      font-size:12px;color:var(--muted);
+      border:1px solid var(--border);
+      background:#0c141a;
+      padding:6px 10px;border-radius:999px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:var(--pad);
+      margin:12px 0;
+      box-shadow:var(--shadow);
+    }
+
+    .muted{color:var(--muted);font-size:12px}
+    .muted2{color:var(--muted2);font-size:12px}
+    .h{font-weight:800;letter-spacing:.2px;margin:0 0 10px;font-size:14px}
+    .badge{
+      display:inline-flex;gap:6px;align-items:center;
+      background:#0c141a;border:1px solid #2b3a46;color:#c8d1d9;
+      padding:6px 10px;border-radius:999px;font-size:12px;
+      margin:6px 6px 0 0;
+    }
+
+    .kasa{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-bottom:12px;
+    }
+    .box{
+      background:var(--card2);
+      border:1px solid var(--border);
+      border-radius:var(--radius2);
+      padding:10px 10px 8px;
+      text-align:left;
+      min-height:74px;
+      display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .box .label{font-size:12px;color:var(--muted)}
+    .box .num{font-size:18px;font-weight:900;letter-spacing:.3px}
+    .pos{color:#29d884}
+    .neg{color:#ff5454}
+    .warn{color:var(--warn)}
+
+    .alertbar{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:10px 12px;border-radius:12px;margin-top:10px;
+      border:1px solid #3a2b2b;
+      background:linear-gradient(180deg,#1a1111,#120c0c);
+    }
+    .alertbar strong{color:#ff6b6b}
+    .alertbar .mini{font-size:12px;color:#f0baba}
+
+    label{font-size:12px;color:var(--muted);display:block;margin:10px 0 6px}
+    input,select,textarea,button{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid var(--border2);
+      background:#0b1217;
+      color:var(--text);
+      outline:none;
+      min-height:var(--tap);
+    }
+    textarea{resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:#3a5466;box-shadow:0 0 0 3px #0ea5e91c}
+
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
-    .kasa{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
-    .box{background:#0f161b;border:1px solid #22303a;border-radius:10px;padding:8px;text-align:center;transition:.3s}
-    .num{font-size:18px;font-weight:700}
-    .num.pos{color:#29d884}.num.neg{color:#ff5454}
-    .badge{display:inline-block;background:#25313b;border:1px solid #33414d;color:#c8d1d9;padding:4px 8px;border-radius:999px;font-size:12px;margin-right:6px}
+    @media (max-width: 900px){
+      .kasa{grid-template-columns:repeat(2,1fr)}
+      .grid3{grid-template-columns:1fr}
+      .grid2{grid-template-columns:1fr}
+    }
+
+    .btnrow{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-height:var(--tap);
+      padding:10px 12px;border-radius:12px;
+      border:1px solid var(--border2);
+      background:#0b1217;
+      cursor:pointer;
+      user-select:none;
+      transition:.15s;
+      font-weight:700;
+      font-size:14px;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn.primary{background:var(--primary);border-color:#2a7b3a}
+    .btn.primary:hover{background:var(--primary2)}
+    .btn.danger{background:var(--danger);border-color:#8a2a2a}
+    .btn.danger:hover{background:var(--danger2)}
+    .btn.ghost{background:transparent}
+    .btn.small{font-size:12px;padding:8px 10px;min-height:38px;border-radius:10px;font-weight:700}
+
+    .quick{
+      display:flex;gap:8px;flex-wrap:wrap;margin-top:10px
+    }
+    .chip{
+      border:1px solid #2f4353;background:#0c141a;color:#cfe3f2;
+      padding:8px 10px;border-radius:999px;font-size:12px;
+      cursor:pointer;user-select:none;
+      transition:.15s;
+    }
+    .chip:hover{transform:translateY(-1px);border-color:#3b5870}
+    .chip.warn{border-color:#5c4a1a;color:#ffe39a}
+
     .table{width:100%;border-collapse:collapse}
-    th,td{border-bottom:1px solid #22303a;padding:6px;text-align:left;font-size:13px}
-    tr.in td{color:#44d38f} tr.out td{color:#d44c4c}
-    .footerbar{position:sticky;bottom:0;background:#0b1115;border-top:1px solid #22303a;padding:8px;
-               display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-    .footerbar button{font-size:15px;padding:10px}
-    .small{font-size:12px;opacity:.75}
-    .fadeIn{animation:fadein .4s ease}
-    @keyframes fadein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+    th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;font-size:13px;vertical-align:top}
+    th{color:var(--muted);font-weight:700}
+    tr.in td{color:#44d38f}
+    tr.out td{color:#ff7070}
+    td.amount{white-space:nowrap;font-weight:900}
+    td.note{color:var(--text)}
+    .right{display:flex;gap:8px;align-items:center;justify-content:flex-end}
+
+    .toolbar{
+      display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;
+      margin:14px 0 6px;
+    }
+    .toolbar .left{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .toolbar .right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+    .searchwrap{
+      display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+      width:min(540px,100%);
+    }
+    .searchwrap input{min-height:40px;padding:10px 12px;border-radius:12px}
+
+    /* fixed footer */
+    .footerbar{
+      position:fixed;
+      left:0;right:0;bottom:0;
+      background:rgba(11,17,21,.92);
+      backdrop-filter: blur(10px);
+      border-top:1px solid var(--border);
+      padding:10px max(10px, env(safe-area-inset-left)) calc(10px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-right));
+    }
+    .footergrid{
+      max-width:980px;margin:auto;
+      display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+    }
+    .footergrid .btn{font-size:14px;padding:12px;border-radius:14px}
+
+    /* küçük animasyon */
+    .fadeIn{animation:fadein .35s ease}
+    @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   </style>
 </head>
+
 <body>
-<div class="container fadeIn">
-  <h1>🧾 Hesap / Aktif Sefer</h1>
+  <div class="container fadeIn">
 
-  <div class="card">
-    <div class="kasa">
-      <div class="box"><div>Başlangıç (Devir)</div><div class="num">{{ sums.devir|tl }}</div></div>
-      <div class="box"><div>Toplam Giriş</div><div class="num pos">{{ sums.giris|tl }}</div></div>
-      <div class="box"><div>Toplam Çıkış</div><div class="num neg">{{ sums.cikis|tl }}</div></div>
-      <div class="box"><div>Kalan</div>
-        <div class="num {{ 'pos' if sums.kalan >= 0 else 'neg' }}">{{ sums.kalan|tl }}</div>
-      </div>
-    </div>
-    <div class="small">
-      {% if trip.route %}<span class="badge">Hat: {{ trip.route }}</span>{% endif %}
-      {% if trip.date %}<span class="badge">Tarih: {{ trip.date }}</span>{% endif %}
-      {% if trip.departure_time %}<span class="badge">Kalkış: {{ trip.departure_time }}</span>{% endif %}
-    </div>
+<div class="title row">
+  <div style="display:flex;gap:10px;align-items:center;">
+    <a href="/" class="btn small ghost">🏠 Ana Sayfa</a>
+    <h1 style="margin:0;">🧾 Hesap / Aktif Sefer</h1>
   </div>
-
-  <div class="grid3">
-    <!-- DEVİR -->
-    <form class="card" method="post" action="{{ url_for('hesap_devir') }}">
-      <h1>⬆️ Devir (Başlangıç)</h1>
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <label>Tutar (TL)</label>
-      <input type="number" name="amount" min="0" required>
-      <label>Not (opsiyonel)</label>
-      <input type="text" name="note" placeholder="Garaj avansı">
-      <button class="primary" style="margin-top:8px">Kaydet</button>
-      <div class="small" style="margin-top:6px">Devir giriş olarak kaydedilir.</div>
-    </form>
-
-    <!-- GİRİŞ -->
-    <form class="card" method="post" action="{{ url_for('hesap_giris') }}">
-      <h1>➕ Giriş</h1>
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <label>Kategori</label>
-      <select name="category" id="cat_in">
-        {% for k in categories_in %}<option value="{{k}}">{{k}}</option>{% endfor %}
-      </select>
-      <label>Tutar (TL)</label>
-      <input type="number" name="amount" min="0" required>
-      <label>Açıklama</label>
-      <input type="text" name="note" placeholder="örn. Harem hesabı">
-      <button class="primary" style="margin-top:8px">Kaydet</button>
-    </form>
-
-    <!-- ÇIKIŞ -->
-    <form class="card" method="post" action="{{ url_for('hesap_cikis') }}">
-      <h1>➖ Çıkış</h1>
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <label>Kategori</label>
-      <select name="category" id="cat_out">
-        {% for k in categories_out %}<option value="{{k}}">{{k}}</option>{% endfor %}
-      </select>
-      <label>Tutar (TL)</label>
-      <input type="number" name="amount" min="0" required>
-      <label>Açıklama</label>
-      <input type="text" name="note" placeholder="örn. Yıkama">
-      <button class="primary" style="margin-top:8px">Kaydet</button>
-    </form>
-  </div>
-
-  <!-- KATEGORİLER -->
-  <form class="card" method="post" action="{{ url_for('hesap_kategoriler_kaydet') }}">
-    <h1>⚙️ Kategoriler</h1>
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <div class="grid2">
-      <div>
-        <label>Giriş Kategorileri</label>
-        <textarea name="cats_in" rows="5">{{ categories_in|join(', ') }}</textarea>
-      </div>
-      <div>
-        <label>Çıkış Kategorileri</label>
-        <textarea name="cats_out" rows="5">{{ categories_out|join(', ') }}</textarea>
-      </div>
-    </div>
-    <div style="margin-top:8px"><button class="primary">Kaydet</button></div>
-  </form>
-
-<div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
-  <h1>📋 Son Hareketler</h1>
-  <div style="display:flex;gap:8px">
-    <button type="button" class="primary" onclick="shareWhatsapp()">WhatsApp’a gönder</button>
-    <a href="{{ url_for('hesap_moves_csv') }}"><button type="button">CSV indir</button></a>
-    <button type="button" onclick="window.print()">Yazdır / PDF</button>
-  </div>
+  <span class="pill">Saha modu • hızlı giriş</span>
 </div>
 
-  <div class="card">
-    <h1>📋 Son Hareketler</h1>
-    <table class="table">
-      <thead>
-        <tr><th>Zaman</th><th>Yön</th><th>Kategori</th><th>Açıklama</th><th>Tutar</th></tr>
-      </thead>
-      <tbody>
-        {% for m in moves %}
-          <tr class="{{ 'in' if m.direction == '+' else 'out' }}">
-            <td>{{ m.created_at }}</td>
-            <td>{{ '+' if m.direction == '+' else '-' }}</td>
-            <td>{{ m.category }}</td>
-            <td>{{ m.note }}</td>
-            <td>{{ m.amount|tl }}</td>
+    <!-- ✅ Sunucudan gelen verileri JS’e güvenli şekilde aktar -->
+    <script>
+      const MOVES = {{ moves|tojson|safe }};
+      const SUMS  = {{ sums|tojson|safe }};
+      const TRIP  = {{ trip|tojson|safe }};
+    </script>
+
+    <!-- ÖZET -->
+    <div class="card">
+      <div class="kasa">
+        <div class="box">
+          <div class="label">Başlangıç (Devir)</div>
+          <div class="num">{{ sums.devir|tl }}</div>
+        </div>
+        <div class="box">
+          <div class="label">Toplam Giriş</div>
+          <div class="num pos">{{ sums.giris|tl }}</div>
+        </div>
+        <div class="box">
+          <div class="label">Toplam Çıkış</div>
+          <div class="num neg">{{ sums.cikis|tl }}</div>
+        </div>
+        <div class="box">
+          <div class="label">Kalan</div>
+          <div class="num {{ 'pos' if sums.kalan >= 0 else 'neg' }}">{{ sums.kalan|tl }}</div>
+        </div>
+      </div>
+
+      <div class="muted">
+        {% if trip.route %}<span class="badge">🚌 Hat: <strong style="color:var(--text)">{{ trip.route }}</strong></span>{% endif %}
+        {% if trip.date %}<span class="badge">📅 Tarih: <strong style="color:var(--text)">{{ trip.date }}</strong></span>{% endif %}
+        {% if trip.departure_time %}<span class="badge">⏱️ Kalkış: <strong style="color:var(--text)">{{ trip.departure_time }}</strong></span>{% endif %}
+      </div>
+
+      {% if sums.kalan < 0 %}
+      <div class="alertbar">
+        <div>
+          <div><strong>⚠️ KASA EKSİ!</strong> <span class="mini">Giriş/çıkışları kontrol et.</span></div>
+          <div class="muted2">Kalan: {{ sums.kalan|tl }}</div>
+        </div>
+        <button class="btn small ghost" type="button" onclick="window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'})">Aşağı in</button>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- HIZLI FORM BLOKLARI -->
+    <div class="grid3">
+
+      <!-- DEVİR -->
+      <form class="card" method="post" action="{{ url_for('hesap_devir') }}">
+        <div class="row" style="margin-bottom:6px">
+          <div class="h">⬆️ Devir (Başlangıç)</div>
+          <span class="muted2">Giriş olarak sayılır</span>
+        </div>
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <label>Tutar (TL)</label>
+        <input id="devir_amount" type="number" name="amount" min="0" step="0.01" inputmode="decimal" placeholder="0,00" required>
+
+        <div class="quick" aria-label="Hızlı tutar seçenekleri">
+          <span class="chip" onclick="addAmount('devir_amount', 10)">+10</span>
+          <span class="chip" onclick="addAmount('devir_amount', 20)">+20</span>
+          <span class="chip" onclick="addAmount('devir_amount', 50)">+50</span>
+          <span class="chip" onclick="addAmount('devir_amount', 100)">+100</span>
+          <span class="chip warn" onclick="fillAmount('devir_amount')">Tutar yaz</span>
+        </div>
+
+        <label>Not (opsiyonel)</label>
+        <input type="text" name="note" placeholder="Garaj avansı">
+
+        <div class="btnrow" style="margin-top:10px">
+          <button class="btn primary" type="submit">Kaydet</button>
+          <button class="btn ghost" type="reset">Temizle</button>
+        </div>
+      </form>
+
+      <!-- GİRİŞ -->
+      <form class="card" method="post" action="{{ url_for('hesap_giris') }}">
+        <div class="row" style="margin-bottom:6px">
+          <div class="h">➕ Giriş</div>
+          <span class="muted2">Hasılat / tahsilat</span>
+        </div>
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <label>Kategori</label>
+        <select name="category" id="cat_in">
+          {% for k in categories_in %}<option value="{{k}}">{{k}}</option>{% endfor %}
+        </select>
+
+        <label>Tutar (TL)</label>
+        <input id="in_amount" type="number" name="amount" min="0" step="0.01" inputmode="decimal" placeholder="0,00" required>
+
+        <div class="quick">
+          <span class="chip" onclick="addAmount('in_amount', 10)">+10</span>
+          <span class="chip" onclick="addAmount('in_amount', 20)">+20</span>
+          <span class="chip" onclick="addAmount('in_amount', 50)">+50</span>
+          <span class="chip" onclick="addAmount('in_amount', 100)">+100</span>
+          <span class="chip warn" onclick="fillAmount('in_amount')">Tutar yaz</span>
+        </div>
+
+        <label>Açıklama</label>
+        <input type="text" name="note" placeholder="örn. Harem hesabı">
+
+        <div class="btnrow" style="margin-top:10px">
+          <button class="btn primary" type="submit">Kaydet</button>
+          <button class="btn ghost" type="reset">Temizle</button>
+        </div>
+      </form>
+
+      <!-- ÇIKIŞ -->
+      <form class="card" method="post" action="{{ url_for('hesap_cikis') }}">
+        <div class="row" style="margin-bottom:6px">
+          <div class="h">➖ Çıkış</div>
+          <span class="muted2">Masraf / ödeme</span>
+        </div>
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <label>Kategori</label>
+        <select name="category" id="cat_out">
+          {% for k in categories_out %}<option value="{{k}}">{{k}}</option>{% endfor %}
+        </select>
+
+        <label>Tutar (TL)</label>
+        <input id="out_amount" type="number" name="amount" min="0" step="0.01" inputmode="decimal" placeholder="0,00" required>
+
+        <div class="quick">
+          <span class="chip" onclick="addAmount('out_amount', 10)">+10</span>
+          <span class="chip" onclick="addAmount('out_amount', 20)">+20</span>
+          <span class="chip" onclick="addAmount('out_amount', 50)">+50</span>
+          <span class="chip" onclick="addAmount('out_amount', 100)">+100</span>
+          <span class="chip warn" onclick="fillAmount('out_amount')">Tutar yaz</span>
+        </div>
+
+        <label>Açıklama</label>
+        <input type="text" name="note" placeholder="örn. Yıkama">
+
+        <div class="btnrow" style="margin-top:10px">
+          <button class="btn primary" type="submit">Kaydet</button>
+          <button class="btn ghost" type="reset">Temizle</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- KATEGORİLER -->
+    <form class="card" method="post" action="{{ url_for('hesap_kategoriler_kaydet') }}">
+      <div class="row">
+        <div class="h">⚙️ Kategoriler</div>
+        <span class="muted2">Virgülle ayır • hızlı düzenle</span>
+      </div>
+
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <div class="grid2">
+        <div>
+          <label>Giriş Kategorileri</label>
+          <textarea name="cats_in" rows="5" placeholder="örn: Bilet, Emanet, İkram...">{{ categories_in|join(', ') }}</textarea>
+        </div>
+        <div>
+          <label>Çıkış Kategorileri</label>
+          <textarea name="cats_out" rows="5" placeholder="örn: Mazot, Yıkama, Otoyol...">{{ categories_out|join(', ') }}</textarea>
+        </div>
+      </div>
+
+      <div class="btnrow" style="margin-top:10px">
+        <button class="btn primary" type="submit">Kaydet</button>
+        <button class="btn ghost" type="reset">Vazgeç</button>
+      </div>
+    </form>
+
+    <!-- SON HAREKETLER TOOLBAR -->
+    <div class="toolbar">
+      <div class="left">
+        <div class="h" style="margin:0">📋 Son Hareketler</div>
+        <span class="muted2">Toplam: <span id="moveCount">0</span> kayıt</span>
+      </div>
+
+      <div class="right">
+        <div class="searchwrap">
+          <input id="q" type="text" placeholder="Ara: kategori / açıklama / + / -">
+          <button class="btn small" type="button" onclick="clearSearch()">Temizle</button>
+        </div>
+
+        <button class="btn small primary" type="button" onclick="shareWhatsapp()">WhatsApp</button>
+        <a class="btn small" href="{{ url_for('hesap_moves_csv') }}">CSV</a>
+        <button class="btn small" type="button" onclick="window.print()">Yazdır/PDF</button>
+
+        <!-- (Opsiyonel) Son işlem geri al — endpoint ekleyince açarız -->
+        {# <form method="post" action="{{ url_for('hesap_undo_last') }}" style="margin:0">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="btn small danger" type="submit">Son işlemi geri al</button>
+        </form> #}
+      </div>
+    </div>
+
+    <!-- SON HAREKETLER TABLO -->
+    <div class="card">
+      <table class="table" id="movesTable">
+        <thead>
+          <tr>
+            <th>Zaman</th><th>Yön</th><th>Kategori</th><th>Açıklama</th><th class="right">Tutar</th>
           </tr>
-        {% else %}
-          <tr><td colspan="5" class="small">Henüz hareket yok.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody id="movesBody">
+          {% for m in moves %}
+            <tr class="{{ 'in' if m.direction == '+' else 'out' }}">
+              <td>{{ m.created_at }}</td>
+              <td>{{ '+' if m.direction == '+' else '-' }}</td>
+              <td>{{ m.category }}</td>
+              <td class="note">{{ m.note }}</td>
+              <td class="amount right">{{ m.amount|tl }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="muted">Henüz hareket yok.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
+  </div><!-- /container -->
+
+  <!-- FOOTER -->
   <div class="footerbar">
-    <a href="{{ url_for('seats') }}"><button>Biletler</button></a>
-    <a href="{{ url_for('consignments_page') }}"><button>Emanet</button></a>
-    <a href="{{ url_for('hesap_page') }}"><button class="primary">Hesap</button></a>
-    <form method="post" action="{{ url_for('end_trip') }}" style="margin:0">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <button class="danger">Seferi Bitir</button>
-    </form>
+    <div class="footergrid">
+      <a class="btn" href="{{ url_for('seats') }}">🎫 Biletler</a>
+      <a class="btn" href="{{ url_for('consignments_page') }}">📦 Emanet</a>
+      <a class="btn primary" href="{{ url_for('hesap_page') }}">🧾 Hesap</a>
+      <form method="post" action="{{ url_for('end_trip') }}" style="margin:0">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn danger" type="submit">⛔ Seferi Bitir</button>
+      </form>
+    </div>
   </div>
-</div>
 
-<script>
-  // ✅ Son seçilen kategori hatırlatma
-  const catIn = document.getElementById("cat_in");
-  const catOut = document.getElementById("cat_out");
-  if(catIn){catIn.value = localStorage.getItem("cat_in") || catIn.value;}
-  if(catOut){catOut.value = localStorage.getItem("cat_out") || catOut.value;}
-  catIn?.addEventListener("change", e => localStorage.setItem("cat_in", e.target.value));
-  catOut?.addEventListener("change", e => localStorage.setItem("cat_out", e.target.value));
-
-  // Sunucudan gelen hareketleri JS tarafına da alalım:
-  function tl(n){ return (new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY'})).format(n||0); }
-  function shareWhatsapp(){
-    if(!Array.isArray(MOVES) || MOVES.length===0){
-      alert("Paylaşılacak hareket yok.");
-      return;
+  <script>
+    // --- Helpers ---
+    function tl(n){
+      const v = Number(n || 0);
+      return new Intl.NumberFormat('tr-TR', {style:'currency', currency:'TRY'}).format(v);
     }
-    // Başlık + satırlar (sondan başa değilse reverse etme)
-    const lines = [];
-    lines.push("🧾 SEFER KASA – Son Hareketler");
-    lines.push(`Hat: {{ trip.route or '' }}  Tarih: {{ trip.date or '' }}  Kalkış: {{ trip.departure_time or '' }}`);
-    lines.push("--------------------------------------------------");
-    MOVES.forEach(m=>{
-      const dir = m.direction === '+' ? '+' : '-';
-      lines.push(`${m.created_at}  ${dir}  ${m.category}  ${m.note||''}  ${tl(m.amount)}`);
-    });
-    lines.push("--------------------------------------------------");
-    lines.push(`Devir:  ${tl({{ sums.devir or 0 }})}`);
-    lines.push(`Giriş:  ${tl({{ sums.giris or 0 }})}`);
-    lines.push(`Çıkış:  ${tl({{ sums.cikis or 0 }})}`);
-    lines.push(`Kalan:  ${tl({{ sums.kalan or 0 }})}`);
+    function getEl(id){ return document.getElementById(id); }
+    function currentVal(id){
+      const el = getEl(id);
+      if(!el) return 0;
+      const v = parseFloat(String(el.value||'').replace(',','.'));
+      return isNaN(v) ? 0 : v;
+    }
+    function setVal(id, v){
+      const el = getEl(id);
+      if(el) el.value = (Math.round(v*100)/100).toFixed(2);
+      el?.focus();
+    }
 
-    const text = encodeURIComponent(lines.join("\n"));
-    // Mobilde WhatsApp’ı açar (masaüstünde web.whatsapp açılır)
-    window.open("https://wa.me/?text=" + text, "_blank");
-  }
-</script>
+    // --- Quick amounts ---
+    function addAmount(id, add){
+      const v = currentVal(id);
+      setVal(id, v + add);
+    }
+    function fillAmount(id){
+      const el = getEl(id);
+      if(!el) return;
+      el.focus();
+      // mobilde sayı klavyesi açılmasına yardımcı olur
+    }
+
+    // ✅ Son seçilen kategori hatırlatma
+    const catIn  = getEl("cat_in");
+    const catOut = getEl("cat_out");
+    if(catIn){ catIn.value = localStorage.getItem("cat_in")  || catIn.value; }
+    if(catOut){catOut.value= localStorage.getItem("cat_out") || catOut.value;}
+    catIn?.addEventListener("change", e => localStorage.setItem("cat_in", e.target.value));
+    catOut?.addEventListener("change", e => localStorage.setItem("cat_out", e.target.value));
+
+    // --- Table search filter ---
+    const q = getEl('q');
+    const movesBody = getEl('movesBody');
+    function normalize(s){
+      return String(s||'').toLowerCase().trim();
+    }
+    function applySearch(){
+      const term = normalize(q.value);
+      const rows = Array.from(movesBody.querySelectorAll('tr'));
+      let shown = 0;
+      rows.forEach(r=>{
+        const text = normalize(r.innerText);
+        const ok = !term || text.includes(term);
+        r.style.display = ok ? '' : 'none';
+        if(ok) shown++;
+      });
+      getEl('moveCount').textContent = Array.isArray(MOVES) ? shown : shown; // fallback
+    }
+    function clearSearch(){
+      q.value = '';
+      applySearch();
+      q.focus();
+    }
+    q?.addEventListener('input', applySearch);
+
+    // init count
+    getEl('moveCount').textContent = Array.isArray(MOVES) ? MOVES.length : (movesBody?.querySelectorAll('tr').length || 0);
+    applySearch();
+
+    // --- WhatsApp share ---
+    function shareWhatsapp(){
+      if(!Array.isArray(MOVES) || MOVES.length === 0){
+        alert("Paylaşılacak hareket yok.");
+        return;
+      }
+      const lines = [];
+      lines.push("🧾 SEFER KASA – Son Hareketler");
+      const route = TRIP?.route || "";
+      const date  = TRIP?.date || "";
+      const dep   = TRIP?.departure_time || "";
+      lines.push(`Hat: ${route}  Tarih: ${date}  Kalkış: ${dep}`);
+      lines.push("--------------------------------------------------");
+
+      MOVES.forEach(m=>{
+        const dir = (m.direction === '+' || m.direction === 'in') ? '+' : '-';
+        const created = m.created_at || m.created || "";
+        const cat = m.category || "";
+        const note = m.note || "";
+        lines.push(`${created}  ${dir}  ${cat}  ${note}  ${tl(m.amount)}`);
+      });
+
+      lines.push("--------------------------------------------------");
+      lines.push(`Devir:  ${tl(SUMS?.devir)}`);
+      lines.push(`Giriş:  ${tl(SUMS?.giris)}`);
+      lines.push(`Çıkış:  ${tl(SUMS?.cikis)}`);
+      lines.push(`Kalan:  ${tl(SUMS?.kalan)}`);
+
+      const text = encodeURIComponent(lines.join("\n"));
+      window.open("https://wa.me/?text=" + text, "_blank");
+    }
+  </script>
 </body>
 </html>
