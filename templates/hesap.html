@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Hesap — Sefer Kasa</title>
+
   <style>
     :root{
       --bg:#0b1115;
@@ -28,30 +29,54 @@
 
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Roboto,Segoe UI,Arial;
-      background:var(--bg);
-      color:var(--text);
-      -webkit-font-smoothing:antialiased;
-      padding-bottom:92px; /* fixed footer için */
-    }
-
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Roboto,Segoe UI,Arial;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  padding-bottom: 0 !important; /* artık buraya güvenmiyoruz */
+}
     a{color:inherit;text-decoration:none}
 
-    .container{max-width:980px;margin:auto;padding:18px}
+.container{
+  max-width:980px;
+  margin:auto;
+  padding:14px 14px calc(18px + var(--footer-h, 140px)) ; /* 👈 EN ÖNEMLİSİ */
+}
     .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .title{
-      display:flex;gap:10px;align-items:center;
-      margin:6px 0 14px;
+
+    /* ✅ Sticky Topbar */
+    .topbar{
+      position:sticky; top:0; z-index:20;
+      background:rgba(11,17,21,.86);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--border);
+      padding:10px 0 10px;
+      margin:0 0 12px;
     }
-    .title h1{font-size:18px;margin:0}
-    .title .pill{
+    .topbar-inner{max-width:980px;margin:auto;padding:0 14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .topbar-left{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .topbar-title{font-weight:900;letter-spacing:.2px}
+    .meta-line{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .pill{
       font-size:12px;color:var(--muted);
       border:1px solid var(--border);
       background:#0c141a;
       padding:6px 10px;border-radius:999px;
     }
+    .kalan-pill{
+      display:flex;gap:8px;align-items:center;
+      border:1px solid var(--border2);
+      background:linear-gradient(180deg,#0c141a,#0b1217);
+      padding:10px 12px;border-radius:999px;
+      box-shadow:var(--shadow);
+      font-weight:900;
+    }
+    .kalan-pill small{color:var(--muted);font-weight:700}
+    .pos{color:#29d884}
+    .neg{color:#ff5454}
+    .warn{color:var(--warn)}
 
     .card{
       background:var(--card);
@@ -61,10 +86,10 @@
       margin:12px 0;
       box-shadow:var(--shadow);
     }
-
     .muted{color:var(--muted);font-size:12px}
     .muted2{color:var(--muted2);font-size:12px}
-    .h{font-weight:800;letter-spacing:.2px;margin:0 0 10px;font-size:14px}
+    .h{font-weight:900;letter-spacing:.2px;margin:0 0 10px;font-size:14px}
+
     .badge{
       display:inline-flex;gap:6px;align-items:center;
       background:#0c141a;border:1px solid #2b3a46;color:#c8d1d9;
@@ -72,26 +97,23 @@
       margin:6px 6px 0 0;
     }
 
+    /* Özet kutuları */
     .kasa{
       display:grid;
       grid-template-columns:repeat(4,1fr);
       gap:10px;
-      margin-bottom:12px;
+      margin-bottom:10px;
     }
     .box{
       background:var(--card2);
       border:1px solid var(--border);
       border-radius:var(--radius2);
       padding:10px 10px 8px;
-      text-align:left;
       min-height:74px;
       display:flex;flex-direction:column;justify-content:space-between;
     }
     .box .label{font-size:12px;color:var(--muted)}
     .box .num{font-size:18px;font-weight:900;letter-spacing:.3px}
-    .pos{color:#29d884}
-    .neg{color:#ff5454}
-    .warn{color:var(--warn)}
 
     .alertbar{
       display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -116,11 +138,9 @@
     textarea{resize:vertical}
     input:focus,select:focus,textarea:focus{border-color:#3a5466;box-shadow:0 0 0 3px #0ea5e91c}
 
-    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media (max-width: 900px){
       .kasa{grid-template-columns:repeat(2,1fr)}
-      .grid3{grid-template-columns:1fr}
       .grid2{grid-template-columns:1fr}
     }
 
@@ -134,7 +154,7 @@
       cursor:pointer;
       user-select:none;
       transition:.15s;
-      font-weight:700;
+      font-weight:800;
       font-size:14px;
     }
     .btn:hover{transform:translateY(-1px)}
@@ -143,41 +163,82 @@
     .btn.danger{background:var(--danger);border-color:#8a2a2a}
     .btn.danger:hover{background:var(--danger2)}
     .btn.ghost{background:transparent}
-    .btn.small{font-size:12px;padding:8px 10px;min-height:38px;border-radius:10px;font-weight:700}
+    .btn.small{font-size:12px;padding:8px 10px;min-height:38px;border-radius:10px;font-weight:800}
 
-    .quick{
-      display:flex;gap:8px;flex-wrap:wrap;margin-top:10px
-    }
+    .quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
     .chip{
       border:1px solid #2f4353;background:#0c141a;color:#cfe3f2;
       padding:8px 10px;border-radius:999px;font-size:12px;
       cursor:pointer;user-select:none;
       transition:.15s;
+      font-weight:800;
     }
     .chip:hover{transform:translateY(-1px);border-color:#3b5870}
     .chip.warn{border-color:#5c4a1a;color:#ffe39a}
 
-    .table{width:100%;border-collapse:collapse}
-    th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;font-size:13px;vertical-align:top}
-    th{color:var(--muted);font-weight:700}
-    tr.in td{color:#44d38f}
-    tr.out td{color:#ff7070}
-    td.amount{white-space:nowrap;font-weight:900}
-    td.note{color:var(--text)}
-    .right{display:flex;gap:8px;align-items:center;justify-content:flex-end}
+    /* ✅ Tek panel / tablar */
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+    .tab{
+      border:1px solid var(--border2);
+      background:#0c141a;
+      color:#cfe3f2;
+      padding:10px 12px;border-radius:999px;
+      font-weight:900;font-size:13px;
+      cursor:pointer;user-select:none;
+      transition:.15s;
+    }
+    .tab.active{
+      background:linear-gradient(180deg,#1f6b2d,#174f22);
+      border-color:#2a7b3a;
+    }
+    .tab small{color:#d8e7dd;font-weight:700}
+    .tabpanels > .panel{display:none}
+    .tabpanels > .panel.active{display:block}
 
+    /* Toolbar / arama */
     .toolbar{
       display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;
       margin:14px 0 6px;
     }
     .toolbar .left{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .toolbar .right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-
     .searchwrap{
       display:flex;gap:8px;align-items:center;flex-wrap:wrap;
       width:min(540px,100%);
     }
     .searchwrap input{min-height:40px;padding:10px 12px;border-radius:12px}
+
+    /* ✅ Hareketler: masaüstünde tablo, mobilde kart */
+    .table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;font-size:13px;vertical-align:top}
+    th{color:var(--muted);font-weight:800}
+    tr.in td{color:#44d38f}
+    tr.out td{color:#ff7070}
+    td.amount{white-space:nowrap;font-weight:900}
+    td.note{color:var(--text)}
+    .right{display:flex;gap:8px;align-items:center;justify-content:flex-end}
+
+    .moves-cards{display:none}
+    .move-card{
+      background:var(--card2);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      display:flex;gap:10px;align-items:flex-start;justify-content:space-between;
+      margin:10px 0;
+    }
+    .move-left{min-width:0}
+    .move-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .move-dir{font-weight:900}
+    .move-cat{font-weight:900}
+    .move-note{color:var(--text);opacity:.92;margin-top:4px;font-size:13px;word-break:break-word}
+    .move-time{color:var(--muted2);font-size:12px;margin-top:6px}
+    .move-amt{font-weight:1000;white-space:nowrap}
+
+    @media (max-width: 720px){
+      .moves-table{display:none}
+      .moves-cards{display:block}
+    }
 
     /* fixed footer */
     .footerbar{
@@ -194,22 +255,35 @@
     }
     .footergrid .btn{font-size:14px;padding:12px;border-radius:14px}
 
-    /* küçük animasyon */
     .fadeIn{animation:fadein .35s ease}
     @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   </style>
 </head>
 
 <body>
-  <div class="container fadeIn">
+  <!-- ✅ Sticky Topbar -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-left">
+        <a href="/" class="btn small ghost">🏠 Ana Sayfa</a>
+        <div>
+          <div class="topbar-title">🧾 Hesap / Aktif Sefer</div>
+          <div class="meta-line">
+            {% if trip.route %}<span class="pill">🚌 {{ trip.route }}</span>{% endif %}
+            {% if trip.date %}<span class="pill">📅 {{ trip.date }}</span>{% endif %}
+            {% if trip.departure_time %}<span class="pill">⏱️ {{ trip.departure_time }}</span>{% endif %}
+          </div>
+        </div>
+      </div>
 
-<div class="title row">
-  <div style="display:flex;gap:10px;align-items:center;">
-    <a href="/" class="btn small ghost">🏠 Ana Sayfa</a>
-    <h1 style="margin:0;">🧾 Hesap / Aktif Sefer</h1>
+      <div class="kalan-pill">
+        <small>KALAN</small>
+        <span class="{{ 'pos' if sums.kalan >= 0 else 'neg' }}">{{ sums.kalan|tl }}</span>
+      </div>
+    </div>
   </div>
-  <span class="pill">Saha modu • hızlı giriş</span>
-</div>
+
+  <div class="container fadeIn">
 
     <!-- ✅ Sunucudan gelen verileri JS’e güvenli şekilde aktar -->
     <script>
@@ -239,122 +313,123 @@
         </div>
       </div>
 
-      <div class="muted">
-        {% if trip.route %}<span class="badge">🚌 Hat: <strong style="color:var(--text)">{{ trip.route }}</strong></span>{% endif %}
-        {% if trip.date %}<span class="badge">📅 Tarih: <strong style="color:var(--text)">{{ trip.date }}</strong></span>{% endif %}
-        {% if trip.departure_time %}<span class="badge">⏱️ Kalkış: <strong style="color:var(--text)">{{ trip.departure_time }}</strong></span>{% endif %}
-      </div>
-
       {% if sums.kalan < 0 %}
       <div class="alertbar">
         <div>
           <div><strong>⚠️ KASA EKSİ!</strong> <span class="mini">Giriş/çıkışları kontrol et.</span></div>
           <div class="muted2">Kalan: {{ sums.kalan|tl }}</div>
         </div>
-        <button class="btn small ghost" type="button" onclick="window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'})">Aşağı in</button>
+        <button class="btn small ghost" type="button"
+          onclick="window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'})">Aşağı in</button>
       </div>
       {% endif %}
     </div>
 
-    <!-- HIZLI FORM BLOKLARI -->
-    <div class="grid3">
+    <!-- ✅ HIZLI İŞLEM (Tab’li tek panel) -->
+    <div class="card">
+      <div class="row" style="margin-bottom:10px">
+        <div class="h" style="margin:0">⚡ Hızlı İşlem</div>
+        <span class="muted2">Devir / Giriş / Çıkış</span>
+      </div>
 
-      <!-- DEVİR -->
-      <form class="card" method="post" action="{{ url_for('hesap_devir') }}">
-        <div class="row" style="margin-bottom:6px">
-          <div class="h">⬆️ Devir (Başlangıç)</div>
-          <span class="muted2">Giriş olarak sayılır</span>
+      <div class="tabs" role="tablist" aria-label="Hızlı işlem sekmeleri">
+        <button class="tab active" type="button" data-tab="panel-in">➕ Giriş <small>(hasılat)</small></button>
+        <button class="tab" type="button" data-tab="panel-out">➖ Çıkış <small>(masraf)</small></button>
+        <button class="tab" type="button" data-tab="panel-devir">⬆️ Devir <small>(başlangıç)</small></button>
+      </div>
+
+      <div class="tabpanels">
+        <!-- GİRİŞ -->
+        <div class="panel active" id="panel-in">
+          <form method="post" action="{{ url_for('hesap_giris') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <label>Kategori</label>
+            <select name="category" id="cat_in">
+              {% for k in categories_in %}<option value="{{k}}">{{k}}</option>{% endfor %}
+            </select>
+
+            <label>Tutar (TL)</label>
+            <input id="in_amount" type="number" name="amount" min="0" step="1" inputmode="numeric" placeholder="0" required>
+
+            <div class="quick">
+              <span class="chip" onclick="addAmount('in_amount', 10)">+10</span>
+              <span class="chip" onclick="addAmount('in_amount', 20)">+20</span>
+              <span class="chip" onclick="addAmount('in_amount', 50)">+50</span>
+              <span class="chip" onclick="addAmount('in_amount', 100)">+100</span>
+              <span class="chip" onclick="addAmount('in_amount', 200)">+200</span>
+              <span class="chip warn" onclick="fillAmount('in_amount')">Tutar yaz</span>
+            </div>
+
+            <label>Açıklama</label>
+            <input type="text" name="note" placeholder="örn. Harem hesabı">
+
+            <div class="btnrow" style="margin-top:10px">
+              <button class="btn primary" type="submit">✅ Kaydet</button>
+              <button class="btn ghost" type="reset">Temizle</button>
+            </div>
+          </form>
         </div>
 
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <!-- ÇIKIŞ -->
+        <div class="panel" id="panel-out">
+          <form method="post" action="{{ url_for('hesap_cikis') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-        <label>Tutar (TL)</label>
-        <input id="devir_amount" type="number" name="amount" min="0" step="0.01" inputmode="decimal" placeholder="0,00" required>
+            <label>Kategori</label>
+            <select name="category" id="cat_out">
+              {% for k in categories_out %}<option value="{{k}}">{{k}}</option>{% endfor %}
+            </select>
 
-        <div class="quick" aria-label="Hızlı tutar seçenekleri">
-          <span class="chip" onclick="addAmount('devir_amount', 10)">+10</span>
-          <span class="chip" onclick="addAmount('devir_amount', 20)">+20</span>
-          <span class="chip" onclick="addAmount('devir_amount', 50)">+50</span>
-          <span class="chip" onclick="addAmount('devir_amount', 100)">+100</span>
-          <span class="chip warn" onclick="fillAmount('devir_amount')">Tutar yaz</span>
+            <label>Tutar (TL)</label>
+            <input id="out_amount" type="number" name="amount" min="0" step="1" inputmode="numeric" placeholder="0" required>
+
+            <div class="quick">
+              <span class="chip" onclick="addAmount('out_amount', 10)">+10</span>
+              <span class="chip" onclick="addAmount('out_amount', 20)">+20</span>
+              <span class="chip" onclick="addAmount('out_amount', 50)">+50</span>
+              <span class="chip" onclick="addAmount('out_amount', 100)">+100</span>
+              <span class="chip" onclick="addAmount('out_amount', 200)">+200</span>
+              <span class="chip warn" onclick="fillAmount('out_amount')">Tutar yaz</span>
+            </div>
+
+            <label>Açıklama</label>
+            <input type="text" name="note" placeholder="örn. Yıkama">
+
+            <div class="btnrow" style="margin-top:10px">
+              <button class="btn primary" type="submit">✅ Kaydet</button>
+              <button class="btn ghost" type="reset">Temizle</button>
+            </div>
+          </form>
         </div>
 
-        <label>Not (opsiyonel)</label>
-        <input type="text" name="note" placeholder="Garaj avansı">
+        <!-- DEVİR -->
+        <div class="panel" id="panel-devir">
+          <form method="post" action="{{ url_for('hesap_devir') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-        <div class="btnrow" style="margin-top:10px">
-          <button class="btn primary" type="submit">Kaydet</button>
-          <button class="btn ghost" type="reset">Temizle</button>
+            <label>Tutar (TL)</label>
+            <input id="devir_amount" type="number" name="amount" min="0" step="1" inputmode="numeric" placeholder="0" required>
+
+            <div class="quick" aria-label="Hızlı tutar seçenekleri">
+              <span class="chip" onclick="addAmount('devir_amount', 10)">+10</span>
+              <span class="chip" onclick="addAmount('devir_amount', 20)">+20</span>
+              <span class="chip" onclick="addAmount('devir_amount', 50)">+50</span>
+              <span class="chip" onclick="addAmount('devir_amount', 100)">+100</span>
+              <span class="chip" onclick="addAmount('devir_amount', 200)">+200</span>
+              <span class="chip warn" onclick="fillAmount('devir_amount')">Tutar yaz</span>
+            </div>
+
+            <label>Not (opsiyonel)</label>
+            <input type="text" name="note" placeholder="Garaj avansı">
+
+            <div class="btnrow" style="margin-top:10px">
+              <button class="btn primary" type="submit">✅ Kaydet</button>
+              <button class="btn ghost" type="reset">Temizle</button>
+            </div>
+          </form>
         </div>
-      </form>
-
-      <!-- GİRİŞ -->
-      <form class="card" method="post" action="{{ url_for('hesap_giris') }}">
-        <div class="row" style="margin-bottom:6px">
-          <div class="h">➕ Giriş</div>
-          <span class="muted2">Hasılat / tahsilat</span>
-        </div>
-
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-
-        <label>Kategori</label>
-        <select name="category" id="cat_in">
-          {% for k in categories_in %}<option value="{{k}}">{{k}}</option>{% endfor %}
-        </select>
-
-        <label>Tutar (TL)</label>
-        <input id="in_amount" type="number" name="amount" min="0" step="0.01" inputmode="decimal" placeholder="0,00" required>
-
-        <div class="quick">
-          <span class="chip" onclick="addAmount('in_amount', 10)">+10</span>
-          <span class="chip" onclick="addAmount('in_amount', 20)">+20</span>
-          <span class="chip" onclick="addAmount('in_amount', 50)">+50</span>
-          <span class="chip" onclick="addAmount('in_amount', 100)">+100</span>
-          <span class="chip warn" onclick="fillAmount('in_amount')">Tutar yaz</span>
-        </div>
-
-        <label>Açıklama</label>
-        <input type="text" name="note" placeholder="örn. Harem hesabı">
-
-        <div class="btnrow" style="margin-top:10px">
-          <button class="btn primary" type="submit">Kaydet</button>
-          <button class="btn ghost" type="reset">Temizle</button>
-        </div>
-      </form>
-
-      <!-- ÇIKIŞ -->
-      <form class="card" method="post" action="{{ url_for('hesap_cikis') }}">
-        <div class="row" style="margin-bottom:6px">
-          <div class="h">➖ Çıkış</div>
-          <span class="muted2">Masraf / ödeme</span>
-        </div>
-
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-
-        <label>Kategori</label>
-        <select name="category" id="cat_out">
-          {% for k in categories_out %}<option value="{{k}}">{{k}}</option>{% endfor %}
-        </select>
-
-        <label>Tutar (TL)</label>
-        <input id="out_amount" type="number" name="amount" min="0" step="0.01" inputmode="decimal" placeholder="0,00" required>
-
-        <div class="quick">
-          <span class="chip" onclick="addAmount('out_amount', 10)">+10</span>
-          <span class="chip" onclick="addAmount('out_amount', 20)">+20</span>
-          <span class="chip" onclick="addAmount('out_amount', 50)">+50</span>
-          <span class="chip" onclick="addAmount('out_amount', 100)">+100</span>
-          <span class="chip warn" onclick="fillAmount('out_amount')">Tutar yaz</span>
-        </div>
-
-        <label>Açıklama</label>
-        <input type="text" name="note" placeholder="örn. Yıkama">
-
-        <div class="btnrow" style="margin-top:10px">
-          <button class="btn primary" type="submit">Kaydet</button>
-          <button class="btn ghost" type="reset">Temizle</button>
-        </div>
-      </form>
+      </div>
     </div>
 
     <!-- KATEGORİLER -->
@@ -387,7 +462,7 @@
     <div class="toolbar">
       <div class="left">
         <div class="h" style="margin:0">📋 Son Hareketler</div>
-        <span class="muted2">Toplam: <span id="moveCount">0</span> kayıt</span>
+        <span class="muted2">Gösterilen: <span id="moveCount">0</span> kayıt</span>
       </div>
 
       <div class="right">
@@ -399,17 +474,11 @@
         <button class="btn small primary" type="button" onclick="shareWhatsapp()">WhatsApp</button>
         <a class="btn small" href="{{ url_for('hesap_moves_csv') }}">CSV</a>
         <button class="btn small" type="button" onclick="window.print()">Yazdır/PDF</button>
-
-        <!-- (Opsiyonel) Son işlem geri al — endpoint ekleyince açarız -->
-        {# <form method="post" action="{{ url_for('hesap_undo_last') }}" style="margin:0">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button class="btn small danger" type="submit">Son işlemi geri al</button>
-        </form> #}
       </div>
     </div>
 
-    <!-- SON HAREKETLER TABLO -->
-    <div class="card">
+    <!-- SON HAREKETLER: Tablo -->
+    <div class="card moves-table">
       <table class="table" id="movesTable">
         <thead>
           <tr>
@@ -432,12 +501,33 @@
       </table>
     </div>
 
+    <!-- SON HAREKETLER: Mobil kart -->
+    <div class="card moves-cards" id="movesCards">
+      {% for m in moves %}
+        <div class="move-card {{ 'in' if m.direction == '+' else 'out' }}">
+          <div class="move-left">
+            <div class="move-top">
+              <span class="move-dir">{{ '+' if m.direction == '+' else '-' }}</span>
+              <span class="move-cat">{{ m.category }}</span>
+            </div>
+            {% if m.note %}
+              <div class="move-note">{{ m.note }}</div>
+            {% endif %}
+            <div class="move-time">{{ m.created_at }}</div>
+          </div>
+          <div class="move-amt">{{ m.amount|tl }}</div>
+        </div>
+      {% else %}
+        <div class="muted">Henüz hareket yok.</div>
+      {% endfor %}
+    </div>
+
   </div><!-- /container -->
 
   <!-- FOOTER -->
   <div class="footerbar">
     <div class="footergrid">
-      <a class="btn" href="{{ url_for('seats') }}">🎫 Biletler</a>
+      <a class="btn" href="{{ url_for('seats_page') }}">🎫 Biletler</a>
       <a class="btn" href="{{ url_for('consignments_page') }}">📦 Emanet</a>
       <a class="btn primary" href="{{ url_for('hesap_page') }}">🧾 Hesap</a>
       <form method="post" action="{{ url_for('end_trip') }}" style="margin:0">
@@ -462,7 +552,7 @@
     }
     function setVal(id, v){
       const el = getEl(id);
-      if(el) el.value = (Math.round(v*100)/100).toFixed(2);
+      if(el) el.value = String(Math.max(0, Math.round(v))).replace('.', ',');
       el?.focus();
     }
 
@@ -475,8 +565,16 @@
       const el = getEl(id);
       if(!el) return;
       el.focus();
-      // mobilde sayı klavyesi açılmasına yardımcı olur
     }
+
+    // ✅ Tabs
+    const tabs = Array.from(document.querySelectorAll(".tab"));
+    const panels = Array.from(document.querySelectorAll(".tabpanels .panel"));
+    function setTab(panelId){
+      tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === panelId));
+      panels.forEach(p => p.classList.toggle("active", p.id === panelId));
+    }
+    tabs.forEach(t => t.addEventListener("click", () => setTab(t.dataset.tab)));
 
     // ✅ Son seçilen kategori hatırlatma
     const catIn  = getEl("cat_in");
@@ -486,24 +584,35 @@
     catIn?.addEventListener("change", e => localStorage.setItem("cat_in", e.target.value));
     catOut?.addEventListener("change", e => localStorage.setItem("cat_out", e.target.value));
 
-    // --- Table search filter ---
+    // --- Table search filter (tablo + kart sayımı) ---
     const q = getEl('q');
     const movesBody = getEl('movesBody');
-    function normalize(s){
-      return String(s||'').toLowerCase().trim();
-    }
+    const cardsWrap = getEl('movesCards');
+
+    function normalize(s){ return String(s||'').toLowerCase().trim(); }
+
     function applySearch(){
       const term = normalize(q.value);
-      const rows = Array.from(movesBody.querySelectorAll('tr'));
+
+      // tablo satırları
+      const rows = Array.from(movesBody?.querySelectorAll('tr') || []);
       let shown = 0;
       rows.forEach(r=>{
-        const text = normalize(r.innerText);
-        const ok = !term || text.includes(term);
+        const ok = !term || normalize(r.innerText).includes(term);
         r.style.display = ok ? '' : 'none';
         if(ok) shown++;
       });
-      getEl('moveCount').textContent = Array.isArray(MOVES) ? shown : shown; // fallback
+
+      // kartlar
+      const cards = Array.from(cardsWrap?.querySelectorAll('.move-card') || []);
+      cards.forEach(c=>{
+        const ok = !term || normalize(c.innerText).includes(term);
+        c.style.display = ok ? '' : 'none';
+      });
+
+      getEl('moveCount').textContent = shown || cards.filter(c => c.style.display !== 'none').length || 0;
     }
+
     function clearSearch(){
       q.value = '';
       applySearch();
@@ -546,6 +655,25 @@
       const text = encodeURIComponent(lines.join("\n"));
       window.open("https://wa.me/?text=" + text, "_blank");
     }
+
+function fixFooterGap(){
+  const fb = document.querySelector('.footerbar');
+  if(!fb) return;
+
+  const h = fb.getBoundingClientRect().height || fb.offsetHeight || 0;
+
+  // CSS değişkenine yaz → container padding bunu kullanacak
+  document.documentElement.style.setProperty('--footer-h', (h + 16) + 'px');
+
+  // Debug: çalışıyor mu görmek için (1 kere gör, sonra silebilirsin)
+  // console.log("footer height:", h);
+}
+
+window.addEventListener("load", fixFooterGap, {once:true});
+window.addEventListener("resize", fixFooterGap);
+window.addEventListener("orientationchange", fixFooterGap);
+setTimeout(fixFooterGap, 300);   // adres çubuğu otursun diye
+setTimeout(fixFooterGap, 1200);  // bazı cihazlar geç ölçüyor
   </script>
 </body>
 </html>
