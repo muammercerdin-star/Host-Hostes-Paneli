@@ -3,6 +3,7 @@ import csv
 import json
 import secrets
 import sqlite3
+import re
 from io import StringIO
 from pathlib import Path
 from datetime import datetime
@@ -105,6 +106,36 @@ NEIGHBORS = {
 DEFAULT_CATS_IN = ["Devir","Garaj","Harem","Eşya","Nakit Bilet","Avans","Diğer"]
 DEFAULT_CATS_OUT = ["Yıkama","Sigara","Yemek","Otoyol","Otogar","İkram","Temizlik","Su/Çay","Bakım","Diğer"]
 
+AI_INTENTS = {
+    "seat_add_single": {
+        "title": "Tek koltuk ekleme",
+        "pattern": "seat + add",
+    },
+    "seat_add_group": {
+        "title": "Çoklu koltuk ekleme",
+        "pattern": "seat_list + add",
+    },
+    "seat_remove_single": {
+        "title": "Tek koltuk boşaltma",
+        "pattern": "seat + offload",
+    },
+    "seat_remove_group": {
+        "title": "Çoklu koltuk boşaltma",
+        "pattern": "seat_list + offload",
+    },
+    "standing_add": {
+        "title": "Ayakta ekleme",
+        "pattern": "standing + add",
+    },
+    "service_mark": {
+        "title": "Servis işaretleme",
+        "pattern": "service + mark",
+    },
+    "query": {
+        "title": "Sorgu",
+        "pattern": "query",
+    },
+}
 
 # =========================================================
 # Yardımcı normalize fonksiyonları
@@ -156,6 +187,199 @@ def allowed_file(filename: str) -> bool:
     ext = "." + filename.rsplit(".", 1)[1].lower()
     return ext in ALLOWED_IMAGE_EXTS
 
+
+# =========================================================
+# AI Console helpers
+# =========================================================
+
+def normalize_ai_text(text: str) -> str:
+    text = (text or "").strip().lower()
+    text = text.replace("’", "").replace("'", "").replace("`", "")
+    text = re.sub(r"[^0-9a-zçğıöşü\s-]", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def ai_extract_seat_list(text: str):
+    text = text or ""
+    text = re.sub(r"(\d+)\s*-\s*(\d+)", r"\1 \2", text)
+    text = re.sub(r"(\d+)\s*ve\s*(\d+)", r"\1 \2", text, flags=re.IGNORECASE)
+    text = re.sub(r"(\d+)\s*ile\s*(\d+)", r"\1 \2", text, flags=re.IGNORECASE)
+
+    nums = re.findall(r"\b\d{1,2}\b", text)
+    out = []
+    for n in nums:
+        x = int(n)
+        if 1 <= x <= 60 and x not in out:
+            out.append(x)
+    return out
+
+
+def ai_make_skeleton(text: str) -> str:
+    text = normalize_ai_text(text)
+    text = re.sub(r"\d+", "{n}", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def ai_find_learned_match(command: str):
+    db = get_db()
+    phrase_norm = normalize_ai_text(command)
+    skeleton = ai_make_skeleton(command)
+
+    row = db.execute(
+        """
+        SELECT id, phrase, intent, pattern
+        FROM learned_commands
+        WHERE phrase_norm=?
+        LIMIT 1
+        """,
+        (phrase_norm,)
+    ).fetchone()
+
+    if row:
+        return dict(row), "exact"
+
+    row = db.execute(
+        """
+        SELECT id, phrase, intent, pattern
+        FROM learned_commands
+        WHERE skeleton=?
+        LIMIT 1
+        """,
+        (skeleton,)
+    ).fetchone()
+
+    if row:
+        return dict(row), "skeleton"
+
+    return None, None
+
+
+def ai_parse_default_command(command: str):
+    text = normalize_ai_text(command)
+    seats = ai_extract_seat_list(command)
+
+    has_add = bool(re.search(r"\b(ekle|yaz|kaydet|oturt|bindir)\b", text))
+    has_offload = bool(re.search(r"\b(boşalt|indir|indirdim|insin|sil)\b", text))
+    has_service = bool(re.search(r"\b(servis|ikram|tamam|işaretle|verildi)\b", text))
+    has_standing = "ayakta" in text
+    has_query = bool(re.search(r"\b(hangi|kaç|sıradaki|durak|nerede|dolu|boş|kim)\b", text))
+
+    if has_offload and len(seats) >= 2:
+        return {
+            "intent": "seat_remove_group",
+            "pattern": "seat_list + offload",
+            "confidence": 0.86,
+            "seats": seats,
+        }
+
+    if has_offload and len(seats) == 1:
+        return {
+            "intent": "seat_remove_single",
+            "pattern": "seat + offload",
+            "confidence": 0.83,
+            "seats": seats,
+        }
+
+    if has_standing and has_add:
+        return {
+            "intent": "standing_add",
+            "pattern": "standing + add",
+            "confidence": 0.84,
+            "seats": seats,
+        }
+
+    if has_add and len(seats) >= 2:
+        return {
+            "intent": "seat_add_group",
+            "pattern": "seat_list + add",
+            "confidence": 0.81,
+            "seats": seats,
+        }
+
+    if has_add and len(seats) == 1:
+        return {
+            "intent": "seat_add_single",
+            "pattern": "seat + add",
+            "confidence": 0.82,
+            "seats": seats,
+        }
+
+    if has_service:
+        return {
+            "intent": "service_mark",
+            "pattern": "service + mark",
+            "confidence": 0.58,
+            "seats": seats,
+        }
+
+    if has_query:
+        return {
+            "intent": "query",
+            "pattern": "query",
+            "confidence": 0.55,
+            "seats": seats,
+        }
+
+    return {
+        "intent": None,
+        "pattern": None,
+        "confidence": 0.12,
+        "seats": seats,
+    }
+
+
+def resolve_ai_command(command: str):
+    learned, match_type = ai_find_learned_match(command)
+    if learned:
+        return {
+            "status": "matched",
+            "source": f"learned_{match_type}",
+            "intent": learned["intent"],
+            "pattern": learned.get("pattern"),
+            "confidence": 0.98,
+            "seats": ai_extract_seat_list(command),
+            "command": command,
+        }
+
+    parsed = ai_parse_default_command(command)
+
+    if parsed["intent"] and parsed["confidence"] >= 0.80:
+        return {
+            "status": "matched",
+            "source": "default_parser",
+            "intent": parsed["intent"],
+            "pattern": parsed["pattern"],
+            "confidence": parsed["confidence"],
+            "seats": parsed["seats"],
+            "command": command,
+        }
+
+    if parsed["intent"] and parsed["confidence"] >= 0.45:
+        return {
+            "status": "suggest",
+            "source": "default_parser",
+            "intent": parsed["intent"],
+            "pattern": parsed["pattern"],
+            "confidence": parsed["confidence"],
+            "seats": parsed["seats"],
+            "command": command,
+            "suggestion": {
+                "intent": parsed["intent"],
+                "pattern": parsed["pattern"],
+            }
+        }
+
+    return {
+        "status": "unknown",
+        "source": "none",
+        "intent": None,
+        "pattern": None,
+        "confidence": parsed["confidence"],
+        "seats": parsed["seats"],
+        "command": command,
+    }
 
 # =========================================================
 # DB
@@ -225,6 +449,11 @@ def ensure_schema():
             PRIMARY KEY(trip_id, seat_no),
             FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE
         );
+
+        CREATE INDEX IF NOT EXISTS idx_seats_trip ON seats(trip_id);
+        CREATE INDEX IF NOT EXISTS idx_seats_trip_to_stop ON seats(trip_id, to_stop);
+        CREATE INDEX IF NOT EXISTS idx_seats_trip_from_stop ON seats(trip_id, from_stop);
+        CREATE INDEX IF NOT EXISTS idx_seats_trip_payment ON seats(trip_id, payment);
 
         CREATE TABLE IF NOT EXISTS walk_on_sales(
             id INTEGER PRIMARY KEY,
@@ -326,12 +555,33 @@ def ensure_schema():
         );
 
         CREATE INDEX IF NOT EXISTS idx_cash_moves_trip ON cash_moves(trip_id);
-        """
+
+        CREATE TABLE IF NOT EXISTS learned_commands(
+            id INTEGER PRIMARY KEY,
+            phrase TEXT NOT NULL,
+            phrase_norm TEXT NOT NULL UNIQUE,
+            skeleton TEXT,
+            intent TEXT NOT NULL,
+            pattern TEXT,
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            updated_at TEXT DEFAULT (datetime('now','localtime'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_learned_commands_phrase_norm
+        ON learned_commands(phrase_norm);
+
+        CREATE INDEX IF NOT EXISTS idx_learned_commands_skeleton
+        ON learned_commands(skeleton);
+
+        CREATE INDEX IF NOT EXISTS idx_learned_commands_intent
+        ON learned_commands(intent);
+
+
+       """
     )
 
-    # ---- seats eski tablo migration ----
+    # Eski DB migrasyonları
     seat_cols = [r["name"] for r in db.execute("PRAGMA table_info(seats)").fetchall()]
-
     migrations = {
         "from_stop": "ALTER TABLE seats ADD COLUMN from_stop TEXT DEFAULT ''",
         "to_stop": "ALTER TABLE seats ADD COLUMN to_stop TEXT DEFAULT ''",
@@ -342,28 +592,12 @@ def ensure_schema():
         "passenger_name": "ALTER TABLE seats ADD COLUMN passenger_name TEXT DEFAULT ''",
         "passenger_phone": "ALTER TABLE seats ADD COLUMN passenger_phone TEXT DEFAULT ''",
     }
-
     for col, sql in migrations.items():
         if col not in seat_cols:
             db.execute(sql)
 
-    # ---- Eski seat tablosunda sadece "stop" varsa, to_stop'u doldur ----
-    seat_cols = [r["name"] for r in db.execute("PRAGMA table_info(seats)").fetchall()]
-    if "stop" in seat_cols and "to_stop" in seat_cols:
-        db.execute(
-            """
-            UPDATE seats
-            SET to_stop = COALESCE(NULLIF(to_stop,''), stop)
-            """
-        )
-
-    # ---- Migration bittikten SONRA indexler ----
-    db.execute("CREATE INDEX IF NOT EXISTS idx_seats_trip ON seats(trip_id)")
-    db.execute("CREATE INDEX IF NOT EXISTS idx_seats_trip_to_stop ON seats(trip_id, to_stop)")
-    db.execute("CREATE INDEX IF NOT EXISTS idx_seats_trip_from_stop ON seats(trip_id, from_stop)")
-    db.execute("CREATE INDEX IF NOT EXISTS idx_seats_trip_payment ON seats(trip_id, payment)")
-
     db.commit()
+
 
 # =========================================================
 # TL filter
@@ -616,6 +850,10 @@ def logout():
 # =========================================================
 # Ana sayfalar
 # =========================================================
+
+@app.route("/ai-console")
+def ai_console_page():
+    return render_template("ai_console.html")
 
 @app.route("/")
 def index():
@@ -1181,6 +1419,164 @@ def hesap_moves_csv():
 
 
 # =========================================================
+# AI Console API
+# =========================================================
+
+@app.get("/api/ai/intents")
+def api_ai_intents():
+    return jsonify({
+        "ok": True,
+        "items": [
+            {
+                "key": k,
+                "title": v["title"],
+                "pattern": v["pattern"],
+            }
+            for k, v in AI_INTENTS.items()
+        ]
+    })
+
+
+@app.get("/api/ai/learned")
+def api_ai_learned():
+    rows = get_db().execute(
+        """
+        SELECT id, phrase, intent, pattern, created_at, updated_at
+        FROM learned_commands
+        ORDER BY id DESC
+        """
+    ).fetchall()
+
+    return jsonify({
+        "ok": True,
+        "items": [dict(r) for r in rows]
+    })
+
+
+@app.post("/api/ai/resolve")
+def api_ai_resolve():
+    data = request.get_json(force=True) or {}
+    command = (data.get("command") or "").strip()
+
+    if not command:
+        return jsonify({"ok": False, "msg": "command gerekli"}), 400
+
+    result = resolve_ai_command(command)
+    return jsonify({"ok": True, "result": result})
+
+
+@app.post("/api/ai/learn")
+def api_ai_learn():
+    data = request.get_json(force=True) or {}
+
+    phrase = (data.get("phrase") or "").strip()
+    intent = (data.get("intent") or "").strip()
+    pattern = (data.get("pattern") or "").strip()
+
+    if not phrase:
+        return jsonify({"ok": False, "msg": "phrase gerekli"}), 400
+    if intent not in AI_INTENTS:
+        return jsonify({"ok": False, "msg": "intent geçersiz"}), 400
+
+    if not pattern:
+        pattern = AI_INTENTS[intent]["pattern"]
+
+    phrase_norm = normalize_ai_text(phrase)
+    skeleton = ai_make_skeleton(phrase)
+
+    db = get_db()
+    row = db.execute(
+        "SELECT id FROM learned_commands WHERE phrase_norm=?",
+        (phrase_norm,)
+    ).fetchone()
+
+    if row:
+        db.execute(
+            """
+            UPDATE learned_commands
+            SET phrase=?, skeleton=?, intent=?, pattern=?, updated_at=datetime('now','localtime')
+            WHERE id=?
+            """,
+            (phrase, skeleton, intent, pattern, row["id"])
+        )
+        item_id = row["id"]
+    else:
+        cur = db.execute(
+            """
+            INSERT INTO learned_commands(phrase, phrase_norm, skeleton, intent, pattern)
+            VALUES(?,?,?,?,?)
+            """,
+            (phrase, phrase_norm, skeleton, intent, pattern)
+        )
+        item_id = cur.lastrowid
+
+    db.commit()
+
+    saved = db.execute(
+        """
+        SELECT id, phrase, intent, pattern, created_at, updated_at
+        FROM learned_commands
+        WHERE id=?
+        """,
+        (item_id,)
+    ).fetchone()
+
+    return jsonify({"ok": True, "item": dict(saved)})
+
+
+@app.put("/api/ai/learned/<int:item_id>")
+def api_ai_learned_update(item_id):
+    data = request.get_json(force=True) or {}
+
+    phrase = (data.get("phrase") or "").strip()
+    intent = (data.get("intent") or "").strip()
+    pattern = (data.get("pattern") or "").strip()
+
+    if not phrase:
+        return jsonify({"ok": False, "msg": "phrase gerekli"}), 400
+    if intent not in AI_INTENTS:
+        return jsonify({"ok": False, "msg": "intent geçersiz"}), 400
+
+    if not pattern:
+        pattern = AI_INTENTS[intent]["pattern"]
+
+    phrase_norm = normalize_ai_text(phrase)
+    skeleton = ai_make_skeleton(phrase)
+
+    db = get_db()
+    db.execute(
+        """
+        UPDATE learned_commands
+        SET phrase=?, phrase_norm=?, skeleton=?, intent=?, pattern=?, updated_at=datetime('now','localtime')
+        WHERE id=?
+        """,
+        (phrase, phrase_norm, skeleton, intent, pattern, item_id)
+    )
+    db.commit()
+
+    row = db.execute(
+        """
+        SELECT id, phrase, intent, pattern, created_at, updated_at
+        FROM learned_commands
+        WHERE id=?
+        """,
+        (item_id,)
+    ).fetchone()
+
+    if not row:
+        return jsonify({"ok": False, "msg": "Kayıt bulunamadı"}), 404
+
+    return jsonify({"ok": True, "item": dict(row)})
+
+
+@app.delete("/api/ai/learned/<int:item_id>")
+def api_ai_learned_delete(item_id):
+    db = get_db()
+    db.execute("DELETE FROM learned_commands WHERE id=?", (item_id,))
+    db.commit()
+    return jsonify({"ok": True, "id": item_id})
+
+# =========================================================
 # API: seats
 # =========================================================
 
@@ -1423,6 +1819,42 @@ def api_seats_offload():
 
     return jsonify({"ok": True, "deleted": seat_list})
 
+@app.post("/api/seats/service")
+def api_seats_service():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
+    data = request.get_json(force=True) or {}
+    seats = data.get("seats")
+    if not isinstance(seats, list) or not seats:
+        return jsonify({"ok": False, "msg": "seats listesi gerekli"}), 400
+
+    service = norm_bool(data.get("service", 1))
+    service_note = (data.get("service_note") or "").strip()
+
+    try:
+        seat_list = [int(x if not isinstance(x, dict) else x.get("seat_no")) for x in seats]
+    except Exception:
+        return jsonify({"ok": False, "msg": "seats geçersiz"}), 400
+
+    db = get_db()
+    db.executemany(
+        """
+        UPDATE seats
+        SET service=?, service_note=?
+        WHERE trip_id=? AND seat_no=?
+        """,
+        [(service, service_note, tid, s) for s in seat_list]
+    )
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "updated": seat_list,
+        "service": service,
+        "service_note": service_note
+    })
 
 # =========================================================
 # Stops / coords

@@ -935,42 +935,47 @@
     </div>
   </div>
 
-  <div class="ai-panel glass">
-    <div class="section-title">🧠 AI Asistan</div>
-    <div class="ai-grid">
-      <div class="ai-card">
-        <div class="ai-big" id="aiMain">Veriler hazırlanıyor…</div>
-        <div class="ai-sub" id="aiSub">Sistem otobüs içi operasyon özetini oluşturuyor.</div>
+<div class="ai-panel glass">
+  <div class="section-title">🧠 AI Asistan</div>
+
+  <div class="ai-grid">
+    <div class="ai-card">
+      <div class="ai-big" id="aiMain">Veriler hazırlanıyor…</div>
+      <div class="ai-sub" id="aiSub">Sistem otobüs içi operasyon özetini oluşturuyor.</div>
+
+      <div class="ai-command-box">
+        <input id="aiCommandInput"
+               type="text"
+               placeholder="Komut yaz... (örn: 5 numara alaşehir bayan 300 lira)"
+               autocomplete="off">
+
+        <button id="aiSendBtn">Gönder</button>
       </div>
-<div class="ai-command-box">
-  <input id="aiCommandInput" 
-         type="text" 
-         placeholder="Komut yaz... (örn: 5 numara alaşehir bayan 300 lira)"
-         autocomplete="off">
+    </div>
 
-  <button id="aiSendBtn">Gönder</button>
-</div>
+    <div class="ai-list">
+      <div class="ai-item">
+        <b>Sıradaki İşlem</b>
+        <span id="aiNextAction">—</span>
+      </div>
 
-      <div class="ai-list">
-        <div class="ai-item">
-          <b>Sıradaki İşlem</b>
-          <span id="aiNextAction">—</span>
-        </div>
-        <div class="ai-item">
-          <b>Servis Durumu</b>
-          <span id="aiService">—</span>
-        </div>
-        <div class="ai-item">
-          <b>Emanet Uyarısı</b>
-          <span id="aiParcel">—</span>
-        </div>
-        <div class="ai-item">
-          <b>Yoğunluk</b>
-          <span id="aiDensity">—</span>
-        </div>
+      <div class="ai-item">
+        <b>Servis Durumu</b>
+        <span id="aiService">—</span>
+      </div>
+
+      <div class="ai-item">
+        <b>Emanet Uyarısı</b>
+        <span id="aiParcel">—</span>
+      </div>
+
+      <div class="ai-item">
+        <b>Yoğunluk</b>
+        <span id="aiDensity">—</span>
       </div>
     </div>
   </div>
+</div>
 
   <div class="main-grid">
     <div class="sidebar">
@@ -1333,7 +1338,8 @@
   const serviceNotes = {{ service_notes | tojson | safe }};
 
   const boardsMap = JSON.parse(localStorage.getItem('boardsMap:' + TRIP_KEY) || '{}');
-
+  const seatMetaMap = {}
+  
   const BAG_TRIP = TRIP_KEY;
   window.BAG_TRIP = BAG_TRIP;
 
@@ -1401,6 +1407,58 @@
   function persistBoards(){
     localStorage.setItem('boardsMap:' + TRIP_KEY, JSON.stringify(boardsMap || {}));
   }
+
+function syncSeatMeta(seatNo, patch = {}){
+  const key = String(seatNo);
+  seatMetaMap[key] = {
+    seat_no: Number(seatNo),
+    from: boardsMap[key] || "",
+    stop: stopsMap[key] || "",
+    ticket_type: "biletsiz",
+    payment: "nakit",
+    amount: 0,
+    gender: genders[key] || "",
+    pair_ok: 0,
+    service: !!serviceMap[key],
+    service_note: serviceNotes[key] || "",
+    ...(seatMetaMap[key] || {}),
+    ...patch
+  };
+  return seatMetaMap[key];
+}
+
+function getSeatMeta(seatNo){
+  const key = String(seatNo);
+  if(!seatMetaMap[key]){
+    syncSeatMeta(seatNo);
+  }
+  return { ...seatMetaMap[key] };
+}
+
+async function loadSeatMetaMap(){
+  try{
+    const j = await safeJsonFetch('/api/seats/list');
+    if(!(j?.ok) || !Array.isArray(j.items)) return;
+
+    j.items.forEach(item => {
+      const seatNo = Number(item.seat_no);
+      const key = String(seatNo);
+
+      seatMetaMap[key] = {
+        seat_no: seatNo,
+        from: boardsMap[key] || "",
+        stop: item.stop || "",
+        ticket_type: item.ticket_type || "biletsiz",
+        payment: item.payment || "nakit",
+        amount: Number(item.amount || 0),
+        gender: item.gender || "",
+        pair_ok: Number(item.pair_ok || 0),
+        service: !!item.service,
+        service_note: item.service_note || ""
+      };
+    });
+  }catch(_){}
+}
 
   function sampleRandom(arr, count){
     const a = arr.slice();
@@ -1792,6 +1850,19 @@
       serviceNotes[String(currentSeat)] = service_note;
       boardsMap[String(currentSeat)] = from;
       persistBoards();
+      syncSeatMeta(e.seatNo, payload)
+
+      syncSeatMeta(currentSeat, {
+        from,
+        stop,
+        ticket_type: ticket,
+        payment,
+        amount,
+        gender,
+        pair_ok,
+        service,
+        service_note
+      });
 
       setSeatVisual(currentSeat);
       closeSeat();
@@ -1812,6 +1883,7 @@
     delete serviceMap[String(seatNo)];
     delete serviceNotes[String(seatNo)];
     delete boardsMap[String(seatNo)];
+    delete seatMetaMap[String(seatNo)];
     persistBoards();
     setSeatVisual(seatNo);
 
@@ -1977,6 +2049,17 @@
         boardsMap[String(n)] = from;
         serviceMap[String(n)] = !!useService;
         serviceNotes[String(n)] = '';
+        syncSeatMeta(n, {
+          from,
+          stop: to,
+          ticket_type: ticketVal,
+          payment: "nakit",
+          amount: 0,
+          gender: "",
+          pair_ok: 0,
+          service: !!useService,
+          service_note: ""
+        });
         setSeatVisual(n);
       }
 
@@ -3094,7 +3177,7 @@
       await loadStandingTotals();
       await loadStandingItems();
       await loadParcelItems();
-
+      await loadSeatMetaMap();
       for(const seatNo of Object.keys(seatPositions || {})){
         setSeatVisual(seatNo);
       }
@@ -3394,76 +3477,158 @@ const AIIntentResolver = {
   resolve(entities){
     const text = entities.text;
 
-    if(AIUtils.containsAny(text, AIConfig.confirmWords)){
+    if (AIUtils.containsAny(text, AIConfig.confirmWords)) {
       return "confirm_yes";
     }
 
-    if(AIUtils.containsAny(text, AIConfig.rejectWords)){
+    if (AIUtils.containsAny(text, AIConfig.rejectWords)) {
       return "confirm_no";
     }
 
-    if(AIUtils.containsAny(text, ["sıradaki durak", "siradaki durak"])){
+    if (AIUtils.containsAny(text, ["sıradaki durak", "siradaki durak"])) {
       return "next_stop_set";
     }
 
-    if(AIUtils.containsAny(text, ["yaklaşma paneli aç", "yaklasma paneli ac", "panel aç", "panel ac"]) && entities.stop){
+    if (
+      AIUtils.containsAny(text, [
+        "yaklaşma paneli aç",
+        "yaklasma paneli ac",
+        "panel aç",
+        "panel ac"
+      ]) &&
+      entities.stop
+    ) {
       return "open_approach";
     }
 
-    if(entities.stop && AIUtils.containsAny(text, ["kimler", "kaç kişi", "kac kisi", "kaç yolcu", "kac yolcu", "var mı", "var mi"])){
-      return "stop_summary_query";
-    }
-
-    if(AIUtils.containsAny(text, ["kaç ayakta", "kac ayakta", "ayakta kaç", "ayakta kac"])){
-      return "standing_total_query";
-    }
-
-    if(AIUtils.containsAny(text, ["servis yapılmayan", "servis yapilmayan", "servis almayan", "servis olmayan", "servis bekleyen"])){
-      return "unserved_query";
-    }
-
-    if(AIUtils.containsAny(text, ["boş koltuk", "bos koltuk", "kaç boş", "kac bos"])){
-      return "empty_seat_query";
-    }
-
-    if(AIUtils.containsAny(text, ["toplam yolcu", "kaç kişi var", "kac kisi var", "toplam kaç", "toplam kac"])){
-      return "total_pax_query";
-    }
-
-    if(AIUtils.containsAny(text, ["en çok yolcu", "en cok yolcu", "hangi durakta en çok", "hangi durakta en cok", "yoğun durak", "yogun durak"])){
-      return "busiest_stop_query";
-    }
-
-    if(AIUtils.containsAny(text, ["emanet var mı", "emanet var mi", "kaç emanet", "kac emanet"]) && !entities.stop){
-      return "parcel_total_query";
-    }
-
-    if(entities.stop && AIUtils.containsAny(text, ["emanet", "kargo", "paket"])){
+    // Önce daha spesifik sorgular
+    if (
+      entities.stop &&
+      AIUtils.containsAny(text, ["emanet", "kargo", "paket"])
+    ) {
       return "parcel_stop_query";
     }
 
-    if(entities.stop && AIUtils.containsAny(text, ["indir", "boşalt", "bosalt"])){
-      const hasSeatStyle = /(\d+)\s*numara/.test(text) || /^\d+\b/.test(text);
-      if(!hasSeatStyle) return "stop_offload";
+    if (
+      AIUtils.containsAny(text, [
+        "emanet var mı",
+        "emanet var mi",
+        "kaç emanet",
+        "kac emanet"
+      ]) &&
+      !entities.stop
+    ) {
+      return "parcel_total_query";
     }
 
-    if(AIUtils.containsAny(text, ["indir", "boşalt", "bosalt"])){
+    if (
+      AIUtils.containsAny(text, [
+        "servis yapılmayan",
+        "servis yapilmayan",
+        "servis almayan",
+        "servis olmayan",
+        "servis bekleyen"
+      ])
+    ) {
+      return "unserved_query";
+    }
+
+    if (
+      AIUtils.containsAny(text, [
+        "kaç ayakta",
+        "kac ayakta",
+        "ayakta kaç",
+        "ayakta kac"
+      ])
+    ) {
+      return "standing_total_query";
+    }
+
+    if (
+      AIUtils.containsAny(text, [
+        "boş koltuk",
+        "bos koltuk",
+        "kaç boş",
+        "kac bos"
+      ])
+    ) {
+      return "empty_seat_query";
+    }
+
+    if (
+      AIUtils.containsAny(text, [
+        "toplam yolcu",
+        "kaç kişi var",
+        "kac kisi var",
+        "toplam kaç",
+        "toplam kac"
+      ])
+    ) {
+      return "total_pax_query";
+    }
+
+    if (
+      AIUtils.containsAny(text, [
+        "en çok yolcu",
+        "en cok yolcu",
+        "hangi durakta en çok",
+        "hangi durakta en cok",
+        "yoğun durak",
+        "yogun durak"
+      ])
+    ) {
+      return "busiest_stop_query";
+    }
+
+    // Daha genel durak özeti en sona yakın gelsin
+    if (
+      entities.stop &&
+      AIUtils.containsAny(text, [
+        "kimler",
+        "kaç kişi",
+        "kac kisi",
+        "kaç yolcu",
+        "kac yolcu",
+        "var mı",
+        "var mi"
+      ])
+    ) {
+      return "stop_summary_query";
+    }
+
+    if (
+      entities.stop &&
+      AIUtils.containsAny(text, ["indir", "boşalt", "bosalt"])
+    ) {
+      const hasSeatStyle =
+        /(\d+)\s*numara/.test(text) || /^\d+\b/.test(text);
+
+      if (!hasSeatStyle) {
+        return "stop_offload";
+      }
+    }
+
+    if (AIUtils.containsAny(text, ["indir", "boşalt", "bosalt"])) {
       return "seat_offload";
     }
 
-    if(AIUtils.containsAny(text, ["ayakta"])){
+    if (AIUtils.containsAny(text, ["ayakta"])) {
       return "standing_create";
     }
 
-    if(AIUtils.containsAny(text, ["servis"]) && entities.seatNo && !entities.stop){
+    if (
+      AIUtils.containsAny(text, ["servis"]) &&
+      entities.seatNo &&
+      !entities.stop
+    ) {
       return "service_mark";
     }
 
-    if(entities.seatNo && entities.gender && !entities.stop){
+    if (entities.seatNo && entities.gender && !entities.stop) {
       return "gender_update";
     }
 
-    if(entities.seatNo && entities.stop){
+    if (entities.seatNo && entities.stop) {
       return "seat_create_or_update";
     }
 
@@ -3740,18 +3905,20 @@ const AIActionExecutor = {
     AIUtils.reply(`${e.count} ayakta yolcu eklendi`, source);
   },
 
-  async genderUpdate(e, source){
+async genderUpdate(e, source){
+    const meta = getSeatMeta(e.seatNo);
+
     const payload = {
       seat_no: e.seatNo,
-      from: boardsMap[String(e.seatNo)] || "",
-      stop: stopsMap[String(e.seatNo)] || "",
-      ticket_type: "biletsiz",
-      payment: "nakit",
-      amount: 0,
+      from: meta.from || "",
+      stop: meta.stop || "",
+      ticket_type: meta.ticket_type || "biletsiz",
+      payment: meta.payment || "nakit",
+      amount: Number(meta.amount || 0),
       gender: e.gender,
-      pair_ok: 0,
-      service: !!serviceMap[String(e.seatNo)],
-      service_note: serviceNotes[String(e.seatNo)] || ""
+      pair_ok: Number(meta.pair_ok || 0),
+      service: !!meta.service,
+      service_note: meta.service_note || ""
     };
 
     const j = await safeJsonFetch('/api/seat', {
@@ -3766,26 +3933,29 @@ const AIActionExecutor = {
     if(!j.ok) throw new Error(j.msg || "Cinsiyet güncellenemedi");
 
     genders[String(e.seatNo)] = e.gender;
+    syncSeatMeta(e.seatNo, payload);
     setSeatVisual(e.seatNo);
     renderAI();
 
     AIUtils.reply(`${e.seatNo} numara güncellendi`, source);
   },
 
-  async serviceMark(e, source){
+async serviceMark(e, source){
     if(!assigned[String(e.seatNo)]) throw new Error("Bu koltuk dolu değil");
+
+    const meta = getSeatMeta(e.seatNo);
 
     const payload = {
       seat_no: e.seatNo,
-      from: boardsMap[String(e.seatNo)] || "",
-      stop: stopsMap[String(e.seatNo)] || "",
-      ticket_type: "biletsiz",
-      payment: "nakit",
-      amount: 0,
-      gender: genders[String(e.seatNo)] || "",
-      pair_ok: 0,
+      from: meta.from || "",
+      stop: meta.stop || "",
+      ticket_type: meta.ticket_type || "biletsiz",
+      payment: meta.payment || "nakit",
+      amount: Number(meta.amount || 0),
+      gender: meta.gender || "",
+      pair_ok: Number(meta.pair_ok || 0),
       service: true,
-      service_note: "ai engine"
+      service_note: meta.service_note || "ai engine"
     };
 
     const j = await safeJsonFetch('/api/seat', {
@@ -3800,7 +3970,8 @@ const AIActionExecutor = {
     if(!j.ok) throw new Error(j.msg || "Servis işlenemedi");
 
     serviceMap[String(e.seatNo)] = true;
-    serviceNotes[String(e.seatNo)] = "ai engine";
+    serviceNotes[String(e.seatNo)] = payload.service_note || "ai engine";
+    syncSeatMeta(e.seatNo, payload);
     setSeatVisual(e.seatNo);
     renderAI();
 
