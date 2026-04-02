@@ -447,7 +447,7 @@
 
   .action-grid{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:repeat(auto-fit, minmax(140px,1fr));
     gap:10px;
   }
 
@@ -799,38 +799,47 @@
     }
   }
 
-#voiceBtn.listening{
-  background:#ef4444;
-  animation:voicePulse 1s ease-in-out infinite;
-}
-@keyframes voicePulse{
-  0%,100%{transform:scale(1)}
-  50%{transform:scale(1.08)}
-}
-
-.ai-command-box{
-  display:flex;
-  gap:8px;
-  margin-top:10px;
-}
-
-#aiCommandInput{
-  flex:1;
-  padding:10px;
-  border-radius:10px;
+.deck-ai-mic{
+  position:absolute;
+  top:118px;
+  right:22px;
+  z-index:60;
   border:none;
-  background:#1e2327;
-  color:#fff;
-  font-size:14px;
-}
-
-#aiSendBtn{
+  cursor:pointer;
+  border-radius:999px;
   padding:10px 14px;
-  border-radius:10px;
-  border:none;
-  background:#2563eb;
+  background:linear-gradient(180deg,#8b5cf6,#6d28d9);
   color:#fff;
-  font-weight:600;
+  font-weight:900;
+  font-size:13px;
+  box-shadow:0 12px 24px rgba(0,0,0,.35);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.deck-ai-mic:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.06);
+}
+
+.deck-ai-mic.listening{
+  background:linear-gradient(180deg,#ef4444,#b91c1c);
+  animation:aiMicPulse 1s ease-in-out infinite;
+}
+
+@keyframes aiMicPulse{
+  0%,100%{ box-shadow:0 0 0 0 rgba(239,68,68,0), 0 12px 24px rgba(0,0,0,.35); }
+  50%{ box-shadow:0 0 0 10px rgba(239,68,68,.20), 0 12px 24px rgba(0,0,0,.35); }
+}
+
+@media (max-width:760px){
+  .deck-ai-mic{
+    top:108px;
+    right:14px;
+    padding:9px 12px;
+    font-size:12px;
+  }
 }
 </style>
 
@@ -851,7 +860,8 @@
           <a href="{{ url_for('index') }}" class="icon-btn" title="Ana Sayfa">🏠</a>
           <a href="{{ url_for('hesap_page') }}" class="icon-btn" title="Hesap">💵</a>
           <a href="{{ url_for('consignments_page') }}" class="icon-btn" title="Emanetler">📦</a>
-          <form method="post" action="{{ url_for('end_trip') }}" onsubmit="return confirm('Sefer sonlandırılsın mı?')">
+          <a href="{{ url_for('ai_console_page') }}" class="icon-btn" title="AI Console">🧠</a>  
+        <form method="post" action="{{ url_for('end_trip') }}" onsubmit="return confirm('Sefer sonlandırılsın mı?')">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <button type="submit" class="icon-btn" title="Seferi Sonlandır">⛔</button>
           </form>
@@ -897,7 +907,6 @@
             <div class="speed-meta" id="spLimit">Limit: —</div>
           </div>
           <button class="tts-btn" id="ttsToggle" title="Sesli uyarı">🔊</button>
-          <button class="tts-btn" id="voiceBtn" title="Sesli komut">🎤</button>
         </div>
       </div>
     </div>
@@ -935,47 +944,34 @@
     </div>
   </div>
 
-<div class="ai-panel glass">
-  <div class="section-title">🧠 AI Asistan</div>
-
-  <div class="ai-grid">
-    <div class="ai-card">
-      <div class="ai-big" id="aiMain">Veriler hazırlanıyor…</div>
-      <div class="ai-sub" id="aiSub">Sistem otobüs içi operasyon özetini oluşturuyor.</div>
-
-      <div class="ai-command-box">
-        <input id="aiCommandInput"
-               type="text"
-               placeholder="Komut yaz... (örn: 5 numara alaşehir bayan 300 lira)"
-               autocomplete="off">
-
-        <button id="aiSendBtn">Gönder</button>
-      </div>
-    </div>
-
-    <div class="ai-list">
-      <div class="ai-item">
-        <b>Sıradaki İşlem</b>
-        <span id="aiNextAction">—</span>
+  <div class="ai-panel glass">
+    <div class="section-title">🧠 AI Asistan</div>
+    <div class="ai-grid">
+      <div class="ai-card">
+        <div class="ai-big" id="aiMain">Veriler hazırlanıyor…</div>
+        <div class="ai-sub" id="aiSub">Sistem otobüs içi operasyon özetini oluşturuyor.</div>
       </div>
 
-      <div class="ai-item">
-        <b>Servis Durumu</b>
-        <span id="aiService">—</span>
-      </div>
-
-      <div class="ai-item">
-        <b>Emanet Uyarısı</b>
-        <span id="aiParcel">—</span>
-      </div>
-
-      <div class="ai-item">
-        <b>Yoğunluk</b>
-        <span id="aiDensity">—</span>
+      <div class="ai-list">
+        <div class="ai-item">
+          <b>Sıradaki İşlem</b>
+          <span id="aiNextAction">—</span>
+        </div>
+        <div class="ai-item">
+          <b>Servis Durumu</b>
+          <span id="aiService">—</span>
+        </div>
+        <div class="ai-item">
+          <b>Emanet Uyarısı</b>
+          <span id="aiParcel">—</span>
+        </div>
+        <div class="ai-item">
+          <b>Yoğunluk</b>
+          <span id="aiDensity">—</span>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
   <div class="main-grid">
     <div class="sidebar">
@@ -1061,7 +1057,7 @@
           <div class="chip">🔔 İniş</div>
         </div>
       </div>
-
+      <button class="deck-ai-mic" id="btnDeckAI" type="button" title="Sesli AI komut">🎤 AI</button>
       <button class="ghost-offload" id="btnGhostOffload">BOŞALT</button>
 
       <div class="deck" id="deck">
@@ -1338,8 +1334,7 @@
   const serviceNotes = {{ service_notes | tojson | safe }};
 
   const boardsMap = JSON.parse(localStorage.getItem('boardsMap:' + TRIP_KEY) || '{}');
-  const seatMetaMap = {}
-  
+
   const BAG_TRIP = TRIP_KEY;
   window.BAG_TRIP = BAG_TRIP;
 
@@ -1407,58 +1402,6 @@
   function persistBoards(){
     localStorage.setItem('boardsMap:' + TRIP_KEY, JSON.stringify(boardsMap || {}));
   }
-
-function syncSeatMeta(seatNo, patch = {}){
-  const key = String(seatNo);
-  seatMetaMap[key] = {
-    seat_no: Number(seatNo),
-    from: boardsMap[key] || "",
-    stop: stopsMap[key] || "",
-    ticket_type: "biletsiz",
-    payment: "nakit",
-    amount: 0,
-    gender: genders[key] || "",
-    pair_ok: 0,
-    service: !!serviceMap[key],
-    service_note: serviceNotes[key] || "",
-    ...(seatMetaMap[key] || {}),
-    ...patch
-  };
-  return seatMetaMap[key];
-}
-
-function getSeatMeta(seatNo){
-  const key = String(seatNo);
-  if(!seatMetaMap[key]){
-    syncSeatMeta(seatNo);
-  }
-  return { ...seatMetaMap[key] };
-}
-
-async function loadSeatMetaMap(){
-  try{
-    const j = await safeJsonFetch('/api/seats/list');
-    if(!(j?.ok) || !Array.isArray(j.items)) return;
-
-    j.items.forEach(item => {
-      const seatNo = Number(item.seat_no);
-      const key = String(seatNo);
-
-      seatMetaMap[key] = {
-        seat_no: seatNo,
-        from: boardsMap[key] || "",
-        stop: item.stop || "",
-        ticket_type: item.ticket_type || "biletsiz",
-        payment: item.payment || "nakit",
-        amount: Number(item.amount || 0),
-        gender: item.gender || "",
-        pair_ok: Number(item.pair_ok || 0),
-        service: !!item.service,
-        service_note: item.service_note || ""
-      };
-    });
-  }catch(_){}
-}
 
   function sampleRandom(arr, count){
     const a = arr.slice();
@@ -1850,19 +1793,6 @@ async function loadSeatMetaMap(){
       serviceNotes[String(currentSeat)] = service_note;
       boardsMap[String(currentSeat)] = from;
       persistBoards();
-      syncSeatMeta(e.seatNo, payload)
-
-      syncSeatMeta(currentSeat, {
-        from,
-        stop,
-        ticket_type: ticket,
-        payment,
-        amount,
-        gender,
-        pair_ok,
-        service,
-        service_note
-      });
 
       setSeatVisual(currentSeat);
       closeSeat();
@@ -1883,7 +1813,6 @@ async function loadSeatMetaMap(){
     delete serviceMap[String(seatNo)];
     delete serviceNotes[String(seatNo)];
     delete boardsMap[String(seatNo)];
-    delete seatMetaMap[String(seatNo)];
     persistBoards();
     setSeatVisual(seatNo);
 
@@ -2049,17 +1978,6 @@ async function loadSeatMetaMap(){
         boardsMap[String(n)] = from;
         serviceMap[String(n)] = !!useService;
         serviceNotes[String(n)] = '';
-        syncSeatMeta(n, {
-          from,
-          stop: to,
-          ticket_type: ticketVal,
-          payment: "nakit",
-          amount: 0,
-          gender: "",
-          pair_ok: 0,
-          service: !!useService,
-          service_note: ""
-        });
         setSeatVisual(n);
       }
 
@@ -3177,7 +3095,7 @@ async function loadSeatMetaMap(){
       await loadStandingTotals();
       await loadStandingItems();
       await loadParcelItems();
-      await loadSeatMetaMap();
+
       for(const seatNo of Object.keys(seatPositions || {})){
         setSeatVisual(seatNo);
       }
@@ -3188,1045 +3106,59 @@ async function loadSeatMetaMap(){
       updateStats();
       updateGeoHint();
       renderAI();
-      initVoiceRecognition();
-      initAICommandInput();
     }catch(e){
       toast(e.message || 'Başlangıç yükleme hatası');
     }
   })();
 
-/* =========================================================
-   AI ENGINE v1 — MERKEZİ KOMUT BEYNİ
-========================================================= */
-
-const AIConfig = {
-  aliases: {
-    "alaşehir": "Alaşehir Otogar",
-    "alashehir": "Alaşehir Otogar",
-    "ala sehir": "Alaşehir Otogar",
-    "salihli": "Salihli Garaj",
-    "turgutlu": "Turgutlu Garaj",
-    "manisa": "Manisa Otogar",
-    "izmir": "İzmir Otogar",
-    "denizli": "Denizli otogar",
-    "esenler": "Esenler Otogar",
-    "bursa": "Bursa Otogar",
-    "antalya": "Antalya Otogar",
-    "harem": "Harem",
-    "gebze": "Gebze Garaj",
-    "bornova": "Bornova",
-    "soma": "Soma",
-    "akhisar": "Akhisar",
-    "susurluk": "Susurluk",
-    "balıkesir": "Balıkesir",
-    "sarayköy": "Sarayköy",
-    "saraykoy": "Sarayköy",
-    "alibeyköy": "Alibeyköy",
-    "alibeykoy": "Alibeyköy"
-  },
-
-  paymentKeywords: {
-    "nakit": "nakit",
-    "iban": "iban",
-    "havale": "iban",
-    "eft": "iban",
-    "pos": "pos",
-    "kart": "pos",
-    "kartla": "pos",
-    "online": "online",
-    "ücretsiz": "ucretsiz",
-    "ucretsiz": "ucretsiz",
-    "bedava": "ucretsiz"
-  },
-
-  ticketKeywords: {
-    "biletli": "biletli",
-    "biletsiz": "biletsiz",
-    "ücretsiz": "ucretsiz",
-    "ucretsiz": "ucretsiz",
-    "bedava": "ucretsiz"
-  },
-
-  genderKeywords: {
-    "bayan": "bayan",
-    "kadın": "bayan",
-    "kadin": "bayan",
-    "hanım": "bayan",
-    "hanim": "bayan",
-    "hanımefendi": "bayan",
-    "hanimefendi": "bayan",
-
-    "bay": "bay",
-    "erkek": "bay",
-    "bey": "bay",
-    "delikanlı": "bay",
-    "delikanli": "bay"
-  },
-
-  confirmWords: ["evet", "tamam", "onaylıyorum", "onay", "olur"],
-  rejectWords: ["hayır", "iptal", "vazgeç", "vazgec", "olmaz"]
-};
-
-const AIContext = {
-  pendingIntent: null,
-  pendingEntities: null,
-  awaitingConfirmation: false,
-  missingFields: [],
-  lastQuestion: "",
-  source: "text",
-
-  reset(){
-    this.pendingIntent = null;
-    this.pendingEntities = null;
-    this.awaitingConfirmation = false;
-    this.missingFields = [];
-    this.lastQuestion = "";
-  }
-};
-
-const AIUtils = {
-  normalize(text){
-    return (text || "")
-      .toLowerCase()
-      .replace(/[']/g, "")
-      .replace(/[.,!?;:]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-  },
-
-  containsAny(text, arr){
-    return arr.some(x => text.includes(x));
-  },
-
-  canonicalStop(raw){
-    const t = norm(raw || "");
-    if(!t) return "";
-
-    if(AIConfig.aliases[t]) return AIConfig.aliases[t];
-
-    if(Array.isArray(cachedStops)){
-      for(const s of cachedStops){
-        if(norm(s.name) === t) return s.name;
-      }
-      for(const s of cachedStops){
-        const ns = norm(s.name);
-        if(ns.includes(t) || t.includes(ns)) return s.name;
-      }
-    }
-    return raw || "";
-  },
-
-  extractFirstNumber(text){
-    const m = text.match(/(\d+)/);
-    return m ? parseInt(m[1], 10) : null;
-  },
-
-  extractSeatNumber(text){
-    let m = text.match(/(\d+)\s*numara/);
-    if(m) return parseInt(m[1], 10);
-
-    m = text.match(/numara\s*(\d+)/);
-    if(m) return parseInt(m[1], 10);
-
-    m = text.match(/(\d+)\s*koltuk/);
-    if(m) return parseInt(m[1], 10);
-
-    m = text.match(/^(\d+)\b/);
-    if(m) return parseInt(m[1], 10);
-
-    return null;
-  },
-
-  extractStop(text){
-    if(!Array.isArray(cachedStops)) return "";
-
-    for(const key of Object.keys(AIConfig.aliases)){
-      if(text.includes(key)) return AIConfig.aliases[key];
-    }
-
-    for(const s of cachedStops){
-      const ns = norm(s.name);
-      if(text.includes(ns)) return s.name;
-    }
-
-    return "";
-  },
-
-  extractMoney(text){
-    let m = text.match(/(\d+)\s*lira/);
-    if(m) return parseFloat(m[1]);
-
-    m = text.match(/(\d+)\s*tl/);
-    if(m) return parseFloat(m[1]);
-
-    m = text.match(/(\d+)\s*₺/);
-    if(m) return parseFloat(m[1]);
-
-    return null;
-  },
-
-  extractPayment(text){
-    for(const [k,v] of Object.entries(AIConfig.paymentKeywords)){
-      if(text.includes(k)) return v;
-    }
-    return "nakit";
-  },
-
-  extractTicketType(text){
-    for(const [k,v] of Object.entries(AIConfig.ticketKeywords)){
-      if(text.includes(k)) return v;
-    }
-    return "biletsiz";
-  },
-
-  extractGender(text){
-    for(const [k,v] of Object.entries(AIConfig.genderKeywords)){
-      if(text.includes(k)) return v;
-    }
-    return "";
-  },
-
-  extractService(text){
-    return text.includes("servis");
-  },
-
-  speak(text){
-    try{
-      if(!("speechSynthesis" in window)) return;
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = "tr-TR";
-      window.speechSynthesis.speak(u);
-    }catch(_){}
-  },
-
-  reply(text, source="text"){
-    toast(text, 3500);
-    if(source === "voice") this.speak(text);
-  }
-};
-
-const AIKnowledge = {
-  totalFilledSeats(){
-    return Object.values(assigned || {}).filter(Boolean).length;
-  },
-
-  totalEmptySeats(){
-    const totalSeats = Object.keys(seatPositions || {}).length;
-    return totalSeats - this.totalFilledSeats();
-  },
-
-  totalPax(){
-    return this.totalFilledSeats() + Number(standingCount || 0);
-  },
-
-  seatCountForStop(stopName){
-    return seatsForStop(stopName).length;
-  },
-
-  standingCountForStop(stopName){
-    return computeStandingCountsByStop()?.[stopName] || 0;
-  },
-
-  parcelCountForStop(stopName){
-    return computeParcelCountsByStop()?.[stopName] || 0;
-  },
-
-  unservedSeatNumbers(){
-    return Object.keys(assigned || {})
-      .filter(k => assigned[k] && !serviceMap[k])
-      .map(Number)
-      .sort((a,b)=>a-b);
-  },
-
-  busiestStop(){
-    const counts = computeSeatCountsByStop();
-    let bestStop = "";
-    let bestCount = 0;
-
-    Object.entries(counts || {}).forEach(([stop, count]) => {
-      if(count > bestCount){
-        bestStop = stop;
-        bestCount = count;
-      }
-    });
-
-    return { stop: bestStop, count: bestCount };
-  }
-};
-
-const AIEntityExtractor = {
-  extract(rawText){
-    const text = AIUtils.normalize(rawText);
-
-    return {
-      rawText,
-      text,
-      seatNo: AIUtils.extractSeatNumber(text) || AIUtils.extractFirstNumber(text),
-      count: AIUtils.extractFirstNumber(text),
-      stop: AIUtils.canonicalStop(AIUtils.extractStop(text)),
-      amount: AIUtils.extractMoney(text),
-      payment: AIUtils.extractPayment(text),
-      ticketType: AIUtils.extractTicketType(text),
-      gender: AIUtils.extractGender(text),
-      service: AIUtils.extractService(text)
-    };
-  }
-};
-
-const AIIntentResolver = {
-  resolve(entities){
-    const text = entities.text;
-
-    if (AIUtils.containsAny(text, AIConfig.confirmWords)) {
-      return "confirm_yes";
-    }
-
-    if (AIUtils.containsAny(text, AIConfig.rejectWords)) {
-      return "confirm_no";
-    }
-
-    if (AIUtils.containsAny(text, ["sıradaki durak", "siradaki durak"])) {
-      return "next_stop_set";
-    }
-
-    if (
-      AIUtils.containsAny(text, [
-        "yaklaşma paneli aç",
-        "yaklasma paneli ac",
-        "panel aç",
-        "panel ac"
-      ]) &&
-      entities.stop
-    ) {
-      return "open_approach";
-    }
-
-    // Önce daha spesifik sorgular
-    if (
-      entities.stop &&
-      AIUtils.containsAny(text, ["emanet", "kargo", "paket"])
-    ) {
-      return "parcel_stop_query";
-    }
-
-    if (
-      AIUtils.containsAny(text, [
-        "emanet var mı",
-        "emanet var mi",
-        "kaç emanet",
-        "kac emanet"
-      ]) &&
-      !entities.stop
-    ) {
-      return "parcel_total_query";
-    }
-
-    if (
-      AIUtils.containsAny(text, [
-        "servis yapılmayan",
-        "servis yapilmayan",
-        "servis almayan",
-        "servis olmayan",
-        "servis bekleyen"
-      ])
-    ) {
-      return "unserved_query";
-    }
-
-    if (
-      AIUtils.containsAny(text, [
-        "kaç ayakta",
-        "kac ayakta",
-        "ayakta kaç",
-        "ayakta kac"
-      ])
-    ) {
-      return "standing_total_query";
-    }
-
-    if (
-      AIUtils.containsAny(text, [
-        "boş koltuk",
-        "bos koltuk",
-        "kaç boş",
-        "kac bos"
-      ])
-    ) {
-      return "empty_seat_query";
-    }
-
-    if (
-      AIUtils.containsAny(text, [
-        "toplam yolcu",
-        "kaç kişi var",
-        "kac kisi var",
-        "toplam kaç",
-        "toplam kac"
-      ])
-    ) {
-      return "total_pax_query";
-    }
-
-    if (
-      AIUtils.containsAny(text, [
-        "en çok yolcu",
-        "en cok yolcu",
-        "hangi durakta en çok",
-        "hangi durakta en cok",
-        "yoğun durak",
-        "yogun durak"
-      ])
-    ) {
-      return "busiest_stop_query";
-    }
-
-    // Daha genel durak özeti en sona yakın gelsin
-    if (
-      entities.stop &&
-      AIUtils.containsAny(text, [
-        "kimler",
-        "kaç kişi",
-        "kac kisi",
-        "kaç yolcu",
-        "kac yolcu",
-        "var mı",
-        "var mi"
-      ])
-    ) {
-      return "stop_summary_query";
-    }
-
-    if (
-      entities.stop &&
-      AIUtils.containsAny(text, ["indir", "boşalt", "bosalt"])
-    ) {
-      const hasSeatStyle =
-        /(\d+)\s*numara/.test(text) || /^\d+\b/.test(text);
-
-      if (!hasSeatStyle) {
-        return "stop_offload";
-      }
-    }
-
-    if (AIUtils.containsAny(text, ["indir", "boşalt", "bosalt"])) {
-      return "seat_offload";
-    }
-
-    if (AIUtils.containsAny(text, ["ayakta"])) {
-      return "standing_create";
-    }
-
-    if (
-      AIUtils.containsAny(text, ["servis"]) &&
-      entities.seatNo &&
-      !entities.stop
-    ) {
-      return "service_mark";
-    }
-
-    if (entities.seatNo && entities.gender && !entities.stop) {
-      return "gender_update";
-    }
-
-    if (entities.seatNo && entities.stop) {
-      return "seat_create_or_update";
-    }
-
-    return "unknown";
-  }
-};
-
-const AIPolicyEngine = {
-  evaluate(intent, entities){
-    const result = {
-      mode: "execute", // execute | ask | confirm | reject
-      question: "",
-      reason: "",
-      risk: "low"
-    };
-
-    if(intent === "unknown"){
-      result.mode = "reject";
-      result.reason = "Komut anlaşılmadı";
-      return result;
-    }
-
-    if(intent === "seat_create_or_update"){
-      if(!entities.seatNo){
-        result.mode = "ask";
-        result.question = "Hangi koltuk?";
-        return result;
-      }
-      if(!entities.stop){
-        result.mode = "ask";
-        result.question = "Hangi durak?";
-        return result;
-      }
-
-      if(assigned[String(entities.seatNo)] && stopsMap[String(entities.seatNo)] && stopsMap[String(entities.seatNo)] !== entities.stop){
-        result.mode = "confirm";
-        result.risk = "high";
-        result.question = `${entities.seatNo} numara şu an ${stopsMap[String(entities.seatNo)]}. ${entities.stop} olarak değiştirilecek. Onaylıyor musun?`;
-        return result;
-      }
-    }
-
-    if(intent === "standing_create"){
-      if(!entities.count){
-        result.mode = "ask";
-        result.question = "Kaç kişi?";
-        return result;
-      }
-      if(!entities.stop){
-        result.mode = "ask";
-        result.question = "Hangi durak?";
-        return result;
-      }
-    }
-
-    if(intent === "gender_update"){
-      if(!entities.seatNo){
-        result.mode = "ask";
-        result.question = "Hangi koltuk?";
-        return result;
-      }
-      if(!entities.gender){
-        result.mode = "ask";
-        result.question = "Bay mı bayan mı?";
-        return result;
-      }
-      if(!assigned[String(entities.seatNo)]){
-        result.mode = "reject";
-        result.reason = "Bu koltuk dolu değil";
-        return result;
-      }
-    }
-
-    if(intent === "seat_offload"){
-      if(!entities.seatNo){
-        result.mode = "ask";
-        result.question = "Hangi koltuk?";
-        return result;
-      }
-    }
-
-    if(intent === "stop_offload"){
-      if(!entities.stop){
-        result.mode = "ask";
-        result.question = "Hangi durak?";
-        return result;
-      }
-      result.mode = "confirm";
-      result.risk = "high";
-      result.question = `${entities.stop} için toplu indirme yapılacak. Ayaktalar hariç. Onaylıyor musun?`;
-      return result;
-    }
-
-    if(intent === "next_stop_set" && !entities.stop){
-      result.mode = "ask";
-      result.question = "Hangi durak?";
-      return result;
-    }
-
-    if(intent === "stop_summary_query" && !entities.stop){
-      result.mode = "ask";
-      result.question = "Hangi durak?";
-      return result;
-    }
-
-    if(intent === "parcel_stop_query" && !entities.stop){
-      result.mode = "ask";
-      result.question = "Hangi durak?";
-      return result;
-    }
-
-    return result;
-  }
-};
-
-const AIActionExecutor = {
-  async execute(intent, entities, source="text"){
-    switch(intent){
-      case "seat_create_or_update":
-        return this.seatCreateOrUpdate(entities, source);
-
-      case "seat_offload":
-        return this.seatOffload(entities, source);
-
-      case "standing_create":
-        return this.standingCreate(entities, source);
-
-      case "gender_update":
-        return this.genderUpdate(entities, source);
-
-      case "service_mark":
-        return this.serviceMark(entities, source);
-
-      case "next_stop_set":
-        return this.nextStopSet(entities, source);
-
-      case "stop_offload":
-        return this.stopOffload(entities, source);
-
-      case "stop_summary_query":
-        return this.stopSummaryQuery(entities, source);
-
-      case "standing_total_query":
-        return this.standingTotalQuery(source);
-
-      case "unserved_query":
-        return this.unservedQuery(source);
-
-      case "empty_seat_query":
-        return this.emptySeatQuery(source);
-
-      case "total_pax_query":
-        return this.totalPaxQuery(source);
-
-      case "busiest_stop_query":
-        return this.busiestStopQuery(source);
-
-      case "parcel_total_query":
-        return this.parcelTotalQuery(source);
-
-      case "parcel_stop_query":
-        return this.parcelStopQuery(entities, source);
-
-      case "open_approach":
-        return this.openApproach(entities, source);
-
-      default:
-        throw new Error("İşlem tanımsız");
-    }
-  },
-
-  async seatCreateOrUpdate(e, source){
-    const fromStop = $('#alertStop')?.value || "";
-
-    const payload = {
-      seat_no: e.seatNo,
-      from: fromStop,
-      stop: e.stop,
-      ticket_type: e.ticketType || "biletsiz",
-      payment: e.payment || "nakit",
-      amount: e.amount || 0,
-      gender: e.gender || "",
-      pair_ok: 0,
-      service: !!e.service,
-      service_note: e.service ? "ai engine" : ""
-    };
-
-    const j = await safeJsonFetch('/api/seat', {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'X-CSRF-Token': csrf
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if(!j.ok) throw new Error(j.msg || "Kayıt yapılamadı");
-
-    assigned[String(e.seatNo)] = true;
-    stopsMap[String(e.seatNo)] = e.stop;
-    boardsMap[String(e.seatNo)] = fromStop;
-    genders[String(e.seatNo)] = e.gender || "";
-    serviceMap[String(e.seatNo)] = !!e.service;
-    serviceNotes[String(e.seatNo)] = e.service ? "ai engine" : "";
-    persistBoards();
-    setSeatVisual(e.seatNo);
-    updateStats();
-    refreshStopBadges();
-    updateStopSeatBadges();
-    renderAI();
-
-    AIUtils.reply(`${e.seatNo} numara kaydedildi`, source);
-  },
-
-  async seatOffload(e, source){
-    const j = await safeJsonFetch('/api/seat?seat_no=' + e.seatNo, {
-      method:'DELETE',
-      headers:{ 'X-CSRF-Token': csrf }
-    });
-
-    if(!j.ok) throw new Error(j.msg || "Koltuk boşaltılamadı");
-
-    await clearBagsForSeat(e.seatNo);
-    clearSeatUI(e.seatNo);
-    updateStats();
-    refreshStopBadges();
-    updateStopSeatBadges();
-    renderAI();
-
-    AIUtils.reply(`${e.seatNo} numara boşaltıldı`, source);
-  },
-
-  async standingCreate(e, source){
-    const fromStop = $('#alertStop')?.value || "";
-
-    const j = await safeJsonFetch('/api/standing', {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'X-CSRF-Token': csrf
-      },
-      body: JSON.stringify({
-        count: e.count,
-        from: fromStop,
-        to: e.stop,
-        price: e.amount || 0,
-        payment: e.payment || "nakit",
-        note: "ai engine"
-      })
-    });
-
-    if(!j.ok) throw new Error(j.msg || "Ayakta eklenemedi");
-
-    standingCount += e.count;
-    standingRevenue += e.count * (e.amount || 0);
-
-    standingItems.push({
-      id: Date.now(),
-      from: fromStop,
-      to: e.stop,
-      count: e.count,
-      price: e.amount || 0,
-      payment: e.payment || "nakit",
-      note: "ai engine",
-      ts: Date.now()
-    });
-
-    persistStandingItems();
-    persistStandingTotals();
-    updateStats();
-    refreshStopBadges();
-    renderAI();
-
-    AIUtils.reply(`${e.count} ayakta yolcu eklendi`, source);
-  },
-
-async genderUpdate(e, source){
-    const meta = getSeatMeta(e.seatNo);
-
-    const payload = {
-      seat_no: e.seatNo,
-      from: meta.from || "",
-      stop: meta.stop || "",
-      ticket_type: meta.ticket_type || "biletsiz",
-      payment: meta.payment || "nakit",
-      amount: Number(meta.amount || 0),
-      gender: e.gender,
-      pair_ok: Number(meta.pair_ok || 0),
-      service: !!meta.service,
-      service_note: meta.service_note || ""
-    };
-
-    const j = await safeJsonFetch('/api/seat', {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'X-CSRF-Token': csrf
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if(!j.ok) throw new Error(j.msg || "Cinsiyet güncellenemedi");
-
-    genders[String(e.seatNo)] = e.gender;
-    syncSeatMeta(e.seatNo, payload);
-    setSeatVisual(e.seatNo);
-    renderAI();
-
-    AIUtils.reply(`${e.seatNo} numara güncellendi`, source);
-  },
-
-async serviceMark(e, source){
-    if(!assigned[String(e.seatNo)]) throw new Error("Bu koltuk dolu değil");
-
-    const meta = getSeatMeta(e.seatNo);
-
-    const payload = {
-      seat_no: e.seatNo,
-      from: meta.from || "",
-      stop: meta.stop || "",
-      ticket_type: meta.ticket_type || "biletsiz",
-      payment: meta.payment || "nakit",
-      amount: Number(meta.amount || 0),
-      gender: meta.gender || "",
-      pair_ok: Number(meta.pair_ok || 0),
-      service: true,
-      service_note: meta.service_note || "ai engine"
-    };
-
-    const j = await safeJsonFetch('/api/seat', {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'X-CSRF-Token': csrf
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if(!j.ok) throw new Error(j.msg || "Servis işlenemedi");
-
-    serviceMap[String(e.seatNo)] = true;
-    serviceNotes[String(e.seatNo)] = payload.service_note || "ai engine";
-    syncSeatMeta(e.seatNo, payload);
-    setSeatVisual(e.seatNo);
-    renderAI();
-
-    AIUtils.reply(`${e.seatNo} numaraya servis işlendi`, source);
-  },
-
-  async nextStopSet(e, source){
-    setSelectedStop(e.stop, {silent:true});
-    refreshStopBadges();
-    updateStopSeatBadges();
-    renderAI();
-    AIUtils.reply(`${e.stop} seçildi`, source);
-  },
-
-  async stopOffload(e, source){
-    const seats = seatsForStop(e.stop);
-    if(seats.length) await bulkOffload(seats);
-    refreshStopBadges();
-    updateStopSeatBadges();
-    renderAI();
-    AIUtils.reply(`${e.stop} için koltuklar indirildi`, source);
-  },
-
-  async stopSummaryQuery(e, source){
-    const seated = AIKnowledge.seatCountForStop(e.stop);
-    const standing = AIKnowledge.standingCountForStop(e.stop);
-    const parcels = AIKnowledge.parcelCountForStop(e.stop);
-    const seatNos = seatsForStop(e.stop);
-
-    let msg = `${e.stop} için ${seated} koltuk`;
-    if(standing > 0) msg += `, ${standing} ayakta`;
-    if(parcels > 0) msg += `, ${parcels} emanet`;
-    if(seated === 0 && standing === 0 && parcels === 0){
-      msg = `${e.stop} için kayıtlı işlem görünmüyor`;
-    } else if(seatNos.length){
-      msg += `. Koltuklar: ${seatNos.join(", ")}`;
-    }
-
-    AIUtils.reply(msg, source);
-  },
-
-  async standingTotalQuery(source){
-    const msg = standingCount > 0
-      ? `Toplam ${standingCount} ayakta yolcu var`
-      : `Ayakta yolcu yok`;
-    AIUtils.reply(msg, source);
-  },
-
-  async unservedQuery(source){
-    const arr = AIKnowledge.unservedSeatNumbers();
-    const msg = arr.length
-      ? `Servis yapılmayan ${arr.length} koltuk var. ${arr.join(", ")}`
-      : `Servis bekleyen yolcu görünmüyor`;
-    AIUtils.reply(msg, source);
-  },
-
-  async emptySeatQuery(source){
-    AIUtils.reply(`Boş koltuk sayısı ${AIKnowledge.totalEmptySeats()}`, source);
-  },
-
-  async totalPaxQuery(source){
-    const total = AIKnowledge.totalPax();
-    const seated = AIKnowledge.totalFilledSeats();
-    AIUtils.reply(`Toplam ${total} yolcu var. ${seated} oturan, ${standingCount} ayakta.`, source);
-  },
-
-  async busiestStopQuery(source){
-    const x = AIKnowledge.busiestStop();
-    const msg = x.stop
-      ? `En yoğun durak ${x.stop}. ${x.count} koltuk var.`
-      : `Henüz yoğunluk verisi yok`;
-    AIUtils.reply(msg, source);
-  },
-
-  async parcelTotalQuery(source){
-    const map = computeParcelCountsByStop();
-    const total = Object.values(map || {}).reduce((a,b)=>a + Number(b || 0), 0);
-    const msg = total > 0
-      ? `Toplam ${total} emanet var`
-      : `Bekleyen emanet görünmüyor`;
-    AIUtils.reply(msg, source);
-  },
-
-  async parcelStopQuery(e, source){
-    const cnt = AIKnowledge.parcelCountForStop(e.stop);
-    const msg = cnt > 0
-      ? `${e.stop} için ${cnt} emanet var`
-      : `${e.stop} için emanet yok`;
-    AIUtils.reply(msg, source);
-  },
-
-  async openApproach(e, source){
-    const seats = seatsForStop(e.stop);
-    renderApproachPanel(e.stop, seats);
-    startBlink(seats);
-    AIUtils.reply(`${e.stop} yaklaşma paneli açıldı`, source);
-  }
-};
-
-const AIEngine = {
-  async process(rawText, source="text"){
-    AIContext.source = source;
-
-    const text = AIUtils.normalize(rawText);
-
-    // 1) Eğer teyit bekleniyorsa önce onu çöz
-    if(AIContext.awaitingConfirmation){
-      if(AIUtils.containsAny(text, AIConfig.confirmWords)){
-        const intent = AIContext.pendingIntent;
-        const entities = AIContext.pendingEntities;
-        AIContext.reset();
-        return AIActionExecutor.execute(intent, entities, source);
-      }
-
-      if(AIUtils.containsAny(text, AIConfig.rejectWords)){
-        AIContext.reset();
-        return AIUtils.reply("İşlem iptal edildi", source);
-      }
-    }
-
-    // 2) Eğer eksik alan bekleniyorsa onu tamamla
-    if(AIContext.missingFields.length && AIContext.pendingIntent && AIContext.pendingEntities){
-      const entities = AIEntityExtractor.extract(rawText);
-
-      if(AIContext.missingFields.includes("stop") && entities.stop){
-        AIContext.pendingEntities.stop = entities.stop;
-      }
-      if(AIContext.missingFields.includes("seatNo") && entities.seatNo){
-        AIContext.pendingEntities.seatNo = entities.seatNo;
-      }
-      if(AIContext.missingFields.includes("count") && entities.count){
-        AIContext.pendingEntities.count = entities.count;
-      }
-      if(AIContext.missingFields.includes("gender") && entities.gender){
-        AIContext.pendingEntities.gender = entities.gender;
-      }
-
-      const intent = AIContext.pendingIntent;
-      const merged = AIContext.pendingEntities;
-      const policy = AIPolicyEngine.evaluate(intent, merged);
-
-      if(policy.mode === "ask"){
-        AIContext.lastQuestion = policy.question;
-        return AIUtils.reply(policy.question, source);
-      }
-
-      if(policy.mode === "confirm"){
-        AIContext.awaitingConfirmation = true;
-        AIContext.missingFields = [];
-        AIContext.lastQuestion = policy.question;
-        return AIUtils.reply(policy.question, source);
-      }
-
-      AIContext.reset();
-      return AIActionExecutor.execute(intent, merged, source);
-    }
-
-    // 3) Normal akış
-    const entities = AIEntityExtractor.extract(rawText);
-    const intent = AIIntentResolver.resolve(entities);
-    const policy = AIPolicyEngine.evaluate(intent, entities);
-
-    if(policy.mode === "reject"){
-      return AIUtils.reply(policy.reason || "Komut anlaşılmadı", source);
-    }
-
-    if(policy.mode === "ask"){
-      AIContext.pendingIntent = intent;
-      AIContext.pendingEntities = { ...entities };
-      AIContext.missingFields = [];
-
-      if(policy.question === "Hangi durak?") AIContext.missingFields.push("stop");
-      if(policy.question === "Hangi koltuk?") AIContext.missingFields.push("seatNo");
-      if(policy.question === "Kaç kişi?") AIContext.missingFields.push("count");
-      if(policy.question === "Bay mı bayan mı?") AIContext.missingFields.push("gender");
-
-      AIContext.lastQuestion = policy.question;
-      return AIUtils.reply(policy.question, source);
-    }
-
-    if(policy.mode === "confirm"){
-      AIContext.pendingIntent = intent;
-      AIContext.pendingEntities = { ...entities };
-      AIContext.awaitingConfirmation = true;
-      AIContext.lastQuestion = policy.question;
-      return AIUtils.reply(policy.question, source);
-    }
-
-    return AIActionExecutor.execute(intent, entities, source);
-  }
-};
-
-/* =========================================================
-   VOICE + TEXT INIT
-========================================================= */
-function initVoiceRecognition(){
-  const btn = $('#voiceBtn');
-  if(!btn) return;
-
+function startDeckAIVoice(){
+  const btn = $('#btnDeckAI');
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
   if(!SR){
-    btn.disabled = true;
-    btn.title = 'Tarayıcı desteklemiyor';
+    toast('Bu tarayıcı sesli komutu desteklemiyor');
+    location.href = '/ai-console';
     return;
   }
 
-  const recognition = new SR();
-  recognition.lang = 'tr-TR';
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
+  const rec = new SR();
+  rec.lang = 'tr-TR';
+  rec.continuous = false;
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
 
-  recognition.onstart = function(){
-    btn.classList.add('listening');
-    toast('🎤 Dinliyorum...');
+  btn.classList.add('listening');
+  btn.textContent = '🔴 Dinliyor';
+
+  rec.onresult = (e) => {
+    const text = e.results?.[0]?.[0]?.transcript?.trim() || '';
+    if(!text){
+      toast('Ses algılandı ama metin çıkarılamadı');
+      return;
+    }
+
+    toast('Algılandı: ' + text, 1800);
+    location.href = '/ai-console?cmd=' + encodeURIComponent(text);
   };
 
-  recognition.onend = function(){
+  rec.onerror = (e) => {
+    toast('Sesli komut hatası: ' + (e.error || 'bilinmiyor'));
+  };
+
+  rec.onend = () => {
     btn.classList.remove('listening');
+    btn.textContent = '🎤 AI';
   };
 
-  recognition.onerror = function(e){
+  try{
+    rec.start();
+  }catch(_){
     btn.classList.remove('listening');
-    toast('🎤 Ses hatası: ' + (e.error || 'bilinmiyor'));
-  };
-
-  recognition.onresult = async function(event){
-    const text = event.results?.[0]?.[0]?.transcript || '';
-    if(!text) return;
-    toast('🎤 ' + text, 2000);
-    await AIEngine.process(text, "voice");
-  };
-
-  btn.addEventListener('click', function(){
-    try{ recognition.start(); }catch(_){}
-  });
-}
-
-function initAICommandInput(){
-  const input = document.getElementById('aiCommandInput');
-  const btn = document.getElementById('aiSendBtn');
-  if(!input || !btn) return;
-
-  async function send(){
-    const text = input.value.trim();
-    if(!text) return;
-    input.value = "";
-    toast("⌨️ " + text, 2000);
-    await AIEngine.process(text, "text");
+    btn.textContent = '🎤 AI';
+    toast('Mikrofon başlatılamadı');
   }
-
-  btn.addEventListener("click", send);
-  input.addEventListener("keydown", function(e){
-    if(e.key === "Enter") send();
-  });
 }
+
+$('#btnDeckAI')?.addEventListener('click', startDeckAIVoice);
 </script>
 {% endblock %}

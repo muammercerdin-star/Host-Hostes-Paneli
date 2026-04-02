@@ -1,0 +1,1242 @@
+{% extends "base.html" %} {% block content %}
+
+<link rel="stylesheet" href="/static/style.css"><script>
+  window.CSRF_TOKEN = {{ csrf_token|tojson }};
+</script><style>
+  :root{
+    --bg:#0f1418;
+    --bg-soft:#151b21;
+    --card:#1c252d;
+    --card-2:#202a33;
+    --line:#2d3943;
+    --line-soft:#24303a;
+    --text:#eef4fa;
+    --muted:#9aacbc;
+    --brand:#2f9e44;
+    --brand-dark:#257b35;
+    --brand-soft:rgba(47,158,68,.14);
+    --danger:#d94841;
+    --danger-soft:rgba(217,72,65,.14);
+    --warn:#f59f00;
+    --warn-soft:rgba(245,159,0,.14);
+    --info:#339af0;
+    --info-soft:rgba(51,154,240,.14);
+    --purple:#845ef7;
+    --purple-soft:rgba(132,94,247,.14);
+    --shadow:0 18px 42px rgba(0,0,0,.22);
+    --radius:18px;
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--text)}
+
+  .ai-page{
+    width:min(1240px,96vw);
+    margin:18px auto 90px;
+    display:grid;
+    grid-template-columns:1.35fr .85fr;
+    gap:16px;
+    align-items:start;
+  }
+
+  .panel{
+    background:linear-gradient(180deg,var(--card),var(--card-2));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+
+  .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:16px 18px;
+    border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.02);
+  }
+
+  .title-wrap{display:flex;align-items:center;gap:12px}
+  .title-icon{
+    width:44px;height:44px;border-radius:14px;
+    display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--brand-soft),rgba(255,255,255,.03));
+    border:1px solid rgba(255,255,255,.08);
+    font-size:20px;
+  }
+  .title{margin:0;font-size:20px;font-weight:800;letter-spacing:.2px}
+  .subtitle{margin:4px 0 0;color:var(--muted);font-size:13px}
+
+  .mode-switch{display:flex;gap:8px;flex-wrap:wrap}
+  .mode-btn{
+    border:1px solid var(--line);
+    background:#141b21;
+    color:var(--text);
+    padding:10px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:700;
+    font-size:13px;
+    transition:.16s ease;
+  }
+  .mode-btn:hover{transform:translateY(-1px);border-color:#40515f}
+  .mode-btn.active{
+    background:var(--brand-soft);
+    color:#d9ffe3;
+    border-color:rgba(47,158,68,.45);
+  }
+
+  .main-body{padding:16px}
+
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .stat{
+    background:#121920;
+    border:1px solid var(--line-soft);
+    border-radius:16px;
+    padding:12px;
+    min-width:0;
+  }
+  .stat-k{color:var(--muted);font-size:12px;margin-bottom:8px}
+  .stat-v{font-size:22px;font-weight:800;line-height:1.05}
+  .stat-sub{margin-top:6px;color:var(--muted);font-size:12px}
+
+  .console-shell{
+    background:#0b1015;
+    border:1px solid #1d2730;
+    border-radius:20px;
+    overflow:hidden;
+  }
+
+  .quick-row{
+    padding:12px 14px 0;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .chip{
+    border:1px solid var(--line);
+    background:#141c23;
+    color:var(--text);
+    border-radius:999px;
+    padding:8px 12px;
+    cursor:pointer;
+    font-size:12px;
+    transition:.16s ease;
+  }
+  .chip:hover{transform:translateY(-1px);border-color:#486173}
+
+  .console-log{
+    min-height:380px;
+    max-height:58vh;
+    overflow:auto;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    scroll-behavior:smooth;
+  }
+
+  .msg{
+    max-width:92%;
+    border-radius:18px;
+    padding:12px 14px;
+    border:1px solid rgba(255,255,255,.06);
+    box-shadow:0 8px 24px rgba(0,0,0,.16);
+  }
+  .msg.user{
+    align-self:flex-end;
+    background:linear-gradient(180deg,#17321e,#112616);
+    border-color:rgba(47,158,68,.28);
+  }
+  .msg.sys{
+    align-self:flex-start;
+    background:linear-gradient(180deg,#171f27,#121920);
+    border-color:rgba(255,255,255,.08);
+  }
+  .msg.ok{
+    align-self:flex-start;
+    background:linear-gradient(180deg,#102118,#0d1a13);
+    border-color:rgba(47,158,68,.24);
+  }
+  .msg.warn{
+    align-self:flex-start;
+    background:linear-gradient(180deg,#2a2110,#1f180b);
+    border-color:rgba(245,159,0,.22);
+  }
+  .msg.err{
+    align-self:flex-start;
+    background:linear-gradient(180deg,#2a1715,#21110f);
+    border-color:rgba(217,72,65,.26);
+  }
+  .msg.info{
+    align-self:flex-start;
+    background:linear-gradient(180deg,#132233,#101a26);
+    border-color:rgba(51,154,240,.22);
+  }
+
+  .msg-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;color:var(--muted);font-size:12px;font-weight:700}
+  .msg-body{font-size:14px;line-height:1.52;white-space:pre-wrap;word-break:break-word}
+
+  .console-input{
+    padding:14px;
+    border-top:1px solid #1d2730;
+    background:#0d1419;
+  }
+
+  .input-wrap{display:grid;grid-template-columns:1fr auto;gap:10px}
+  .textarea{
+    min-height:72px;
+    resize:vertical;
+    border-radius:16px;
+    border:1px solid var(--line);
+    background:#131b22;
+    color:var(--text);
+    padding:14px 16px;
+    outline:none;
+    font:inherit;
+  }
+  .textarea:focus{border-color:#50697c;box-shadow:0 0 0 4px rgba(80,105,124,.12)}
+
+  .send-btn{
+    border:none;
+    min-width:122px;
+    border-radius:16px;
+    background:linear-gradient(180deg,var(--brand),var(--brand-dark));
+    color:white;
+    font-weight:800;
+    cursor:pointer;
+    padding:0 18px;
+    box-shadow:0 14px 30px rgba(47,158,68,.18);
+  }
+
+  .helper-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .helper-text{font-size:12px;color:var(--muted)}
+  .helper-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+  .soft-btn,.mini-btn{
+    border:1px solid var(--line);
+    background:#131b22;
+    color:var(--text);
+    border-radius:12px;
+    padding:10px 12px;
+    cursor:pointer;
+    font-size:13px;
+    transition:.16s ease;
+  }
+  .mini-btn:hover,.soft-btn:hover{transform:translateY(-1px)}
+  .mini-btn.brand{background:var(--brand-soft);border-color:rgba(47,158,68,.35);color:#d9ffe3}
+  .mini-btn.warn{background:var(--warn-soft);border-color:rgba(245,159,0,.35);color:#ffe7b3}
+  .mini-btn.danger{background:var(--danger-soft);border-color:rgba(217,72,65,.35);color:#ffd4cf}
+  .mini-btn.info{background:var(--info-soft);border-color:rgba(51,154,240,.35);color:#d2ebff}
+  .soft-btn.active{background:var(--purple-soft);border-color:rgba(132,94,247,.35)}
+
+  .flow-box{
+    margin-top:14px;
+    border:1px solid var(--line);
+    border-radius:18px;
+    background:#10171d;
+    padding:14px;
+    display:none;
+  }
+  .flow-box.open{display:block}
+
+  .flow-title{font-size:15px;font-weight:800;margin:0 0 6px}
+  .flow-sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+
+  .confidence-pill,.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+    border:1px solid rgba(255,255,255,.08);
+    background:#0f151b;
+    color:#d8e7f3;
+  }
+  .confidence-pill.good,.badge.ok{border-color:rgba(47,158,68,.42);color:#cbffd7;background:var(--brand-soft)}
+  .confidence-pill.mid,.badge.warn{border-color:rgba(245,159,0,.42);color:#ffe7b0;background:var(--warn-soft)}
+  .confidence-pill.low,.badge.err{border-color:rgba(217,72,65,.42);color:#ffd2cd;background:var(--danger-soft)}
+  .badge.info{border-color:rgba(51,154,240,.42);color:#d2ebff;background:var(--info-soft)}
+
+  .suggest-grid,.action-grid,.intent-grid{display:flex;gap:8px;flex-wrap:wrap}
+  .intent-grid{margin-top:10px}
+  .intent-option{
+    border:1px solid var(--line);
+    background:#131b22;
+    color:var(--text);
+    border-radius:14px;
+    padding:12px 13px;
+    cursor:pointer;
+    min-width:230px;
+    max-width:100%;
+    transition:.16s ease;
+  }
+  .intent-option:hover{transform:translateY(-1px);border-color:#486173}
+  .intent-option.active{background:var(--purple-soft);border-color:rgba(132,94,247,.38)}
+  .intent-title{display:block;font-weight:800;font-size:13px;margin-bottom:4px}
+  .intent-desc{display:block;color:var(--muted);font-size:12px;line-height:1.45}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .field{margin-top:12px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+  .input,.select{
+    width:100%;
+    border:1px solid var(--line);
+    background:#131b22;
+    color:var(--text);
+    border-radius:14px;
+    padding:12px 13px;
+    outline:none;
+    font:inherit;
+  }
+  .input:focus,.select:focus{border-color:#50697c;box-shadow:0 0 0 4px rgba(80,105,124,.12)}
+
+  .side-body{padding:16px;display:flex;flex-direction:column;gap:14px}
+  .card-mini{background:#121920;border:1px solid var(--line-soft);border-radius:16px;padding:14px}
+  .card-title{margin:0 0 10px;font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .muted{color:var(--muted)}
+  .flow-list{margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.65}
+  .flow-list li + li{margin-top:4px}
+  .table-wrap{overflow:auto}
+  .table{width:100%;border-collapse:collapse;font-size:13px}
+  .table th,.table td{padding:11px 8px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top}
+  .table th{color:var(--muted);font-weight:700}
+  .empty-state{border:1px dashed var(--line);border-radius:14px;padding:16px;color:var(--muted);text-align:center;background:#10171d}
+  .top-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+  @media (max-width: 980px){
+    .ai-page{grid-template-columns:1fr}
+    .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+
+  @media (max-width: 680px){
+    .panel-head{flex-direction:column;align-items:flex-start}
+    .input-wrap,.grid-2,.grid-3{grid-template-columns:1fr}
+    .send-btn{min-height:50px}
+    .msg{max-width:100%}
+    .stats{grid-template-columns:1fr}
+    .intent-option{min-width:100%}
+  }
+</style><div class="ai-page">
+  <section class="panel">
+    <div class="panel-head">
+      <div class="title-wrap">
+        <div class="title-icon">🧠</div>
+        <div>
+          <h1 class="title">AI Console</h1>
+          <p class="subtitle">Komut çözümleme, güven skoru, kontrollü öğrenme ve otomatik aksiyon</p>
+        </div>
+      </div><div class="mode-switch" id="modeSwitch">
+    <button type="button" class="mode-btn active" data-mode="normal">Normal kullanım</button>
+    <button type="button" class="mode-btn" data-mode="teach">Öğretme modu</button>
+  </div>
+</div>
+
+<div class="main-body">
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-k">Aktif mod</div>
+      <div class="stat-v" id="statMode">Normal</div>
+      <div class="stat-sub">Güvenli çözümleme</div>
+    </div>
+    <div class="stat">
+      <div class="stat-k">Son güven</div>
+      <div class="stat-v" id="statConfidence">-</div>
+      <div class="stat-sub">Tahmin ve öğretme için</div>
+    </div>
+    <div class="stat">
+      <div class="stat-k">Öğrenilen komut</div>
+      <div class="stat-v" id="statLearnedCount">0</div>
+      <div class="stat-sub">DB üzerinden okunur</div>
+    </div>
+    <div class="stat">
+      <div class="stat-k">Son intent</div>
+      <div class="stat-v" id="statLastIntent">-</div>
+      <div class="stat-sub">Son çözülen niyet</div>
+    </div>
+  </div>
+
+  <div class="console-shell">
+    <div class="quick-row">
+      <button type="button" class="chip" data-fill="7-8 numarayı boşalt">7-8 numarayı boşalt</button>
+      <button type="button" class="chip" data-fill="7 ve 8 i boşalt">7 ve 8 i boşalt</button>
+      <button type="button" class="chip" data-fill="12 numaraya yolcu ekle">12 numaraya yolcu ekle</button>
+      <button type="button" class="chip" data-fill="arka dörtlü servis tamam">arka dörtlü servis tamam</button>
+      <button type="button" class="chip" data-fill="ayakta 3 yaz">ayakta 3 yaz</button>
+    </div>
+
+    <div class="console-log" id="consoleLog"></div>
+
+    <div class="console-input">
+<div class="input-wrap" style="grid-template-columns:1fr auto auto;">
+  <textarea id="commandInput" class="textarea" placeholder="Komut yaz... örn: 7-8 numarayı boşalt"></textarea>
+  <button type="button" id="micBtn" class="soft-btn" title="Sesli komut">🎤</button>
+  <button type="button" id="sendBtn" class="send-btn">Çalıştır</button>
+</div>
+      <div class="helper-row">
+        <div class="helper-text">Önce learned map, sonra parser, sonra öğretme akışı</div>
+        <div class="helper-actions">
+          <button type="button" class="soft-btn" id="clearConsoleBtn">Konsolu temizle</button>
+          <button type="button" class="soft-btn" id="openTeachBtn">Komut öğret</button>
+        </div>
+      </div>
+
+      <div class="flow-box" id="flowBox">
+        <h3 class="flow-title" id="flowTitle">Komut Öğret</h3>
+        <p class="flow-sub" id="flowSub">Sistem kendi kafasına göre yeni intent üretmez. Sen seçersin.</p>
+
+        <div id="suggestArea" style="display:none">
+          <div class="confidence-pill" id="suggestConfidence">Güven: -</div>
+          <div style="height:8px"></div>
+          <div class="suggest-grid">
+            <button type="button" class="mini-btn info" id="acceptSuggestionBtn">Evet, bu intent doğru</button>
+            <button type="button" class="mini-btn warn" id="rejectSuggestionBtn">Hayır, intent seçeyim</button>
+          </div>
+        </div>
+
+        <div id="teachArea" style="display:none">
+          <div class="field">
+            <label for="teachPhrase">Öğretilecek ifade</label>
+            <input id="teachPhrase" class="input" type="text" placeholder="Örn: 7 ve 8 i boşalt">
+          </div>
+
+          <div class="field">
+            <label>Intent seç</label>
+            <div class="intent-grid" id="intentGrid"></div>
+          </div>
+
+          <div class="action-grid" style="margin-top:12px">
+            <button type="button" class="mini-btn brand" id="saveLearningBtn">Öğren ve kaydet</button>
+            <button type="button" class="mini-btn danger" id="cancelFlowBtn">İptal</button>
+          </div>
+        </div>
+
+        <div id="actionArea" style="display:none">
+          <div class="badge info" id="actionBadge">Ek bilgi gerekli</div>
+          <div class="field">
+            <label>Koltuklar</label>
+            <input id="actionSeats" class="input" type="text" placeholder="örn: 12,13,14">
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="actionFrom">Biniş durağı</label>
+              <input id="actionFrom" class="input" type="text" placeholder="örn: Alaşehir Otogar">
+            </div>
+            <div class="field">
+              <label for="actionTo">İniş durağı</label>
+              <input id="actionTo" class="input" type="text" placeholder="örn: Salihli Garaj">
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div class="field">
+              <label for="actionPayment">Ödeme</label>
+              <select id="actionPayment" class="select">
+                <option value="nakit">nakit</option>
+                <option value="iban">iban</option>
+                <option value="online">online</option>
+                <option value="pos">pos</option>
+                <option value="ucretsiz">ucretsiz</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="actionAmount">Tutar</label>
+              <input id="actionAmount" class="input" type="number" step="0.01" min="0" placeholder="0">
+            </div>
+            <div class="field">
+              <label for="actionTicketType">Bilet tipi</label>
+              <select id="actionTicketType" class="select">
+                <option value="biletsiz">biletsiz</option>
+                <option value="biletli">biletli</option>
+                <option value="ucretsiz">ucretsiz</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-3" id="seatExtraGrid">
+            <div class="field">
+              <label for="actionGender">Cinsiyet</label>
+              <select id="actionGender" class="select">
+                <option value="">boş</option>
+                <option value="bay">bay</option>
+                <option value="bayan">bayan</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="actionPairOk">Pair ok</label>
+              <select id="actionPairOk" class="select">
+                <option value="0">hayır</option>
+                <option value="1">evet</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="actionServiceNote">Not</label>
+              <input id="actionServiceNote" class="input" type="text" placeholder="opsiyonel not">
+            </div>
+          </div>
+
+          <div class="action-grid" style="margin-top:12px">
+            <button type="button" class="mini-btn brand" id="runActionBtn">Aksiyonu uygula</button>
+            <button type="button" class="mini-btn danger" id="cancelActionBtn">İptal</button>
+          </div>
+        </div>
+
+        <div id="doneArea" style="display:none">
+          <div class="badge ok" id="doneBadge">Tamamlandı</div>
+          <div style="height:10px"></div>
+          <div class="action-grid">
+            <button type="button" class="mini-btn info" id="closeDoneBtn">Tamam</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </section>  <aside class="panel">
+    <div class="panel-head">
+      <div class="title-wrap">
+        <div class="title-icon">⚙️</div>
+        <div>
+          <h2 class="title" style="font-size:18px">Komut Yönetimi</h2>
+          <p class="subtitle">Öğrenilen komutları düzenle, sil, kontrol et</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="badge info" id="modeBadge">Mod: Normal</span>
+        <span class="badge ok" id="countBadge">0 kayıt</span>
+      </div>
+    </div><div class="side-body">
+  <div class="card-mini">
+    <h3 class="card-title">🎯 Intent listesi</h3>
+    <div id="intentLegend"></div>
+  </div>
+
+  <div class="card-mini">
+    <h3 class="card-title">🧭 Akış mantığı</h3>
+    <ol class="flow-list">
+      <li>Komut gelir</li>
+      <li>Öğrenilen komut listesi aranır</li>
+      <li>Varsayılan parser çalışır</li>
+      <li>Güven düşükse tahmin önerilir</li>
+      <li>Gerekirse intent seçilir</li>
+      <li>Komut ayrı listede öğrenilir</li>
+      <li>Uygulanabilir intent ise aksiyon çağrılır</li>
+    </ol>
+  </div>
+
+  <div class="card-mini">
+    <h3 class="card-title">📚 Öğrenilen komutlar</h3>
+    <div id="learnedEmpty" class="empty-state">Henüz öğrenilen komut yok</div>
+    <div id="learnedTableWrap" class="table-wrap" style="display:none">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>İfade</th>
+            <th>Intent</th>
+            <th>Pattern</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody id="learnedTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+  </aside>
+</div><script>
+  const state = {
+    mode: 'normal',
+    intents: [],
+    learned: [],
+    selectedIntent: null,
+    pendingPhrase: '',
+    pendingSuggestion: null,
+    editingLearningId: null,
+    pendingAction: null,
+    lastConfidence: 0,
+    lastIntent: '-'
+  };
+
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+  const els = {
+    consoleLog: $('#consoleLog'),
+    commandInput: $('#commandInput'),
+    sendBtn: $('#sendBtn'),
+    clearConsoleBtn: $('#clearConsoleBtn'),
+    openTeachBtn: $('#openTeachBtn'),
+    modeSwitch: $('#modeSwitch'),
+    statMode: $('#statMode'),
+    statConfidence: $('#statConfidence'),
+    statLearnedCount: $('#statLearnedCount'),
+    statLastIntent: $('#statLastIntent'),
+    modeBadge: $('#modeBadge'),
+    countBadge: $('#countBadge'),
+    flowBox: $('#flowBox'),
+    flowTitle: $('#flowTitle'),
+    flowSub: $('#flowSub'),
+    suggestArea: $('#suggestArea'),
+    suggestConfidence: $('#suggestConfidence'),
+    teachArea: $('#teachArea'),
+    actionArea: $('#actionArea'),
+    doneArea: $('#doneArea'),
+    teachPhrase: $('#teachPhrase'),
+    intentGrid: $('#intentGrid'),
+    intentLegend: $('#intentLegend'),
+    learnedEmpty: $('#learnedEmpty'),
+    learnedTableWrap: $('#learnedTableWrap'),
+    learnedTbody: $('#learnedTbody'),
+    acceptSuggestionBtn: $('#acceptSuggestionBtn'),
+    rejectSuggestionBtn: $('#rejectSuggestionBtn'),
+    saveLearningBtn: $('#saveLearningBtn'),
+    cancelFlowBtn: $('#cancelFlowBtn'),
+    closeDoneBtn: $('#closeDoneBtn'),
+    doneBadge: $('#doneBadge'),
+    actionBadge: $('#actionBadge'),
+    actionSeats: $('#actionSeats'),
+    actionFrom: $('#actionFrom'),
+    actionTo: $('#actionTo'),
+    actionPayment: $('#actionPayment'),
+    actionAmount: $('#actionAmount'),
+    actionTicketType: $('#actionTicketType'),
+    actionGender: $('#actionGender'),
+    actionPairOk: $('#actionPairOk'),
+    actionServiceNote: $('#actionServiceNote'),
+    seatExtraGrid: $('#seatExtraGrid'),
+    runActionBtn: $('#runActionBtn'),
+    cancelActionBtn: $('#cancelActionBtn')
+  };
+
+  init();
+
+  async function init(){
+    bindEvents();
+    seedWelcome();
+    await Promise.all([loadIntents(), loadLearned()]);
+    updateStats();
+    initVoiceInput();
+  }
+
+  function bindEvents(){
+    els.sendBtn.addEventListener('click', runCommand);
+    els.clearConsoleBtn.addEventListener('click', clearConsole);
+    els.openTeachBtn.addEventListener('click', openTeachFlowEmpty);
+    els.acceptSuggestionBtn.addEventListener('click', acceptSuggestion);
+    els.rejectSuggestionBtn.addEventListener('click', openTeachFlowFromSuggestion);
+    els.saveLearningBtn.addEventListener('click', saveLearning);
+    els.cancelFlowBtn.addEventListener('click', closeFlow);
+    els.closeDoneBtn.addEventListener('click', closeFlow);
+    els.runActionBtn.addEventListener('click', runPendingActionFromForm);
+    els.cancelActionBtn.addEventListener('click', closeFlow);
+
+    els.commandInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        runCommand();
+      }
+    });
+
+    els.modeSwitch.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-mode]');
+      if (!btn) return;
+      state.mode = btn.dataset.mode;
+      $$('#modeSwitch .mode-btn').forEach(x => x.classList.remove('active'));
+      btn.classList.add('active');
+      updateStats();
+      addMessage('sys', `Mod değişti: ${state.mode === 'normal' ? 'Normal kullanım' : 'Öğretme modu'}`);
+    });
+
+    $$('.chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        els.commandInput.value = btn.dataset.fill || '';
+        els.commandInput.focus();
+      });
+    });
+  }
+
+  async function api(url, options = {}){
+    const headers = Object.assign({ 'Content-Type': 'application/json', 'X-CSRF-Token': window.CSRF_TOKEN }, options.headers || {});
+    const cfg = Object.assign({ credentials: 'same-origin', headers }, options);
+    if (cfg.body && typeof cfg.body !== 'string') {
+      cfg.body = JSON.stringify(Object.assign({}, cfg.body, { csrf_token: window.CSRF_TOKEN }));
+    }
+    const res = await fetch(url, cfg);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.msg || data.error || `İstek başarısız (${res.status})`);
+    }
+    return data;
+  }
+
+  async function loadIntents(){
+    const data = await api('/api/ai/intents', { method: 'GET', headers: { 'X-CSRF-Token': window.CSRF_TOKEN } });
+    state.intents = data.items || [];
+    renderIntentLegend();
+    renderIntentGrid();
+  }
+
+  async function loadLearned(){
+    const data = await api('/api/ai/learned', { method: 'GET', headers: { 'X-CSRF-Token': window.CSRF_TOKEN } });
+    state.learned = data.items || [];
+    renderLearnedCommands();
+    updateStats();
+  }
+
+  function seedWelcome(){
+    addMessage('sys', 'AI Console hazır.\nBir komut yaz. Sistem önce öğrenilen komutlara bakar, sonra parserı çalıştırır. Uygulanabilir intent ise aksiyonu tetikler.');
+  }
+
+  async function runCommand(){
+    const text = els.commandInput.value.trim();
+    if (!text) return;
+    addMessage('user', text);
+    els.commandInput.value = '';
+    closeFlow(true);
+
+    try {
+      const data = await api('/api/ai/resolve', { method: 'POST', body: { command: text } });
+      const result = data.result || {};
+      state.pendingPhrase = text;
+      state.lastConfidence = result.confidence || 0;
+      state.lastIntent = result.intent ? (intentTitle(result.intent) || result.intent) : '-';
+      updateStats();
+
+      if (result.status === 'matched') {
+        addMessage('ok', formatResolveMessage(result));
+        await maybeExecuteResolvedAction(result, true);
+        return;
+      }
+
+      if (result.status === 'suggest') {
+        state.pendingSuggestion = result.suggestion || null;
+        addMessage('warn', `Komut kesin çözülemedi. Tahmin: ${intentTitle(result.intent) || result.intent}`);
+        openSuggestionFlow(text, result.suggestion, result.confidence);
+        return;
+      }
+
+      state.pendingSuggestion = null;
+      addMessage('err', 'Bu komut tanımlı değil. İstersen intent seçip yeni söyleyiş olarak öğretebilirsin.');
+      if (state.mode === 'teach') openTeachFlow(text);
+    } catch (err) {
+      addMessage('err', err.message || 'Komut çözümlenemedi.');
+    }
+  }
+
+  async function maybeExecuteResolvedAction(result, fromRun = false){
+    const intent = result.intent;
+    const seats = Array.isArray(result.seats) ? result.seats : [];
+
+    if (intent === 'seat_remove_group' || intent === 'seat_remove_single') {
+      if (!seats.length) {
+        addMessage('warn', 'Koltuk bulunamadı. İşlem uygulanmadı.');
+        return;
+      }
+      try {
+        const data = await api('/api/seats/offload', { method: 'POST', body: { seats } });
+        addMessage('ok', `Boşaltma uygulandı.\nSilinen koltuklar: ${(data.deleted || seats).join(', ')}`);
+      } catch (err) {
+        addMessage('err', `Boşaltma başarısız: ${err.message}`);
+      }
+      return;
+    }
+
+    if (intent === 'service_mark') {
+      if (!seats.length) {
+        addMessage('warn', 'Servis işaretlemek için koltuk bulunamadı.');
+        return;
+      }
+      try {
+        const data = await api('/api/seats/service', {
+          method: 'POST',
+          body: { seats, service: 1, service_note: 'AI Console' }
+        });
+        addMessage('ok', `Servis işlendi.\nKoltuklar: ${(data.updated || seats).join(', ')}`);
+      } catch (err) {
+        addMessage('err', `Servis işaretleme başarısız: ${err.message}`);
+      }
+      return;
+    }
+
+    if (intent === 'seat_add_single' || intent === 'seat_add_group' || intent === 'standing_add') {
+      state.pendingAction = result;
+      openActionFlow(result);
+      if (fromRun) addMessage('info', 'Bu intent için ek bilgi gerekiyor. Formu doldurup aksiyonu uygula.');
+      return;
+    }
+
+    if (intent === 'query') {
+      addMessage('info', 'Sorgu intenti çözüldü. Şu an yalnızca intent tespiti yapıldı; sorgu cevabı modülü istersen sonra ekleriz.');
+      return;
+    }
+  }
+
+  function openSuggestionFlow(phrase, suggestion, confidence){
+    els.flowBox.classList.add('open');
+    els.flowTitle.textContent = 'Tahmin önerisi';
+    els.flowSub.textContent = `Bu komutu "${intentTitle(suggestion?.intent) || suggestion?.intent || '-'}" olarak yorumlamamı ister misin?`;
+    els.suggestArea.style.display = 'block';
+    els.teachArea.style.display = 'none';
+    els.actionArea.style.display = 'none';
+    els.doneArea.style.display = 'none';
+    els.teachPhrase.value = phrase || '';
+    els.suggestConfidence.className = 'confidence-pill ' + confidenceClass(confidence);
+    els.suggestConfidence.textContent = `Güven: ${Math.round((confidence || 0) * 100)}%`;
+  }
+
+  function openTeachFlow(phrase=''){
+    els.flowBox.classList.add('open');
+    els.flowTitle.textContent = state.editingLearningId ? 'Komutu düzenle' : 'Komut öğret';
+    els.flowSub.textContent = 'Sistem kendi kendine yeni intent üretmez. Sen intent seçersin, sistem güvenli şekilde öğrenir.';
+    els.suggestArea.style.display = 'none';
+    els.teachArea.style.display = 'block';
+    els.actionArea.style.display = 'none';
+    els.doneArea.style.display = 'none';
+    els.teachPhrase.value = phrase || state.pendingPhrase || '';
+    renderIntentGrid();
+  }
+
+  function openTeachFlowEmpty(){
+    state.pendingPhrase = '';
+    state.pendingSuggestion = null;
+    state.selectedIntent = null;
+    state.editingLearningId = null;
+    openTeachFlow('');
+  }
+
+  function openTeachFlowFromSuggestion(){
+    state.selectedIntent = state.pendingSuggestion?.intent || null;
+    state.editingLearningId = null;
+    openTeachFlow(state.pendingPhrase || '');
+  }
+
+  async function acceptSuggestion(){
+    if (!state.pendingPhrase || !state.pendingSuggestion) return;
+    state.selectedIntent = state.pendingSuggestion.intent;
+    await saveLearning();
+  }
+
+  async function saveLearning(){
+    const phrase = (els.teachPhrase.value || state.pendingPhrase || '').trim();
+    const intentKey = state.selectedIntent || state.pendingSuggestion?.intent;
+
+    if (!phrase) {
+      addMessage('err', 'Önce öğretilecek ifadeyi gir.');
+      return;
+    }
+    if (!intentKey) {
+      addMessage('err', 'Önce intent seç.');
+      return;
+    }
+
+    try {
+      const url = state.editingLearningId ? `/api/ai/learned/${state.editingLearningId}` : '/api/ai/learn';
+      const method = state.editingLearningId ? 'PUT' : 'POST';
+      const pattern = intentPattern(intentKey);
+      await api(url, { method, body: { phrase, intent: intentKey, pattern } });
+      await loadLearned();
+      state.lastIntent = intentTitle(intentKey) || intentKey;
+      state.lastConfidence = 1;
+      updateStats();
+      addMessage('ok', `${state.editingLearningId ? 'Güncellendi' : 'Öğrenildi'}:\n"${phrase}" → ${intentTitle(intentKey) || intentKey}`);
+
+      els.flowBox.classList.add('open');
+      els.flowTitle.textContent = state.editingLearningId ? 'Güncelleme tamamlandı' : 'Öğrenme tamamlandı';
+      els.flowSub.textContent = 'Bu ifade artık sonraki sefer otomatik olarak çözülecek.';
+      els.suggestArea.style.display = 'none';
+      els.teachArea.style.display = 'none';
+      els.actionArea.style.display = 'none';
+      els.doneArea.style.display = 'block';
+      els.doneBadge.textContent = `${state.editingLearningId ? 'Güncellendi' : 'Öğrenildi'}: ${intentTitle(intentKey) || intentKey}`;
+
+      state.pendingPhrase = '';
+      state.pendingSuggestion = null;
+      state.selectedIntent = null;
+      state.editingLearningId = null;
+      renderIntentGrid();
+    } catch (err) {
+      addMessage('err', err.message || 'Öğrenme kaydedilemedi.');
+    }
+  }
+
+  function openActionFlow(result){
+    els.flowBox.classList.add('open');
+    els.flowTitle.textContent = 'Ek bilgiyle aksiyon uygula';
+    els.flowSub.textContent = `Çözülen intent: ${intentTitle(result.intent) || result.intent}`;
+    els.suggestArea.style.display = 'none';
+    els.teachArea.style.display = 'none';
+    els.actionArea.style.display = 'block';
+    els.doneArea.style.display = 'none';
+
+    const seats = Array.isArray(result.seats) ? result.seats : [];
+    els.actionSeats.value = seats.join(',');
+    els.actionFrom.value = '';
+    els.actionTo.value = '';
+    els.actionAmount.value = '';
+    els.actionPayment.value = 'nakit';
+    els.actionTicketType.value = 'biletsiz';
+    els.actionGender.value = '';
+    els.actionPairOk.value = '0';
+    els.actionServiceNote.value = '';
+
+    if (result.intent === 'standing_add') {
+      els.actionBadge.textContent = 'Ayakta ekleme için durak ve ücret gerekli';
+      els.seatExtraGrid.style.display = 'none';
+      if (!els.actionAmount.value && seats.length) {
+        els.actionAmount.value = '';
+      }
+    } else {
+      els.actionBadge.textContent = 'Koltuk ekleme için durak ve gerekirse ücret bilgisi gir';
+      els.seatExtraGrid.style.display = 'grid';
+    }
+  }
+
+  async function runPendingActionFromForm(){
+    const result = state.pendingAction;
+    if (!result) {
+      addMessage('err', 'Bekleyen aksiyon yok.');
+      return;
+    }
+
+    const seats = parseSeatCsv(els.actionSeats.value);
+    const from = els.actionFrom.value.trim();
+    const to = els.actionTo.value.trim();
+    const payment = els.actionPayment.value;
+    const amount = Number(els.actionAmount.value || 0);
+    const ticketType = els.actionTicketType.value;
+    const gender = els.actionGender.value;
+    const pairOk = els.actionPairOk.value === '1';
+    const note = els.actionServiceNote.value.trim();
+
+    try {
+      if (result.intent === 'seat_add_single') {
+        if (seats.length !== 1) throw new Error('Tek koltuk ekleme için 1 koltuk gerekli.');
+        await api('/api/seat', {
+          method: 'POST',
+          body: {
+            seat_no: seats[0],
+            from_stop: from,
+            to_stop: to,
+            payment,
+            amount,
+            ticket_type: ticketType,
+            gender,
+            pair_ok: pairOk,
+            service_note: note
+          }
+        });
+        addMessage('ok', `Koltuk kaydedildi: ${seats[0]}`);
+      } else if (result.intent === 'seat_add_group') {
+        if (!seats.length) throw new Error('Çoklu koltuk ekleme için koltuk listesi gerekli.');
+        await api('/api/seats/bulk', {
+          method: 'POST',
+          body: {
+            seats,
+            from_stop: from,
+            to_stop: to,
+            payment,
+            amount,
+            ticket_type: ticketType,
+            service_note: note
+          }
+        });
+        addMessage('ok', `Toplu koltuk kaydı yapıldı: ${seats.join(', ')}`);
+      } else if (result.intent === 'standing_add') {
+        const count = inferStandingCount(result.command, seats);
+        if (!from || !to) throw new Error('Ayakta ekleme için biniş ve iniş durağı gerekli.');
+        await api('/api/standing', {
+          method: 'POST',
+          body: {
+            from_stop: from,
+            to_stop: to,
+            count,
+            price: amount,
+            payment,
+            note
+          }
+        });
+        addMessage('ok', `Ayakta kayıt işlendi. Adet: ${count}`);
+      }
+
+      els.flowBox.classList.add('open');
+      els.flowTitle.textContent = 'Aksiyon tamamlandı';
+      els.flowSub.textContent = 'İşlem başarıyla uygulandı.';
+      els.suggestArea.style.display = 'none';
+      els.teachArea.style.display = 'none';
+      els.actionArea.style.display = 'none';
+      els.doneArea.style.display = 'block';
+      els.doneBadge.textContent = 'İşlem başarılı';
+      state.pendingAction = null;
+    } catch (err) {
+      addMessage('err', err.message || 'Aksiyon uygulanamadı.');
+    }
+  }
+
+  function inferStandingCount(command, seats){
+    const nums = String(command || '').match(/\b\d+\b/g) || [];
+    if (nums.length) return Number(nums[0]) || 1;
+    return seats.length || 1;
+  }
+
+  function parseSeatCsv(value){
+    return (value || '')
+      .split(',')
+      .map(x => Number(String(x).trim()))
+      .filter(x => Number.isInteger(x) && x > 0);
+  }
+
+  function closeFlow(keepPending = false){
+    els.flowBox.classList.remove('open');
+    els.suggestArea.style.display = 'none';
+    els.teachArea.style.display = 'none';
+    els.actionArea.style.display = 'none';
+    els.doneArea.style.display = 'none';
+    if (!keepPending) {
+      state.pendingPhrase = '';
+      state.pendingSuggestion = null;
+      state.selectedIntent = null;
+      state.editingLearningId = null;
+      state.pendingAction = null;
+      renderIntentGrid();
+    }
+  }
+
+  function renderIntentLegend(){
+    els.intentLegend.innerHTML = state.intents.map(item => `
+      <div class="badge" style="display:flex;justify-content:space-between;width:100%;margin-bottom:8px">
+        <span>${escapeHtml(item.title)}</span>
+        <span>${escapeHtml(item.key)}</span>
+      </div>
+    `).join('');
+  }
+
+  function renderIntentGrid(){
+    els.intentGrid.innerHTML = '';
+    state.intents.forEach(item => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'intent-option' + (state.selectedIntent === item.key ? ' active' : '');
+      btn.innerHTML = `
+        <span class="intent-title">${escapeHtml(item.title)}</span>
+        <span class="intent-desc">${escapeHtml(item.pattern || '')}</span>
+      `;
+      btn.addEventListener('click', () => {
+        state.selectedIntent = item.key;
+        renderIntentGrid();
+      });
+      els.intentGrid.appendChild(btn);
+    });
+  }
+
+  function renderLearnedCommands(){
+    els.learnedTbody.innerHTML = '';
+    els.countBadge.textContent = `${state.learned.length} kayıt`;
+    els.statLearnedCount.textContent = String(state.learned.length);
+
+    if (!state.learned.length) {
+      els.learnedEmpty.style.display = 'block';
+      els.learnedTableWrap.style.display = 'none';
+      return;
+    }
+
+    els.learnedEmpty.style.display = 'none';
+    els.learnedTableWrap.style.display = 'block';
+
+    state.learned.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(item.phrase)}</td>
+        <td>${escapeHtml(intentTitle(item.intent) || item.intent)}</td>
+        <td>${escapeHtml(item.pattern || '-')}</td>
+        <td>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" class="mini-btn info" data-edit="${item.id}">Düzenle</button>
+            <button type="button" class="mini-btn danger" data-del="${item.id}">Sil</button>
+          </div>
+        </td>
+      `;
+      els.learnedTbody.appendChild(tr);
+    });
+
+    $$('[data-edit]').forEach(btn => btn.addEventListener('click', () => editLearned(btn.dataset.edit)));
+    $$('[data-del]').forEach(btn => btn.addEventListener('click', () => deleteLearned(btn.dataset.del)));
+  }
+
+  function editLearned(id){
+    const item = state.learned.find(x => String(x.id) === String(id));
+    if (!item) return;
+    state.pendingPhrase = item.phrase;
+    state.pendingSuggestion = null;
+    state.selectedIntent = item.intent;
+    state.editingLearningId = item.id;
+    openTeachFlow(item.phrase);
+    addMessage('sys', `Düzenleme açıldı: "${item.phrase}"`);
+  }
+
+  async function deleteLearned(id){
+    try {
+      await api(`/api/ai/learned/${id}`, { method: 'DELETE' });
+      await loadLearned();
+      addMessage('sys', 'Öğrenilen komut silindi.');
+    } catch (err) {
+      addMessage('err', err.message || 'Kayıt silinemedi.');
+    }
+  }
+
+  function updateStats(){
+    els.statMode.textContent = state.mode === 'normal' ? 'Normal' : 'Öğretme';
+    els.modeBadge.textContent = `Mod: ${state.mode === 'normal' ? 'Normal' : 'Öğretme'}`;
+    els.statConfidence.textContent = state.lastConfidence ? `${Math.round(state.lastConfidence * 100)}%` : '-';
+    els.statLastIntent.textContent = state.lastIntent || '-';
+    els.statLearnedCount.textContent = String(state.learned.length);
+    els.countBadge.textContent = `${state.learned.length} kayıt`;
+  }
+
+  function clearConsole(){
+    els.consoleLog.innerHTML = '';
+    closeFlow();
+    state.lastConfidence = 0;
+    state.lastIntent = '-';
+    updateStats();
+    seedWelcome();
+  }
+
+  function addMessage(kind, text){
+    const box = document.createElement('div');
+    box.className = `msg ${kind}`;
+    box.innerHTML = `
+      <div class="msg-head">${messageLabel(kind)}</div>
+      <div class="msg-body"></div>
+    `;
+    box.querySelector('.msg-body').textContent = text;
+    els.consoleLog.appendChild(box);
+    els.consoleLog.scrollTop = els.consoleLog.scrollHeight;
+  }
+
+  function messageLabel(kind){
+    if (kind === 'user') return 'Kullanıcı';
+    if (kind === 'ok') return 'Sistem • Başarılı';
+    if (kind === 'warn') return 'Sistem • Düşük güven';
+    if (kind === 'err') return 'Sistem • Hata';
+    if (kind === 'info') return 'Sistem • Bilgi';
+    return 'Sistem';
+  }
+
+  function formatResolveMessage(result){
+    const seats = Array.isArray(result.seats) && result.seats.length ? `\nKoltuklar: ${result.seats.join(', ')}` : '';
+    return `Komut çözüldü\nIntent: ${intentTitle(result.intent) || result.intent}\nKaynak: ${result.source}\nPattern: ${result.pattern || '-'}${seats}`;
+  }
+
+  function intentTitle(key){
+    return state.intents.find(x => x.key === key)?.title || null;
+  }
+
+  function intentPattern(key){
+    return state.intents.find(x => x.key === key)?.pattern || '';
+  }
+
+  function confidenceClass(v){
+    if (v >= 0.8) return 'good';
+    if (v >= 0.45) return 'mid';
+    return 'low';
+  }
+
+  function escapeHtml(str){
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+const micBtn = document.getElementById('micBtn');
+
+let recognition = null;
+let isListening = false;
+
+function initVoiceInput(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SR) {
+    if (micBtn) {
+      micBtn.disabled = true;
+      micBtn.title = 'Bu tarayıcı ses tanımayı desteklemiyor';
+    }
+    addMessage('warn', 'Bu cihazda/tarayıcıda sesli komut desteklenmiyor.');
+    return;
+  }
+
+  recognition = new SR();
+  recognition.lang = 'tr-TR';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    isListening = true;
+    micBtn.classList.add('active');
+    micBtn.textContent = '🔴';
+    addMessage('sys', 'Dinliyorum...');
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    micBtn.classList.remove('active');
+    micBtn.textContent = '🎤';
+  };
+
+  recognition.onerror = (event) => {
+    addMessage('err', 'Sesli komut hatası: ' + (event.error || 'bilinmiyor'));
+  };
+
+  recognition.onresult = (event) => {
+    const text = event.results?.[0]?.[0]?.transcript?.trim() || '';
+    if (!text) {
+      addMessage('warn', 'Ses algılandı ama metin çıkarılamadı.');
+      return;
+    }
+
+    els.commandInput.value = text;
+    addMessage('sys', 'Sesli komut algılandı: ' + text);
+
+    // İstersen otomatik çalıştır:
+    runCommand();
+  };
+
+  micBtn.addEventListener('click', () => {
+    if (!recognition) return;
+
+    if (isListening) {
+      recognition.stop();
+      return;
+    }
+
+    try {
+      recognition.start();
+    } catch (err) {
+      addMessage('err', 'Mikrofon başlatılamadı.');
+    }
+  });
+}
+</script>{% endblock %}
