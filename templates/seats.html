@@ -3111,13 +3111,88 @@
     }
   })();
 
+async function handleVoiceCommandInSeatPage(text){
+  try{
+    const data = await safeJsonFetch('/api/ai/resolve', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrf
+      },
+      body: JSON.stringify({ command: text })
+    });
+
+    const result = data.result || {};
+    const intent = result.intent || null;
+    const seats = Array.isArray(result.seats) ? result.seats : [];
+
+    if(!intent){
+      toast('Komut çözülemedi');
+      return;
+    }
+
+    // 1) Tekli / çoklu boşaltma
+    if(intent === 'seat_remove_single' || intent === 'seat_remove_group'){
+      if(!seats.length){
+        toast('Boşaltılacak koltuk bulunamadı');
+        return;
+      }
+
+      await bulkOffload(seats);
+      toast('Sesli komut uygulandı: koltuk boşaltıldı');
+      return;
+    }
+
+    // 2) Servis işaretleme
+    if(intent === 'service_mark'){
+      if(!seats.length){
+        toast('Servis işaretlenecek koltuk bulunamadı');
+        return;
+      }
+
+      const j = await safeJsonFetch('/api/seats/service', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrf
+        },
+        body: JSON.stringify({
+          seats,
+          service: 1,
+          service_note: 'Sesli komut'
+        })
+      });
+
+      if(!j.ok){
+        throw new Error(j.msg || 'Servis işaretleme başarısız');
+      }
+
+      seats.forEach(n => {
+        serviceMap[String(n)] = true;
+        serviceNotes[String(n)] = 'Sesli komut';
+        setSeatVisual(n);
+      });
+
+      renderAI();
+      toast('Sesli komut uygulandı: servis işlendi');
+      return;
+    }
+
+    // 3) Ayakta ekleme / koltuk ekleme gibi ek bilgi isteyen intentler
+    toast('Bu komut ek bilgi istiyor, AI Console açılıyor');
+    location.href = '/ai-console?cmd=' + encodeURIComponent(text);
+
+  }catch(e){
+    toast(e.message || 'Sesli komut işlenemedi');
+  }
+}
+
 function startDeckAIVoice(){
   const btn = $('#btnDeckAI');
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if(!SR){
     toast('Bu tarayıcı sesli komutu desteklemiyor');
-    location.href = '/ai-console';
     return;
   }
 
@@ -3130,15 +3205,16 @@ function startDeckAIVoice(){
   btn.classList.add('listening');
   btn.textContent = '🔴 Dinliyor';
 
-  rec.onresult = (e) => {
+  rec.onresult = async (e) => {
     const text = e.results?.[0]?.[0]?.transcript?.trim() || '';
+
     if(!text){
       toast('Ses algılandı ama metin çıkarılamadı');
       return;
     }
 
-    toast('Algılandı: ' + text, 1800);
-    location.href = '/ai-console?cmd=' + encodeURIComponent(text);
+    toast('Algılandı: ' + text, 1600);
+    await handleVoiceCommandInSeatPage(text);
   };
 
   rec.onerror = (e) => {
