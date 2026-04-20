@@ -7,15 +7,23 @@ import re
 from io import StringIO
 from pathlib import Path
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from flask import (
-    Flask, render_template, request, redirect, url_for,
-    jsonify, g, session, abort, send_from_directory, make_response
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    jsonify,
+    g,
+    session,
+    abort,
+    send_from_directory,
+    make_response,
 )
 from werkzeug.utils import secure_filename
 
-# Harici blueprint'ler
 from speedlimit import bp_speed
 from modules.bags import bp as bags_bp
 from modules.bags import bag_root, safe
@@ -38,10 +46,11 @@ app.secret_key = os.getenv("SECRET_KEY", "degistir-beni")
 DB_PATH = os.getenv("DB_PATH", "db.sqlite3")
 DEBUG = env_bool("FLASK_DEBUG", True)
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "yusuf")
+PORT = int(os.getenv("PORT", "5000"))
 
 UPLOAD_DIR = os.getenv(
     "UPLOAD_DIR",
-    os.path.join(os.getcwd(), "uploads", "consignments")
+    os.path.join(os.getcwd(), "uploads", "consignments"),
 )
 MAX_UPLOAD_MB = int(os.getenv("MAX_UPLOAD_MB", "10"))
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
@@ -60,85 +69,83 @@ app.register_blueprint(bp_speed)
 SEAT_NUMBERS = [
     1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20, 21, 23, 24,
     25, 27, 28, 29, 31, 33, 34, 35, 37, 38, 39, 41, 42, 43, 45, 46,
-    49, 50, 51, 52, 53, 54
+    49, 50, 51, 52, 53, 54,
 ]
+
+SEAT_POSITIONS = {
+    1: [1, 1], 3: [1, 3], 4: [1, 4],
+    5: [2, 1], 7: [2, 3], 8: [2, 4],
+    9: [3, 1], 11: [3, 3], 12: [3, 4],
+    13: [4, 1], 15: [4, 3], 16: [4, 4],
+    17: [5, 1], 19: [5, 3], 20: [5, 4],
+    21: [6, 1], 23: [6, 3], 24: [6, 4],
+    25: [7, 1], 27: [7, 3], 28: [7, 4],
+    29: [8, 1],
+    31: [9, 1], 33: [9, 3], 34: [9, 4],
+    35: [10, 1], 37: [10, 3], 38: [10, 4],
+    39: [11, 1], 41: [11, 3], 42: [11, 4],
+    43: [12, 1], 45: [12, 3], 46: [12, 4],
+    49: [13, 3], 50: [13, 4],
+    51: [14, 1], 52: [14, 2], 53: [14, 3], 54: [14, 4],
+}
 
 ROUTE_STOPS = {
     "Denizli – İstanbul": [
-        "Denizli otogar","Sarayköy","Buldan","Bozalan","Derbent(Denizli)","Kadıköy",
-        "İl Sınırı(Manisa)","Dindarlı","Dadağlı","Sarıgöl Garaj","Afşar","Bereketli",
-        "Hacıaliler","Ortahan","Belenyaka","Alaşehir Otogar","Alaşehir Stadyum",
-        "Akkeçili","Piyadeler","Kavaklıdere","Salihli Garaj","Sart","Ahmetli",
-        "Gökkaya","Akçapınar","Derbent(Turgutlu)","Turgutlu Garaj","Özdilek(Turgutlu)",
-        "Manisa Otogar","Akhisar","Saruhanlı","Soma","Kırkağaç","Balıkesir","Susurluk",
-        "Mustafa K.P(Bursa)","Bursa Otogar","Gebze Garaj","Harem","Alibeyköy","Esenler Otogar"
+        "Denizli otogar", "Sarayköy", "Buldan", "Bozalan", "Derbent(Denizli)", "Kadıköy",
+        "İl Sınırı(Manisa)", "Dindarlı", "Dadağlı", "Sarıgöl Garaj", "Afşar", "Bereketli",
+        "Hacıaliler", "Ortahan", "Belenyaka", "Alaşehir Otogar", "Alaşehir Stadyum",
+        "Akkeçili", "Piyadeler", "Kavaklıdere", "Salihli Garaj", "Sart", "Ahmetli",
+        "Gökkaya", "Akçapınar", "Derbent(Turgutlu)", "Turgutlu Garaj", "Özdilek(Turgutlu)",
+        "Manisa Otogar", "Akhisar", "Saruhanlı", "Soma", "Kırkağaç", "Balıkesir", "Susurluk",
+        "Mustafa K.P(Bursa)", "Bursa Otogar", "Gebze Garaj", "Harem", "Alibeyköy", "Esenler Otogar",
     ],
     "Denizli – İzmir": [
-        "Denizli otogar","Sarayköy","Alaşehir Otogar","Salihli Garaj","Turgutlu Garaj",
-        "Manisa Otogar","Bornova","İzmir Otogar"
+        "Denizli otogar", "Sarayköy", "Alaşehir Otogar", "Salihli Garaj", "Turgutlu Garaj",
+        "Manisa Otogar", "Bornova", "İzmir Otogar",
     ],
     "İstanbul – Denizli": [
-        "Esenler Otogar","Alibeyköy","Harem","Gebze Garaj","Bursa Otogar","Susurluk","Balıkesir",
-        "Kırkağaç","Soma","Akhisar","Manisa Otogar","Turgutlu Garaj","Salihli Garaj",
-        "Alaşehir Otogar","Denizli otogar"
+        "Esenler Otogar", "Alibeyköy", "Harem", "Gebze Garaj", "Bursa Otogar", "Susurluk",
+        "Balıkesir", "Kırkağaç", "Soma", "Akhisar", "Manisa Otogar", "Turgutlu Garaj",
+        "Salihli Garaj", "Alaşehir Otogar", "Denizli otogar",
     ],
     "İzmir – Denizli": [
-        "İzmir Otogar","Bornova","Manisa Otogar","Turgutlu Garaj","Salihli Garaj",
-        "Alaşehir Otogar","Sarayköy","Denizli otogar"
+        "İzmir Otogar", "Bornova", "Manisa Otogar", "Turgutlu Garaj", "Salihli Garaj",
+        "Alaşehir Otogar", "Sarayköy", "Denizli otogar",
     ],
     "İstanbul – Antalya": [
-        "Esenler","Alibeyköy","Harem","Gebze","Bursa","Korkuteli","Antalya Otogar"
+        "Esenler", "Alibeyköy", "Harem", "Gebze", "Bursa", "Korkuteli", "Antalya Otogar",
     ],
     "Antalya – İstanbul": [
-        "Antalya Otogar","Korkuteli","Bursa","Gebze","Harem","Alibeyköy","Esenler"
+        "Antalya Otogar", "Korkuteli", "Bursa", "Gebze", "Harem", "Alibeyköy", "Esenler",
     ],
 }
 
 TICKET_TYPES = {"biletli", "biletsiz", "ucretsiz"}
 PAYMENT_TYPES = {"nakit", "iban", "online", "pos", "ucretsiz"}
+GENDERS = {"bay", "bayan", ""}
 
 NEIGHBORS = {
-    3:4, 4:3, 7:8, 8:7, 11:12, 12:11, 15:16, 16:15,
-    19:20, 20:19, 23:24, 24:23, 27:28, 28:27, 33:34, 34:33,
-    37:38, 38:37, 41:42, 42:41, 45:46, 46:45, 49:50, 50:49, 53:54, 54:53,
+    3: 4, 4: 3, 7: 8, 8: 7, 11: 12, 12: 11, 15: 16, 16: 15,
+    19: 20, 20: 19, 23: 24, 24: 23, 27: 28, 28: 27, 33: 34, 34: 33,
+    37: 38, 38: 37, 41: 42, 42: 41, 45: 46, 46: 45, 49: 50, 50: 49, 53: 54, 54: 53,
 }
 
-DEFAULT_CATS_IN = ["Devir","Garaj","Harem","Eşya","Nakit Bilet","Avans","Diğer"]
-DEFAULT_CATS_OUT = ["Yıkama","Sigara","Yemek","Otoyol","Otogar","İkram","Temizlik","Su/Çay","Bakım","Diğer"]
+DEFAULT_CATS_IN = ["Devir", "Garaj", "Harem", "Eşya", "Nakit Bilet", "Avans", "Diğer"]
+DEFAULT_CATS_OUT = ["Yıkama", "Sigara", "Yemek", "Otoyol", "Otogar", "İkram", "Temizlik", "Su/Çay", "Bakım", "Diğer"]
 
 AI_INTENTS = {
-    "seat_add_single": {
-        "title": "Tek koltuk ekleme",
-        "pattern": "seat + add",
-    },
-    "seat_add_group": {
-        "title": "Çoklu koltuk ekleme",
-        "pattern": "seat_list + add",
-    },
-    "seat_remove_single": {
-        "title": "Tek koltuk boşaltma",
-        "pattern": "seat + offload",
-    },
-    "seat_remove_group": {
-        "title": "Çoklu koltuk boşaltma",
-        "pattern": "seat_list + offload",
-    },
-    "standing_add": {
-        "title": "Ayakta ekleme",
-        "pattern": "standing + add",
-    },
-    "service_mark": {
-        "title": "Servis işaretleme",
-        "pattern": "service + mark",
-    },
-    "query": {
-        "title": "Sorgu",
-        "pattern": "query",
-    },
+    "seat_add_single": {"title": "Tek koltuk ekleme", "pattern": "seat + add"},
+    "seat_add_group": {"title": "Çoklu koltuk ekleme", "pattern": "seat_list + add"},
+    "seat_remove_single": {"title": "Tek koltuk boşaltma", "pattern": "seat + offload"},
+    "seat_remove_group": {"title": "Çoklu koltuk boşaltma", "pattern": "seat_list + offload"},
+    "standing_add": {"title": "Ayakta ekleme", "pattern": "standing + add"},
+    "service_mark": {"title": "Servis işaretleme", "pattern": "service + mark"},
+    "query": {"title": "Sorgu", "pattern": "query"},
 }
 
+
 # =========================================================
-# Yardımcı normalize fonksiyonları
+# Genel yardımcılar
 # =========================================================
 
 def norm_ticket_type(val: str) -> str:
@@ -153,31 +160,31 @@ def norm_payment(val: str) -> str:
 
 def norm_gender(val: str) -> str:
     v = (val or "").strip().lower()
-    return v if v in {"bay", "bayan", ""} else ""
+    return v if v in GENDERS else ""
 
 
-def norm_bool(val) -> int:
+def norm_bool(val: Any) -> int:
     if isinstance(val, bool):
         return 1 if val else 0
     s = str(val or "").strip().lower()
     return 1 if s in {"1", "true", "yes", "on"} else 0
 
 
-def parse_float(val, default=0.0) -> float:
+def parse_float(val: Any, default: Optional[float] = 0.0) -> Optional[float]:
     try:
         return float(val)
     except Exception:
         return default
 
 
-def parse_int(val, default=0) -> int:
+def parse_int(val: Any, default: Optional[int] = 0) -> Optional[int]:
     try:
         return int(val)
     except Exception:
         return default
 
 
-def ensure_upload_dir():
+def ensure_upload_dir() -> None:
     Path(UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
 
 
@@ -189,203 +196,10 @@ def allowed_file(filename: str) -> bool:
 
 
 # =========================================================
-# AI Console helpers
-# =========================================================
-
-def normalize_ai_text(text: str) -> str:
-    text = (text or "").strip().lower()
-    text = text.replace("’", "").replace("'", "").replace("`", "")
-    text = re.sub(r"[^0-9a-zçğıöşü\s-]", " ", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
-
-
-def ai_extract_seat_list(text: str):
-    text = text or ""
-    text = re.sub(r"(\d+)\s*-\s*(\d+)", r"\1 \2", text)
-    text = re.sub(r"(\d+)\s*ve\s*(\d+)", r"\1 \2", text, flags=re.IGNORECASE)
-    text = re.sub(r"(\d+)\s*ile\s*(\d+)", r"\1 \2", text, flags=re.IGNORECASE)
-
-    nums = re.findall(r"\b\d{1,2}\b", text)
-    out = []
-    for n in nums:
-        x = int(n)
-        if 1 <= x <= 60 and x not in out:
-            out.append(x)
-    return out
-
-
-def ai_make_skeleton(text: str) -> str:
-    text = normalize_ai_text(text)
-    text = re.sub(r"\d+", "{n}", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
-
-
-def ai_find_learned_match(command: str):
-    db = get_db()
-    phrase_norm = normalize_ai_text(command)
-    skeleton = ai_make_skeleton(command)
-
-    row = db.execute(
-        """
-        SELECT id, phrase, intent, pattern
-        FROM learned_commands
-        WHERE phrase_norm=?
-        LIMIT 1
-        """,
-        (phrase_norm,)
-    ).fetchone()
-
-    if row:
-        return dict(row), "exact"
-
-    row = db.execute(
-        """
-        SELECT id, phrase, intent, pattern
-        FROM learned_commands
-        WHERE skeleton=?
-        LIMIT 1
-        """,
-        (skeleton,)
-    ).fetchone()
-
-    if row:
-        return dict(row), "skeleton"
-
-    return None, None
-
-
-def ai_parse_default_command(command: str):
-    text = normalize_ai_text(command)
-    seats = ai_extract_seat_list(command)
-
-    has_add = bool(re.search(r"\b(ekle|yaz|kaydet|oturt|bindir)\b", text))
-    has_offload = bool(re.search(r"\b(boşalt|indir|indirdim|insin|sil)\b", text))
-    has_service = bool(re.search(r"\b(servis|ikram|tamam|işaretle|verildi)\b", text))
-    has_standing = "ayakta" in text
-    has_query = bool(re.search(r"\b(hangi|kaç|sıradaki|durak|nerede|dolu|boş|kim)\b", text))
-
-    if has_offload and len(seats) >= 2:
-        return {
-            "intent": "seat_remove_group",
-            "pattern": "seat_list + offload",
-            "confidence": 0.86,
-            "seats": seats,
-        }
-
-    if has_offload and len(seats) == 1:
-        return {
-            "intent": "seat_remove_single",
-            "pattern": "seat + offload",
-            "confidence": 0.83,
-            "seats": seats,
-        }
-
-    if has_standing and has_add:
-        return {
-            "intent": "standing_add",
-            "pattern": "standing + add",
-            "confidence": 0.84,
-            "seats": seats,
-        }
-
-    if has_add and len(seats) >= 2:
-        return {
-            "intent": "seat_add_group",
-            "pattern": "seat_list + add",
-            "confidence": 0.81,
-            "seats": seats,
-        }
-
-    if has_add and len(seats) == 1:
-        return {
-            "intent": "seat_add_single",
-            "pattern": "seat + add",
-            "confidence": 0.82,
-            "seats": seats,
-        }
-
-    if has_service:
-        return {
-            "intent": "service_mark",
-            "pattern": "service + mark",
-            "confidence": 0.58,
-            "seats": seats,
-        }
-
-    if has_query:
-        return {
-            "intent": "query",
-            "pattern": "query",
-            "confidence": 0.55,
-            "seats": seats,
-        }
-
-    return {
-        "intent": None,
-        "pattern": None,
-        "confidence": 0.12,
-        "seats": seats,
-    }
-
-
-def resolve_ai_command(command: str):
-    learned, match_type = ai_find_learned_match(command)
-    if learned:
-        return {
-            "status": "matched",
-            "source": f"learned_{match_type}",
-            "intent": learned["intent"],
-            "pattern": learned.get("pattern"),
-            "confidence": 0.98,
-            "seats": ai_extract_seat_list(command),
-            "command": command,
-        }
-
-    parsed = ai_parse_default_command(command)
-
-    if parsed["intent"] and parsed["confidence"] >= 0.80:
-        return {
-            "status": "matched",
-            "source": "default_parser",
-            "intent": parsed["intent"],
-            "pattern": parsed["pattern"],
-            "confidence": parsed["confidence"],
-            "seats": parsed["seats"],
-            "command": command,
-        }
-
-    if parsed["intent"] and parsed["confidence"] >= 0.45:
-        return {
-            "status": "suggest",
-            "source": "default_parser",
-            "intent": parsed["intent"],
-            "pattern": parsed["pattern"],
-            "confidence": parsed["confidence"],
-            "seats": parsed["seats"],
-            "command": command,
-            "suggestion": {
-                "intent": parsed["intent"],
-                "pattern": parsed["pattern"],
-            }
-        }
-
-    return {
-        "status": "unknown",
-        "source": "none",
-        "intent": None,
-        "pattern": None,
-        "confidence": parsed["confidence"],
-        "seats": parsed["seats"],
-        "command": command,
-    }
-
-# =========================================================
 # DB
 # =========================================================
 
-def get_db():
+def get_db() -> sqlite3.Connection:
     if "db" not in g:
         g.db = sqlite3.connect(DB_PATH)
         g.db.row_factory = sqlite3.Row
@@ -401,7 +215,7 @@ def close_db(exc):
         db.close()
 
 
-def ensure_schema():
+def ensure_schema() -> None:
     db = get_db()
 
     db.executescript(
@@ -575,12 +389,9 @@ def ensure_schema():
 
         CREATE INDEX IF NOT EXISTS idx_learned_commands_intent
         ON learned_commands(intent);
-
-
-       """
+        """
     )
 
-    # Eski DB migrasyonları
     seat_cols = [r["name"] for r in db.execute("PRAGMA table_info(seats)").fetchall()]
     migrations = {
         "from_stop": "ALTER TABLE seats ADD COLUMN from_stop TEXT DEFAULT ''",
@@ -592,6 +403,7 @@ def ensure_schema():
         "passenger_name": "ALTER TABLE seats ADD COLUMN passenger_name TEXT DEFAULT ''",
         "passenger_phone": "ALTER TABLE seats ADD COLUMN passenger_phone TEXT DEFAULT ''",
     }
+
     for col, sql in migrations.items():
         if col not in seat_cols:
             db.execute(sql)
@@ -600,7 +412,7 @@ def ensure_schema():
 
 
 # =========================================================
-# TL filter
+# Template filter
 # =========================================================
 
 @app.template_filter("tl")
@@ -628,13 +440,10 @@ def settings_get(key: str, default=None):
         return raw
 
 
-def settings_set(key: str, value):
+def settings_set(key: str, value) -> None:
     raw = json.dumps(value, ensure_ascii=False) if not isinstance(value, str) else value
     db = get_db()
-    db.execute(
-        "INSERT OR REPLACE INTO settings(key, value) VALUES(?, ?)",
-        (key, raw)
-    )
+    db.execute("INSERT OR REPLACE INTO settings(key, value) VALUES(?, ?)", (key, raw))
     db.commit()
 
 
@@ -659,9 +468,10 @@ def get_cash_categories():
     return cats_in, cats_out
 
 
-def save_cash_categories(text_in: str, text_out: str):
+def save_cash_categories(text_in: str, text_out: str) -> None:
     def parse_lines(s: str):
         return [x.strip() for x in (s or "").replace("\n", ",").split(",") if x.strip()]
+
     settings_set("cash_cat_in", parse_lines(text_in) or DEFAULT_CATS_IN)
     settings_set("cash_cat_out", parse_lines(text_out) or DEFAULT_CATS_OUT)
 
@@ -670,7 +480,7 @@ def save_cash_categories(text_in: str, text_out: str):
 # Aktif sefer
 # =========================================================
 
-def set_active_trip(trip_id: Optional[int]):
+def set_active_trip(trip_id: Optional[int]) -> None:
     db = get_db()
     db.execute("UPDATE app_state SET active_trip_id=? WHERE id=1", (trip_id,))
     db.commit()
@@ -681,9 +491,25 @@ def get_active_trip() -> Optional[int]:
     return row["active_trip_id"] if row else None
 
 
+def get_active_trip_row():
+    tid = get_active_trip()
+    if not tid:
+        return None
+    return get_db().execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+
+
 # =========================================================
-# Route helpers
+# Hat / durak yardımcıları
 # =========================================================
+
+def parse_stops(text: str):
+    if not text:
+        return []
+    parts = []
+    for line in text.splitlines():
+        parts.extend(x.strip() for x in line.split(","))
+    return [x for x in parts if x]
+
 
 def get_stops(route_name: str):
     row = get_db().execute("SELECT stops FROM routes WHERE name=?", (route_name,)).fetchone()
@@ -700,31 +526,19 @@ def all_route_names():
     return list(dict.fromkeys(list(ROUTE_STOPS.keys()) + dyn))
 
 
-def parse_stops(text: str):
-    if not text:
-        return []
-    parts = []
-    for line in text.splitlines():
-        parts.extend(x.strip() for x in line.split(","))
-    return [x for x in parts if x]
-
-
 def validate_stop_for_trip(route_name: str, stop: str) -> bool:
     return (stop or "").strip() in set(get_stops(route_name))
 
 
 def validate_stop_for_active_trip(stop: str) -> bool:
-    tid = get_active_trip()
-    if not tid:
-        return False
-    trip = get_db().execute("SELECT route FROM trips WHERE id=?", (tid,)).fetchone()
+    trip = get_active_trip_row()
     if not trip:
         return False
     return validate_stop_for_trip(trip["route"], stop)
 
 
 # =========================================================
-# Neighbor rule
+# Yan koltuk kuralı
 # =========================================================
 
 def neighbor_rule_ok(trip_id: int, seat_no: int, gender: str, pair_ok: bool) -> Tuple[bool, str]:
@@ -738,7 +552,7 @@ def neighbor_rule_ok(trip_id: int, seat_no: int, gender: str, pair_ok: bool) -> 
         FROM seats
         WHERE trip_id=? AND seat_no=?
         """,
-        (trip_id, nb)
+        (trip_id, nb),
     ).fetchone()
 
     if not row:
@@ -758,20 +572,20 @@ def neighbor_rule_ok(trip_id: int, seat_no: int, gender: str, pair_ok: bool) -> 
 # CSRF / Auth
 # =========================================================
 
-def issue_csrf():
+def issue_csrf() -> str:
     token = secrets.token_urlsafe(32)
     session["csrf_token"] = token
     return token
 
 
-def get_csrf():
+def get_csrf() -> str:
     tok = session.get("csrf_token")
     if not tok:
         tok = issue_csrf()
     return tok
 
 
-def check_csrf():
+def check_csrf() -> None:
     form_tok = request.form.get("csrf_token")
     header_tok = request.headers.get("X-CSRF-Token")
     json_tok = None
@@ -809,12 +623,8 @@ def bootstrap_and_guard():
 @app.context_processor
 def inject_globals():
     try:
-        tid = get_active_trip()
-        trip = None
-        if tid:
-            trip = get_db().execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
         return {
-            "active_trip": trip,
+            "active_trip": get_active_trip_row(),
             "csrf_token": get_csrf(),
         }
     except Exception:
@@ -825,7 +635,153 @@ def inject_globals():
 
 
 # =========================================================
-# Auth pages
+# AI yardımcıları
+# =========================================================
+
+def normalize_ai_text(text: str) -> str:
+    text = (text or "").strip().lower()
+    text = text.replace("’", "").replace("'", "").replace("`", "")
+    text = re.sub(r"[^0-9a-zçğıöşü\s-]", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def ai_extract_seat_list(text: str):
+    text = text or ""
+    text = re.sub(r"(\d+)\s*-\s*(\d+)", r"\1 \2", text)
+    text = re.sub(r"(\d+)\sve\s(\d+)", r"\1 \2", text, flags=re.IGNORECASE)
+    text = re.sub(r"(\d+)\sile\s(\d+)", r"\1 \2", text, flags=re.IGNORECASE)
+
+    nums = re.findall(r"\b\d{1,2}\b", text)
+    out = []
+    for n in nums:
+        x = int(n)
+        if 1 <= x <= 60 and x not in out:
+            out.append(x)
+    return out
+
+
+def ai_make_skeleton(text: str) -> str:
+    text = normalize_ai_text(text)
+    text = re.sub(r"\d+", "{n}", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def ai_find_learned_match(command: str):
+    db = get_db()
+    phrase_norm = normalize_ai_text(command)
+    skeleton = ai_make_skeleton(command)
+
+    row = db.execute(
+        """
+        SELECT id, phrase, intent, pattern
+        FROM learned_commands
+        WHERE phrase_norm=?
+        LIMIT 1
+        """,
+        (phrase_norm,),
+    ).fetchone()
+    if row:
+        return dict(row), "exact"
+
+    row = db.execute(
+        """
+        SELECT id, phrase, intent, pattern
+        FROM learned_commands
+        WHERE skeleton=?
+        LIMIT 1
+        """,
+        (skeleton,),
+    ).fetchone()
+    if row:
+        return dict(row), "skeleton"
+
+    return None, None
+
+
+def ai_parse_default_command(command: str):
+    text = normalize_ai_text(command)
+    seats = ai_extract_seat_list(command)
+
+    has_add = bool(re.search(r"\b(ekle|yaz|kaydet|oturt|bindir)\b", text))
+    has_offload = bool(re.search(r"\b(boşalt|indir|indirdim|insin|sil)\b", text))
+    has_service = bool(re.search(r"\b(servis|ikram|tamam|işaretle|verildi)\b", text))
+    has_standing = "ayakta" in text
+    has_query = bool(re.search(r"\b(hangi|kaç|sıradaki|durak|nerede|dolu|boş|kim)\b", text))
+
+    if has_offload and len(seats) >= 2:
+        return {"intent": "seat_remove_group", "pattern": "seat_list + offload", "confidence": 0.86, "seats": seats}
+    if has_offload and len(seats) == 1:
+        return {"intent": "seat_remove_single", "pattern": "seat + offload", "confidence": 0.83, "seats": seats}
+    if has_standing and has_add:
+        return {"intent": "standing_add", "pattern": "standing + add", "confidence": 0.84, "seats": seats}
+    if has_add and len(seats) >= 2:
+        return {"intent": "seat_add_group", "pattern": "seat_list + add", "confidence": 0.81, "seats": seats}
+    if has_add and len(seats) == 1:
+        return {"intent": "seat_add_single", "pattern": "seat + add", "confidence": 0.82, "seats": seats}
+    if has_service:
+        return {"intent": "service_mark", "pattern": "service + mark", "confidence": 0.58, "seats": seats}
+    if has_query:
+        return {"intent": "query", "pattern": "query", "confidence": 0.55, "seats": seats}
+
+    return {"intent": None, "pattern": None, "confidence": 0.12, "seats": seats}
+
+
+def resolve_ai_command(command: str):
+    learned, match_type = ai_find_learned_match(command)
+    if learned:
+        return {
+            "status": "matched",
+            "source": f"learned_{match_type}",
+            "intent": learned["intent"],
+            "pattern": learned.get("pattern"),
+            "confidence": 0.98,
+            "seats": ai_extract_seat_list(command),
+            "command": command,
+        }
+
+    parsed = ai_parse_default_command(command)
+
+    if parsed["intent"] and parsed["confidence"] >= 0.80:
+        return {
+            "status": "matched",
+            "source": "default_parser",
+            "intent": parsed["intent"],
+            "pattern": parsed["pattern"],
+            "confidence": parsed["confidence"],
+            "seats": parsed["seats"],
+            "command": command,
+        }
+
+    if parsed["intent"] and parsed["confidence"] >= 0.45:
+        return {
+            "status": "suggest",
+            "source": "default_parser",
+            "intent": parsed["intent"],
+            "pattern": parsed["pattern"],
+            "confidence": parsed["confidence"],
+            "seats": parsed["seats"],
+            "command": command,
+            "suggestion": {
+                "intent": parsed["intent"],
+                "pattern": parsed["pattern"],
+            },
+        }
+
+    return {
+        "status": "unknown",
+        "source": "none",
+        "intent": None,
+        "pattern": None,
+        "confidence": parsed["confidence"],
+        "seats": parsed["seats"],
+        "command": command,
+    }
+
+
+# =========================================================
+# Auth sayfaları
 # =========================================================
 
 @app.route("/login", methods=["GET", "POST"])
@@ -838,6 +794,7 @@ def login():
             nxt = request.args.get("next") or url_for("index")
             return redirect(nxt)
         return render_template("login.html", error="Hatalı şifre", csrf_token=get_csrf())
+
     return render_template("login.html", csrf_token=get_csrf())
 
 
@@ -855,6 +812,7 @@ def logout():
 def ai_console_page():
     return render_template("ai_console.html")
 
+
 @app.route("/")
 def index():
     routes = all_route_names()
@@ -866,9 +824,9 @@ def index():
 def set_route():
     payload = request.get_json(silent=True) or {}
     route = (request.form.get("route") or payload.get("route") or "").strip()
+
     if not route:
         return jsonify({"ok": False, "msg": "route gerekli"}), 400
-
     if route not in set(all_route_names()):
         return jsonify({"ok": False, "msg": "Geçersiz hat"}), 400
 
@@ -897,7 +855,7 @@ def trip_start():
                 request.form.get("captain2"),
                 request.form.get("attendant"),
                 request.form.get("note"),
-            )
+            ),
         )
         trip_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
         db.commit()
@@ -941,7 +899,7 @@ def seats_page():
         WHERE trip_id=?
         ORDER BY seat_no
         """,
-        (tid,)
+        (tid,),
     ).fetchall()
 
     assigned = {r["seat_no"]: True for r in rows}
@@ -951,12 +909,11 @@ def seats_page():
     service_map = {r["seat_no"]: bool(r["service"]) for r in rows}
     service_notes = {r["seat_no"]: (r["service_note"] or "") for r in rows}
 
-    stops = get_stops(trip["route"])
-
     return render_template(
         "seats.html",
         trip=trip,
-        stops=stops,
+        stops=get_stops(trip["route"]),
+        seat_positions=SEAT_POSITIONS,
         assigned=assigned,
         stops_map=stops_map,
         boards_map=boards_map,
@@ -972,11 +929,7 @@ def passenger_control():
     if not tid:
         return redirect(url_for("trip_start"))
     trip = get_db().execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
-    return render_template(
-        "passenger_control.html",
-        trip=trip,
-        stops=get_stops(trip["route"]),
-    )
+    return render_template("passenger_control.html", trip=trip, stops=get_stops(trip["route"]))
 
 
 # =========================================================
@@ -1009,11 +962,10 @@ def add_route():
         if not name or not stops_text:
             return "Hat adı ve duraklar zorunludur", 400
 
-        stops = parse_stops(stops_text)
         db = get_db()
         db.execute(
             "INSERT OR REPLACE INTO routes(name, stops) VALUES(?, ?)",
-            (name, json.dumps(stops, ensure_ascii=False))
+            (name, json.dumps(parse_stops(stops_text), ensure_ascii=False)),
         )
         db.commit()
         session["route"] = name
@@ -1039,7 +991,7 @@ def route_edit(rid):
 
         db.execute(
             "UPDATE routes SET name=?, stops=? WHERE id=?",
-            (name, json.dumps(stops, ensure_ascii=False), rid)
+            (name, json.dumps(stops, ensure_ascii=False), rid),
         )
         db.commit()
         session["route"] = name
@@ -1057,12 +1009,14 @@ def materialize_builtin_route(name: str) -> Optional[int]:
     stops = ROUTE_STOPS.get(name)
     if not stops:
         return None
+
     db = get_db()
     db.execute(
         "INSERT OR REPLACE INTO routes(name, stops) VALUES(?, ?)",
-        (name, json.dumps(stops, ensure_ascii=False))
+        (name, json.dumps(stops, ensure_ascii=False)),
     )
     db.commit()
+
     row = db.execute("SELECT id FROM routes WHERE name=?", (name,)).fetchone()
     return row["id"] if row else None
 
@@ -1072,9 +1026,11 @@ def builtin_route_edit():
     name = (request.args.get("name") or "").strip()
     if name not in ROUTE_STOPS:
         abort(404, description="Sabit hat bulunamadı")
+
     rid = materialize_builtin_route(name)
     if not rid:
         abort(500, description="Sabit hat DB'ye kopyalanamadı")
+
     session["route"] = name
     return redirect(url_for("route_edit", rid=rid))
 
@@ -1085,19 +1041,21 @@ def route_delete(rid):
     row = db.execute("SELECT name FROM routes WHERE id=?", (rid,)).fetchone()
     db.execute("DELETE FROM routes WHERE id=?", (rid,))
     db.commit()
+
     if row and session.get("route") == row["name"]:
         session.pop("route", None)
+
     return redirect(url_for("routes_list"))
 
 
 # =========================================================
-# Fares
+# Fiyatlar
 # =========================================================
 
 def fetch_fare_exact(route: str, from_stop: str, to_stop: str) -> Optional[float]:
     row = get_db().execute(
         "SELECT price FROM fares WHERE route=? AND from_stop=? AND to_stop=?",
-        (route, from_stop, to_stop)
+        (route, from_stop, to_stop),
     ).fetchone()
     return float(row["price"]) if row else None
 
@@ -1125,7 +1083,7 @@ def quote_price_segmented(route: str, from_stop: str, to_stop: str):
         a, b = stops[k], stops[k + 1]
         row = db.execute(
             "SELECT price FROM fares WHERE route=? AND from_stop=? AND to_stop=?",
-            (route, a, b)
+            (route, a, b),
         ).fetchone()
         if not row:
             return None, "segment-missing"
@@ -1188,7 +1146,7 @@ def fare_admin():
             stops = get_stops(route)
             fare_list = get_db().execute(
                 "SELECT from_stop, to_stop, price FROM fares WHERE route=? ORDER BY rowid",
-                (route,)
+                (route,),
             ).fetchall()
             return render_template(
                 "fare_admin.html",
@@ -1211,7 +1169,7 @@ def fare_admin():
                 price=excluded.price,
                 updated_at=datetime('now','localtime')
             """,
-            (route, from_stop, to_stop, price)
+            (route, from_stop, to_stop, price),
         )
         db.commit()
 
@@ -1222,13 +1180,13 @@ def fare_admin():
 
     row = get_db().execute(
         "SELECT price FROM fares WHERE route=? AND from_stop=? AND to_stop=?",
-        (route, from_stop, to_stop)
+        (route, from_stop, to_stop),
     ).fetchone()
     current_price = float(row["price"]) if row else None
 
     fare_list = get_db().execute(
         "SELECT from_stop, to_stop, price FROM fares WHERE route=? ORDER BY rowid",
-        (route,)
+        (route,),
     ).fetchall()
 
     return render_template(
@@ -1245,22 +1203,22 @@ def fare_admin():
 
 
 # =========================================================
-# Hesap / Kasa
+# Hesap / kasa
 # =========================================================
 
 def cash_sums(trip_id: int):
     db = get_db()
     r_in = db.execute(
         "SELECT COALESCE(SUM(amount),0) FROM cash_moves WHERE trip_id=? AND direction='+'",
-        (trip_id,)
+        (trip_id,),
     ).fetchone()
     r_out = db.execute(
         "SELECT COALESCE(SUM(amount),0) FROM cash_moves WHERE trip_id=? AND direction='-'",
-        (trip_id,)
+        (trip_id,),
     ).fetchone()
     r_dev = db.execute(
         "SELECT COALESCE(SUM(amount),0) FROM cash_moves WHERE trip_id=? AND direction='+' AND lower(category)='devir'",
-        (trip_id,)
+        (trip_id,),
     ).fetchone()
 
     total_in = int(r_in[0] or 0)
@@ -1271,7 +1229,7 @@ def cash_sums(trip_id: int):
         "devir": devir,
         "giris": total_in - devir,
         "cikis": total_out,
-        "kalan": total_in - total_out
+        "kalan": total_in - total_out,
     }
 
 
@@ -1294,7 +1252,7 @@ def hesap_page():
             ORDER BY id DESC
             LIMIT 100
             """,
-            (tid,)
+            (tid,),
         ).fetchall()
     ]
     cats_in, cats_out = get_cash_categories()
@@ -1319,11 +1277,11 @@ def hesap_devir():
     amount = parse_int(request.form.get("amount"), 0)
     note = (request.form.get("note") or "").strip()
 
-    if amount > 0:
+    if amount and amount > 0:
         db = get_db()
         db.execute(
             "INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
-            (tid, '+', 'Devir', amount, note)
+            (tid, "+", "Devir", amount, note),
         )
         db.commit()
 
@@ -1340,11 +1298,11 @@ def hesap_giris():
     category = (request.form.get("category") or "Diğer").strip()
     note = (request.form.get("note") or "").strip()
 
-    if amount > 0:
+    if amount and amount > 0:
         db = get_db()
         db.execute(
             "INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
-            (tid, '+', category, amount, note)
+            (tid, "+", category, amount, note),
         )
         db.commit()
 
@@ -1361,11 +1319,11 @@ def hesap_cikis():
     category = (request.form.get("category") or "Diğer").strip()
     note = (request.form.get("note") or "").strip()
 
-    if amount > 0:
+    if amount and amount > 0:
         db = get_db()
         db.execute(
             "INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
-            (tid, '-', category, amount, note)
+            (tid, "-", category, amount, note),
         )
         db.commit()
 
@@ -1374,10 +1332,7 @@ def hesap_cikis():
 
 @app.post("/hesap/kategoriler")
 def hesap_kategoriler_kaydet():
-    save_cash_categories(
-        request.form.get("cats_in") or "",
-        request.form.get("cats_out") or ""
-    )
+    save_cash_categories(request.form.get("cats_in") or "", request.form.get("cats_out") or "")
     return redirect(url_for("hesap_page"))
 
 
@@ -1395,7 +1350,7 @@ def hesap_moves_csv():
             WHERE trip_id=?
             ORDER BY id DESC
             """,
-            (tid,)
+            (tid,),
         ).fetchall()
     ]
 
@@ -1408,7 +1363,7 @@ def hesap_moves_csv():
             "+" if r.get("direction") == "+" else "-",
             r.get("category", ""),
             r.get("note", ""),
-            r.get("amount", 0)
+            r.get("amount", 0),
         ])
 
     out = buf.getvalue().encode("utf-8-sig")
@@ -1427,13 +1382,9 @@ def api_ai_intents():
     return jsonify({
         "ok": True,
         "items": [
-            {
-                "key": k,
-                "title": v["title"],
-                "pattern": v["pattern"],
-            }
+            {"key": k, "title": v["title"], "pattern": v["pattern"]}
             for k, v in AI_INTENTS.items()
-        ]
+        ],
     })
 
 
@@ -1446,29 +1397,21 @@ def api_ai_learned():
         ORDER BY id DESC
         """
     ).fetchall()
-
-    return jsonify({
-        "ok": True,
-        "items": [dict(r) for r in rows]
-    })
+    return jsonify({"ok": True, "items": [dict(r) for r in rows]})
 
 
 @app.post("/api/ai/resolve")
 def api_ai_resolve():
     data = request.get_json(force=True) or {}
     command = (data.get("command") or "").strip()
-
     if not command:
         return jsonify({"ok": False, "msg": "command gerekli"}), 400
-
-    result = resolve_ai_command(command)
-    return jsonify({"ok": True, "result": result})
+    return jsonify({"ok": True, "result": resolve_ai_command(command)})
 
 
 @app.post("/api/ai/learn")
 def api_ai_learn():
     data = request.get_json(force=True) or {}
-
     phrase = (data.get("phrase") or "").strip()
     intent = (data.get("intent") or "").strip()
     pattern = (data.get("pattern") or "").strip()
@@ -1477,40 +1420,38 @@ def api_ai_learn():
         return jsonify({"ok": False, "msg": "phrase gerekli"}), 400
     if intent not in AI_INTENTS:
         return jsonify({"ok": False, "msg": "intent geçersiz"}), 400
-
     if not pattern:
         pattern = AI_INTENTS[intent]["pattern"]
 
     phrase_norm = normalize_ai_text(phrase)
     skeleton = ai_make_skeleton(phrase)
-
     db = get_db()
-    row = db.execute(
-        "SELECT id FROM learned_commands WHERE phrase_norm=?",
-        (phrase_norm,)
-    ).fetchone()
 
-    if row:
-        db.execute(
-            """
-            UPDATE learned_commands
-            SET phrase=?, skeleton=?, intent=?, pattern=?, updated_at=datetime('now','localtime')
-            WHERE id=?
-            """,
-            (phrase, skeleton, intent, pattern, row["id"])
-        )
-        item_id = row["id"]
-    else:
-        cur = db.execute(
-            """
-            INSERT INTO learned_commands(phrase, phrase_norm, skeleton, intent, pattern)
-            VALUES(?,?,?,?,?)
-            """,
-            (phrase, phrase_norm, skeleton, intent, pattern)
-        )
-        item_id = cur.lastrowid
+    row = db.execute("SELECT id FROM learned_commands WHERE phrase_norm=?", (phrase_norm,)).fetchone()
 
-    db.commit()
+    try:
+        if row:
+            db.execute(
+                """
+                UPDATE learned_commands
+                SET phrase=?, skeleton=?, intent=?, pattern=?, updated_at=datetime('now','localtime')
+                WHERE id=?
+                """,
+                (phrase, skeleton, intent, pattern, row["id"]),
+            )
+            item_id = row["id"]
+        else:
+            cur = db.execute(
+                """
+                INSERT INTO learned_commands(phrase, phrase_norm, skeleton, intent, pattern)
+                VALUES(?,?,?,?,?)
+                """,
+                (phrase, phrase_norm, skeleton, intent, pattern),
+            )
+            item_id = cur.lastrowid
+        db.commit()
+    except sqlite3.IntegrityError:
+        return jsonify({"ok": False, "msg": "Bu ifade zaten başka bir kayıtla çakışıyor"}), 409
 
     saved = db.execute(
         """
@@ -1518,7 +1459,7 @@ def api_ai_learn():
         FROM learned_commands
         WHERE id=?
         """,
-        (item_id,)
+        (item_id,),
     ).fetchone()
 
     return jsonify({"ok": True, "item": dict(saved)})
@@ -1527,7 +1468,6 @@ def api_ai_learn():
 @app.put("/api/ai/learned/<int:item_id>")
 def api_ai_learned_update(item_id):
     data = request.get_json(force=True) or {}
-
     phrase = (data.get("phrase") or "").strip()
     intent = (data.get("intent") or "").strip()
     pattern = (data.get("pattern") or "").strip()
@@ -1536,23 +1476,25 @@ def api_ai_learned_update(item_id):
         return jsonify({"ok": False, "msg": "phrase gerekli"}), 400
     if intent not in AI_INTENTS:
         return jsonify({"ok": False, "msg": "intent geçersiz"}), 400
-
     if not pattern:
         pattern = AI_INTENTS[intent]["pattern"]
 
     phrase_norm = normalize_ai_text(phrase)
     skeleton = ai_make_skeleton(phrase)
-
     db = get_db()
-    db.execute(
-        """
-        UPDATE learned_commands
-        SET phrase=?, phrase_norm=?, skeleton=?, intent=?, pattern=?, updated_at=datetime('now','localtime')
-        WHERE id=?
-        """,
-        (phrase, phrase_norm, skeleton, intent, pattern, item_id)
-    )
-    db.commit()
+
+    try:
+        db.execute(
+            """
+            UPDATE learned_commands
+            SET phrase=?, phrase_norm=?, skeleton=?, intent=?, pattern=?, updated_at=datetime('now','localtime')
+            WHERE id=?
+            """,
+            (phrase, phrase_norm, skeleton, intent, pattern, item_id),
+        )
+        db.commit()
+    except sqlite3.IntegrityError:
+        return jsonify({"ok": False, "msg": "Bu ifade başka bir kayıtla çakışıyor"}), 409
 
     row = db.execute(
         """
@@ -1560,7 +1502,7 @@ def api_ai_learned_update(item_id):
         FROM learned_commands
         WHERE id=?
         """,
-        (item_id,)
+        (item_id,),
     ).fetchone()
 
     if not row:
@@ -1576,8 +1518,9 @@ def api_ai_learned_delete(item_id):
     db.commit()
     return jsonify({"ok": True, "id": item_id})
 
+
 # =========================================================
-# API: seats
+# Koltuk API
 # =========================================================
 
 @app.route("/api/seats/list")
@@ -1602,7 +1545,7 @@ def api_seats_list():
         WHERE trip_id=?
         ORDER BY seat_no
         """,
-        (tid,)
+        (tid,),
     ).fetchall()
 
     return jsonify({"ok": True, "items": [dict(r) for r in rows]})
@@ -1620,7 +1563,6 @@ def api_seat():
         seat_no = parse_int(request.args.get("seat_no"), None)
         if seat_no is None:
             return jsonify({"ok": False, "msg": "seat_no geçersiz"}), 400
-
         db.execute("DELETE FROM seats WHERE trip_id=? AND seat_no=?", (tid, seat_no))
         db.commit()
         return jsonify({"ok": True})
@@ -1640,7 +1582,7 @@ def api_seat():
 
     ticket_type = norm_ticket_type(data.get("ticket_type"))
     payment = norm_payment(data.get("payment"))
-    amount = parse_float(data.get("amount"), 0.0)
+    amount = parse_float(data.get("amount"), 0.0) or 0.0
     gender = norm_gender(data.get("gender"))
     pair_ok = bool(data.get("pair_ok"))
     service = norm_bool(data.get("service"))
@@ -1675,11 +1617,10 @@ def api_seat():
         (
             tid, seat_no, from_stop, to_stop, ticket_type, payment, amount,
             gender, 1 if pair_ok else 0, service, service_note,
-            passenger_name, passenger_phone
-        )
+            passenger_name, passenger_phone,
+        ),
     )
     db.commit()
-
     return jsonify({"ok": True})
 
 
@@ -1695,16 +1636,12 @@ def api_seats_bulk():
         raw = (request.args.get("seats") or "").strip()
         if not raw:
             return jsonify({"ok": False, "msg": "seats gerekli"}), 400
-
         try:
             seat_list = [int(x) for x in raw.split(",") if x.strip()]
         except Exception:
             return jsonify({"ok": False, "msg": "seats geçersiz"}), 400
 
-        db.executemany(
-            "DELETE FROM seats WHERE trip_id=? AND seat_no=?",
-            [(tid, s) for s in seat_list]
-        )
+        db.executemany("DELETE FROM seats WHERE trip_id=? AND seat_no=?", [(tid, s) for s in seat_list])
         db.commit()
         return jsonify({"ok": True, "deleted": seat_list})
 
@@ -1723,7 +1660,7 @@ def api_seats_bulk():
 
     ticket_type = norm_ticket_type(data.get("ticket_type"))
     payment = norm_payment(data.get("payment") or "nakit")
-    amount = parse_float(data.get("amount"), 0.0)
+    amount = parse_float(data.get("amount"), 0.0) or 0.0
     service = norm_bool(data.get("service"))
     service_note = (data.get("service_note") or "").strip()
 
@@ -1738,7 +1675,7 @@ def api_seats_bulk():
             row_to = (item.get("stop") or item.get("to_stop") or item.get("to") or to_stop or "").strip()
             row_ticket = norm_ticket_type(item.get("ticket_type") or ticket_type)
             row_payment = norm_payment(item.get("payment") or payment)
-            row_amount = parse_float(item.get("amount"), amount)
+            row_amount = parse_float(item.get("amount"), amount) or 0.0
             row_gender = norm_gender(item.get("gender"))
             row_pair_ok = bool(item.get("pair_ok"))
             row_service = norm_bool(item.get("service"))
@@ -1755,16 +1692,15 @@ def api_seats_bulk():
 
             rows.append((
                 tid, seat_no, row_from, row_to, row_ticket, row_payment, row_amount,
-                row_gender, 1 if row_pair_ok else 0, row_service, row_service_note, "", ""
+                row_gender, 1 if row_pair_ok else 0, row_service, row_service_note, "", "",
             ))
         else:
             seat_no = parse_int(item, None)
             if seat_no is None:
                 return jsonify({"ok": False, "msg": "seat_no geçersiz"}), 400
-
             rows.append((
                 tid, seat_no, from_stop, to_stop, ticket_type, payment, amount,
-                "", 0, service, service_note, "", ""
+                "", 0, service, service_note, "", "",
             ))
 
     db.executemany(
@@ -1787,10 +1723,9 @@ def api_seats_bulk():
             passenger_name=excluded.passenger_name,
             passenger_phone=excluded.passenger_phone
         """,
-        rows
+        rows,
     )
     db.commit()
-
     return jsonify({"ok": True, "count": len(rows)})
 
 
@@ -1811,13 +1746,10 @@ def api_seats_offload():
         return jsonify({"ok": False, "msg": "seats geçersiz"}), 400
 
     db = get_db()
-    db.executemany(
-        "DELETE FROM seats WHERE trip_id=? AND seat_no=?",
-        [(tid, s) for s in seat_list]
-    )
+    db.executemany("DELETE FROM seats WHERE trip_id=? AND seat_no=?", [(tid, s) for s in seat_list])
     db.commit()
-
     return jsonify({"ok": True, "deleted": seat_list})
+
 
 @app.post("/api/seats/service")
 def api_seats_service():
@@ -1845,7 +1777,7 @@ def api_seats_service():
         SET service=?, service_note=?
         WHERE trip_id=? AND seat_no=?
         """,
-        [(service, service_note, tid, s) for s in seat_list]
+        [(service, service_note, tid, s) for s in seat_list],
     )
     db.commit()
 
@@ -1853,22 +1785,19 @@ def api_seats_service():
         "ok": True,
         "updated": seat_list,
         "service": service,
-        "service_note": service_note
+        "service_note": service_note,
     })
 
+
 # =========================================================
-# Stops / coords
+# Durak / koordinat API
 # =========================================================
 
 @app.route("/api/stops")
 def api_stops():
-    tid = get_active_trip()
-    if not tid:
-        return jsonify({"ok": False, "msg": "Aktif sefer yok", "stops": []}), 400
-
-    trip = get_db().execute("SELECT route FROM trips WHERE id=?", (tid,)).fetchone()
+    trip = get_active_trip_row()
     if not trip:
-        return jsonify({"ok": False, "msg": "Sefer bulunamadı", "stops": []}), 404
+        return jsonify({"ok": False, "msg": "Aktif sefer yok", "stops": []}), 400
 
     route_name = trip["route"]
     return jsonify({"ok": True, "route": route_name, "stops": get_stops(route_name)})
@@ -1876,26 +1805,22 @@ def api_stops():
 
 @app.route("/api/coords", methods=["GET", "POST", "DELETE"])
 def api_coords():
-    tid = get_active_trip()
-    if not tid:
+    trip = get_active_trip_row()
+    if not trip:
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
 
     db = get_db()
-    trip = db.execute("SELECT route FROM trips WHERE id=?", (tid,)).fetchone()
-    if not trip:
-        return jsonify({"ok": False, "msg": "Sefer bulunamadı"}), 404
-
     route_name = trip["route"]
 
     if request.method == "GET":
         rows = db.execute(
             "SELECT stop, lat, lng FROM route_stop_coords WHERE route=? ORDER BY stop",
-            (route_name,)
+            (route_name,),
         ).fetchall()
         return jsonify({
             "ok": True,
             "route": route_name,
-            "items": [{"stop": r["stop"], "lat": float(r["lat"]), "lng": float(r["lng"])} for r in rows]
+            "items": [{"stop": r["stop"], "lat": float(r["lat"]), "lng": float(r["lng"])} for r in rows],
         })
 
     if request.method == "POST":
@@ -1919,7 +1844,7 @@ def api_coords():
                 lat=excluded.lat,
                 lng=excluded.lng
             """,
-            (route_name, stop, lat, lng)
+            (route_name, stop, lat, lng),
         )
         db.commit()
         return jsonify({"ok": True})
@@ -1934,7 +1859,7 @@ def api_coords():
 
 
 # =========================================================
-# Walk-on / Standing
+# Ayakta / walk-on API
 # =========================================================
 
 @app.route("/api/walkon", methods=["GET", "POST", "DELETE"])
@@ -1949,18 +1874,11 @@ def api_walkon():
         if request.args.get("aggregate"):
             row = db.execute(
                 "SELECT COALESCE(SUM(total_amount),0) AS total_amount, COALESCE(SUM(pax),0) AS pax FROM walk_on_sales WHERE trip_id=?",
-                (tid,)
+                (tid,),
             ).fetchone()
-            return jsonify({
-                "ok": True,
-                "pax": int(row["pax"]),
-                "total_amount": float(row["total_amount"])
-            })
+            return jsonify({"ok": True, "pax": int(row["pax"]), "total_amount": float(row["total_amount"])})
 
-        rows = db.execute(
-            "SELECT * FROM walk_on_sales WHERE trip_id=? ORDER BY id DESC",
-            (tid,)
-        ).fetchall()
+        rows = db.execute("SELECT * FROM walk_on_sales WHERE trip_id=? ORDER BY id DESC", (tid,)).fetchall()
         return jsonify({"ok": True, "items": [dict(r) for r in rows]})
 
     if request.method == "POST":
@@ -1975,9 +1893,9 @@ def api_walkon():
         if not validate_stop_for_active_trip(to_stop):
             return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
 
-        pax = parse_int(data.get("pax") or data.get("count"), 1)
-        unit_price = parse_float(data.get("unit_price") or data.get("price"), 0.0)
-        total_amount = parse_float(data.get("total_amount"), pax * unit_price)
+        pax = parse_int(data.get("pax") or data.get("count"), 1) or 1
+        unit_price = parse_float(data.get("unit_price") or data.get("price"), 0.0) or 0.0
+        total_amount = parse_float(data.get("total_amount"), pax * unit_price) or 0.0
         payment = norm_payment(data.get("payment"))
         note = (data.get("note") or "").strip()
 
@@ -1986,7 +1904,7 @@ def api_walkon():
             INSERT INTO walk_on_sales(trip_id, from_stop, to_stop, pax, unit_price, total_amount, payment, note)
             VALUES(?,?,?,?,?,?,?,?)
             """,
-            (tid, from_stop, to_stop, pax, unit_price, total_amount, payment, note)
+            (tid, from_stop, to_stop, pax, unit_price, total_amount, payment, note),
         )
         db.commit()
         new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
@@ -2000,15 +1918,12 @@ def api_walkon():
 
     rows = db.execute(
         "SELECT id FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
-        (tid, to_param)
+        (tid, to_param),
     ).fetchall()
     ids = [r["id"] for r in rows]
 
     if ids:
-        db.executemany(
-            "DELETE FROM walk_on_sales WHERE trip_id=? AND id=?",
-            [(tid, i) for i in ids]
-        )
+        db.executemany("DELETE FROM walk_on_sales WHERE trip_id=? AND id=?", [(tid, i) for i in ids])
         db.commit()
 
     return jsonify({"ok": True, "deleted": ids, "count": len(ids)})
@@ -2025,18 +1940,19 @@ def api_standing():
     if request.method == "GET":
         row = db.execute(
             "SELECT COALESCE(SUM(total_amount),0) AS total_amount, COALESCE(SUM(pax),0) AS pax FROM walk_on_sales WHERE trip_id=?",
-            (tid,)
+            (tid,),
         ).fetchone()
         return jsonify({
             "ok": True,
             "count": int(row["pax"] or 0),
-            "revenue": float(row["total_amount"] or 0.0)
+            "revenue": float(row["total_amount"] or 0.0),
         })
 
     if request.method == "POST":
         data = request.get_json(force=True) or {}
         from_stop = (data.get("from_stop") or data.get("from") or "").strip()
         to_stop = (data.get("to_stop") or data.get("to") or "").strip()
+
         if not from_stop or not to_stop:
             return jsonify({"ok": False, "msg": "from ve to gerekli"}), 400
         if not validate_stop_for_active_trip(from_stop):
@@ -2044,8 +1960,8 @@ def api_standing():
         if not validate_stop_for_active_trip(to_stop):
             return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
 
-        pax = parse_int(data.get("pax") or data.get("count"), 1)
-        unit_price = parse_float(data.get("unit_price") or data.get("price"), 0.0)
+        pax = parse_int(data.get("pax") or data.get("count"), 1) or 1
+        unit_price = parse_float(data.get("unit_price") or data.get("price"), 0.0) or 0.0
         total_amount = pax * unit_price
         payment = norm_payment(data.get("payment"))
         note = (data.get("note") or "").strip()
@@ -2055,10 +1971,9 @@ def api_standing():
             INSERT INTO walk_on_sales(trip_id, from_stop, to_stop, pax, unit_price, total_amount, payment, note)
             VALUES(?,?,?,?,?,?,?,?)
             """,
-            (tid, from_stop, to_stop, pax, unit_price, total_amount, payment, note)
+            (tid, from_stop, to_stop, pax, unit_price, total_amount, payment, note),
         )
         db.commit()
-
         return jsonify({"ok": True, "pax": pax, "total_amount": total_amount})
 
     to_param = (request.args.get("to_stop") or request.args.get("to") or "").strip()
@@ -2069,15 +1984,12 @@ def api_standing():
 
     rows = db.execute(
         "SELECT id FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
-        (tid, to_param)
+        (tid, to_param),
     ).fetchall()
     ids = [r["id"] for r in rows]
 
     if ids:
-        db.executemany(
-            "DELETE FROM walk_on_sales WHERE trip_id=? AND id=?",
-            [(tid, i) for i in ids]
-        )
+        db.executemany("DELETE FROM walk_on_sales WHERE trip_id=? AND id=?", [(tid, i) for i in ids])
         db.commit()
 
     return jsonify({"ok": True, "deleted": ids, "count": len(ids)})
@@ -2096,7 +2008,7 @@ def api_standing_list():
         WHERE trip_id=?
         ORDER BY id DESC
         """,
-        (tid,)
+        (tid,),
     ).fetchall()
 
     items = [{
@@ -2114,7 +2026,7 @@ def api_standing_list():
 
 
 # =========================================================
-# Stats
+# İstatistik API
 # =========================================================
 
 @app.route("/api/stats")
@@ -2133,12 +2045,8 @@ def api_stats():
         FROM seats
         WHERE trip_id=?
         """,
-        (tid,)
+        (tid,),
     ).fetchone()
-
-    seats_reserved = int(seat_row["c"])
-    seats_revenue = float(seat_row["s"])
-    service_count = int(seat_row["svc"])
 
     walk_row = db.execute(
         """
@@ -2147,45 +2055,45 @@ def api_stats():
         FROM walk_on_sales
         WHERE trip_id=?
         """,
-        (tid,)
+        (tid,),
     ).fetchone()
-
-    walkon_pax = int(walk_row["pax"])
-    walkon_revenue = float(walk_row["tot"])
 
     by_pay = {}
     for r in db.execute(
         "SELECT payment, COALESCE(SUM(amount),0) AS s FROM seats WHERE trip_id=? GROUP BY payment",
-        (tid,)
+        (tid,),
     ).fetchall():
         by_pay[r["payment"]] = by_pay.get(r["payment"], 0.0) + float(r["s"])
 
     for r in db.execute(
         "SELECT payment, COALESCE(SUM(total_amount),0) AS s FROM walk_on_sales WHERE trip_id=? GROUP BY payment",
-        (tid,)
+        (tid,),
     ).fetchall():
         by_pay[r["payment"]] = by_pay.get(r["payment"], 0.0) + float(r["s"])
 
+    seats_revenue = float(seat_row["s"] or 0)
+    walkon_revenue = float(walk_row["tot"] or 0)
+
     return jsonify({
         "ok": True,
-        "seats_reserved": seats_reserved,
+        "seats_reserved": int(seat_row["c"] or 0),
         "seats_revenue": seats_revenue,
-        "walkon_pax": walkon_pax,
+        "walkon_pax": int(walk_row["pax"] or 0),
         "walkon_revenue": walkon_revenue,
         "total_revenue": seats_revenue + walkon_revenue,
         "by_payment": by_pay,
-        "service_count": service_count,
+        "service_count": int(seat_row["svc"] or 0),
     })
 
 
 # =========================================================
-# Stop logs
+# Stop log API
 # =========================================================
 
 def seats_count_for_stop(tid: int, stop_name: str) -> int:
     row = get_db().execute(
         "SELECT COUNT(*) AS c FROM seats WHERE trip_id=? AND to_stop=?",
-        (tid, stop_name)
+        (tid, stop_name),
     ).fetchone()
     return int(row["c"] or 0)
 
@@ -2206,7 +2114,7 @@ def api_stoplog():
             WHERE trip_id=?
             ORDER BY ts DESC, id DESC
             """,
-            (tid,)
+            (tid,),
         ).fetchall()
 
         items = []
@@ -2215,6 +2123,7 @@ def api_stoplog():
                 meta = json.loads(r["meta_json"]) if r["meta_json"] else None
             except Exception:
                 meta = None
+
             items.append({
                 "id": r["id"],
                 "trip_id": r["trip_id"],
@@ -2257,7 +2166,7 @@ def api_stoplog():
         INSERT INTO stop_logs(trip_id, stop_name, event, distance_km, seats_for_stop, meta_json)
         VALUES(?,?,?,?,?,?)
         """,
-        (tid, stop_name, event, distance_km, seats_for_stop, meta_json)
+        (tid, stop_name, event, distance_km, seats_for_stop, meta_json),
     )
     db.commit()
 
@@ -2301,7 +2210,6 @@ def api_events():
         args.append(d2)
 
     sql += " ORDER BY l.ts DESC, l.id DESC LIMIT 500"
-
     rows = get_db().execute(sql, args).fetchall()
 
     items = []
@@ -2328,7 +2236,7 @@ def api_events():
 
 
 # =========================================================
-# Reports
+# Raporlar
 # =========================================================
 
 @app.route("/raporlar")
@@ -2367,7 +2275,7 @@ def api_report_seat_stats():
         GROUP BY s.seat_no
         ORDER BY s.seat_no
         """,
-        args
+        args,
     ).fetchall()
 
     per_seat = [{
@@ -2386,7 +2294,7 @@ def api_report_seat_stats():
         JOIN trips t ON t.id=s.trip_id
         WHERE {sql_where}
         """,
-        args
+        args,
     ).fetchone()
 
     walk_tot = db.execute(
@@ -2396,7 +2304,7 @@ def api_report_seat_stats():
         JOIN trips t ON t.id=w.trip_id
         WHERE {sql_where}
         """,
-        args
+        args,
     ).fetchone()
 
     top_seat = max(per_seat, key=lambda x: (x["times"], x["revenue"])) if per_seat else None
@@ -2418,7 +2326,7 @@ def api_report_seat_stats():
 
 
 # =========================================================
-# Consignments
+# Emanetler
 # =========================================================
 
 @app.route("/emanetler")
@@ -2431,7 +2339,7 @@ def consignments_page():
     trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
     rows = db.execute(
         "SELECT * FROM consignments WHERE trip_id=? ORDER BY created_at DESC",
-        (tid,)
+        (tid,),
     ).fetchall()
 
     return render_template(
@@ -2453,7 +2361,7 @@ def api_consignments():
     if request.method == "GET":
         rows = db.execute(
             "SELECT * FROM consignments WHERE trip_id=? ORDER BY created_at DESC",
-            (tid,)
+            (tid,),
         ).fetchall()
         return jsonify({"ok": True, "items": [dict(r) for r in rows]})
 
@@ -2468,7 +2376,7 @@ def api_consignments():
     from_stop = (data.get("from_stop") or "").strip()
     to_stop = (data.get("to_stop") or "").strip()
     payment = norm_payment(data.get("payment"))
-    amount = parse_float(data.get("amount"), 0.0)
+    amount = parse_float(data.get("amount"), 0.0) or 0.0
 
     if not item_name:
         return jsonify({"ok": False, "msg": "Eşya adı gerekli"}), 400
@@ -2487,12 +2395,11 @@ def api_consignments():
         """,
         (
             tid, code, item_name, item_type, from_name, from_phone,
-            to_name, to_phone, from_stop, to_stop, amount, payment
-        )
+            to_name, to_phone, from_stop, to_stop, amount, payment,
+        ),
     )
     db.commit()
     new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
-
     return jsonify({"ok": True, "id": new_id, "code": code})
 
 
@@ -2503,7 +2410,6 @@ def api_parcels():
         return jsonify({"ok": False, "msg": "Aktif sefer yok", "items": []}), 400
 
     status = (request.args.get("status") or "bekliyor").strip().lower()
-
     rows = get_db().execute(
         """
         SELECT COALESCE(to_stop,'') AS to_stop, COUNT(*) AS cnt
@@ -2511,7 +2417,7 @@ def api_parcels():
         WHERE trip_id=? AND status=?
         GROUP BY to_stop
         """,
-        (tid, status)
+        (tid, status),
     ).fetchall()
 
     items = [{"to": r["to_stop"], "count": int(r["cnt"])} for r in rows if r["to_stop"]]
@@ -2534,7 +2440,7 @@ def api_consignment_photos(cid):
             WHERE consignment_id=?
             ORDER BY id DESC
             """,
-            (cid,)
+            (cid,),
         ).fetchall()
 
         items = [{
@@ -2551,6 +2457,7 @@ def api_consignment_photos(cid):
 
     role = (request.form.get("role") or "").strip().lower()
     file = request.files.get("file")
+
     if not file or not file.filename:
         return jsonify({"ok": False, "msg": "Dosya gerekli"}), 400
     if not allowed_file(file.filename):
@@ -2558,10 +2465,7 @@ def api_consignment_photos(cid):
     if file.mimetype not in ALLOWED_IMAGE_MIMES:
         return jsonify({"ok": False, "msg": "Desteklenmeyen MIME"}), 400
 
-    row = db.execute(
-        "SELECT id FROM consignments WHERE id=? AND trip_id=?",
-        (cid, tid)
-    ).fetchone()
+    row = db.execute("SELECT id FROM consignments WHERE id=? AND trip_id=?", (cid, tid)).fetchone()
     if not row:
         return jsonify({"ok": False, "msg": "Emanet bulunamadı"}), 404
 
@@ -2579,7 +2483,7 @@ def api_consignment_photos(cid):
         INSERT INTO consignment_photos(consignment_id, role, file_path, mime, size_bytes)
         VALUES(?,?,?,?,?)
         """,
-        (cid, role, fname, file.mimetype, size_bytes)
+        (cid, role, fname, file.mimetype, size_bytes),
     )
     db.commit()
 
@@ -2598,11 +2502,7 @@ def api_consignment_delete(cid):
         return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
 
     db = get_db()
-
-    photos = db.execute(
-        "SELECT file_path FROM consignment_photos WHERE consignment_id=?",
-        (cid,)
-    ).fetchall()
+    photos = db.execute("SELECT file_path FROM consignment_photos WHERE consignment_id=?", (cid,)).fetchall()
 
     for r in photos:
         try:
@@ -2613,7 +2513,6 @@ def api_consignment_delete(cid):
     db.execute("DELETE FROM consignment_photos WHERE consignment_id=?", (cid,))
     db.execute("DELETE FROM consignments WHERE id=? AND trip_id=?", (cid, tid))
     db.commit()
-
     return jsonify({"ok": True})
 
 
@@ -2628,7 +2527,7 @@ def serve_uploaded(filename):
 
 
 # =========================================================
-# Bags meta + clear
+# Bagaj meta + clear
 # =========================================================
 
 @app.get("/api/bags/meta")
@@ -2644,7 +2543,7 @@ def api_bags_meta():
             "right": 0,
             "left_front": 0,
             "left_back": 0,
-            "eyes": []
+            "eyes": [],
         }), 400
 
     d = bag_root() / safe(trip_code) / safe(seat_no)
@@ -2658,7 +2557,6 @@ def api_bags_meta():
             low = p.name.lower()
             if ".thumb." in low or not low.endswith(exts):
                 continue
-
             if p.name.startswith("R_"):
                 right += 1
             elif p.name.startswith("LF_"):
@@ -2683,7 +2581,7 @@ def api_bags_meta():
         "right": right,
         "left_front": left_front,
         "left_back": left_back,
-        "eyes": eyes
+        "eyes": eyes,
     })
 
 
@@ -2706,7 +2604,6 @@ def bags_clear_alias():
                     deleted += 1
             except Exception:
                 pass
-
         try:
             d.rmdir()
         except Exception:
@@ -2716,7 +2613,7 @@ def bags_clear_alias():
 
 
 # =========================================================
-# End trip / health
+# Sefer bitir / health
 # =========================================================
 
 @app.route("/end-trip", methods=["POST"])
@@ -2749,4 +2646,5 @@ if __name__ == "__main__":
     with app.app_context():
         ensure_schema()
         ensure_upload_dir()
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")), debug=DEBUG)
+
+    app.run(host="0.0.0.0", port=PORT, debug=DEBUG)

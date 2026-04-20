@@ -1,353 +1,842 @@
 {% extends "base.html" %}
 {% block content %}
+
 <link rel="stylesheet" href="/static/style.css">
 
 <style>
   :root{
-    --bg:#11161b;
-    --bg-soft:#182028;
-    --card:#1c252d;
-    --card-2:#222d36;
-    --line:#33414d;
-    --text:#edf3f8;
-    --muted:#9fb0be;
-    --brand:#1f8f48;
-    --brand-2:#27b35a;
-    --primary:#2f6df6;
+    --bg:#0b1220;
+    --bg-soft:#111a2b;
+    --card:#182230;
+    --card-2:#202b3b;
+    --line:rgba(255,255,255,.08);
+    --line-2:rgba(255,255,255,.05);
+    --text:#edf3fb;
+    --muted:#9fb0c4;
+    --brand:#16a34a;
+    --brand-2:#22c55e;
+    --primary:#2563eb;
     --accent:#0ea5e9;
     --warn:#f59e0b;
     --danger:#ef4444;
-    --pink:#ec4899;
-    --shadow:0 16px 34px rgba(0,0,0,.38);
-    --radius:18px;
+    --purple:#7c3aed;
+    --ok:#22c55e;
+    --shadow:0 20px 50px rgba(0,0,0,.32);
+    --radius:22px;
+    --radius-sm:16px;
+    --topbar-h:74px;
+    --seat-w:64px;
+    --seat-h:64px;
+    --seat-gap-y:20px;
+    --seat-gap-x:18px;
   }
 
-  *{box-sizing:border-box}
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
   body{
-    margin:0;
-    background:
-      radial-gradient(circle at top left, rgba(47,109,246,.10), transparent 28%),
-      radial-gradient(circle at top right, rgba(14,165,233,.10), transparent 26%),
-      linear-gradient(180deg,#0f1418 0%, #141b22 100%);
     color:var(--text);
-  }
-
-  .page{
-    width:min(1180px, 96vw);
-    margin:16px auto 40px;
+    font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(37,99,235,.18), transparent 22%),
+      radial-gradient(circle at top right, rgba(14,165,233,.14), transparent 22%),
+      linear-gradient(180deg, #08111f 0%, #0d1728 100%);
   }
 
   .glass{
-    background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
-    border:1px solid rgba(255,255,255,.08);
+    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+    border:1px solid var(--line);
     box-shadow:var(--shadow);
-    backdrop-filter:blur(8px);
+    backdrop-filter:blur(10px);
   }
 
-  .hero{
+  .seats-shell{
+    width:min(1480px, 100%);
+    margin:0 auto;
+    padding:10px 10px 28px;
+  }
+
+  .topbar{
+    position:sticky;
+    top:8px;
+    z-index:1200;
     display:grid;
-    grid-template-columns:1.25fr .95fr;
-    gap:14px;
-    margin-bottom:14px;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:10px;
+    align-items:start;
+    min-height:var(--topbar-h);
+    padding:12px;
+    border-radius:24px;
   }
-
-  .trip-card{
-    border-radius:22px;
-    padding:18px;
-  }
-
-  .trip-top{
+  .route-meta{
+    min-width:0;
     display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:14px;
-    margin-bottom:10px;
+    flex-direction:column;
+    gap:6px;
   }
 
-  .trip-title{
-    font-size:22px;
+  .route-title{
+    font-size:clamp(22px, 4vw, 34px);
     font-weight:900;
-    line-height:1.15;
-    letter-spacing:.2px;
+    line-height:1.04;
+    letter-spacing:-.02em;
   }
 
-  .trip-sub{
+  .route-sub{
     color:var(--muted);
-    margin-top:6px;
-    font-size:14px;
+    font-size:13px;
+    line-height:1.35;
   }
 
-  .trip-badges{
+  .route-live-row{
     display:flex;
     flex-wrap:wrap;
     gap:8px;
-    margin-top:12px;
   }
 
-  .chip{
+  .mini-chip{
     display:inline-flex;
     align-items:center;
     gap:8px;
+    min-height:36px;
     padding:8px 12px;
     border-radius:999px;
     background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.08);
+    border:1px solid var(--line);
     color:#fff;
     font-size:13px;
-    font-weight:700;
+    font-weight:800;
+    line-height:1;
+    white-space:nowrap;
   }
 
-  .hero-actions{
-    display:flex;
+  .mini-chip b{ font-weight:900; }
+
+  .top-actions{
+    display:grid;
+    grid-template-columns:repeat(5, 48px);
     gap:10px;
-    flex-wrap:wrap;
+    align-content:start;
   }
 
   .icon-btn, .btn{
     border:none;
     cursor:pointer;
-    transition:.18s ease;
     color:#fff;
-    font-weight:800;
+    font-weight:900;
+    transition:.16s ease;
+    text-decoration:none;
+  }
+
+  .icon-btn:hover, .btn:hover, .seat:hover, .fab:hover, .tab-btn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.04);
   }
 
   .icon-btn{
     width:48px;
     height:48px;
-    border-radius:50%;
-    background:rgba(255,255,255,.07);
-    border:1px solid rgba(255,255,255,.10);
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:20px;
-    box-shadow:0 8px 20px rgba(0,0,0,.25);
-  }
-  .icon-btn:hover,.btn:hover{transform:translateY(-1px); filter:brightness(1.06)}
-
-  .btn{
-    border-radius:14px;
-    padding:11px 14px;
-    background:var(--brand);
+    border-radius:50%;
+    background:rgba(255,255,255,.06);
+    border:1px solid var(--line);
+    font-size:21px;
     box-shadow:0 10px 24px rgba(0,0,0,.25);
   }
-  .btn.primary{background:var(--primary)}
-  .btn.accent{background:var(--accent)}
-  .btn.warn{background:var(--warn); color:#272727}
-  .btn.danger{background:var(--danger)}
-  .btn.dark{background:#313f4b}
-  .btn.ghost{
-    background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.09);
+
+  .status-row{
+    display:grid;
+    grid-template-columns:repeat(6, minmax(0,1fr));
+    gap:10px;
+    margin:12px 0;
   }
 
-  .ops-card{
-    border-radius:22px;
-    padding:16px;
+  .status-pill{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    min-height:58px;
+    padding:10px 14px;
+    border-radius:18px;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    box-shadow:0 14px 30px rgba(0,0,0,.18);
+    overflow:hidden;
+  }
+
+  .status-pill .k{
+    color:var(--muted);
+    font-size:12px;
+    font-weight:700;
+    line-height:1.1;
+  }
+
+  .status-pill .v{
+    font-size:22px;
+    font-weight:900;
+    line-height:1;
+    text-align:right;
+    white-space:nowrap;
+  }
+
+  .status-pill.total{ background:linear-gradient(135deg, rgba(37,99,235,.18), rgba(37,99,235,.07)); }
+  .status-pill.empty{ background:linear-gradient(135deg, rgba(34,197,94,.16), rgba(34,197,94,.06)); }
+  .status-pill.standing{ background:linear-gradient(135deg, rgba(239,68,68,.16), rgba(239,68,68,.06)); cursor:pointer; }
+  .status-pill.cash{ background:linear-gradient(135deg, rgba(124,58,237,.17), rgba(124,58,237,.06)); }
+  .status-pill.service{ background:linear-gradient(135deg, rgba(14,165,233,.18), rgba(14,165,233,.06)); }
+  .status-pill.parcel{ background:linear-gradient(135deg, rgba(245,158,11,.16), rgba(245,158,11,.06)); }
+
+  .pulse{
+    animation:pulseGlow 1.7s ease-in-out infinite;
+  }
+
+  @keyframes pulseGlow{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.012); }
+  }
+
+  .layout{
     display:grid;
-    grid-template-rows:auto auto auto;
     gap:12px;
   }
 
-  .top-mini{
+  .board-card, .panel-card, .modal, .sheet-modal{
+    border-radius:24px;
+  }
+
+  .board-card{
+    position:relative;
+    padding:14px 14px 18px;
+    overflow:hidden;
+  }
+
+  .board-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+
+  .board-title{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .board-title h2{
+    margin:0;
+    font-size:30px;
+    line-height:1;
+    letter-spacing:-.02em;
+    font-weight:900;
+  }
+
+  .board-title small{
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:flex-end;
+  }
+
+  .legend .mini-chip{
+    min-height:34px;
+    padding:7px 11px;
+    font-size:12px;
+  }
+
+  .board-head-right{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:12px;
+    min-width:220px;
+  }
+
+  .voice-command-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    min-height:54px;
+    padding:12px 18px;
+    border:none;
+    border-radius:18px;
+    cursor:pointer;
+    color:#fff;
+    font-size:18px;
+    font-weight:900;
+    background:linear-gradient(180deg, #8b5cf6, #6d28d9);
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow:
+    0 12px 26px rgba(0,0,0,.28),
+    0 0 0 1px rgba(255,255,255,.06) inset;
+    transition:.16s ease;
+  }
+
+  .voice-command-btn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.05);
+  }
+
+  .voice-command-btn.listening{
+    animation:micPulse 1s ease-in-out infinite;
+    background:linear-gradient(180deg, #ef4444, #b91c1c);
+  }
+  .selected-stop-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    min-height:38px;
+    padding:8px 12px;
+    border-radius:999px;
+    background:rgba(255,255,255,.055);
+    border:1px solid var(--line);
+    color:#fff;
+    font-weight:900;
+    font-size:13px;
+  }
+
+  .board-stage{
+    position:relative;
+    border-radius:22px;
+    padding:14px 10px 16px;
+    background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.018));
+    border:1px solid var(--line-2);
+    overflow:auto;
+    overflow-x:auto;
+    overflow-y:visible;
+  }
+  .deck-wrap{
+    position:relative;
+    width:max-content;
+    min-width:100%;
+    margin:0 auto;
+  }
+
+  .deck{
+    position:relative;
+    display:grid;
+    grid-template-columns:var(--seat-w) var(--seat-w) var(--seat-w) var(--seat-w);
+    grid-auto-rows:calc(var(--seat-h) + 24px);
+    column-gap:var(--seat-gap-x);
+    row-gap:var(--seat-gap-y);
+    justify-content:center;
+    min-height:940px;
+    padding:14px 6px 16px;
+  }
+
+  .corr{
+    grid-column:2;
+    grid-row:1/15;
+    width:56px;
+    justify-self:center;
+    border-radius:18px;
+    background:linear-gradient(180deg,#7b1d1d,#8f2525 55%, #7b1d1d);
+    box-shadow:0 20px 40px rgba(0,0,0,.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    writing-mode:vertical-rl;
+    letter-spacing:5px;
+    font-size:12px;
+    font-weight:900;
+    color:#fff;
+    opacity:.92;
+  }
+
+  .door{
+    grid-column:3/5;
+    grid-row:8;
+    align-self:center;
+    height:28px;
+    border-radius:12px;
+    background:linear-gradient(180deg,#a16d24,#7b551b);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:.06em;
+    box-shadow:0 10px 22px rgba(0,0,0,.22);
+  }
+
+  .cell{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:7px;
+  }
+
+  .seat{
+    position:relative;
+    width:var(--seat-w);
+    height:var(--seat-h);
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:19px;
+    font-weight:900;
+    color:#fff;
+    cursor:pointer;
+    user-select:none;
+    transition:.16s ease;
+    background:linear-gradient(180deg, #1ea34f, #16763a);
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:
+      inset 0 -10px 18px rgba(0,0,0,.14),
+      0 14px 28px rgba(0,0,0,.34);
+  }
+
+  .seat.selected{ outline:3px solid #7fc7ff; }
+  .seat.isAssigned{ background:linear-gradient(180deg, #495f74, #344757); }
+  .seat.male{ background:linear-gradient(180deg, #2970e0, #1c4ca8); }
+  .seat.female{ background:linear-gradient(180deg, #eb5aa6, #c82773); }
+  .seat.multi-picked{ outline:3px dashed #92b7ff; }
+  .seat.has-stop{ box-shadow:0 0 0 2px rgba(245,158,11,.4) inset, 0 14px 28px rgba(0,0,0,.34); }
+  .seat.blink-yellow{
+    animation:blinkWarn 1s linear infinite;
+    outline:3px solid rgba(245,158,11,.95);
+  }
+
+  @keyframes blinkWarn{
+    0%,100%{
+      box-shadow:
+        0 0 0 0 rgba(245,158,11,0),
+        inset 0 -10px 18px rgba(0,0,0,.14),
+        0 14px 28px rgba(0,0,0,.34);
+    }
+    50%{
+      box-shadow:
+        0 0 0 10px rgba(245,158,11,.20),
+        inset 0 -10px 18px rgba(0,0,0,.14),
+        0 14px 28px rgba(0,0,0,.34);
+    }
+  }
+
+  .label{
+    min-height:30px;
+    width:86px;
+    text-align:center;
+    font-size:11px;
+    line-height:1.25;
+    color:#dce6ef;
+    opacity:.96;
+  }
+
+  .svc-badge, .bag-badge, .stop-badge{
+    position:absolute;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:900;
+    color:#fff;
+    box-shadow:0 8px 18px rgba(0,0,0,.26);
+  }
+
+  .svc-badge{
+    left:-7px;
+    top:-7px;
+    min-width:22px;
+    min-height:22px;
+    padding:3px 7px;
+    background:var(--accent);
+  }
+
+  .bag-badge{
+    right:-9px;
+    top:-8px;
+    min-height:23px;
+    min-width:23px;
+    padding:3px 7px;
+    gap:4px;
+    background:var(--primary);
+  }
+
+  .stop-badge{
+    left:-7px;
+    bottom:-7px;
+    min-height:22px;
+    padding:3px 7px;
+    background:var(--warn);
+    color:#1f1f1f;
+  }
+
+  .seat.has-service .svc-badge{ display:flex; }
+  .seat.has-bag .bag-badge{ display:inline-flex; }
+  .seat.has-stop .stop-badge{ display:flex; }
+
+  .fab-column{
+    position:absolute;
+    right:14px;
+    bottom:18px;
+    z-index:40;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .fab{
+    width:56px;
+    height:56px;
+    border:none;
+    border-radius:50%;
+    color:#fff;
+    font-size:22px;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:0 14px 30px rgba(0,0,0,.3);
+  }
+
+  .fab.primary{ background:linear-gradient(180deg, #3b82f6, #1d4ed8); }
+  .fab.green{ background:linear-gradient(180deg, #22c55e, #16843f); }
+  .fab.purple{ background:linear-gradient(180deg, #8b5cf6, #6d28d9); }
+  .fab.orange{ background:linear-gradient(180deg, #f59e0b, #d97706); }
+
+  .fab.listening{
+    animation:micPulse 1s ease-in-out infinite;
+    background:linear-gradient(180deg, #ef4444, #b91c1c);
+  }
+
+  @keyframes micPulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(239,68,68,0), 0 14px 30px rgba(0,0,0,.3); }
+    50%{ box-shadow:0 0 0 11px rgba(239,68,68,.20), 0 14px 30px rgba(0,0,0,.3); }
+  }
+
+  .panel-card{
+    padding:14px;
+  }
+
+  .panel-tabs{
+    display:grid;
+    grid-template-columns:repeat(5, minmax(0,1fr));
+    gap:8px;
+    margin-bottom:12px;
+  }
+
+  .tab-btn{
+    min-height:42px;
+    border:none;
+    border-radius:14px;
+    padding:8px 10px;
+    background:rgba(255,255,255,.045);
+    border:1px solid var(--line);
+    color:#dce7f2;
+    font-weight:800;
+    font-size:13px;
+    cursor:pointer;
+    transition:.16s ease;
+  }
+
+  .tab-btn.active{
+    background:linear-gradient(180deg, rgba(37,99,235,.28), rgba(37,99,235,.14));
+    border-color:rgba(96,165,250,.42);
+    color:#fff;
+  }
+
+  .tab-pane{ display:none; }
+  .tab-pane.active{ display:block; }
+
+  .pane-grid{
+    display:grid;
+    gap:12px;
+  }
+
+  .section-box{
+    border-radius:20px;
+    padding:14px;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+  }
+
+  .section-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:12px;
+  }
+
+  .section-head h3{
+    margin:0;
+    font-size:18px;
+    line-height:1;
+    font-weight:900;
+  }
+
+  .section-head small{
+    color:var(--muted);
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .metrics-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:10px;
   }
 
-  .mini{
-    border-radius:16px;
+  .metric-card{
+    min-height:92px;
+    border-radius:18px;
     padding:12px;
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--line);
   }
 
-  .mini .k{
+  .metric-card .k{
     color:var(--muted);
     font-size:12px;
-    margin-bottom:4px;
+    font-weight:700;
+    margin-bottom:6px;
   }
 
-  .mini .v{
-    font-size:20px;
+  .metric-card .v{
+    font-size:17px;
     font-weight:900;
+    line-height:1.15;
   }
 
-  .clock-strip{
-    display:grid;
-    grid-template-columns:1.2fr .9fr .8fr;
-    gap:10px;
-    align-items:stretch;
-  }
-
-  .clock-box,.prayer-box,.speed-box{
-    border-radius:16px;
-    padding:14px;
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.08);
-    min-height:94px;
-  }
-
-  .clock-box .time{
-    font-size:28px;
-    font-weight:900;
-    letter-spacing:1px;
-    font-variant-numeric:tabular-nums;
-  }
-  .clock-box .date{
+  .metric-card .s{
     color:var(--muted);
-    margin-top:6px;
-    font-size:13px;
+    font-size:12px;
+    margin-top:8px;
+    line-height:1.35;
   }
 
-  .prayer-box{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    gap:6px;
+  .clock-big{
+    font-size:46px;
+    line-height:1;
+    font-weight:900;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:-.03em;
   }
 
-  .pr-accent{ color:#fbbf24; font-weight:900; }
-  .pr-left{ color:#60a5fa; font-weight:900; }
+  .clock-date{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:14px;
+    font-weight:700;
+  }
+
+  .prayer-line{
+    font-size:16px;
+    line-height:1.45;
+    font-weight:700;
+  }
+
+  .pr-accent{ color:#fbbf24; }
+  .pr-left{ color:#60a5fa; }
   .pr-left.soon{ color:#ef4444; animation:blinkPr 1s linear infinite; }
-  @keyframes blinkPr{0%,100%{opacity:1}50%{opacity:.35}}
+
+  @keyframes blinkPr{
+    0%,100%{ opacity:1; }
+    50%{ opacity:.35; }
+  }
 
   .speed-box{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:10px;
+    gap:12px;
+    border-radius:18px;
+    padding:12px 14px;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
   }
 
-  .speed-val{
+  .speed-left .k{
+    color:var(--muted);
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .speed-value{
     display:flex;
     align-items:flex-end;
     gap:6px;
+    margin-top:6px;
   }
 
-  .speed-val b{
-    font-size:34px;
+  .speed-value b{
+    font-size:38px;
     line-height:1;
+    font-weight:900;
   }
 
   .speed-meta{
-    font-size:13px;
+    margin-top:6px;
     color:var(--muted);
+    font-size:13px;
   }
 
   .tts-btn{
-    width:44px;
-    height:44px;
-    border-radius:14px;
+    width:46px;
+    height:46px;
     border:none;
+    border-radius:14px;
     background:rgba(255,255,255,.08);
     color:#fff;
-    cursor:pointer;
     font-size:19px;
     font-weight:900;
+    cursor:pointer;
   }
-  .tts-btn.muted{opacity:.45; text-decoration:line-through}
+
+  .tts-btn.muted{
+    opacity:.45;
+    text-decoration:line-through;
+  }
 
   .speed-box.limit-ok{
-    box-shadow:0 0 0 2px rgba(34,197,94,.28) inset;
-    border-color:rgba(34,197,94,.45);
+    box-shadow:0 0 0 2px rgba(34,197,94,.26) inset;
+    border-color:rgba(34,197,94,.42);
   }
+
   .speed-box.limit-warn{
-    box-shadow:0 0 0 2px rgba(245,158,11,.30) inset;
-    border-color:rgba(245,158,11,.50);
+    box-shadow:0 0 0 2px rgba(245,158,11,.24) inset;
+    border-color:rgba(245,158,11,.42);
   }
+
   .speed-box.limit-bad{
-    box-shadow:0 0 0 2px rgba(239,68,68,.33) inset;
-    border-color:rgba(239,68,68,.56);
+    box-shadow:0 0 0 2px rgba(239,68,68,.25) inset;
+    border-color:rgba(239,68,68,.48);
   }
 
-  .stats{
-    display:grid;
-    grid-template-columns:repeat(5, minmax(0,1fr));
-    gap:12px;
-    margin:14px 0;
-  }
-
-  .stat{
-    position:relative;
-    border-radius:18px;
-    padding:14px 14px 12px;
-    overflow:hidden;
-  }
-
-  .stat::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:linear-gradient(120deg, rgba(255,255,255,.10), transparent 30%, transparent 70%, rgba(255,255,255,.05));
-    pointer-events:none;
-  }
-
-  .stat .k{
-    color:#c5d1da;
-    font-size:12px;
-    margin-bottom:6px;
-  }
-
-  .stat .v{
-    font-size:27px;
+  .delay-main{
+    font-size:20px;
     font-weight:900;
-    line-height:1;
+    line-height:1.1;
   }
 
-  .stat .s{
+  .delay-main.good{ color:#86efac; }
+  .delay-main.warn{ color:#fde68a; }
+  .delay-main.bad{ color:#fca5a5; }
+
+  .delay-sub{
+    margin-top:6px;
     color:var(--muted);
-    font-size:12px;
-    margin-top:8px;
-  }
-
-  .stat.total{ background:linear-gradient(135deg, rgba(47,109,246,.22), rgba(47,109,246,.10)); border:1px solid rgba(47,109,246,.30); }
-  .stat.empty{ background:linear-gradient(135deg, rgba(31,143,72,.20), rgba(31,143,72,.08)); border:1px solid rgba(31,143,72,.28); }
-  .stat.occ{ background:linear-gradient(135deg, rgba(245,158,11,.22), rgba(245,158,11,.08)); border:1px solid rgba(245,158,11,.30); }
-  .stat.standing{ background:linear-gradient(135deg, rgba(239,68,68,.22), rgba(239,68,68,.08)); border:1px solid rgba(239,68,68,.30); cursor:pointer; }
-  .stat.money{ background:linear-gradient(135deg, rgba(168,85,247,.22), rgba(168,85,247,.08)); border:1px solid rgba(168,85,247,.30); }
-
-  .pulse{ animation:pulseGlow 1.7s ease-in-out infinite; }
-  @keyframes pulseGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
-
-  .ai-panel{
-    border-radius:20px;
-    padding:16px;
-    margin-bottom:14px;
-  }
-
-  .section-title{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    font-weight:900;
-    font-size:18px;
-    margin-bottom:12px;
-  }
-
-  .ai-grid{
-    display:grid;
-    grid-template-columns:1.1fr .9fr;
-    gap:12px;
-  }
-
-  .ai-card{
-    border-radius:16px;
-    padding:14px;
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.08);
-  }
-
-  .ai-big{
-    font-size:18px;
-    font-weight:800;
+    font-size:13px;
     line-height:1.35;
   }
 
-  .ai-sub{
-    color:var(--muted);
-    margin-top:8px;
+  .crew-list{
+    display:grid;
+    gap:8px;
+  }
+
+  .crew-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-height:44px;
+    padding:10px 12px;
+    border-radius:16px;
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--line);
+    font-weight:800;
+  }
+
+  .field-grid{ display:grid; gap:12px; }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  label.field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    color:#dbe6f0;
     font-size:13px;
+    font-weight:700;
+  }
+
+  .muted{
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.4;
+  }
+
+  select,
+  input[type="number"],
+  input[type="text"],
+  textarea{
+    width:100%;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.09);
+    background:#08111c;
+    color:#fff;
+    padding:12px 13px;
+    outline:none;
+    font-size:16px;
+  }
+
+  textarea{
+    resize:vertical;
+    min-height:96px;
+  }
+
+  .toggle-line{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px 13px;
+    border-radius:16px;
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--line);
+  }
+
+  .toggle-line label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:0;
+    font-size:14px;
+    font-weight:700;
+  }
+
+  .btn{
+    min-height:48px;
+    border-radius:16px;
+    padding:12px 15px;
+    box-shadow:0 14px 28px rgba(0,0,0,.2);
+    font-size:15px;
+  }
+
+  .btn.primary{ background:var(--primary); }
+  .btn.accent{ background:var(--accent); }
+  .btn.warn{ background:var(--warn); color:#1d1d1d; }
+  .btn.danger{ background:var(--danger); }
+  .btn.dark{ background:#334155; }
+  .btn.green{ background:var(--brand); }
+  .btn.ghost{ background:rgba(255,255,255,.05); border:1px solid var(--line); }
+
+  .action-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:10px;
+  }
+
+  .ai-main{
+    font-size:18px;
+    line-height:1.35;
+    font-weight:900;
+  }
+
+  .ai-sub{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.4;
   }
 
   .ai-list{
@@ -357,766 +846,840 @@
 
   .ai-item{
     display:flex;
-    justify-content:space-between;
-    gap:10px;
-    border-radius:12px;
-    padding:10px 12px;
-    background:rgba(255,255,255,.035);
-  }
-
-  .ai-item b{font-size:13px}
-  .ai-item span{
-    color:var(--muted);
-    font-size:13px;
-    text-align:right;
-  }
-
-  .main-grid{
-    display:grid;
-    grid-template-columns:360px 1fr;
-    gap:14px;
-    align-items:start;
-  }
-
-  .sidebar{
-    display:grid;
-    gap:14px;
-    position:sticky;
-    top:10px;
-  }
-
-  .panel{
-    border-radius:20px;
-    padding:16px;
-  }
-
-  .field-grid{
-    display:grid;
-    gap:12px;
-  }
-
-  .field-row{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-  }
-
-  label.field{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-    font-size:13px;
-    color:#dce6ee;
-  }
-
-  .muted{
-    color:var(--muted);
-    font-size:13px;
-  }
-
-  select,input[type="number"],input[type="text"],textarea{
-    width:100%;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.10);
-    background:#0d1216;
-    color:#fff;
-    padding:11px 12px;
-    outline:none;
-  }
-
-  textarea{min-height:92px; resize:vertical}
-
-  .toggle-line{
-    display:flex;
     align-items:center;
     justify-content:space-between;
     gap:10px;
+    padding:11px 12px;
     border-radius:14px;
-    padding:11px 12px;
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.07);
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--line);
   }
 
-  .toggle-line label{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin:0;
+  .ai-item b{
     font-size:13px;
   }
 
-  .action-grid{
+  .ai-item span{
+    text-align:right;
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  .timeline-list{
     display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(140px,1fr));
-    gap:10px;
-  }
-
-  .deck-wrap{
-    border-radius:24px;
-    padding:18px;
-    position:relative;
-    overflow:hidden;
-  }
-
-  .deck-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-    margin-bottom:14px;
-    flex-wrap:wrap;
-  }
-
-  .legend{
-    display:flex;
-    flex-wrap:wrap;
     gap:8px;
+    max-height:440px;
+    overflow:auto;
+    padding-right:4px;
   }
 
-  .legend .chip{
-    padding:7px 10px;
-    font-size:12px;
-    background:rgba(255,255,255,.04);
-  }
-
-  .deck{
-    position:relative;
+  .eta-row{
     display:grid;
-    grid-template-columns:86px 86px 86px 86px;
-    grid-auto-rows:82px;
-    gap:24px;
-    justify-content:center;
-    min-height:980px;
-    padding-top:28px;
-  }
-
-  .corr{
-    grid-column:2;
-    grid-row:1/15;
-    width:66px;
+    grid-template-columns:1fr auto;
+    gap:12px;
+    align-items:center;
+    padding:12px;
     border-radius:18px;
-    background:linear-gradient(180deg, #6b1f1f, #8d2f2f);
-    color:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:900;
-    writing-mode:vertical-rl;
-    letter-spacing:5px;
-    box-shadow:var(--shadow);
-    opacity:.92;
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--line);
+    cursor:pointer;
   }
 
-  .door{
-    grid-column:3/5;
-    grid-row:8;
-    height:30px;
-    align-self:center;
-    border-radius:12px;
-    background:linear-gradient(180deg,#87652a,#6a4d1f);
-    color:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:900;
-    letter-spacing:.6px;
+  .eta-row.active{
+    box-shadow:0 0 0 2px rgba(59,130,246,.32) inset;
+    border-color:rgba(96,165,250,.45);
   }
 
-  .cell{
-    display:flex;
-    flex-direction:column;
+  .eta-row.passed{ opacity:.58; }
+
+  .eta-name{
+    font-size:15px;
+    font-weight:900;
+  }
+
+  .eta-meta{
+    margin-top:5px;
+    color:var(--muted);
+    font-size:12px;
+  }
+
+  .eta-right{ text-align:right; }
+
+  .eta-main{
+    font-size:14px;
+    font-weight:900;
+  }
+
+  .eta-badge{
+    display:inline-flex;
     align-items:center;
     gap:6px;
-  }
-
-  .seat{
-    position:relative;
-    width:64px;
-    height:64px;
-    border-radius:18px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:18px;
-    font-weight:900;
-    color:#fff;
-    cursor:pointer;
-    user-select:none;
-    box-shadow:0 12px 24px rgba(0,0,0,.35);
-    transition:.16s ease;
-    background:linear-gradient(180deg, #1f8f48, #176838);
-    border:1px solid rgba(255,255,255,.10);
-  }
-
-  .seat:hover{ transform:translateY(-1px) scale(1.02) }
-  .seat.selected{ outline:3px solid #7fc6ff; }
-  .seat.isAssigned{ background:linear-gradient(180deg, #4a6074, #344551); }
-  .seat.male{ background:linear-gradient(180deg, #2d6cdf, #1e4fa6); }
-  .seat.female{ background:linear-gradient(180deg, #ec4899, #c12574); }
-  .seat.multi-picked{ outline:3px dashed #7aa2ff; }
-
-  .label{
-    min-height:30px;
-    width:88px;
-    text-align:center;
-    font-size:11px;
-    color:#d6e0e8;
-    line-height:1.25;
-    opacity:.95;
-  }
-
-  .svc-badge, .bag-badge, .stop-badge{
-    position:absolute;
-    display:none;
-    align-items:center;
-    justify-content:center;
+    padding:5px 9px;
+    margin-top:6px;
     border-radius:999px;
-    color:#fff;
-    box-shadow:0 8px 18px rgba(0,0,0,.28);
-    font-weight:900;
-  }
-
-  .svc-badge{
-    left:-7px;
-    top:-7px;
-    background:var(--accent);
-    padding:4px 7px;
     font-size:11px;
-  }
-  .seat.has-service .svc-badge{display:flex}
-
-  .bag-badge{
-    right:-8px;
-    top:-8px;
-    background:var(--primary);
-    min-width:23px;
-    min-height:23px;
-    padding:3px 7px;
-    font-size:11px;
-    gap:4px;
-  }
-  .seat.has-bag .bag-badge{display:inline-flex}
-
-  .stop-badge{
-    left:-7px;
-    bottom:-7px;
-    background:var(--warn);
-    color:#232323;
-    padding:4px 7px;
-    font-size:11px;
-  }
-  .seat.has-stop .stop-badge{display:flex}
-
-  .seat.blink-yellow{
-    animation:blinkWarn 1s linear infinite;
-    outline:3px solid var(--warn);
-  }
-  @keyframes blinkWarn{
-    0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0), 0 12px 24px rgba(0,0,0,.35)}
-    50%{box-shadow:0 0 0 10px rgba(245,158,11,.25), 0 12px 24px rgba(0,0,0,.35)}
-  }
-
-  .fab-stack{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    transform:translateY(-22px);
-  }
-
-  .fab-inline{
-    min-width:168px;
-    border-radius:999px;
-    padding:14px 16px;
-    background:linear-gradient(180deg, #2b6df6, #1d54c4);
-    border:1px solid rgba(255,255,255,.10);
-    color:#fff;
     font-weight:900;
-    box-shadow:var(--shadow);
-    cursor:pointer;
-  }
-  .fab-inline.green{
-    background:linear-gradient(180deg,#1f8f48,#166436);
+    border:1px solid var(--line);
   }
 
-  .modal-backdrop{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.52);
-    z-index:3000;
-  }
-
-  .modal{
-    display:none;
-    position:fixed;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    width:min(620px, 95vw);
-    max-height:92vh;
-    overflow:auto;
-    border-radius:22px;
-    padding:18px;
-    z-index:3010;
-  }
-
-  .modal h3{
-    margin:0 0 12px;
-    font-size:22px;
-  }
-
-  .radio-row,.check-row{
-    display:flex;
-    gap:12px;
-    flex-wrap:wrap;
-    align-items:center;
-  }
-
-  .radio-row label,.check-row label{
-    display:flex;
-    align-items:center;
-    gap:7px;
-    font-size:14px;
-    margin:0;
-  }
-
-  .modal-actions{
-    display:flex;
-    justify-content:flex-end;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top:14px;
-  }
-
-  .standing-pop{
-    display:none;
-    position:fixed;
-    z-index:3020;
-    width:min(390px, 94vw);
-    border-radius:18px;
-    padding:14px;
-  }
-
-  .standing-head{
-    font-size:18px;
-    font-weight:900;
-    margin-bottom:6px;
-  }
+  .eta-badge.good{ background:rgba(34,197,94,.16); border-color:rgba(34,197,94,.3); color:#bbf7d0; }
+  .eta-badge.warn{ background:rgba(245,158,11,.16); border-color:rgba(245,158,11,.3); color:#fde68a; }
+  .eta-badge.bad{ background:rgba(239,68,68,.16); border-color:rgba(239,68,68,.3); color:#fecaca; }
+  .eta-badge.info{ background:rgba(14,165,233,.16); border-color:rgba(14,165,233,.3); color:#bae6fd; }
 
   .standing-list{
     display:grid;
     gap:8px;
-    max-height:320px;
-    overflow:auto;
-    margin-top:12px;
   }
 
   .standing-item{
     display:flex;
     align-items:center;
     justify-content:space-between;
+    gap:12px;
+    padding:11px 12px;
+    border-radius:14px;
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--line);
+  }
+
+  .standing-item small{
+    display:block;
+    color:var(--muted);
+    font-size:12px;
+    margin-top:4px;
+  }
+
+  .modal-backdrop{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    z-index:3000;
+  }
+
+  .modal, .sheet-modal{
+    display:none;
+    position:fixed;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:min(680px, 95vw);
+    max-height:92vh;
+    overflow:auto;
+    z-index:3010;
+    padding:18px;
+  }
+
+  .sheet-modal{
+    top:auto;
+    bottom:12px;
+    transform:translateX(-50%);
+  }
+
+  .modal h3, .sheet-modal h3{
+    margin:0 0 12px;
+    font-size:24px;
+    line-height:1.1;
+    font-weight:900;
+  }
+
+  .radio-row, .check-row{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+
+  .radio-row label, .check-row label{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    margin:0;
+    font-size:14px;
+    font-weight:700;
+  }
+
+  .modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    flex-wrap:wrap;
     gap:10px;
-    border-radius:12px;
-    padding:10px 12px;
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.06);
+    margin-top:14px;
   }
 
   .approach-list{
     display:grid;
     gap:8px;
     margin-top:12px;
-    max-height:260px;
-    overflow:auto;
   }
 
   .approach-row{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:10px;
-    border-radius:12px;
-    padding:10px 12px;
-    background:rgba(255,255,255,.04);
-  }
-
-  .ghost-offload{
-    display:none;
-    position:absolute;
-    left:50%;
-    transform:translateX(-50%);
-    top:-8px;
-    z-index:20;
+    gap:12px;
+    padding:11px 12px;
     border-radius:14px;
-    padding:11px 16px;
-    background:var(--danger);
-    color:#fff;
-    font-weight:900;
-    border:none;
-    cursor:pointer;
-    box-shadow:var(--shadow);
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--line);
   }
 
   #toast{
     display:none;
     position:fixed;
-    top:16px;
-    right:16px;
+    top:18px;
+    right:18px;
     z-index:5000;
-    border-radius:12px;
-    padding:10px 14px;
-    background:rgba(0,0,0,.76);
+    max-width:340px;
+    padding:11px 14px;
+    border-radius:14px;
     color:#fff;
-    box-shadow:var(--shadow);
-    max-width:320px;
+    background:rgba(0,0,0,.84);
+    box-shadow:0 16px 32px rgba(0,0,0,.3);
+    font-size:14px;
+    font-weight:800;
   }
 
-  @media (max-width:1100px){
-    .hero{grid-template-columns:1fr}
-    .main-grid{grid-template-columns:1fr}
-    .sidebar{position:static}
+  @media (min-width: 1180px){
+    .layout{
+      grid-template-columns:minmax(0, 1.18fr) 420px;
+      align-items:start;
+    }
+
+    .panel-card{
+      position:sticky;
+      top:94px;
+    }
+
+    .board-stage{
+      min-height:calc(100vh - 210px);
+    }
   }
 
-  @media (max-width:760px){
-    .page{width:min(100vw, 100%); padding:0 10px}
-    .stats{
+  @media (max-width: 980px){
+    .status-row{
+      grid-template-columns:repeat(3, minmax(0,1fr));
+    }
+
+    .top-actions{
+      grid-template-columns:repeat(3, 46px);
+      justify-content:end;
+    }
+
+    .field-row,
+    .metrics-grid,
+    .action-grid{
+      grid-template-columns:1fr;
+    }
+  }
+
+  @media (max-width: 760px){
+    :root{
+      --seat-w:58px;
+      --seat-h:58px;
+      --seat-gap-y:18px;
+      --seat-gap-x:16px;
+      --topbar-h:68px;
+    }
+
+    .seats-shell{
+      padding:8px 8px 20px;
+    }
+
+    .topbar{
+      padding:10px;
+      border-radius:20px;
+    }
+
+    .top-actions{
+      grid-template-columns:repeat(5, 42px);
+      gap:8px;
+    }
+
+    .icon-btn{
+      width:42px;
+      height:42px;
+      font-size:18px;
+    }
+
+    .route-title{
+      font-size:clamp(18px, 7vw, 28px);
+    }
+
+    .status-row{
       grid-auto-flow:column;
-      grid-auto-columns:minmax(180px,1fr);
-      overflow-x:auto;
+      grid-auto-columns:minmax(170px, 1fr);
       grid-template-columns:unset;
+      overflow:auto;
       padding-bottom:4px;
     }
-    .stats::-webkit-scrollbar{display:none}
-    .clock-strip{grid-template-columns:1fr}
-    .ai-grid{grid-template-columns:1fr}
-    .field-row{grid-template-columns:1fr}
-    .action-grid{grid-template-columns:1fr}
+
+    .status-row::-webkit-scrollbar{ display:none; }
+
+    .board-card,
+    .panel-card{
+      padding:12px;
+      border-radius:20px;
+    }
+
+    .board-head{
+      gap:10px;
+    }
+
+    .board-title h2{
+      font-size:23px;
+    }
+
+    .legend{
+      justify-content:flex-start;
+    }
+
+    .board-stage{
+      padding:12px 6px 14px;
+    }
+
     .deck{
-      transform:scale(.88);
-      transform-origin:top center;
-      margin-left:-20px;
-      margin-right:-20px;
+      min-height:900px;
+    }
+
+    .fab-column{
+      right:10px;
+      bottom:12px;
+    }
+
+    .fab{
+      width:52px;
+      height:52px;
+      font-size:20px;
+    }
+
+    .panel-tabs{
+      grid-template-columns:repeat(5, minmax(0,1fr));
+      gap:6px;
+    }
+
+    .tab-btn{
+      min-height:40px;
+      font-size:12px;
+      padding:8px 6px;
+    }
+
+    .clock-big{
+      font-size:40px;
+    }
+
+    .modal, .sheet-modal{
+      width:min(96vw, 96vw);
+      padding:16px;
+      border-radius:22px;
     }
   }
 
-.deck-ai-mic{
-  position:absolute;
-  top:118px;
-  right:22px;
-  z-index:60;
-  border:none;
-  cursor:pointer;
-  border-radius:999px;
-  padding:10px 14px;
-  background:linear-gradient(180deg,#8b5cf6,#6d28d9);
-  color:#fff;
-  font-weight:900;
-  font-size:13px;
-  box-shadow:0 12px 24px rgba(0,0,0,.35);
-  display:flex;
-  align-items:center;
-  gap:8px;
+:root{
+  --mobile-safe-bottom: 96px;
+  --mobile-fab-offset: 14px;
+  --mobile-fab-stack-w: 64px;
 }
 
-.deck-ai-mic:hover{
-  transform:translateY(-1px);
-  filter:brightness(1.06);
+/* Koltukların üstüne eleman binmesini engelle */
+.board-stage{
+  scroll-margin-top: 12px;
 }
 
-.deck-ai-mic.listening{
-  background:linear-gradient(180deg,#ef4444,#b91c1c);
-  animation:aiMicPulse 1s ease-in-out infinite;
+.deck{
+  padding-bottom: 24px;
 }
 
-@keyframes aiMicPulse{
-  0%,100%{ box-shadow:0 0 0 0 rgba(239,68,68,0), 0 12px 24px rgba(0,0,0,.35); }
-  50%{ box-shadow:0 0 0 10px rgba(239,68,68,.20), 0 12px 24px rgba(0,0,0,.35); }
-}
+/* Masaüstü kalsın, büyük ekranda sorun yok */
+@media (min-width: 981px){
+  .topbar{
+    position:sticky;
+    top:8px;
+    z-index:1200;
+  }
 
-@media (max-width:760px){
-  .deck-ai-mic{
-    top:108px;
+  .fab-column{
+    position:absolute;
     right:14px;
-    padding:9px 12px;
-    font-size:12px;
+    bottom:18px;
+    z-index:40;
+  }
+
+  .board-stage{
+    padding-right:10px;
+    padding-bottom:16px;
   }
 }
+
+/* Mobil düzeltme */
+@media (max-width: 980px){
+  .seats-shell{
+    padding:8px 8px calc(var(--mobile-safe-bottom) + 18px);
+  }
+
+  /* Üst bar artık koltukların üstüne binmesin */
+  .topbar{
+    position:relative;
+    top:auto;
+    z-index:20;
+    grid-template-columns:1fr;
+    align-items:stretch;
+  }
+
+  .route-meta{
+    gap:8px;
+  }
+
+  .route-live-row{
+    gap:8px;
+  }
+
+  .top-actions{
+    grid-template-columns:repeat(5, 42px);
+    justify-content:flex-start;
+    margin-top:2px;
+  }
+
+  /* Koltuk alanına sağdan ve alttan boşluk ver */
+  .board-stage{
+    overflow-x:auto;
+    overflow-y:visible;
+    padding-right:84px;
+    padding-bottom:calc(var(--mobile-safe-bottom) + 90px);
+  }
+
+  .deck-wrap{
+    padding-right:72px;
+  }
+
+  .deck{
+    padding-right:6px;
+    padding-bottom:calc(var(--mobile-safe-bottom) + 80px);
+  }
+
+  /* Sağdaki yuvarlak butonları koltuk alanından çıkar */
+  .fab-column{
+    position:fixed;
+    right:var(--mobile-fab-offset);
+    bottom:calc(var(--mobile-safe-bottom) + 10px);
+    z-index:1300;
+    gap:10px;
+  }
+
+  .fab{
+    width:54px;
+    height:54px;
+    font-size:20px;
+  }
+
+  /* Sağ alt koltukların görünmesi için son sütuna yaklaşan elemanlar ezilmesin */
+  .cell{
+    position:relative;
+    z-index:1;
+  }
+
+  .seat{
+    position:relative;
+    z-index:1;
+  }
+}
+
+/* Daha küçük telefonlarda üst bilgiyi biraz sıkıştır */
+@media (max-width: 760px){
+  .route-title{
+    font-size:clamp(18px, 7vw, 26px);
+    line-height:1.08;
+  }
+
+  .route-sub{
+    font-size:12px;
+    line-height:1.45;
+  }
+
+  .mini-chip{
+    min-height:34px;
+    padding:7px 10px;
+    font-size:12px;
+  }
+
+  .board-stage{
+    padding-right:78px;
+    padding-bottom:calc(var(--mobile-safe-bottom) + 86px);
+  }
+
+  .fab-column{
+    right:10px;
+  }
+
+  .fab{
+    width:52px;
+    height:52px;
+    font-size:19px;
+  }
+}
+
+/* Çok dar cihazlar */
+@media (max-width: 420px){
+  .top-actions{
+    grid-template-columns:repeat(5, 40px);
+    gap:6px;
+  }
+
+  .icon-btn{
+    width:40px;
+    height:40px;
+    font-size:17px;
+  }
+
+  .board-stage{
+    padding-right:74px;
+  }
+}
+
 </style>
 
-<div class="page">
-  <div class="hero">
-    <div class="trip-card glass">
-      <div class="trip-top">
-        <div>
-          <div class="trip-title">{{ trip['route'] }}</div>
-          <div class="trip-sub">
-            Plaka: <b>{{ trip['plate'] or '-' }}</b> ·
-            Sefer Tarihi: <b>{{ trip['date'] or '-' }}</b> ·
-            Çıkış: <b>{{ trip['departure_time'] or '-' }}</b>
-          </div>
-        </div>
-
-        <div class="hero-actions">
-          <a href="{{ url_for('index') }}" class="icon-btn" title="Ana Sayfa">🏠</a>
-          <a href="{{ url_for('hesap_page') }}" class="icon-btn" title="Hesap">💵</a>
-          <a href="{{ url_for('consignments_page') }}" class="icon-btn" title="Emanetler">📦</a>
-          <a href="{{ url_for('ai_console_page') }}" class="icon-btn" title="AI Console">🧠</a>  
-        <form method="post" action="{{ url_for('end_trip') }}" onsubmit="return confirm('Sefer sonlandırılsın mı?')">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <button type="submit" class="icon-btn" title="Seferi Sonlandır">⛔</button>
-          </form>
-        </div>
+<div class="seats-shell">
+  <div class="topbar glass">
+    <div class="route-meta">
+      <div class="route-title">{{ trip['route'] }}</div>
+      <div class="route-sub">
+        Plaka: <b>{{ trip['plate'] or '-' }}</b>
+        · Sefer Tarihi: <b>{{ trip['date'] or '-' }}</b>
+        · Çıkış: <b>{{ trip['departure_time'] or '-' }}</b>
       </div>
-
-      <div class="trip-badges">
-        <div class="chip">🧑‍✈️ 1. Kaptan: <b>{{ trip['captain1'] or '-' }}</b></div>
-        <div class="chip">🧑‍✈️ 2. Kaptan: <b>{{ trip['captain2'] or '-' }}</b></div>
-        <div class="chip">🤝 Muavin: <b>{{ trip['attendant'] or '-' }}</b></div>
+      <div class="route-live-row">
+        <div class="mini-chip">📍 <span>Durak</span> <b id="topLiveStop">—</b></div>
+        <div class="mini-chip">🚦 <span>Hız</span> <b id="topSpeed">0 km/h</b></div>
+        <div class="mini-chip">🕒 <span>Saat</span> <b id="topClock">--:--</b></div>
+        <div class="mini-chip">🎯 <span>Doluluk</span> <b id="topOcc">0%</b></div>
       </div>
     </div>
 
-    <div class="ops-card glass">
-      <div class="top-mini">
-        <div class="mini">
-          <div class="k">Aktif Durum</div>
-          <div class="v" id="miniLiveState">Hazır</div>
-        </div>
-        <div class="mini">
-          <div class="k">Seçili Durak</div>
-          <div class="v" id="miniStop">—</div>
-        </div>
-      </div>
-
-      <div class="clock-strip">
-        <div class="clock-box">
-          <div class="time" id="clockMain">--:--:--</div>
-          <div class="date" id="clockSub">—</div>
-        </div>
-
-        <div class="prayer-box">
-          <div class="muted">Namaz Vakti</div>
-          <div id="prLine">Konum alınıyor…</div>
-        </div>
-
-        <div class="speed-box" id="speedBox">
-          <div>
-            <div class="muted">Hız / Limit</div>
-            <div class="speed-val">
-              <b id="spVal">0</b><span>km/h</span>
-            </div>
-            <div class="speed-meta" id="spLimit">Limit: —</div>
-          </div>
-          <button class="tts-btn" id="ttsToggle" title="Sesli uyarı">🔊</button>
-        </div>
-      </div>
+    <div class="top-actions">
+      <a href="{{ url_for('index') }}" class="icon-btn" title="Ana Sayfa">🏠</a>
+      <a href="{{ url_for('hesap_page') }}" class="icon-btn" title="Hesap">💵</a>
+      <a href="{{ url_for('consignments_page') }}" class="icon-btn" title="Emanetler">📦</a>
+      <a href="{{ url_for('ai_console_page') }}" class="icon-btn" title="AI Console">🧠</a>
+      <form method="post" action="{{ url_for('end_trip') }}" onsubmit="return confirm('Sefer sonlandırılsın mı?')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="icon-btn" title="Seferi Sonlandır">⛔</button>
+      </form>
     </div>
   </div>
 
-  <div class="stats">
-    <div class="stat total glass">
+  <div class="status-row">
+    <div class="status-pill total">
       <div class="k">Toplam Yolcu</div>
-      <div class="v" id="stTotalPax">0</div>
-      <div class="s" id="stTotalHint">Oturan / Ayakta</div>
+      <div class="v" id="pillTotal">0</div>
     </div>
-
-    <div class="stat empty glass">
+    <div class="status-pill empty">
       <div class="k">Boş Koltuk</div>
-      <div class="v" id="stEmpty">0</div>
-      <div class="s">Anlık kalan</div>
+      <div class="v" id="pillEmpty">0</div>
     </div>
-
-    <div class="stat occ glass">
-      <div class="k">Doluluk</div>
-      <div class="v" id="stOcc">0%</div>
-      <div class="s">Koltuk bazlı oran</div>
+    <div class="status-pill standing" id="standingCard" role="button" tabindex="0">
+      <div class="k">Ayakta</div>
+      <div class="v" id="pillStanding">0</div>
     </div>
-
-    <div class="stat standing glass" id="standingCard" role="button" tabindex="0" title="Ayakta yolcular">
-      <div class="k">Ayakta Yolcu</div>
-      <div class="v" id="stStanding">0</div>
-      <div class="s">Listeyi aç</div>
-    </div>
-
-    <div class="stat money glass">
+    <div class="status-pill cash">
       <div class="k">Ayakta Tahsilat</div>
-      <div class="v" id="stStandingTL">₺0.00</div>
-      <div class="s">Ayakta satış toplamı</div>
+      <div class="v" id="pillCash">₺0.00</div>
+    </div>
+    <div class="status-pill service">
+      <div class="k">Servis</div>
+      <div class="v" id="pillService">0</div>
+    </div>
+    <div class="status-pill parcel">
+      <div class="k">Emanet</div>
+      <div class="v" id="pillParcel">0</div>
     </div>
   </div>
 
-  <div class="ai-panel glass">
-    <div class="section-title">🧠 AI Asistan</div>
-    <div class="ai-grid">
-      <div class="ai-card">
-        <div class="ai-big" id="aiMain">Veriler hazırlanıyor…</div>
-        <div class="ai-sub" id="aiSub">Sistem otobüs içi operasyon özetini oluşturuyor.</div>
-      </div>
-
-      <div class="ai-list">
-        <div class="ai-item">
-          <b>Sıradaki İşlem</b>
-          <span id="aiNextAction">—</span>
+  <div class="layout">
+    <section class="board-card glass">
+      <div class="board-head">
+        <div class="board-title">
+          <h2>🚌 Koltuk Planı</h2>
+          <small>Mobil öncelikli final yerleşim</small>
+          <div class="selected-stop-chip">🎯 Seçili durak: <b id="selectedStopBadge">—</b></div>
         </div>
-        <div class="ai-item">
-          <b>Servis Durumu</b>
-          <span id="aiService">—</span>
-        </div>
-        <div class="ai-item">
-          <b>Emanet Uyarısı</b>
-          <span id="aiParcel">—</span>
-        </div>
-        <div class="ai-item">
-          <b>Yoğunluk</b>
-          <span id="aiDensity">—</span>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="main-grid">
-    <div class="sidebar">
-      <div class="panel glass">
-        <div class="section-title">🧭 Sıradaki Durak</div>
+<div class="board-head-right">
+  <button class="voice-command-btn" id="btnDeckAI" type="button" title="Sesli Komut">
+    🎤 <span>Sesli Komut</span>
+  </button>
 
-        <div class="field-grid">
-          <label class="field">
-            <span>Durak</span>
-            <select id="alertStop"><option value="">—</option></select>
-          </label>
-
-          <div class="field-row">
-            <label class="field">
-              <span>Eşik (km)</span>
-              <input type="number" id="alertRadius" min="0.1" step="0.1" value="3">
-            </label>
-
-            <label class="field">
-              <span>Konum İzleme</span>
-              <button class="btn primary" type="button" id="btnGeoWatch">KAPALI</button>
-            </label>
-          </div>
-
-          <div class="toggle-line">
-            <label><input type="checkbox" id="soundToggle" checked> Sesli uyarı</label>
-            <label><input type="checkbox" id="autoAdvanceToggle" checked> Oto ilerle</label>
-          </div>
-
-          <div class="action-grid">
-            <button class="btn warn" type="button" id="btnTriggerNow">Şimdi Uyar</button>
-            <button class="btn danger" type="button" id="btnOffloadNow">İnecekleri İndir</button>
-          </div>
-
-          <div class="muted" id="geoHint">Durak seç.</div>
-        </div>
-      </div>
-
-      <div class="panel glass">
-        <div class="section-title">📍 Koordinat</div>
-
-        <div class="field-grid">
-          <label class="field">
-            <span>Seçili Durak</span>
-            <input type="text" id="coordStopName" readonly>
-          </label>
-
-          <div class="field-row">
-            <label class="field">
-              <span>Lat</span>
-              <input type="number" id="coordLat" step="0.000001" placeholder="37.xxxxxx">
-            </label>
-            <label class="field">
-              <span>Lng</span>
-              <input type="number" id="coordLng" step="0.000001" placeholder="29.xxxxxx">
-            </label>
-          </div>
-
-          <button class="btn accent" type="button" id="btnSaveCoord">Koordinatı Kaydet</button>
-          <div class="muted">Bu kayıt <code>route_stop_coords</code> tablosuna yazılır.</div>
-        </div>
-      </div>
-
-      <div class="panel glass">
-        <div class="section-title">⚡ Hızlı İşlemler</div>
-        <div class="action-grid">
-          <button class="btn primary" type="button" id="fabBulk">Toplu Giriş</button>
-          <button class="btn" type="button" id="fabCash">Hızlı Tahsilat</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="deck-wrap glass">
-      <div class="deck-top">
-        <div class="section-title" style="margin:0">🚌 Koltuk Planı</div>
-
-        <div class="legend">
-          <div class="chip">🟢 Boş</div>
-          <div class="chip">🔵 Bay</div>
-          <div class="chip">🩷 Bayan</div>
-          <div class="chip">🚌 Servis</div>
-          <div class="chip">🧳 Bagaj</div>
-          <div class="chip">🔔 İniş</div>
-        </div>
-      </div>
-      <button class="deck-ai-mic" id="btnDeckAI" type="button" title="Sesli AI komut">🎤 AI</button>
-      <button class="ghost-offload" id="btnGhostOffload">BOŞALT</button>
-
-      <div class="deck" id="deck">
-        <div class="corr">KORİDOR</div>
-
-        {% set seat_positions = {
-          1:[1,1],3:[1,3],4:[1,4],
-          5:[2,1],7:[2,3],8:[2,4],
-          9:[3,1],11:[3,3],12:[3,4],
-          13:[4,1],15:[4,3],16:[4,4],
-          17:[5,1],19:[5,3],20:[5,4],
-          21:[6,1],23:[6,3],24:[6,4],
-          25:[7,1],27:[7,3],28:[7,4],
-          29:[8,1],
-          31:[9,1],33:[9,3],34:[9,4],
-          35:[10,1],37:[10,3],38:[10,4],
-          39:[11,1],41:[11,3],42:[11,4],
-          43:[12,1],45:[12,3],46:[12,4],
-          49:[13,3],50:[13,4],
-          51:[14,1],52:[14,2],53:[14,3],54:[14,4]
-        } %}
-
-        {% for n, pos in seat_positions.items() %}
-          {% if n == 29 %}
-            <div class="door">KAPI</div>
-          {% endif %}
-
-          <div class="cell" style="grid-row:{{ pos[0] }}; grid-column:{{ pos[1] }};">
-            <div
-              class="seat"
-              id="seat-{{ n }}"
-              data-seat="{{ n }}"
-              role="button"
-              aria-label="Koltuk {{ n }}"
-            >
-              {{ n }}
-              <span class="svc-badge" title="Servis">🚌</span>
-              <span class="bag-badge" title="Bagaj">
-                <span class="bag-dir"></span>
-                <span class="bag-count">0</span>
-              </span>
-              <span class="stop-badge" title="Bu durakta inecek">🔔</span>
-            </div>
-            <div class="label" id="label-{{ n }}"></div>
-          </div>
-        {% endfor %}
-
-        <div class="cell" style="grid-row:13; grid-column:1;">
-          <div class="fab-stack">
-            <button class="fab-inline" type="button" id="fabBulkFixed">Toplu Giriş</button>
-            <button class="fab-inline green" type="button" id="fabCashFixed">Hızlı Tahsilat</button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="legend">
+    <div class="mini-chip">🟢 Boş</div>
+    <div class="mini-chip">🔵 Bay</div>
+    <div class="mini-chip">🩷 Bayan</div>
+    <div class="mini-chip">🧳 Bagaj</div>
+    <div class="mini-chip">🔔 İniş</div>
+    <div class="mini-chip">🚌 Servis</div>
   </div>
 </div>
 
-<!-- Tekli koltuk modal -->
+      <div class="board-stage">
+        <div class="deck-wrap">
+          <div class="deck" id="deck">
+            <div class="corr">KORİDOR</div>
+
+            {% for n, pos in seat_positions.items() %}
+              {% if n == 29 %}
+                <div class="door">KAPI</div>
+              {% endif %}
+
+              <div class="cell" style="grid-row:{{ pos[0] }}; grid-column:{{ pos[1] }};">
+                <div class="seat" id="seat-{{ n }}" data-seat="{{ n }}" role="button" aria-label="Koltuk {{ n }}">
+                  {{ n }}
+                  <span class="svc-badge" title="Servis">🚌</span>
+                  <span class="bag-badge" title="Bagaj"><span class="bag-dir"></span><span class="bag-count">0</span></span>
+                  <span class="stop-badge" title="Bu durakta inecek">🔔</span>
+                </div>
+                <div class="label" id="label-{{ n }}"></div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="fab-column" aria-label="Hızlı işlemler">
+            <button class="fab primary" id="fabBulk" type="button" title="Toplu Giriş">＋</button>
+            <button class="fab green" id="fabCash" type="button" title="Hızlı Tahsilat">₺</button>
+            <button class="fab orange" id="btnOffloadNow" type="button" title="İndir">⇩</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel-card glass">
+      <div class="panel-tabs">
+        <button class="tab-btn active" type="button" data-tab="overview">Genel</button>
+        <button class="tab-btn" type="button" data-tab="route">Durak</button>
+        <button class="tab-btn" type="button" data-tab="eta">ETA</button>
+        <button class="tab-btn" type="button" data-tab="quick">İşlem</button>
+        <button class="tab-btn" type="button" data-tab="ai">Asistan</button>
+      </div>
+
+      <div class="tab-pane active" data-pane="overview">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Operasyon Özeti</h3>
+              <small id="miniLiveState">Hazır</small>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="k">Canlı Durak</div>
+                <div class="v" id="miniStop">—</div>
+                <div class="s">GPS veya manuel seçime göre</div>
+              </div>
+              <div class="metric-card">
+                <div class="k">Sonraki İşlem</div>
+                <div class="v" id="aiNextAction">—</div>
+                <div class="s">Sistem önerisi</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Saat</h3>
+              <small id="clockSub">—</small>
+            </div>
+            <div class="clock-big" id="clockMain">--:--:--</div>
+            <div class="clock-date" id="clockDate">—</div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Namaz Vakti</h3>
+              <small>Canlı</small>
+            </div>
+            <div class="prayer-line" id="prLine">Konum alınıyor…</div>
+          </div>
+
+          <div class="section-box">
+            <div class="speed-box" id="speedBox">
+              <div class="speed-left">
+                <div class="k">Hız / Limit</div>
+                <div class="speed-value"><b id="spVal">0</b><span>km/h</span></div>
+                <div class="speed-meta" id="spLimit">Limit: —</div>
+              </div>
+              <button class="tts-btn" id="ttsToggle" title="Sesli uyarı">🔊</button>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Rötar / ETA</h3>
+              <small id="routeNextTimed">—</small>
+            </div>
+            <div class="delay-main warn" id="delayMain">—</div>
+            <div class="delay-sub" id="delaySub">Saatli durak bekleniyor</div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Ekip</h3>
+              <small>Aktif sefer</small>
+            </div>
+            <div class="crew-list">
+              <div class="crew-item">🧑‍✈️ 1. Kaptan: <b>{{ trip['captain1'] or '-' }}</b></div>
+              <div class="crew-item">🧑‍✈️ 2. Kaptan: <b>{{ trip['captain2'] or '-' }}</b></div>
+              <div class="crew-item">🤝 Muavin: <b>{{ trip['attendant'] or '-' }}</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="route">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Canlı Durak Yönetimi</h3>
+              <small id="routeLiveStop">—</small>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Sıradaki Durak</span>
+                <select id="alertStop">
+                  <option value="">—</option>
+                </select>
+              </label>
+
+              <div class="field-row">
+                <label class="field">
+                  <span>Eşik (km)</span>
+                  <input type="number" id="alertRadius" min="0.1" step="0.1" value="3">
+                </label>
+
+                <label class="field">
+                  <span>Konum İzleme</span>
+                  <button class="btn primary" type="button" id="btnGeoWatch">KAPALI</button>
+                </label>
+              </div>
+
+              <div class="toggle-line">
+                <label><input type="checkbox" id="soundToggle" checked> Sesli yanıt</label>
+                <label><input type="checkbox" id="autoAdvanceToggle" checked> Oto ilerle</label>
+              </div>
+
+              <div class="action-grid">
+                <button class="btn warn" type="button" id="btnTriggerNow">Şimdi Uyar</button>
+                <button class="btn danger" type="button" id="btnOffloadNowPane">İnecekleri İndir</button>
+              </div>
+
+              <div class="muted" id="geoHint">Durak seç.</div>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Koordinat</h3>
+              <small>route_stop_coords</small>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Seçili Durak</span>
+                <input type="text" id="coordStopName" readonly>
+              </label>
+
+              <div class="field-row">
+                <label class="field">
+                  <span>Lat</span>
+                  <input type="number" id="coordLat" step="0.000001" placeholder="37.xxxxxx">
+                </label>
+                <label class="field">
+                  <span>Lng</span>
+                  <input type="number" id="coordLng" step="0.000001" placeholder="29.xxxxxx">
+                </label>
+              </div>
+
+              <button class="btn accent" type="button" id="btnSaveCoord">Koordinatı Kaydet</button>
+              <div class="muted">Bu kayıt route_stop_coords tablosuna yazılır.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="eta">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Saatli Garaj / Rötar</h3>
+              <small id="stEtaHint">Plan / ETA</small>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="k">Canlı Durak</div>
+                <div class="v" id="routeLiveStopCard">—</div>
+              </div>
+              <div class="metric-card">
+                <div class="k">Sonraki Saatli</div>
+                <div class="v" id="stEtaTarget">—</div>
+              </div>
+            </div>
+
+            <div class="timeline-list" id="etaTimeline" style="margin-top:12px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="quick">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Hızlı İşlemler</h3>
+              <small>Tek dokunuş</small>
+            </div>
+
+            <div class="action-grid">
+              <button class="btn primary" type="button" id="fabBulkPane">Toplu Giriş</button>
+              <button class="btn green" type="button" id="fabCashPane">Hızlı Tahsilat</button>
+              <button class="btn ghost" type="button" id="openStandingModalBtn">Ayakta Listesi</button>
+              <button class="btn dark" type="button" id="btnOpenRouteTab">Durak Sekmesi</button>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Ayakta Yolcular</h3>
+              <small id="quickStandingMeta">0 kişi</small>
+            </div>
+            <div class="standing-list" id="quickStandingList"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="ai">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>🧠 Operasyon Asistanı</h3>
+              <small>Canlı analiz</small>
+            </div>
+
+            <div class="ai-main" id="aiMain">Veriler hazırlanıyor…</div>
+            <div class="ai-sub" id="aiSub">Sistem canlı rota, durak ve rötar özetini hazırlıyor.</div>
+
+            <div class="ai-list" style="margin-top:12px;">
+              <div class="ai-item"><b>Sıradaki İşlem</b><span id="aiNextActionMirror">—</span></div>
+              <div class="ai-item"><b>Canlı Durak</b><span id="aiLiveStop">—</span></div>
+              <div class="ai-item"><b>Rötar Durumu</b><span id="aiDelay">—</span></div>
+              <div class="ai-item"><b>Yoğunluk</b><span id="aiDensity">—</span></div>
+              <div class="ai-item"><b>Servis</b><span id="aiService">—</span></div>
+              <div class="ai-item"><b>Emanet</b><span id="aiParcel">—</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="seatBackdrop"></div>
 <div class="modal glass" id="seatModal">
   <h3 id="seatTitle">Koltuk</h3>
@@ -1127,7 +1690,6 @@
         <span>Biniş Yeri</span>
         <select id="pickup"><option value="">—</option></select>
       </label>
-
       <label class="field">
         <span>İniş Yeri</span>
         <select id="dropoff"><option value="">—</option></select>
@@ -1159,7 +1721,6 @@
         <span>Tutar (₺)</span>
         <input type="number" id="price" value="0.00" step="0.01">
       </label>
-
       <label class="field">
         <span>Servis Notu</span>
         <input type="text" id="service_note" placeholder="Not / konum / açıklama">
@@ -1187,15 +1748,14 @@
   </div>
 
   <div class="modal-actions">
-    <button class="btn" type="button" id="btnSeatSave">Kaydet</button>
+    <button class="btn green" type="button" id="btnSeatSave">Kaydet</button>
     <button class="btn danger" type="button" id="btnSeatOffload">İniş (Boşalt)</button>
     <button class="btn ghost" type="button" id="btnSeatClose">Kapat</button>
   </div>
 </div>
 
-<!-- Toplu giriş -->
 <div class="modal-backdrop" id="bulkBackdrop"></div>
-<div class="modal glass" id="bulkModal">
+<div class="sheet-modal glass" id="bulkModal">
   <h3>Toplu Giriş</h3>
 
   <div class="field-grid">
@@ -1230,9 +1790,7 @@
       <label><input type="checkbox" id="bulkService"> Servis</label>
     </div>
 
-    <div class="muted">
-      Çoklu seçim açıksa koltukları elle seçersin. Kapalıysa sistem boş koltuklardan rastgele yerleştirir.
-    </div>
+    <div class="muted">Çoklu seçim açıksa koltukları elle seçersin. Kapalıysa sistem boş koltuklardan yerleştirir.</div>
   </div>
 
   <div class="modal-actions">
@@ -1241,9 +1799,8 @@
   </div>
 </div>
 
-<!-- Hızlı tahsilat -->
 <div class="modal-backdrop" id="cashBackdrop"></div>
-<div class="modal glass" id="cashModal">
+<div class="sheet-modal glass" id="cashModal">
   <h3>Hızlı Tahsilat (Ayakta)</h3>
 
   <div class="field-grid">
@@ -1252,7 +1809,6 @@
         <span>Adet</span>
         <input type="number" id="cashCount" min="1" value="1">
       </label>
-
       <label class="field">
         <span>Tutar (₺ / kişi)</span>
         <input type="number" id="cashPrice" min="0" step="0.01" value="0">
@@ -1264,7 +1820,6 @@
         <span>Nereden</span>
         <select id="cashFrom"><option value="">—</option></select>
       </label>
-
       <label class="field">
         <span>Nereye</span>
         <select id="cashTo"><option value="">—</option></select>
@@ -1293,9 +1848,8 @@
   </div>
 </div>
 
-<!-- Yaklaşma paneli -->
 <div class="modal-backdrop" id="approachBackdrop"></div>
-<div class="modal glass" id="approachModal">
+<div class="sheet-modal glass" id="approachModal">
   <h3 id="approachTitle">Durak Yaklaşıyor</h3>
   <div class="muted" id="approachInfo">—</div>
   <div class="approach-list" id="approachList"></div>
@@ -1307,12 +1861,11 @@
   </div>
 </div>
 
-<!-- Ayakta popover -->
 <div class="modal-backdrop" id="standingBackdrop"></div>
-<div class="standing-pop glass" id="standingPopover">
-  <div class="standing-head">Ayakta Yolcular</div>
+<div class="sheet-modal glass" id="standingModal">
+  <h3>Ayakta Yolcular</h3>
   <div class="muted" id="standingSummary">—</div>
-  <div class="standing-list" id="standingList"></div>
+  <div class="standing-list" id="standingList" style="margin-top:12px;"></div>
 
   <div class="modal-actions">
     <button class="btn danger" type="button" id="standingBulkOff" style="display:none">Toplu İndir</button>
@@ -1323,20 +1876,82 @@
 <div id="toast"></div>
 
 <script>
-  const csrf = "{{ csrf_token }}";
-  const TRIP_KEY = "{{ (trip['route'] ~ '|' ~ trip['plate'])|replace(' ', '_') }}";
+  const csrf = {{ csrf_token | tojson | safe }};
+  const ROUTE_NAME = {{ trip['route'] | tojson | safe }};
+  const TRIP_DATE = {{ trip['date'] | tojson | safe }};
+  const TRIP_DEPARTURE_TIME = {{ trip['departure_time'] | tojson | safe }};
+  const TRIP_KEY = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
 
   const seatPositions = {{ seat_positions | tojson | safe }};
   const assigned = {{ assigned | tojson | safe }};
   const stopsMap = {{ stops_map | tojson | safe }};
+  const boardsMapServer = {{ boards_map | tojson | safe }};
   const genders = {{ genders | tojson | safe }};
   const serviceMap = {{ service_map | tojson | safe }};
   const serviceNotes = {{ service_notes | tojson | safe }};
-
-  const boardsMap = JSON.parse(localStorage.getItem('boardsMap:' + TRIP_KEY) || '{}');
+  const serverStops = {{ stops | tojson | safe }};
 
   const BAG_TRIP = TRIP_KEY;
   window.BAG_TRIP = BAG_TRIP;
+
+  const ROUTE_SCHEDULES = {
+    "Denizli – İstanbul": [
+      { stop: "Denizli otogar", time: "20:00" },
+      { stop: "Alaşehir Otogar", time: "23:10" },
+      { stop: "Salihli Garaj", time: "23:50" },
+      { stop: "Turgutlu Garaj", time: "00:25" },
+      { stop: "Manisa Otogar", time: "01:05" },
+      { stop: "Balıkesir", time: "03:10" },
+      { stop: "Bursa Otogar", time: "04:30" },
+      { stop: "Harem", time: "07:30" },
+      { stop: "Esenler Otogar", time: "08:00" }
+    ],
+    "İstanbul – Denizli": [
+      { stop: "Esenler Otogar", time: "20:00" },
+      { stop: "Harem", time: "20:35" },
+      { stop: "Bursa Otogar", time: "23:15" },
+      { stop: "Balıkesir", time: "00:35" },
+      { stop: "Manisa Otogar", time: "02:40" },
+      { stop: "Turgutlu Garaj", time: "03:15" },
+      { stop: "Salihli Garaj", time: "03:55" },
+      { stop: "Alaşehir Otogar", time: "04:40" },
+      { stop: "Denizli otogar", time: "07:20" }
+    ],
+    "Denizli – İzmir": [
+      { stop: "Denizli otogar", time: "20:00" },
+      { stop: "Alaşehir Otogar", time: "22:10" },
+      { stop: "Salihli Garaj", time: "22:50" },
+      { stop: "Turgutlu Garaj", time: "23:25" },
+      { stop: "Manisa Otogar", time: "00:00" },
+      { stop: "İzmir Otogar", time: "01:10" }
+    ],
+    "İzmir – Denizli": [
+      { stop: "İzmir Otogar", time: "20:00" },
+      { stop: "Manisa Otogar", time: "21:00" },
+      { stop: "Turgutlu Garaj", time: "21:35" },
+      { stop: "Salihli Garaj", time: "22:10" },
+      { stop: "Alaşehir Otogar", time: "22:50" },
+      { stop: "Denizli otogar", time: "01:00" }
+    ]
+  };
+
+  const VOICE_HELP = [
+    "kaç yolcu var",
+    "ayakta kaç kişi var",
+    "hesap aç",
+    "emanet aç",
+    "sıradaki durak [durak adı]",
+    "durak seç [durak adı]",
+    "bir sonraki durak",
+    "rötar kaç",
+    "hangi duraktayız",
+    "sesli yardım"
+  ];
+
+  const $ = (s)=>document.querySelector(s);
+  const $$ = (s)=>Array.from(document.querySelectorAll(s));
+
+  const boardsMap = Object.assign({}, boardsMapServer || {}, JSON.parse(localStorage.getItem("boardsMap:" + TRIP_KEY) || "{}"));
 
   let cachedStops = null;
   let currentSeat = null;
@@ -1346,61 +1961,104 @@
   let standingItems = [];
   let parcelItems = [];
   let geoWatchId = null;
+  let speedWatchId = null;
   let lastAlertAt = 0;
   let snoozeUntil = 0;
   let lastApproach = { stop:null, seats:[] };
+  let currentCoords = null;
+
   const multiSelected = new Set();
   const ALERT_COOLDOWN_MS = 3 * 60 * 1000;
 
-  const $ = (s)=>document.querySelector(s);
-  const $$ = (s)=>Array.from(document.querySelectorAll(s));
+  const speedState = {
+    current: 0,
+    history: [],
+    lastLimitObj: null,
+    lastLimitFetchTs: 0,
+    lastLimitValue: null,
+    lastWarnOverAt: 0,
+    lastWarnNearAt: 0,
+    liveStop: '',
+    passedStops: new Set(),
+    etaItems: []
+  };
 
-  function toast(msg, ms=2200){
-    const t = $('#toast');
+  function toast(msg, ms=2400){
+    const t = $("#toast");
     if(!t) return;
     t.textContent = msg;
-    t.style.display = 'block';
+    t.style.display = "block";
     clearTimeout(toast._timer);
-    toast._timer = setTimeout(()=> t.style.display='none', ms);
+    toast._timer = setTimeout(()=> t.style.display = "none", ms);
   }
 
   function fmtTL(v){
-    return '₺' + Number(v || 0).toFixed(2);
+    return "₺" + Number(v || 0).toFixed(2);
   }
 
   function parseMoney(v){
-    if(typeof v === 'number') return v;
-    const s = String(v || '').replace(',', '.').trim();
+    const s = String(v ?? "").replace(",", ".").trim();
     const n = parseFloat(s);
-    return isNaN(n) ? 0 : n;
+    return Number.isFinite(n) ? n : 0;
   }
 
   function numTR(v){
-    const n = parseFloat(String(v ?? '').replace(',', '.'));
+    const n = parseFloat(String(v ?? "").replace(",", "."));
     return Number.isFinite(n) ? n : NaN;
   }
 
+  function clamp(v,min,max){
+    return Math.max(min, Math.min(max, v));
+  }
+
   function norm(s){
-    return (s || '')
+    return (s || "")
       .toString()
-      .normalize('NFKD')
-      .replace(/[\u0300-\u036f]/g, '')
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
       .trim()
       .toLowerCase();
   }
 
+  function safeDate(dateStr, fallback=new Date()){
+    const d = new Date(dateStr);
+    return Number.isNaN(d.getTime()) ? fallback : d;
+  }
+
   async function safeJsonFetch(url, opt){
     const res = await fetch(url, opt || {});
-    const ct = res.headers.get('content-type') || '';
-    if(!ct.includes('application/json')){
+    const ct = res.headers.get("content-type") || "";
+    if(!ct.includes("application/json")){
       const txt = await res.text();
-      throw new Error(txt || 'JSON bekleniyordu');
+      throw new Error(txt || "JSON bekleniyordu");
     }
     return await res.json();
   }
 
   function persistBoards(){
-    localStorage.setItem('boardsMap:' + TRIP_KEY, JSON.stringify(boardsMap || {}));
+    localStorage.setItem("boardsMap:" + TRIP_KEY, JSON.stringify(boardsMap || {}));
+  }
+
+  function persistVoiceState(){
+    localStorage.setItem("liveStop:" + TRIP_KEY, speedState.liveStop || "");
+    localStorage.setItem("passedStops:" + TRIP_KEY, JSON.stringify([...speedState.passedStops]));
+  }
+
+  function loadVoiceState(){
+    speedState.liveStop = localStorage.getItem("liveStop:" + TRIP_KEY) || "";
+    try{
+      speedState.passedStops = new Set(JSON.parse(localStorage.getItem("passedStops:" + TRIP_KEY) || "[]"));
+    }catch(_){
+      speedState.passedStops = new Set();
+    }
+  }
+
+  function persistStandingTotals(){
+    localStorage.setItem("standingTotals:" + TRIP_KEY, JSON.stringify({ count: standingCount, revenue: standingRevenue }));
+  }
+
+  function persistStandingItems(){
+    localStorage.setItem("standingItems:" + TRIP_KEY, JSON.stringify(standingItems || []));
   }
 
   function sampleRandom(arr, count){
@@ -1412,9 +2070,26 @@
     return a.slice(0, Math.max(0, Math.min(count, a.length)));
   }
 
+  function allStopsList(){
+    if(Array.isArray(cachedStops) && cachedStops.length) return cachedStops.map(x => x.name);
+    return Array.isArray(serverStops) ? serverStops.slice() : [];
+  }
+
+  function indexOfStopByName(name){
+    const list = allStopsList();
+    const t = norm(name);
+    return list.findIndex(x => norm(x) === t);
+  }
+
   function findStopByName(name){
     const t = norm(name);
-    return (cachedStops || []).find(x => norm(x?.name) === t) || null;
+    const list = Array.isArray(cachedStops) ? cachedStops : (Array.isArray(serverStops) ? serverStops.map(s => ({ name:s, lat:null, lng:null })) : []);
+    return list.find(x => norm(x?.name) === t) || null;
+  }
+
+  function findCanonicalStopName(name){
+    const s = findStopByName(name);
+    return s?.name || "";
   }
 
   function hasCoord(stop){
@@ -1429,22 +2104,101 @@
     const toRad = d => d * Math.PI / 180;
     const dLat = toRad(b.lat - a.lat);
     const dLng = toRad(b.lng - a.lng);
-    const la1 = toRad(a.lat), la2 = toRad(b.lat);
+    const la1 = toRad(a.lat);
+    const la2 = toRad(b.lat);
     const h = Math.sin(dLat/2)**2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLng/2)**2;
     return 2 * R * Math.asin(Math.sqrt(h));
   }
 
+  function tripStartDate(){
+    const datePart = TRIP_DATE || new Date().toISOString().slice(0,10);
+    const timePart = TRIP_DEPARTURE_TIME || "00:00";
+    const iso = `${datePart}T${String(timePart).length === 5 ? timePart + ":00" : timePart}`;
+    return safeDate(iso, new Date());
+  }
+
+  function getRouteSchedule(){
+    return ROUTE_SCHEDULES[ROUTE_NAME] || [];
+  }
+
+  function scheduleOffsetsForRoute(){
+    const sample = getRouteSchedule();
+    if(!sample.length) return [];
+    let prev = null;
+    let carry = 0;
+    let firstAbs = null;
+    return sample.map(item => {
+      const parts = String(item.time || "00:00").split(":");
+      const hh = parseInt(parts[0], 10) || 0;
+      const mm = parseInt(parts[1], 10) || 0;
+      let cur = hh * 60 + mm + carry;
+      if(prev !== null && cur < prev){
+        carry += 1440;
+        cur = hh * 60 + mm + carry;
+      }
+      if(firstAbs === null) firstAbs = cur;
+      prev = cur;
+      return { stop:item.stop, sampleTime:item.time, offsetMin: cur - firstAbs };
+    });
+  }
+
+  function buildActualSchedule(){
+    const start = tripStartDate();
+    const offsets = scheduleOffsetsForRoute();
+    return offsets.map(x => ({
+      stop: x.stop,
+      plan: x.sampleTime,
+      planDate: new Date(start.getTime() + x.offsetMin * 60000),
+      offsetMin: x.offsetMin,
+      routeIndex: indexOfStopByName(x.stop)
+    }));
+  }
+
+  function minutesDiff(a, b){
+    return Math.round((a - b) / 60000);
+  }
+
+  function fmtHour(d){
+    if(!d || Number.isNaN(d.getTime())) return "—";
+    return d.toLocaleTimeString("tr-TR", { hour:"2-digit", minute:"2-digit" });
+  }
+
+  function fmtSignedMin(mins){
+    if(!Number.isFinite(mins)) return "—";
+    if(Math.abs(mins) > 720) return "Plan dışı";
+    if(mins === 0) return "Tam saat";
+    if(mins < 0) return `${Math.abs(mins)} dk erken`;
+    return `${mins} dk rötar`;
+  }
+
+  function getSelectedStopName(){
+    return ($("#alertStop")?.value || "").trim();
+  }
+
+  function isTimedStop(name){
+    return getRouteSchedule().some(x => norm(x.stop) === norm(name));
+  }
+
+  function hasPassengersFor(stopName){
+    return seatsForStop(stopName).length > 0;
+  }
+
+  function isFinalStop(name){
+    const list = allStopsList();
+    const idx = indexOfStopByName(name);
+    return idx >= 0 && idx === list.length - 1;
+  }
+
   async function fetchStops(){
-    const j = await safeJsonFetch('/api/stops');
-    if(!j.ok) throw new Error(j.msg || 'Duraklar alınamadı');
+    const j = await safeJsonFetch("/api/stops");
+    if(!j.ok) throw new Error(j.msg || "Duraklar alınamadı");
 
     let stops = (j.stops || []).map(name => ({ name, lat:null, lng:null }));
-
     try{
-      const c = await safeJsonFetch('/api/coords');
+      const c = await safeJsonFetch("/api/coords");
       if(c.ok){
-        const map = new Map((c.items || []).map(i => [i.stop, { lat:i.lat, lng:i.lng }]));
-        stops = stops.map(s => map.has(s.name) ? { ...s, ...map.get(s.name) } : s);
+        const coordMap = new Map((c.items || []).map(i => [i.stop, { lat:i.lat, lng:i.lng }]));
+        stops = stops.map(s => coordMap.has(s.name) ? { ...s, ...coordMap.get(s.name) } : s);
       }
     }catch(_){}
 
@@ -1454,23 +2208,23 @@
 
   async function populateStops(){
     if(!cachedStops) await fetchStops();
-    const ids = ['alertStop','pickup','dropoff','bulkFrom','bulkTo','cashFrom','cashTo'];
-    for(const id of ids){
-      const el = $('#' + id);
-      if(!el) continue;
 
+    const ids = ["alertStop","pickup","dropoff","bulkFrom","bulkTo","cashFrom","cashTo"];
+    for(const id of ids){
+      const el = $("#" + id);
+      if(!el) continue;
       const prev = el.value;
-      el.innerHTML = '';
-      const o0 = document.createElement('option');
-      o0.value = '';
-      o0.textContent = '—';
+      el.innerHTML = "";
+      const o0 = document.createElement("option");
+      o0.value = "";
+      o0.textContent = "—";
       el.appendChild(o0);
 
       for(const s of cachedStops){
-        const o = document.createElement('option');
+        const o = document.createElement("option");
         o.value = s.name;
         o.dataset.label = s.name;
-        o.textContent = s.name + (hasCoord(s) ? ' •' : '');
+        o.textContent = s.name + (hasCoord(s) ? " •" : "");
         el.appendChild(o);
       }
 
@@ -1483,8 +2237,7 @@
   function computeSeatCountsByStop(){
     const out = {};
     Object.values(stopsMap || {}).forEach(stop => {
-      if(!stop) return;
-      out[stop] = (out[stop] || 0) + 1;
+      if(stop) out[stop] = (out[stop] || 0) + 1;
     });
     return out;
   }
@@ -1492,7 +2245,7 @@
   function computeStandingCountsByStop(){
     const out = {};
     (standingItems || []).forEach(it => {
-      const raw = (it?.to || '').trim();
+      const raw = (it?.to || "").trim();
       if(!raw) return;
       const key = (findStopByName(raw)?.name || raw).trim();
       const c = Number(it?.count || 0);
@@ -1505,7 +2258,7 @@
   function computeParcelCountsByStop(){
     const out = {};
     (parcelItems || []).forEach(it => {
-      const raw = (it?.to || '').trim();
+      const raw = (it?.to || "").trim();
       if(!raw) return;
       const key = (findStopByName(raw)?.name || raw).trim();
       const c = Number(it?.count || 0);
@@ -1515,8 +2268,24 @@
     return out;
   }
 
+  function totalParcelCount(){
+    return (parcelItems || []).reduce((a,b)=> a + Number(b?.count || 0), 0);
+  }
+
+  function totalServiceCount(){
+    return Object.keys(assigned || {}).filter(k => assigned[k] && serviceMap[k]).length;
+  }
+
+  function seatsForStop(stop){
+    const out = [];
+    for(const [seat, st] of Object.entries(stopsMap || {})){
+      if(norm(st) === norm(stop)) out.push(Number(seat));
+    }
+    return out.sort((a,b)=>a-b);
+  }
+
   function refreshStopBadges(){
-    const sel = $('#alertStop');
+    const sel = $("#alertStop");
     if(!sel) return;
 
     const seatCounts = computeSeatCountsByStop();
@@ -1525,62 +2294,54 @@
 
     [...sel.options].forEach(opt => {
       if(!opt.value){
-        opt.textContent = '—';
+        opt.textContent = "—";
         return;
       }
       const base = opt.dataset.label || opt.value;
       const stop = findStopByName(base);
-      const dot = hasCoord(stop) ? ' •' : '';
-      const seatTxt = seatCounts[base] ? ` (${seatCounts[base]} koltuk)` : '';
-      const standTxt = standingCounts[base] ? ` + Ayakta ${standingCounts[base]}` : '';
-      const parcelTxt = parcelCounts[base] ? ` 📦 ${parcelCounts[base]}` : '';
+      const dot = hasCoord(stop) ? " •" : "";
+      const seatTxt = seatCounts[base] ? ` (${seatCounts[base]} koltuk)` : "";
+      const standTxt = standingCounts[base] ? ` + Ayakta ${standingCounts[base]}` : "";
+      const parcelTxt = parcelCounts[base] ? ` 📦 ${parcelCounts[base]}` : "";
       opt.textContent = base + dot + seatTxt + standTxt + parcelTxt;
     });
   }
 
-  function seatsForStop(stop){
-    const out = [];
-    for(const [seat, st] of Object.entries(stopsMap || {})){
-      if(st === stop) out.push(Number(seat));
-    }
-    return out.sort((a,b)=>a-b);
-  }
-
   function updateStopSeatBadges(){
-    const stop = $('#alertStop')?.value || '';
-    $$('.seat').forEach(el => el.classList.remove('has-stop'));
+    const stop = getSelectedStopName();
+    $$(".seat").forEach(el => el.classList.remove("has-stop"));
     if(!stop) return;
     seatsForStop(stop).forEach(n => {
-      const el = $('#seat-' + n);
-      if(el) el.classList.add('has-stop');
+      const el = $("#seat-" + n);
+      if(el) el.classList.add("has-stop");
     });
   }
 
   function setSeatVisual(seatNo){
-    const el = $('#seat-' + seatNo);
+    const key = String(seatNo);
+    const el = $("#seat-" + seatNo);
     if(!el) return;
 
-    el.classList.remove('male','female','isAssigned','has-service');
+    el.classList.remove("male","female","isAssigned","has-service");
+    const isAssigned = !!assigned[key];
+    const gender = genders[key] || "";
 
-    const isAssigned = !!assigned[String(seatNo)];
-    const gender = genders[String(seatNo)] || '';
+    if(isAssigned) el.classList.add("isAssigned");
+    if(gender === "bay") el.classList.add("male");
+    if(gender === "bayan") el.classList.add("female");
+    if(serviceMap[key]) el.classList.add("has-service");
 
-    if(isAssigned) el.classList.add('isAssigned');
-    if(gender === 'bay') el.classList.add('male');
-    if(gender === 'bayan') el.classList.add('female');
-    if(serviceMap[String(seatNo)]) el.classList.add('has-service');
-
-    const label = $('#label-' + seatNo);
+    const label = $("#label-" + seatNo);
     if(label){
-      const from = boardsMap[String(seatNo)] || '';
-      const to = stopsMap[String(seatNo)] || '';
-      label.textContent = isAssigned ? (from ? `${from} → ${to}` : to) : '';
+      const from = boardsMap[key] || "";
+      const to = stopsMap[key] || "";
+      label.textContent = isAssigned ? (from ? `${from} → ${to}` : to) : "";
     }
 
-    const svc = el.querySelector('.svc-badge');
+    const svc = el.querySelector(".svc-badge");
     if(svc){
-      const note = (serviceNotes[String(seatNo)] || '').trim();
-      svc.title = note ? ('Servis: ' + note) : 'Servis';
+      const note = (serviceNotes[key] || "").trim();
+      svc.title = note ? `Servis: ${note}` : "Servis";
     }
   }
 
@@ -1590,140 +2351,204 @@
     const empty = totalSeats - filled;
     const occ = totalSeats ? Math.round((filled / totalSeats) * 100) : 0;
 
-    $('#stTotalPax').textContent = standingCount > 0 ? `${filled} + ${standingCount}` : `${filled}`;
-    $('#stTotalHint').textContent = `Toplam ${filled + standingCount} · Oturan ${filled} · Ayakta ${standingCount}`;
-    $('#stEmpty').textContent = String(empty);
-    $('#stOcc').textContent = occ + '%';
-    $('#stStanding').textContent = String(standingCount);
-    $('#stStandingTL').textContent = fmtTL(standingRevenue);
+    $("#pillTotal").textContent = String(filled + standingCount);
+    $("#pillEmpty").textContent = String(empty);
+    $("#pillStanding").textContent = String(standingCount);
+    $("#pillCash").textContent = fmtTL(standingRevenue);
+    $("#pillService").textContent = String(totalServiceCount());
+    $("#pillParcel").textContent = String(totalParcelCount());
 
-    const card = $('#standingCard');
-    if(card){
-      if(standingCount > 0) card.classList.add('pulse');
-      else card.classList.remove('pulse');
-    }
-  }
+    $("#topOcc").textContent = occ + "%";
 
-  function getSelectedStopName(){
-    return ($('#alertStop')?.value || '').trim();
-  }
-
-  function indexOfStopByName(name){
-    if(!Array.isArray(cachedStops)) return -1;
-    const t = norm(name);
-    return cachedStops.findIndex(s => norm(s?.name) === t);
-  }
-
-  function hasPassengersFor(stopName){
-    return seatsForStop(stopName).length > 0;
-  }
-
-  function isFinalStop(name){
-    if(!Array.isArray(cachedStops) || !cachedStops.length) return false;
-    const idx = indexOfStopByName(name);
-    return idx >= 0 && idx === cachedStops.length - 1;
-  }
-
-  function computeNextStopName(currentName, mode='nextWithSeats'){
-    if(!Array.isArray(cachedStops) || !cachedStops.length) return '';
-    const curIdx = indexOfStopByName(currentName);
-    let i = (curIdx >= 0 ? curIdx + 1 : 0);
-
-    if(mode === 'strictNext'){
-      return cachedStops[i]?.name || '';
+    const standingCard = $("#standingCard");
+    if(standingCard){
+      standingCount > 0 ? standingCard.classList.add("pulse") : standingCard.classList.remove("pulse");
     }
 
-    for(; i < cachedStops.length; i++){
-      const nm = cachedStops[i]?.name;
-      if(nm && hasPassengersFor(nm)) return nm;
-    }
-    return '';
+    const quickStandingMeta = $("#quickStandingMeta");
+    if(quickStandingMeta) quickStandingMeta.textContent = `${standingCount} kişi · ${fmtTL(standingRevenue)}`;
   }
 
-  function setSelectedStop(name, { silent=false } = {}){
-    const sel = $('#alertStop');
-    if(!sel) return;
+  function renderQuickStandingList(){
+    const box = $("#quickStandingList");
+    if(!box) return;
+    box.innerHTML = "";
 
-    if(!name){
-      sel.value = '';
-      updateGeoHint();
-      refreshStopBadges();
-      updateStopSeatBadges();
-      renderAI();
+    if(!standingItems.length){
+      box.innerHTML = `<div class="muted">Ayakta kayıt yok.</div>`;
       return;
     }
 
-    const ok = [...sel.options].some(o => norm(o.value) === norm(name));
-    if(!ok) return;
-
-    sel.value = name;
-    updateGeoHint();
-    refreshStopBadges();
-    updateStopSeatBadges();
-    renderAI();
-
-    if(!silent){
-      if(isFinalStop(name)){
-        speakFinalStopSequence(name);
-      }else{
-        const seats = seatsForStop(name);
-        speak(`Sıradaki durak ${name}. Bu durakta ${seats.length} yolcu inecek.`);
-      }
-    }
+    standingItems.slice(0, 6).forEach(it => {
+      const d = document.createElement("div");
+      d.className = "standing-item";
+      d.innerHTML = `
+        <div>
+          <b>${it.from || "—"} → ${it.to || "—"}</b>
+          <small>${it.count} kişi · ${fmtTL(Number(it.count || 0) * Number(it.price || 0))}</small>
+        </div>
+        <span>${it.payment || "nakit"}</span>
+      `;
+      box.appendChild(d);
+    });
   }
 
-  function advanceToNextStop({ mode='nextWithSeats', silent=false, ignoreToggle=false } = {}){
-    const autoOn = $('#autoAdvanceToggle')?.checked;
+  function updateCompactHeader(){
+    $("#topLiveStop").textContent = speedState.liveStop || getSelectedStopName() || "—";
+    $("#topSpeed").textContent = `${Math.round(Number(speedState.current || 0))} km/h`;
+
+    const sel = getSelectedStopName();
+    $("#selectedStopBadge").textContent = sel || "—";
+
+    const liveState = $("#miniLiveState");
+    if(liveState){
+      const seatCt = sel ? seatsForStop(sel).length : 0;
+      const standingCt = sel ? (computeStandingCountsByStop()[sel] || 0) : 0;
+      const parcelCt = sel ? (computeParcelCountsByStop()[sel] || 0) : 0;
+      const totalOps = seatCt + standingCt + parcelCt;
+      liveState.textContent = sel ? (totalOps > 0 ? "İşlem var" : "Sakin") : (speedState.liveStop ? "Yolda" : "Hazır");
+    }
+
+    $("#miniStop").textContent = sel || speedState.liveStop || "—";
+    $("#routeLiveStop").textContent = speedState.liveStop || "—";
+    $("#routeLiveStopCard").textContent = speedState.liveStop || "—";
+    $("#coordStopName").value = sel || "";
+  }
+
+  function computeNextStopName(currentName, mode="nextWithSeats"){
+    const list = allStopsList();
+    if(!list.length) return "";
+
+    const curIdx = indexOfStopByName(currentName);
+    let i = curIdx >= 0 ? curIdx + 1 : 0;
+
+    if(mode === "strictNext") return list[i] || "";
+
+    for(; i < list.length; i++){
+      const nm = list[i];
+      if(!nm) continue;
+      if(mode === "nextWithSeats"){
+        if(hasPassengersFor(nm) || computeStandingCountsByStop()[nm] || computeParcelCountsByStop()[nm] || isTimedStop(nm)){
+          return nm;
+        }
+      }
+    }
+    return "";
+  }
+
+  function setSelectedStop(name, { silent=false, voiceReply=true } = {}){
+    const sel = $("#alertStop");
+    if(!sel) return false;
+
+    if(!name){
+      sel.value = "";
+      refreshStopBadges();
+      updateStopSeatBadges();
+      updateGeoHint();
+      renderAI();
+      renderTimeline();
+      updateCompactHeader();
+      return true;
+    }
+
+    const canonical = findCanonicalStopName(name);
+    if(!canonical) return false;
+
+    const ok = [...sel.options].some(o => norm(o.value) === norm(canonical));
+    if(!ok) return false;
+
+    sel.value = canonical;
+    refreshStopBadges();
+    updateStopSeatBadges();
+    updateGeoHint();
+    renderAI();
+    renderTimeline();
+    updateCompactHeader();
+
+    if(!silent && voiceReply){
+      const seatCt = seatsForStop(canonical).length;
+      const standCt = computeStandingCountsByStop()[canonical] || 0;
+      const parcelCt = computeParcelCountsByStop()[canonical] || 0;
+      speak(`Sıradaki durak ${canonical}. ${seatCt} oturan, ${standCt} ayakta, ${parcelCt} emanet işlemi var.`);
+    }
+
+    return true;
+  }
+
+  function markPassedStopsUntil(stopName){
+    const idx = indexOfStopByName(stopName);
+    const list = allStopsList();
+    if(idx < 0 || !list.length) return;
+    for(let i=0; i<=idx; i++) speedState.passedStops.add(list[i]);
+    persistVoiceState();
+  }
+
+  function setLiveStop(name){
+    const canonical = findCanonicalStopName(name);
+    if(!canonical) return false;
+    speedState.liveStop = canonical;
+    markPassedStopsUntil(canonical);
+    persistVoiceState();
+    updateCompactHeader();
+    renderTimeline();
+    renderAI();
+    return true;
+  }
+
+  function advanceToNextStop({ mode="nextWithSeats", silent=false, ignoreToggle=false } = {}){
+    const autoOn = $("#autoAdvanceToggle")?.checked;
     if(autoOn === false && !ignoreToggle) return;
 
     const cur = getSelectedStopName();
     const next = computeNextStopName(cur, mode);
+
     if(!next){
-      toast('Rota bitti ya da ileride yolcusu olan durak yok.');
-      setSelectedStop('', { silent:true });
+      toast("Rota bitti ya da ileride işlem yok.");
+      setSelectedStop("", { silent:true, voiceReply:false });
       return;
     }
-    setSelectedStop(next, { silent });
+
+    setSelectedStop(next, { silent, voiceReply: !silent });
   }
 
   function updateGeoHint(){
-    const h = $('#geoHint');
-    const stopName = $('#alertStop')?.value || '';
-    $('#miniStop').textContent = stopName || '—';
-    $('#coordStopName').value = stopName || '';
+    const h = $("#geoHint");
+    if(!h) return;
 
+    const stopName = getSelectedStopName();
     if(geoWatchId){
       return;
     }
-    if(!h) return;
+
     if(!stopName){
-      h.textContent = 'Durak seç.';
+      h.textContent = "Durak seç.";
       return;
     }
 
     const s = findStopByName(stopName);
-    h.textContent = hasCoord(s) ? 'Koordinat hazır.' : 'Koordinat yok. Aşağıdan ekleyin.';
+    h.textContent = hasCoord(s) ? "Koordinat hazır." : "Koordinat yok. Aşağıdan ekleyin.";
   }
 
   function openModal(backdropSel, modalSel){
-    $(backdropSel).style.display = 'block';
-    $(modalSel).style.display = 'block';
+    $(backdropSel).style.display = "block";
+    $(modalSel).style.display = "block";
   }
 
   function closeModal(backdropSel, modalSel){
-    $(backdropSel).style.display = 'none';
-    $(modalSel).style.display = 'none';
+    $(backdropSel).style.display = "none";
+    $(modalSel).style.display = "none";
   }
 
   function openSeat(seatNo){
     currentSeat = seatNo;
-    $$('.seat.selected').forEach(x => x.classList.remove('selected'));
-    const seatEl = $('#seat-' + seatNo);
-    if(seatEl) seatEl.classList.add('selected');
+    $$(".seat.selected").forEach(x => x.classList.remove("selected"));
 
-    $('#seatTitle').textContent = 'Koltuk ' + seatNo;
-    $('#pickup').value = boardsMap[String(seatNo)] || $('#alertStop')?.value || '';
-    $('#dropoff').value = stopsMap[String(seatNo)] || '';
+    const seatEl = $("#seat-" + seatNo);
+    if(seatEl) seatEl.classList.add("selected");
+
+    $("#seatTitle").textContent = "Koltuk " + seatNo;
+    $("#pickup").value = boardsMap[String(seatNo)] || getSelectedStopName() || "";
+    $("#dropoff").value = stopsMap[String(seatNo)] || "";
 
     const pay = document.querySelector('input[name="pay"][value="nakit"]');
     if(pay) pay.checked = true;
@@ -1731,60 +2556,46 @@
     const ticket = document.querySelector('input[name="ticket"][value="biletsiz"]');
     if(ticket) ticket.checked = true;
 
-    $('#price').value = '0.00';
+    $("#price").value = "0.00";
 
-    const prevGender = genders[String(seatNo)] || '';
+    const prevGender = genders[String(seatNo)] || "";
     const gInput = document.querySelector(`input[name="gender"][value="${prevGender}"]`) || document.querySelector('input[name="gender"][value=""]');
     if(gInput) gInput.checked = true;
 
-    $('#service').checked = !!serviceMap[String(seatNo)];
-    $('#service_note').value = serviceNotes[String(seatNo)] || '';
-    $('#pairOk').checked = false;
+    $("#service").checked = !!serviceMap[String(seatNo)];
+    $("#service_note").value = serviceNotes[String(seatNo)] || "";
+    $("#pairOk").checked = false;
 
-    openModal('#seatBackdrop', '#seatModal');
+    openModal("#seatBackdrop", "#seatModal");
   }
 
   function closeSeat(){
     currentSeat = null;
-    closeModal('#seatBackdrop', '#seatModal');
-    $$('.seat.selected').forEach(x => x.classList.remove('selected'));
+    closeModal("#seatBackdrop", "#seatModal");
+    $$(".seat.selected").forEach(x => x.classList.remove("selected"));
   }
 
   async function saveSeat(){
     if(!currentSeat) return;
 
-    const from = $('#pickup').value || $('#alertStop')?.value || '';
-    const stop = $('#dropoff').value || '';
-    const ticket = document.querySelector('input[name="ticket"]:checked')?.value || 'biletsiz';
-    const payment = document.querySelector('input[name="pay"]:checked')?.value || 'nakit';
-    const amount = parseMoney($('#price').value || 0);
-    const gender = document.querySelector('input[name="gender"]:checked')?.value || '';
-    const pair_ok = $('#pairOk').checked ? 1 : 0;
-    const service = $('#service').checked;
-    const service_note = $('#service_note').value || '';
+    const from = $("#pickup").value || getSelectedStopName() || "";
+    const stop = $("#dropoff").value || "";
+    const ticket = document.querySelector('input[name="ticket"]:checked')?.value || "biletsiz";
+    const payment = document.querySelector('input[name="pay"]:checked')?.value || "nakit";
+    const amount = parseMoney($("#price").value || 0);
+    const gender = document.querySelector('input[name="gender"]:checked')?.value || "";
+    const pair_ok = $("#pairOk").checked ? 1 : 0;
+    const service = $("#service").checked;
+    const service_note = $("#service_note").value || "";
 
     try{
-      const j = await safeJsonFetch('/api/seat', {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'X-CSRF-Token':csrf
-        },
-        body:JSON.stringify({
-          seat_no: currentSeat,
-          from,
-          stop,
-          ticket_type: ticket,
-          payment,
-          amount,
-          gender,
-          pair_ok,
-          service,
-          service_note
-        })
+      const j = await safeJsonFetch("/api/seat", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json", "X-CSRF-Token":csrf },
+        body:JSON.stringify({ seat_no: currentSeat, from, stop, ticket_type: ticket, payment, amount, gender, pair_ok, service, service_note })
       });
 
-      if(!j.ok) throw new Error(j.msg || 'Kayıt başarısız');
+      if(!j.ok) throw new Error(j.msg || "Kayıt başarısız");
 
       assigned[String(currentSeat)] = true;
       stopsMap[String(currentSeat)] = stop;
@@ -1792,17 +2603,19 @@
       serviceMap[String(currentSeat)] = !!service;
       serviceNotes[String(currentSeat)] = service_note;
       boardsMap[String(currentSeat)] = from;
-      persistBoards();
 
+      persistBoards();
       setSeatVisual(currentSeat);
       closeSeat();
       updateStats();
       refreshStopBadges();
       updateStopSeatBadges();
       renderAI();
-      toast('Koltuk kaydedildi');
+      renderTimeline();
+      updateCompactHeader();
+      toast("Koltuk kaydedildi");
     }catch(e){
-      toast(e.message || 'Kaydetme hatası');
+      toast(e.message || "Kaydetme hatası");
     }
   }
 
@@ -1813,29 +2626,28 @@
     delete serviceMap[String(seatNo)];
     delete serviceNotes[String(seatNo)];
     delete boardsMap[String(seatNo)];
+
     persistBoards();
     setSeatVisual(seatNo);
 
-    const el = $('#seat-' + seatNo);
+    const el = $("#seat-" + seatNo);
     if(el){
-      el.classList.remove('has-stop','multi-picked','blink-yellow','has-bag');
-      const cnt = el.querySelector('.bag-count');
-      const dir = el.querySelector('.bag-dir');
-      if(cnt) cnt.textContent = '0';
-      if(dir) dir.textContent = '';
+      el.classList.remove("has-stop","multi-picked","blink-yellow","has-bag");
+      const cnt = el.querySelector(".bag-count");
+      const dir = el.querySelector(".bag-dir");
+      if(cnt) cnt.textContent = "0";
+      if(dir) dir.textContent = "";
     }
   }
 
   async function offloadSeat(){
     if(!currentSeat) return;
-
     try{
-      const j = await safeJsonFetch('/api/seat?seat_no=' + currentSeat, {
-        method:'DELETE',
-        headers:{ 'X-CSRF-Token': csrf }
+      const j = await safeJsonFetch("/api/seat?seat_no=" + currentSeat, {
+        method:"DELETE",
+        headers:{ "X-CSRF-Token": csrf }
       });
-
-      if(!j.ok) throw new Error(j.msg || 'Silme başarısız');
+      if(!j.ok) throw new Error(j.msg || "Silme başarısız");
 
       await clearBagsForSeat(currentSeat);
       clearSeatUI(currentSeat);
@@ -1844,65 +2656,64 @@
       refreshStopBadges();
       updateStopSeatBadges();
       renderAI();
-      toast('Koltuk boşaltıldı');
+      renderTimeline();
+      updateCompactHeader();
+      toast("Koltuk boşaltıldı");
     }catch(e){
-      toast(e.message || 'İniş hatası');
+      toast(e.message || "İniş hatası");
     }
   }
 
   function clearMultiPicks(){
-    for(const el of multiSelected){
-      el.classList.remove('multi-picked');
-    }
+    for(const el of multiSelected) el.classList.remove("multi-picked");
     multiSelected.clear();
   }
 
   function toggleSeatPick(el){
-    if(el.classList.contains('isAssigned')) return;
+    if(el.classList.contains("isAssigned")) return;
     if(multiSelected.has(el)){
       multiSelected.delete(el);
-      el.classList.remove('multi-picked');
+      el.classList.remove("multi-picked");
     }else{
       multiSelected.add(el);
-      el.classList.add('multi-picked');
+      el.classList.add("multi-picked");
     }
   }
 
   function setMultiMode(on){
     multiMode = !!on;
-    const cb = $('#multiPick');
+    const cb = $("#multiPick");
     if(cb) cb.checked = multiMode;
-
     if(!multiMode){
       clearMultiPicks();
-      toast('Çoklu seçim kapalı');
+      toast("Çoklu seçim kapalı");
     }else{
-      toast('Çoklu seçim açık. Koltukları seç.');
+      toast("Çoklu seçim açık. Koltukları seç.");
     }
   }
 
   function openBulk(){
-    populateStops().then(()=>{
-      const a = $('#alertStop')?.value || '';
-      if(a) $('#bulkTo').value = a;
-      $('#multiPick').checked = !!multiMode;
-      openModal('#bulkBackdrop', '#bulkModal');
+    populateStops().then(() => {
+      const a = getSelectedStopName() || "";
+      if(a) $("#bulkTo").value = a;
+      $("#multiPick").checked = !!multiMode;
+      openModal("#bulkBackdrop", "#bulkModal");
     });
   }
 
   function closeBulk(){
-    closeModal('#bulkBackdrop', '#bulkModal');
+    closeModal("#bulkBackdrop", "#bulkModal");
   }
 
   async function saveBulk(){
-    const from = $('#bulkFrom').value || '';
-    const to = $('#bulkTo').value || '';
-    const count = Math.max(1, parseInt($('#bulkCount').value || '1', 10));
-    const ticketVal = document.querySelector('input[name="bulkTicket"]:checked')?.value || 'biletsiz';
-    const useService = $('#bulkService').checked || false;
+    const from = $("#bulkFrom").value || "";
+    const to = $("#bulkTo").value || "";
+    const count = Math.max(1, parseInt($("#bulkCount").value || "1", 10));
+    const ticketVal = document.querySelector('input[name="bulkTicket"]:checked')?.value || "biletsiz";
+    const useService = $("#bulkService").checked || false;
 
     if(!to){
-      toast('Nereye seç');
+      toast("Nereye seç");
       return;
     }
 
@@ -1911,18 +2722,18 @@
 
     if(multiMode){
       if(!chosen.length){
-        toast('Çoklu seçim açık. Önce koltukları seç.');
+        toast("Önce koltukları seç.");
         return;
       }
       targets = chosen;
     }else{
       const empties = [];
-      $$('.seat').forEach(el => {
+      $$(".seat").forEach(el => {
         const no = el.dataset.seat;
         if(!assigned?.[no]) empties.push(Number(no));
       });
       if(!empties.length){
-        toast('Boş koltuk yok');
+        toast("Boş koltuk yok");
         return;
       }
       targets = sampleRandom(empties, count);
@@ -1931,43 +2742,20 @@
     try{
       let ok = false;
       try{
-        const j = await safeJsonFetch('/api/seats/bulk', {
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json',
-            'X-CSRF-Token':csrf
-          },
-          body:JSON.stringify({
-            seats: targets,
-            from,
-            stop: to,
-            ticket_type: ticketVal,
-            service: useService
-          })
+        const j = await safeJsonFetch("/api/seats/bulk", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json", "X-CSRF-Token":csrf },
+          body:JSON.stringify({ seats: targets, from, stop: to, ticket_type: ticketVal, service: useService })
         });
         ok = !!j.ok;
       }catch(_){}
 
       if(!ok){
         for(const n of targets){
-          await safeJsonFetch('/api/seat', {
-            method:'POST',
-            headers:{
-              'Content-Type':'application/json',
-              'X-CSRF-Token':csrf
-            },
-            body:JSON.stringify({
-              seat_no:n,
-              from,
-              stop:to,
-              ticket_type:ticketVal,
-              payment:'nakit',
-              amount:0,
-              gender:'',
-              pair_ok:0,
-              service:useService,
-              service_note:''
-            })
+          await safeJsonFetch("/api/seat", {
+            method:"POST",
+            headers:{ "Content-Type":"application/json", "X-CSRF-Token":csrf },
+            body:JSON.stringify({ seat_no:n, from, stop:to, ticket_type:ticketVal, payment:"nakit", amount:0, gender:"", pair_ok:0, service:useService, service_note:"" })
           });
         }
       }
@@ -1977,119 +2765,99 @@
         stopsMap[String(n)] = to;
         boardsMap[String(n)] = from;
         serviceMap[String(n)] = !!useService;
-        serviceNotes[String(n)] = '';
+        serviceNotes[String(n)] = "";
         setSeatVisual(n);
       }
 
       persistBoards();
       clearMultiPicks();
       multiMode = false;
-      $('#multiPick').checked = false;
+      $("#multiPick").checked = false;
       closeBulk();
       updateStats();
       refreshStopBadges();
       updateStopSeatBadges();
       renderAI();
+      renderTimeline();
+      updateCompactHeader();
       toast(`${targets.length} koltuk eklendi`);
     }catch(e){
-      toast(e.message || 'Toplu giriş hatası');
+      toast(e.message || "Toplu giriş hatası");
     }
   }
 
   function openCash(){
-    populateStops().then(()=>{
-      const a = $('#alertStop')?.value || '';
-      if(a) $('#cashTo').value = a;
-      openModal('#cashBackdrop', '#cashModal');
+    populateStops().then(() => {
+      const a = getSelectedStopName() || "";
+      if(a) $("#cashTo").value = a;
+      openModal("#cashBackdrop", "#cashModal");
     });
   }
 
   function closeCash(){
-    closeModal('#cashBackdrop', '#cashModal');
+    closeModal("#cashBackdrop", "#cashModal");
   }
 
   async function saveCash(){
-    const cnt = Math.max(1, parseInt($('#cashCount').value || '1', 10));
-    const price = parseMoney($('#cashPrice').value || 0);
-    const pay = $('#cashPay').value || 'nakit';
-    const from = $('#cashFrom').value || '';
-    const to = $('#cashTo').value || '';
-    const note = $('#cashNote').value || '';
+    const cnt = Math.max(1, parseInt($("#cashCount").value || "1", 10));
+    const price = parseMoney($("#cashPrice").value || 0);
+    const pay = $("#cashPay").value || "nakit";
+    const from = $("#cashFrom").value || "";
+    const to = $("#cashTo").value || "";
+    const note = $("#cashNote").value || "";
 
     try{
-      try{
-        await safeJsonFetch('/api/standing', {
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json',
-            'X-CSRF-Token':csrf
-          },
-          body:JSON.stringify({
-            count:cnt,
-            price,
-            payment:pay,
-            from,
-            to,
-            note
-          })
-        });
-      }catch(_){}
+      await safeJsonFetch("/api/standing", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json", "X-CSRF-Token":csrf },
+        body:JSON.stringify({ count:cnt, price, payment:pay, from, to, note })
+      });
 
       standingCount += cnt;
       standingRevenue += cnt * price;
 
-      const item = {
+      standingItems.push({
         id: Date.now(),
         from,
-        to: (findStopByName(to)?.name || to || '').trim(),
+        to: (findStopByName(to)?.name || to || "").trim(),
         count: cnt,
         price,
         payment: pay,
         note,
         ts: Date.now()
-      };
+      });
 
-      standingItems.push(item);
       persistStandingTotals();
       persistStandingItems();
-
       updateStats();
       refreshStopBadges();
       renderAI();
+      renderTimeline();
+      renderStandingList();
+      renderQuickStandingList();
 
-      $('#cashCount').value = '1';
-      $('#cashPrice').value = '0';
-      $('#cashNote').value = '';
-
+      $("#cashCount").value = "1";
+      $("#cashPrice").value = "0";
+      $("#cashNote").value = "";
       closeCash();
-      toast('Ayakta satış eklendi');
+      toast("Ayakta satış eklendi");
     }catch(e){
-      toast(e.message || 'Tahsilat hatası');
+      toast(e.message || "Tahsilat hatası");
     }
-  }
-
-  function persistStandingTotals(){
-    localStorage.setItem('standingTotals:' + TRIP_KEY, JSON.stringify({
-      count: standingCount,
-      revenue: standingRevenue
-    }));
-  }
-
-  function persistStandingItems(){
-    localStorage.setItem('standingItems:' + TRIP_KEY, JSON.stringify(standingItems || []));
   }
 
   async function loadStandingTotals(){
     try{
-      const j = await safeJsonFetch('/api/standing');
+      const j = await safeJsonFetch("/api/standing");
       if(j?.ok){
         standingCount = Number(j.count || 0);
         standingRevenue = Number(j.revenue || 0);
         return;
       }
     }catch(_){}
+
     try{
-      const x = JSON.parse(localStorage.getItem('standingTotals:' + TRIP_KEY) || 'null');
+      const x = JSON.parse(localStorage.getItem("standingTotals:" + TRIP_KEY) || "null");
       standingCount = Number(x?.count || 0);
       standingRevenue = Number(x?.revenue || 0);
     }catch(_){
@@ -2100,14 +2868,15 @@
 
   async function loadStandingItems(){
     try{
-      const j = await safeJsonFetch('/api/standing/list');
+      const j = await safeJsonFetch("/api/standing/list");
       if(j?.ok && Array.isArray(j.items)){
         standingItems = j.items.slice();
         return;
       }
     }catch(_){}
+
     try{
-      const x = JSON.parse(localStorage.getItem('standingItems:' + TRIP_KEY) || '[]');
+      const x = JSON.parse(localStorage.getItem("standingItems:" + TRIP_KEY) || "[]");
       standingItems = Array.isArray(x) ? x : [];
     }catch(_){
       standingItems = [];
@@ -2116,7 +2885,7 @@
 
   async function loadParcelItems(){
     try{
-      const j = await safeJsonFetch('/api/parcels?status=bekliyor');
+      const j = await safeJsonFetch("/api/parcels?status=bekliyor");
       if(j?.ok && Array.isArray(j.items)){
         parcelItems = j.items.slice();
         return;
@@ -2126,13 +2895,12 @@
   }
 
   function renderStandingList(){
-    const list = $('#standingList');
-    const sum = $('#standingSummary');
-    const bulk = $('#standingBulkOff');
-
+    const list = $("#standingList");
+    const sum = $("#standingSummary");
+    const bulk = $("#standingBulkOff");
     if(!list || !sum || !bulk) return;
 
-    list.innerHTML = '';
+    list.innerHTML = "";
 
     const rows = [];
     standingItems.forEach(it => {
@@ -2141,53 +2909,41 @@
     });
 
     if(!rows.length){
-      sum.textContent = 'Kayıt yok';
-      bulk.style.display = 'none';
+      sum.textContent = "Kayıt yok";
+      bulk.style.display = "none";
       return;
     }
 
     let totalPrice = 0;
     standingItems.forEach(it => totalPrice += Number(it?.price || 0) * Number(it?.count || 0));
-
     sum.textContent = `${rows.length} ayakta · ${fmtTL(totalPrice)}`;
-    bulk.style.display = rows.length > 1 ? 'inline-flex' : 'none';
+    bulk.style.display = rows.length > 1 ? "inline-flex" : "none";
 
     rows.forEach((it, idx) => {
-      const d = document.createElement('div');
-      d.className = 'standing-item';
+      const d = document.createElement("div");
+      d.className = "standing-item";
       d.innerHTML = `
-        <div>${it.from || '—'} → ${it.to || '—'}</div>
-        <button class="btn danger" style="padding:7px 10px" data-idx="${idx}">İndir</button>
+        <div>
+          <b>${it.from || "—"} → ${it.to || "—"}</b>
+          <small>${fmtTL(Number(it.price || 0))} · ${it.payment || "nakit"}</small>
+        </div>
+        <button class="btn danger" style="min-height:40px;padding:8px 12px" data-idx="${idx}">İndir</button>
       `;
       list.appendChild(d);
     });
 
-    list.querySelectorAll('button[data-idx]').forEach(btn => {
-      btn.addEventListener('click', ()=>{
-        removeStandingByIndex(parseInt(btn.dataset.idx, 10));
-      });
+    list.querySelectorAll("button[data-idx]").forEach(btn => {
+      btn.addEventListener("click", ()=> removeStandingByIndex(parseInt(btn.dataset.idx, 10)));
     });
   }
 
-  function openStandingPopover(){
+  function openStandingModal(){
     renderStandingList();
-    $('#standingBackdrop').style.display = 'block';
-    const pop = $('#standingPopover');
-    pop.style.display = 'block';
-
-    const card = $('#standingCard');
-    const r = card.getBoundingClientRect();
-    const popW = pop.offsetWidth || 360;
-    const left = Math.max(10, Math.min(window.innerWidth - popW - 10, r.left));
-    const top = r.bottom + 10 + window.scrollY;
-
-    pop.style.left = left + 'px';
-    pop.style.top = top + 'px';
+    openModal("#standingBackdrop", "#standingModal");
   }
 
-  function closeStandingPopover(){
-    $('#standingBackdrop').style.display = 'none';
-    $('#standingPopover').style.display = 'none';
+  function closeStandingModal(){
+    closeModal("#standingBackdrop", "#standingModal");
   }
 
   function removeStandingByIndex(idx){
@@ -2195,7 +2951,6 @@
     standingItems.forEach(it => {
       for(let i=0; i<it.count; i++) expanded.push(it);
     });
-
     const target = expanded[idx];
     if(!target) return;
 
@@ -2206,20 +2961,15 @@
     }
 
     standingCount = Math.max(0, standingCount - 1);
+    standingRevenue = standingItems.reduce((acc, it) => acc + Number(it.count || 0) * Number(it.price || 0), 0);
     persistStandingItems();
     persistStandingTotals();
     updateStats();
-    renderStandingList();
     refreshStopBadges();
+    renderStandingList();
+    renderQuickStandingList();
     renderAI();
-  }
-
-  function idsForStandingStop(stopName){
-    const t = norm(stopName);
-    return (standingItems || [])
-      .filter(it => norm(it?.to || '') === t)
-      .map(it => it?.id)
-      .filter(Boolean);
+    renderTimeline();
   }
 
   async function offloadStandingForStop(stopName){
@@ -2227,15 +2977,15 @@
     let removed = 0;
 
     try{
-      await safeJsonFetch('/api/standing?to=' + encodeURIComponent(stopName), {
-        method:'DELETE',
-        headers:{ 'X-CSRF-Token': csrf }
+      await safeJsonFetch("/api/standing?to=" + encodeURIComponent(stopName), {
+        method:"DELETE",
+        headers:{ "X-CSRF-Token": csrf }
       });
     }catch(_){}
 
     for(let i = standingItems.length - 1; i >= 0; i--){
       const it = standingItems[i];
-      if(norm(it?.to || '') === t){
+      if(norm(it?.to || "") === t){
         removed += Number(it?.count || 0);
         standingItems.splice(i, 1);
       }
@@ -2243,11 +2993,14 @@
 
     if(removed > 0){
       standingCount = Math.max(0, standingCount - removed);
+      standingRevenue = standingItems.reduce((acc, it) => acc + Number(it.count || 0) * Number(it.price || 0), 0);
       persistStandingItems();
       persistStandingTotals();
       updateStats();
       refreshStopBadges();
+      renderQuickStandingList();
       renderAI();
+      renderTimeline();
     }
     return removed;
   }
@@ -2255,40 +3008,40 @@
   function startBlink(list){
     if(!Array.isArray(list) || !list.length) return;
     list.forEach(n => {
-      const el = $('#seat-' + n);
-      if(el) el.classList.add('blink-yellow');
+      const el = $("#seat-" + n);
+      if(el) el.classList.add("blink-yellow");
     });
   }
 
   function stopBlink(list){
-    const arr = list || [...$$('.seat.blink-yellow')].map(el => Number(el.dataset.seat));
+    const arr = list || [...$$(".seat.blink-yellow")].map(el => Number(el.dataset.seat));
     arr.forEach(n => {
-      const el = $('#seat-' + n);
-      if(el) el.classList.remove('blink-yellow');
+      const el = $("#seat-" + n);
+      if(el) el.classList.remove("blink-yellow");
     });
   }
 
   function snoozeBlink(ms=5*60*1000){
     stopBlink();
     snoozeUntil = Date.now() + ms;
-    toast('Uyarı 5 dk ertelendi');
+    toast("Uyarı 5 dk ertelendi");
   }
 
   function speak(text){
-    if(!$('#soundToggle').checked) return;
+    if(!$("#soundToggle").checked) return;
     try{
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'tr-TR';
+      u.lang = "tr-TR";
       speechSynthesis.speak(u);
     }catch(_){}
-    if(navigator.vibrate) navigator.vibrate([140,70,140]);
+    if(navigator.vibrate) navigator.vibrate([140, 70, 140]);
   }
 
   function speakFinalStopSequence(name){
     const cnt = seatsForStop(name).length;
     speak(`Sıradaki durak ${name}. Bu durakta ${cnt} yolcu inecek.`);
-    setTimeout(()=>{
-      speak('Sarıkız Turizm ailesini tercih ettiğiniz için teşekkür ederiz. Bir sonraki yolculukta görüşmek üzere.');
+    setTimeout(() => {
+      speak("Sarıkız Turizm ailesini tercih ettiğiniz için teşekkür ederiz. Bir sonraki yolculukta görüşmek üzere.");
     }, 1800);
   }
 
@@ -2298,53 +3051,41 @@
     const standingMap = computeStandingCountsByStop();
     const parcelMap = computeParcelCountsByStop();
 
-    $('#approachTitle').textContent = stop + ' yaklaşıyor';
-    $('#approachInfo').textContent =
-      `${seats.length} koltuk · ${standingMap[stop] || 0} ayakta · ${parcelMap[stop] || 0} emanet`;
+    $("#approachTitle").textContent = stop + " yaklaşıyor";
+    $("#approachInfo").textContent = `${seats.length} koltuk · ${standingMap[stop] || 0} ayakta · ${parcelMap[stop] || 0} emanet`;
 
-    const list = $('#approachList');
-    list.innerHTML = '';
+    const list = $("#approachList");
+    list.innerHTML = "";
 
     if(!seats.length && !(standingMap[stop] || 0) && !(parcelMap[stop] || 0)){
-      list.innerHTML = '<div class="approach-row">Bu durakta işlem görünmüyor.</div>';
+      list.innerHTML = `<div class="approach-row">Bu durakta işlem görünmüyor.</div>`;
     }
 
     seats.forEach(n => {
-      const row = document.createElement('div');
-      row.className = 'approach-row';
-      row.innerHTML = `<b>Koltuk ${n}</b><span>${boardsMap[String(n)] || '—'} → ${stopsMap[String(n)] || '—'}</span>`;
+      const row = document.createElement("div");
+      row.className = "approach-row";
+      row.innerHTML = `<b>Koltuk ${n}</b><span>${boardsMap[String(n)] || "—"} → ${stopsMap[String(n)] || "—"}</span>`;
       list.appendChild(row);
     });
 
     if(standingMap[stop]){
-      const row = document.createElement('div');
-      row.className = 'approach-row';
+      const row = document.createElement("div");
+      row.className = "approach-row";
       row.innerHTML = `<b>Ayakta</b><span>${standingMap[stop]} kişi inecek</span>`;
       list.appendChild(row);
     }
 
     if(parcelMap[stop]){
-      const row = document.createElement('div');
-      row.className = 'approach-row';
+      const row = document.createElement("div");
+      row.className = "approach-row";
       row.innerHTML = `<b>Emanet</b><span>${parcelMap[stop]} teslim var</span>`;
       list.appendChild(row);
     }
 
-    openModal('#approachBackdrop', '#approachModal');
+    openModal("#approachBackdrop", "#approachModal");
 
-    if(isFinalStop(stop)){
-      speakFinalStopSequence(stop);
-    }else{
-      speak(`Sıradaki durak ${stop}. Bu durakta ${seats.length} yolcu inecek.`);
-    }
-  }
-
-  function showGhostOffload(){
-    const btn = $('#btnGhostOffload');
-    if(!btn || !lastApproach?.seats?.length) return;
-    btn.style.display = 'block';
-    clearTimeout(showGhostOffload._t);
-    showGhostOffload._t = setTimeout(()=> btn.style.display = 'none', 5000);
+    if(isFinalStop(stop)) speakFinalStopSequence(stop);
+    else speak(`Sıradaki durak ${stop}. Bu durakta ${seats.length} yolcu inecek.`);
   }
 
   async function bulkOffload(seatNums){
@@ -2353,12 +3094,9 @@
     try{
       let ok = false;
       try{
-        const j = await safeJsonFetch('/api/seats/offload', {
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json',
-            'X-CSRF-Token':csrf
-          },
+        const j = await safeJsonFetch("/api/seats/offload", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json", "X-CSRF-Token":csrf },
           body:JSON.stringify({ seats: seatNums })
         });
         ok = !!j.ok;
@@ -2366,11 +3104,11 @@
 
       if(!ok){
         for(const n of seatNums){
-          const j = await safeJsonFetch('/api/seat?seat_no=' + n, {
-            method:'DELETE',
-            headers:{ 'X-CSRF-Token':csrf }
+          const j = await safeJsonFetch("/api/seat?seat_no=" + n, {
+            method:"DELETE",
+            headers:{ "X-CSRF-Token":csrf }
           });
-          if(!j.ok) throw new Error(j.msg || ('Koltuk ' + n + ' boşaltılamadı'));
+          if(!j.ok) throw new Error(j.msg || ("Koltuk " + n + " boşaltılamadı"));
         }
       }
 
@@ -2384,24 +3122,26 @@
       refreshStopBadges();
       updateStopSeatBadges();
       renderAI();
+      renderTimeline();
+      updateCompactHeader();
       lastApproach = { stop:null, seats:[] };
       toast(`${seatNums.length} koltuk boşaltıldı`);
     }catch(e){
-      toast(e.message || 'Toplu boşaltma hatası');
+      toast(e.message || "Toplu boşaltma hatası");
     }
   }
 
   async function triggerManualApproach(){
-    const stop = $('#alertStop')?.value || '';
+    const stop = getSelectedStopName();
     if(!stop){
-      toast('Önce durak seç');
+      toast("Önce durak seç");
       return;
     }
 
     const seats = seatsForStop(stop);
     if(!seats.length && !(computeStandingCountsByStop()[stop] || 0) && !(computeParcelCountsByStop()[stop] || 0)){
-      toast('Bu durakta işlem yok. İleri atlanıyor.');
-      advanceToNextStop({ mode:'nextWithSeats' });
+      toast("Bu durakta işlem yok. İleri atlanıyor.");
+      advanceToNextStop({ mode:"nextWithSeats" });
       return;
     }
 
@@ -2410,15 +3150,15 @@
   }
 
   async function offloadSelectedStop(){
-    const stop = $('#alertStop')?.value || '';
+    const stop = getSelectedStopName();
     if(!stop){
-      toast('Önce durak seç');
+      toast("Önce durak seç");
       return;
     }
 
     const seats = seatsForStop(stop);
     if(!seats.length && !(computeStandingCountsByStop()[stop] || 0)){
-      toast('Bu durakta indirilecek yolcu yok');
+      toast("Bu durakta indirilecek yolcu yok");
       return;
     }
 
@@ -2429,44 +3169,50 @@
     const removed = await offloadStandingForStop(stop);
     if(removed > 0) toast(`Ayakta ${removed} kişi indirildi`);
 
+    markPassedStopsUntil(stop);
+    setLiveStop(stop);
     refreshStopBadges();
     updateStopSeatBadges();
-    advanceToNextStop({ mode:'nextWithSeats', ignoreToggle:true });
+    advanceToNextStop({ mode:"nextWithSeats", ignoreToggle:true });
   }
 
   async function toggleGeoWatch(){
-    const btn = $('#btnGeoWatch');
+    const btn = $("#btnGeoWatch");
 
     if(geoWatchId){
       navigator.geolocation.clearWatch(geoWatchId);
       geoWatchId = null;
-      btn.textContent = 'KAPALI';
+      btn.textContent = "KAPALI";
       updateGeoHint();
-      toast('Konum izleme kapatıldı');
+      toast("Konum izleme kapatıldı");
       return;
     }
 
     if(!cachedStops) await fetchStops();
 
-    const stopName = ($('#alertStop')?.value || '').trim();
+    const stopName = getSelectedStopName();
     if(!stopName){
-      toast('Önce durak seç');
+      toast("Önce durak seç");
       return;
     }
 
     const s = findStopByName(stopName);
     if(!s || !hasCoord(s)){
-      toast('Bu durak için koordinat yok');
+      toast("Bu durak için koordinat yok");
       return;
     }
 
-    const radiusKm = parseFloat($('#alertRadius').value || '3');
+    const radiusKm = parseFloat($("#alertRadius").value || "3");
 
-    geoWatchId = navigator.geolocation.watchPosition((pos)=>{
+    geoWatchId = navigator.geolocation.watchPosition((pos) => {
       const p = { lat:pos.coords.latitude, lng:pos.coords.longitude };
-      const d = distKm(p, { lat:s.lat, lng:s.lng });
+      currentCoords = p;
 
-      $('#geoHint').textContent = `Mesafe: ${d.toFixed(2)} km (eşik ${radiusKm} km)`;
+      const d = distKm(p, { lat:Number(s.lat), lng:Number(s.lng) });
+      $("#geoHint").textContent = `Mesafe: ${d.toFixed(2)} km (eşik ${radiusKm} km)`;
+
+      autoDetectLiveStop(p);
+      renderTimeline();
 
       if(d <= radiusKm){
         const now = Date.now();
@@ -2477,74 +3223,68 @@
           startBlink(seats);
         }
       }
-    }, (err)=>{
-      toast('Konum hatası: ' + (err?.message || ''));
+    }, (err) => {
+      toast("Konum hatası: " + (err?.message || ""));
     }, {
       enableHighAccuracy:true,
       timeout:10000,
       maximumAge:2000
     });
 
-    btn.textContent = 'AÇIK';
+    btn.textContent = "AÇIK";
   }
 
   async function saveCoord(){
     try{
-      const stop = ($('#alertStop')?.value || $('#coordStopName').value || '').trim();
+      const stop = (getSelectedStopName() || $("#coordStopName").value || "").trim();
       if(!stop){
-        toast('Önce durak seç');
+        toast("Önce durak seç");
         return;
       }
 
-      const lat = numTR($('#coordLat').value);
-      const lng = numTR($('#coordLng').value);
+      const lat = numTR($("#coordLat").value);
+      const lng = numTR($("#coordLng").value);
 
       if(!Number.isFinite(lat) || !Number.isFinite(lng)){
-        toast('Lat/Lng geçersiz');
+        toast("Lat/Lng geçersiz");
         return;
       }
 
-      const j = await safeJsonFetch('/api/coords', {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'X-CSRF-Token':csrf
-        },
+      const j = await safeJsonFetch("/api/coords", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json", "X-CSRF-Token":csrf },
         body:JSON.stringify({ stop, lat, lng })
       });
 
-      if(!j.ok) throw new Error(j.msg || 'Kayıt başarısız');
+      if(!j.ok) throw new Error(j.msg || "Kayıt başarısız");
 
       await fetchStops();
       await populateStops();
       refreshStopBadges();
       updateGeoHint();
       renderAI();
+      renderTimeline();
 
-      $('#coordLat').value = '';
-      $('#coordLng').value = '';
-
-      toast('Koordinat kaydedildi');
+      $("#coordLat").value = "";
+      $("#coordLng").value = "";
+      toast("Koordinat kaydedildi");
     }catch(e){
-      toast(e.message || 'Koordinat kaydedilemedi');
+      toast(e.message || "Koordinat kaydedilemedi");
     }
   }
 
   async function fetchBagMeta(seatNo){
     try{
-      const u = `/bags?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seatNo)}&format=json`;
+      const u = `/api/bags/meta?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seatNo)}`;
       const j = await safeJsonFetch(u);
-
       const right = Number(j?.right || 0);
       const leftFront = Number(j?.left_front || 0);
       const leftBack = Number(j?.left_back || 0);
       const total = Number(j?.count || (right + leftFront + leftBack));
-
       const eyes = [];
-      if(right > 0) eyes.push('R');
-      if(leftFront > 0) eyes.push('LF');
-      if(leftBack > 0) eyes.push('LB');
-
+      if(right > 0) eyes.push("R");
+      if(leftFront > 0) eyes.push("LF");
+      if(leftBack > 0) eyes.push("LB");
       return { count: total, eyes };
     }catch(_){
       return { count:0, eyes:[] };
@@ -2552,57 +3292,168 @@
   }
 
   function eyesToIcons(eyes){
-    if(!eyes || !eyes.length) return '';
+    if(!eyes || !eyes.length) return "";
     const set = new Set(eyes);
     const parts = [];
-    if(set.has('R')) parts.push('➡️');
-    if(set.has('LF')) parts.push('⬅️🔺');
-    if(set.has('LB')) parts.push('⬅️🔻');
-    return parts.join(' ');
+    if(set.has("R")) parts.push("➡️");
+    if(set.has("LF")) parts.push("⬅️🔺");
+    if(set.has("LB")) parts.push("⬅️🔻");
+    return parts.join(" ");
   }
 
   async function refreshBagBadgeForSeat(seatNo){
-    const el = $('#seat-' + seatNo);
+    const el = $("#seat-" + seatNo);
     if(!el) return;
 
     const meta = await fetchBagMeta(seatNo);
     const cnt = meta.count;
     const eyes = meta.eyes || [];
 
-    el.classList.toggle('has-bag', cnt > 0);
+    el.classList.toggle("has-bag", cnt > 0);
 
-    const bagCount = el.querySelector('.bag-count');
-    const bagDir = el.querySelector('.bag-dir');
-    const badge = el.querySelector('.bag-badge');
+    const bagCount = el.querySelector(".bag-count");
+    const bagDir = el.querySelector(".bag-dir");
+    const badge = el.querySelector(".bag-badge");
 
     if(bagCount) bagCount.textContent = String(cnt || 0);
-    if(bagDir) bagDir.textContent = eyesToIcons(eyes) || '';
-    if(badge) badge.title = cnt ? `Bagaj: ${cnt} adet` : 'Bagaj yok';
+    if(bagDir) bagDir.textContent = eyesToIcons(eyes) || "";
+    if(badge) badge.title = cnt ? `Bagaj: ${cnt} adet` : "Bagaj yok";
   }
 
   async function refreshBagsAll(){
-    const seats = $$('.seat').map(el => Number(el.dataset.seat));
-    for(const n of seats){
-      await refreshBagBadgeForSeat(n);
-    }
+    const seats = $$(".seat").map(el => Number(el.dataset.seat));
+    for(const n of seats) await refreshBagBadgeForSeat(n);
   }
 
   async function clearBagsForSeat(seatNo){
     try{
       const u = `/bags/clear?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seatNo)}`;
       await safeJsonFetch(u, {
-        method:'DELETE',
-        headers:{ 'X-CSRF-Token':csrf }
+        method:"DELETE",
+        headers:{ "X-CSRF-Token":csrf }
       });
     }catch(_){}
-    const el = $('#seat-' + seatNo);
+
+    const el = $("#seat-" + seatNo);
     if(el){
-      el.classList.remove('has-bag');
-      const cnt = el.querySelector('.bag-count');
-      const dir = el.querySelector('.bag-dir');
-      if(cnt) cnt.textContent = '0';
-      if(dir) dir.textContent = '';
+      el.classList.remove("has-bag");
+      const cnt = el.querySelector(".bag-count");
+      const dir = el.querySelector(".bag-dir");
+      if(cnt) cnt.textContent = "0";
+      if(dir) dir.textContent = "";
     }
+  }
+
+  function buildEtaModel(){
+    const items = buildActualSchedule();
+    if(!items.length){
+      speedState.etaItems = [];
+      $("#routeNextTimed").textContent = "—";
+      $("#stEtaTarget").textContent = "—";
+      $("#stEtaHint").textContent = "Plan / ETA";
+      $("#delayMain").textContent = "—";
+      $("#delaySub").textContent = "Saatli durak tanımlı değil";
+      return [];
+    }
+
+    const now = new Date();
+    const liveIdx = indexOfStopByName(speedState.liveStop);
+    const selectedIdx = indexOfStopByName(getSelectedStopName());
+
+    let anchor = null;
+    if(liveIdx >= 0){
+      anchor = [...items].reverse().find(x => x.routeIndex >= 0 && x.routeIndex <= liveIdx) || items[0];
+    }else if(selectedIdx >= 0){
+      anchor = [...items].reverse().find(x => x.routeIndex >= 0 && x.routeIndex <= selectedIdx) || items[0];
+    }else{
+      anchor = items[0];
+    }
+
+    const globalDelayMin = minutesDiff(now, anchor.planDate);
+
+    const model = items.map(item => {
+      const etaDate = new Date(item.planDate.getTime() + globalDelayMin * 60000);
+      const delayMin = minutesDiff(etaDate, item.planDate);
+
+      const passed = liveIdx >= 0
+        ? (item.routeIndex >= 0 && item.routeIndex < liveIdx)
+        : etaDate.getTime() < now.getTime() - (5 * 60000);
+
+      let badgeCls = "good";
+      if(passed) badgeCls = "info";
+      else if(delayMin > 15) badgeCls = "bad";
+      else if(delayMin > 0) badgeCls = "warn";
+
+      const badgeText = passed ? "Geçildi" : fmtSignedMin(delayMin);
+      const activeName = getSelectedStopName();
+      const active = activeName
+        ? norm(activeName) === norm(item.stop)
+        : (!passed && item === (items.find(x => !(
+            liveIdx >= 0
+              ? (x.routeIndex >= 0 && x.routeIndex < liveIdx)
+              : (new Date(x.planDate.getTime() + globalDelayMin * 60000).getTime() < now.getTime() - 5*60000)
+          )) || items[items.length - 1]));
+
+      return {
+        stop: item.stop,
+        plan: fmtHour(item.planDate),
+        planDate: item.planDate,
+        etaDate,
+        delayMin,
+        badgeCls,
+        badgeText,
+        passed,
+        active,
+        remainingKm: null
+      };
+    });
+
+    speedState.etaItems = model;
+
+    const nextTimed = model.find(x => !x.passed) || model[model.length - 1];
+    $("#routeNextTimed").textContent = nextTimed?.stop || "—";
+    $("#stEtaTarget").textContent = nextTimed?.stop || "—";
+    $("#stEtaHint").textContent = nextTimed ? `Plan ${nextTimed.plan} · ETA ${fmtHour(nextTimed.etaDate)}` : "Plan / ETA";
+
+    if(nextTimed){
+      const delayEl = $("#delayMain");
+      const diff = nextTimed.delayMin;
+      delayEl.textContent = fmtSignedMin(diff);
+      delayEl.className = "delay-main " + (diff <= 0 ? "good" : diff <= 15 ? "warn" : "bad");
+      $("#delaySub").textContent = `${nextTimed.stop} · plan ${nextTimed.plan} · ETA ${fmtHour(nextTimed.etaDate)}`;
+    }
+
+    return model;
+  }
+
+  function renderTimeline(){
+    const list = $("#etaTimeline");
+    if(!list) return;
+
+    const items = buildEtaModel();
+    list.innerHTML = "";
+
+    if(!items.length){
+      list.innerHTML = `<div class="eta-row"><div><div class="eta-name">Saatli durak yok</div><div class="eta-meta">Bu hatta henüz saat tanımı yapılmamış.</div></div></div>`;
+      return;
+    }
+
+    items.forEach(item => {
+      const row = document.createElement("div");
+      row.className = `eta-row ${item.active ? "active" : ""} ${item.passed ? "passed" : ""}`;
+      row.innerHTML = `
+        <div>
+          <div class="eta-name">${item.stop}</div>
+          <div class="eta-meta">Plan ${item.plan}</div>
+        </div>
+        <div class="eta-right">
+          <div class="eta-main">ETA ${fmtHour(item.etaDate)}</div>
+          <div class="eta-badge ${item.badgeCls}">${item.badgeText}</div>
+        </div>
+      `;
+      row.addEventListener("click", () => setSelectedStop(item.stop, { silent:true, voiceReply:false }));
+      list.appendChild(row);
+    });
   }
 
   function renderAI(){
@@ -2620,9 +3471,9 @@
       if(assigned[k] && !serviceMap[k]) unserved++;
     });
 
-    let busiestStop = '—';
+    let busiestStop = "—";
     let busiestCount = 0;
-    Object.entries(seatCounts).forEach(([k,v])=>{
+    Object.entries(seatCounts).forEach(([k,v]) => {
       if(v > busiestCount){
         busiestCount = v;
         busiestStop = k;
@@ -2630,83 +3481,267 @@
     });
 
     const totalOps = selectedSeatCount + selectedStanding + selectedParcel;
+    const live = speedState.liveStop || "—";
+    const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
 
-    $('#aiMain').textContent = stop
+    $("#aiMain").textContent = stop
       ? `${stop} için ${selectedSeatCount} koltuk, ${selectedStanding} ayakta, ${selectedParcel} emanet görünüyor.`
-      : 'Durak seçildiğinde sistem o durak için canlı operasyon özetini çıkarır.';
+      : `${live} civarındasın. Sistem canlı durak ve rötarı izliyor.`;
 
-    let aiSub = 'Şu an sistem normal akışta.';
-    if(stop && totalOps >= 6) aiSub = 'Bu durakta yoğun işlem bekleniyor. Ön hazırlık yap.';
-    else if(stop && totalOps > 0) aiSub = 'Bu durak orta yoğunlukta görünüyor.';
-    else if(stop) aiSub = 'Bu durak için kayıtlı işlem görünmüyor.';
-    $('#aiSub').textContent = aiSub;
+    let aiSub = "Şu an sistem normal akışta.";
+    if(stop && totalOps >= 6) aiSub = "Bu durakta yoğun işlem bekleniyor. Ön hazırlık yap.";
+    else if(stop && totalOps > 0) aiSub = "Bu durak orta yoğunlukta görünüyor.";
+    else if(stop) aiSub = "Bu durak için kayıtlı işlem görünmüyor.";
+    else if(nextTimed) aiSub = `${nextTimed.stop} için plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
 
-    $('#aiNextAction').textContent = stop
-      ? (selectedSeatCount || selectedStanding || selectedParcel ? `Hazırlık: ${stop}` : 'İleri atlanabilir')
-      : 'Durak bekleniyor';
+    $("#aiSub").textContent = aiSub;
 
-    $('#aiService').textContent = unserved > 0
-      ? `${unserved} yolcu servis bekliyor`
-      : 'Servis tarafı temiz';
+    const nextAction = stop
+      ? (totalOps ? `Hazırlık: ${stop}` : "İleri atlanabilir")
+      : (nextTimed?.stop || "Durak bekleniyor");
 
-    $('#aiParcel').textContent = selectedParcel > 0
-      ? `${selectedParcel} teslim var`
-      : (stop ? 'Teslim yok' : 'Durak seçilmedi');
+    $("#aiNextAction").textContent = nextAction;
+    $("#aiNextActionMirror").textContent = nextAction;
+    $("#aiLiveStop").textContent = live;
+    $("#aiDelay").textContent = nextTimed ? fmtSignedMin(nextTimed.delayMin) : "—";
+    $("#aiDensity").textContent = busiestCount > 0 ? `${busiestStop} (${busiestCount} koltuk)` : "Henüz veri yok";
+    $("#aiService").textContent = unserved > 0 ? `${unserved} yolcu servis bekliyor` : "Servis tarafı temiz";
+    $("#aiParcel").textContent = selectedParcel > 0 ? `${selectedParcel} teslim var` : (stop ? "Teslim yok" : "Durak seçilmedi");
+  }
 
-    $('#aiDensity').textContent = busiestCount > 0
-      ? `${busiestStop} (${busiestCount} koltuk)`
-      : 'Henüz veri yok';
+  function autoDetectLiveStop(coords){
+    if(!coords || !cachedStops?.length) return;
 
-    $('#miniLiveState').textContent = stop
-      ? (totalOps > 0 ? 'İşlem var' : 'Sakin')
-      : 'Hazır';
+    let best = null;
+    for(const stop of cachedStops){
+      if(!hasCoord(stop)) continue;
+      const km = distKm(coords, { lat:Number(stop.lat), lng:Number(stop.lng) });
+      if(!best || km < best.km) best = { stop: stop.name, km };
+    }
+
+    if(best && best.km <= 3.5){
+      setLiveStop(best.stop);
+    }
+  }
+
+  function findStopMention(text){
+    const ntext = norm(text);
+    const list = allStopsList();
+    let best = "";
+    for(const stop of list){
+      const ns = norm(stop);
+      if(ns && ntext.includes(ns) && ns.length > best.length) best = stop;
+    }
+    return best;
+  }
+
+  function parseVoiceCommand(text){
+    const t = norm(text);
+    const mentionedStop = findStopMention(text);
+
+    if(/^(hesap ac|hesap aç)$/.test(t)) return { type:"open_hesap" };
+    if(/^(emanet ac|emanet aç|emanetler ac|emanetler aç)$/.test(t)) return { type:"open_emanet" };
+    if(/^(sesli yardim|sesli yardım|yardim|yardım)$/.test(t)) return { type:"help" };
+    if(/(kac yolcu var|kaç yolcu var|toplam yolcu)/.test(t)) return { type:"ask_total" };
+    if(/(ayakta kac|ayakta kaç)/.test(t)) return { type:"ask_standing" };
+    if(/(hangi duraktayiz|hangi duraktayız|neredeyiz)/.test(t)) return { type:"ask_live_stop" };
+    if(/(rotar kac|rötar kaç|gecikme kac|gecikme kaç)/.test(t)) return { type:"ask_delay" };
+    if(/(bir sonraki durak|siradaki saatli|sıradaki saatli)/.test(t)) return { type:"ask_next_timed" };
+    if((/(siradaki durak|sıradaki durak|durak sec|durak seç)/.test(t)) && mentionedStop){
+      return { type:"set_stop", stop: mentionedStop };
+    }
+    if(mentionedStop && /(durak|sec|seç)/.test(t)) return { type:"set_stop", stop: mentionedStop };
+    return { type:"unknown", raw:text };
+  }
+
+  async function handleBasicVoiceCommand(text){
+    const cmd = parseVoiceCommand(text);
+
+    if(cmd.type === "help"){
+      const help = "Temel komutlar: " + VOICE_HELP.join(", ");
+      toast(help, 4200);
+      speak(help);
+      return;
+    }
+
+    if(cmd.type === "open_hesap"){
+      speak("Hesap sayfası açılıyor.");
+      location.href = "{{ url_for('hesap_page') }}";
+      return;
+    }
+
+    if(cmd.type === "open_emanet"){
+      speak("Emanet sayfası açılıyor.");
+      location.href = "{{ url_for('consignments_page') }}";
+      return;
+    }
+
+    if(cmd.type === "ask_total"){
+      const filled = Object.values(assigned || {}).filter(Boolean).length;
+      const total = filled + standingCount;
+      const msg = `Toplam ${total} yolcu var. ${filled} oturan, ${standingCount} ayakta.`;
+      toast(msg, 3200);
+      speak(msg);
+      return;
+    }
+
+    if(cmd.type === "ask_standing"){
+      const msg = `Ayakta ${standingCount} kişi var. Tahsilat ${fmtTL(standingRevenue)}.`;
+      toast(msg, 3200);
+      speak(msg);
+      return;
+    }
+
+    if(cmd.type === "ask_live_stop"){
+      const live = speedState.liveStop || "kesinleşmedi";
+      const msg = live === "kesinleşmedi"
+        ? "Canlı durak henüz tespit edilemedi."
+        : `Şu an ${live} civarındasın.`;
+      toast(msg, 3200);
+      speak(msg);
+      return;
+    }
+
+    if(cmd.type === "ask_delay"){
+      const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+      if(!nextTimed){
+        toast("Saatli nokta yok");
+        speak("Bu hatta saatli nokta tanımlı değil.");
+        return;
+      }
+      const msg = `${nextTimed.stop} için ${fmtSignedMin(nextTimed.delayMin)}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
+      toast(msg, 3600);
+      speak(msg);
+      return;
+    }
+
+    if(cmd.type === "ask_next_timed"){
+      const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+      if(!nextTimed){
+        toast("Saatli nokta yok");
+        speak("Sıradaki saatli durak bulunamadı.");
+        return;
+      }
+      const msg = `Sıradaki saatli nokta ${nextTimed.stop}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
+      toast(msg, 3600);
+      speak(msg);
+      return;
+    }
+
+    if(cmd.type === "set_stop"){
+      const ok = setSelectedStop(cmd.stop, { silent:true, voiceReply:false });
+      if(!ok){
+        toast("Bu durak güzergâhta yok");
+        speak("Bu durak bu güzergâhta bulunmuyor.");
+        return;
+      }
+      const stop = getSelectedStopName();
+      const seat = seatsForStop(stop).length;
+      const stand = computeStandingCountsByStop()[stop] || 0;
+      const parcel = computeParcelCountsByStop()[stop] || 0;
+      const msg = `${stop} seçildi. ${seat} oturan, ${stand} ayakta, ${parcel} emanet.`;
+      toast(msg, 3600);
+      speak(msg);
+      return;
+    }
+
+    toast("Komut anlaşılmadı");
+    speak("Komutu anlayamadım. Sesli yardım diyebilirsin.");
+  }
+
+  function startDeckAIVoice(){
+    const btn = $("#btnDeckAI");
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if(!SR){
+      toast("Bu tarayıcı sesli komutu desteklemiyor");
+      return;
+    }
+
+    const rec = new SR();
+    rec.lang = "tr-TR";
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+
+    btn.classList.add("listening");
+    btn.textContent = "🔴";
+
+    rec.onresult = async (e) => {
+      const text = e.results?.[0]?.[0]?.transcript?.trim() || "";
+      if(!text){
+        toast("Ses algılandı ama metin çıkarılamadı");
+        return;
+      }
+      toast("Algılandı: " + text, 1600);
+      await handleBasicVoiceCommand(text);
+    };
+
+    rec.onerror = (e) => {
+      toast("Sesli komut hatası: " + (e.error || "bilinmiyor"));
+    };
+
+    rec.onend = () => {
+      btn.classList.remove("listening");
+      btn.textContent = "🎤";
+    };
+
+    try{
+      rec.start();
+    }catch(_){
+      btn.classList.remove("listening");
+      btn.textContent = "🎤";
+      toast("Mikrofon başlatılamadı");
+    }
+  }
+
+  function initTabs(){
+    $$(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tab = btn.dataset.tab;
+        $$(".tab-btn").forEach(b => b.classList.toggle("active", b === btn));
+        $$(".tab-pane").forEach(p => p.classList.toggle("active", p.dataset.pane === tab));
+      });
+    });
+  }
+
+  function openTab(name){
+    const btn = document.querySelector(`.tab-btn[data-tab="${name}"]`);
+    if(btn) btn.click();
   }
 
   (function initClock(){
-    const t = $('#clockMain');
-    const d = $('#clockSub');
-    if(!t || !d) return;
+    const topClock = $("#topClock");
+    const main = $("#clockMain");
+    const date = $("#clockDate");
+    const sub = $("#clockSub");
 
-    const tf = new Intl.DateTimeFormat('tr-TR', {
-      hour:'2-digit',
-      minute:'2-digit',
-      second:'2-digit',
-      hour12:false
-    });
+    if(!topClock || !main || !date || !sub) return;
 
-    const df = new Intl.DateTimeFormat('tr-TR', {
-      weekday:'long',
-      day:'2-digit',
-      month:'long',
-      year:'numeric'
-    });
+    const tf = new Intl.DateTimeFormat("tr-TR", { hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false });
+    const sf = new Intl.DateTimeFormat("tr-TR", { hour:"2-digit", minute:"2-digit", hour12:false });
+    const df = new Intl.DateTimeFormat("tr-TR", { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
 
-    const tick = ()=>{
+    const tick = () => {
       const n = new Date();
-      t.textContent = tf.format(n);
-      d.textContent = df.format(n);
+      topClock.textContent = sf.format(n);
+      main.textContent = tf.format(n);
+      date.textContent = df.format(n);
+      sub.textContent = df.format(n);
     };
 
     tick();
-    setInterval(tick, 500);
+    setInterval(tick, 1000);
   })();
 
   (function initPrayer(){
-    const PR_ORDER = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
-    const TR_PR = {
-      Fajr:'İmsak',
-      Sunrise:'Güneş',
-      Dhuhr:'Öğle',
-      Asr:'İkindi',
-      Maghrib:'Akşam',
-      Isha:'Yatsı'
-    };
+    const PR_ORDER = ["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"];
+    const TR_PR = { Fajr:"İmsak", Sunrise:"Güneş", Dhuhr:"Öğle", Asr:"İkindi", Maghrib:"Akşam", Isha:"Yatsı" };
     const METHOD = 13;
     const SCHOOL = 0;
-    const FALLBACK = { lat:38.5190, lng:28.5192, place:'Alaşehir' };
-
-    const lineEl = $('#prLine');
-    const pad2 = n => String(n).padStart(2,'0');
+    const FALLBACK = { lat:38.5190, lng:28.5192, place:"Alaşehir" };
+    const lineEl = $("#prLine");
+    const pad2 = n => String(n).padStart(2,"0");
 
     function fmtHM(d){
       return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
@@ -2714,8 +3749,8 @@
 
     function toTodayDate(s){
       if(!s) return null;
-      if(s.includes('T')) return new Date(s);
-      const [h,m] = s.split(':').map(x => parseInt(x, 10));
+      if(s.includes("T")) return new Date(s);
+      const [h,m] = s.split(":").map(x => parseInt(x,10));
       const d = new Date();
       d.setHours(h || 0, m || 0, 0, 0);
       return d;
@@ -2725,27 +3760,27 @@
       const sec = Math.max(0, Math.floor(ms / 1000));
       const h = Math.floor(sec / 3600);
       const m = Math.floor((sec % 3600) / 60);
-      return (h ? `${h} saat ` : '') + `${m} dk`;
+      return (h ? `${h} saat ` : "") + `${m} dk`;
     }
 
     async function reverseGeocode(lat,lng){
       try{
         const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
         const a = (await r.json()).address || {};
-        const town = a.village || a.town || a.hamlet || a.suburb || '';
-        const dist = a.county || a.district || '';
-        const prov = a.province || a.state || '';
+        const town = a.village || a.town || a.hamlet || a.suburb || "";
+        const dist = a.county || a.district || "";
+        const prov = a.province || a.state || "";
         const right = dist && dist !== town ? dist : prov;
-        return [town || right, right && right !== town ? right : ''].filter(Boolean).join(', ');
+        return [town || right, right && right !== town ? right : ""].filter(Boolean).join(", ");
       }catch(_){
-        return '';
+        return "";
       }
     }
 
     async function fetchTimings(lat,lng){
       const url = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=${METHOD}&school=${SCHOOL}&iso8601=true`;
       const j = await (await fetch(url)).json();
-      if(!j?.data?.timings) throw new Error('timings yok');
+      if(!j?.data?.timings) throw new Error("timings yok");
       return j.data.timings;
     }
 
@@ -2753,42 +3788,38 @@
       const now = new Date();
       const list = PR_ORDER.map(k => ({ key:k, at:toTodayDate(timings[k]) })).filter(x => x.at && !isNaN(x.at));
       const future = list.filter(x => x.at > now);
-
       if(future.length){
         const next = future[0];
         const i = list.indexOf(next);
         const prev = i > 0 ? list[i - 1] : list[list.length - 1];
         return { prev, next };
       }
-
       const prev = list[list.length - 1];
-      const tmr = toTodayDate(timings['Fajr']);
+      const tmr = toTodayDate(timings["Fajr"]);
       tmr.setDate(tmr.getDate() + 1);
-      return { prev, next:{ key:'Fajr', at:tmr } };
+      return { prev, next:{ key:"Fajr", at:tmr } };
     }
 
     function render(place, timings){
       const { prev, next } = computePrevNext(timings);
-      const placeTxt = place ? `${place}: ` : '';
+      const placeTxt = place ? `${place}: ` : "";
       const curName = TR_PR[prev.key] || prev.key;
       const nxtName = TR_PR[next.key] || next.key;
       const curHH = fmtHM(prev.at);
       const nxtHH = fmtHM(next.at);
       const leftMs = next.at - new Date();
       const leftTxt = humanLeft(leftMs);
-
-      lineEl.innerHTML =
-        `${placeTxt}<span class="pr-accent">${curName} ${curHH}</span> · Sonraki: <b>${nxtName} ${nxtHH}</b> · <span class="pr-left ${leftMs <= 10*60*1000 ? 'soon' : ''}">Kalan ${leftTxt}</span>`;
+      lineEl.innerHTML = `${placeTxt}<span class="pr-accent">${curName} ${curHH}</span> · Sonraki: <b>${nxtName} ${nxtHH}</b> · <span class="pr-left ${leftMs <= 10*60*1000 ? "soon" : ""}">Kalan ${leftTxt}</span>`;
     }
 
-    async function boot(lat,lng,placeHint=''){
+    async function boot(lat,lng,placeHint=""){
       try{
         const timings = await fetchTimings(lat,lng);
         const place = (await reverseGeocode(lat,lng)) || placeHint;
         render(place, timings);
 
         let lastDay = new Date().getDate();
-        setInterval(async ()=>{
+        setInterval(async () => {
           const today = new Date().getDate();
           if(today !== lastDay){
             lastDay = today;
@@ -2798,11 +3829,11 @@
           }
         }, 1000);
       }catch(_){
-        lineEl.textContent = 'Vakitler alınamadı';
+        lineEl.textContent = "Vakitler alınamadı";
       }
     }
 
-    if('geolocation' in navigator){
+    if("geolocation" in navigator){
       navigator.geolocation.getCurrentPosition(
         p => boot(p.coords.latitude, p.coords.longitude),
         _ => boot(FALLBACK.lat, FALLBACK.lng, FALLBACK.place),
@@ -2814,81 +3845,75 @@
   })();
 
   (function initSpeed(){
-    const spVal = $('#spVal');
-    const spLimit = $('#spLimit');
-    const speedBox = $('#speedBox');
-    const ttsBtn = $('#ttsToggle');
+    const spVal = $("#spVal");
+    const spLimit = $("#spLimit");
+    const speedBox = $("#speedBox");
+    const ttsBtn = $("#ttsToggle");
+    const TTS_KEY = "ttsEnabled";
 
-    const TTS_KEY = 'ttsEnabled';
-    let ttsEnabled = (localStorage.getItem(TTS_KEY) ?? '1') === '1';
+    let ttsEnabled = (localStorage.getItem(TTS_KEY) ?? "1") === "1";
 
     function syncTts(){
-      if(ttsEnabled) ttsBtn.classList.remove('muted');
-      else ttsBtn.classList.add('muted');
+      ttsEnabled ? ttsBtn.classList.remove("muted") : ttsBtn.classList.add("muted");
     }
+
     syncTts();
 
-    ttsBtn.addEventListener('click', ()=>{
+    ttsBtn.addEventListener("click", () => {
       ttsEnabled = !ttsEnabled;
-      localStorage.setItem(TTS_KEY, ttsEnabled ? '1' : '0');
+      localStorage.setItem(TTS_KEY, ttsEnabled ? "1" : "0");
       syncTts();
-      if(ttsEnabled) speakOnce('Sesli uyarı açık.');
+      if(ttsEnabled) speakOnce("Sesli uyarı açık.");
     });
 
     let trVoice = null;
     function loadVoices(){
       const voices = speechSynthesis.getVoices();
-      trVoice = voices.find(v => (v.lang || '').toLowerCase().startsWith('tr')) || null;
+      trVoice = voices.find(v => (v.lang || "").toLowerCase().startsWith("tr")) || null;
     }
-    if('speechSynthesis' in window){
+
+    if("speechSynthesis" in window){
       loadVoices();
       speechSynthesis.onvoiceschanged = loadVoices;
     }
 
     function speakOnce(text){
-      if(!ttsEnabled || !('speechSynthesis' in window)) return;
+      if(!ttsEnabled || !("speechSynthesis" in window)) return;
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = trVoice ? trVoice.lang : 'tr-TR';
+      u.lang = trVoice ? trVoice.lang : "tr-TR";
       if(trVoice) u.voice = trVoice;
       u.rate = 1;
       speechSynthesis.speak(u);
     }
 
     function setState(cls){
-      speedBox.classList.remove('limit-ok','limit-warn','limit-bad');
+      speedBox.classList.remove("limit-ok","limit-warn","limit-bad");
       if(cls) speedBox.classList.add(cls);
     }
 
     function trHighway(hw){
       const m = {
-        motorway:'otoyol',
-        trunk:'ana yol',
-        primary:'birincil',
-        secondary:'ikincil',
-        tertiary:'üçüncül',
-        residential:'yerleşim',
-        service:'servis'
+        motorway:"otoyol",
+        trunk:"ana yol",
+        primary:"birincil",
+        secondary:"ikincil",
+        tertiary:"üçüncül",
+        residential:"yerleşim",
+        service:"servis"
       };
-      return m[hw] || (hw || '');
+      return m[hw] || (hw || "");
     }
-
-    let lastLimitObj = null;
-    let lastFetchTs = 0;
-    let lastLimitValue = null;
-    let lastWarnOverAt = 0;
-    let lastWarnNearAt = 0;
 
     async function fetchLimit(lat,lng){
       const now = Date.now();
-      if(now - lastFetchTs < 10000 && lastLimitObj) return lastLimitObj;
-      lastFetchTs = now;
-
+      if(now - speedState.lastLimitFetchTs < 10000 && speedState.lastLimitObj) return speedState.lastLimitObj;
+      speedState.lastLimitFetchTs = now;
       try{
         const r = await fetch(`/api/speedlimit?lat=${lat}&lng=${lng}`);
         const j = await r.json();
         if(j?.ok){
-          lastLimitObj = { limit:j.limit, highway:j.highway };
-          return lastLimitObj;
+          speedState.lastLimitObj = { limit:j.limit, highway:j.highway };
+          return speedState.lastLimitObj;
         }
       }catch(_){}
       return null;
@@ -2898,103 +3923,110 @@
       const s = Math.round(Number(speed || 0));
       const l = Math.round(Number(limit || 0));
       if(!l) return;
-
       const now = Date.now();
       const ratio = l > 0 ? (s / l) : 0;
 
-      if(l !== lastLimitValue){
-        lastLimitValue = l;
+      if(l !== speedState.lastLimitValue){
+        speedState.lastLimitValue = l;
         speakOnce(`Yeni hız limiti ${l}.`);
       }
 
       if(ratio >= 1){
-        if(now - lastWarnOverAt > 15000){
+        if(now - speedState.lastWarnOverAt > 15000){
           speakOnce(`Dikkat. Limit ${l}, hız ${s}. Yavaşlayın.`);
-          lastWarnOverAt = now;
+          speedState.lastWarnOverAt = now;
         }
       }else if(ratio >= .85){
-        if(now - lastWarnNearAt > 30000){
+        if(now - speedState.lastWarnNearAt > 30000){
           speakOnce(`Hız limiti ${l}. Mevcut hız ${s}. Dikkat.`);
-          lastWarnNearAt = now;
+          speedState.lastWarnNearAt = now;
         }
       }
     }
 
-    if('geolocation' in navigator){
-      navigator.geolocation.watchPosition(async (pos)=>{
+    if("geolocation" in navigator){
+      speedWatchId = navigator.geolocation.watchPosition(async (pos) => {
         const rawSpeed = pos.coords.speed;
-        const kmh = (typeof rawSpeed === 'number' && !isNaN(rawSpeed)) ? rawSpeed * 3.6 : 0;
+        const kmh = (typeof rawSpeed === "number" && !isNaN(rawSpeed)) ? rawSpeed * 3.6 : 0;
+
+        speedState.current = kmh;
+        currentCoords = { lat:pos.coords.latitude, lng:pos.coords.longitude };
+        speedState.history.push(kmh);
+        if(speedState.history.length > 15) speedState.history.shift();
+
         spVal.textContent = Math.round(kmh);
+        autoDetectLiveStop(currentCoords);
+        updateCompactHeader();
 
         const lim = await fetchLimit(pos.coords.latitude, pos.coords.longitude);
         if(lim?.limit){
-          spLimit.textContent = `Limit: ${lim.limit} km/h${lim.highway ? ' · ' + trHighway(lim.highway) : ''}`;
-
-          if(kmh <= lim.limit) setState('limit-ok');
-          else if(kmh <= lim.limit + 10) setState('limit-warn');
-          else setState('limit-bad');
-
+          spLimit.textContent = `Limit: ${lim.limit} km/h${lim.highway ? " · " + trHighway(lim.highway) : ""}`;
+          if(kmh <= lim.limit) setState("limit-ok");
+          else if(kmh <= lim.limit + 10) setState("limit-warn");
+          else setState("limit-bad");
           maybeSpeak(kmh, lim.limit);
         }else{
-          spLimit.textContent = 'Limit: —';
-          setState('');
+          spLimit.textContent = "Limit: —";
+          setState("");
         }
-      }, ()=>{
-        spVal.textContent = '0';
-        spLimit.textContent = 'GPS kapalı';
-        setState('');
+
+        renderTimeline();
+        renderAI();
+      }, () => {
+        spVal.textContent = "0";
+        spLimit.textContent = "GPS kapalı";
+        setState("");
       }, {
         enableHighAccuracy:true,
         maximumAge:3000,
         timeout:12000
       });
     }else{
-      spLimit.textContent = 'GPS yok';
+      spLimit.textContent = "GPS yok";
     }
   })();
 
-  document.addEventListener('click', (e)=>{
-    const seatEl = e.target.closest('.seat');
+  document.addEventListener("click", (e) => {
+    const bagBadge = e.target.closest(".bag-badge");
+    if(bagBadge){
+      e.preventDefault();
+      e.stopPropagation();
+      const seat = bagBadge.closest(".seat")?.dataset.seat;
+      if(!seat) return;
+      const next = location.pathname;
+      const url = `/bags?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seat)}&next=${encodeURIComponent(next)}`;
+      location.href = url;
+      return;
+    }
+
+    const seatEl = e.target.closest(".seat");
     if(seatEl && !multiMode){
       openSeat(Number(seatEl.dataset.seat));
       return;
     }
-
     if(seatEl && multiMode){
       e.preventDefault();
       e.stopPropagation();
       toggleSeatPick(seatEl);
       return;
     }
-
-    const bagBadge = e.target.closest('.bag-badge');
-    if(bagBadge){
-      e.preventDefault();
-      e.stopPropagation();
-      const seat = bagBadge.closest('.seat')?.dataset.seat;
-      if(!seat) return;
-
-      const next = location.pathname;
-      const url = `/bags?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seat)}&next=${encodeURIComponent(next)}`;
-      location.href = url;
-    }
   }, true);
 
-  $('#btnSeatClose').addEventListener('click', closeSeat);
-  $('#seatBackdrop').addEventListener('click', closeSeat);
-  $('#btnSeatSave').addEventListener('click', saveSeat);
-  $('#btnSeatOffload').addEventListener('click', offloadSeat);
+  $("#btnSeatClose").addEventListener("click", closeSeat);
+  $("#seatBackdrop").addEventListener("click", closeSeat);
+  $("#btnSeatSave").addEventListener("click", saveSeat);
+  $("#btnSeatOffload").addEventListener("click", offloadSeat);
 
-  $('#btnBagAdd').addEventListener('click', ()=>{
+  $("#btnBagAdd").addEventListener("click", () => {
     const seat = currentSeat;
     if(!seat) return;
-    const drop = $('#dropoff')?.value || '';
+    const drop = $("#dropoff")?.value || "";
     const next = window.location.pathname;
     const url = `/bags/capture?trip_code=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seat)}&to_stop=${encodeURIComponent(drop)}&next=${encodeURIComponent(next)}`;
     window.location.href = url;
   });
 
-  $('#btnBagView').addEventListener('click', ()=>{
+  $("#btnBagView").addEventListener("click", () => {
     const seat = currentSeat;
     if(!seat) return;
     const next = window.location.pathname;
@@ -3002,94 +4034,94 @@
     window.location.href = url;
   });
 
-  $('#fabBulk').addEventListener('click', openBulk);
-  $('#fabCash').addEventListener('click', openCash);
-  $('#fabBulkFixed').addEventListener('click', openBulk);
-  $('#fabCashFixed').addEventListener('click', openCash);
+  $("#fabBulk").addEventListener("click", openBulk);
+  $("#fabBulkPane").addEventListener("click", openBulk);
+  $("#bulkClose").addEventListener("click", closeBulk);
+  $("#bulkBackdrop").addEventListener("click", closeBulk);
+  $("#bulkSave").addEventListener("click", saveBulk);
+  $("#multiPick").addEventListener("change", (e) => setMultiMode(e.target.checked));
 
-  $('#bulkClose').addEventListener('click', closeBulk);
-  $('#bulkBackdrop').addEventListener('click', closeBulk);
-  $('#bulkSave').addEventListener('click', saveBulk);
-  $('#multiPick').addEventListener('change', (e)=> setMultiMode(e.target.checked));
+  $("#fabCash").addEventListener("click", openCash);
+  $("#fabCashPane").addEventListener("click", openCash);
+  $("#cashClose").addEventListener("click", closeCash);
+  $("#cashBackdrop").addEventListener("click", closeCash);
+  $("#cashSave").addEventListener("click", saveCash);
 
-  $('#cashClose').addEventListener('click', closeCash);
-  $('#cashBackdrop').addEventListener('click', closeCash);
-  $('#cashSave').addEventListener('click', saveCash);
+  $("#standingCard").addEventListener("click", openStandingModal);
+  $("#openStandingModalBtn").addEventListener("click", openStandingModal);
+  $("#standingClose").addEventListener("click", closeStandingModal);
+  $("#standingBackdrop").addEventListener("click", closeStandingModal);
 
-  $('#standingCard').addEventListener('click', openStandingPopover);
-  $('#standingClose').addEventListener('click', closeStandingPopover);
-  $('#standingBackdrop').addEventListener('click', closeStandingPopover);
-
-  $('#standingBulkOff').addEventListener('click', ()=>{
+  $("#standingBulkOff").addEventListener("click", () => {
     let totalPeople = 0;
     standingItems.forEach(it => totalPeople += (it.count || 0));
     standingItems.length = 0;
     standingCount = Math.max(0, standingCount - totalPeople);
+    standingRevenue = 0;
     persistStandingItems();
     persistStandingTotals();
     updateStats();
     renderStandingList();
+    renderQuickStandingList();
     refreshStopBadges();
     renderAI();
+    renderTimeline();
   });
 
-  $('#btnGeoWatch').addEventListener('click', toggleGeoWatch);
-  $('#btnTriggerNow').addEventListener('click', triggerManualApproach);
-  $('#btnOffloadNow').addEventListener('click', offloadSelectedStop);
-  $('#btnSaveCoord').addEventListener('click', saveCoord);
+  $("#btnGeoWatch").addEventListener("click", toggleGeoWatch);
+  $("#btnTriggerNow").addEventListener("click", triggerManualApproach);
+  $("#btnOffloadNow").addEventListener("click", offloadSelectedStop);
+  $("#btnOffloadNowPane").addEventListener("click", offloadSelectedStop);
+  $("#btnSaveCoord").addEventListener("click", saveCoord);
+  $("#btnOpenRouteTab").addEventListener("click", () => openTab("route"));
 
-  $('#approachClose').addEventListener('click', ()=>{
-    closeModal('#approachBackdrop', '#approachModal');
-    showGhostOffload();
-  });
-  $('#approachBackdrop').addEventListener('click', ()=>{
-    closeModal('#approachBackdrop', '#approachModal');
-    showGhostOffload();
-  });
-  $('#approachSnooze').addEventListener('click', ()=>{
-    closeModal('#approachBackdrop', '#approachModal');
+  $("#approachClose").addEventListener("click", () => closeModal("#approachBackdrop", "#approachModal"));
+  $("#approachBackdrop").addEventListener("click", () => closeModal("#approachBackdrop", "#approachModal"));
+  $("#approachSnooze").addEventListener("click", () => {
+    closeModal("#approachBackdrop", "#approachModal");
     snoozeBlink();
-    showGhostOffload();
   });
-  $('#approachOffload').addEventListener('click', async ()=>{
+  $("#approachOffload").addEventListener("click", async () => {
     const stop = lastApproach?.stop;
     if(!stop) return;
     await bulkOffload(lastApproach.seats || []);
     await offloadStandingForStop(stop);
-    closeModal('#approachBackdrop', '#approachModal');
+    setLiveStop(stop);
+    closeModal("#approachBackdrop", "#approachModal");
     renderAI();
+    renderTimeline();
   });
 
-  $('#btnGhostOffload').addEventListener('click', async ()=>{
-    await bulkOffload(lastApproach.seats || []);
-    if(lastApproach.stop) await offloadStandingForStop(lastApproach.stop);
-    $('#btnGhostOffload').style.display = 'none';
-    advanceToNextStop({ mode:'nextWithSeats', ignoreToggle:true });
-  });
-
-  $('#alertStop').addEventListener('change', ()=>{
+  $("#alertStop").addEventListener("change", () => {
     updateGeoHint();
     refreshStopBadges();
     updateStopSeatBadges();
     renderAI();
+    renderTimeline();
+    updateCompactHeader();
 
-    const a = $('#alertStop').value || '';
-    if(a && $('#cashModal').style.display === 'block') $('#cashTo').value = a;
-    if(a && $('#bulkModal').style.display === 'block') $('#bulkTo').value = a;
+    const a = getSelectedStopName() || "";
+    if(a && $("#cashModal").style.display === "block") $("#cashTo").value = a;
+    if(a && $("#bulkModal").style.display === "block") $("#bulkTo").value = a;
   });
 
-  window.addEventListener('keydown', (e)=>{
-    if(e.key === 'Escape'){
+  window.addEventListener("keydown", (e) => {
+    if(e.key === "Escape"){
       closeSeat();
       closeBulk();
       closeCash();
-      closeStandingPopover();
-      closeModal('#approachBackdrop', '#approachModal');
+      closeStandingModal();
+      closeModal("#approachBackdrop", "#approachModal");
     }
   });
 
+  $("#btnDeckAI").addEventListener("click", startDeckAIVoice);
+
   (async function init(){
     try{
+      initTabs();
+      loadVoiceState();
+
       await fetchStops();
       await populateStops();
       await loadStandingTotals();
@@ -3101,140 +4133,28 @@
       }
 
       await refreshBagsAll();
+
       refreshStopBadges();
       updateStopSeatBadges();
       updateStats();
       updateGeoHint();
+      renderQuickStandingList();
+
+      if(speedState.liveStop){
+        updateCompactHeader();
+      }
+
+      const next = computeNextStopName(speedState.liveStop || "", "nextWithSeats");
+      if(next) setSelectedStop(next, { silent:true, voiceReply:false });
+      else if(serverStops?.length) setSelectedStop(serverStops[0], { silent:true, voiceReply:false });
+
+      renderTimeline();
       renderAI();
+      updateCompactHeader();
     }catch(e){
-      toast(e.message || 'Başlangıç yükleme hatası');
+      toast(e.message || "Başlangıç yükleme hatası");
     }
   })();
-
-async function handleVoiceCommandInSeatPage(text){
-  try{
-    const data = await safeJsonFetch('/api/ai/resolve', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrf
-      },
-      body: JSON.stringify({ command: text })
-    });
-
-    const result = data.result || {};
-    const intent = result.intent || null;
-    const seats = Array.isArray(result.seats) ? result.seats : [];
-
-    if(!intent){
-      toast('Komut çözülemedi');
-      return;
-    }
-
-    // 1) Tekli / çoklu boşaltma
-    if(intent === 'seat_remove_single' || intent === 'seat_remove_group'){
-      if(!seats.length){
-        toast('Boşaltılacak koltuk bulunamadı');
-        return;
-      }
-
-      await bulkOffload(seats);
-      toast('Sesli komut uygulandı: koltuk boşaltıldı');
-      return;
-    }
-
-    // 2) Servis işaretleme
-    if(intent === 'service_mark'){
-      if(!seats.length){
-        toast('Servis işaretlenecek koltuk bulunamadı');
-        return;
-      }
-
-      const j = await safeJsonFetch('/api/seats/service', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrf
-        },
-        body: JSON.stringify({
-          seats,
-          service: 1,
-          service_note: 'Sesli komut'
-        })
-      });
-
-      if(!j.ok){
-        throw new Error(j.msg || 'Servis işaretleme başarısız');
-      }
-
-      seats.forEach(n => {
-        serviceMap[String(n)] = true;
-        serviceNotes[String(n)] = 'Sesli komut';
-        setSeatVisual(n);
-      });
-
-      renderAI();
-      toast('Sesli komut uygulandı: servis işlendi');
-      return;
-    }
-
-    // 3) Ayakta ekleme / koltuk ekleme gibi ek bilgi isteyen intentler
-    toast('Bu komut ek bilgi istiyor, AI Console açılıyor');
-    location.href = '/ai-console?cmd=' + encodeURIComponent(text);
-
-  }catch(e){
-    toast(e.message || 'Sesli komut işlenemedi');
-  }
-}
-
-function startDeckAIVoice(){
-  const btn = $('#btnDeckAI');
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-  if(!SR){
-    toast('Bu tarayıcı sesli komutu desteklemiyor');
-    return;
-  }
-
-  const rec = new SR();
-  rec.lang = 'tr-TR';
-  rec.continuous = false;
-  rec.interimResults = false;
-  rec.maxAlternatives = 1;
-
-  btn.classList.add('listening');
-  btn.textContent = '🔴 Dinliyor';
-
-  rec.onresult = async (e) => {
-    const text = e.results?.[0]?.[0]?.transcript?.trim() || '';
-
-    if(!text){
-      toast('Ses algılandı ama metin çıkarılamadı');
-      return;
-    }
-
-    toast('Algılandı: ' + text, 1600);
-    await handleVoiceCommandInSeatPage(text);
-  };
-
-  rec.onerror = (e) => {
-    toast('Sesli komut hatası: ' + (e.error || 'bilinmiyor'));
-  };
-
-  rec.onend = () => {
-    btn.classList.remove('listening');
-    btn.textContent = '🎤 AI';
-  };
-
-  try{
-    rec.start();
-  }catch(_){
-    btn.classList.remove('listening');
-    btn.textContent = '🎤 AI';
-    toast('Mikrofon başlatılamadı');
-  }
-}
-
-$('#btnDeckAI')?.addEventListener('click', startDeckAIVoice);
 </script>
+
 {% endblock %}
