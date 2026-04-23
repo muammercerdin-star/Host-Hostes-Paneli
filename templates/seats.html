@@ -2198,6 +2198,7 @@
     "emanet aç",
     "sıradaki durak [durak adı]",
     "durak seç [durak adı]",
+    "[durak adı] kaç yolcu var",
     "bir sonraki durak",
     "rötar kaç",
     "hangi duraktayız",
@@ -2220,11 +2221,6 @@
   function setText(sel, val){
     const el = $(sel);
     if(el) el.textContent = val;
-  }
-
-  function setHTML(sel, val){
-    const el = $(sel);
-    if(el) el.innerHTML = val;
   }
 
   function setValue(sel, val){
@@ -3850,8 +3846,7 @@
         badgeCls,
         badgeText,
         passed,
-        active,
-        remainingKm: null
+        active
       };
     });
 
@@ -3983,167 +3978,48 @@
     const ntext = norm(text);
     const list = allStopsList();
     let best = "";
+
     for(const stop of list){
       const ns = norm(stop);
-      if(ns && ntext.includes(ns) && ns.length > best.length) best = stop;
+      if(ns && ntext.includes(ns) && ns.length > best.length){
+        best = stop;
+      }
     }
+
     return best;
   }
 
-function parseVoiceCommand(text){
-  const t = norm(text);
-  const mentionedStop = findStopMention(text);
+  function parseVoiceCommand(text){
+    const t = norm(text);
+    const mentionedStop = findStopMention(text);
 
-  if(/^(hesap ac|hesap aç)$/.test(t)) return { type:"open_hesap" };
-  if(/^(emanet ac|emanet aç|emanetler ac|emanetler aç)$/.test(t)) return { type:"open_emanet" };
-  if(/^(sesli yardim|sesli yardım|yardim|yardım)$/.test(t)) return { type:"help" };
-  if(/(kac yolcu var|kaç yolcu var|toplam yolcu)/.test(t)) return { type:"ask_total" };
-  if(/(ayakta kac|ayakta kaç)/.test(t)) return { type:"ask_standing" };
-  if(/(hangi duraktayiz|hangi duraktayız|neredeyiz)/.test(t)) return { type:"ask_live_stop" };
-  if(/(rotar kac|rötar kaç|gecikme kac|gecikme kaç)/.test(t)) return { type:"ask_delay" };
-  if(/(bir sonraki durak|siradaki saatli|sıradaki saatli)/.test(t)) return { type:"ask_next_timed" };
+    if(/^(hesap ac|hesap aç)$/.test(t)) return { type:"open_hesap" };
+    if(/^(emanet ac|emanet aç|emanetler ac|emanetler aç)$/.test(t)) return { type:"open_emanet" };
+    if(/^(sesli yardim|sesli yardım|yardim|yardım)$/.test(t)) return { type:"help" };
 
-  if(mentionedStop && /(kaç yolcu var|kac yolcu var|orada kaç yolcu var|orada kac yolcu var)/.test(t)){
-    return { type:"ask_stop_count", stop: mentionedStop };
-  }
-
-  if((/(siradaki durak|sıradaki durak|durak sec|durak seç)/.test(t)) && mentionedStop){
-    return { type:"set_stop", stop: mentionedStop };
-  }
-
-  if(mentionedStop && /(durak|sec|seç)/.test(t)){
-    return { type:"set_stop", stop: mentionedStop };
-  }
-
-  return { type:"unknown", raw:text };
-}
-
-async function handleLocalVoiceCommand(text){
-  const cmd = parseVoiceCommand(text);
-
-  if(cmd.type === "help"){
-    const help = "Temel komutlar: " + VOICE_HELP.join(", ");
-    toast(help, 4200);
-    speak(help);
-    return true;
-  }
-
-  if(cmd.type === "open_hesap"){
-    speak("Hesap sayfası açılıyor.");
-    location.href = "{{ url_for('hesap_page') }}";
-    return true;
-  }
-
-  if(cmd.type === "open_emanet"){
-    speak("Emanet sayfası açılıyor.");
-    location.href = "{{ url_for('consignments_page') }}";
-    return true;
-  }
-
-  if(cmd.type === "ask_total"){
-    const filled = Object.values(assigned || {}).filter(Boolean).length;
-    const total = filled + standingCount;
-    const msg = `Toplam ${total} yolcu var. ${filled} oturan, ${standingCount} ayakta.`;
-    toast(msg, 3200);
-    speak(msg);
-    return true;
-  }
-
-  if(cmd.type === "ask_standing"){
-    const msg = `Ayakta ${standingCount} kişi var. Tahsilat ${fmtTL(standingRevenue)}.`;
-    toast(msg, 3200);
-    speak(msg);
-    return true;
-  }
-
-  if(cmd.type === "ask_live_stop"){
-    const live = speedState.liveStop || "kesinleşmedi";
-    const msg = live === "kesinleşmedi"
-      ? "Canlı durak henüz tespit edilemedi."
-      : `Şu an ${live} civarındasın.`;
-    toast(msg, 3200);
-    speak(msg);
-    return true;
-  }
-
-  if(cmd.type === "ask_delay"){
-    const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
-    if(!nextTimed){
-      toast("Saatli nokta yok");
-      speak("Bu hatta saatli nokta tanımlı değil.");
-      return true;
-    }
-    const msg = `${nextTimed.stop} için ${fmtSignedMin(nextTimed.delayMin)}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
-    toast(msg, 3600);
-    speak(msg);
-    return true;
-  }
-
-  if(cmd.type === "ask_next_timed"){
-    const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
-    if(!nextTimed){
-      toast("Saatli nokta yok");
-      speak("Sıradaki saatli durak bulunamadı.");
-      return true;
-    }
-    const msg = `Sıradaki saatli nokta ${nextTimed.stop}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
-    toast(msg, 3600);
-    speak(msg);
-    return true;
-  }
-
-  if(cmd.type === "ask_stop_count"){
-    const stop = cmd.stop;
-    const seat = seatsForStop(stop).length;
-    const stand = computeStandingCountsByStop()[stop] || 0;
-    const parcel = computeParcelCountsByStop()[stop] || 0;
-    const total = seat + stand;
-
-    const msg = `${stop} için ${total} yolcu var. ${seat} oturan, ${stand} ayakta.${parcel ? ` Ayrıca ${parcel} emanet var.` : ""}`;
-    toast(msg, 3600);
-    speak(msg);
-    return true;
-  }
-
-  if(cmd.type === "set_stop"){
-    const ok = setSelectedStop(cmd.stop, { silent:true, voiceReply:false });
-    if(!ok){
-      toast("Bu durak güzergâhta yok");
-      speak("Bu durak bu güzergâhta bulunmuyor.");
-      return true;
+    if(
+      mentionedStop &&
+      /(kaç yolcu var|kac yolcu var|kaç kişi var|kac kisi var|orada kaç yolcu var|orada kac yolcu var)/.test(t)
+    ){
+      return { type:"ask_stop_count", stop: mentionedStop };
     }
 
-    const stop = getSelectedStopName();
-    const seat = seatsForStop(stop).length;
-    const stand = computeStandingCountsByStop()[stop] || 0;
-    const parcel = computeParcelCountsByStop()[stop] || 0;
-    const msg = `${stop} seçildi. ${seat} oturan, ${stand} ayakta, ${parcel} emanet.`;
-    toast(msg, 3600);
-    speak(msg);
-    return true;
+    if(/(kac yolcu var|kaç yolcu var|toplam yolcu)/.test(t)) return { type:"ask_total" };
+    if(/(ayakta kac|ayakta kaç)/.test(t)) return { type:"ask_standing" };
+    if(/(hangi duraktayiz|hangi duraktayız|neredeyiz)/.test(t)) return { type:"ask_live_stop" };
+    if(/(rotar kac|rötar kaç|gecikme kac|gecikme kaç)/.test(t)) return { type:"ask_delay" };
+    if(/(bir sonraki durak|siradaki saatli|sıradaki saatli)/.test(t)) return { type:"ask_next_timed" };
+
+    if((/(siradaki durak|sıradaki durak|durak sec|durak seç)/.test(t)) && mentionedStop){
+      return { type:"set_stop", stop: mentionedStop };
+    }
+
+    if(mentionedStop && /(durak|sec|seç)/.test(t)){
+      return { type:"set_stop", stop: mentionedStop };
+    }
+
+    return { type:"unknown", raw:text };
   }
-
-  return false;
-}
-
-async function handleBasicVoiceCommand(text){
-  const localHandled = await handleLocalVoiceCommand(text);
-  if(localHandled) return;
-
-  try{
-    const resolved = await resolveVoiceWithBackendAI(text);
-    const handled = await executeResolvedAiOnSeats(resolved);
-
-    if(handled) return;
-
-    toast("Komut anlaşılmadı");
-    speak("Komutu anlayamadım. Sesli yardım diyebilirsin.");
-  }catch(e){
-    console.error("AI voice resolve error:", e);
-    toast("AI sesli komut hatası");
-    speak("AI sesli komut tarafında bir hata oluştu.");
-  }
-}
 
   function aiIntentTitle(intent){
     const map = {
@@ -4232,7 +4108,7 @@ async function handleBasicVoiceCommand(text){
     speak("Ayakta satış formu açıldı.");
   }
 
-  async function applyServiceMark(seats, text){
+  async function applyServiceMark(seats){
     if(!Array.isArray(seats) || !seats.length){
       toast("Servis için koltuk bulunamadı");
       speak("Servis için koltuk bulunamadı.");
@@ -4300,7 +4176,7 @@ async function handleBasicVoiceCommand(text){
     }
 
     if(intent === "service_mark"){
-      await applyServiceMark(seats, rawText);
+      await applyServiceMark(seats);
       return true;
     }
 
@@ -4330,9 +4206,7 @@ async function handleBasicVoiceCommand(text){
     }
 
     if(intent === "query"){
-      toast("Bu sorgu AI Console mantığında çözüldü ama seats ekranında cevap akışı bağlı değil");
-      speak("Bu sorgu çözüldü fakat cevap modülü seats ekranına henüz bağlanmadı.");
-      return true;
+      return false;
     }
 
     return false;
@@ -4340,10 +4214,6 @@ async function handleBasicVoiceCommand(text){
 
   async function handleLocalVoiceCommand(text){
     const cmd = parseVoiceCommand(text);
-
-if (mentionedStop && /(kac yolcu var|kaç yolcu var|kac kisi var|kaç kişi var)/.test(t)) {
-  return { type:"ask_stop_count", stop: mentionedStop };
-}
 
     if(cmd.type === "help"){
       const help = "Temel komutlar: " + VOICE_HELP.join(", ");
@@ -4365,26 +4235,40 @@ if (mentionedStop && /(kac yolcu var|kaç yolcu var|kac kisi var|kaç kişi var)
     }
 
     if(cmd.type === "ask_total"){
-      const filled = Object.values(assigned || {}).filter(Boolean).length;
-      const total = filled + standingCount;
-      const msg = `Toplam ${total} yolcu var. ${filled} oturan, ${standingCount} ayakta.`;
-      toast(msg, 3200);
+      const seated = Object.values(assigned || {}).filter(Boolean).length;
+      const total = seated + (standingCount || 0);
+      const msg = `Toplam ${total} yolcu var. ${seated} oturan, ${standingCount || 0} ayakta.`;
+      toast(msg, 3600);
       speak(msg);
       return true;
     }
 
     if(cmd.type === "ask_standing"){
-      const msg = `Ayakta ${standingCount} kişi var. Tahsilat ${fmtTL(standingRevenue)}.`;
-      toast(msg, 3200);
+      const msg = `Ayakta ${standingCount || 0} kişi var. Tahsilat ${fmtTL(standingRevenue || 0)}.`;
+      toast(msg, 3600);
+      speak(msg);
+      return true;
+    }
+
+    if(cmd.type === "ask_stop_count"){
+      const stop = cmd.stop;
+      const seat = seatsForStop(stop).length;
+      const stand = computeStandingCountsByStop()[stop] || 0;
+      const parcel = computeParcelCountsByStop()[stop] || 0;
+      const total = seat + stand;
+
+      const msg =
+        `${stop} için ${total} yolcu var. ${seat} oturan, ${stand} ayakta.` +
+        (parcel ? ` Ayrıca ${parcel} emanet var.` : "");
+
+      toast(msg, 4200);
       speak(msg);
       return true;
     }
 
     if(cmd.type === "ask_live_stop"){
-      const live = speedState.liveStop || "kesinleşmedi";
-      const msg = live === "kesinleşmedi"
-        ? "Canlı durak henüz tespit edilemedi."
-        : `Şu an ${live} civarındasın.`;
+      const live = speedState.liveStop || getSelectedStopName() || "henüz belli değil";
+      const msg = `Şu an ${live} civarındasın.`;
       toast(msg, 3200);
       speak(msg);
       return true;
@@ -4393,12 +4277,14 @@ if (mentionedStop && /(kac yolcu var|kaç yolcu var|kac kisi var|kaç kişi var)
     if(cmd.type === "ask_delay"){
       const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
       if(!nextTimed){
-        toast("Saatli nokta yok");
-        speak("Bu hatta saatli nokta tanımlı değil.");
+        const msg = "Saatli durak bilgisi yok.";
+        toast(msg, 3200);
+        speak(msg);
         return true;
       }
+
       const msg = `${nextTimed.stop} için ${fmtSignedMin(nextTimed.delayMin)}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
-      toast(msg, 3600);
+      toast(msg, 4200);
       speak(msg);
       return true;
     }
@@ -4406,12 +4292,14 @@ if (mentionedStop && /(kac yolcu var|kaç yolcu var|kac kisi var|kaç kişi var)
     if(cmd.type === "ask_next_timed"){
       const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
       if(!nextTimed){
-        toast("Saatli nokta yok");
-        speak("Sıradaki saatli durak bulunamadı.");
+        const msg = "Sıradaki saatli durak bulunamadı.";
+        toast(msg, 3200);
+        speak(msg);
         return true;
       }
+
       const msg = `Sıradaki saatli nokta ${nextTimed.stop}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
-      toast(msg, 3600);
+      toast(msg, 4200);
       speak(msg);
       return true;
     }
@@ -4437,150 +4325,56 @@ if (mentionedStop && /(kac yolcu var|kaç yolcu var|kac kisi var|kaç kişi var)
     return false;
   }
 
-async function handleLocalVoiceCommand(text){
-  const cmd = parseVoiceCommand(text);
-
-  if(cmd.type === "ask_total"){
-    const seated = Object.values(assigned || {}).filter(Boolean).length;
-    const total = seated + (standingCount || 0);
-    const msg = `Toplam ${total} yolcu var. ${seated} oturan, ${standingCount || 0} ayakta.`;
-    toast(msg, 3600);
-    speak(msg);
-    return true;
-  }
-
-  if(cmd.type === "ask_standing"){
-    const msg = `Ayakta ${standingCount || 0} kişi var. Tahsilat ${fmtTL(standingRevenue || 0)}.`;
-    toast(msg, 3600);
-    speak(msg);
-    return true;
-  }
-
-  if(cmd.type === "ask_stop_count"){
-    const stop = cmd.stop;
-    const seat = seatsForStop(stop).length;
-    const stand = computeStandingCountsByStop()[stop] || 0;
-    const parcel = computeParcelCountsByStop()[stop] || 0;
-    const total = seat + stand;
-
-    const msg =
-      `${stop} için ${total} yolcu var. ${seat} oturan, ${stand} ayakta.` +
-      (parcel ? ` Ayrıca ${parcel} emanet var.` : "");
-
-    toast(msg, 3600);
-    speak(msg);
-    return true;
-  }
-
-  if(cmd.type === "ask_live_stop"){
-    const live = speedState.liveStop || getSelectedStopName() || "henüz belli değil";
-    const msg = `Şu an ${live} civarındasın.`;
-    toast(msg, 3200);
-    speak(msg);
-    return true;
-  }
-
-  if(cmd.type === "ask_delay"){
-    const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
-    if(!nextTimed){
-      const msg = "Saatli durak bilgisi yok.";
-      toast(msg, 3200);
-      speak(msg);
-      return true;
-    }
-
-    const msg = `${nextTimed.stop} için ${fmtSignedMin(nextTimed.delayMin)}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
-    toast(msg, 4200);
-    speak(msg);
-    return true;
-  }
-
-  if(cmd.type === "set_stop"){
-    const ok = setSelectedStop(cmd.stop, { silent:true, voiceReply:false });
-    if(!ok){
-      toast("Bu durak güzergâhta yok");
-      speak("Bu durak bu güzergâhta bulunmuyor.");
-      return true;
-    }
-
-    const stop = getSelectedStopName();
-    const seat = seatsForStop(stop).length;
-    const stand = computeStandingCountsByStop()[stop] || 0;
-    const parcel = computeParcelCountsByStop()[stop] || 0;
-    const msg = `${stop} seçildi. ${seat} oturan, ${stand} ayakta, ${parcel} emanet.`;
-    toast(msg, 3600);
-    speak(msg);
-    return true;
-  }
-
-  return false;
-}
-
-  try{
-    const resolved = await resolveVoiceWithBackendAI(text);
-    const handled = await executeResolvedAiOnSeats(resolved);
-
-    if(handled) return;
-
-    toast("Komut anlaşılmadı");
-    speak("Komutu anlayamadım. Sesli yardım diyebilirsin.");
-  }catch(e){
-    console.error("AI voice resolve error:", e);
-    toast("AI sesli komut hatası");
-    speak("AI sesli komut tarafında bir hata oluştu.");
-  }
-}
-
-  function startDeckAIVoice(){
-    const btn = $("#btnDeckAI");
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if(!SR){
-      toast("Bu tarayıcı sesli komutu desteklemiyor");
-      return;
-    }
-
-    const rec = new SR();
-    rec.lang = "tr-TR";
-    rec.continuous = false;
-    rec.interimResults = false;
-    rec.maxAlternatives = 1;
-
-    if(btn){
-      btn.classList.add("listening");
-      btn.innerHTML = "🔴 <span>Dinliyor</span>";
-    }
-
-    rec.onresult = async (e) => {
-      const text = e.results?.[0]?.[0]?.transcript?.trim() || "";
-      if(!text){
-        toast("Ses algılandı ama metin çıkarılamadı");
-        return;
-      }
-
-      toast("Algılandı: " + text, 1500);
-      await handleBasicVoiceCommand(text);
-    };
-
-    rec.onerror = (e) => {
-      toast("Sesli komut hatası: " + (e.error || "bilinmiyor"));
-    };
-
-    rec.onend = () => {
-      if(btn){
-        btn.classList.remove("listening");
-        btn.innerHTML = "🎤 <span>Sesli Komut</span>";
-      }
-    };
+  async function handleBasicVoiceCommand(text){
+    const localHandled = await handleLocalVoiceCommand(text);
+    if(localHandled) return;
 
     try{
-      rec.start();
-    }catch(_){
-      if(btn){
-        btn.classList.remove("listening");
-        btn.innerHTML = "🎤 <span>Sesli Komut</span>";
+      const resolved = await resolveVoiceWithBackendAI(text);
+      const handled = await executeResolvedAiOnSeats(resolved, text);
+
+      if(handled) return;
+
+      if(resolved?.intent === "query"){
+        const cmd = parseVoiceCommand(text);
+
+        if(cmd.type === "ask_stop_count"){
+          const stop = cmd.stop;
+          const seat = seatsForStop(stop).length;
+          const stand = computeStandingCountsByStop()[stop] || 0;
+          const parcel = computeParcelCountsByStop()[stop] || 0;
+          const total = seat + stand;
+          const msg =
+            `${stop} için ${total} yolcu var. ${seat} oturan, ${stand} ayakta.` +
+            (parcel ? ` Ayrıca ${parcel} emanet var.` : "");
+          toast(msg, 4200);
+          speak(msg);
+          return;
+        }
+
+        if(cmd.type === "ask_total"){
+          const seated = Object.values(assigned || {}).filter(Boolean).length;
+          const total = seated + (standingCount || 0);
+          const msg = `Toplam ${total} yolcu var. ${seated} oturan, ${standingCount || 0} ayakta.`;
+          toast(msg, 3600);
+          speak(msg);
+          return;
+        }
+
+        if(cmd.type === "ask_standing"){
+          const msg = `Ayakta ${standingCount || 0} kişi var. Tahsilat ${fmtTL(standingRevenue || 0)}.`;
+          toast(msg, 3600);
+          speak(msg);
+          return;
+        }
       }
-      toast("Mikrofon başlatılamadı");
+
+      toast("Komut anlaşılmadı");
+      speak("Komutu anlayamadım. Sesli yardım diyebilirsin.");
+    }catch(e){
+      console.error("AI voice resolve error:", e);
+      toast("AI sesli komut hatası");
+      speak("AI sesli komut tarafında bir hata oluştu.");
     }
   }
 
@@ -5130,5 +4924,4 @@ async function handleLocalVoiceCommand(text){
     }
   })();
 </script>
-
 {% endblock %}
