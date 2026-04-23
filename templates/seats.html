@@ -479,35 +479,67 @@
 
   .route-stop{
     flex:0 0 auto;
-    min-width:110px;
-    min-height:56px;
+    min-width:138px;
+    min-height:84px;
     padding:10px 12px;
     border-radius:18px;
     background:rgba(255,255,255,.04);
     border:1px solid var(--line);
     display:flex;
     flex-direction:column;
-    justify-content:center;
-    gap:4px;
+    justify-content:space-between;
+    gap:6px;
     box-shadow:0 10px 20px rgba(0,0,0,.16);
+    text-align:left;
   }
 
   .route-stop .name{
     font-size:12px;
     font-weight:900;
     color:#ecf3fb;
-    line-height:1.2;
+    line-height:1.25;
   }
 
   .route-stop .meta{
-    font-size:11px;
+    font-size:10px;
     color:var(--muted);
-    line-height:1;
+    line-height:1.2;
+  }
+
+  .route-stop .extra{
+    display:grid;
+    gap:4px;
+    margin-top:2px;
+  }
+
+  .route-stop .extra-line{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    font-size:10px;
+    line-height:1.2;
+  }
+
+  .route-stop .extra-k{
+    color:var(--muted);
+    font-weight:700;
+    white-space:nowrap;
+  }
+
+  .route-stop .extra-v{
+    color:#dfe9f5;
+    font-weight:900;
+    text-align:right;
+    white-space:nowrap;
   }
 
   .route-stop.active{
     background:linear-gradient(180deg, rgba(37,99,235,.22), rgba(37,99,235,.10));
     border-color:rgba(96,165,250,.35);
+    box-shadow:
+    0 12px 24px rgba(0,0,0,.18),
+    0 0 0 1px rgba(96,165,250,.16) inset;
   }
 
   .route-stop.done{
@@ -2708,63 +2740,109 @@
     });
   }
 
-  function renderRouteStrip(){
-    const wrap = $("#routeStrip");
-    if(!wrap) return;
+function renderRouteStrip(){
+  const wrap = $("#routeStrip");
+  if(!wrap) return;
 
-    const list = allStopsList();
-    wrap.innerHTML = "";
+  const list = allStopsList();
+  wrap.innerHTML = "";
 
-    if(!list.length){
-      wrap.innerHTML = `
-        <div class="route-stop active">
-          <div class="name">Rota hazırlanıyor</div>
-          <div class="meta">Duraklar yüklenecek</div>
-        </div>
-      `;
-      return;
+  if(!list.length){
+    wrap.innerHTML = `
+      <div class="route-stop active">
+        <div class="name">Rota hazırlanıyor</div>
+        <div class="meta">Duraklar yüklenecek</div>
+      </div>
+    `;
+    return;
+  }
+
+  const selected = getSelectedStopName();
+  const live = speedState.liveStop || "";
+  const selectedNorm = norm(selected);
+  const liveNorm = norm(live);
+
+  const seatCounts = computeSeatCountsByStop();
+  const standingCounts = computeStandingCountsByStop();
+  const parcelCounts = computeParcelCountsByStop();
+
+  const actualSchedule = buildActualSchedule();
+  const planMap = new Map(
+    actualSchedule.map(x => [norm(x.stop), x.plan || ""])
+  );
+
+  list.forEach(stop => {
+    const seatCt = seatCounts[stop] || 0;
+    const standingCt = standingCounts[stop] || 0;
+    const parcelCt = parcelCounts[stop] || 0;
+
+    const isActive = !!selectedNorm && norm(stop) === selectedNorm;
+    const isLive = !!liveNorm && norm(stop) === liveNorm;
+    const isDone = speedState.passedStops.has(stop) && !isActive && !isLive;
+
+    const stopObj = findStopByName(stop);
+    const plan = planMap.get(norm(stop)) || "";
+    let kmText = "";
+
+    if(currentCoords && stopObj && hasCoord(stopObj)){
+      const km = distKm(currentCoords, {
+        lat: Number(stopObj.lat),
+        lng: Number(stopObj.lng)
+      });
+      kmText = `${km.toFixed(1)} km`;
     }
 
-    const selected = getSelectedStopName();
-    const live = speedState.liveStop || "";
-    const selectedNorm = norm(selected);
-    const liveNorm = norm(live);
-    const seatCounts = computeSeatCountsByStop();
-    const standingCounts = computeStandingCountsByStop();
-    const parcelCounts = computeParcelCountsByStop();
+    let metaLine1 = "";
+    if(isLive) metaLine1 = "Canlı";
+    else if(isActive) metaLine1 = "Seçili";
+    else if(isDone) metaLine1 = "Geçildi";
+    else metaLine1 = "Bekliyor";
 
-    list.forEach(stop => {
-      const seatCt = seatCounts[stop] || 0;
-      const standingCt = standingCounts[stop] || 0;
-      const parcelCt = parcelCounts[stop] || 0;
-      const isActive = selectedNorm && norm(stop) === selectedNorm;
-      const isLive = liveNorm && norm(stop) === liveNorm;
-      const isDone = speedState.passedStops.has(stop) && !isActive && !isLive;
+    let metaLine2 = "";
+    if(seatCt || standingCt || parcelCt){
+      metaLine2 = `${seatCt}K ${standingCt}A ${parcelCt}E`;
+    }else{
+      metaLine2 = isDone ? "İşlem bitti" : "İşlem yok";
+    }
 
-      const metaParts = [];
-      if(isLive) metaParts.push("Canlı");
-      else if(isActive) metaParts.push("Seçili");
-      else if(isDone) metaParts.push("Geçildi");
+    const extraBits = [];
+    if(plan) extraBits.push(`Plan ${plan}`);
+    if(kmText) extraBits.push(kmText);
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done" : ""}`;
 
-      if(seatCt || standingCt || parcelCt){
-        metaParts.push(`${seatCt}K ${standingCt}A ${parcelCt}E`);
-      }else if(!isDone){
-        metaParts.push("İşlem yok");
-      }
+    const planText = plan || "—";
+    const kmValue = kmText || "—";
 
-      const item = document.createElement("button");
-      item.type = "button";
-      item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done" : ""}`;
-      item.innerHTML = `
-        <div class="name">${stop}</div>
-        <div class="meta">${metaParts.join(" · ")}</div>
-      `;
-      item.addEventListener("click", () => {
-        setSelectedStop(stop, { silent:true, voiceReply:false });
-      });
-      wrap.appendChild(item);
+    item.innerHTML = `
+  <div class="name">${stop}</div>
+  <div class="meta">${metaLine1} · ${metaLine2}</div>
+  <div class="extra">
+    <div class="extra-line">
+      <span class="extra-k">Saat</span>
+      <span class="extra-v">${planText}</span>
+    </div>
+    <div class="extra-line">
+      <span class="extra-k">Mesafe</span>
+      <span class="extra-v">${kmValue}</span>
+    </div>
+  </div>
+   `;
+
+   item.addEventListener("click", () => {
+   setSelectedStop(stop, { silent:true, voiceReply:false });
+   });
+
+   wrap.appendChild(item);
+
+    item.addEventListener("click", () => {
+      setSelectedStop(stop, { silent:true, voiceReply:false });
     });
-  }
+
+    wrap.appendChild(item);
+  });
+}
 
   function updateCompactHeader(){
     const selected = getSelectedStopName();
@@ -3989,37 +4067,114 @@
     return best;
   }
 
-  function parseVoiceCommand(text){
-    const t = norm(text);
-    const mentionedStop = findStopMention(text);
-
-    if(/^(hesap ac|hesap aç)$/.test(t)) return { type:"open_hesap" };
-    if(/^(emanet ac|emanet aç|emanetler ac|emanetler aç)$/.test(t)) return { type:"open_emanet" };
-    if(/^(sesli yardim|sesli yardım|yardim|yardım)$/.test(t)) return { type:"help" };
-
-    if(
-      mentionedStop &&
-      /(kaç yolcu var|kac yolcu var|kaç kişi var|kac kisi var|orada kaç yolcu var|orada kac yolcu var)/.test(t)
-    ){
-      return { type:"ask_stop_count", stop: mentionedStop };
+function extractSeatNumbersFromText(text){
+  const nums = String(text || "").match(/\b\d{1,2}\b/g) || [];
+  const out = [];
+  nums.forEach(n => {
+    const x = parseInt(n, 10);
+    if(Number.isInteger(x) && x > 0 && x <= 60 && !out.includes(x)){
+      out.push(x);
     }
+  });
+  return out;
+}
 
-    if(/(kac yolcu var|kaç yolcu var|toplam yolcu)/.test(t)) return { type:"ask_total" };
-    if(/(ayakta kac|ayakta kaç)/.test(t)) return { type:"ask_standing" };
-    if(/(hangi duraktayiz|hangi duraktayız|neredeyiz)/.test(t)) return { type:"ask_live_stop" };
-    if(/(rotar kac|rötar kaç|gecikme kac|gecikme kaç)/.test(t)) return { type:"ask_delay" };
-    if(/(bir sonraki durak|siradaki saatli|sıradaki saatli)/.test(t)) return { type:"ask_next_timed" };
+function detectGenderFromText(text){
+  const t = norm(text);
 
-    if((/(siradaki durak|sıradaki durak|durak sec|durak seç)/.test(t)) && mentionedStop){
-      return { type:"set_stop", stop: mentionedStop };
-    }
+  if(/\b(erkek|bay|adam)\b/.test(t)) return "bay";
+  if(/\b(kadin|kadın|bayan|kiz|kız)\b/.test(t)) return "bayan";
+  if(/\b(bos yap|boş yap|cinsiyeti kaldir|cinsiyeti kaldır|temizle|sil|sifirla|sıfırla)\b/.test(t)) return "";
 
-    if(mentionedStop && /(durak|sec|seç)/.test(t)){
-      return { type:"set_stop", stop: mentionedStop };
-    }
+  return null;
+}
 
-    return { type:"unknown", raw:text };
+async function applySeatGender(seats, gender){
+  const validSeats = (Array.isArray(seats) ? seats : [])
+    .map(x => Number(x))
+    .filter(x => Number.isInteger(x) && x > 0);
+
+  if(!validSeats.length){
+    toast("Koltuk bulunamadı");
+    speak("Koltuk bulunamadı.");
+    return true;
   }
+
+  const occupiedSeats = validSeats.filter(n => !!assigned[String(n)]);
+  const emptySeats = validSeats.filter(n => !assigned[String(n)]);
+
+  if(!occupiedSeats.length){
+    toast("Önce koltuğa yolcu ekle");
+    speak("Önce koltuğa yolcu eklemelisin.");
+    return true;
+  }
+
+  const j = await safeJsonFetch("/api/seats/gender", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": csrf
+    },
+    body: JSON.stringify({
+      seats: occupiedSeats,
+      gender: gender
+    })
+  });
+
+  if(!j.ok) throw new Error(j.msg || "Cinsiyet güncellenemedi");
+
+  occupiedSeats.forEach(n => {
+    genders[String(n)] = gender;
+    setSeatVisual(n);
+  });
+
+  const genderLabel =
+    gender === "bay" ? "bay" :
+    gender === "bayan" ? "bayan" : "boş";
+
+  let msg = `${occupiedSeats.join(", ")} numara ${genderLabel} yapıldı`;
+  if(emptySeats.length){
+    msg += `. Boş olduğu için atlanan: ${emptySeats.join(", ")}`;
+  }
+
+  toast(msg, 3200);
+  speak(msg);
+  return true;
+}
+
+function parseVoiceCommand(text){
+  const t = norm(text);
+  const mentionedStop = findStopMention(text);
+  const seats = extractSeatNumbersFromText(text);
+  const gender = detectGenderFromText(text);
+
+  if(/^(hesap ac|hesap aç)$/.test(t)) return { type:"open_hesap" };
+  if(/^(emanet ac|emanet aç|emanetler ac|emanetler aç)$/.test(t)) return { type:"open_emanet" };
+  if(/^(sesli yardim|sesli yardım|yardim|yardım)$/.test(t)) return { type:"help" };
+  if(/(kac yolcu var|kaç yolcu var|toplam yolcu)/.test(t)) return { type:"ask_total" };
+  if(/(ayakta kac|ayakta kaç)/.test(t)) return { type:"ask_standing" };
+  if(/(hangi duraktayiz|hangi duraktayız|neredeyiz)/.test(t)) return { type:"ask_live_stop" };
+  if(/(rotar kac|rötar kaç|gecikme kac|gecikme kaç)/.test(t)) return { type:"ask_delay" };
+  if(/(bir sonraki durak|siradaki saatli|sıradaki saatli)/.test(t)) return { type:"ask_next_timed" };
+
+  if(mentionedStop && /(kaç yolcu var|kac yolcu var|orada kaç yolcu var|orada kac yolcu var|kaç kişi var|kac kisi var)/.test(t)){
+    return { type:"ask_stop_count", stop: mentionedStop };
+  }
+
+  if(seats.length && gender !== null){
+    return { type:"set_gender", seats, gender };
+  }
+
+  if((/(siradaki durak|sıradaki durak|durak sec|durak seç)/.test(t)) && mentionedStop){
+    return { type:"set_stop", stop: mentionedStop };
+  }
+
+  if(mentionedStop && /(durak|sec|seç)/.test(t)){
+    return { type:"set_stop", stop: mentionedStop };
+  }
+
+  return { type:"unknown", raw:text };
+}
 
   function aiIntentTitle(intent){
     const map = {
@@ -4212,118 +4367,123 @@
     return false;
   }
 
-  async function handleLocalVoiceCommand(text){
-    const cmd = parseVoiceCommand(text);
+async function handleLocalVoiceCommand(text){
+  const cmd = parseVoiceCommand(text);
 
-    if(cmd.type === "help"){
-      const help = "Temel komutlar: " + VOICE_HELP.join(", ");
-      toast(help, 4200);
-      speak(help);
-      return true;
-    }
+  if(cmd.type === "help"){
+    const help = "Temel komutlar: " + VOICE_HELP.join(", ");
+    toast(help, 4200);
+    speak(help);
+    return true;
+  }
 
-    if(cmd.type === "open_hesap"){
-      speak("Hesap sayfası açılıyor.");
-      location.href = "{{ url_for('hesap_page') }}";
-      return true;
-    }
+  if(cmd.type === "open_hesap"){
+    speak("Hesap sayfası açılıyor.");
+    location.href = "{{ url_for('hesap_page') }}";
+    return true;
+  }
 
-    if(cmd.type === "open_emanet"){
-      speak("Emanet sayfası açılıyor.");
-      location.href = "{{ url_for('consignments_page') }}";
-      return true;
-    }
+  if(cmd.type === "open_emanet"){
+    speak("Emanet sayfası açılıyor.");
+    location.href = "{{ url_for('consignments_page') }}";
+    return true;
+  }
 
-    if(cmd.type === "ask_total"){
-      const seated = Object.values(assigned || {}).filter(Boolean).length;
-      const total = seated + (standingCount || 0);
-      const msg = `Toplam ${total} yolcu var. ${seated} oturan, ${standingCount || 0} ayakta.`;
-      toast(msg, 3600);
-      speak(msg);
-      return true;
-    }
+  if(cmd.type === "set_gender"){
+    await applySeatGender(cmd.seats, cmd.gender);
+    return true;
+  }
 
-    if(cmd.type === "ask_standing"){
-      const msg = `Ayakta ${standingCount || 0} kişi var. Tahsilat ${fmtTL(standingRevenue || 0)}.`;
-      toast(msg, 3600);
-      speak(msg);
-      return true;
-    }
+  if(cmd.type === "ask_total"){
+    const seated = Object.values(assigned || {}).filter(Boolean).length;
+    const total = seated + (standingCount || 0);
+    const msg = `Toplam ${total} yolcu var. ${seated} oturan, ${standingCount || 0} ayakta.`;
+    toast(msg, 3600);
+    speak(msg);
+    return true;
+  }
 
-    if(cmd.type === "ask_stop_count"){
-      const stop = cmd.stop;
-      const seat = seatsForStop(stop).length;
-      const stand = computeStandingCountsByStop()[stop] || 0;
-      const parcel = computeParcelCountsByStop()[stop] || 0;
-      const total = seat + stand;
+  if(cmd.type === "ask_standing"){
+    const msg = `Ayakta ${standingCount || 0} kişi var. Tahsilat ${fmtTL(standingRevenue || 0)}.`;
+    toast(msg, 3600);
+    speak(msg);
+    return true;
+  }
 
-      const msg =
-        `${stop} için ${total} yolcu var. ${seat} oturan, ${stand} ayakta.` +
-        (parcel ? ` Ayrıca ${parcel} emanet var.` : "");
+  if(cmd.type === "ask_stop_count"){
+    const stop = cmd.stop;
+    const seat = seatsForStop(stop).length;
+    const stand = computeStandingCountsByStop()[stop] || 0;
+    const parcel = computeParcelCountsByStop()[stop] || 0;
+    const total = seat + stand;
 
-      toast(msg, 4200);
-      speak(msg);
-      return true;
-    }
+    const msg =
+      `${stop} için ${total} yolcu var. ${seat} oturan, ${stand} ayakta.` +
+      (parcel ? ` Ayrıca ${parcel} emanet var.` : "");
 
-    if(cmd.type === "ask_live_stop"){
-      const live = speedState.liveStop || getSelectedStopName() || "henüz belli değil";
-      const msg = `Şu an ${live} civarındasın.`;
+    toast(msg, 4200);
+    speak(msg);
+    return true;
+  }
+
+  if(cmd.type === "ask_live_stop"){
+    const live = speedState.liveStop || getSelectedStopName() || "henüz belli değil";
+    const msg = `Şu an ${live} civarındasın.`;
+    toast(msg, 3200);
+    speak(msg);
+    return true;
+  }
+
+  if(cmd.type === "ask_delay"){
+    const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+    if(!nextTimed){
+      const msg = "Saatli durak bilgisi yok.";
       toast(msg, 3200);
       speak(msg);
       return true;
     }
 
-    if(cmd.type === "ask_delay"){
-      const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
-      if(!nextTimed){
-        const msg = "Saatli durak bilgisi yok.";
-        toast(msg, 3200);
-        speak(msg);
-        return true;
-      }
-
-      const msg = `${nextTimed.stop} için ${fmtSignedMin(nextTimed.delayMin)}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
-      toast(msg, 4200);
-      speak(msg);
-      return true;
-    }
-
-    if(cmd.type === "ask_next_timed"){
-      const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
-      if(!nextTimed){
-        const msg = "Sıradaki saatli durak bulunamadı.";
-        toast(msg, 3200);
-        speak(msg);
-        return true;
-      }
-
-      const msg = `Sıradaki saatli nokta ${nextTimed.stop}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
-      toast(msg, 4200);
-      speak(msg);
-      return true;
-    }
-
-    if(cmd.type === "set_stop"){
-      const ok = setSelectedStop(cmd.stop, { silent:true, voiceReply:false });
-      if(!ok){
-        toast("Bu durak güzergâhta yok");
-        speak("Bu durak bu güzergâhta bulunmuyor.");
-        return true;
-      }
-
-      const stop = getSelectedStopName();
-      const seat = seatsForStop(stop).length;
-      const stand = computeStandingCountsByStop()[stop] || 0;
-      const parcel = computeParcelCountsByStop()[stop] || 0;
-      const msg = `${stop} seçildi. ${seat} oturan, ${stand} ayakta, ${parcel} emanet.`;
-      toast(msg, 3600);
-      speak(msg);
-      return true;
-    }
-
-    return false;
+    const msg = `${nextTimed.stop} için ${fmtSignedMin(nextTimed.delayMin)}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
+    toast(msg, 4200);
+    speak(msg);
+    return true;
   }
+
+  if(cmd.type === "ask_next_timed"){
+    const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+    if(!nextTimed){
+      const msg = "Sıradaki saatli durak bulunamadı.";
+      toast(msg, 3200);
+      speak(msg);
+      return true;
+    }
+
+    const msg = `Sıradaki saatli nokta ${nextTimed.stop}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
+    toast(msg, 4200);
+    speak(msg);
+    return true;
+  }
+
+  if(cmd.type === "set_stop"){
+    const ok = setSelectedStop(cmd.stop, { silent:true, voiceReply:false });
+    if(!ok){
+      toast("Bu durak güzergâhta yok");
+      speak("Bu durak bu güzergâhta bulunmuyor.");
+      return true;
+    }
+
+    const stop = getSelectedStopName();
+    const seat = seatsForStop(stop).length;
+    const stand = computeStandingCountsByStop()[stop] || 0;
+    const parcel = computeParcelCountsByStop()[stop] || 0;
+    const msg = `${stop} seçildi. ${seat} oturan, ${stand} ayakta, ${parcel} emanet.`;
+    toast(msg, 3600);
+    speak(msg);
+    return true;
+  }
+
+  return false;
+}
 
   async function handleBasicVoiceCommand(text){
     const localHandled = await handleLocalVoiceCommand(text);

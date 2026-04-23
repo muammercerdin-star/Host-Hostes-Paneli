@@ -2866,6 +2866,85 @@ def api_seats_service():
         "service_note": service_note,
     })
 
+@app.post("/api/seats/gender")
+def api_seats_gender():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
+    data = request.get_json(force=True) or {}
+    seats = data.get("seats")
+
+    if not isinstance(seats, list) or not seats:
+        return jsonify({"ok": False, "msg": "seats listesi gerekli"}), 400
+
+    raw_gender = (data.get("gender") or "").strip().lower()
+
+    gender_alias = {
+        "erkek": "bay",
+        "bay": "bay",
+        "adam": "bay",
+
+        "kadin": "bayan",
+        "kadın": "bayan",
+        "bayan": "bayan",
+        "kiz": "bayan",
+        "kız": "bayan",
+
+        "bos": "",
+        "boş": "",
+        "temizle": "",
+        "sil": "",
+        "sifirla": "",
+        "sıfırla": "",
+    }
+
+    gender = gender_alias.get(raw_gender, raw_gender)
+    if gender not in {"bay", "bayan", ""}:
+        return jsonify({"ok": False, "msg": "gender geçersiz"}), 400
+
+    try:
+        seat_list = [int(x if not isinstance(x, dict) else x.get("seat_no")) for x in seats]
+    except Exception:
+        return jsonify({"ok": False, "msg": "seats geçersiz"}), 400
+
+    invalid = [s for s in seat_list if not validate_seat_no(s)]
+    if invalid:
+        return jsonify({"ok": False, "msg": f"Geçersiz koltuklar: {invalid}"}), 400
+
+    db = get_db()
+
+    existing_rows = db.execute(
+        f"""
+        SELECT seat_no
+        FROM seats
+        WHERE trip_id=? AND seat_no IN ({",".join("?" * len(seat_list))})
+        """,
+        [tid, *seat_list],
+    ).fetchall()
+
+    existing = {int(r["seat_no"]) for r in existing_rows}
+    missing = [s for s in seat_list if s not in existing]
+
+    if not existing:
+        return jsonify({"ok": False, "msg": "Bu koltuklarda kayıtlı yolcu yok"}), 400
+
+    db.executemany(
+        """
+        UPDATE seats
+        SET gender=?
+        WHERE trip_id=? AND seat_no=?
+        """,
+        [(gender, tid, s) for s in existing],
+    )
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "updated": sorted(existing),
+        "missing": missing,
+        "gender": gender,
+    })
 
 # =========================================================
 # Durak / koordinat API
