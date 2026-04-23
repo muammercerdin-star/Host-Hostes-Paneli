@@ -194,7 +194,66 @@ def allowed_file(filename: str) -> bool:
     ext = "." + filename.rsplit(".", 1)[1].lower()
     return ext in ALLOWED_IMAGE_EXTS
 
+def validate_seat_no(seat_no: int) -> bool:
+    return seat_no in SEAT_NUMBERS
 
+
+def parse_int_list(raw: str):
+    if not raw:
+        return []
+    out = []
+    for part in raw.split(","):
+        n = parse_int(part.strip(), None)
+        if n is not None and n not in out:
+            out.append(n)
+    return out
+
+
+def delete_walkon_rows(
+    db: sqlite3.Connection,
+    trip_id: int,
+    *,
+    item_id: Optional[int] = None,
+    ids: Optional[list[int]] = None,
+    to_stop: Optional[str] = None,
+    clear_all: bool = False,
+):
+    rows = []
+
+    if item_id is not None:
+        rows = db.execute(
+            "SELECT id FROM walk_on_sales WHERE trip_id=? AND id=?",
+            (trip_id, item_id),
+        ).fetchall()
+
+    elif ids:
+        placeholders = ",".join("?" * len(ids))
+        rows = db.execute(
+            f"SELECT id FROM walk_on_sales WHERE trip_id=? AND id IN ({placeholders})",
+            [trip_id, *ids],
+        ).fetchall()
+
+    elif clear_all:
+        rows = db.execute(
+            "SELECT id FROM walk_on_sales WHERE trip_id=?",
+            (trip_id,),
+        ).fetchall()
+
+    elif to_stop:
+        rows = db.execute(
+            "SELECT id FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
+            (trip_id, to_stop),
+        ).fetchall()
+
+    deleted_ids = [r["id"] for r in rows]
+
+    if deleted_ids:
+        db.executemany(
+            "DELETE FROM walk_on_sales WHERE trip_id=? AND id=?",
+            [(trip_id, i) for i in deleted_ids],
+        )
+
+    return deleted_ids
 # =========================================================
 # DB
 # =========================================================
@@ -1563,14 +1622,20 @@ def api_seat():
         seat_no = parse_int(request.args.get("seat_no"), None)
         if seat_no is None:
             return jsonify({"ok": False, "msg": "seat_no geçersiz"}), 400
+        if not validate_seat_no(seat_no):
+            return jsonify({"ok": False, "msg": "Geçersiz koltuk numarası"}), 400
+
         db.execute("DELETE FROM seats WHERE trip_id=? AND seat_no=?", (tid, seat_no))
         db.commit()
         return jsonify({"ok": True})
 
     data = request.get_json(force=True) or {}
     seat_no = parse_int(data.get("seat_no"), None)
+
     if seat_no is None:
         return jsonify({"ok": False, "msg": "seat_no gerekli"}), 400
+    if not validate_seat_no(seat_no):
+        return jsonify({"ok": False, "msg": "Geçersiz koltuk numarası"}), 400
 
     from_stop = (data.get("from") or data.get("from_stop") or "").strip()
     to_stop = (data.get("stop") or data.get("to_stop") or data.get("to") or "").strip()
@@ -1623,6 +1688,34 @@ def api_seat():
     db.commit()
     return jsonify({"ok": True})
 
+    db.execute(
+        """
+        INSERT INTO seats(
+            trip_id, seat_no, from_stop, to_stop, ticket_type, payment, amount,
+            gender, pair_ok, service, service_note, passenger_name, passenger_phone
+        )
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ON CONFLICT(trip_id, seat_no) DO UPDATE SET
+            from_stop=excluded.from_stop,
+            to_stop=excluded.to_stop,
+            ticket_type=excluded.ticket_type,
+            payment=excluded.payment,
+            amount=excluded.amount,
+            gender=excluded.gender,
+            pair_ok=excluded.pair_ok,
+            service=excluded.service,
+            service_note=excluded.service_note,
+            passenger_name=excluded.passenger_name,
+            passenger_phone=excluded.passenger_phone
+        """,
+        (
+            tid, seat_no, from_stop, to_stop, ticket_type, payment, amount,
+            gender, 1 if pair_ok else 0, service, service_note,
+            passenger_name, passenger_phone,
+        ),
+    )
+    db.commit()
+    return jsonify({"ok": True})
 
 @app.route("/api/seats/bulk", methods=["POST", "DELETE"])
 def api_seats_bulk():
@@ -1636,17 +1729,25 @@ def api_seats_bulk():
         raw = (request.args.get("seats") or "").strip()
         if not raw:
             return jsonify({"ok": False, "msg": "seats gerekli"}), 400
-        try:
-            seat_list = [int(x) for x in raw.split(",") if x.strip()]
-        except Exception:
+
+        seat_list = parse_int_list(raw)
+        if not seat_list:
             return jsonify({"ok": False, "msg": "seats geçersiz"}), 400
 
-        db.executemany("DELETE FROM seats WHERE trip_id=? AND seat_no=?", [(tid, s) for s in seat_list])
+        invalid = [s for s in seat_list if not validate_seat_no(s)]
+        if invalid:
+            return jsonify({"ok": False, "msg": f"Geçersiz koltuklar: {invalid}"}), 400
+
+        db.executemany(
+            "DELETE FROM seats WHERE trip_id=? AND seat_no=?",
+            [(tid, s) for s in seat_list],
+        )
         db.commit()
         return jsonify({"ok": True, "deleted": seat_list})
 
     data = request.get_json(force=True) or {}
     seats = data.get("seats")
+
     if not isinstance(seats, list) or not seats:
         return jsonify({"ok": False, "msg": "seats listesi gerekli"}), 400
 
@@ -1665,11 +1766,14 @@ def api_seats_bulk():
     service_note = (data.get("service_note") or "").strip()
 
     rows = []
+
     for item in seats:
         if isinstance(item, dict):
             seat_no = parse_int(item.get("seat_no"), None)
             if seat_no is None:
                 return jsonify({"ok": False, "msg": "seat_no geçersiz"}), 400
+            if not validate_seat_no(seat_no):
+                return jsonify({"ok": False, "msg": f"Geçersiz koltuk numarası: {seat_no}"}), 400
 
             row_from = (item.get("from") or item.get("from_stop") or from_stop or "").strip()
             row_to = (item.get("stop") or item.get("to_stop") or item.get("to") or to_stop or "").strip()
@@ -1694,10 +1798,14 @@ def api_seats_bulk():
                 tid, seat_no, row_from, row_to, row_ticket, row_payment, row_amount,
                 row_gender, 1 if row_pair_ok else 0, row_service, row_service_note, "", "",
             ))
+
         else:
             seat_no = parse_int(item, None)
             if seat_no is None:
                 return jsonify({"ok": False, "msg": "seat_no geçersiz"}), 400
+            if not validate_seat_no(seat_no):
+                return jsonify({"ok": False, "msg": f"Geçersiz koltuk numarası: {seat_no}"}), 400
+
             rows.append((
                 tid, seat_no, from_stop, to_stop, ticket_type, payment, amount,
                 "", 0, service, service_note, "", "",
@@ -1726,8 +1834,8 @@ def api_seats_bulk():
         rows,
     )
     db.commit()
-    return jsonify({"ok": True, "count": len(rows)})
 
+    return jsonify({"ok": True, "count": len(rows)})
 
 @app.route("/api/seats/offload", methods=["POST"])
 def api_seats_offload():
@@ -1737,6 +1845,7 @@ def api_seats_offload():
 
     data = request.get_json(force=True) or {}
     seats = data.get("seats")
+
     if not isinstance(seats, list) or not seats:
         return jsonify({"ok": False, "msg": "seats listesi gerekli"}), 400
 
@@ -1745,11 +1854,15 @@ def api_seats_offload():
     except Exception:
         return jsonify({"ok": False, "msg": "seats geçersiz"}), 400
 
+    invalid = [s for s in seat_list if not validate_seat_no(s)]
+    if invalid:
+        return jsonify({"ok": False, "msg": f"Geçersiz koltuklar: {invalid}"}), 400
+
     db = get_db()
     db.executemany("DELETE FROM seats WHERE trip_id=? AND seat_no=?", [(tid, s) for s in seat_list])
     db.commit()
-    return jsonify({"ok": True, "deleted": seat_list})
 
+    return jsonify({"ok": True, "deleted": seat_list})
 
 @app.post("/api/seats/service")
 def api_seats_service():
@@ -1861,7 +1974,6 @@ def api_coords():
 # =========================================================
 # Ayakta / walk-on API
 # =========================================================
-
 @app.route("/api/walkon", methods=["GET", "POST", "DELETE"])
 def api_walkon():
     tid = get_active_trip()
@@ -1873,29 +1985,46 @@ def api_walkon():
     if request.method == "GET":
         if request.args.get("aggregate"):
             row = db.execute(
-                "SELECT COALESCE(SUM(total_amount),0) AS total_amount, COALESCE(SUM(pax),0) AS pax FROM walk_on_sales WHERE trip_id=?",
+                """
+                SELECT COALESCE(SUM(total_amount),0) AS total_amount,
+                       COALESCE(SUM(pax),0) AS pax
+                FROM walk_on_sales
+                WHERE trip_id=?
+                """,
                 (tid,),
             ).fetchone()
-            return jsonify({"ok": True, "pax": int(row["pax"]), "total_amount": float(row["total_amount"])})
+            return jsonify({
+                "ok": True,
+                "pax": int(row["pax"]),
+                "total_amount": float(row["total_amount"]),
+            })
 
-        rows = db.execute("SELECT * FROM walk_on_sales WHERE trip_id=? ORDER BY id DESC", (tid,)).fetchall()
+        rows = db.execute(
+            "SELECT * FROM walk_on_sales WHERE trip_id=? ORDER BY id DESC",
+            (tid,),
+        ).fetchall()
         return jsonify({"ok": True, "items": [dict(r) for r in rows]})
 
     if request.method == "POST":
         data = request.get_json(force=True) or {}
+
         from_stop = (data.get("from_stop") or data.get("from") or "").strip()
         to_stop = (data.get("to_stop") or data.get("to") or "").strip()
 
-        if not from_stop or not to_stop:
-            return jsonify({"ok": False, "msg": "from/to gerekli"}), 400
-        if not validate_stop_for_active_trip(from_stop):
+        if not to_stop:
+            return jsonify({"ok": False, "msg": "to gerekli"}), 400
+
+        if from_stop and not validate_stop_for_active_trip(from_stop):
             return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {from_stop}"}), 400
-        if not validate_stop_for_active_trip(to_stop):
+        if to_stop and not validate_stop_for_active_trip(to_stop):
             return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
 
-        pax = parse_int(data.get("pax") or data.get("count"), 1) or 1
+        pax = max(1, parse_int(data.get("pax") or data.get("count"), 1) or 1)
         unit_price = parse_float(data.get("unit_price") or data.get("price"), 0.0) or 0.0
-        total_amount = parse_float(data.get("total_amount"), pax * unit_price) or 0.0
+        total_amount = parse_float(data.get("total_amount"), None)
+        if total_amount is None:
+            total_amount = pax * unit_price
+
         payment = norm_payment(data.get("payment"))
         note = (data.get("note") or "").strip()
 
@@ -1908,26 +2037,40 @@ def api_walkon():
         )
         db.commit()
         new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
-        return jsonify({"ok": True, "id": new_id, "pax": pax, "total_amount": total_amount})
 
+        return jsonify({
+            "ok": True,
+            "id": new_id,
+            "pax": pax,
+            "total_amount": total_amount,
+        })
+
+    item_id = parse_int(request.args.get("id"), None)
+    ids = parse_int_list(request.args.get("ids") or "")
     to_param = (request.args.get("to_stop") or request.args.get("to") or "").strip()
-    if not to_param:
-        return jsonify({"ok": False, "msg": "to veya to_stop gerekli"}), 400
-    if not validate_stop_for_active_trip(to_param):
+    clear_all = bool(norm_bool(request.args.get("all")))
+
+    if to_param and not validate_stop_for_active_trip(to_param):
         return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_param}"}), 400
 
-    rows = db.execute(
-        "SELECT id FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
-        (tid, to_param),
-    ).fetchall()
-    ids = [r["id"] for r in rows]
+    if item_id is None and not ids and not to_param and not clear_all:
+        return jsonify({"ok": False, "msg": "id, ids, to/to_stop veya all gerekli"}), 400
 
-    if ids:
-        db.executemany("DELETE FROM walk_on_sales WHERE trip_id=? AND id=?", [(tid, i) for i in ids])
-        db.commit()
+    deleted_ids = delete_walkon_rows(
+        db,
+        tid,
+        item_id=item_id,
+        ids=ids or None,
+        to_stop=to_param or None,
+        clear_all=clear_all,
+    )
+    db.commit()
 
-    return jsonify({"ok": True, "deleted": ids, "count": len(ids)})
-
+    return jsonify({
+        "ok": True,
+        "deleted": deleted_ids,
+        "count": len(deleted_ids),
+    })
 
 @app.route("/api/standing", methods=["GET", "POST", "DELETE"])
 def api_standing():
@@ -1939,9 +2082,15 @@ def api_standing():
 
     if request.method == "GET":
         row = db.execute(
-            "SELECT COALESCE(SUM(total_amount),0) AS total_amount, COALESCE(SUM(pax),0) AS pax FROM walk_on_sales WHERE trip_id=?",
+            """
+            SELECT COALESCE(SUM(total_amount),0) AS total_amount,
+                   COALESCE(SUM(pax),0) AS pax
+            FROM walk_on_sales
+            WHERE trip_id=?
+            """,
             (tid,),
         ).fetchone()
+
         return jsonify({
             "ok": True,
             "count": int(row["pax"] or 0),
@@ -1950,19 +2099,24 @@ def api_standing():
 
     if request.method == "POST":
         data = request.get_json(force=True) or {}
+
         from_stop = (data.get("from_stop") or data.get("from") or "").strip()
         to_stop = (data.get("to_stop") or data.get("to") or "").strip()
 
-        if not from_stop or not to_stop:
-            return jsonify({"ok": False, "msg": "from ve to gerekli"}), 400
-        if not validate_stop_for_active_trip(from_stop):
+        if not to_stop:
+            return jsonify({"ok": False, "msg": "to gerekli"}), 400
+
+        if from_stop and not validate_stop_for_active_trip(from_stop):
             return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {from_stop}"}), 400
-        if not validate_stop_for_active_trip(to_stop):
+        if to_stop and not validate_stop_for_active_trip(to_stop):
             return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
 
-        pax = parse_int(data.get("pax") or data.get("count"), 1) or 1
+        pax = max(1, parse_int(data.get("pax") or data.get("count"), 1) or 1)
         unit_price = parse_float(data.get("unit_price") or data.get("price"), 0.0) or 0.0
-        total_amount = pax * unit_price
+        total_amount = parse_float(data.get("total_amount"), None)
+        if total_amount is None:
+            total_amount = pax * unit_price
+
         payment = norm_payment(data.get("payment"))
         note = (data.get("note") or "").strip()
 
@@ -1974,26 +2128,41 @@ def api_standing():
             (tid, from_stop, to_stop, pax, unit_price, total_amount, payment, note),
         )
         db.commit()
-        return jsonify({"ok": True, "pax": pax, "total_amount": total_amount})
+        new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
 
+        return jsonify({
+            "ok": True,
+            "id": new_id,
+            "pax": pax,
+            "total_amount": total_amount,
+        })
+
+    item_id = parse_int(request.args.get("id"), None)
+    ids = parse_int_list(request.args.get("ids") or "")
     to_param = (request.args.get("to_stop") or request.args.get("to") or "").strip()
-    if not to_param:
-        return jsonify({"ok": False, "msg": "to veya to_stop gerekli"}), 400
-    if not validate_stop_for_active_trip(to_param):
+    clear_all = bool(norm_bool(request.args.get("all")))
+
+    if to_param and not validate_stop_for_active_trip(to_param):
         return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_param}"}), 400
 
-    rows = db.execute(
-        "SELECT id FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
-        (tid, to_param),
-    ).fetchall()
-    ids = [r["id"] for r in rows]
+    if item_id is None and not ids and not to_param and not clear_all:
+        return jsonify({"ok": False, "msg": "id, ids, to/to_stop veya all gerekli"}), 400
 
-    if ids:
-        db.executemany("DELETE FROM walk_on_sales WHERE trip_id=? AND id=?", [(tid, i) for i in ids])
-        db.commit()
+    deleted_ids = delete_walkon_rows(
+        db,
+        tid,
+        item_id=item_id,
+        ids=ids or None,
+        to_stop=to_param or None,
+        clear_all=clear_all,
+    )
+    db.commit()
 
-    return jsonify({"ok": True, "deleted": ids, "count": len(ids)})
-
+    return jsonify({
+        "ok": True,
+        "deleted": deleted_ids,
+        "count": len(deleted_ids),
+    })
 
 @app.route("/api/standing/list")
 def api_standing_list():
@@ -2003,7 +2172,7 @@ def api_standing_list():
 
     rows = get_db().execute(
         """
-        SELECT id, from_stop, to_stop, pax, unit_price, payment, note, created_at
+        SELECT id, from_stop, to_stop, pax, unit_price, total_amount, payment, note, created_at
         FROM walk_on_sales
         WHERE trip_id=?
         ORDER BY id DESC
@@ -2017,13 +2186,13 @@ def api_standing_list():
         "to": r["to_stop"],
         "count": r["pax"],
         "price": r["unit_price"],
+        "total_amount": r["total_amount"],
         "payment": r["payment"],
         "note": r["note"],
         "ts": r["created_at"],
     } for r in rows]
 
     return jsonify({"ok": True, "items": items})
-
 
 # =========================================================
 # İstatistik API
@@ -2624,6 +2793,7 @@ def end_trip():
     if tid:
         db.execute("DELETE FROM seats WHERE trip_id=?", (tid,))
         db.execute("DELETE FROM walk_on_sales WHERE trip_id=?", (tid,))
+        db.execute("DELETE FROM stop_logs WHERE trip_id=?", (tid,))
         db.execute("UPDATE app_state SET active_trip_id=NULL WHERE id=1")
         db.commit()
     else:
@@ -2631,12 +2801,6 @@ def end_trip():
         db.commit()
 
     return redirect(url_for("index"))
-
-
-@app.route("/health")
-def health():
-    return "ok"
-
 
 # =========================================================
 # Run
