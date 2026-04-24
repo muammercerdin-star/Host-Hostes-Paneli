@@ -1,0 +1,727 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+
+<style>
+  :root{
+    --bg:#0b1220;
+    --card:#151e2b;
+    --card-2:#1b2636;
+    --line:rgba(255,255,255,.08);
+    --text:#eef4fb;
+    --muted:#9eb0c6;
+    --blue:#1d7df2;
+    --blue-2:#1567c8;
+    --green:#2fb35a;
+    --green-2:#239147;
+    --red:#e05858;
+    --red-2:#bf4343;
+    --gray:#6c7785;
+    --gray-2:#56606d;
+    --shadow:0 20px 50px rgba(0,0,0,.28);
+    --radius:26px;
+    --radius-md:18px;
+    --radius-sm:14px;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    color:var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(29,125,242,.10), transparent 22%),
+      radial-gradient(circle at top right, rgba(47,179,90,.08), transparent 18%),
+      linear-gradient(180deg, #09111d 0%, #0d1726 100%);
+  }
+
+  .page{
+    width:min(1320px, 96vw);
+    margin:18px auto 36px;
+    display:grid;
+    gap:16px;
+  }
+
+  .glass{
+    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    border-radius:var(--radius);
+    backdrop-filter:blur(10px);
+  }
+
+  .hero{
+    padding:18px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:16px;
+    align-items:start;
+  }
+
+  .hero-left{
+    min-width:0;
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+  }
+
+  .hero-icon{
+    width:58px;
+    height:58px;
+    border-radius:18px;
+    display:grid;
+    place-items:center;
+    font-size:26px;
+    background:linear-gradient(180deg, rgba(29,125,242,.22), rgba(29,125,242,.10));
+    border:1px solid rgba(255,255,255,.09);
+    box-shadow:0 12px 30px rgba(0,0,0,.22);
+    flex:0 0 auto;
+  }
+
+  .hero-title{
+    margin:0;
+    font-size:34px;
+    line-height:1;
+    letter-spacing:-.03em;
+    font-weight:900;
+  }
+
+  .hero-sub{
+    margin:8px 0 0;
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.45;
+  }
+
+  .hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:12px;
+  }
+
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    min-height:36px;
+    padding:8px 12px;
+    border-radius:999px;
+    background:rgba(255,255,255,.045);
+    border:1px solid var(--line);
+    color:#fff;
+    font-size:13px;
+    font-weight:800;
+    line-height:1;
+  }
+
+  .hero-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:flex-end;
+  }
+
+  .btn,
+  .btn-sm,
+  .icon-btn{
+    border:none;
+    cursor:pointer;
+    color:#fff;
+    font-weight:900;
+    text-decoration:none;
+    transition:.16s ease;
+    box-shadow:0 12px 24px rgba(0,0,0,.18);
+  }
+
+  .btn:hover,
+  .btn-sm:hover,
+  .icon-btn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.04);
+  }
+
+  .btn{
+    min-height:48px;
+    border-radius:16px;
+    padding:12px 16px;
+    font-size:15px;
+  }
+
+  .btn-sm{
+    min-height:40px;
+    border-radius:13px;
+    padding:9px 12px;
+    font-size:13px;
+  }
+
+  .btn.blue{ background:linear-gradient(180deg, var(--blue), var(--blue-2)); }
+  .btn.green{ background:linear-gradient(180deg, var(--green), var(--green-2)); }
+  .btn.red{ background:linear-gradient(180deg, var(--red), var(--red-2)); }
+  .btn.gray{ background:linear-gradient(180deg, var(--gray), var(--gray-2)); }
+  .btn.ghost{
+    background:rgba(255,255,255,.05);
+    border:1px solid var(--line);
+  }
+
+  .btn-sm.blue{ background:linear-gradient(180deg, var(--blue), var(--blue-2)); }
+  .btn-sm.red{ background:linear-gradient(180deg, var(--red), var(--red-2)); }
+  .btn-sm.green{ background:linear-gradient(180deg, var(--green), var(--green-2)); }
+  .btn-sm.gray{ background:linear-gradient(180deg, var(--gray), var(--gray-2)); }
+
+  .layout{
+    display:grid;
+    grid-template-columns:340px minmax(0,1fr);
+    gap:16px;
+    align-items:start;
+  }
+
+  .card{
+    padding:16px;
+  }
+
+  .card-title{
+    margin:0 0 6px;
+    font-size:22px;
+    font-weight:900;
+    line-height:1.05;
+  }
+
+  .card-sub{
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.4;
+    margin-bottom:14px;
+  }
+
+  .field{
+    display:grid;
+    gap:7px;
+    margin-bottom:12px;
+  }
+
+  .field label{
+    color:#dbe6f2;
+    font-size:13px;
+    font-weight:800;
+  }
+
+  input[type="text"],
+  input[type="time"],
+  input[type="number"],
+  select,
+  textarea{
+    width:100%;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background:#0c1522;
+    color:#fff;
+    padding:12px 13px;
+    outline:none;
+    font:inherit;
+  }
+
+  textarea{
+    resize:vertical;
+    min-height:90px;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus{
+    border-color:rgba(29,125,242,.65);
+    box-shadow:0 0 0 4px rgba(29,125,242,.12);
+  }
+
+  .toggle{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-height:46px;
+    padding:10px 12px;
+    border-radius:14px;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    margin-bottom:12px;
+  }
+
+  .toggle label{
+    font-size:14px;
+    font-weight:800;
+    margin:0;
+  }
+
+  .profiles{
+    display:grid;
+    gap:10px;
+    margin-top:12px;
+  }
+
+  .profile-item{
+    padding:12px;
+    border-radius:16px;
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--line);
+    display:grid;
+    gap:8px;
+  }
+
+  .profile-item.active{
+    box-shadow:0 0 0 2px rgba(29,125,242,.28) inset;
+    border-color:rgba(29,125,242,.48);
+    background:linear-gradient(180deg, rgba(29,125,242,.14), rgba(29,125,242,.06));
+  }
+
+  .profile-top{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:flex-start;
+  }
+
+  .profile-name{
+    font-size:15px;
+    font-weight:900;
+    line-height:1.2;
+  }
+
+  .profile-meta{
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.3;
+  }
+
+  .profile-badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    min-height:28px;
+    padding:5px 9px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:900;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    color:#dbe7f3;
+  }
+
+  .badge.blue{
+    background:rgba(29,125,242,.14);
+    border-color:rgba(29,125,242,.28);
+    color:#cfe4ff;
+  }
+
+  .badge.green{
+    background:rgba(47,179,90,.15);
+    border-color:rgba(47,179,90,.28);
+    color:#d2ffe0;
+  }
+
+  .section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+  }
+
+  .section-title{
+    margin:0;
+    font-size:22px;
+    font-weight:900;
+    line-height:1.05;
+  }
+
+  .section-right{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .table-wrap{
+    overflow:auto;
+    border-radius:20px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.025);
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:900px;
+  }
+
+  thead th{
+    position:sticky;
+    top:0;
+    z-index:1;
+    background:#111a28;
+    color:#d9e4f0;
+    font-size:12px;
+    font-weight:900;
+    text-align:left;
+    padding:12px 10px;
+    border-bottom:1px solid var(--line);
+    letter-spacing:.02em;
+  }
+
+  tbody td{
+    padding:10px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    vertical-align:middle;
+  }
+
+  tbody tr:hover{
+    background:rgba(255,255,255,.025);
+  }
+
+  .stop-cell{
+    min-width:230px;
+  }
+
+  .stop-name{
+    font-weight:900;
+    font-size:14px;
+    line-height:1.25;
+  }
+
+  .stop-sub{
+    margin-top:4px;
+    color:var(--muted);
+    font-size:12px;
+  }
+
+  .mini-input{
+    min-width:110px;
+  }
+
+  .mini-note{
+    min-width:180px;
+  }
+
+  .center{
+    text-align:center;
+  }
+
+  .foot-actions{
+    margin-top:14px;
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .muted-box{
+    padding:12px 14px;
+    border-radius:16px;
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--line);
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.5;
+  }
+
+  .empty{
+    padding:18px;
+    border-radius:18px;
+    border:1px dashed var(--line);
+    background:rgba(255,255,255,.025);
+    color:var(--muted);
+    text-align:center;
+    font-size:14px;
+  }
+
+  @media (max-width: 1080px){
+    .layout{
+      grid-template-columns:1fr;
+    }
+  }
+
+  @media (max-width: 760px){
+    .page{
+      width:min(98vw, 98vw);
+      margin:10px auto 20px;
+    }
+
+    .hero{
+      grid-template-columns:1fr;
+      padding:14px;
+    }
+
+    .hero-title{
+      font-size:28px;
+    }
+
+    .hero-actions{
+      justify-content:flex-start;
+    }
+
+    .card{
+      padding:14px;
+    }
+
+    .section-title,
+    .card-title{
+      font-size:20px;
+    }
+
+    .btn{
+      width:100%;
+      justify-content:center;
+      text-align:center;
+    }
+
+    .foot-actions{
+      flex-direction:column;
+    }
+  }
+</style>
+
+<div class="page">
+  <section class="glass hero">
+    <div class="hero-left">
+      <div class="hero-icon">🕒</div>
+      <div>
+        <h1 class="hero-title">Saat Yönetimi</h1>
+        <div class="hero-sub">
+          Hat için saat profili oluştur, durak bazlı plan saatlerini gir, segment km tanımla.
+          Bu ekran daha sonra seats ekranındaki plan saat ve kalan km görünümünü besleyecek.
+        </div>
+
+        <div class="hero-meta">
+          <span class="chip">🛣️ Hat: <b>{{ route_name }}</b></span>
+          <span class="chip">📍 Durak sayısı: <b>{{ editor_rows|length }}</b></span>
+          {% if selected_profile %}
+            <span class="chip">🧾 Profil: <b>{{ selected_profile.title }}</b></span>
+          {% else %}
+            <span class="chip">🧾 Profil: <b>Yeni profil</b></span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <a href="{{ url_for('routes_list') }}" class="btn gray">← Hatlar</a>
+      <a href="{{ url_for('route_edit', rid=route['id']) }}" class="btn blue">Hat Düzenle</a>
+      <a href="{{ url_for('index') }}" class="btn ghost">Ana Sayfa</a>
+    </div>
+  </section>
+
+  <div class="layout">
+    <aside class="glass card">
+      <h2 class="card-title">Profil Yönetimi</h2>
+      <div class="card-sub">
+        Aynı hat için birden fazla saat profili tutabilirsin.
+        Örn: Gece seferi, sabah seferi, yaz tarifesi, dönüş tarifesi.
+      </div>
+
+      <form method="get" action="{{ url_for('route_schedule_edit', rid=route['id']) }}">
+        <div class="field">
+          <label for="profile_id_pick">Profil seç</label>
+          <select id="profile_id_pick" name="profile_id" onchange="this.form.submit()">
+            <option value="">Yeni profil oluştur</option>
+            {% for p in profiles %}
+              <option value="{{ p.id }}" {% if selected_profile and p.id == selected_profile.id %}selected{% endif %}>
+                {{ p.title }} · {{ p.direction }}{% if p.is_default %} · varsayılan{% endif %}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+
+      {% if profiles %}
+        <div class="profiles">
+          {% for p in profiles %}
+            <div class="profile-item {% if selected_profile and p.id == selected_profile.id %}active{% endif %}">
+              <div class="profile-top">
+                <div>
+                  <div class="profile-name">{{ p.title }}</div>
+                  <div class="profile-meta">{{ p.direction }}{% if p.note %} · {{ p.note }}{% endif %}</div>
+                </div>
+              </div>
+
+              <div class="profile-badges">
+                <span class="badge blue">ID {{ p.id }}</span>
+                {% if p.is_default %}
+                  <span class="badge green">Varsayılan</span>
+                {% endif %}
+              </div>
+
+              <a href="{{ url_for('route_schedule_edit', rid=route['id'], profile_id=p.id) }}" class="btn-sm blue">Aç</a>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty">Henüz saat profili yok.</div>
+      {% endif %}
+    </aside>
+
+    <section class="glass card">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">
+            {% if selected_profile %}
+              Profil Düzenle
+            {% else %}
+              Yeni Profil
+            {% endif %}
+          </h2>
+          <div class="card-sub" style="margin:6px 0 0">
+            Duraklar otomatik hat listesinden gelir. Saat ve km verisini burada güncellersin.
+          </div>
+        </div>
+
+        <div class="section-right">
+          {% if selected_profile %}
+            <form method="post" action="{{ url_for('route_schedule_edit', rid=route['id']) }}" onsubmit="return confirm('Bu saat profili silinsin mi?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="action" value="delete_profile">
+              <input type="hidden" name="profile_id" value="{{ selected_profile.id }}">
+              <button type="submit" class="btn red">Profili Sil</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <form method="post" action="{{ url_for('route_schedule_edit', rid=route['id']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="action" value="save">
+        <input type="hidden" name="profile_id" value="{{ selected_profile.id if selected_profile else '' }}">
+
+        <div class="field">
+          <label for="title">Profil adı</label>
+          <input
+            id="title"
+            type="text"
+            name="title"
+            placeholder="örn: Gece Seferi"
+            value="{{ selected_profile.title if selected_profile else 'Varsayılan' }}"
+            required>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field">
+            <label for="direction">Yön</label>
+            <select id="direction" name="direction">
+              {% set dirv = selected_profile.direction if selected_profile else 'gidis' %}
+              <option value="gidis" {% if dirv == 'gidis' %}selected{% endif %}>Gidiş</option>
+              <option value="donus" {% if dirv == 'donus' %}selected{% endif %}>Dönüş</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="profile_note">Profil notu</label>
+            <input
+              id="profile_note"
+              type="text"
+              name="profile_note"
+              placeholder="örn: Yaz tarifesi"
+              value="{{ selected_profile.note if selected_profile else '' }}">
+          </div>
+        </div>
+
+        <div class="toggle">
+          <input
+            id="is_default"
+            type="checkbox"
+            name="is_default"
+            value="1"
+            {% if selected_profile and selected_profile.is_default %}checked{% endif %}>
+          <label for="is_default">Bu yön için varsayılan profil olsun</label>
+        </div>
+
+        <div class="muted-box">
+          <b>Not:</b> `Plan saat` alanını sadece saatli duraklarda doldurman yeterli.
+          `Segment km` ise bir önceki duraktan bu durağa olan yol mesafesidir.
+          İlk durakta segment km boş kalabilir.
+        </div>
+
+        <div class="table-wrap" style="margin-top:14px;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Durak</th>
+                <th class="center">Saatli</th>
+                <th>Plan saat</th>
+                <th>Segment km</th>
+                <th>Not</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in editor_rows %}
+                <tr>
+                  <td class="center">
+                    {{ loop.index }}
+                    <input type="hidden" name="stop_name" value="{{ row.stop_name }}">
+                  </td>
+
+                  <td class="stop-cell">
+                    <div class="stop-name">{{ row.stop_name }}</div>
+                    <div class="stop-sub">Sıra: {{ loop.index }}</div>
+                  </td>
+
+                  <td class="center">
+                    <input
+                      type="checkbox"
+                      name="is_timed"
+                      value="{{ row.stop_name }}"
+                      {% if row.is_timed %}checked{% endif %}>
+                  </td>
+
+                  <td>
+                    <input
+                      class="mini-input"
+                      type="time"
+                      name="planned_time"
+                      value="{{ row.planned_time }}">
+                  </td>
+
+                  <td>
+                    <input
+                      class="mini-input"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      name="segment_km"
+                      placeholder="örn: 24.8"
+                      value="{{ row.segment_km if row.segment_km is not none else '' }}">
+                  </td>
+
+                  <td>
+                    <input
+                      class="mini-note"
+                      type="text"
+                      name="item_note"
+                      placeholder="opsiyonel not"
+                      value="{{ row.note }}">
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="foot-actions">
+          <div class="muted-box" style="flex:1;">
+            Kaydettiğin saatler daha sonra:
+            <br>• Durak Akışı kutusunda plan saat olarak
+            <br>• ETA / Rötar hesabında referans veri olarak
+            <br>• Sesli cevaplarda “Alaşehir kaçta?” benzeri sorgularda kullanılacak.
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a href="{{ url_for('routes_list') }}" class="btn gray">Vazgeç</a>
+            <button type="submit" class="btn green">Kaydet</button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}

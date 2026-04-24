@@ -1755,20 +1755,19 @@
               <small id="miniLiveState">Hazır</small>
             </div>
 
-            <div class="metrics-grid">
-              <div class="metric-card">
-                <div class="k">Canlı Durak</div>
-                <div class="v" id="miniStop">—</div>
-                <div class="s">GPS veya manuel seçime göre</div>
-              </div>
-              <div class="metric-card">
-                <div class="k">Sonraki İşlem</div>
-                <div class="v" id="aiNextAction">—</div>
-                <div class="s">Sistem önerisi</div>
-              </div>
-            </div>
-          </div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="k">Canlı Durak</div>
+            <div class="v" id="miniStop">—</div>
+            <div class="s">GPS veya manuel seçime göre</div>
+      </div>
 
+        <div class="metric-card">
+            <div class="k">Sonraki İşlem</div>
+            <div class="v" id="aiNextAction">—</div>
+            <div class="s">Sistem önerisi</div>
+        </div>
+        </div>
           <div class="section-box">
             <div class="section-head">
               <h3>Saat</h3>
@@ -2182,46 +2181,7 @@
   const BAG_TRIP = TRIP_KEY;
   window.BAG_TRIP = BAG_TRIP;
 
-  const ROUTE_SCHEDULES = {
-    "Denizli – İstanbul": [
-      { stop: "Denizli otogar", time: "20:00" },
-      { stop: "Alaşehir Otogar", time: "23:10" },
-      { stop: "Salihli Garaj", time: "23:50" },
-      { stop: "Turgutlu Garaj", time: "00:25" },
-      { stop: "Manisa Otogar", time: "01:05" },
-      { stop: "Balıkesir", time: "03:10" },
-      { stop: "Bursa Otogar", time: "04:30" },
-      { stop: "Harem", time: "07:30" },
-      { stop: "Esenler Otogar", time: "08:00" }
-    ],
-    "İstanbul – Denizli": [
-      { stop: "Esenler Otogar", time: "20:00" },
-      { stop: "Harem", time: "20:35" },
-      { stop: "Bursa Otogar", time: "23:15" },
-      { stop: "Balıkesir", time: "00:35" },
-      { stop: "Manisa Otogar", time: "02:40" },
-      { stop: "Turgutlu Garaj", time: "03:15" },
-      { stop: "Salihli Garaj", time: "03:55" },
-      { stop: "Alaşehir Otogar", time: "04:40" },
-      { stop: "Denizli otogar", time: "07:20" }
-    ],
-    "Denizli – İzmir": [
-      { stop: "Denizli otogar", time: "20:00" },
-      { stop: "Alaşehir Otogar", time: "22:10" },
-      { stop: "Salihli Garaj", time: "22:50" },
-      { stop: "Turgutlu Garaj", time: "23:25" },
-      { stop: "Manisa Otogar", time: "00:00" },
-      { stop: "İzmir Otogar", time: "01:10" }
-    ],
-    "İzmir – Denizli": [
-      { stop: "İzmir Otogar", time: "20:00" },
-      { stop: "Manisa Otogar", time: "21:00" },
-      { stop: "Turgutlu Garaj", time: "21:35" },
-      { stop: "Salihli Garaj", time: "22:10" },
-      { stop: "Alaşehir Otogar", time: "22:50" },
-      { stop: "Denizli otogar", time: "01:00" }
-    ]
-  };
+  const ROUTE_SCHEDULES = null;
 
   const VOICE_HELP = [
     "kaç yolcu var",
@@ -2287,6 +2247,9 @@
   let snoozeUntil = 0;
   let lastApproach = { stop:null, seats:[] };
   let currentCoords = null;
+  let routeScheduleProfile = null;
+  let routeScheduleItems = [];
+
 
   const multiSelected = new Set();
   const ALERT_COOLDOWN_MS = 3 * 60 * 1000;
@@ -2353,6 +2316,23 @@
     }
     return await res.json();
   }
+
+async function loadRouteSchedule(){
+  try{
+    const j = await safeJsonFetch("/api/route-schedule");
+    if(!j?.ok){
+      routeScheduleProfile = null;
+      routeScheduleItems = [];
+      return;
+    }
+
+    routeScheduleProfile = j.profile || null;
+    routeScheduleItems = Array.isArray(j.items) ? j.items : [];
+  }catch(_){
+    routeScheduleProfile = null;
+    routeScheduleItems = [];
+  }
+}
 
   function persistBoards(){
     localStorage.setItem("boardsMap:" + TRIP_KEY, JSON.stringify(boardsMap || {}));
@@ -2442,51 +2422,66 @@
   }
 
   function getRouteSchedule(){
-    return ROUTE_SCHEDULES[ROUTE_NAME] || [];
-  }
-
-  function scheduleOffsetsForRoute(){
-    const sample = getRouteSchedule();
-    if(!sample.length) return [];
-
-    let prev = null;
-    let carry = 0;
-    let firstAbs = null;
-
-    return sample.map(item => {
-      const parts = String(item.time || "00:00").split(":");
-      const hh = parseInt(parts[0], 10) || 0;
-      const mm = parseInt(parts[1], 10) || 0;
-      let cur = hh * 60 + mm + carry;
-
-      if(prev !== null && cur < prev){
-        carry += 1440;
-        cur = hh * 60 + mm + carry;
-      }
-
-      if(firstAbs === null) firstAbs = cur;
-      prev = cur;
-
-      return {
-        stop:item.stop,
-        sampleTime:item.time,
-        offsetMin: cur - firstAbs
-      };
-    });
-  }
-
-  function buildActualSchedule(){
-    const start = tripStartDate();
-    const offsets = scheduleOffsetsForRoute();
-
-    return offsets.map(x => ({
-      stop: x.stop,
-      plan: x.sampleTime,
-      planDate: new Date(start.getTime() + x.offsetMin * 60000),
-      offsetMin: x.offsetMin,
-      routeIndex: indexOfStopByName(x.stop)
+    return (routeScheduleItems || [])
+    .filter(x => x && x.planned_time)
+    .map(x => ({
+      stop: x.stop_name,
+      time: x.planned_time
     }));
   }
+
+function scheduleOffsetsForRoute(){
+  const sample = getRouteSchedule();
+  if(!sample.length) return [];
+
+  let prev = null;
+  let carry = 0;
+  let firstAbs = null;
+
+  return sample.map(item => {
+    const raw = String(item.time || "00:00").trim();
+    const parts = raw.split(":");
+    const hh = parseInt(parts[0], 10) || 0;
+    const mm = parseInt(parts[1], 10) || 0;
+
+    let cur = hh * 60 + mm + carry;
+
+    if(prev !== null && cur < prev){
+      carry += 1440;
+      cur = hh * 60 + mm + carry;
+    }
+
+    if(firstAbs === null) firstAbs = cur;
+    prev = cur;
+
+    return {
+      stop: item.stop,
+      sampleTime: raw,
+      offsetMin: cur - firstAbs
+    };
+  });
+}
+
+function buildActualSchedule(){
+  const start = tripStartDate();
+  const offsets = scheduleOffsetsForRoute();
+
+  const kmMap = new Map(
+    (routeScheduleItems || []).map(x => [
+      norm(x.stop_name),
+      x.segment_km == null || x.segment_km === "" ? null : Number(x.segment_km)
+    ])
+  );
+
+  return offsets.map(x => ({
+    stop: x.stop,
+    plan: x.sampleTime,
+    planDate: new Date(start.getTime() + x.offsetMin * 60000),
+    offsetMin: x.offsetMin,
+    routeIndex: indexOfStopByName(x.stop),
+    segmentKm: kmMap.get(norm(x.stop)) ?? null
+  }));
+}
 
   function minutesDiff(a, b){
     return Math.round((a - b) / 60000);
@@ -2852,7 +2847,7 @@ function renderRouteStrip(){
     setText("#topLiveStop", live || selected || "—");
     setText("#topSpeed", `${Math.round(Number(speedState.current || 0))} km/h`);
     setText("#selectedStopBadge", selected || "—");
-    setText("#miniStop", selected || live || "—");
+    setText("#topLiveStop", live || selected || "—");
     setText("#routeLiveStop", live || "—");
     setText("#routeLiveStopCard", live || "—");
     setValue("#coordStopName", selected || "");
@@ -4037,20 +4032,33 @@ function renderRouteStrip(){
     setText("#aiParcel", selectedParcel > 0 ? `${selectedParcel} teslim var` : (stop ? "Teslim yok" : "Durak seçilmedi"));
   }
 
-  function autoDetectLiveStop(coords){
-    if(!coords || !cachedStops?.length) return;
+function autoDetectLiveStop(coords){
+  if(!coords || !cachedStops?.length) return;
 
-    let best = null;
-    for(const stop of cachedStops){
-      if(!hasCoord(stop)) continue;
-      const km = distKm(coords, { lat:Number(stop.lat), lng:Number(stop.lng) });
-      if(!best || km < best.km) best = { stop: stop.name, km };
-    }
+  const radiusKm = parseFloat($("#alertRadius")?.value || "3.5");
+  let best = null;
 
-    if(best && best.km <= 3.5){
-      setLiveStop(best.stop);
+  for(const stop of cachedStops){
+    if(!hasCoord(stop)) continue;
+
+    const km = distKm(coords, {
+      lat: Number(stop.lat),
+      lng: Number(stop.lng)
+    });
+
+    if(!best || km < best.km){
+      best = { stop: stop.name, km };
     }
   }
+
+  if(best && best.km <= radiusKm){
+    setLiveStop(best.stop);
+  }else{
+    speedState.liveStop = "";
+    persistVoiceState();
+    updateCompactHeader();
+  }
+}
 
   function findStopMention(text){
     const ntext = norm(text);
@@ -5051,6 +5059,7 @@ async function handleLocalVoiceCommand(text){
 
       await fetchStops();
       await populateStops();
+      await loadRouteSchedule();
       await loadStandingTotals();
       await loadStandingItems();
       await loadParcelItems();

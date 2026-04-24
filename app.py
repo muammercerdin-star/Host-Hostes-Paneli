@@ -448,6 +448,46 @@ def ensure_schema() -> None:
 
         CREATE INDEX IF NOT EXISTS idx_learned_commands_intent
         ON learned_commands(intent);
+
+        CREATE TABLE IF NOT EXISTS route_schedule_profiles(
+            id INTEGER PRIMARY KEY,
+            route_name TEXT NOT NULL,
+            title TEXT NOT NULL,
+            direction TEXT NOT NULL DEFAULT 'gidis',
+            is_default INTEGER NOT NULL DEFAULT 0,
+            note TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            updated_at TEXT DEFAULT (datetime('now','localtime'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_route_schedule_profiles_route
+        ON route_schedule_profiles(route_name);
+
+        CREATE INDEX IF NOT EXISTS idx_route_schedule_profiles_route_direction
+        ON route_schedule_profiles(route_name, direction);
+
+        CREATE TABLE IF NOT EXISTS route_schedule_items(
+            id INTEGER PRIMARY KEY,
+            profile_id INTEGER NOT NULL,
+            stop_name TEXT NOT NULL,
+            planned_time TEXT DEFAULT '',
+            segment_km REAL DEFAULT NULL,
+            is_timed INTEGER NOT NULL DEFAULT 0,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            note TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            updated_at TEXT DEFAULT (datetime('now','localtime')),
+            FOREIGN KEY(profile_id) REFERENCES route_schedule_profiles(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_route_schedule_items_profile
+        ON route_schedule_items(profile_id);
+
+        CREATE INDEX IF NOT EXISTS idx_route_schedule_items_profile_sort
+        ON route_schedule_items(profile_id, sort_order);
+
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_route_schedule_items_profile_stop
+        ON route_schedule_items(profile_id, stop_name);
         """
     )
 
@@ -595,6 +635,90 @@ def validate_stop_for_active_trip(stop: str) -> bool:
         return False
     return validate_stop_for_trip(trip["route"], stop)
 
+def valid_hhmm(val: str) -> bool:
+    v = (val or "").strip()
+    return bool(re.match(r"^\d{2}:\d{2}$", v))
+
+
+def normalize_hhmm(val: str) -> str:
+    v = (val or "").strip()
+    return v if valid_hhmm(v) else ""
+
+
+def schedule_profiles_for_route(route_name: str):
+    rows = get_db().execute(
+        """
+        SELECT id, route_name, title, direction, is_default, note, created_at, updated_at
+        FROM route_schedule_profiles
+        WHERE route_name=?
+        ORDER BY direction, is_default DESC, title, id
+        """,
+        (route_name,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def schedule_profile_get(profile_id: Optional[int]):
+    if not profile_id:
+        return None
+    row = get_db().execute(
+        """
+        SELECT id, route_name, title, direction, is_default, note, created_at, updated_at
+        FROM route_schedule_profiles
+        WHERE id=?
+        """,
+        (profile_id,),
+    ).fetchone()
+    return dict(row) if row else None
+
+
+def schedule_items_for_profile(profile_id: int):
+    rows = get_db().execute(
+        """
+        SELECT id, profile_id, stop_name, planned_time, segment_km, is_timed, sort_order, note
+        FROM route_schedule_items
+        WHERE profile_id=?
+        ORDER BY sort_order, id
+        """,
+        (profile_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def schedule_editor_rows(route_name: str, profile_id: Optional[int] = None):
+    stops = get_stops(route_name)
+    items_map = {}
+
+    if profile_id:
+        for r in schedule_items_for_profile(profile_id):
+            items_map[r["stop_name"]] = r
+
+    rows = []
+    for idx, stop in enumerate(stops):
+        item = items_map.get(stop, {})
+        rows.append({
+            "stop_name": stop,
+            "planned_time": item.get("planned_time", "") or "",
+            "segment_km": item.get("segment_km", None),
+            "is_timed": int(item.get("is_timed", 0) or 0),
+            "note": item.get("note", "") or "",
+            "sort_order": idx,
+        })
+
+    return rows
+
+def schedule_default_profile_for_route(route_name: str, direction: str = "gidis"):
+    row = get_db().execute(
+        """
+        SELECT id, route_name, title, direction, is_default, note
+        FROM route_schedule_profiles
+        WHERE route_name=? AND direction=?
+        ORDER BY is_default DESC, id ASC
+        LIMIT 1
+        """,
+        (route_name, direction),
+    ).fetchone()
+    return dict(row) if row else None
 
 # =========================================================
 # Yan koltuk kuralı
@@ -1106,6 +1230,172 @@ def route_delete(rid):
 
     return redirect(url_for("routes_list"))
 
+@app.route("/hat/<int:rid>/saatler", methods=["GET", "POST"])
+def route_schedule_edit(rid):
+    db = get_db()
+    route_row = db.execute("SELECT * FROM routes WHERE id=?", (rid,)).fetchone()
+    if not route_row:
+        return "Hat bulunamadı", 404
+
+    route_name = route_row["name"]
+
+    if request.method == "POST":
+        action = (request.form.get("action") or "save").strip()
+        profile_id = parse_int(request.form.get("profile_id"), None)
+
+        if action == "delete_profile":
+            if profile_id:
+                db.execute("DELETE FROM route_schedule_profiles WHERE id=? AND route_name=?", (profile_id, route_name))
+                db.commit()
+            return redirect(url_for("route_schedule_edit", rid=rid))
+
+        title = (request.form.get("title") or "").strip() or "Varsayılan"
+        direction = (request.form.get("direction") or "gidis").strip().lower()
+        if direction not in {"gidis", "donus"}:
+            direction = "gidis"
+
+        is_default = norm_bool(request.form.get("is_default"))
+        profile_note = (request.form.get("profile_note") or "").strip()
+
+        existing = None
+        if profile_id:
+            existing = db.execute(
+                "SELECT id, route_name FROM route_schedule_profiles WHERE id=?",
+                (profile_id,),
+            ).fetchone()
+
+        if is_default:
+            db.execute(
+                """
+                UPDATE route_schedule_profiles
+                SET is_default=0, updated_at=datetime('now','localtime')
+                WHERE route_name=? AND direction=?
+                """,
+                (route_name, direction),
+            )
+
+        if existing and existing["route_name"] == route_name:
+            db.execute(
+                """
+                UPDATE route_schedule_profiles
+                SET title=?, direction=?, is_default=?, note=?, updated_at=datetime('now','localtime')
+                WHERE id=?
+                """,
+                (title, direction, is_default, profile_note, profile_id),
+            )
+        else:
+            cur = db.execute(
+                """
+                INSERT INTO route_schedule_profiles(route_name, title, direction, is_default, note)
+                VALUES(?,?,?,?,?)
+                """,
+                (route_name, title, direction, is_default, profile_note),
+            )
+            profile_id = cur.lastrowid
+
+        posted_stops = request.form.getlist("stop_name")
+        posted_times = request.form.getlist("planned_time")
+        posted_kms = request.form.getlist("segment_km")
+        posted_notes = request.form.getlist("item_note")
+        posted_timed = set(request.form.getlist("is_timed"))
+
+        allowed_stops = set(get_stops(route_name))
+
+        db.execute("DELETE FROM route_schedule_items WHERE profile_id=?", (profile_id,))
+
+        for idx, stop_name in enumerate(posted_stops):
+            stop_name = (stop_name or "").strip()
+            if not stop_name or stop_name not in allowed_stops:
+                continue
+
+            planned_time = normalize_hhmm(posted_times[idx] if idx < len(posted_times) else "")
+            seg_raw = (posted_kms[idx] if idx < len(posted_kms) else "").strip()
+            segment_km = parse_float(seg_raw, None) if seg_raw else None
+            item_note = (posted_notes[idx] if idx < len(posted_notes) else "").strip()
+            is_timed_item = 1 if stop_name in posted_timed else 0
+
+            db.execute(
+                """
+                INSERT INTO route_schedule_items(
+                    profile_id, stop_name, planned_time, segment_km, is_timed, sort_order, note
+                )
+                VALUES(?,?,?,?,?,?,?)
+                """,
+                (
+                    profile_id,
+                    stop_name,
+                    planned_time,
+                    segment_km,
+                    is_timed_item,
+                    idx,
+                    item_note,
+                ),
+            )
+
+        db.commit()
+
+        return redirect(url_for("route_schedule_edit", rid=rid, profile_id=profile_id))
+
+    profiles = schedule_profiles_for_route(route_name)
+
+    selected_profile_id = parse_int(request.args.get("profile_id"), None)
+    if not selected_profile_id and profiles:
+        default_profile = next((x for x in profiles if int(x.get("is_default", 0) or 0) == 1), None)
+        selected_profile_id = (default_profile or profiles[0]).get("id")
+
+    selected_profile = schedule_profile_get(selected_profile_id) if selected_profile_id else None
+    editor_rows = schedule_editor_rows(route_name, selected_profile_id)
+
+    return render_template(
+        "route_schedule_edit.html",
+        route=route_row,
+        route_name=route_name,
+        profiles=profiles,
+        selected_profile=selected_profile,
+        editor_rows=editor_rows,
+    )
+
+@app.get("/api/route-schedule")
+def api_route_schedule():
+    route_name = (request.args.get("route") or "").strip()
+    direction = (request.args.get("direction") or "gidis").strip().lower()
+
+    if direction not in {"gidis", "donus"}:
+        direction = "gidis"
+
+    if not route_name:
+        trip = get_active_trip_row()
+        if not trip:
+            return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+        route_name = trip["route"]
+
+    profile = schedule_default_profile_for_route(route_name, direction)
+    if not profile:
+        return jsonify({
+            "ok": True,
+            "route_name": route_name,
+            "direction": direction,
+            "profile": None,
+            "items": []
+        })
+
+    items = get_db().execute(
+        """
+        SELECT stop_name, planned_time, segment_km, is_timed, sort_order, note
+        FROM route_schedule_items
+        WHERE profile_id=?
+        ORDER BY sort_order, id
+        """,
+        (profile["id"],),
+    ).fetchall()
+
+    return jsonify({
+        "ok": True,
+        "route_name": route_name,
+        "direction": direction,
+        "profile": profile,
+        "items": [dict(r) for r in items],
+    })
 
 # =========================================================
 # Fiyatlar

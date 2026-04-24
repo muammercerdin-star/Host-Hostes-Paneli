@@ -1375,6 +1375,28 @@ window.addEventListener('scroll',  repositionSeatForm, {passive:true});
 window.addEventListener('resize',  repositionSeatForm);
 window.addEventListener('orientationchange', repositionSeatForm);
 
+$('#alertStop')?.addEventListener('change', () => {
+  updateGeoHint?.();
+  refreshStopBadges?.();
+  updateStopBadgesForSelected?.();
+  renderAI?.();
+  renderTimeline?.();
+  updateCompactHeader?.();
+
+  const a = getSelectedStopName?.() || '';
+  if(a && $('#cashModal')?.style.display === 'block' && $('#cashTo')) $('#cashTo').value = a;
+  if(a && $('#bulkModal')?.style.display === 'block' && $('#bulkTo')) $('#bulkTo').value = a;
+});
+
+$('#alertRadius')?.addEventListener('change', () => {
+  if(currentCoords){
+    autoDetectLiveStop(currentCoords);
+    updateCompactHeader?.();
+    renderTimeline?.();
+    renderAI?.();
+  }
+});
+
 /* Init */
 (async function init(){
   loadBoardsMapFromLS();
