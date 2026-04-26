@@ -4049,33 +4049,25 @@ def api_bags_meta():
             "eyes": [],
         }), 400
 
-    d = bag_root() / safe(trip_code) / safe(seat_no)
-    right = left_front = left_back = 0
-    exts = (".jpg", ".jpeg", ".png", ".webp")
+    # modules/bags içindeki asıl doğru okuyucuyu kullanıyoruz.
+    # Bu fonksiyon meta.json varsa onu okur,
+    # yoksa R1_, LF2_, LB3_ gibi dosya adlarını doğru çözer.
+    from modules.bags import get_counts
 
-    if d.exists() and d.is_dir():
-        for p in d.iterdir():
-            if not p.is_file():
-                continue
-            low = p.name.lower()
-            if ".thumb." in low or not low.endswith(exts):
-                continue
-            if p.name.startswith("R_"):
-                right += 1
-            elif p.name.startswith("LF_"):
-                left_front += 1
-            elif p.name.startswith("LB_"):
-                left_back += 1
-            else:
-                right += 1
+    right, left_front, left_back = get_counts(trip_code, seat_no)
+
+    right = int(right or 0)
+    left_front = int(left_front or 0)
+    left_back = int(left_back or 0)
 
     total = right + left_front + left_back
+
     eyes = []
-    if right:
+    if right > 0:
         eyes.append("R")
-    if left_front:
+    if left_front > 0:
         eyes.append("LF")
-    if left_back:
+    if left_back > 0:
         eyes.append("LB")
 
     return jsonify({
@@ -4107,13 +4099,16 @@ def bags_clear_alias():
                     deleted += 1
             except Exception:
                 pass
+
         try:
             d.rmdir()
         except Exception:
             pass
 
-    return jsonify({"ok": True, "deleted": deleted})
-
+    return jsonify({
+        "ok": True,
+        "deleted": deleted,
+    })
 
 # =========================================================
 # Sefer bitir / health
