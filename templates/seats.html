@@ -7,68 +7,11 @@
 
 
 <div class="seats-shell">
-  <div class="topbar glass">
-    <div class="route-meta">
-      <div class="route-title-row">
-        <div class="route-badge">🚌</div>
-        <div class="route-title-wrap">
-          <div class="route-title">{{ trip['route'] }}</div>
-          <div class="route-sub">
-            Plaka: <b>{{ trip['plate'] or '-' }}</b>
-            · Sefer Tarihi: <b>{{ trip['date'] or '-' }}</b>
-            · Çıkış: <b>{{ trip['departure_time'] or '-' }}</b>
-          </div>
-        </div>
-      </div>
+  {% include "seats_parts/topbar.html" %}
 
-      <div class="route-live-row">
-        <div class="mini-chip">📍 <span>Durak</span> <b id="topLiveStop">—</b></div>
-        <div class="mini-chip">🚦 <span>Hız</span> <b id="topSpeed">0 km/h</b></div>
-        <div class="mini-chip">🕒 <span>Saat</span> <b id="topClock">--:--</b></div>
-        <div class="mini-chip">🎯 <span>Doluluk</span> <b id="topOcc">0%</b></div>
-      </div>
-    </div>
+{% include "seats_parts/stats.html" %}
 
-    <div class="top-actions">
-      <a href="{{ url_for('index') }}" class="icon-btn" title="Ana Sayfa">🏠</a>
-      <a href="{{ url_for('hesap_page') }}" class="icon-btn" title="Hesap">💵</a>
-      <a href="{{ url_for('consignments_page') }}" class="icon-btn" title="Emanetler">📦</a>
-      <a href="{{ url_for('ai_console_page') }}" class="icon-btn" title="AI Console">🧠</a>
-      <form method="post" action="{{ url_for('end_trip') }}" onsubmit="return confirm('Sefer sonlandırılsın mı?')">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button type="submit" class="icon-btn" title="Seferi Sonlandır">⛔</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="status-row">
-    <div class="status-pill total">
-      <div class="k">Toplam Yolcu</div>
-      <div class="v" id="pillTotal">0</div>
-    </div>
-    <div class="status-pill empty">
-      <div class="k">Boş Koltuk</div>
-      <div class="v" id="pillEmpty">0</div>
-    </div>
-    <div class="status-pill standing" id="standingCard" role="button" tabindex="0">
-      <div class="k">Ayakta</div>
-      <div class="v" id="pillStanding">0</div>
-    </div>
-    <div class="status-pill cash">
-      <div class="k">Ayakta Tahsilat</div>
-      <div class="v" id="pillCash">₺0.00</div>
-    </div>
-    <div class="status-pill service">
-      <div class="k">Servis</div>
-      <div class="v" id="pillService">0</div>
-    </div>
-    <div class="status-pill parcel">
-      <div class="k">Emanet</div>
-      <div class="v" id="pillParcel">0</div>
-    </div>
-  </div>
-
-  <div class="layout">
+<div class="layout">
     <section class="board-card glass">
       <div class="board-inner">
         <div class="board-head">
