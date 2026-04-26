@@ -2346,6 +2346,7 @@
   let lastApproach = { stop:null, seats:[] };
   let currentCoords = null;
   let lastApproachVoiceStop = "";
+  let lastRouteStripCenteredStop = "";
 
   const multiSelected = new Set();
   const ALERT_COOLDOWN_MS = 3 * 60 * 1000;
@@ -2946,6 +2947,18 @@ async function loadRouteScheduleFromApi(){
     });
   }
 
+function centerRouteStripItem(item, behavior = "smooth"){
+  const wrap = $("#routeStrip");
+  if(!wrap || !item) return;
+
+  const left = item.offsetLeft - (wrap.clientWidth / 2) + (item.clientWidth / 2);
+
+  wrap.scrollTo({
+    left: Math.max(0, left),
+    behavior
+  });
+}
+
 function renderRouteStrip(){
   const wrap = $("#routeStrip");
   if(!wrap) return;
@@ -2967,6 +2980,7 @@ function renderRouteStrip(){
   const live = getDisplayLiveStop();
   const selectedNorm = norm(selected);
   const liveNorm = norm(live);
+  let routeFocusItem = null;
   const liveKm = stopDistanceKmByName(live);
   const liveDangerOn = Number.isFinite(liveKm) && liveKm <= 5;
   // if(liveDangerOn){maybeSpeakApproachStop(live, liveKm);}
@@ -3026,6 +3040,7 @@ function renderRouteStrip(){
     const item = document.createElement("button");
     item.type = "button";
     item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done" : ""} ${liveDangerOn && isLive ? "live-danger" : ""} ${isNextWarn ? "next-warning" : ""} ${isFlowGreen ? "flow-green" : ""}`;
+    if(isLive){routeFocusItem = item;}   
 
     const planText = plan || "—";
     const kmValue = kmText || "—";
@@ -3045,20 +3060,27 @@ function renderRouteStrip(){
   </div>
    `;
 
-   item.addEventListener("click", () => {
-   setSelectedStop(stop, { silent:true, voiceReply:false });
-   });
+item.addEventListener("click", () => {
+  setSelectedStop(stop, { silent:true, voiceReply:false });
+});
 
-   wrap.appendChild(item);
+wrap.appendChild(item);
+});
 
-    item.addEventListener("click", () => {
-      setSelectedStop(stop, { silent:true, voiceReply:false });
+if(routeFocusItem && live){
+  const focusKey = norm(live);
+
+  if(lastRouteStripCenteredStop !== focusKey){
+    lastRouteStripCenteredStop = focusKey;
+
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        centerRouteStripItem(routeFocusItem, "smooth");
+      }, 80);
     });
-
-    wrap.appendChild(item);
-  });
+  }
 }
-
+}
   function updateCompactHeader(){
     const selected = getSelectedStopName();
     const live = getDisplayLiveStop();
