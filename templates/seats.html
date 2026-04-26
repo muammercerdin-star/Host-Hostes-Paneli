@@ -1593,6 +1593,64 @@
       min-width:92px;
     }
   }
+
+/* =========================================================
+   CANLI DURAK 5 KM UYARI RENKLERİ
+========================================================= */
+
+.route-stop.live-danger{
+  background:linear-gradient(135deg, rgba(127,29,29,.98), rgba(239,68,68,.55)) !important;
+  border-color:rgba(248,113,113,.95) !important;
+  box-shadow:
+    0 0 0 1px rgba(248,113,113,.55),
+    0 0 22px rgba(239,68,68,.55),
+    inset 0 1px 0 rgba(255,255,255,.14) !important;
+  animation:liveStopBlink .85s linear infinite;
+}
+
+.route-stop.live-danger .name,
+.route-stop.live-danger .meta,
+.route-stop.live-danger .extra-k,
+.route-stop.live-danger .extra-v{
+  color:#fff !important;
+}
+
+@keyframes liveStopBlink{
+  0%,100%{
+    filter:brightness(1);
+    transform:scale(1);
+  }
+  50%{
+    filter:brightness(1.35);
+    transform:scale(1.025);
+  }
+}
+
+.route-stop.next-warning{
+  background:linear-gradient(135deg, rgba(120,75,0,.96), rgba(245,158,11,.55)) !important;
+  border-color:rgba(251,191,36,.9) !important;
+  box-shadow:
+    0 0 0 1px rgba(251,191,36,.42),
+    0 0 18px rgba(245,158,11,.35),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+
+.route-stop.next-warning .name,
+.route-stop.next-warning .meta,
+.route-stop.next-warning .extra-k,
+.route-stop.next-warning .extra-v{
+  color:#fff !important;
+}
+
+.route-stop.flow-green{
+  background:linear-gradient(135deg, rgba(20,83,45,.94), rgba(34,197,94,.44)) !important;
+  border-color:rgba(74,222,128,.75) !important;
+  box-shadow:
+    0 0 0 1px rgba(74,222,128,.32),
+    0 0 14px rgba(34,197,94,.22),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+
 </style>
 
 <div class="seats-shell">
@@ -1755,19 +1813,20 @@
               <small id="miniLiveState">Hazır</small>
             </div>
 
-      <div class="metrics-grid">
-        <div class="metric-card">
-            <div class="k">Canlı Durak</div>
-            <div class="v" id="miniStop">—</div>
-            <div class="s">GPS veya manuel seçime göre</div>
-      </div>
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="k">Canlı Durak</div>
+                <div class="v" id="miniStop">—</div>
+                <div class="s">GPS veya manuel seçime göre</div>
+              </div>
+              <div class="metric-card">
+                <div class="k">Sonraki İşlem</div>
+                <div class="v" id="aiNextAction">—</div>
+                <div class="s">Sistem önerisi</div>
+              </div>
+            </div>
+          </div>
 
-        <div class="metric-card">
-            <div class="k">Sonraki İşlem</div>
-            <div class="v" id="aiNextAction">—</div>
-            <div class="s">Sistem önerisi</div>
-        </div>
-        </div>
           <div class="section-box">
             <div class="section-head">
               <h3>Saat</h3>
@@ -2181,7 +2240,46 @@
   const BAG_TRIP = TRIP_KEY;
   window.BAG_TRIP = BAG_TRIP;
 
-  const ROUTE_SCHEDULES = null;
+  let ROUTE_SCHEDULES = {
+    "Denizli – İstanbul": [
+      { stop: "Denizli otogar", time: "20:00" },
+      { stop: "Alaşehir Otogar", time: "23:10" },
+      { stop: "Salihli Garaj", time: "23:50" },
+      { stop: "Turgutlu Garaj", time: "00:25" },
+      { stop: "Manisa Otogar", time: "01:05" },
+      { stop: "Balıkesir", time: "03:10" },
+      { stop: "Bursa Otogar", time: "04:30" },
+      { stop: "Harem", time: "07:30" },
+      { stop: "Esenler Otogar", time: "08:00" }
+    ],
+    "İstanbul – Denizli": [
+      { stop: "Esenler Otogar", time: "20:00" },
+      { stop: "Harem", time: "20:35" },
+      { stop: "Bursa Otogar", time: "23:15" },
+      { stop: "Balıkesir", time: "00:35" },
+      { stop: "Manisa Otogar", time: "02:40" },
+      { stop: "Turgutlu Garaj", time: "03:15" },
+      { stop: "Salihli Garaj", time: "03:55" },
+      { stop: "Alaşehir Otogar", time: "04:40" },
+      { stop: "Denizli otogar", time: "07:20" }
+    ],
+    "Denizli – İzmir": [
+      { stop: "Denizli otogar", time: "20:00" },
+      { stop: "Alaşehir Otogar", time: "22:10" },
+      { stop: "Salihli Garaj", time: "22:50" },
+      { stop: "Turgutlu Garaj", time: "23:25" },
+      { stop: "Manisa Otogar", time: "00:00" },
+      { stop: "İzmir Otogar", time: "01:10" }
+    ],
+    "İzmir – Denizli": [
+      { stop: "İzmir Otogar", time: "20:00" },
+      { stop: "Manisa Otogar", time: "21:00" },
+      { stop: "Turgutlu Garaj", time: "21:35" },
+      { stop: "Salihli Garaj", time: "22:10" },
+      { stop: "Alaşehir Otogar", time: "22:50" },
+      { stop: "Denizli otogar", time: "01:00" }
+    ]
+  };
 
   const VOICE_HELP = [
     "kaç yolcu var",
@@ -2247,9 +2345,7 @@
   let snoozeUntil = 0;
   let lastApproach = { stop:null, seats:[] };
   let currentCoords = null;
-  let routeScheduleProfile = null;
-  let routeScheduleItems = [];
-
+  let lastApproachVoiceStop = "";
 
   const multiSelected = new Set();
   const ALERT_COOLDOWN_MS = 3 * 60 * 1000;
@@ -2316,23 +2412,6 @@
     }
     return await res.json();
   }
-
-async function loadRouteSchedule(){
-  try{
-    const j = await safeJsonFetch("/api/route-schedule");
-    if(!j?.ok){
-      routeScheduleProfile = null;
-      routeScheduleItems = [];
-      return;
-    }
-
-    routeScheduleProfile = j.profile || null;
-    routeScheduleItems = Array.isArray(j.items) ? j.items : [];
-  }catch(_){
-    routeScheduleProfile = null;
-    routeScheduleItems = [];
-  }
-}
 
   function persistBoards(){
     localStorage.setItem("boardsMap:" + TRIP_KEY, JSON.stringify(boardsMap || {}));
@@ -2414,74 +2493,206 @@ async function loadRouteSchedule(){
     return 2 * R * Math.asin(Math.sqrt(h));
   }
 
-  function tripStartDate(){
-    const datePart = TRIP_DATE || new Date().toISOString().slice(0,10);
-    const timePart = TRIP_DEPARTURE_TIME || "00:00";
-    const iso = `${datePart}T${String(timePart).length === 5 ? timePart + ":00" : timePart}`;
-    return safeDate(iso, new Date());
-  }
+function nearestStopByGps(maxKm = 15){
+  if(!currentCoords || !Array.isArray(cachedStops)) return "";
 
-  function getRouteSchedule(){
-    return (routeScheduleItems || [])
-    .filter(x => x && x.planned_time)
-    .map(x => ({
-      stop: x.stop_name,
-      time: x.planned_time
-    }));
-  }
+  let best = null;
 
-function scheduleOffsetsForRoute(){
-  const sample = getRouteSchedule();
-  if(!sample.length) return [];
+  for(const s of cachedStops){
+    if(!s || !hasCoord(s)) continue;
 
-  let prev = null;
-  let carry = 0;
-  let firstAbs = null;
+    const km = distKm(currentCoords, {
+      lat: Number(s.lat),
+      lng: Number(s.lng)
+    });
 
-  return sample.map(item => {
-    const raw = String(item.time || "00:00").trim();
-    const parts = raw.split(":");
-    const hh = parseInt(parts[0], 10) || 0;
-    const mm = parseInt(parts[1], 10) || 0;
-
-    let cur = hh * 60 + mm + carry;
-
-    if(prev !== null && cur < prev){
-      carry += 1440;
-      cur = hh * 60 + mm + carry;
+    if(!best || km < best.km){
+      best = {
+        name: s.name,
+        km
+      };
     }
+  }
 
-    if(firstAbs === null) firstAbs = cur;
-    prev = cur;
+  if(!best) return "";
 
-    return {
-      stop: item.stop,
-      sampleTime: raw,
-      offsetMin: cur - firstAbs
-    };
+  // Çok uzaktaysa canlı durak göstermesin
+  if(best.km > maxKm) return "";
+
+  return best.name || "";
+}
+
+function getDisplayLiveStop(){
+  return speedState.liveStop || nearestStopByGps(15) || "";
+}
+
+function stopDistanceKmByName(name){
+  if(!name || !currentCoords) return NaN;
+
+  const stopObj = findStopByName(name);
+  if(!stopObj || !hasCoord(stopObj)) return NaN;
+
+  return distKm(currentCoords, {
+    lat: Number(stopObj.lat),
+    lng: Number(stopObj.lng)
   });
 }
 
-function buildActualSchedule(){
-  const start = tripStartDate();
-  const offsets = scheduleOffsetsForRoute();
+function bagSeatsForStop(stopName){
+  const seats = seatsForStop(stopName).map(Number).filter(Boolean);
+  const bagSeats = [];
 
-  const kmMap = new Map(
-    (routeScheduleItems || []).map(x => [
-      norm(x.stop_name),
-      x.segment_km == null || x.segment_km === "" ? null : Number(x.segment_km)
-    ])
-  );
+  seats.forEach(seatNo => {
+    const el = document.querySelector(`.seat[data-seat="${seatNo}"]`);
+    if(!el) return;
 
-  return offsets.map(x => ({
-    stop: x.stop,
-    plan: x.sampleTime,
-    planDate: new Date(start.getTime() + x.offsetMin * 60000),
-    offsetMin: x.offsetMin,
-    routeIndex: indexOfStopByName(x.stop),
-    segmentKm: kmMap.get(norm(x.stop)) ?? null
-  }));
+    const cntText = el.querySelector(".bag-count")?.textContent || "0";
+    const cnt = parseInt(cntText, 10) || 0;
+    const hasBag = el.classList.contains("has-bag") || cnt > 0;
+
+    if(hasBag){
+      bagSeats.push(seatNo);
+    }
+  });
+
+  return bagSeats;
 }
+
+function formatSeatListForVoice(seats){
+  const list = seats.map(String);
+
+  if(list.length === 0) return "";
+  if(list.length === 1) return `${list[0]} numaralı koltukta`;
+
+  const last = list.pop();
+  return `${list.join(", ")} ve ${last} numaralı koltuklarda`;
+}
+
+function maybeSpeakApproachStop(stopName, km){
+  if(!stopName) return;
+  if(!Number.isFinite(km)) return;
+  if(km > 5) return;
+
+  const key = `${TRIP_KEY}:${stopName}`;
+  if(lastApproachVoiceStop === key) return;
+
+  lastApproachVoiceStop = key;
+
+  const seats = seatsForStop(stopName).map(Number).filter(Boolean);
+  const standingCt = computeStandingCountsByStop()[stopName] || 0;
+  const totalPassenger = seats.length + standingCt;
+
+  const bagSeats = bagSeatsForStop(stopName);
+
+  let msg = `${stopName} durağına yaklaşılıyor.`;
+
+  if(totalPassenger > 0){
+    msg += ` ${stopName}'de ${totalPassenger} kişi inecek.`;
+  }else{
+    msg += ` Bu durakta inecek yolcu görünmüyor.`;
+  }
+
+  if(bagSeats.length > 0){
+    msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
+  }
+
+  speak(msg);
+}
+
+function tripStartDate(){
+  const datePart = TRIP_DATE || new Date().toISOString().slice(0,10);
+
+  // Öncelik: Saat yönetimindeki profilin ilk saatli durağı
+  const routeSchedule = getRouteSchedule();
+  const firstTimedStop = Array.isArray(routeSchedule)
+    ? routeSchedule.find(x => x && String(x.time || "").trim())
+    : null;
+
+  const rawTime = firstTimedStop?.time || TRIP_DEPARTURE_TIME || "00:00";
+  const timePart = String(rawTime).trim();
+
+  const iso = `${datePart}T${timePart.length === 5 ? timePart + ":00" : timePart}`;
+  return safeDate(iso, new Date());
+}
+
+  function getRouteSchedule(){
+    return ROUTE_SCHEDULES[ROUTE_NAME] || [];
+  }
+
+async function loadRouteScheduleFromApi(){
+  try{
+    const url = `/api/route-schedule?route=${encodeURIComponent(ROUTE_NAME)}&direction=gidis&_=${Date.now()}`;
+    const j = await safeJsonFetch(url);
+
+    if(!j || !j.ok || !Array.isArray(j.items) || !j.items.length){
+      console.warn("Saat profili bulunamadı, gömülü liste kullanılacak.");
+      return false;
+    }
+
+    const apiSchedule = j.items
+      .filter(x => Number(x.is_timed) === 1 && String(x.planned_time || "").trim())
+      .map(x => ({
+        stop: x.stop_name,
+        time: String(x.planned_time || "").trim(),
+        segment_km: x.segment_km,
+        sort_order: x.sort_order
+      }));
+
+    if(apiSchedule.length){
+      ROUTE_SCHEDULES[ROUTE_NAME] = apiSchedule;
+      console.log("Saat profili API'den yüklendi:", apiSchedule);
+      return true;
+    }
+
+    return false;
+  }catch(err){
+    console.warn("Saat profili API hatası:", err);
+    return false;
+  }
+}
+
+  function scheduleOffsetsForRoute(){
+    const sample = getRouteSchedule();
+    if(!sample.length) return [];
+
+    let prev = null;
+    let carry = 0;
+    let firstAbs = null;
+
+    return sample.map(item => {
+      const parts = String(item.time || "00:00").split(":");
+      const hh = parseInt(parts[0], 10) || 0;
+      const mm = parseInt(parts[1], 10) || 0;
+      let cur = hh * 60 + mm + carry;
+
+      if(prev !== null && cur < prev){
+        carry += 1440;
+        cur = hh * 60 + mm + carry;
+      }
+
+      if(firstAbs === null) firstAbs = cur;
+      prev = cur;
+
+      return {
+        stop:item.stop,
+        sampleTime:item.time,
+        offsetMin: cur - firstAbs
+      };
+    });
+  }
+
+  function buildActualSchedule(){
+    const start = tripStartDate();
+    const offsets = scheduleOffsetsForRoute();
+
+    return offsets.map(x => ({
+      stop: x.stop,
+      plan: x.sampleTime,
+      planDate: new Date(start.getTime() + x.offsetMin * 60000),
+      offsetMin: x.offsetMin,
+      routeIndex: indexOfStopByName(x.stop)
+    }));
+  }
 
   function minutesDiff(a, b){
     return Math.round((a - b) / 60000);
@@ -2753,10 +2964,17 @@ function renderRouteStrip(){
   }
 
   const selected = getSelectedStopName();
-  const live = speedState.liveStop || "";
+  const live = getDisplayLiveStop();
   const selectedNorm = norm(selected);
   const liveNorm = norm(live);
+  const liveKm = stopDistanceKmByName(live);
+  const liveDangerOn = Number.isFinite(liveKm) && liveKm <= 5;
+  // if(liveDangerOn){maybeSpeakApproachStop(live, liveKm);}
+  const nextWarnStop = liveDangerOn? computeNextStopName(live || selected || "", "nextWithSeats"): "";
+  const greenStop = liveDangerOn && nextWarnStop? computeNextStopName(nextWarnStop, "nextWithSeats"): "";
 
+  const nextWarnNorm = norm(nextWarnStop);
+  const greenNorm = norm(greenStop);
   const seatCounts = computeSeatCountsByStop();
   const standingCounts = computeStandingCountsByStop();
   const parcelCounts = computeParcelCountsByStop();
@@ -2774,6 +2992,8 @@ function renderRouteStrip(){
     const isActive = !!selectedNorm && norm(stop) === selectedNorm;
     const isLive = !!liveNorm && norm(stop) === liveNorm;
     const isDone = speedState.passedStops.has(stop) && !isActive && !isLive;
+    const isNextWarn = liveDangerOn && !!nextWarnNorm && norm(stop) === nextWarnNorm;
+    const isFlowGreen = liveDangerOn && !!greenNorm && norm(stop) === greenNorm;
 
     const stopObj = findStopByName(stop);
     const plan = planMap.get(norm(stop)) || "";
@@ -2805,7 +3025,7 @@ function renderRouteStrip(){
     if(kmText) extraBits.push(kmText);
     const item = document.createElement("button");
     item.type = "button";
-    item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done" : ""}`;
+    item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done" : ""} ${liveDangerOn && isLive ? "live-danger" : ""} ${isNextWarn ? "next-warning" : ""} ${isFlowGreen ? "flow-green" : ""}`;
 
     const planText = plan || "—";
     const kmValue = kmText || "—";
@@ -2841,13 +3061,13 @@ function renderRouteStrip(){
 
   function updateCompactHeader(){
     const selected = getSelectedStopName();
-    const live = speedState.liveStop || "";
-    const next = computeNextStopName(selected || live || "", "nextWithSeats");
+    const live = getDisplayLiveStop();
+    const next = computeNextStopName(live || selected || "", "nextWithSeats");
 
     setText("#topLiveStop", live || selected || "—");
     setText("#topSpeed", `${Math.round(Number(speedState.current || 0))} km/h`);
     setText("#selectedStopBadge", selected || "—");
-    setText("#topLiveStop", live || selected || "—");
+    setText("#miniStop", selected || live || "—");
     setText("#routeLiveStop", live || "—");
     setText("#routeLiveStopCard", live || "—");
     setValue("#coordStopName", selected || "");
@@ -2929,7 +3149,15 @@ function renderRouteStrip(){
       const seatCt = seatsForStop(canonical).length;
       const standCt = computeStandingCountsByStop()[canonical] || 0;
       const parcelCt = computeParcelCountsByStop()[canonical] || 0;
-      speak(`Sıradaki durak ${canonical}. ${seatCt} oturan, ${standCt} ayakta, ${parcelCt} emanet işlemi var.`);
+      const bagSeats = bagSeatsForStop(canonical);
+
+let msg = `Sıradaki durak ${canonical}. ${seatCt} oturan, ${standCt} ayakta, ${parcelCt} emanet işlemi var.`;
+
+if(bagSeats.length > 0){
+  msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
+}
+
+speak(msg);
     }
 
     return true;
@@ -3179,7 +3407,7 @@ function renderRouteStrip(){
   function openBulk(){
     populateStops().then(() => {
       const selected = getSelectedStopName() || "";
-      const live = speedState.liveStop || "";
+      const live = getDisplayLiveStop();
       const fromDefault = live || selected || serverStops?.[0] || "";
       if(selected) setValue("#bulkTo", selected);
       if(fromDefault) setValue("#bulkFrom", fromDefault);
@@ -3296,7 +3524,7 @@ function renderRouteStrip(){
   function openCash(){
     populateStops().then(() => {
       const selected = getSelectedStopName() || "";
-      const live = speedState.liveStop || "";
+      const live = getDisplayLiveStop();
       const fromDefault = live || selected || serverStops?.[0] || "";
       if(selected) setValue("#cashTo", selected);
       if(fromDefault) setValue("#cashFrom", fromDefault);
@@ -3543,7 +3771,15 @@ function renderRouteStrip(){
 
   function speakFinalStopSequence(name){
     const cnt = seatsForStop(name).length;
-    speak(`Sıradaki durak ${name}. Bu durakta ${cnt} yolcu inecek.`);
+    const bagSeats = bagSeatsForStop(name);
+
+let msg = `Sıradaki durak ${name}. Bu durakta ${cnt} yolcu inecek.`;
+
+if(bagSeats.length > 0){
+  msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
+}
+
+speak(msg);
     setTimeout(() => {
       speak("Sarıkız Turizm ailesini tercih ettiğiniz için teşekkür ederiz. Bir sonraki yolculukta görüşmek üzere.");
     }, 1800);
@@ -3590,9 +3826,18 @@ function renderRouteStrip(){
     openModal("#approachBackdrop", "#approachModal");
 
     if(isFinalStop(stop)) speakFinalStopSequence(stop);
-    else speak(`Sıradaki durak ${stop}. Bu durakta ${seats.length} yolcu inecek.`);
+    else{
+  const bagSeats = bagSeatsForStop(stop);
+
+  let msg = `Sıradaki durak ${stop}. Bu durakta ${seats.length} yolcu inecek.`;
+
+  if(bagSeats.length > 0){
+    msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
   }
 
+  speak(msg);
+}
+}
   async function bulkOffload(seatNums){
     if(!Array.isArray(seatNums) || !seatNums.length) return;
 
@@ -4032,33 +4277,20 @@ function renderRouteStrip(){
     setText("#aiParcel", selectedParcel > 0 ? `${selectedParcel} teslim var` : (stop ? "Teslim yok" : "Durak seçilmedi"));
   }
 
-function autoDetectLiveStop(coords){
-  if(!coords || !cachedStops?.length) return;
+  function autoDetectLiveStop(coords){
+    if(!coords || !cachedStops?.length) return;
 
-  const radiusKm = parseFloat($("#alertRadius")?.value || "3.5");
-  let best = null;
+    let best = null;
+    for(const stop of cachedStops){
+      if(!hasCoord(stop)) continue;
+      const km = distKm(coords, { lat:Number(stop.lat), lng:Number(stop.lng) });
+      if(!best || km < best.km) best = { stop: stop.name, km };
+    }
 
-  for(const stop of cachedStops){
-    if(!hasCoord(stop)) continue;
-
-    const km = distKm(coords, {
-      lat: Number(stop.lat),
-      lng: Number(stop.lng)
-    });
-
-    if(!best || km < best.km){
-      best = { stop: stop.name, km };
+    if(best && best.km <= 3.5){
+      setLiveStop(best.stop);
     }
   }
-
-  if(best && best.km <= radiusKm){
-    setLiveStop(best.stop);
-  }else{
-    speedState.liveStop = "";
-    persistVoiceState();
-    updateCompactHeader();
-  }
-}
 
   function findStopMention(text){
     const ntext = norm(text);
@@ -5059,7 +5291,7 @@ async function handleLocalVoiceCommand(text){
 
       await fetchStops();
       await populateStops();
-      await loadRouteSchedule();
+      await loadRouteScheduleFromApi();
       await loadStandingTotals();
       await loadStandingItems();
       await loadParcelItems();
