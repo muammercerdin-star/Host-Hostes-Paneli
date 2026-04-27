@@ -4216,3 +4216,34 @@ body:not(.drive-mode) .voice-row{
   }
 }
 
+
+/* =========================================================
+   DURAK GEÇİLDİ ÖZETİ
+========================================================= */
+
+.route-stop.done.has-flow-summary .meta.done-summary{
+  white-space:normal !important;
+  line-height:1.22 !important;
+  font-weight:850 !important;
+  color:rgba(232,240,255,.78) !important;
+}
+
+.route-stop.done.has-flow-summary{
+  border-color:rgba(148,163,184,.18) !important;
+}
+
+.route-stop.done.has-flow-summary .name{
+  opacity:.78 !important;
+}
+
+body.drive-mode .route-stop.done.has-flow-summary .meta.done-summary{
+  font-size:12px !important;
+  line-height:1.2 !important;
+}
+
+@media (max-width:420px){
+  .route-stop.done.has-flow-summary .meta.done-summary{
+    font-size:11.5px !important;
+  }
+}
+

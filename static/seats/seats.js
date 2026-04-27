@@ -515,6 +515,123 @@ async function loadRouteScheduleFromApi(){
     return out;
   }
 
+
+  const STOP_FLOW_SUMMARY_KEY = "stopFlowSummary:" + TRIP_KEY;
+  let stopFlowSummary = {};
+
+  function loadStopFlowSummary(){
+    try{
+      const raw = localStorage.getItem(STOP_FLOW_SUMMARY_KEY) || "{}";
+      const obj = JSON.parse(raw);
+      stopFlowSummary = obj && typeof obj === "object" ? obj : {};
+    }catch(_){
+      stopFlowSummary = {};
+    }
+  }
+
+  function persistStopFlowSummary(){
+    try{
+      localStorage.setItem(STOP_FLOW_SUMMARY_KEY, JSON.stringify(stopFlowSummary || {}));
+    }catch(_){}
+  }
+
+  function stopSummaryKey(stopName){
+    return (findCanonicalStopName(stopName) || String(stopName || "")).trim();
+  }
+
+  function boardCountForStop(stopName){
+    const key = norm(stopName);
+    if(!key) return 0;
+
+    let total = 0;
+
+    Object.keys(assigned || {}).forEach(seatNo => {
+      if(!assigned[seatNo]) return;
+      if(norm(boardsMap[String(seatNo)] || "") === key){
+        total += 1;
+      }
+    });
+
+    (standingItems || []).forEach(it => {
+      if(norm(it?.from || "") === key){
+        total += Number(it?.count || 0);
+      }
+    });
+
+    return total;
+  }
+
+  function offCountForStop(stopName){
+    const stop = stopSummaryKey(stopName);
+    let total = 0;
+
+    try{
+      total += seatsForStop(stop).length;
+    }catch(_){}
+
+    try{
+      total += Number(computeStandingCountsByStop()[stop] || 0);
+    }catch(_){}
+
+    return total;
+  }
+
+  function parcelCountForStop(stopName){
+    const stop = stopSummaryKey(stopName);
+
+    try{
+      return Number(computeParcelCountsByStop()[stop] || 0);
+    }catch(_){
+      return 0;
+    }
+  }
+
+  function snapshotStopFlowSummary(stopName, data = {}){
+    const key = stopSummaryKey(stopName);
+    if(!key) return;
+
+    const old = stopFlowSummary[key] || {};
+
+    const off = Number(
+      data.offCount !== undefined ? data.offCount : offCountForStop(key)
+    ) || 0;
+
+    const board = Number(
+      data.boardCount !== undefined ? data.boardCount : boardCountForStop(key)
+    ) || 0;
+
+    const parcel = Number(
+      data.parcelCount !== undefined ? data.parcelCount : parcelCountForStop(key)
+    ) || 0;
+
+    stopFlowSummary[key] = {
+      off: Math.max(Number(old.off || 0), off),
+      board: Math.max(Number(old.board || 0), board),
+      parcel: Math.max(Number(old.parcel || 0), parcel),
+      ts: Date.now()
+    };
+
+    persistStopFlowSummary();
+  }
+
+  function stopFlowSummaryLine(stopName){
+    const key = stopSummaryKey(stopName);
+    const rec = stopFlowSummary[key] || {};
+
+    const off = Math.max(Number(rec.off || 0), offCountForStop(key));
+    const board = Math.max(Number(rec.board || 0), boardCountForStop(key));
+    const parcel = Math.max(Number(rec.parcel || 0), parcelCountForStop(key));
+
+    const parts = [];
+
+    if(off > 0) parts.push(`${off} kişi indi`);
+    if(board > 0) parts.push(`${board} kişi bindi`);
+    if(parcel > 0) parts.push(`${parcel} emanet teslim`);
+
+    return parts.length ? parts.join(" · ") : "İşlem bitti";
+  }
+
+
   function totalParcelCount(){
     return (parcelItems || []).reduce((a,b) => a + Number(b?.count || 0), 0);
   }
@@ -766,10 +883,12 @@ function renderRouteStrip(){
     else metaLine1 = "Bekliyor";
 
     let metaLine2 = "";
-    if(seatCt || standingCt || parcelCt){
+    if(isDone){
+      metaLine2 = stopFlowSummaryLine(stop);
+    }else if(seatCt || standingCt || parcelCt){
       metaLine2 = `${seatCt}K ${standingCt}A ${parcelCt}E`;
     }else{
-      metaLine2 = isDone ? "İşlem bitti" : "İşlem yok";
+      metaLine2 = "İşlem yok";
     }
 
     const extraBits = [];
@@ -778,7 +897,7 @@ function renderRouteStrip(){
     const item = document.createElement("button");
     item.type = "button";
     item.dataset.stop = stop;
-    item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done" : ""} ${liveDangerOn && isLive ? "live-danger" : ""} ${isNextWarn ? "next-warning" : ""} ${isFlowGreen ? "flow-green" : ""}`;
+    item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done has-flow-summary" : ""} ${liveDangerOn && isLive ? "live-danger" : ""} ${isNextWarn ? "next-warning" : ""} ${isFlowGreen ? "flow-green" : ""}`;
     if(isLive){routeFocusItem = item;}   
 
     const planText = plan || "—";
@@ -786,7 +905,7 @@ function renderRouteStrip(){
 
     item.innerHTML = `
   <div class="name">${stop}</div>
-  <div class="meta">${metaLine1} · ${metaLine2}</div>
+  <div class="meta ${isDone ? "done-summary" : ""}">${metaLine1} · ${metaLine2}</div>
   <div class="extra">
     <div class="extra-line">
       <span class="extra-k">Saat</span>
@@ -919,6 +1038,7 @@ if(routeFocusItem && live){
     if(idx < 0 || !list.length) return;
 
     for(let i = 0; i <= idx; i++){
+      snapshotStopFlowSummary(list[i]);
       speedState.passedStops.add(list[i]);
     }
     persistVoiceState();
@@ -1415,6 +1535,12 @@ function renderApproachPanel(stop, seats){
 
     const ok = confirm(`"${stop}" için işlemleri yapayım mı?`);
     if(!ok) return;
+
+    snapshotStopFlowSummary(stop, {
+      offCount: seats.length + Number(computeStandingCountsByStop()[stop] || 0),
+      boardCount: boardCountForStop(stop),
+      parcelCount: parcelCountForStop(stop)
+    });
 
     if(seats.length) await bulkOffload(seats);
     const removed = await offloadStandingForStop(stop);
@@ -2128,6 +2254,12 @@ function initTabs(){
   onClick("#approachOffload", async () => {
     const stop = lastApproach?.stop;
     if(!stop) return;
+    snapshotStopFlowSummary(stop, {
+      offCount: (lastApproach.seats || []).length + Number(computeStandingCountsByStop()[stop] || 0),
+      boardCount: boardCountForStop(stop),
+      parcelCount: parcelCountForStop(stop)
+    });
+
     await bulkOffload(lastApproach.seats || []);
     await offloadStandingForStop(stop);
     setLiveStop(stop);
@@ -2194,6 +2326,7 @@ function initTabs(){
     try{
       initTabs();
       loadVoiceState();
+      loadStopFlowSummary();
       setVoiceBadge("Hazır");
 
       await fetchStops();
