@@ -357,26 +357,7 @@ function maybeSpeakApproachStop(stopName, km){
   if(lastApproachVoiceStop === key) return;
 
   lastApproachVoiceStop = key;
-
-  const seats = seatsForStop(stopName).map(Number).filter(Boolean);
-  const standingCt = computeStandingCountsByStop()[stopName] || 0;
-  const totalPassenger = seats.length + standingCt;
-
-  const bagSeats = bagSeatsForStop(stopName);
-
-  let msg = `${stopName} durağına yaklaşılıyor.`;
-
-  if(totalPassenger > 0){
-    msg += ` ${stopName}'de ${totalPassenger} kişi inecek.`;
-  }else{
-    msg += ` Bu durakta inecek yolcu görünmüyor.`;
-  }
-
-  if(bagSeats.length > 0){
-    msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
-  }
-
-  speak(msg);
+  speak(`${stopName} durağına yaklaşılıyor. ${stopHumanVoiceSummary(stopName)}`);
 }
 
 function tripStartDate(){
@@ -607,7 +588,80 @@ async function loadRouteScheduleFromApi(){
     return out.sort((a,b) => a - b);
   }
 
-  function setVoiceBadge(text){
+  
+function stopHumanVoiceSummary(stopName){
+  const stop = String(stopName || "").trim();
+  if(!stop) return "Durak bilgisi bulunamadı.";
+
+  let seats = [];
+  let parcelCt = 0;
+  let standingCt = 0;
+  let bagSeats = [];
+
+  try{
+    seats = seatsForStop(stop).map(Number).filter(Boolean);
+  }catch(_){
+    seats = [];
+  }
+
+  try{
+    parcelCt = computeParcelCountsByStop()[stop] || 0;
+  }catch(_){
+    parcelCt = 0;
+  }
+
+  try{
+    standingCt = computeStandingCountsByStop()[stop] || 0;
+  }catch(_){
+    standingCt = 0;
+  }
+
+  try{
+    bagSeats = bagSeatsForStop(stop);
+  }catch(_){
+    bagSeats = [];
+  }
+
+  let bay = 0;
+  let bayan = 0;
+  let yolcu = 0;
+
+  seats.forEach(seatNo => {
+    const g = genders[String(seatNo)] || "";
+    if(g === "bay") bay++;
+    else if(g === "bayan") bayan++;
+    else yolcu++;
+  });
+
+  // Ayakta yolcuyu "ayakta" diye söyleme; normal yolcu gibi ekle.
+  yolcu += Number(standingCt || 0);
+
+  const parts = [];
+  if(bay > 0) parts.push(`${bay} bay`);
+  if(bayan > 0) parts.push(`${bayan} bayan`);
+  if(yolcu > 0) parts.push(`${yolcu} yolcu`);
+
+  let msg = "";
+
+  if(parts.length > 0){
+    msg = `${stop} durağında ${parts.join(", ")} inecek.`;
+  }else{
+    msg = `${stop} durağı için inecek yolcu görünmüyor.`;
+  }
+
+  if(parcelCt > 0){
+    msg += ` Ayrıca ${parcelCt} emanet teslim var.`;
+  }
+
+  if(bagSeats.length > 0){
+    msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
+  }
+
+  return msg;
+}
+
+
+function setVoiceBadge(text){
     setText("#voiceStateBadge", text || "Hazır");
   }
 
@@ -840,7 +894,7 @@ function renderRouteStrip(){
    `;
 
 item.addEventListener("click", () => {
-  setSelectedStop(stop, { silent:true, voiceReply:false });
+  setSelectedStop(stop, { silent:false, voiceReply:true });
 });
 
 wrap.appendChild(item);
@@ -947,18 +1001,7 @@ if(routeFocusItem && live){
     updateCompactHeader();
 
     if(!silent && voiceReply){
-      const seatCt = seatsForStop(canonical).length;
-      const standCt = computeStandingCountsByStop()[canonical] || 0;
-      const parcelCt = computeParcelCountsByStop()[canonical] || 0;
-      const bagSeats = bagSeatsForStop(canonical);
-
-let msg = `Sıradaki durak ${canonical}. ${seatCt} oturan, ${standCt} ayakta, ${parcelCt} emanet işlemi var.`;
-
-if(bagSeats.length > 0){
-  msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
-}
-
-speak(msg);
+      speak(stopHumanVoiceSummary(canonical));
     }
 
     return true;
@@ -1561,26 +1604,44 @@ speak(msg);
   }
 
   function speak(text){
-    if(!$("#soundToggle")?.checked) return;
+    const msg = String(text || "").trim();
+    if(!msg) return;
+
+    const soundToggle = $("#soundToggle");
+
+    // Checkbox varsa ve kapalıysa konuşma.
+    // Checkbox bulunamazsa sistemi tamamen susturma.
+    if(soundToggle && !soundToggle.checked) return;
+
     try{
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = "tr-TR";
-      speechSynthesis.speak(u);
-    }catch(_){}
+      if("speechSynthesis" in window){
+        // Android/Chrome bazen eski sesi kuyrukta kilitliyor; temizleyip başlatıyoruz.
+        speechSynthesis.cancel();
+
+        const u = new SpeechSynthesisUtterance(msg);
+
+        const voices = speechSynthesis.getVoices ? speechSynthesis.getVoices() : [];
+        const trVoice = voices.find(v => (v.lang || "").toLowerCase().startsWith("tr"));
+
+        if(trVoice) u.voice = trVoice;
+        u.lang = trVoice ? trVoice.lang : "tr-TR";
+        u.rate = 1;
+        u.pitch = 1;
+        u.volume = 1;
+
+        setTimeout(() => {
+          speechSynthesis.speak(u);
+        }, 80);
+      }
+    }catch(e){
+      console.warn("Sesli okuma hatası:", e);
+    }
+
     if(navigator.vibrate) navigator.vibrate([140, 70, 140]);
   }
 
   function speakFinalStopSequence(name){
-    const cnt = seatsForStop(name).length;
-    const bagSeats = bagSeatsForStop(name);
-
-let msg = `Sıradaki durak ${name}. Bu durakta ${cnt} yolcu inecek.`;
-
-if(bagSeats.length > 0){
-  msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
-}
-
-speak(msg);
+    speak(stopHumanVoiceSummary(name));
     setTimeout(() => {
       speak("Sarıkız Turizm ailesini tercih ettiğiniz için teşekkür ederiz. Bir sonraki yolculukta görüşmek üzere.");
     }, 1800);
@@ -1628,16 +1689,8 @@ speak(msg);
 
     if(isFinalStop(stop)) speakFinalStopSequence(stop);
     else{
-  const bagSeats = bagSeatsForStop(stop);
-
-  let msg = `Sıradaki durak ${stop}. Bu durakta ${seats.length} yolcu inecek.`;
-
-  if(bagSeats.length > 0){
-    msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
-  }
-
-  speak(msg);
-}
+      speak(stopHumanVoiceSummary(stop));
+    }
 }
   async function bulkOffload(seatNums){
     if(!Array.isArray(seatNums) || !seatNums.length) return;
@@ -2453,14 +2506,7 @@ async function handleLocalVoiceCommand(text){
 
   if(cmd.type === "ask_stop_count"){
     const stop = cmd.stop;
-    const seat = seatsForStop(stop).length;
-    const stand = computeStandingCountsByStop()[stop] || 0;
-    const parcel = computeParcelCountsByStop()[stop] || 0;
-    const total = seat + stand;
-
-    const msg =
-      `${stop} için ${total} yolcu var. ${seat} oturan, ${stand} ayakta.` +
-      (parcel ? ` Ayrıca ${parcel} emanet var.` : "");
+    const msg = stopHumanVoiceSummary(stop);
 
     toast(msg, 4200);
     speak(msg);
@@ -2514,10 +2560,7 @@ async function handleLocalVoiceCommand(text){
     }
 
     const stop = getSelectedStopName();
-    const seat = seatsForStop(stop).length;
-    const stand = computeStandingCountsByStop()[stop] || 0;
-    const parcel = computeParcelCountsByStop()[stop] || 0;
-    const msg = `${stop} seçildi. ${seat} oturan, ${stand} ayakta, ${parcel} emanet.`;
+    const msg = stopHumanVoiceSummary(stop);
     toast(msg, 3600);
     speak(msg);
     return true;
