@@ -127,10 +127,6 @@ const BAG_TRIP = TRIP_KEY;
   let lastApproachVoiceStop = "";
   let lastRouteStripCenteredStop = "";
 
-// Bagaj göz bilgisi sesli uyarıda kullanılacak.
-// Örnek: bagMetaCache["3"] = {count:1, right:0, left_front:1, left_back:0, eyes:["LF"]}
-const bagMetaCache = {};
-
   const multiSelected = new Set();
   const ALERT_COOLDOWN_MS = 3 * 60 * 1000;
 
@@ -352,53 +348,6 @@ function formatSeatListForVoice(seats){
   return `${list.join(", ")} ve ${last} numaralı koltuklarda`;
 }
 
-
-function bagEyeVoicePartsForSeat(seatNo){
-  const meta = bagMetaCache[String(seatNo)] || {};
-  const parts = [];
-
-  const right = Number(meta.right || 0);
-  const leftFront = Number(meta.left_front || 0);
-  const leftBack = Number(meta.left_back || 0);
-
-  function add(label, count){
-    if(count <= 0) return;
-    if(count === 1) parts.push(`${label} gözde bagaj`);
-    else parts.push(`${label} gözde ${count} bagaj`);
-  }
-
-  add("sağ", right);
-  add("sol ön", leftFront);
-  add("sol arka", leftBack);
-
-  // Eğer detaylı adet yok ama göz kodu varsa yine göz adını söyle.
-  if(!parts.length && Array.isArray(meta.eyes)){
-    if(meta.eyes.includes("R")) parts.push("sağ gözde bagaj");
-    if(meta.eyes.includes("LF")) parts.push("sol ön gözde bagaj");
-    if(meta.eyes.includes("LB")) parts.push("sol arka gözde bagaj");
-  }
-
-  return parts;
-}
-
-function bagVoiceSummaryForStop(stopName){
-  const seats = bagSeatsForStop(stopName).map(Number).filter(Boolean);
-  if(!seats.length) return "";
-
-  const chunks = seats.map(seatNo => {
-    const parts = bagEyeVoicePartsForSeat(seatNo);
-
-    if(parts.length){
-      return `${seatNo} numarada ${parts.join(", ")}`;
-    }
-
-    return `${seatNo} numarada bagaj`;
-  });
-
-  return `Bagaj uyarısı: ${chunks.join(". ")} var.`;
-}
-
-
 function maybeSpeakApproachStop(stopName, km){
   if(!stopName) return;
   if(!Number.isFinite(km)) return;
@@ -408,7 +357,26 @@ function maybeSpeakApproachStop(stopName, km){
   if(lastApproachVoiceStop === key) return;
 
   lastApproachVoiceStop = key;
-  speak(`${stopName} durağına yaklaşılıyor. ${stopHumanVoiceSummary(stopName)}`);
+
+  const seats = seatsForStop(stopName).map(Number).filter(Boolean);
+  const standingCt = computeStandingCountsByStop()[stopName] || 0;
+  const totalPassenger = seats.length + standingCt;
+
+  const bagSeats = bagSeatsForStop(stopName);
+
+  let msg = `${stopName} durağına yaklaşılıyor.`;
+
+  if(totalPassenger > 0){
+    msg += ` ${stopName}'de ${totalPassenger} kişi inecek.`;
+  }else{
+    msg += ` Bu durakta inecek yolcu görünmüyor.`;
+  }
+
+  if(bagSeats.length > 0){
+    msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
+  }
+
+  speak(msg);
 }
 
 function tripStartDate(){
@@ -641,72 +609,41 @@ async function loadRouteScheduleFromApi(){
 
   
 function stopHumanVoiceSummary(stopName){
-  const stop = String(stopName || "").trim();
-  if(!stop) return "Durak bilgisi bulunamadı.";
-
-  let seats = [];
-  let parcelCt = 0;
-  let standingCt = 0;
-  let bagSeats = [];
-
-  try{
-    seats = seatsForStop(stop).map(Number).filter(Boolean);
-  }catch(_){
-    seats = [];
-  }
-
-  try{
-    parcelCt = computeParcelCountsByStop()[stop] || 0;
-  }catch(_){
-    parcelCt = 0;
-  }
-
-  try{
-    standingCt = computeStandingCountsByStop()[stop] || 0;
-  }catch(_){
-    standingCt = 0;
-  }
-
-  try{
-    bagSeats = bagSeatsForStop(stop);
-  }catch(_){
-    bagSeats = [];
-  }
+  const seats = seatsForStop(stopName).map(Number).filter(Boolean);
+  const parcelCt = computeParcelCountsByStop()[stopName] || 0;
+  const bagSeats = bagSeatsForStop(stopName);
 
   let bay = 0;
   let bayan = 0;
-  let yolcu = 0;
+  let belirsiz = 0;
 
   seats.forEach(seatNo => {
     const g = genders[String(seatNo)] || "";
     if(g === "bay") bay++;
     else if(g === "bayan") bayan++;
-    else yolcu++;
+    else belirsiz++;
   });
 
-  // Ayakta yolcuyu "ayakta" diye söyleme; normal yolcu gibi ekle.
-  yolcu += Number(standingCt || 0);
-
   const parts = [];
+
   if(bay > 0) parts.push(`${bay} bay`);
   if(bayan > 0) parts.push(`${bayan} bayan`);
-  if(yolcu > 0) parts.push(`${yolcu} yolcu`);
+  if(belirsiz > 0) parts.push(`${belirsiz} yolcu`);
 
   let msg = "";
 
   if(parts.length > 0){
-    msg = `${stop} durağında ${parts.join(", ")} inecek.`;
+    msg = `${stopName} durağında ${parts.join(", ")} inecek.`;
   }else{
-    msg = `${stop} durağı için inecek yolcu görünmüyor.`;
+    msg = `${stopName} durağı için inecek yolcu görünmüyor.`;
   }
 
   if(parcelCt > 0){
     msg += ` Ayrıca ${parcelCt} emanet teslim var.`;
   }
 
-  const bagMsg = bagVoiceSummaryForStop(stop);
-  if(bagMsg){
-    msg += ` ${bagMsg}`;
+  if(bagSeats.length > 0){
+    msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
   }
 
   return msg;
@@ -844,41 +781,6 @@ function centerRouteStripItem(item, behavior = "smooth"){
   });
 }
 
-
-function focusRouteStripStop(stopName, { select=false, voice=false } = {}){
-  const name = (stopName || "").trim();
-  if(!name){
-    toast("Durak bulunamadı");
-    return false;
-  }
-
-  const canonical = findCanonicalStopName(name) || name;
-
-  if(select){
-    setSelectedStop(canonical, { silent:!voice, voiceReply:voice });
-  }else{
-    renderRouteStrip();
-  }
-
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      const wrap = $("#routeStrip");
-      if(!wrap) return;
-
-      const target = Array.from(wrap.querySelectorAll(".route-stop"))
-        .find(el => norm(el.dataset.stop || el.querySelector(".name")?.textContent || "") === norm(canonical));
-
-      if(target){
-        centerRouteStripItem(target, "smooth");
-        target.classList.add("route-focus-flash");
-        setTimeout(() => target.classList.remove("route-focus-flash"), 1200);
-      }
-    }, 80);
-  });
-
-  return true;
-}
-
 function renderRouteStrip(){
   const wrap = $("#routeStrip");
   if(!wrap) return;
@@ -959,7 +861,6 @@ function renderRouteStrip(){
     if(kmText) extraBits.push(kmText);
     const item = document.createElement("button");
     item.type = "button";
-    item.dataset.stop = stop;
     item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done" : ""} ${liveDangerOn && isLive ? "live-danger" : ""} ${isNextWarn ? "next-warning" : ""} ${isFlowGreen ? "flow-green" : ""}`;
     if(isLive){routeFocusItem = item;}   
 
@@ -1692,44 +1593,26 @@ if(routeFocusItem && live){
   }
 
   function speak(text){
-    const msg = String(text || "").trim();
-    if(!msg) return;
-
-    const soundToggle = $("#soundToggle");
-
-    // Checkbox varsa ve kapalıysa konuşma.
-    // Checkbox bulunamazsa sistemi tamamen susturma.
-    if(soundToggle && !soundToggle.checked) return;
-
+    if(!$("#soundToggle")?.checked) return;
     try{
-      if("speechSynthesis" in window){
-        // Android/Chrome bazen eski sesi kuyrukta kilitliyor; temizleyip başlatıyoruz.
-        speechSynthesis.cancel();
-
-        const u = new SpeechSynthesisUtterance(msg);
-
-        const voices = speechSynthesis.getVoices ? speechSynthesis.getVoices() : [];
-        const trVoice = voices.find(v => (v.lang || "").toLowerCase().startsWith("tr"));
-
-        if(trVoice) u.voice = trVoice;
-        u.lang = trVoice ? trVoice.lang : "tr-TR";
-        u.rate = 1;
-        u.pitch = 1;
-        u.volume = 1;
-
-        setTimeout(() => {
-          speechSynthesis.speak(u);
-        }, 80);
-      }
-    }catch(e){
-      console.warn("Sesli okuma hatası:", e);
-    }
-
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "tr-TR";
+      speechSynthesis.speak(u);
+    }catch(_){}
     if(navigator.vibrate) navigator.vibrate([140, 70, 140]);
   }
 
   function speakFinalStopSequence(name){
-    speak(stopHumanVoiceSummary(name));
+    const cnt = seatsForStop(name).length;
+    const bagSeats = bagSeatsForStop(name);
+
+let msg = `Sıradaki durak ${name}. Bu durakta ${cnt} yolcu inecek.`;
+
+if(bagSeats.length > 0){
+  msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
+}
+
+speak(msg);
     setTimeout(() => {
       speak("Sarıkız Turizm ailesini tercih ettiğiniz için teşekkür ederiz. Bir sonraki yolculukta görüşmek üzere.");
     }, 1800);
@@ -1777,8 +1660,16 @@ if(routeFocusItem && live){
 
     if(isFinalStop(stop)) speakFinalStopSequence(stop);
     else{
-      speak(stopHumanVoiceSummary(stop));
-    }
+  const bagSeats = bagSeatsForStop(stop);
+
+  let msg = `Sıradaki durak ${stop}. Bu durakta ${seats.length} yolcu inecek.`;
+
+  if(bagSeats.length > 0){
+    msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
+  }
+
+  speak(msg);
+}
 }
   async function bulkOffload(seatNums){
     if(!Array.isArray(seatNums) || !seatNums.length) return;
@@ -1968,8 +1859,6 @@ if(routeFocusItem && live){
   }
 
   async function fetchBagMeta(seatNo){
-    const key = String(seatNo);
-
     try{
       const u = `/api/bags/meta?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seatNo)}`;
       const j = await safeJsonFetch(u);
@@ -1978,30 +1867,19 @@ if(routeFocusItem && live){
       const leftFront = Number(j?.left_front || 0);
       const leftBack = Number(j?.left_back || 0);
       const total = Number(j?.count || (right + leftFront + leftBack));
-
       const eyes = [];
+
       if(right > 0) eyes.push("R");
       if(leftFront > 0) eyes.push("LF");
       if(leftBack > 0) eyes.push("LB");
 
-      const meta = {
-        count: total,
-        right,
-        left_front: leftFront,
-        left_back: leftBack,
-        eyes
-      };
-
-      bagMetaCache[key] = meta;
-      return meta;
+      return { count: total, eyes };
     }catch(_){
-      const fallback = bagMetaCache[key] || { count:0, right:0, left_front:0, left_back:0, eyes:[] };
-      return fallback;
+      return { count:0, eyes:[] };
     }
   }
 
-
-function eyesToIcons(eyes){
+  function eyesToIcons(eyes){
     if(!eyes || !eyes.length) return "";
     const set = new Set(eyes);
     const parts = [];
@@ -2607,7 +2485,14 @@ async function handleLocalVoiceCommand(text){
 
   if(cmd.type === "ask_stop_count"){
     const stop = cmd.stop;
-    const msg = stopHumanVoiceSummary(stop);
+    const seat = seatsForStop(stop).length;
+    const stand = computeStandingCountsByStop()[stop] || 0;
+    const parcel = computeParcelCountsByStop()[stop] || 0;
+    const total = seat + stand;
+
+    const msg =
+      `${stop} için ${total} yolcu var. ${seat} oturan, ${stand} ayakta.` +
+      (parcel ? ` Ayrıca ${parcel} emanet var.` : "");
 
     toast(msg, 4200);
     speak(msg);
@@ -3226,34 +3111,6 @@ async function handleLocalVoiceCommand(text){
     }
   });
 
-
-  const livePill = $("#routeMiniLive")?.closest(".route-pill");
-  if(livePill){
-    livePill.addEventListener("click", () => {
-      const live = getDisplayLiveStop();
-      if(!live){
-        toast("Canlı durak henüz yok");
-        return;
-      }
-      focusRouteStripStop(live);
-    });
-  }
-
-  const nextPill = $("#routeMiniNext")?.closest(".route-pill");
-  if(nextPill){
-    nextPill.addEventListener("click", () => {
-      const live = getDisplayLiveStop();
-      const selected = getSelectedStopName();
-      const next = computeNextStopName(live || selected || "", "nextWithSeats") || selected;
-      if(!next){
-        toast("Sıradaki durak bulunamadı");
-        return;
-      }
-      focusRouteStripStop(next, { select:true, voice:false });
-    });
-  }
-
-
   onClick("#btnDeckAI", startDeckAIVoice);
 
   (async function init(){
@@ -3297,266 +3154,3 @@ async function handleLocalVoiceCommand(text){
       toast(e.message || "Başlangıç yükleme hatası");
     }
   })();
-
-/* =========================================================
-   SÜRÜŞ MODU TOGGLE
-========================================================= */
-(function initDriveModeToggle(){
-  try{
-    const boot = window.SEATS_BOOT || {};
-    const key = "driveMode:" + (window.BAG_TRIP || boot.tripKey || "default");
-
-    if(document.getElementById("driveModeToggle")) return;
-
-    const btn = document.createElement("button");
-    btn.id = "driveModeToggle";
-    btn.type = "button";
-    btn.setAttribute("aria-label", "Sürüş modu");
-
-    document.body.appendChild(btn);
-
-    function isOn(){
-      return localStorage.getItem(key) === "1";
-    }
-
-    function sync(){
-      const on = isOn();
-      document.body.classList.toggle("drive-mode", on);
-      btn.textContent = on ? "↩ Normal" : "🚘 Sürüş";
-      btn.title = on ? "Normal moda geç" : "Sürüş moduna geç";
-    }
-
-    btn.addEventListener("click", () => {
-      const next = isOn() ? "0" : "1";
-      localStorage.setItem(key, next);
-      sync();
-
-      setTimeout(() => {
-        try{
-          if(typeof renderRouteStrip === "function") renderRouteStrip();
-          if(typeof updateCompactHeader === "function") updateCompactHeader();
-        }catch(_){}
-      }, 80);
-    });
-
-    sync();
-  }catch(e){
-    console.warn("Sürüş modu başlatılamadı:", e);
-  }
-})();
-
-/* =========================================================
-   SÜRÜŞ MODU HIZ KUTUSU
-   Normal butonunun altında canlı hız / limit gösterir
-========================================================= */
-
-function ensureDriveSpeedChip(){
-  let el = document.getElementById("driveSpeedChip");
-  if(el) return el;
-
-  el = document.createElement("div");
-  el.id = "driveSpeedChip";
-  el.className = "drive-speed-chip neutral";
-  el.innerHTML = `
-    <div class="drive-speed-top">
-      <span class="drive-speed-ico">🚦</span>
-      <b>0</b>
-      <span>km/h</span>
-    </div>
-    <div class="drive-speed-sub">Limit: —</div>
-  `;
-
-  document.body.appendChild(el);
-  return el;
-}
-
-function updateDriveSpeedChip(){
-  const el = ensureDriveSpeedChip();
-
-  let speed = 0;
-  let limit = 0;
-  let liveStop = "";
-
-  try{
-    if(typeof speedState !== "undefined"){
-      speed = Math.round(Number(speedState.current || 0));
-      limit = Number(speedState.lastLimitValue || speedState.lastLimitObj?.limit || 0);
-    }
-  }catch(_){}
-
-  try{
-    if(typeof getDisplayLiveStop === "function"){
-      liveStop = getDisplayLiveStop() || "";
-    }
-  }catch(_){}
-
-  let cls = "neutral";
-  if(limit > 0){
-    if(speed <= limit) cls = "ok";
-    else if(speed <= limit + 10) cls = "warn";
-    else cls = "bad";
-  }
-
-  el.className = "drive-speed-chip " + cls;
-
-  const limitText = limit > 0 ? `Limit: ${limit}` : "Limit: —";
-  const stopText = liveStop ? ` · ${liveStop}` : "";
-
-  el.innerHTML = `
-    <div class="drive-speed-top">
-      <span class="drive-speed-ico">🚦</span>
-      <b>${speed}</b>
-      <span>km/h</span>
-    </div>
-    <div class="drive-speed-sub">${limitText}${stopText}</div>
-  `;
-}
-
-ensureDriveSpeedChip();
-updateDriveSpeedChip();
-setInterval(updateDriveSpeedChip, 1000);
-
-
-
-/* =========================================================
-   SÜRÜŞ MODU KART İÇİ DOCK
-   Normal butonu + hız kutusu ekranı takip etmez,
-   koltuk planı üst alanında durur
-========================================================= */
-
-function ensureDriveInlineDock(){
-  let dock = document.getElementById("driveInlineDock");
-
-  if(!dock){
-    dock = document.createElement("div");
-    dock.id = "driveInlineDock";
-
-    const board = document.querySelector(".board-card .board-inner") || document.querySelector(".board-card");
-    if(board){
-      board.prepend(dock);
-    }else{
-      document.body.appendChild(dock);
-    }
-  }
-
-  const toggle = document.getElementById("driveModeToggle");
-  const speed = document.getElementById("driveSpeedChip");
-
-  if(toggle && toggle.parentElement !== dock){
-    dock.appendChild(toggle);
-  }
-
-  if(speed && speed.parentElement !== dock){
-    dock.appendChild(speed);
-  }
-
-  return dock;
-}
-
-ensureDriveInlineDock();
-window.addEventListener("load", ensureDriveInlineDock);
-window.addEventListener("resize", ensureDriveInlineDock);
-setTimeout(ensureDriveInlineDock, 400);
-setTimeout(ensureDriveInlineDock, 1200);
-
-
-
-
-/* =========================================================
-   GECE MODU SESLİ ROBOT AÇ / KAPAT BUTONU
-   Durak Akışı üst kısmına küçük ses kontrolü ekler
-========================================================= */
-
-const VOICE_SOUND_KEY = "voiceSoundEnabled:" + TRIP_KEY;
-
-function getVoiceEnabled(){
-  const saved = localStorage.getItem(VOICE_SOUND_KEY);
-  if(saved !== null) return saved === "1";
-
-  const cb = document.getElementById("soundToggle");
-  if(cb) return cb.checked !== false;
-
-  return true;
-}
-
-function updateNightVoiceToggle(){
-  const btn = document.getElementById("nightVoiceToggle");
-  if(!btn) return;
-
-  const on = getVoiceEnabled();
-
-  btn.classList.toggle("is-off", !on);
-  btn.innerHTML = on
-    ? `<span class="nv-ico">🔊</span><span>Ses Açık</span>`
-    : `<span class="nv-ico">🔇</span><span>Sessiz</span>`;
-
-  btn.title = on
-    ? "Sesli robot açık. Kapatmak için dokun."
-    : "Sesli robot kapalı. Açmak için dokun.";
-}
-
-function setVoiceEnabled(on, { announce=false, silent=false } = {}){
-  const enabled = !!on;
-
-  localStorage.setItem(VOICE_SOUND_KEY, enabled ? "1" : "0");
-
-  const cb = document.getElementById("soundToggle");
-  if(cb) cb.checked = enabled;
-
-  updateNightVoiceToggle();
-
-  if(!silent){
-    toast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1800);
-  }
-
-  if(enabled && announce){
-    setTimeout(() => speak("Sesli robot açık."), 80);
-  }
-}
-
-function ensureNightVoiceToggle(){
-  let btn = document.getElementById("nightVoiceToggle");
-
-  if(!btn){
-    btn = document.createElement("button");
-    btn.id = "nightVoiceToggle";
-    btn.type = "button";
-    btn.className = "night-voice-toggle";
-
-    const meta = document.querySelector(".route-strip-meta");
-    const head = document.querySelector(".route-strip-head");
-
-    if(meta){
-      meta.appendChild(btn);
-    }else if(head){
-      head.appendChild(btn);
-    }else{
-      document.body.appendChild(btn);
-    }
-
-    btn.addEventListener("click", () => {
-      setVoiceEnabled(!getVoiceEnabled(), { announce:true });
-    });
-  }
-
-  const saved = localStorage.getItem(VOICE_SOUND_KEY);
-  const cb = document.getElementById("soundToggle");
-
-  if(saved !== null && cb){
-    cb.checked = saved === "1";
-  }
-
-  updateNightVoiceToggle();
-}
-
-ensureNightVoiceToggle();
-setTimeout(ensureNightVoiceToggle, 500);
-setTimeout(ensureNightVoiceToggle, 1500);
-
-const soundToggleEl = document.getElementById("soundToggle");
-if(soundToggleEl){
-  soundToggleEl.addEventListener("change", () => {
-    setVoiceEnabled(soundToggleEl.checked, { silent:true });
-  });
-}
-

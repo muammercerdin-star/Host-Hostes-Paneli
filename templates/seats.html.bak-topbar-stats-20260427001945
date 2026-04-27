@@ -2,16 +2,73 @@
 {% block content %}
 
 <link rel="stylesheet" href="/static/style.css">
-<link rel="stylesheet" href="/static/seats/seats.css?v=34">
+<link rel="stylesheet" href="/static/seats/seats.css?v=1">
 
 
 
 <div class="seats-shell">
-  {% include "seats_parts/topbar.html" %}
+  <div class="topbar glass">
+    <div class="route-meta">
+      <div class="route-title-row">
+        <div class="route-badge">🚌</div>
+        <div class="route-title-wrap">
+          <div class="route-title">{{ trip['route'] }}</div>
+          <div class="route-sub">
+            Plaka: <b>{{ trip['plate'] or '-' }}</b>
+            · Sefer Tarihi: <b>{{ trip['date'] or '-' }}</b>
+            · Çıkış: <b>{{ trip['departure_time'] or '-' }}</b>
+          </div>
+        </div>
+      </div>
 
-{% include "seats_parts/stats.html" %}
+      <div class="route-live-row">
+        <div class="mini-chip">📍 <span>Durak</span> <b id="topLiveStop">—</b></div>
+        <div class="mini-chip">🚦 <span>Hız</span> <b id="topSpeed">0 km/h</b></div>
+        <div class="mini-chip">🕒 <span>Saat</span> <b id="topClock">--:--</b></div>
+        <div class="mini-chip">🎯 <span>Doluluk</span> <b id="topOcc">0%</b></div>
+      </div>
+    </div>
 
-<div class="layout">
+    <div class="top-actions">
+      <a href="{{ url_for('index') }}" class="icon-btn" title="Ana Sayfa">🏠</a>
+      <a href="{{ url_for('hesap_page') }}" class="icon-btn" title="Hesap">💵</a>
+      <a href="{{ url_for('consignments_page') }}" class="icon-btn" title="Emanetler">📦</a>
+      <a href="{{ url_for('ai_console_page') }}" class="icon-btn" title="AI Console">🧠</a>
+      <form method="post" action="{{ url_for('end_trip') }}" onsubmit="return confirm('Sefer sonlandırılsın mı?')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="icon-btn" title="Seferi Sonlandır">⛔</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="status-row">
+    <div class="status-pill total">
+      <div class="k">Toplam Yolcu</div>
+      <div class="v" id="pillTotal">0</div>
+    </div>
+    <div class="status-pill empty">
+      <div class="k">Boş Koltuk</div>
+      <div class="v" id="pillEmpty">0</div>
+    </div>
+    <div class="status-pill standing" id="standingCard" role="button" tabindex="0">
+      <div class="k">Ayakta</div>
+      <div class="v" id="pillStanding">0</div>
+    </div>
+    <div class="status-pill cash">
+      <div class="k">Ayakta Tahsilat</div>
+      <div class="v" id="pillCash">₺0.00</div>
+    </div>
+    <div class="status-pill service">
+      <div class="k">Servis</div>
+      <div class="v" id="pillService">0</div>
+    </div>
+    <div class="status-pill parcel">
+      <div class="k">Emanet</div>
+      <div class="v" id="pillParcel">0</div>
+    </div>
+  </div>
+
+  <div class="layout">
     <section class="board-card glass">
       <div class="board-inner">
         <div class="board-head">
@@ -41,10 +98,52 @@
           </div>
         </div>
 
-        {% include "seats_parts/route_flow.html" %}
+        <div class="route-strip-shell">
+          <div class="route-strip-head">
+            <div class="route-strip-title">Durak Akışı</div>
+            <div class="route-strip-meta">
+              <div class="route-pill">Canlı: <b id="routeMiniLive">—</b></div>
+              <div class="route-pill">Sıradaki: <b id="routeMiniNext">—</b></div>
+            </div>
+          </div>
 
-{% include "seats_parts/deck.html" %}
+          <div class="route-strip" id="routeStrip">
+            <div class="route-stop active">
+              <div class="name">Rota hazırlanıyor</div>
+              <div class="meta">Duraklar yüklenecek</div>
+            </div>
+          </div>
+        </div>
 
+        <div class="board-stage">
+          <div class="deck-wrap">
+            <div class="deck" id="deck">
+              <div class="corr">KORİDOR</div>
+
+              {% for n, pos in seat_positions.items() %}
+                {% if n == 29 %}
+                  <div class="door">KAPI</div>
+                {% endif %}
+
+                <div class="cell" style="grid-row:{{ pos[0] }}; grid-column:{{ pos[1] }};">
+                  <div class="seat" id="seat-{{ n }}" data-seat="{{ n }}" role="button" aria-label="Koltuk {{ n }}">
+                    {{ n }}
+                    <span class="svc-badge" title="Servis">🚌</span>
+                    <span class="bag-badge" title="Bagaj"><span class="bag-dir"></span><span class="bag-count">0</span></span>
+                    <span class="stop-badge" title="Bu durakta inecek">🔔</span>
+                  </div>
+                  <div class="label" id="label-{{ n }}"></div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="fab-column" aria-label="Hızlı işlemler">
+              <button class="fab primary" id="fabBulk" type="button" title="Toplu Giriş">＋</button>
+              <button class="fab green" id="fabCash" type="button" title="Hızlı Tahsilat">₺</button>
+              <button class="fab orange" id="btnOffloadNow" type="button" title="İndir">⇩</button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -307,5 +406,5 @@
   };
 </script>
 
-<script src="/static/seats/seats.js?v=17"></script>
+<script src="/static/seats/seats.js?v=1"></script>
 {% endblock %}

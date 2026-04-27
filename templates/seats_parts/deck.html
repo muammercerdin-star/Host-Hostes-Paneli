@@ -1,0 +1,29 @@
+<div class="board-stage">
+          <div class="deck-wrap">
+            <div class="deck" id="deck">
+              <div class="corr">KORİDOR</div>
+
+              {% for n, pos in seat_positions.items() %}
+                {% if n == 29 %}
+                  <div class="door">KAPI</div>
+                {% endif %}
+
+                <div class="cell" style="grid-row:{{ pos[0] }}; grid-column:{{ pos[1] }};">
+                  <div class="seat" id="seat-{{ n }}" data-seat="{{ n }}" role="button" aria-label="Koltuk {{ n }}">
+                    {{ n }}
+                    <span class="svc-badge" title="Servis">🚌</span>
+                    <span class="bag-badge" title="Bagaj"><span class="bag-dir"></span><span class="bag-count">0</span></span>
+                    <span class="stop-badge" title="Bu durakta inecek">🔔</span>
+                  </div>
+                  <div class="label" id="label-{{ n }}"></div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="fab-column" aria-label="Hızlı işlemler">
+              <button class="fab primary" id="fabBulk" type="button" title="Toplu Giriş">＋</button>
+              <button class="fab green" id="fabCash" type="button" title="Hızlı Tahsilat">₺</button>
+              <button class="fab orange" id="btnOffloadNow" type="button" title="İndir">⇩</button>
+            </div>
+          </div>
+        </div>

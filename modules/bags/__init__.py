@@ -208,38 +208,86 @@ def _pick_default_side(trip: str, seat: str, requested: str | None) -> str:
 # =========================
 #        /bags  (GALERİ)
 # =========================
+
+def _side_from_filename(filename: str) -> str:
+    """
+    Dosya adından bagaj gözünü bulur.
+    Destek: R1_..., LF2_..., LB3_..., eski R_ / LF_ / LB_ formatları.
+    """
+    name = filename or ""
+    prefix = name.split("_", 1)[0] if "_" in name else name
+    letters = "".join(ch for ch in prefix if ch.isalpha()).upper()
+
+    if letters in ("R", "LF", "LB"):
+        return letters
+
+    if name.upper().startswith("LF"):
+        return "LF"
+    if name.upper().startswith("LB"):
+        return "LB"
+    return "R"
+
+
+def _side_label(side: str) -> str:
+    return {
+        "R": "Sağ göz",
+        "LF": "Sol ön",
+        "LB": "Sol arka",
+    }.get((side or "").upper(), "Sağ göz")
+
+
+def _side_icon(side: str) -> str:
+    return {
+        "R": "➡️",
+        "LF": "⬅️🔺",
+        "LB": "⬅️🔻",
+    }.get((side or "").upper(), "➡️")
+
+
+def _clamp_bag_count(raw, default: int = 1) -> int:
+    try:
+        n = int(raw)
+    except Exception:
+        n = default
+    return max(1, min(n, 10))
+
+
 @bp.route("", methods=["GET", "POST"])
 def gallery():
     """
-    - GET: galeri sayfası
-    - POST: aynı sayfadan fotoğraf yükleme (foto olmasa bile adet kaydı)
-    - ?format=json: sağ / sol ön / sol arka sayaç
+    Profesyonel bagaj ekranı:
+    - Göz kartları
+    - +/- adet seçici
+    - Fotoğrafları sağ / sol ön / sol arka olarak gruplar
+    - Fotoğraf olmasa bile adet meta.json içine kaydedilir
+    - ?format=json sayaç döndürür
     """
 
     trip = request.values.get("trip", "") or request.values.get("trip_code", "")
     seat = request.values.get("seat", "")
     fmt = (request.args.get("format", "") or "").lower()
-
-    # koltuktan gelen default adet
-    bag_raw = request.values.get("bag_count", "") or "1"
-    try:
-        bag_count_default = int(bag_raw)
-    except ValueError:
-        bag_count_default = 1
-    bag_count_default = max(1, min(bag_count_default, 10))
-
-    # side (gelmezse tahmin)
-    side = _pick_default_side(trip, seat, request.values.get("side"))
+    nxt = _back_url()
 
     d = seat_dir(trip, seat)
+    side = _pick_default_side(trip, seat, request.values.get("side"))
+    bag_count_default = _clamp_bag_count(request.values.get("bag_count", ""), 1)
 
     # -------- JSON sayaç --------
     if request.method == "GET" and fmt == "json":
         if not (trip and seat):
             return jsonify(ok=False, msg="trip/seat gerekli"), 400
+
         r, lf, lb = get_counts(trip, seat)
         total = r + lf + lb
-        return jsonify(ok=True, count=int(total), right=int(r), left_front=int(lf), left_back=int(lb))
+
+        return jsonify(
+            ok=True,
+            count=int(total),
+            right=int(r),
+            left_front=int(lf),
+            left_back=int(lb),
+            eyes=[x for x, v in {"R": r, "LF": lf, "LB": lb}.items() if v > 0],
+        )
 
     # -------- POST: foto yükleme + adet kaydı --------
     if request.method == "POST":
@@ -248,21 +296,14 @@ def gallery():
         if not (trip and seat):
             return redirect("/seats")
 
-        # side: formdan gelebilir, gelmezse tahmin
+        nxt = _normalize_next(request.values.get("next") or request.headers.get("Referer") or "/seats")
         side = _pick_default_side(trip, seat, request.values.get("side"))
+        bag_count_in = _clamp_bag_count(request.values.get("bag_count", ""), 1)
 
-        # formdan gelen bag_count (adet)
-        bag_raw2 = request.values.get("bag_count", "") or "1"
-        try:
-            bag_count_in = int(bag_raw2)
-        except ValueError:
-            bag_count_in = 1
-        bag_count_in = max(1, min(bag_count_in, 10))
-
-        files = request.files.getlist("files") or []
+        files = [f for f in (request.files.getlist("files") or []) if f and f.filename]
         d.mkdir(parents=True, exist_ok=True)
 
-        # ✅ FOTO YOKSA BİLE ADEDİ KAYDET (meta.json)
+        # Fotoğraf olmasa bile adet kaydı
         meta = read_meta(trip, seat) or {}
         meta.setdefault("trip", trip)
         meta.setdefault("seat", seat)
@@ -271,275 +312,706 @@ def gallery():
 
         meta["counts"][side] = int(bag_count_in)
         meta["updated_at"] = int(time.time())
-        meta["events"].append(
-            {
-                "t": int(time.time()),
-                "type": "set_counts",
-                "side": side,
-                "count": int(bag_count_in),
-                "has_photos": bool(files),
-            }
-        )
+        meta["events"].append({
+            "t": int(time.time()),
+            "type": "set_counts",
+            "side": side,
+            "count": int(bag_count_in),
+            "has_photos": bool(files),
+        })
         write_meta(trip, seat, meta)
 
-        # ✅ Foto isim prefix’i: "ok gibi artmasın"
-        # Foto eklemek "yeni adet" yaratmaz -> her zaman meta'daki sayı ile kaydet.
-        bag_count_for_files = int(bag_count_in)
-
+        # Foto eklemek yeni adet yaratmaz; seçili adet neyse dosya prefix'i odur.
         for f in files:
-            if not f or not f.filename:
-                continue
-
             ext = (os.path.splitext(f.filename)[1] or ".jpg").lower()
             ts = int(time.time() * 1000)
+            name = f"{side}{bag_count_in}_{ts}_{safe(seat) or 'bag'}{ext}"
+            img = d / name
 
-            name = f"{side}{bag_count_for_files}_{ts}_{safe(seat) or 'bag'}{ext}"
-            p = d / name
-            f.save(p)
+            f.save(img)
+
             try:
-                ensure_thumb(p)
+                ensure_thumb(img)
             except Exception:
                 pass
 
-        return redirect(url_for("bags.gallery", trip=trip, seat=seat))
+        return redirect(url_for("bags.gallery", trip=trip, seat=seat, next=nxt))
 
-    # -------- GET: HTML galeri --------
-    nxt = "/seats"
-    imgs: list[tuple[str, str]] = []
+    # -------- GET: HTML ekran --------
+    counts = {"R": 0, "LF": 0, "LB": 0}
+    if trip and seat:
+        r, lf, lb = get_counts(trip, seat)
+        counts = {"R": int(r), "LF": int(lf), "LB": int(lb)}
 
+    if not request.values.get("bag_count") and counts.get(side, 0) > 0:
+        bag_count_default = counts.get(side, 1)
+
+    total_count = sum(counts.values())
+
+    photos = []
     if trip and seat and d.exists():
-        for p in sorted(d.iterdir()):
+        for p in sorted(d.iterdir(), key=lambda x: x.stat().st_mtime if x.exists() else 0, reverse=True):
             if p.is_file() and _is_image(p):
                 ensure_thumb(p)
-                imgs.append((p.name, thumb_path(p).name))
+                side_key = _side_from_filename(p.name)
+                photos.append({
+                    "fn": p.name,
+                    "tn": thumb_path(p).name,
+                    "side": side_key,
+                    "side_label": _side_label(side_key),
+                    "side_icon": _side_icon(side_key),
+                })
 
+    sections = []
+    for key, label, hint in [
+        ("R", "Sağ göz", "Otobüs sağ bagaj gözü"),
+        ("LF", "Sol ön", "Sol taraf ön göz"),
+        ("LB", "Sol arka", "Sol taraf arka göz"),
+    ]:
+        sections.append({
+            "key": key,
+            "label": label,
+            "hint": hint,
+            "icon": _side_icon(key),
+            "count": counts.get(key, 0),
+            "photos": [x for x in photos if x["side"] == key],
+        })
+
+    display_trip = (trip or "-").replace("_", " ").replace("|", " · Plaka: ")
     csrf_token = _get_csrf()
-    gallery_url = url_for("bags.gallery", trip=trip, seat=seat)
+    gallery_url = url_for("bags.gallery", trip=trip, seat=seat, next=nxt)
 
     tpl = """
-    <meta name=viewport content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <style>
-      body{
-        background:#101417;
-        color:#eef;
-        font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-        margin:0;
-      }
-      .wrap{max-width:960px;margin:auto;padding:10px}
+    <!doctype html>
+    <html lang="tr">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+      <title>Bagaj Takibi</title>
 
-      .bar{
-        display:flex;
-        gap:8px;
-        align-items:center;
-        margin:8px 0 14px;
-        justify-content:space-between;
-      }
-      .muted{opacity:.8;font-size:13px}
-      a.btn{
-        background:#2563eb;
-        color:#fff;
-        text-decoration:none;
-        padding:8px 12px;
-        border-radius:10px;
-        display:inline-block;
-        font-size:14px;
-      }
+      <style>
+        :root{
+          --bg:#070b12;
+          --card:#0c1220;
+          --card2:#111827;
+          --line:rgba(255,255,255,.10);
+          --text:#f3f6fb;
+          --muted:#9ca8bb;
+          --blue:#2563eb;
+          --green:#22c55e;
+          --red:#dc2626;
+          --amber:#f59e0b;
+          --shadow:0 18px 42px rgba(0,0,0,.38);
+        }
 
-      .main-row{
-        display:flex;
-        gap:16px;
-        align-items:flex-start;
-        flex-wrap:wrap;
-      }
-      .gallery-col{ flex:1 1 220px; }
-      .form-col{ flex:0 0 280px; max-width:280px; }
+        *{box-sizing:border-box}
 
-      .top-card{
-        background:#020617;
-        border-radius:18px;
-        padding:14px 14px 18px;
-        border:1px solid #111827;
-      }
-      .top-card h2{
-        margin:0 0 10px;
-        font-size:16px;
-      }
+        body{
+          margin:0;
+          background:
+            radial-gradient(circle at top left, rgba(37,99,235,.16), transparent 24%),
+            radial-gradient(circle at bottom right, rgba(34,197,94,.09), transparent 24%),
+            var(--bg);
+          color:var(--text);
+          font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+        }
 
-      label{font-size:13px;opacity:.9;display:block;margin-bottom:4px}
-      select{
-        width:100%;
-        padding:8px 10px;
-        border-radius:12px;
-        border:1px solid #1f2933;
-        background:#020617;
-        color:#e5e7eb;
-        font-size:14px;
-      }
+        .page{
+          width:min(980px,100%);
+          margin:0 auto;
+          padding:14px 14px 28px;
+        }
 
-      /* Kamera / Galeri */
-      .pick-row{display:flex; gap:10px; margin-top:10px;}
-      .pick-btn{
-        flex:1;
-        text-align:center;
-        padding:10px 12px;
-        border-radius:999px;
-        border:1px solid #1f2933;
-        background:#0b1220;
-        color:#e5e7eb;
-        font-weight:700;
-        font-size:14px;
-        cursor:pointer;
-        user-select:none;
-      }
-      .pick-btn:active{transform:scale(.98)}
-      .hidden-file{display:none}
+        .hero{
+          display:grid;
+          grid-template-columns:1fr auto;
+          gap:12px;
+          align-items:start;
+          margin-bottom:14px;
+        }
 
-      .btn-main{
-        width:100%;
-        margin-top:12px;
-        padding:10px 14px;
-        border-radius:999px;
-        border:none;
-        background:#22c55e;
-        color:#022c22;
-        font-weight:900;
-        font-size:15px;
-      }
+        .title{
+          min-width:0;
+        }
 
-      .grid{
-        display:grid;
-        grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-        gap:10px;
-      }
-      .card{
-        background:#1b2126;
-        border:1px solid #30363d;
-        border-radius:14px;
-        overflow:hidden;
-        display:flex;
-        flex-direction:column;
-      }
-      .t{text-align:center;padding:6px 6px 4px;font-weight:700;font-size:13px}
-      img{
-        display:block;
-        width:100%;
-        height:160px;
-        object-fit:cover;
-        background:#0b0e10;
-      }
-      .del-form{margin:4px 6px 10px;}
-      .del-btn{
-        width:100%;
-        padding:6px 8px;
-        border-radius:999px;
-        border:none;
-        font-size:12px;
-        background:#b91c1c;
-        color:#fee2e2;
-        font-weight:800;
-      }
+        .kicker{
+          display:inline-flex;
+          align-items:center;
+          gap:7px;
+          padding:7px 11px;
+          border-radius:999px;
+          background:rgba(255,255,255,.06);
+          border:1px solid var(--line);
+          color:#dbeafe;
+          font-weight:900;
+          font-size:12px;
+          margin-bottom:10px;
+        }
 
-      @media (max-width: 720px){
-        .main-row{flex-direction:column;}
-        .form-col{flex:1 1 auto;max-width:none;}
-      }
-    </style>
+        h1{
+          margin:0;
+          font-size:30px;
+          line-height:1;
+          letter-spacing:-.04em;
+        }
 
-    <div class="wrap">
-      <div class="bar">
-        <div class="muted">
-          Sefer: <b>{{trip or "-"}}</b> • Koltuk: <b>{{seat or "-"}}</b>
-        </div>
-        <a class="btn" href="{{ nxt }}">Koltuk ekranına dön</a>
-      </div>
+        .sub{
+          margin-top:8px;
+          color:var(--muted);
+          font-size:14px;
+          line-height:1.45;
+        }
 
-      {% if not trip or not seat %}
-        <p class="muted">Önce koltuk ekranından bir koltuk seçip bagaj ekranına gel.</p>
-      {% else %}
+        .back{
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          min-height:52px;
+          padding:12px 16px;
+          border-radius:18px;
+          background:linear-gradient(180deg,#3b82f6,#1d4ed8);
+          color:#fff;
+          text-decoration:none;
+          font-weight:900;
+          box-shadow:var(--shadow);
+          white-space:nowrap;
+        }
 
-      <div class="main-row">
+        .summary{
+          display:grid;
+          grid-template-columns:repeat(4,minmax(0,1fr));
+          gap:10px;
+          margin:14px 0;
+        }
 
-        <div class="gallery-col">
-          {% if not imgs %}
-            <p class="muted">Bu koltuk için kayıtlı bagaj fotoğrafı yok.</p>
-          {% else %}
-            <div class="grid">
-              {% for fn,tn in imgs %}
-                <div class="card">
-                  <a href="{{ url_for('bags.raw', trip=trip, seat=seat, filename=fn) }}">
-                    <img loading="lazy"
-                         src="{{ url_for('bags.thumb', trip=trip, seat=seat, filename=tn) }}">
-                  </a>
-                  <div class="t">#{{ loop.index }}</div>
-                  <form class="del-form" method="post" action="{{ url_for('bags.delete_one') }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <input type="hidden" name="trip" value="{{ trip }}">
-                    <input type="hidden" name="seat" value="{{ seat }}">
-                    <input type="hidden" name="filename" value="{{ fn }}">
-                    <button type="submit" class="del-btn">🗑 Fotoğrafı sil</button>
-                  </form>
-                </div>
-              {% endfor %}
+        .sum-card{
+          min-height:82px;
+          border-radius:20px;
+          padding:13px;
+          background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));
+          border:1px solid var(--line);
+          box-shadow:0 12px 28px rgba(0,0,0,.22);
+        }
+
+        .sum-card .k{
+          color:var(--muted);
+          font-size:12px;
+          font-weight:800;
+        }
+
+        .sum-card .v{
+          margin-top:7px;
+          font-size:27px;
+          line-height:1;
+          font-weight:950;
+        }
+
+        .main{
+          display:grid;
+          grid-template-columns:minmax(0,1fr) 360px;
+          gap:14px;
+          align-items:start;
+        }
+
+        .panel,
+        .gallery-panel{
+          border-radius:26px;
+          background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));
+          border:1px solid var(--line);
+          box-shadow:var(--shadow);
+          overflow:hidden;
+        }
+
+        .panel{
+          padding:16px;
+          position:sticky;
+          top:10px;
+        }
+
+        .gallery-panel{
+          padding:14px;
+        }
+
+        .panel h2,
+        .gallery-panel h2{
+          margin:0 0 12px;
+          font-size:22px;
+          line-height:1.1;
+          letter-spacing:-.02em;
+        }
+
+        .eye-grid{
+          display:grid;
+          gap:10px;
+          margin:12px 0 16px;
+        }
+
+        .eye-card{
+          width:100%;
+          border:1px solid var(--line);
+          background:#0b1220;
+          color:#fff;
+          border-radius:19px;
+          padding:13px;
+          display:grid;
+          grid-template-columns:auto 1fr auto;
+          gap:12px;
+          align-items:center;
+          cursor:pointer;
+          text-align:left;
+          box-shadow:0 10px 22px rgba(0,0,0,.20);
+        }
+
+        .eye-card.active{
+          border-color:rgba(96,165,250,.90);
+          background:linear-gradient(135deg,rgba(37,99,235,.45),rgba(14,165,233,.18));
+          box-shadow:
+            0 0 0 2px rgba(96,165,250,.24) inset,
+            0 16px 32px rgba(0,0,0,.26);
+        }
+
+        .eye-ico{
+          width:42px;
+          height:42px;
+          border-radius:15px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          background:rgba(255,255,255,.08);
+          font-size:20px;
+        }
+
+        .eye-name{
+          font-weight:950;
+          font-size:16px;
+        }
+
+        .eye-hint{
+          margin-top:3px;
+          color:var(--muted);
+          font-size:12px;
+        }
+
+        .eye-count{
+          min-width:46px;
+          height:38px;
+          border-radius:999px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          background:rgba(255,255,255,.10);
+          font-weight:950;
+          font-size:17px;
+        }
+
+        .count-box{
+          margin:12px 0 14px;
+          padding:13px;
+          border-radius:20px;
+          background:#080f1c;
+          border:1px solid var(--line);
+        }
+
+        .label{
+          color:#dbe6f5;
+          font-weight:900;
+          font-size:14px;
+          margin-bottom:10px;
+        }
+
+        .counter{
+          display:grid;
+          grid-template-columns:58px 1fr 58px;
+          gap:10px;
+          align-items:center;
+        }
+
+        .count-btn{
+          height:54px;
+          border:none;
+          border-radius:17px;
+          background:#182235;
+          color:#fff;
+          font-size:28px;
+          font-weight:950;
+        }
+
+        .count-view{
+          height:54px;
+          border-radius:17px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          background:#020617;
+          border:1px solid var(--line);
+          font-size:28px;
+          font-weight:950;
+        }
+
+        .pick-row{
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:10px;
+          margin-top:10px;
+        }
+
+        .hidden-file{display:none}
+
+        .pick-btn{
+          min-height:54px;
+          border-radius:18px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          gap:9px;
+          background:#0b1220;
+          border:1px solid var(--line);
+          color:#fff;
+          font-size:16px;
+          font-weight:950;
+          cursor:pointer;
+        }
+
+        .file-hint{
+          margin-top:9px;
+          color:var(--muted);
+          font-size:13px;
+        }
+
+        .save{
+          width:100%;
+          min-height:58px;
+          margin-top:14px;
+          border:none;
+          border-radius:999px;
+          background:linear-gradient(180deg,#2dd46d,#16a34a);
+          color:#04130a;
+          font-weight:950;
+          font-size:20px;
+          box-shadow:0 16px 34px rgba(34,197,94,.22);
+        }
+
+        .note{
+          margin:12px 0 0;
+          color:var(--muted);
+          font-size:13px;
+          line-height:1.4;
+        }
+
+        .side-section{
+          margin-bottom:14px;
+          border-radius:22px;
+          background:#0b1220;
+          border:1px solid var(--line);
+          overflow:hidden;
+        }
+
+        .side-head{
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:10px;
+          padding:13px;
+          border-bottom:1px solid var(--line);
+        }
+
+        .side-head b{
+          font-size:16px;
+        }
+
+        .side-head span{
+          color:var(--muted);
+          font-size:13px;
+          font-weight:800;
+        }
+
+        .photo-grid{
+          display:grid;
+          grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+          gap:10px;
+          padding:12px;
+        }
+
+        .empty{
+          padding:14px;
+          color:var(--muted);
+          font-size:14px;
+        }
+
+        .photo{
+          background:#121a2a;
+          border:1px solid var(--line);
+          border-radius:18px;
+          overflow:hidden;
+        }
+
+        .photo img{
+          display:block;
+          width:100%;
+          height:145px;
+          object-fit:cover;
+          background:#020617;
+        }
+
+        .photo-meta{
+          padding:9px 10px;
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:8px;
+          font-weight:900;
+        }
+
+        .small{
+          color:var(--muted);
+          font-size:12px;
+          font-weight:800;
+        }
+
+        .del-form{
+          padding:0 10px 10px;
+        }
+
+        .del-btn{
+          width:100%;
+          min-height:38px;
+          border:none;
+          border-radius:999px;
+          background:#b91c1c;
+          color:#fee2e2;
+          font-weight:950;
+        }
+
+        .no-trip{
+          padding:18px;
+          border-radius:22px;
+          background:#0b1220;
+          border:1px solid var(--line);
+          color:var(--muted);
+        }
+
+        @media(max-width:760px){
+          .page{padding:12px 10px 24px}
+          .hero{grid-template-columns:1fr}
+          .back{width:100%}
+          .summary{
+            grid-template-columns:repeat(2,minmax(0,1fr));
+          }
+          .main{
+            grid-template-columns:1fr;
+          }
+          .panel{
+            position:relative;
+            top:auto;
+            order:-1;
+          }
+          h1{font-size:28px}
+        }
+      </style>
+    </head>
+
+    <body>
+      <div class="page">
+        <div class="hero">
+          <div class="title">
+            <div class="kicker">🧳 Bagaj Operasyon Paneli</div>
+            <h1>Koltuk {{ seat or "-" }} Bagaj</h1>
+            <div class="sub">
+              {{ display_trip }}
             </div>
-          {% endif %}
+          </div>
+
+          <a class="back" href="{{ nxt }}">Koltuk ekranına dön</a>
         </div>
 
-        <div class="form-col">
-          <div class="top-card">
-            <h2>Yeni fotoğraf ekle</h2>
+        {% if not trip or not seat %}
+          <div class="no-trip">
+            Önce koltuk ekranından bir koltuk seçip bagaj ekranına gel.
+          </div>
+        {% else %}
+
+        <div class="summary">
+          <div class="sum-card">
+            <div class="k">Toplam</div>
+            <div class="v">{{ total_count }}</div>
+          </div>
+          {% for sec in sections %}
+            <div class="sum-card">
+              <div class="k">{{ sec.icon }} {{ sec.label }}</div>
+              <div class="v">{{ sec.count }}</div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="main">
+          <div class="gallery-panel">
+            <h2>Fotoğraflar</h2>
+
+            {% for sec in sections %}
+              <div class="side-section">
+                <div class="side-head">
+                  <b>{{ sec.icon }} {{ sec.label }}</b>
+                  <span>{{ sec.count }} bagaj · {{ sec.photos|length }} foto</span>
+                </div>
+
+                {% if sec.photos %}
+                  <div class="photo-grid">
+                    {% for photo in sec.photos %}
+                      <div class="photo">
+                        <a href="{{ url_for('bags.raw', trip=trip, seat=seat, filename=photo.fn) }}">
+                          <img loading="lazy"
+                               src="{{ url_for('bags.thumb', trip=trip, seat=seat, filename=photo.tn) }}">
+                        </a>
+
+                        <div class="photo-meta">
+                          <b>#{{ loop.index }}</b>
+                          <div class="small">{{ photo.side_label }}</div>
+                        </div>
+
+                        <form class="del-form" method="post" action="{{ url_for('bags.delete_one') }}">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                          <input type="hidden" name="trip" value="{{ trip }}">
+                          <input type="hidden" name="seat" value="{{ seat }}">
+                          <input type="hidden" name="filename" value="{{ photo.fn }}">
+                          <input type="hidden" name="next" value="{{ nxt }}">
+                          <button type="submit" class="del-btn"
+                                  onclick="return confirm('Bu fotoğraf silinsin mi?')">
+                            🗑 Fotoğrafı sil
+                          </button>
+                        </form>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="empty">Bu göz için fotoğraf yok.</div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="panel">
+            <h2>Yeni kayıt</h2>
 
             <form method="post" action="{{ gallery_url }}" enctype="multipart/form-data">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-              <input type="hidden" name="trip"  value="{{ trip }}">
-              <input type="hidden" name="seat"  value="{{ seat }}">
+              <input type="hidden" name="trip" value="{{ trip }}">
+              <input type="hidden" name="seat" value="{{ seat }}">
+              <input type="hidden" name="next" value="{{ nxt }}">
+              <input type="hidden" name="side" id="sideInput" value="{{ side }}">
+              <input type="hidden" name="bag_count" id="countInput" value="{{ bag_count }}">
 
-              <label>Göz:</label>
-              <select name="side">
-                <option value="R"  {{ "selected" if side=="R"  else "" }}>Sağ göz</option>
-                <option value="LF" {{ "selected" if side=="LF" else "" }}>Sol ön</option>
-                <option value="LB" {{ "selected" if side=="LB" else "" }}>Sol arka</option>
-              </select>
+              <div class="label">Bagaj gözü</div>
 
-              <label style="margin-top:10px;">Bagaj adedi:</label>
-              <select name="bag_count">
-                {% for i in range(1, 11) %}
-                  <option value="{{ i }}" {{ "selected" if bag_count==i else "" }}>{{ i }}</option>
+              <div class="eye-grid">
+                {% for sec in sections %}
+                  <button type="button"
+                          class="eye-card {{ 'active' if sec.key == side else '' }}"
+                          data-side="{{ sec.key }}"
+                          data-count="{{ sec.count }}">
+                    <div class="eye-ico">{{ sec.icon }}</div>
+                    <div>
+                      <div class="eye-name">{{ sec.label }}</div>
+                      <div class="eye-hint">{{ sec.hint }}</div>
+                    </div>
+                    <div class="eye-count">{{ sec.count }}</div>
+                  </button>
                 {% endfor %}
-              </select>
+              </div>
 
-              <!-- Kamera / Galeri iki ayrı input -->
+              <div class="count-box">
+                <div class="label">Bagaj adedi</div>
+                <div class="counter">
+                  <button type="button" class="count-btn" id="decCount">−</button>
+                  <div class="count-view" id="countView">{{ bag_count }}</div>
+                  <button type="button" class="count-btn" id="incCount">+</button>
+                </div>
+              </div>
+
+              <div class="label">Fotoğraf ekle</div>
+
               <input id="camFiles" class="hidden-file"
                      name="files" type="file" accept="image/*"
                      capture="environment" multiple>
 
               <input id="galFiles" class="hidden-file"
-                     name="files" type="file" accept="image/*"
-                     multiple>
+                     name="files" type="file" accept="image/*" multiple>
 
               <div class="pick-row">
                 <label class="pick-btn" for="camFiles">📷 Kamera</label>
                 <label class="pick-btn" for="galFiles">🖼️ Galeri</label>
               </div>
 
-              <button type="submit" class="btn-main">Kaydet</button>
+              <div class="file-hint" id="selectedFiles">Fotoğraf seçilmedi</div>
 
-              <p class="muted" style="margin:10px 0 0;">
-                Not: Fotoğraf seçmesen bile bagaj adedi kaydedilir.
+              <button type="submit" class="save">Kaydet</button>
+
+              <p class="note">
+                Fotoğraf seçmesen bile seçili göz ve bagaj adedi kaydedilir.
               </p>
             </form>
           </div>
         </div>
 
+        {% endif %}
       </div>
-      {% endif %}
-    </div>
+
+      <script>
+        const counts = {{ counts|tojson }};
+        const sideInput = document.getElementById("sideInput");
+        const countInput = document.getElementById("countInput");
+        const countView = document.getElementById("countView");
+        const selectedFiles = document.getElementById("selectedFiles");
+
+        function setCount(v){
+          let n = Number(v || 1);
+          if(!Number.isFinite(n)) n = 1;
+          n = Math.max(1, Math.min(10, Math.round(n)));
+          if(countInput) countInput.value = String(n);
+          if(countView) countView.textContent = String(n);
+        }
+
+        document.querySelectorAll(".eye-card").forEach(btn => {
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".eye-card").forEach(x => x.classList.remove("active"));
+            btn.classList.add("active");
+
+            const side = btn.dataset.side || "R";
+            const existing = Number(btn.dataset.count || 0);
+
+            if(sideInput) sideInput.value = side;
+            setCount(existing > 0 ? existing : 1);
+          });
+        });
+
+        document.getElementById("decCount")?.addEventListener("click", () => {
+          setCount(Number(countInput?.value || 1) - 1);
+        });
+
+        document.getElementById("incCount")?.addEventListener("click", () => {
+          setCount(Number(countInput?.value || 1) + 1);
+        });
+
+        function syncFileText(input){
+          const n = input?.files?.length || 0;
+          selectedFiles.textContent = n ? `${n} fotoğraf seçildi` : "Fotoğraf seçilmedi";
+        }
+
+        document.getElementById("camFiles")?.addEventListener("change", e => syncFileText(e.target));
+        document.getElementById("galFiles")?.addEventListener("change", e => syncFileText(e.target));
+      </script>
+    </body>
+    </html>
     """
 
     return render_template_string(
         tpl,
         trip=trip,
         seat=seat,
-        imgs=imgs,
+        display_trip=display_trip,
+        counts=counts,
+        total_count=total_count,
+        sections=sections,
+        photos=photos,
         nxt=nxt,
         csrf_token=csrf_token,
         gallery_url=gallery_url,
@@ -589,9 +1061,10 @@ def delete_one():
     trip = request.form.get("trip", "")
     seat = request.form.get("seat", "")
     filename = request.form.get("filename", "")
+    nxt = _normalize_next(request.form.get("next") or request.headers.get("Referer") or "/seats")
 
     if not (trip and seat and filename):
-        return redirect(_back_url())
+        return redirect(nxt)
 
     d = seat_dir(trip, seat)
     p = d / filename
@@ -609,7 +1082,7 @@ def delete_one():
     except Exception:
         pass
 
-    return redirect(url_for("bags.gallery", trip=trip, seat=seat))
+    return redirect(url_for("bags.gallery", trip=trip, seat=seat, next=nxt))
 
 
 # =========================
