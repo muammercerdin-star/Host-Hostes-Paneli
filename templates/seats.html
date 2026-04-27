@@ -2,7 +2,7 @@
 {% block content %}
 
 <link rel="stylesheet" href="/static/style.css">
-<link rel="stylesheet" href="/static/seats/seats.css?v=34">
+<link rel="stylesheet" href="/static/seats/seats.css?v=36">
 
 
 
@@ -14,6 +14,19 @@
 <div class="layout">
     <section class="board-card glass">
       <div class="board-inner">
+        <div id="driveInlineDock">
+          <button id="driveModeToggle" type="button" aria-label="Sürüş modu">🚘 Sürüş</button>
+
+          <div id="driveSpeedChip" class="drive-speed-chip neutral">
+            <div class="drive-speed-top">
+              <span class="drive-speed-ico">🚦</span>
+              <b>0</b>
+              <span>km/h</span>
+            </div>
+            <div class="drive-speed-sub">Limit: —</div>
+          </div>
+        </div>
+
         <div class="board-head">
           <div class="board-title">
             <div class="board-kicker">Canlı Operasyon Paneli</div>
@@ -307,5 +320,6 @@
   };
 </script>
 
-<script src="/static/seats/seats.js?v=17"></script>
+<script src="/static/seats/seats.js?v=21"></script>
+<script src="/static/seats/drive-controls.js?v=1"></script>
 {% endblock %}
