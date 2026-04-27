@@ -127,6 +127,10 @@ const BAG_TRIP = TRIP_KEY;
   let lastApproachVoiceStop = "";
   let lastRouteStripCenteredStop = "";
 
+// Bagaj göz bilgisi sesli uyarıda kullanılacak.
+// Örnek: bagMetaCache["3"] = {count:1, right:0, left_front:1, left_back:0, eyes:["LF"]}
+const bagMetaCache = {};
+
   const multiSelected = new Set();
   const ALERT_COOLDOWN_MS = 3 * 60 * 1000;
 
@@ -347,6 +351,53 @@ function formatSeatListForVoice(seats){
   const last = list.pop();
   return `${list.join(", ")} ve ${last} numaralı koltuklarda`;
 }
+
+
+function bagEyeVoicePartsForSeat(seatNo){
+  const meta = bagMetaCache[String(seatNo)] || {};
+  const parts = [];
+
+  const right = Number(meta.right || 0);
+  const leftFront = Number(meta.left_front || 0);
+  const leftBack = Number(meta.left_back || 0);
+
+  function add(label, count){
+    if(count <= 0) return;
+    if(count === 1) parts.push(`${label} gözde bagaj`);
+    else parts.push(`${label} gözde ${count} bagaj`);
+  }
+
+  add("sağ", right);
+  add("sol ön", leftFront);
+  add("sol arka", leftBack);
+
+  // Eğer detaylı adet yok ama göz kodu varsa yine göz adını söyle.
+  if(!parts.length && Array.isArray(meta.eyes)){
+    if(meta.eyes.includes("R")) parts.push("sağ gözde bagaj");
+    if(meta.eyes.includes("LF")) parts.push("sol ön gözde bagaj");
+    if(meta.eyes.includes("LB")) parts.push("sol arka gözde bagaj");
+  }
+
+  return parts;
+}
+
+function bagVoiceSummaryForStop(stopName){
+  const seats = bagSeatsForStop(stopName).map(Number).filter(Boolean);
+  if(!seats.length) return "";
+
+  const chunks = seats.map(seatNo => {
+    const parts = bagEyeVoicePartsForSeat(seatNo);
+
+    if(parts.length){
+      return `${seatNo} numarada ${parts.join(", ")}`;
+    }
+
+    return `${seatNo} numarada bagaj`;
+  });
+
+  return `Bagaj uyarısı: ${chunks.join(". ")} var.`;
+}
+
 
 function maybeSpeakApproachStop(stopName, km){
   if(!stopName) return;
@@ -653,8 +704,9 @@ function stopHumanVoiceSummary(stopName){
     msg += ` Ayrıca ${parcelCt} emanet teslim var.`;
   }
 
-  if(bagSeats.length > 0){
-    msg += ` ${formatSeatListForVoice(bagSeats)} bagaj var.`;
+  const bagMsg = bagVoiceSummaryForStop(stop);
+  if(bagMsg){
+    msg += ` ${bagMsg}`;
   }
 
   return msg;
@@ -1880,6 +1932,8 @@ if(routeFocusItem && live){
   }
 
   async function fetchBagMeta(seatNo){
+    const key = String(seatNo);
+
     try{
       const u = `/api/bags/meta?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seatNo)}`;
       const j = await safeJsonFetch(u);
@@ -1888,19 +1942,30 @@ if(routeFocusItem && live){
       const leftFront = Number(j?.left_front || 0);
       const leftBack = Number(j?.left_back || 0);
       const total = Number(j?.count || (right + leftFront + leftBack));
-      const eyes = [];
 
+      const eyes = [];
       if(right > 0) eyes.push("R");
       if(leftFront > 0) eyes.push("LF");
       if(leftBack > 0) eyes.push("LB");
 
-      return { count: total, eyes };
+      const meta = {
+        count: total,
+        right,
+        left_front: leftFront,
+        left_back: leftBack,
+        eyes
+      };
+
+      bagMetaCache[key] = meta;
+      return meta;
     }catch(_){
-      return { count:0, eyes:[] };
+      const fallback = bagMetaCache[key] || { count:0, right:0, left_front:0, left_back:0, eyes:[] };
+      return fallback;
     }
   }
 
-  function eyesToIcons(eyes){
+
+function eyesToIcons(eyes){
     if(!eyes || !eyes.length) return "";
     const set = new Set(eyes);
     const parts = [];
