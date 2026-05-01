@@ -1,3 +1,5 @@
+import shutil
+import zipfile
 import os
 import csv
 import json
@@ -6,7 +8,7 @@ import sqlite3
 import re
 from io import StringIO
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Optional, Tuple
 
 from flask import (
@@ -20,9 +22,11 @@ from flask import (
     session,
     abort,
     send_from_directory,
+    send_file,
     make_response,
 )
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from speedlimit import bp_speed
 from modules.bags import bp as bags_bp
@@ -46,6 +50,165 @@ app.secret_key = os.getenv("SECRET_KEY", "degistir-beni")
 DB_PATH = os.getenv("DB_PATH", "db.sqlite3")
 DEBUG = env_bool("FLASK_DEBUG", True)
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "yusuf")
+
+
+
+
+# =========================================================
+# Admin Profil / İlk Kurulum
+# =========================================================
+def ensure_admin_profile_table(db):
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS admin_profile(
+            id INTEGER PRIMARY KEY CHECK(id=1),
+            full_name TEXT NOT NULL DEFAULT '',
+            phone TEXT NOT NULL DEFAULT '',
+            photo_path TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+        )
+    """)
+
+
+def get_admin_profile():
+    db = get_db()
+    ensure_admin_profile_table(db)
+    row = db.execute("""
+        SELECT id, full_name, phone, photo_path, created_at, updated_at
+        FROM admin_profile
+        WHERE id=1
+    """).fetchone()
+
+    if not row:
+        return None
+
+    return {
+        "id": row["id"],
+        "full_name": row["full_name"] or "",
+        "phone": row["phone"] or "",
+        "photo_path": row["photo_path"] or "",
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+
+
+def admin_profile_exists():
+    prof = get_admin_profile()
+    return bool(prof and prof.get("full_name"))
+
+
+def save_admin_profile(full_name, phone, photo_path=""):
+    full_name = (full_name or "").strip()
+    phone = (phone or "").strip()
+    photo_path = (photo_path or "").strip()
+
+    db = get_db()
+    ensure_admin_profile_table(db)
+
+    old = get_admin_profile()
+    if not photo_path and old:
+        photo_path = old.get("photo_path", "")
+
+    db.execute("""
+        INSERT INTO admin_profile(id, full_name, phone, photo_path, created_at, updated_at)
+        VALUES(1, ?, ?, ?, datetime('now','localtime'), datetime('now','localtime'))
+        ON CONFLICT(id) DO UPDATE SET
+            full_name=excluded.full_name,
+            phone=excluded.phone,
+            photo_path=excluded.photo_path,
+            updated_at=datetime('now','localtime')
+    """, (full_name, phone, photo_path))
+
+    db.commit()
+
+
+def save_profile_photo(file_storage):
+    if not file_storage or not getattr(file_storage, "filename", ""):
+        return ""
+
+    filename = secure_filename(file_storage.filename or "")
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+    allowed = {"jpg", "jpeg", "png", "webp"}
+    if ext not in allowed:
+        return ""
+
+    folder = Path(app.root_path) / "static" / "profile"
+    folder.mkdir(parents=True, exist_ok=True)
+
+    new_name = f"admin_profile_{secrets.token_hex(6)}.{ext}"
+    target = folder / new_name
+    file_storage.save(str(target))
+
+    return f"/static/profile/{new_name}"
+
+
+@app.context_processor
+def inject_admin_profile():
+    try:
+        return {"admin_profile": get_admin_profile()}
+    except Exception:
+        return {"admin_profile": None}
+
+# =========================================================
+# Admin Şifre Yönetimi
+# =========================================================
+def ensure_security_table(db):
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS admin_security(
+            id INTEGER PRIMARY KEY CHECK(id=1),
+            password_hash TEXT NOT NULL,
+            updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+        )
+    """)
+
+
+def get_admin_password_hash(db):
+    ensure_security_table(db)
+    row = db.execute("SELECT password_hash FROM admin_security WHERE id=1").fetchone()
+    return row["password_hash"] if row else ""
+
+
+def verify_admin_password(password):
+    password = (password or "").strip()
+    if not password:
+        return False
+
+    db = get_db()
+    saved_hash = get_admin_password_hash(db)
+
+    # Veritabanında yeni şifre varsa onu kontrol et
+    if saved_hash:
+        try:
+            return check_password_hash(saved_hash, password)
+        except Exception:
+            return False
+
+    # İlk kurulum / eski sistem desteği
+    return password == ADMIN_PASSWORD
+
+
+def set_admin_password(new_password):
+    new_password = (new_password or "").strip()
+    if len(new_password) < 4:
+        return False, "Yeni şifre en az 4 karakter olmalı."
+
+    db = get_db()
+    ensure_security_table(db)
+
+    password_hash = generate_password_hash(new_password)
+
+    db.execute("""
+        INSERT INTO admin_security(id, password_hash, updated_at)
+        VALUES(1, ?, datetime('now','localtime'))
+        ON CONFLICT(id) DO UPDATE SET
+            password_hash=excluded.password_hash,
+            updated_at=datetime('now','localtime')
+    """, (password_hash,))
+
+    db.commit()
+    return True, "Şifre başarıyla güncellendi."
+
 PORT = int(os.getenv("PORT", "5000"))
 
 UPLOAD_DIR = os.getenv(
@@ -546,6 +709,51 @@ def settings_set(key: str, value) -> None:
     db.commit()
 
 
+# =========================================================
+# Kurtarma Kodu Yönetimi
+# =========================================================
+def normalize_recovery_code(code: str) -> str:
+    raw = (code or "").strip().upper()
+    raw = raw.replace(" ", "").replace("_", "-")
+    while "--" in raw:
+        raw = raw.replace("--", "-")
+    return raw
+
+
+def make_recovery_code() -> str:
+    # Örnek: SARIKIZ-4829-7315-6042
+    parts = [f"{secrets.randbelow(10000):04d}" for _ in range(3)]
+    return "SARIKIZ-" + "-".join(parts)
+
+
+def get_recovery_code_hash() -> str:
+    try:
+        return settings_get("recovery_code_hash", "") or ""
+    except Exception:
+        return ""
+
+
+def set_recovery_code(code: str) -> None:
+    code = normalize_recovery_code(code)
+    settings_set("recovery_code_hash", generate_password_hash(code))
+    settings_set("recovery_code_updated_at", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+
+def verify_recovery_code(code: str) -> bool:
+    code = normalize_recovery_code(code)
+    if not code:
+        return False
+
+    saved_hash = get_recovery_code_hash()
+    if not saved_hash:
+        return False
+
+    try:
+        return check_password_hash(saved_hash, code)
+    except Exception:
+        return False
+
+
 def ensure_list(x):
     if isinstance(x, list):
         return x
@@ -781,7 +989,7 @@ def check_csrf() -> None:
 
 
 PROTECTED_PREFIXES = ("/",)
-EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit")
+EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
 
 
 def is_excluded_path(path: str) -> bool:
@@ -790,6 +998,53 @@ def is_excluded_path(path: str) -> bool:
 
 @app.before_request
 def bootstrap_and_guard():
+    # =====================================================
+    # Paket özellik kilidi
+    # Örn: Standart kullanıcı Pro özelliğe girerse paket ekranına yönlenir.
+    # =====================================================
+    try:
+        rule = find_feature_rule_for_path(request.path)
+        if rule and admin_profile_exists() and session.get("auth_ok"):
+            if not plan_allows(rule["required_plan"]):
+                return redirect(url_for(
+                    "package_required_page",
+                    feature=rule["feature_name"],
+                    required=rule["required_plan"],
+                ))
+    except Exception:
+        pass
+
+    # =====================================================
+    # Abonelik erişim kilidi
+    # Deneme bittiyse ana uygulama sayfalarını kilitler.
+    # Login, kurulum ve abonelik ekranları açık kalır.
+    # =====================================================
+    sub_free_paths = (
+        "/static",
+        "/login",
+        "/logout",
+        "/kurulum",
+        "/sifre-unuttum",
+        "/abonelik-gerekli",
+        "/ayarlar/abonelik",
+    )
+
+    if not any(request.path.startswith(x) for x in sub_free_paths):
+        try:
+            if admin_profile_exists() and session.get("auth_ok") and not subscription_allows_access():
+                return redirect(url_for("subscription_required_page"))
+        except Exception:
+            pass
+
+    if request.path.startswith("/kurulum"):
+        return None
+
+    if request.path.startswith("/sifre-unuttum"):
+        return None
+
+    if request.path.startswith("/static"):
+        return None
+
     if not app.config.get("_schema_ready"):
         ensure_schema()
         ensure_upload_dir()
@@ -969,9 +1224,12 @@ def resolve_ai_command(command: str):
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if not admin_profile_exists():
+        return redirect(url_for("setup_page"))
+
     if request.method == "POST":
         pwd = (request.form.get("password") or "").strip()
-        if pwd == ADMIN_PASSWORD:
+        if verify_admin_password(pwd):
             session["auth_ok"] = True
             issue_csrf()
             nxt = request.args.get("next") or url_for("index")
@@ -981,7 +1239,7 @@ def login():
     return render_template("login.html", csrf_token=get_csrf())
 
 
-@app.route("/logout", methods=["POST"])
+@app.route("/logout", methods=["GET", "POST"])
 def logout():
     session.clear()
     return redirect(url_for("login"))
@@ -1019,6 +1277,20 @@ def set_route():
 
 @app.route("/sefer-baslat", methods=["GET", "POST"])
 def trip_start():
+    routes = all_route_names()
+
+    selected_route = (
+        request.args.get("route")
+        or request.form.get("route")
+        or session.get("route")
+        or (routes[0] if routes else "Denizli – İstanbul")
+    ).strip()
+
+    if selected_route not in set(routes):
+        selected_route = routes[0] if routes else "Denizli – İstanbul"
+
+    session["route"] = selected_route
+
     if request.method == "POST":
         db = get_db()
         date_val = request.form.get("date") or datetime.now().strftime("%Y-%m-%d")
@@ -1031,7 +1303,7 @@ def trip_start():
             """,
             (
                 date_val,
-                session.get("route", "Denizli – İstanbul"),
+                selected_route,
                 time_val,
                 request.form.get("plate"),
                 request.form.get("captain1"),
@@ -1040,6 +1312,7 @@ def trip_start():
                 request.form.get("note"),
             ),
         )
+
         trip_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
         db.commit()
         set_active_trip(trip_id)
@@ -1049,16 +1322,96 @@ def trip_start():
     return render_template(
         "start_trip.html",
         now=now_str,
-        current_route=session.get("route", "Denizli – İstanbul"),
+        current_route=selected_route,
+        all_routes=routes,
     )
-
 
 @app.route("/continue-trip")
 def continue_trip():
     tid = get_active_trip()
-    if tid:
-        return redirect(url_for("seats_page"))
-    return redirect(url_for("trip_start"))
+    if not tid:
+        return redirect(url_for("trip_start"))
+
+    db = get_db()
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+
+    if not trip:
+        set_active_trip(None)
+        return redirect(url_for("trip_start"))
+
+    # Koltuk doluluk bilgisi
+    passenger_count = db.execute(
+        "SELECT COUNT(*) FROM seats WHERE trip_id=?",
+        (tid,),
+    ).fetchone()[0] or 0
+
+    total_seats = len(SEAT_POSITIONS)
+    empty_seats = max(total_seats - passenger_count, 0)
+    occupancy = round((passenger_count / total_seats) * 100) if total_seats else 0
+
+    # Tahmini koltuk tahsilatı
+    seat_total = db.execute(
+        "SELECT COALESCE(SUM(COALESCE(amount,0)),0) FROM seats WHERE trip_id=?",
+        (tid,),
+    ).fetchone()[0] or 0
+
+    # Ayakta satış varsa ekle
+    walkon_total = 0
+    try:
+        walkon_total = db.execute(
+            "SELECT COALESCE(SUM(COALESCE(total_amount,0)),0) FROM walk_on_sales WHERE trip_id=?",
+            (tid,),
+        ).fetchone()[0] or 0
+    except Exception:
+        walkon_total = 0
+
+    total_revenue = seat_total + walkon_total
+
+    stops = get_stops(trip["route"])
+    first_stop = stops[0] if stops else ""
+    last_stop = stops[-1] if stops else ""
+
+    # Yolcuların en çok ineceği sıradaki durak gibi basit özet
+    next_stop = ""
+    try:
+        row = db.execute(
+            """
+            SELECT to_stop, COUNT(*) AS c
+            FROM seats
+            WHERE trip_id=? AND COALESCE(to_stop,'') <> ''
+            GROUP BY to_stop
+            ORDER BY c DESC
+            LIMIT 1
+            """,
+            (tid,),
+        ).fetchone()
+        if row:
+            next_stop = row["to_stop"]
+    except Exception:
+        next_stop = ""
+
+    if not next_stop:
+        next_stop = first_stop
+
+    stats = {
+        "passenger_count": passenger_count,
+        "total_seats": total_seats,
+        "empty_seats": empty_seats,
+        "occupancy": occupancy,
+        "seat_total": seat_total,
+        "walkon_total": walkon_total,
+        "total_revenue": total_revenue,
+        "first_stop": first_stop,
+        "last_stop": last_stop,
+        "next_stop": next_stop,
+    }
+
+    return render_template(
+        "continue_trip.html",
+        trip=trip,
+        stats=stats,
+        stops=stops,
+    )
 
 
 @app.route("/seats")
@@ -2865,6 +3218,91 @@ def api_seats_list():
     return jsonify({"ok": True, "items": [dict(r) for r in rows]})
 
 
+
+# =========================================================
+# Sefer durak olay kayıt yardımcıları
+# =========================================================
+
+def _row_dict(row):
+    if not row:
+        return {}
+    try:
+        return {k: row[k] for k in row.keys()}
+    except Exception:
+        return {}
+
+
+def _seat_event_meta(row, extra=None):
+    d = _row_dict(row)
+    meta = {
+        "seat_no": d.get("seat_no"),
+        "from_stop": d.get("from_stop") or "",
+        "to_stop": d.get("to_stop") or "",
+        "ticket_type": d.get("ticket_type") or "",
+        "payment": d.get("payment") or "",
+        "amount": float(d.get("amount") or 0),
+        "gender": d.get("gender") or "",
+        "service": int(d.get("service") or 0),
+        "service_note": d.get("service_note") or "",
+        "passenger_name": d.get("passenger_name") or "",
+        "passenger_phone": d.get("passenger_phone") or "",
+        "source": "seat",
+    }
+    if isinstance(extra, dict):
+        meta.update(extra)
+    return meta
+
+
+def _walkon_event_meta(row, extra=None):
+    d = _row_dict(row)
+    meta = {
+        "walkon_id": d.get("id"),
+        "from_stop": d.get("from_stop") or "",
+        "to_stop": d.get("to_stop") or "",
+        "pax": int(d.get("pax") or 0),
+        "unit_price": float(d.get("unit_price") or 0),
+        "total_amount": float(d.get("total_amount") or 0),
+        "payment": d.get("payment") or "",
+        "note": d.get("note") or "",
+        "source": "standing",
+    }
+    if isinstance(extra, dict):
+        meta.update(extra)
+    return meta
+
+
+def log_trip_stop_event(db, tid, stop_name, event, meta=None, distance_km=None, seats_for_stop=None):
+    """
+    stop_logs içine profesyonel sefer raporu için olay kaydı atar.
+    event örnekleri:
+      board, offload, standing_add, standing_off, parcel_deliver, pass_stop
+    """
+    stop_name = (stop_name or "").strip()
+    event = (event or "").strip().lower()
+
+    if not tid or not stop_name or not event:
+        return
+
+    try:
+        if seats_for_stop is None:
+            seats_for_stop = seats_count_for_stop(tid, stop_name)
+    except Exception:
+        seats_for_stop = 0
+
+    try:
+        meta_json = json.dumps(meta or {}, ensure_ascii=False)
+    except Exception:
+        meta_json = "{}"
+
+    db.execute(
+        """
+        INSERT INTO stop_logs(trip_id, stop_name, event, distance_km, seats_for_stop, meta_json)
+        VALUES(?,?,?,?,?,?)
+        """,
+        (tid, stop_name, event, distance_km, seats_for_stop, meta_json),
+    )
+
+
 @app.route("/api/seat", methods=["POST", "DELETE"])
 def api_seat():
     tid = get_active_trip()
@@ -2879,6 +3317,20 @@ def api_seat():
             return jsonify({"ok": False, "msg": "seat_no geçersiz"}), 400
         if not validate_seat_no(seat_no):
             return jsonify({"ok": False, "msg": "Geçersiz koltuk numarası"}), 400
+
+        old_row = db.execute(
+            "SELECT * FROM seats WHERE trip_id=? AND seat_no=?",
+            (tid, seat_no),
+        ).fetchone()
+
+        if old_row and (old_row["to_stop"] or "").strip():
+            log_trip_stop_event(
+                db,
+                tid,
+                old_row["to_stop"],
+                "offload",
+                _seat_event_meta(old_row, {"action": "offload_single"}),
+            )
 
         db.execute("DELETE FROM seats WHERE trip_id=? AND seat_no=?", (tid, seat_no))
         db.commit()
@@ -2914,6 +3366,11 @@ def api_seat():
     if not ok:
         return jsonify({"ok": False, "msg": msg}), 400
 
+    old_row = db.execute(
+        "SELECT * FROM seats WHERE trip_id=? AND seat_no=?",
+        (tid, seat_no),
+    ).fetchone()
+
     db.execute(
         """
         INSERT INTO seats(
@@ -2940,6 +3397,24 @@ def api_seat():
             passenger_name, passenger_phone,
         ),
     )
+    if from_stop and (
+        not old_row
+        or (old_row["from_stop"] or "") != from_stop
+        or (old_row["to_stop"] or "") != to_stop
+    ):
+        new_row = db.execute(
+            "SELECT * FROM seats WHERE trip_id=? AND seat_no=?",
+            (tid, seat_no),
+        ).fetchone()
+
+        log_trip_stop_event(
+            db,
+            tid,
+            from_stop,
+            "board",
+            _seat_event_meta(new_row, {"action": "board_single"}),
+        )
+
     db.commit()
     return jsonify({"ok": True})
 
@@ -2992,6 +3467,22 @@ def api_seats_bulk():
         invalid = [s for s in seat_list if not validate_seat_no(s)]
         if invalid:
             return jsonify({"ok": False, "msg": f"Geçersiz koltuklar: {invalid}"}), 400
+
+        placeholders = ",".join("?" for _ in seat_list)
+        rows_to_log = db.execute(
+            f"SELECT * FROM seats WHERE trip_id=? AND seat_no IN ({placeholders})",
+            [tid] + seat_list,
+        ).fetchall()
+
+        for r in rows_to_log:
+            if (r["to_stop"] or "").strip():
+                log_trip_stop_event(
+                    db,
+                    tid,
+                    r["to_stop"],
+                    "offload",
+                    _seat_event_meta(r, {"action": "offload_bulk_delete"}),
+                )
 
         db.executemany(
             "DELETE FROM seats WHERE trip_id=? AND seat_no=?",
@@ -3088,6 +3579,24 @@ def api_seats_bulk():
         """,
         rows,
     )
+    for r in rows:
+        row_from = r[2]
+        seat_no = r[1]
+
+        if row_from:
+            saved_row = db.execute(
+                "SELECT * FROM seats WHERE trip_id=? AND seat_no=?",
+                (tid, seat_no),
+            ).fetchone()
+
+            log_trip_stop_event(
+                db,
+                tid,
+                row_from,
+                "board",
+                _seat_event_meta(saved_row, {"action": "board_bulk"}),
+            )
+
     db.commit()
 
     return jsonify({"ok": True, "count": len(rows)})
@@ -3114,6 +3623,23 @@ def api_seats_offload():
         return jsonify({"ok": False, "msg": f"Geçersiz koltuklar: {invalid}"}), 400
 
     db = get_db()
+
+    placeholders = ",".join("?" for _ in seat_list)
+    rows_to_log = db.execute(
+        f"SELECT * FROM seats WHERE trip_id=? AND seat_no IN ({placeholders})",
+        [tid] + seat_list,
+    ).fetchall()
+
+    for r in rows_to_log:
+        if (r["to_stop"] or "").strip():
+            log_trip_stop_event(
+                db,
+                tid,
+                r["to_stop"],
+                "offload",
+                _seat_event_meta(r, {"action": "offload_bulk"}),
+            )
+
     db.executemany("DELETE FROM seats WHERE trip_id=? AND seat_no=?", [(tid, s) for s in seat_list])
     db.commit()
 
@@ -3250,64 +3776,146 @@ def api_stops():
     return jsonify({"ok": True, "route": route_name, "stops": get_stops(route_name)})
 
 
+
 @app.route("/api/coords", methods=["GET", "POST", "DELETE"])
 def api_coords():
-    trip = get_active_trip_row()
-    if not trip:
-        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
+    """
+    TEMİZ KOORDİNAT API
+    - İnternet yok
+    - Başka hat yok
+    - Sadece verilen route içindeki route_stop_coords kayıtları
+    """
     db = get_db()
-    route_name = trip["route"]
+
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS route_stop_coords(
+            route TEXT NOT NULL,
+            stop TEXT NOT NULL,
+            lat REAL NOT NULL,
+            lng REAL NOT NULL,
+            PRIMARY KEY(route, stop)
+        )
+    """)
+    db.commit()
+
+    def active_route_name():
+        try:
+            tid = get_active_trip()
+            if not tid:
+                return ""
+            row = db.execute("SELECT route FROM trips WHERE id=?", (tid,)).fetchone()
+            return (row["route"] if row else "") or ""
+        except Exception:
+            return ""
 
     if request.method == "GET":
+        route_name = (request.args.get("route") or active_route_name() or "").strip()
+        stop_name = (request.args.get("stop") or "").strip()
+
+        if not route_name:
+            return jsonify({"ok": False, "msg": "Hat adı yok", "items": []}), 400
+
+        if stop_name:
+            row = db.execute(
+                "SELECT route, stop, lat, lng FROM route_stop_coords WHERE route=? AND stop=? LIMIT 1",
+                (route_name, stop_name),
+            ).fetchone()
+
+            if not row:
+                return jsonify({
+                    "ok": True,
+                    "route": route_name,
+                    "stop": stop_name,
+                    "found": False,
+                    "item": None,
+                    "items": [],
+                })
+
+            item = {
+                "route": row["route"],
+                "stop": row["stop"],
+                "lat": row["lat"],
+                "lng": row["lng"],
+            }
+
+            return jsonify({
+                "ok": True,
+                "route": route_name,
+                "stop": stop_name,
+                "found": True,
+                "item": item,
+                "items": [item],
+            })
+
         rows = db.execute(
-            "SELECT stop, lat, lng FROM route_stop_coords WHERE route=? ORDER BY stop",
+            "SELECT route, stop, lat, lng FROM route_stop_coords WHERE route=? ORDER BY stop",
             (route_name,),
         ).fetchall()
+
         return jsonify({
             "ok": True,
             "route": route_name,
-            "items": [{"stop": r["stop"], "lat": float(r["lat"]), "lng": float(r["lng"])} for r in rows],
+            "items": [
+                {
+                    "route": r["route"],
+                    "stop": r["stop"],
+                    "lat": r["lat"],
+                    "lng": r["lng"],
+                }
+                for r in rows
+            ],
         })
 
-    if request.method == "POST":
-        data = request.get_json(force=True) or {}
-        stop = (data.get("stop") or "").strip()
-        lat = parse_float(data.get("lat"), None)
-        lng = parse_float(data.get("lng"), None)
+    data = request.get_json(silent=True) or request.form or {}
 
-        if not stop:
-            return jsonify({"ok": False, "msg": "stop gerekli"}), 400
-        if lat is None or lng is None:
-            return jsonify({"ok": False, "msg": "lat/lng geçersiz"}), 400
-        if not validate_stop_for_trip(route_name, stop):
-            return jsonify({"ok": False, "msg": "Durak hat üzerinde değil"}), 400
+    route_name = (data.get("route") or data.get("route_name") or active_route_name() or "").strip()
+    stop_name = (data.get("stop") or data.get("stop_name") or "").strip()
 
+    if not route_name:
+        return jsonify({"ok": False, "msg": "Hat adı yok"}), 400
+
+    if not stop_name:
+        return jsonify({"ok": False, "msg": "Durak adı yok"}), 400
+
+    if request.method == "DELETE":
         db.execute(
-            """
-            INSERT INTO route_stop_coords(route, stop, lat, lng)
-            VALUES(?,?,?,?)
-            ON CONFLICT(route, stop) DO UPDATE SET
-                lat=excluded.lat,
-                lng=excluded.lng
-            """,
-            (route_name, stop, lat, lng),
+            "DELETE FROM route_stop_coords WHERE route=? AND stop=?",
+            (route_name, stop_name),
         )
         db.commit()
-        return jsonify({"ok": True})
+        return jsonify({"ok": True, "msg": "Koordinat silindi", "route": route_name, "stop": stop_name})
 
-    stop = (request.args.get("stop") or "").strip()
-    if not stop:
-        return jsonify({"ok": False, "msg": "stop gerekli"}), 400
+    try:
+        lat = float(data.get("lat"))
+        lng = float(data.get("lng"))
+    except Exception:
+        return jsonify({"ok": False, "msg": "Lat/Lng geçersiz"}), 400
 
-    db.execute("DELETE FROM route_stop_coords WHERE route=? AND stop=?", (route_name, stop))
+    if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+        return jsonify({"ok": False, "msg": "Koordinat aralığı geçersiz"}), 400
+
+    db.execute(
+        """
+        INSERT INTO route_stop_coords(route, stop, lat, lng)
+        VALUES(?,?,?,?)
+        ON CONFLICT(route, stop)
+        DO UPDATE SET lat=excluded.lat, lng=excluded.lng
+        """,
+        (route_name, stop_name, lat, lng),
+    )
     db.commit()
-    return jsonify({"ok": True})
+
+    return jsonify({
+        "ok": True,
+        "msg": "Koordinat kaydedildi",
+        "route": route_name,
+        "stop": stop_name,
+        "lat": lat,
+        "lng": lng,
+    })
 
 
-# =========================================================
-# Ayakta / walk-on API
-# =========================================================
+
 @app.route("/api/walkon", methods=["GET", "POST", "DELETE"])
 def api_walkon():
     tid = get_active_trip()
@@ -3362,15 +3970,30 @@ def api_walkon():
         payment = norm_payment(data.get("payment"))
         note = (data.get("note") or "").strip()
 
-        db.execute(
+        cur = db.execute(
             """
             INSERT INTO walk_on_sales(trip_id, from_stop, to_stop, pax, unit_price, total_amount, payment, note)
             VALUES(?,?,?,?,?,?,?,?)
             """,
             (tid, from_stop, to_stop, pax, unit_price, total_amount, payment, note),
         )
+        new_id = cur.lastrowid
+
+        if from_stop:
+            row_for_log = db.execute(
+                "SELECT * FROM walk_on_sales WHERE id=? AND trip_id=?",
+                (new_id, tid),
+            ).fetchone()
+
+            log_trip_stop_event(
+                db,
+                tid,
+                from_stop,
+                "standing_add",
+                _walkon_event_meta(row_for_log, {"action": "standing_board"}),
+            )
+
         db.commit()
-        new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
 
         return jsonify({
             "ok": True,
@@ -3390,6 +4013,30 @@ def api_walkon():
     if item_id is None and not ids and not to_param and not clear_all:
         return jsonify({"ok": False, "msg": "id, ids, to/to_stop veya all gerekli"}), 400
 
+    rows_to_log = []
+
+    if item_id is not None:
+        rows_to_log = db.execute(
+            "SELECT * FROM walk_on_sales WHERE trip_id=? AND id=?",
+            (tid, item_id),
+        ).fetchall()
+    elif ids:
+        placeholders = ",".join("?" for _ in ids)
+        rows_to_log = db.execute(
+            f"SELECT * FROM walk_on_sales WHERE trip_id=? AND id IN ({placeholders})",
+            [tid] + ids,
+        ).fetchall()
+    elif to_param:
+        rows_to_log = db.execute(
+            "SELECT * FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
+            (tid, to_param),
+        ).fetchall()
+    elif clear_all:
+        rows_to_log = db.execute(
+            "SELECT * FROM walk_on_sales WHERE trip_id=?",
+            (tid,),
+        ).fetchall()
+
     deleted_ids = delete_walkon_rows(
         db,
         tid,
@@ -3398,6 +4045,17 @@ def api_walkon():
         to_stop=to_param or None,
         clear_all=clear_all,
     )
+
+    for r in rows_to_log:
+        if r["id"] in deleted_ids and (r["to_stop"] or "").strip():
+            log_trip_stop_event(
+                db,
+                tid,
+                r["to_stop"],
+                "standing_off",
+                _walkon_event_meta(r, {"action": "standing_offload"}),
+            )
+
     db.commit()
 
     return jsonify({
@@ -3454,7 +4112,7 @@ def api_standing():
         payment = norm_payment(data.get("payment"))
         note = (data.get("note") or "").strip()
 
-        db.execute(
+        cur = db.execute(
             """
             INSERT INTO walk_on_sales(trip_id, from_stop, to_stop, pax, unit_price, total_amount, payment, note)
             VALUES(?,?,?,?,?,?,?,?)
@@ -3648,7 +4306,14 @@ def api_stoplog():
         return jsonify({"ok": False, "msg": "stop_name gerekli"}), 400
     if not validate_stop_for_active_trip(stop_name):
         return jsonify({"ok": False, "msg": "Durak bu hat üzerinde değil"}), 400
-    if event not in {"arrive", "depart", "approach"}:
+    allowed_events = {
+        "arrive", "depart", "approach",
+        "board", "offload",
+        "standing_add", "standing_off",
+        "parcel_deliver", "pass_stop",
+    }
+
+    if event not in allowed_events:
         return jsonify({"ok": False, "msg": "event geçersiz"}), 400
 
     distance_km = data.get("distance_km")
@@ -3680,6 +4345,114 @@ def api_stoplog():
         "distance_km": distance_km,
         "seats_for_stop": seats_for_stop,
     })
+
+
+
+
+@app.route("/sefer-raporu")
+def trip_report_page():
+    return render_template("trip_report.html")
+
+
+@app.route("/api/trip-report")
+def api_trip_report():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
+    db = get_db()
+
+    trip = db.execute(
+        "SELECT * FROM trips WHERE id=?",
+        (tid,),
+    ).fetchone()
+
+    rows = db.execute(
+        """
+        SELECT id, stop_name, event, seats_for_stop, meta_json, ts
+        FROM stop_logs
+        WHERE trip_id=?
+        ORDER BY id ASC
+        """,
+        (tid,),
+    ).fetchall()
+
+    groups = {}
+    order = []
+
+    def group_for(stop):
+        if stop not in groups:
+            groups[stop] = {
+                "stop_name": stop,
+                "board": [],
+                "offload": [],
+                "standing_add": [],
+                "standing_off": [],
+                "parcel_deliver": [],
+                "pass_stop": [],
+                "other": [],
+                "summary": {
+                    "board_count": 0,
+                    "offload_count": 0,
+                    "standing_board_count": 0,
+                    "standing_off_count": 0,
+                    "parcel_count": 0,
+                },
+            }
+            order.append(stop)
+        return groups[stop]
+
+    for r in rows:
+        stop = r["stop_name"] or "—"
+        event = r["event"] or "other"
+
+        try:
+            meta = json.loads(r["meta_json"]) if r["meta_json"] else {}
+        except Exception:
+            meta = {}
+
+        item = {
+            "id": r["id"],
+            "event": event,
+            "ts": r["ts"],
+            "seats_for_stop": r["seats_for_stop"],
+            "meta": meta,
+        }
+
+        g = group_for(stop)
+
+        if event == "board":
+            g["board"].append(item)
+            g["summary"]["board_count"] += 1
+
+        elif event == "offload":
+            g["offload"].append(item)
+            g["summary"]["offload_count"] += 1
+
+        elif event == "standing_add":
+            g["standing_add"].append(item)
+            g["summary"]["standing_board_count"] += int(meta.get("pax") or 0)
+
+        elif event == "standing_off":
+            g["standing_off"].append(item)
+            g["summary"]["standing_off_count"] += int(meta.get("pax") or 0)
+
+        elif event == "parcel_deliver":
+            g["parcel_deliver"].append(item)
+            g["summary"]["parcel_count"] += int(meta.get("count") or 1)
+
+        elif event == "pass_stop":
+            g["pass_stop"].append(item)
+
+        else:
+            g["other"].append(item)
+
+    return jsonify({
+        "ok": True,
+        "trip": _row_dict(trip),
+        "stops": [groups[x] for x in order],
+    })
+
 
 
 @app.route("/olaylar")
@@ -3736,6 +4509,171 @@ def api_events():
         })
 
     return jsonify({"ok": True, "items": items})
+
+
+
+# =========================================================
+# Bitmiş sefer rapor arşivi
+# =========================================================
+
+def reports_dir_path():
+    d = Path(app.root_path) / "storage" / "reports"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def safe_report_base(base):
+    b = str(base or "").strip()
+    b = b.replace("/", "").replace("\\", "")
+    if not b or ".." in b:
+        return ""
+    return b
+
+
+@app.route("/sefer-raporu/arsiv/<base>")
+def archived_trip_report_page(base):
+    base = safe_report_base(base)
+    if not base:
+        abort(404)
+
+    json_path = reports_dir_path() / f"{base}.json"
+    if not json_path.exists():
+        abort(404)
+
+    return render_template("trip_report.html", archive_base=base)
+
+
+@app.route("/api/trip-report/archive/<base>")
+def api_archived_trip_report(base):
+    base = safe_report_base(base)
+    if not base:
+        return jsonify({"ok": False, "msg": "Geçersiz rapor"}), 400
+
+    json_path = reports_dir_path() / f"{base}.json"
+    if not json_path.exists():
+        return jsonify({"ok": False, "msg": "Rapor dosyası bulunamadı"}), 404
+
+    try:
+        data = json.loads(json_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        return jsonify({"ok": False, "msg": f"Rapor okunamadı: {e}"}), 500
+
+    return jsonify(data)
+
+
+
+
+@app.route("/api/report-archive")
+def api_report_archive():
+    items = []
+
+    for f in sorted(reports_dir_path().glob("*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+        base = f.stem
+        title = base
+        route = ""
+        plate = ""
+        date = ""
+
+        try:
+            data = json.loads(f.read_text(encoding="utf-8"))
+            trip = data.get("trip") or {}
+            date = trip.get("date") or ""
+            route = trip.get("route") or ""
+            plate = trip.get("plate") or ""
+            title = f"{date or '-'} · {route or '-'} · {plate or '-'}"
+        except Exception:
+            pass
+
+        items.append({
+            "base": base,
+            "title": title,
+            "date": date,
+            "route": route,
+            "plate": plate,
+            "view": f"/sefer-raporu/arsiv/{base}",
+            "txt": f"/rapor-dosya/{base}/txt",
+            "csv": f"/rapor-dosya/{base}/csv",
+            "json": f"/api/trip-report/archive/{base}",
+        })
+
+    return jsonify({"ok": True, "items": items})
+
+
+
+
+@app.route("/sefer-raporu-son")
+def latest_trip_report_redirect():
+    """
+    Ana ekrandaki SEFER RAPORLARI kartı buraya gelir.
+    Aktif sefer varsa canlı sefer raporunu açar.
+    Aktif sefer yoksa en son arşivlenen raporu açar.
+    """
+    tid = get_active_trip()
+
+    if tid:
+        return redirect("/sefer-raporu")
+
+    files = sorted(
+        reports_dir_path().glob("*.json"),
+        key=lambda x: x.stat().st_mtime,
+        reverse=True
+    )
+
+    if files:
+        return redirect(url_for("archived_trip_report_page", base=files[0].stem))
+
+    return redirect("/rapor-arsiv")
+
+
+@app.route("/rapor-arsiv")
+def report_archive_page():
+    items = []
+
+    for f in sorted(reports_dir_path().glob("*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+        base = f.stem
+        title = base
+
+        try:
+            data = json.loads(f.read_text(encoding="utf-8"))
+            trip = data.get("trip") or {}
+            title = f"{trip.get('date') or '-'} · {trip.get('route') or '-'} · {trip.get('plate') or '-'}"
+        except Exception:
+            pass
+
+        items.append({
+            "base": base,
+            "title": title,
+            "json": f"/api/trip-report/archive/{base}",
+            "view": f"/sefer-raporu/arsiv/{base}",
+            "txt": f"/rapor-dosya/{base}/txt",
+            "csv": f"/rapor-dosya/{base}/csv",
+        })
+
+    return render_template("report_archive.html", items=items)
+
+
+@app.route("/rapor-dosya/<base>/<kind>")
+def report_file_download(base, kind):
+    base = safe_report_base(base)
+    if not base:
+        abort(404)
+
+    ext_map = {
+        "json": "json",
+        "txt": "txt",
+        "csv": "csv",
+    }
+
+    ext = ext_map.get(kind)
+    if not ext:
+        abort(404)
+
+    path = reports_dir_path() / f"{base}.{ext}"
+    if not path.exists():
+        abort(404)
+
+    return send_from_directory(str(reports_dir_path()), path.name, as_attachment=True)
+
 
 
 # =========================================================
@@ -4114,12 +5052,324 @@ def bags_clear_alias():
 # Sefer bitir / health
 # =========================================================
 
-@app.route("/end-trip", methods=["POST"])
+# =========================================================
+# Sefer bitişinde rapor dosyası oluşturma
+# =========================================================
+
+def _report_slug(v):
+    raw = str(v or "").strip()
+    out = []
+    for c in raw:
+        if c.isalnum() or c in "-_":
+            out.append(c)
+        else:
+            out.append("_")
+    return "".join(out).strip("_") or "rapor"
+
+
+def build_trip_report_payload_for_trip(db, tid):
+    trip = db.execute(
+        "SELECT * FROM trips WHERE id=?",
+        (tid,),
+    ).fetchone()
+
+    rows = db.execute(
+        """
+        SELECT id, stop_name, event, seats_for_stop, meta_json, ts
+        FROM stop_logs
+        WHERE trip_id=?
+        ORDER BY id ASC
+        """,
+        (tid,),
+    ).fetchall()
+
+    groups = {}
+    order = []
+
+    def group_for(stop):
+        if stop not in groups:
+            groups[stop] = {
+                "stop_name": stop,
+                "board": [],
+                "offload": [],
+                "standing_add": [],
+                "standing_off": [],
+                "parcel_deliver": [],
+                "pass_stop": [],
+                "other": [],
+                "summary": {
+                    "board_count": 0,
+                    "offload_count": 0,
+                    "standing_board_count": 0,
+                    "standing_off_count": 0,
+                    "parcel_count": 0,
+                },
+            }
+            order.append(stop)
+        return groups[stop]
+
+    for r in rows:
+        stop = r["stop_name"] or "—"
+        event = r["event"] or "other"
+
+        try:
+            meta = json.loads(r["meta_json"]) if r["meta_json"] else {}
+        except Exception:
+            meta = {}
+
+        item = {
+            "id": r["id"],
+            "event": event,
+            "ts": r["ts"],
+            "seats_for_stop": r["seats_for_stop"],
+            "meta": meta,
+        }
+
+        g = group_for(stop)
+
+        if event == "board":
+            g["board"].append(item)
+            g["summary"]["board_count"] += 1
+        elif event == "offload":
+            g["offload"].append(item)
+            g["summary"]["offload_count"] += 1
+        elif event == "standing_add":
+            g["standing_add"].append(item)
+            g["summary"]["standing_board_count"] += int(meta.get("pax") or 0)
+        elif event == "standing_off":
+            g["standing_off"].append(item)
+            g["summary"]["standing_off_count"] += int(meta.get("pax") or 0)
+        elif event == "parcel_deliver":
+            g["parcel_deliver"].append(item)
+            g["summary"]["parcel_count"] += int(meta.get("count") or 1)
+        elif event == "pass_stop":
+            g["pass_stop"].append(item)
+        else:
+            g["other"].append(item)
+
+    return {
+        "ok": True,
+        "trip": _row_dict(trip),
+        "stops": [groups[x] for x in order],
+    }
+
+
+def finalize_remaining_trip_events(db, tid):
+    """
+    Sefer bitirilirken hâlâ koltukta görünen yolcu varsa,
+    rapor eksik kalmasın diye final iniş kaydı atar.
+    """
+    seat_rows = db.execute(
+        "SELECT * FROM seats WHERE trip_id=? ORDER BY seat_no",
+        (tid,),
+    ).fetchall()
+
+    for r in seat_rows:
+        to_stop = (r["to_stop"] or "").strip()
+        if not to_stop:
+            continue
+
+        log_trip_stop_event(
+            db,
+            tid,
+            to_stop,
+            "offload",
+            _seat_event_meta(r, {"action": "final_trip_offload"}),
+        )
+
+    walk_rows = db.execute(
+        "SELECT * FROM walk_on_sales WHERE trip_id=? ORDER BY id",
+        (tid,),
+    ).fetchall()
+
+    for r in walk_rows:
+        to_stop = (r["to_stop"] or "").strip()
+        if not to_stop:
+            continue
+
+        log_trip_stop_event(
+            db,
+            tid,
+            to_stop,
+            "standing_off",
+            _walkon_event_meta(r, {"action": "final_trip_standing_offload"}),
+        )
+
+
+def trip_report_text(payload):
+    trip = payload.get("trip") or {}
+    lines = []
+
+    lines.append("SEFER RAPORU")
+    lines.append("=" * 34)
+    lines.append(f"Hat: {trip.get('route') or '-'}")
+    lines.append(f"Plaka: {trip.get('plate') or '-'}")
+    lines.append(f"Tarih: {trip.get('date') or '-'}")
+    lines.append(f"Çıkış: {trip.get('departure_time') or '-'}")
+    lines.append("")
+
+    total_board = 0
+    total_off = 0
+    total_stand_board = 0
+    total_stand_off = 0
+
+    for stop in payload.get("stops") or []:
+        sm = stop.get("summary") or {}
+        total_board += int(sm.get("board_count") or 0)
+        total_off += int(sm.get("offload_count") or 0)
+        total_stand_board += int(sm.get("standing_board_count") or 0)
+        total_stand_off += int(sm.get("standing_off_count") or 0)
+
+    lines.append(f"Toplam Binen: {total_board}")
+    lines.append(f"Toplam İnen: {total_off}")
+    lines.append(f"Ayakta Binen: {total_stand_board}")
+    lines.append(f"Ayakta İnen: {total_stand_off}")
+    lines.append("")
+
+    for stop in payload.get("stops") or []:
+        sm = stop.get("summary") or {}
+
+        lines.append(f"Durak: {stop.get('stop_name')}")
+        lines.append("-" * 34)
+        lines.append(
+            f"Binen {sm.get('board_count') or 0} | "
+            f"İnen {sm.get('offload_count') or 0} | "
+            f"Ayakta binen {sm.get('standing_board_count') or 0} | "
+            f"Ayakta inen {sm.get('standing_off_count') or 0}"
+        )
+
+        if stop.get("board"):
+            lines.append("Binenler:")
+            for it in stop.get("board") or []:
+                m = it.get("meta") or {}
+                lines.append(
+                    f"  + Koltuk {m.get('seat_no') or '-'} | "
+                    f"{m.get('from_stop') or '-'} -> {m.get('to_stop') or '-'} | "
+                    f"{m.get('gender') or '-'} | {m.get('payment') or '-'} | "
+                    f"{it.get('ts') or '-'}"
+                )
+
+        if stop.get("offload"):
+            lines.append("İnenler:")
+            for it in stop.get("offload") or []:
+                m = it.get("meta") or {}
+                lines.append(
+                    f"  - Koltuk {m.get('seat_no') or '-'} | "
+                    f"{m.get('from_stop') or '-'} -> {m.get('to_stop') or '-'} | "
+                    f"{m.get('gender') or '-'} | {m.get('payment') or '-'} | "
+                    f"{it.get('ts') or '-'}"
+                )
+
+        if stop.get("standing_add"):
+            lines.append("Ayakta Binen:")
+            for it in stop.get("standing_add") or []:
+                m = it.get("meta") or {}
+                lines.append(
+                    f"  + {m.get('pax') or 0} kişi | "
+                    f"{m.get('from_stop') or '-'} -> {m.get('to_stop') or '-'} | "
+                    f"{m.get('payment') or '-'} | {it.get('ts') or '-'}"
+                )
+
+        if stop.get("standing_off"):
+            lines.append("Ayakta İnen:")
+            for it in stop.get("standing_off") or []:
+                m = it.get("meta") or {}
+                lines.append(
+                    f"  - {m.get('pax') or 0} kişi | "
+                    f"{m.get('from_stop') or '-'} -> {m.get('to_stop') or '-'} | "
+                    f"{m.get('payment') or '-'} | {it.get('ts') or '-'}"
+                )
+
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def trip_report_csv(payload):
+    rows = [
+        ["durak", "islem", "koltuk", "kisi", "nereden", "nereye", "cinsiyet", "odeme", "tutar", "zaman"]
+    ]
+
+    def add(stop_name, label, items):
+        for it in items or []:
+            m = it.get("meta") or {}
+            rows.append([
+                stop_name,
+                label,
+                m.get("seat_no") or "",
+                m.get("pax") or "",
+                m.get("from_stop") or "",
+                m.get("to_stop") or "",
+                m.get("gender") or "",
+                m.get("payment") or "",
+                m.get("amount") or m.get("total_amount") or "",
+                it.get("ts") or "",
+            ])
+
+    for stop in payload.get("stops") or []:
+        name = stop.get("stop_name") or ""
+        add(name, "bindi", stop.get("board"))
+        add(name, "indi", stop.get("offload"))
+        add(name, "ayakta_bindi", stop.get("standing_add"))
+        add(name, "ayakta_indi", stop.get("standing_off"))
+
+    out = []
+    for r in rows:
+        out.append(",".join('"' + str(v).replace('"', '""') + '"' for v in r))
+
+    return "\ufeff" + "\n".join(out)
+
+
+def save_finished_trip_report(tid):
+    db = get_db()
+
+    trip = db.execute(
+        "SELECT * FROM trips WHERE id=?",
+        (tid,),
+    ).fetchone()
+
+    if not trip:
+        return {}
+
+    reports_dir = Path(app.root_path) / "storage" / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    base = "sefer_{id}_{date}_{plate}".format(
+        id=trip["id"],
+        date=_report_slug(trip["date"]),
+        plate=_report_slug(trip["plate"]),
+    )
+
+    payload = build_trip_report_payload_for_trip(db, tid)
+
+    json_path = reports_dir / f"{base}.json"
+    txt_path = reports_dir / f"{base}.txt"
+    csv_path = reports_dir / f"{base}.csv"
+
+    json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    txt_path.write_text(trip_report_text(payload), encoding="utf-8")
+    csv_path.write_text(trip_report_csv(payload), encoding="utf-8-sig")
+
+    return {
+        "json": str(json_path),
+        "txt": str(txt_path),
+        "csv": str(csv_path),
+        "base": base,
+    }
+
+
+
+@app.route("/end-trip", methods=["GET", "POST"])
+@app.route("/end_trip", methods=["GET", "POST"])
 def end_trip():
     tid = get_active_trip()
     db = get_db()
 
     if tid:
+        finalize_remaining_trip_events(db, tid)
+        report_files = save_finished_trip_report(tid)
+        session["last_finished_trip_report"] = report_files
+
         db.execute("DELETE FROM seats WHERE trip_id=?", (tid,))
         db.execute("DELETE FROM walk_on_sales WHERE trip_id=?", (tid,))
         db.execute("DELETE FROM stop_logs WHERE trip_id=?", (tid,))
@@ -4129,11 +5379,1155 @@ def end_trip():
         db.execute("UPDATE app_state SET active_trip_id=NULL WHERE id=1")
         db.commit()
 
+    last_report = session.get("last_finished_trip_report") or {}
+
+
+    base = last_report.get("base")
+
+
+    if base:
+
+
+        return redirect(url_for("archived_trip_report_page", base=base))
+
+
     return redirect(url_for("index"))
 
 # =========================================================
 # Run
 # =========================================================
+
+
+
+
+
+@app.route("/ayarlar/sifre", methods=["GET", "POST"])
+def settings_password_page():
+    msg = ""
+    error = ""
+
+    if request.method == "POST":
+        old_password = (request.form.get("old_password") or "").strip()
+        new_password = (request.form.get("new_password") or "").strip()
+        new_password2 = (request.form.get("new_password2") or "").strip()
+
+        if not verify_admin_password(old_password):
+            error = "Eski şifre yanlış."
+        elif len(new_password) < 4:
+            error = "Yeni şifre en az 4 karakter olmalı."
+        elif new_password != new_password2:
+            error = "Yeni şifreler birbiriyle aynı değil."
+        else:
+            ok, text = set_admin_password(new_password)
+            if ok:
+                msg = text
+            else:
+                error = text
+
+    return render_template("settings_password.html", msg=msg, error=error)
+
+
+
+@app.route("/ayarlar/kurtarma-kodu", methods=["GET", "POST"])
+def settings_recovery_code_page():
+    code = None
+    msg = ""
+    error = ""
+
+    current_hash = get_recovery_code_hash()
+
+    if request.method == "POST":
+        action = (request.form.get("action") or "").strip()
+
+        if action == "generate":
+            code = make_recovery_code()
+            set_recovery_code(code)
+            msg = "Yeni kurtarma kodu oluşturuldu. Bu kodu güvenli bir yere not et."
+        else:
+            error = "Geçersiz işlem."
+
+    elif not current_hash:
+        code = make_recovery_code()
+        set_recovery_code(code)
+        msg = "İlk kurtarma kodun oluşturuldu. Bu kodu güvenli bir yere not et."
+
+    updated_at = settings_get("recovery_code_updated_at", "")
+
+    return render_template(
+        "settings_recovery.html",
+        code=code,
+        msg=msg,
+        error=error,
+        updated_at=updated_at,
+    )
+
+
+@app.route("/sifre-unuttum", methods=["GET", "POST"])
+def forgot_password_page():
+    msg = ""
+    error = ""
+
+    if request.method == "POST":
+        recovery_code = (request.form.get("recovery_code") or "").strip()
+        new_password = (request.form.get("new_password") or "").strip()
+        new_password2 = (request.form.get("new_password2") or "").strip()
+
+        if not verify_recovery_code(recovery_code):
+            error = "Kurtarma kodu yanlış."
+        elif len(new_password) < 4:
+            error = "Yeni şifre en az 4 karakter olmalı."
+        elif new_password != new_password2:
+            error = "Yeni şifreler aynı değil."
+        else:
+            ok, text = set_admin_password(new_password)
+            if ok:
+                session.clear()
+                msg = "Şifre sıfırlandı. Yeni şifrenle giriş yapabilirsin."
+            else:
+                error = text
+
+    return render_template("forgot_password.html", msg=msg, error=error)
+
+
+
+@app.route("/kurulum", methods=["GET", "POST"])
+def setup_page():
+    # Profil varsa kurulum ekranını tekrar açtırma
+    if admin_profile_exists():
+        return redirect(url_for("login"))
+
+    error = ""
+
+    if request.method == "POST":
+        full_name = (request.form.get("full_name") or "").strip()
+        phone = (request.form.get("phone") or "").strip()
+        password = (request.form.get("password") or "").strip()
+        password2 = (request.form.get("password2") or "").strip()
+
+        if len(full_name) < 3:
+            error = "Ad soyad en az 3 karakter olmalı."
+        elif len(phone) < 10:
+            error = "Cep telefonu eksik görünüyor."
+        elif len(password) < 4:
+            error = "Şifre en az 4 karakter olmalı."
+        elif password != password2:
+            error = "Şifreler aynı değil."
+        else:
+            photo_path = save_profile_photo(request.files.get("profile_photo"))
+            save_admin_profile(full_name, phone, photo_path)
+
+            ok, text = set_admin_password(password)
+            if not ok:
+                error = text
+            else:
+                recovery_code = make_recovery_code()
+                set_recovery_code(recovery_code)
+                start_trial_if_missing()
+                session.clear()
+                return render_template("setup_done.html", recovery_code=recovery_code, full_name=full_name)
+
+    return render_template("setup.html", error=error)
+
+
+@app.route("/ayarlar/profil", methods=["GET", "POST"])
+def settings_profile_page():
+    msg = ""
+    error = ""
+    prof = get_admin_profile()
+
+    if request.method == "POST":
+        full_name = (request.form.get("full_name") or "").strip()
+        phone = (request.form.get("phone") or "").strip()
+
+        if len(full_name) < 3:
+            error = "Ad soyad en az 3 karakter olmalı."
+        elif len(phone) < 10:
+            error = "Cep telefonu eksik görünüyor."
+        else:
+            photo_path = save_profile_photo(request.files.get("profile_photo"))
+            save_admin_profile(full_name, phone, photo_path)
+            msg = "Profil bilgileri güncellendi."
+            prof = get_admin_profile()
+
+    return render_template("settings_profile.html", msg=msg, error=error, profile=prof)
+
+
+
+# =========================================================
+# Yedekleme Sistemi
+# =========================================================
+def backup_dir_path():
+    p = Path(app.root_path) / "storage" / "backups"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def safe_backup_filename(name):
+    name = (name or "").strip()
+    if not name:
+        return ""
+    name = Path(name).name
+    if not name.startswith("yedek_"):
+        return ""
+    if not name.endswith(".zip"):
+        return ""
+    return name
+
+
+def file_size_text(size):
+    try:
+        size = float(size)
+    except Exception:
+        return "0 B"
+
+    units = ["B", "KB", "MB", "GB"]
+    i = 0
+    while size >= 1024 and i < len(units) - 1:
+        size /= 1024
+        i += 1
+
+    if i == 0:
+        return f"{int(size)} {units[i]}"
+    return f"{size:.1f} {units[i]}"
+
+
+def list_backup_files():
+    folder = backup_dir_path()
+    items = []
+
+    for f in sorted(folder.glob("yedek_*.zip"), key=lambda x: x.stat().st_mtime, reverse=True):
+        st = f.stat()
+        items.append({
+            "name": f.name,
+            "size": file_size_text(st.st_size),
+            "mtime": datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
+        })
+
+    return items
+
+
+def add_file_to_zip(zf, file_path, arcname):
+    file_path = Path(file_path)
+    if file_path.exists() and file_path.is_file():
+        zf.write(str(file_path), arcname)
+
+
+def add_folder_to_zip(zf, folder_path, arc_prefix):
+    folder_path = Path(folder_path)
+    if not folder_path.exists() or not folder_path.is_dir():
+        return
+
+    for item in folder_path.rglob("*"):
+        if item.is_file():
+            rel = item.relative_to(folder_path)
+            zf.write(str(item), str(Path(arc_prefix) / rel))
+
+
+def create_backup_zip():
+    folder = backup_dir_path()
+    now = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"yedek_{now}.zip"
+    target = folder / filename
+
+    root = Path(app.root_path)
+
+    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as zf:
+        # Ana veritabanı
+        add_file_to_zip(zf, root / "db.sqlite3", "db.sqlite3")
+
+        # Sefer raporları
+        add_folder_to_zip(zf, root / "storage" / "reports", "storage/reports")
+
+        # Yüklenen profil fotoğrafları
+        add_folder_to_zip(zf, root / "static" / "profile", "static/profile")
+
+        # Uygulama içi yüklenen dosyalar/fotoğraflar
+        add_folder_to_zip(zf, root / "uploads", "uploads")
+
+        # Bilgi dosyası
+        info = []
+        info.append("Sarıkız Host/Hostes Paneli Yedek Dosyası")
+        info.append(f"Oluşturma: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        info.append("")
+        info.append("İçerik:")
+        info.append("- db.sqlite3")
+        info.append("- storage/reports")
+        info.append("- static/profile")
+        info.append("- uploads")
+        zf.writestr("YEDEK_BILGI.txt", "\n".join(info))
+
+    return filename
+
+
+@app.route("/ayarlar/yedekleme")
+def settings_backup_page():
+    created = (request.args.get("created") or "").strip()
+    deleted = (request.args.get("deleted") or "").strip()
+    restored = (request.args.get("restored") or "").strip()
+    emergency = (request.args.get("emergency") or "").strip()
+    restore_error = (request.args.get("restore_error") or "").strip()
+    items = list_backup_files()
+
+    return render_template(
+        "settings_backup.html",
+        items=items,
+        created=created,
+        deleted=deleted,
+        restored=restored,
+        emergency=emergency,
+        restore_error=restore_error,
+    )
+
+
+@app.post("/ayarlar/yedekleme/olustur")
+def settings_backup_create():
+    filename = create_backup_zip()
+    return redirect(url_for("settings_backup_page", created=filename))
+
+
+@app.route("/ayarlar/yedekleme/indir/<filename>")
+def settings_backup_download(filename):
+    filename = safe_backup_filename(filename)
+    if not filename:
+        abort(404)
+
+    path = backup_dir_path() / filename
+    if not path.exists():
+        abort(404)
+
+    return send_file(str(path), as_attachment=True, download_name=filename)
+
+
+@app.post("/ayarlar/yedekleme/sil/<filename>")
+def settings_backup_delete(filename):
+    filename = safe_backup_filename(filename)
+    if not filename:
+        abort(404)
+
+    path = backup_dir_path() / filename
+    if path.exists():
+        path.unlink()
+
+    return redirect(url_for("settings_backup_page", deleted=filename))
+
+
+
+# =========================================================
+# Yedekten Geri Yükleme Sistemi
+# =========================================================
+def restore_upload_dir_path():
+    p = Path(app.root_path) / "storage" / "restore_uploads"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def is_allowed_restore_member(name):
+    name = (name or "").replace("\\", "/").strip()
+
+    if not name or name.startswith("/") or name.startswith("../") or "/../" in name:
+        return False
+
+    allowed_exact = {"db.sqlite3", "YEDEK_BILGI.txt"}
+    allowed_prefixes = (
+        "storage/reports/",
+        "static/profile/",
+        "uploads/",
+    )
+
+    if name in allowed_exact:
+        return True
+
+    return any(name.startswith(prefix) for prefix in allowed_prefixes)
+
+
+def extract_restore_zip_safely(zip_path):
+    zip_path = Path(zip_path)
+    root = Path(app.root_path)
+    temp_dir = root / "storage" / "restore_temp"
+
+    if temp_dir.exists():
+        shutil.rmtree(temp_dir)
+    temp_dir.mkdir(parents=True, exist_ok=True)
+
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        names = zf.namelist()
+
+        if "db.sqlite3" not in names:
+            raise ValueError("Bu yedek dosyasında db.sqlite3 bulunamadı.")
+
+        for name in names:
+            if name.endswith("/"):
+                continue
+
+            if not is_allowed_restore_member(name):
+                continue
+
+            target = temp_dir / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+
+            with zf.open(name) as src, open(target, "wb") as dst:
+                shutil.copyfileobj(src, dst)
+
+    return temp_dir
+
+
+def close_db_for_restore():
+    # Açık SQLite bağlantısı varsa kapatmaya çalış
+    try:
+        db = getattr(g, "db", None)
+        if db:
+            db.close()
+            g.db = None
+    except Exception:
+        pass
+
+    try:
+        db = getattr(g, "_database", None)
+        if db:
+            db.close()
+            g._database = None
+    except Exception:
+        pass
+
+
+def restore_backup_from_zip(zip_path):
+    root = Path(app.root_path)
+
+    # Önce mevcut sistemi acil yedekle
+    emergency_backup = create_backup_zip()
+
+    temp_dir = extract_restore_zip_safely(zip_path)
+
+    close_db_for_restore()
+
+    # Veritabanı geri yükle
+    src_db = temp_dir / "db.sqlite3"
+    if src_db.exists():
+        shutil.copy2(src_db, root / "db.sqlite3")
+
+    # Raporlar geri yükle
+    src_reports = temp_dir / "storage" / "reports"
+    dst_reports = root / "storage" / "reports"
+    if src_reports.exists():
+        if dst_reports.exists():
+            shutil.rmtree(dst_reports)
+        dst_reports.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(src_reports, dst_reports)
+
+    # Profil fotoğrafları geri yükle
+    src_profile = temp_dir / "static" / "profile"
+    dst_profile = root / "static" / "profile"
+    if src_profile.exists():
+        if dst_profile.exists():
+            shutil.rmtree(dst_profile)
+        dst_profile.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(src_profile, dst_profile)
+
+    # Uploads geri yükle
+    src_uploads = temp_dir / "uploads"
+    dst_uploads = root / "uploads"
+    if src_uploads.exists():
+        if dst_uploads.exists():
+            shutil.rmtree(dst_uploads)
+        dst_uploads.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(src_uploads, dst_uploads)
+
+    try:
+        shutil.rmtree(temp_dir)
+    except Exception:
+        pass
+
+    return emergency_backup
+
+
+@app.post("/ayarlar/yedekleme/geri-yukle")
+def settings_backup_restore():
+    f = request.files.get("backup_file")
+
+    if not f or not f.filename:
+        return redirect(url_for("settings_backup_page", restore_error="Yedek dosyası seçilmedi."))
+
+    filename = secure_filename(f.filename or "")
+
+    if not filename.lower().endswith(".zip"):
+        return redirect(url_for("settings_backup_page", restore_error="Sadece .zip yedek dosyası yüklenebilir."))
+
+    upload_dir = restore_upload_dir_path()
+    upload_path = upload_dir / f"restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
+    f.save(str(upload_path))
+
+    try:
+        emergency = restore_backup_from_zip(upload_path)
+    except zipfile.BadZipFile:
+        try:
+            upload_path.unlink()
+        except Exception:
+            pass
+        return redirect(url_for("settings_backup_page", restore_error="Zip dosyası bozuk veya geçersiz."))
+    except Exception as e:
+        try:
+            upload_path.unlink()
+        except Exception:
+            pass
+        return redirect(url_for("settings_backup_page", restore_error=str(e)))
+
+    try:
+        upload_path.unlink()
+    except Exception:
+        pass
+
+    return redirect(url_for(
+        "settings_backup_page",
+        restored=filename,
+        emergency=emergency
+    ))
+
+
+
+# =========================================================
+# Abonelik / 30 Gün Deneme Sistemi
+# =========================================================
+TRIAL_DAYS = 30
+
+
+def parse_dt_safe(value):
+    try:
+        return datetime.fromisoformat(str(value))
+    except Exception:
+        return None
+
+
+
+
+def format_dt_tr(value):
+    dt = parse_dt_safe(value)
+    if not dt:
+        return value or "-"
+    return dt.strftime("%d.%m.%Y %H:%M")
+
+
+def subscription_defaults():
+    now = datetime.now()
+    ends = now + timedelta(days=TRIAL_DAYS)
+
+    return {
+        "subscription_status": "trial",
+        "trial_started_at": now.isoformat(timespec="seconds"),
+        "trial_ends_at": ends.isoformat(timespec="seconds"),
+        "subscription_plan": "Deneme",
+        "payment_method_added": "0",
+        "subscription_started_at": "",
+        "subscription_ends_at": "",
+        "last_payment_at": "",
+    }
+
+
+def ensure_subscription_state():
+    status = settings_get("subscription_status", "")
+
+    if status:
+        return
+
+    data = subscription_defaults()
+    for k, v in data.items():
+        settings_set(k, v)
+
+
+def get_subscription_info():
+    ensure_subscription_state()
+
+    status = settings_get("subscription_status", "trial") or "trial"
+    trial_started_at = settings_get("trial_started_at", "") or ""
+    trial_ends_at = settings_get("trial_ends_at", "") or ""
+    plan = settings_get("subscription_plan", "Deneme") or "Deneme"
+    payment_method_added = settings_get("payment_method_added", "0") or "0"
+    subscription_started_at = settings_get("subscription_started_at", "") or ""
+    last_payment_at = settings_get("last_payment_at", "") or ""
+
+    now = datetime.now()
+    end_dt = parse_dt_safe(trial_ends_at)
+
+    days_left = 0
+    expired = False
+
+    if status == "trial" and end_dt:
+        diff = end_dt - now
+        days_left = max(0, diff.days + (1 if diff.seconds > 0 else 0))
+        expired = now > end_dt
+
+    if status == "active":
+        expired = False
+        days_left = None
+
+    if status in {"past_due", "canceled", "expired"}:
+        expired = True
+
+    return {
+        "status": status,
+        "plan": plan,
+        "trial_started_at": trial_started_at,
+        "trial_ends_at": trial_ends_at,
+        "trial_started_text": format_dt_tr(trial_started_at),
+        "trial_ends_text": format_dt_tr(trial_ends_at),
+        "payment_method_added": payment_method_added == "1",
+        "subscription_started_at": subscription_started_at,
+        "subscription_started_text": format_dt_tr(subscription_started_at),
+        "last_payment_at": last_payment_at,
+        "last_payment_text": format_dt_tr(last_payment_at),
+        "days_left": days_left,
+        "expired": expired,
+    }
+
+
+def subscription_allows_access():
+    info = get_subscription_info()
+
+    if info["status"] == "active":
+        return True
+
+    if info["status"] == "trial" and not info["expired"]:
+        return True
+
+    return False
+
+
+def start_trial_if_missing():
+    ensure_subscription_state()
+
+
+def activate_subscription_manually(plan="Standart"):
+    settings_set("subscription_status", "active")
+    settings_set("subscription_plan", plan or "Standart")
+    settings_set("payment_method_added", "1")
+    settings_set("subscription_started_at", datetime.now().isoformat(timespec="seconds"))
+    settings_set("last_payment_at", datetime.now().isoformat(timespec="seconds"))
+
+
+def force_expire_trial_for_test():
+    settings_set("subscription_status", "expired")
+    settings_set("trial_ends_at", (datetime.now() - timedelta(minutes=1)).isoformat(timespec="seconds"))
+
+
+@app.context_processor
+def inject_subscription_info():
+    try:
+        return {"subscription_info": get_subscription_info()}
+    except Exception:
+        return {"subscription_info": None}
+
+
+def subscription_dev_mode():
+    """
+    Test abonelik butonları sadece açıkça izin verilirse görünür.
+    Müşteri sürümünde asla görünmez.
+    
+    Test için:
+    SHOW_TEST_CONTROLS=1 python app.py
+    """
+    try:
+        return os.getenv("SHOW_TEST_CONTROLS", "").strip().lower() in {"1", "true", "yes", "on"}
+    except Exception:
+        return False
+
+
+
+
+
+# =========================================================
+# Paketlere Göre Özellik Kilidi
+# =========================================================
+PLAN_LEVELS = {
+    "": 0,
+    "Deneme": 2,      # Deneme süresinde Pro özellikleri açık
+    "Standart": 1,
+    "Pro": 2,
+    "Sınırsız": 3,
+}
+
+FEATURE_RULES = [
+    # path_prefix, gerekli_paket, özellik_adı
+    ("/sefer-raporu-son", "Pro", "Gelişmiş sefer raporları"),
+    ("/api/report-archive", "Pro", "Rapor arşivi API"),
+    ("/ayarlar/yedekleme/geri-yukle", "Pro", "Yedekten geri yükleme"),
+]
+
+
+def get_effective_plan():
+    """
+    Kullanıcının paketini hesaplar.
+    Deneme süresi devam ediyorsa Pro hakları verilir.
+    """
+    info = get_subscription_info()
+
+    if info.get("status") == "trial" and not info.get("expired"):
+        return "Deneme"
+
+    if info.get("status") == "active":
+        return info.get("plan") or "Standart"
+
+    return ""
+
+
+def plan_level(plan):
+    return PLAN_LEVELS.get(plan or "", 0)
+
+
+def plan_allows(required_plan):
+    current = get_effective_plan()
+    return plan_level(current) >= plan_level(required_plan)
+
+
+def find_feature_rule_for_path(path):
+    path = path or ""
+    for prefix, required_plan, feature_name in FEATURE_RULES:
+        if path.startswith(prefix):
+            return {
+                "prefix": prefix,
+                "required_plan": required_plan,
+                "feature_name": feature_name,
+            }
+    return None
+
+
+@app.route("/paket-gerekli")
+def package_required_page():
+    feature = (request.args.get("feature") or "Bu özellik").strip()
+    required = (request.args.get("required") or "Pro").strip()
+    current = get_effective_plan() or "Yok"
+
+    return render_template(
+        "package_required.html",
+        feature=feature,
+        required=required,
+        current=current,
+    )
+
+@app.route("/ayarlar/abonelik", methods=["GET", "POST"])
+def settings_subscription_page():
+    msg = ""
+    error = ""
+
+    if request.method == "POST":
+        action = (request.form.get("action") or "").strip()
+
+        if action in {"activate_manual", "expire_test", "restart_trial"} and not subscription_dev_mode():
+            error = "Bu test işlemi müşteri sürümünde kapalıdır."
+
+        elif action == "activate_manual":
+            activate_subscription_manually(request.form.get("plan") or "Standart")
+            msg = "Abonelik manuel olarak aktif edildi. Ödeme sistemi bağlanınca bu işlem otomatik olacak."
+
+        elif action == "expire_test":
+            force_expire_trial_for_test()
+            msg = "Test için deneme süresi bitmiş hale getirildi."
+
+        elif action == "restart_trial":
+            data = subscription_defaults()
+            for k, v in data.items():
+                settings_set(k, v)
+            msg = "Deneme süresi yeniden başlatıldı."
+
+        else:
+            error = "Geçersiz işlem."
+
+    upgrade_required = (request.args.get("required") or "").strip()
+    upgrade_feature = (request.args.get("feature") or "").strip()
+
+    return render_template(
+        "settings_subscription.html",
+        info=get_subscription_info(),
+        msg=msg,
+        error=error,
+        dev_mode=subscription_dev_mode(),
+        upgrade_required=upgrade_required,
+        upgrade_feature=upgrade_feature,
+    )
+
+
+@app.route("/abonelik-gerekli")
+def subscription_required_page():
+    return render_template("subscription_required.html", info=get_subscription_info())
+
+@app.route("/ayarlar")
+def settings_page():
+    return render_template("settings.html")
+
+
+
+# =========================================================
+# Paket Talep Kayıtları
+# =========================================================
+def ensure_package_requests_table():
+    db = get_db()
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS package_requests(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            requested_plan TEXT NOT NULL,
+            current_plan TEXT,
+            subscription_status TEXT,
+            note TEXT,
+            user_agent TEXT,
+            created_at TEXT NOT NULL,
+            is_done INTEGER NOT NULL DEFAULT 0
+        )
+    """)
+    db.commit()
+
+
+@app.post("/api/package-request")
+def api_package_request():
+    if not subscription_dev_mode():
+        return jsonify({
+            "ok": False,
+            "error": "Paket talebi müşteri sürümünde kapalıdır. Satın alma Google Play üzerinden yapılacaktır."
+        }), 403
+
+    ensure_package_requests_table()
+
+    requested_plan = (
+        request.form.get("plan")
+        or (request.json.get("plan") if request.is_json and request.json else "")
+        or ""
+    ).strip()
+
+    if requested_plan not in {"Standart", "Pro", "Sınırsız"}:
+        return jsonify({"ok": False, "error": "Geçersiz paket seçimi."}), 400
+
+    info = get_subscription_info()
+    current_plan = get_effective_plan() or info.get("plan") or ""
+    status = info.get("status") or ""
+
+    note = f"{requested_plan} paketi için talep oluşturuldu."
+
+    db = get_db()
+    db.execute(
+        """
+        INSERT INTO package_requests(
+            requested_plan,
+            current_plan,
+            subscription_status,
+            note,
+            user_agent,
+            created_at,
+            is_done
+        )
+        VALUES(?,?,?,?,?,?,0)
+        """,
+        (
+            requested_plan,
+            current_plan,
+            status,
+            note,
+            request.headers.get("User-Agent", ""),
+            datetime.now().isoformat(timespec="seconds"),
+        ),
+    )
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "message": f"{requested_plan} paket talebiniz kaydedildi."
+    })
+
+
+@app.route("/ayarlar/paket-talepleri")
+def settings_package_requests_page():
+    if not subscription_dev_mode():
+        abort(404)
+
+    ensure_package_requests_table()
+
+    rows = get_db().execute(
+        """
+        SELECT *
+        FROM package_requests
+        ORDER BY id DESC
+        LIMIT 100
+        """
+    ).fetchall()
+
+    return render_template("settings_package_requests.html", rows=rows)
+
+
+@app.post("/ayarlar/paket-talepleri/<int:req_id>/tamamla")
+def settings_package_request_done(req_id):
+    if not subscription_dev_mode():
+        abort(404)
+
+    ensure_package_requests_table()
+
+    get_db().execute(
+        "UPDATE package_requests SET is_done=1 WHERE id=?",
+        (req_id,),
+    )
+    get_db().commit()
+
+    return redirect(url_for("settings_package_requests_page"))
+
+
+
+
+# =========================================================
+# Google Play Satın Alma Başarılı Köprüsü
+# =========================================================
+GOOGLE_PLAY_PRODUCT_TO_PLAN = {
+    "standart_monthly": "Standart",
+    "pro_monthly": "Pro",
+    "unlimited_monthly": "Sınırsız",
+}
+
+
+def google_play_plan_from_product(product_id: str) -> str:
+    product_id = (product_id or "").strip()
+    return GOOGLE_PLAY_PRODUCT_TO_PLAN.get(product_id, "")
+
+
+@app.post("/api/google-play/purchase-success")
+def api_google_play_purchase_success():
+    """
+    Android WebView içinde Google Play Billing ödeme başarılı olunca çağrılır.
+
+    ÖNEMLİ:
+    Gerçek yayın sürümünde satın alma token'ı Google Play tarafında doğrulanmadan
+    paket açılmamalı. Şimdilik Android köprü altyapısı için yerel aktivasyon yapıyoruz.
+    """
+    product_id = (
+        request.form.get("product_id")
+        or (request.json.get("product_id") if request.is_json and request.json else "")
+        or ""
+    ).strip()
+
+    purchase_token = (
+        request.form.get("purchase_token")
+        or (request.json.get("purchase_token") if request.is_json and request.json else "")
+        or ""
+    ).strip()
+
+    plan = google_play_plan_from_product(product_id)
+
+    if not plan:
+        return jsonify({
+            "ok": False,
+            "error": "Geçersiz Google Play ürün kodu.",
+            "product_id": product_id,
+        }), 400
+
+    # Şimdilik yerel aktivasyon.
+    # Gerçek Play Store sürümünde burada token doğrulama / backend doğrulama yapılacak.
+    activate_subscription_manually(plan)
+
+    try:
+        settings_set("google_play_product_id", product_id)
+        settings_set("google_play_purchase_token", purchase_token)
+        settings_set("google_play_last_purchase_at", datetime.now().isoformat(timespec="seconds"))
+    except Exception:
+        pass
+
+    return jsonify({
+        "ok": True,
+        "plan": plan,
+        "product_id": product_id,
+        "message": f"{plan} paketi Google Play satın alma sonrası aktif edildi.",
+    })
+
+
+@app.post("/api/google-play/purchase-cancelled")
+def api_google_play_purchase_cancelled():
+    product_id = (
+        request.form.get("product_id")
+        or (request.json.get("product_id") if request.is_json and request.json else "")
+        or ""
+    ).strip()
+
+    try:
+        settings_set("google_play_last_cancelled_product_id", product_id)
+        settings_set("google_play_last_cancelled_at", datetime.now().isoformat(timespec="seconds"))
+    except Exception:
+        pass
+
+    return jsonify({
+        "ok": True,
+        "message": "Satın alma iptal bilgisi kaydedildi.",
+    })
+
+
+
+
+
+
+# === LOCAL COORDS MANAGER START ===
+
+def _coords_norm_text(x):
+    import re
+    x = str(x or "").strip()
+    x = re.sub(r"\s+", " ", x)
+    return x
+
+
+def _parse_stops_local(raw):
+    import json
+    import re
+
+    if raw is None:
+        return []
+
+    if isinstance(raw, list):
+        arr = raw
+    else:
+        txt = str(raw).strip()
+        if not txt:
+            return []
+
+        try:
+            obj = json.loads(txt)
+            arr = obj if isinstance(obj, list) else re.split(r"[\n,]+", txt)
+        except Exception:
+            arr = re.split(r"[\n,]+", txt)
+
+    out = []
+    seen = set()
+
+    for item in arr:
+        stop = _coords_norm_text(item)
+        key = stop.casefold()
+        if stop and key not in seen:
+            seen.add(key)
+            out.append(stop)
+
+    return out
+
+
+def _ensure_route_stop_coords_table_local():
+    db = get_db()
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS route_stop_coords(
+            route TEXT NOT NULL,
+            stop TEXT NOT NULL,
+            lat REAL NOT NULL,
+            lng REAL NOT NULL,
+            PRIMARY KEY(route, stop)
+        )
+    """)
+    db.commit()
+
+
+def _save_route_stop_coord_local(route_name, stop_name, lat, lng):
+    db = get_db()
+    db.execute(
+        """
+        INSERT INTO route_stop_coords(route, stop, lat, lng)
+        VALUES(?,?,?,?)
+        ON CONFLICT(route, stop)
+        DO UPDATE SET lat=excluded.lat, lng=excluded.lng
+        """,
+        (route_name, stop_name, lat, lng),
+    )
+    db.commit()
+
+
+@app.route("/api/routes/<int:rid>/coord-status", methods=["POST"])
+def api_route_coord_status(rid):
+    _ensure_route_stop_coords_table_local()
+
+    db = get_db()
+    route = db.execute("SELECT * FROM routes WHERE id=?", (rid,)).fetchone()
+    if not route:
+        return jsonify({"ok": False, "msg": "Hat bulunamadı"}), 404
+
+    data = request.get_json(silent=True) or {}
+
+    route_name = (data.get("route_name") or route["name"] or "").strip()
+    stops = _parse_stops_local(data.get("stops"))
+
+    if not stops:
+        stops = _parse_stops_local(route["stops"])
+
+    if not route_name:
+        return jsonify({"ok": False, "msg": "Hat adı boş"}), 400
+
+    if not stops:
+        return jsonify({"ok": False, "msg": "Durak listesi boş"}), 400
+
+    items = []
+    saved = 0
+    missing = 0
+
+    for stop in stops:
+        row = db.execute(
+            "SELECT route, stop, lat, lng FROM route_stop_coords WHERE route=? AND stop=? LIMIT 1",
+            (route_name, stop),
+        ).fetchone()
+
+        if row:
+            saved += 1
+            items.append({
+                "stop": stop,
+                "status": "saved",
+                "msg": "Bu hatta kayıtlı",
+                "lat": row["lat"],
+                "lng": row["lng"],
+            })
+        else:
+            missing += 1
+            items.append({
+                "stop": stop,
+                "status": "missing",
+                "msg": "Koordinat yok. Elle girilecek.",
+            })
+
+    return jsonify({
+        "ok": True,
+        "route": route_name,
+        "total": len(stops),
+        "saved": saved,
+        "copied": 0,
+        "missing": missing,
+        "items": items,
+    })
+
+
+@app.route("/api/routes/<int:rid>/coord-save-manual", methods=["POST"])
+def api_route_coord_save_manual(rid):
+    _ensure_route_stop_coords_table_local()
+
+    db = get_db()
+    route = db.execute("SELECT * FROM routes WHERE id=?", (rid,)).fetchone()
+    if not route:
+        return jsonify({"ok": False, "msg": "Hat bulunamadı"}), 404
+
+    data = request.get_json(silent=True) or {}
+
+    route_name = (data.get("route_name") or route["name"] or "").strip()
+    stop = (data.get("stop") or "").strip()
+
+    try:
+        lat = float(data.get("lat"))
+        lng = float(data.get("lng"))
+    except Exception:
+        return jsonify({"ok": False, "msg": "Lat/Lng geçersiz"}), 400
+
+    if not route_name:
+        return jsonify({"ok": False, "msg": "Hat adı boş"}), 400
+
+    if not stop:
+        return jsonify({"ok": False, "msg": "Durak adı boş"}), 400
+
+    if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+        return jsonify({"ok": False, "msg": "Koordinat aralığı geçersiz"}), 400
+
+    _save_route_stop_coord_local(route_name, stop, lat, lng)
+
+    return jsonify({
+        "ok": True,
+        "msg": "Koordinat kaydedildi",
+        "route": route_name,
+        "stop": stop,
+        "lat": lat,
+        "lng": lng,
+    })
+
+# === LOCAL COORDS MANAGER END ===
+
 
 if __name__ == "__main__":
     with app.app_context():

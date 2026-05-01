@@ -24,7 +24,7 @@
       <a href="{{ url_for('index') }}" class="icon-btn" title="Ana Sayfa">🏠</a>
       <a href="{{ url_for('hesap_page') }}" class="icon-btn" title="Hesap">💵</a>
       <a href="{{ url_for('consignments_page') }}" class="icon-btn" title="Emanetler">📦</a>
-      <a href="{{ url_for('ai_console_page') }}" class="icon-btn" title="AI Console">🧠</a>
+      <a href="{{ url_for('logout') }}" class="icon-btn" title="AI Console">🧠</a>
       <form method="post" action="{{ url_for('end_trip') }}" onsubmit="return confirm('Sefer sonlandırılsın mı?')">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <button type="submit" class="icon-btn" title="Seferi Sonlandır">⛔</button>

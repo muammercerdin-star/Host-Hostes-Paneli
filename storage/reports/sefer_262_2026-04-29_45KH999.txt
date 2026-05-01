@@ -1,0 +1,23 @@
+SEFER RAPORU
+==================================
+Hat: Denizli-İstanbul (Vardön)
+Plaka: 45KH999
+Tarih: 2026-04-29
+Çıkış: 16:12
+
+Toplam Binen: 1
+Toplam İnen: 1
+Ayakta Binen: 0
+Ayakta İnen: 0
+
+Durak: Denizli
+----------------------------------
+Binen 1 | İnen 0 | Ayakta binen 0 | Ayakta inen 0
+Binenler:
+  + Koltuk 1 | Denizli -> Esenler Otogar | bay | nakit | 2026-04-29 20:06:08
+
+Durak: Esenler Otogar
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 1 | Denizli -> Esenler Otogar | bay | nakit | 2026-04-29 20:08:00

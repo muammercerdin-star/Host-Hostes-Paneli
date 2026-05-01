@@ -23,6 +23,7 @@
 
   <!-- Form: /sefer-baslat (trip_start) -->
   <form id="startForm" method="post" action="{{ url_for('trip_start') }}">
+      <input type="hidden" name="route" value="{{ current_route }}">
 
     <div class="grid">
       <label for="dt">Tarih & Saat</label>
@@ -92,6 +93,338 @@
     document.getElementById('date').value = d;               // app.py -> request.form['date']
     document.getElementById('departure_time').value = t;     // app.py -> request.form['departure_time']
   });
+</script>
+
+
+<style id="premium-trip-start-style">
+/* =========================================================
+   YENİ SEFER BAŞLAT — PREMIUM AÇIK TEMA
+========================================================= */
+
+body{
+  background:
+    radial-gradient(circle at 18% 0%, rgba(59,130,246,.14), transparent 34%),
+    radial-gradient(circle at 100% 18%, rgba(20,184,166,.12), transparent 30%),
+    linear-gradient(180deg,#f8fbff,#eaf3ff) !important;
+  color:#0f172a !important;
+}
+
+body.trip-start-premium{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important;
+}
+
+.start-premium-shell{
+  width:min(94vw,720px) !important;
+  margin:18px auto 28px !important;
+  padding:16px !important;
+  border-radius:30px !important;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(59,130,246,.12), transparent 34%),
+    linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96)) !important;
+  border:1px solid rgba(255,255,255,.82) !important;
+  box-shadow:0 28px 80px rgba(15,23,42,.18) !important;
+  color:#0f172a !important;
+}
+
+.start-premium-hero{
+  min-height:118px;
+  margin-bottom:16px;
+  padding:22px 20px;
+  border-radius:26px;
+  background:
+    linear-gradient(90deg,rgba(11,94,235,.96),rgba(11,94,235,.72),rgba(11,94,235,.15)),
+    url("/static/img/home-bus-card.jpg") center right / cover no-repeat;
+  box-shadow:0 18px 38px rgba(15,23,42,.18);
+  color:#fff;
+  position:relative;
+  overflow:hidden;
+}
+
+.start-premium-hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,rgba(0,0,0,.12),transparent 60%);
+  pointer-events:none;
+}
+
+.start-premium-kicker{
+  position:relative;
+  z-index:1;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.16);
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+}
+
+.start-premium-title{
+  position:relative;
+  z-index:1;
+  margin:14px 0 4px !important;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important;
+  font-size:34px !important;
+  line-height:1 !important;
+  font-weight:950 !important;
+  color:#fff !important;
+  text-shadow:0 3px 16px rgba(0,0,0,.28) !important;
+}
+
+.start-premium-route{
+  position:relative;
+  z-index:1;
+  margin-top:8px;
+  color:rgba(255,255,255,.90);
+  font-size:15px;
+  font-weight:750;
+}
+
+/* Form alanı */
+.start-premium-form{
+  display:grid !important;
+  gap:13px !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+
+/* Form satırlarını premium kart yap */
+.start-premium-form > div,
+.start-premium-form .form-row,
+.start-premium-form .field,
+.start-premium-form p{
+  display:grid !important;
+  grid-template-columns:150px 1fr !important;
+  align-items:center !important;
+  gap:12px !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+
+/* Etiketler */
+.start-premium-form label{
+  margin:0 !important;
+  color:#334155 !important;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important;
+  font-size:15px !important;
+  line-height:1.1 !important;
+  font-weight:900 !important;
+}
+
+/* Inputlar */
+.start-premium-form input,
+.start-premium-form select,
+.start-premium-form textarea{
+  width:100% !important;
+  min-height:54px !important;
+  border-radius:18px !important;
+  border:1px solid rgba(148,163,184,.24) !important;
+  background:#fff !important;
+  color:#0f172a !important;
+  padding:0 16px !important;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important;
+  font-size:17px !important;
+  font-weight:750 !important;
+  outline:none !important;
+  box-shadow:
+    0 10px 22px rgba(15,23,42,.07),
+    inset 0 1px 0 rgba(255,255,255,.92) !important;
+}
+
+.start-premium-form textarea{
+  min-height:86px !important;
+  padding-top:14px !important;
+  resize:vertical;
+}
+
+.start-premium-form input:focus,
+.start-premium-form select:focus,
+.start-premium-form textarea:focus{
+  border-color:rgba(37,99,235,.75) !important;
+  box-shadow:
+    0 0 0 4px rgba(37,99,235,.12),
+    0 12px 26px rgba(15,23,42,.10) !important;
+}
+
+/* Buton alanı */
+.start-premium-actions{
+  display:flex !important;
+  gap:12px !important;
+  margin-top:8px !important;
+  padding-top:6px !important;
+}
+
+.start-premium-actions button,
+.start-premium-actions a,
+.start-premium-form button,
+.start-premium-form input[type="submit"],
+.start-premium-form a.btn{
+  min-height:58px !important;
+  border-radius:20px !important;
+  padding:0 22px !important;
+  border:0 !important;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important;
+  font-size:17px !important;
+  font-weight:950 !important;
+  text-decoration:none !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  box-shadow:0 14px 28px rgba(15,23,42,.14) !important;
+}
+
+.start-premium-form button[type="submit"],
+.start-premium-form input[type="submit"],
+.start-primary-btn{
+  background:linear-gradient(145deg,#38bdf8,#2563eb) !important;
+  color:#fff !important;
+}
+
+.start-premium-form a,
+.start-premium-form button:not([type="submit"]),
+.start-secondary-btn{
+  background:linear-gradient(145deg,#f8fafc,#e2e8f0) !important;
+  color:#334155 !important;
+}
+
+/* Eski koyu paneli kır */
+.start-premium-shell *,
+.start-premium-shell input,
+.start-premium-shell select,
+.start-premium-shell textarea{
+  box-sizing:border-box;
+}
+
+@media(max-width:520px){
+  .start-premium-shell{
+    width:calc(100vw - 24px) !important;
+    margin:14px auto 24px !important;
+    padding:14px !important;
+    border-radius:28px !important;
+  }
+
+  .start-premium-hero{
+    min-height:112px;
+    border-radius:24px;
+    padding:20px 18px;
+  }
+
+  .start-premium-title{
+    font-size:30px !important;
+  }
+
+  .start-premium-form > div,
+  .start-premium-form .form-row,
+  .start-premium-form .field,
+  .start-premium-form p{
+    grid-template-columns:1fr !important;
+    gap:7px !important;
+  }
+
+  .start-premium-form label{
+    font-size:14px !important;
+    padding-left:4px;
+  }
+
+  .start-premium-actions{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+  }
+}
+</style>
+
+<script id="premium-trip-start-script">
+(function(){
+  document.body.classList.add("trip-start-premium");
+
+  function txt(el){
+    return (el && el.textContent || "").replace(/\s+/g, " ").trim();
+  }
+
+  const title = Array.from(document.querySelectorAll("h1,h2,.title"))
+    .find(el => /Yeni Sefer Başlat/i.test(txt(el)));
+
+  const form = document.querySelector("form");
+
+  if(!form) return;
+
+  let shell =
+    form.closest(".panel") ||
+    form.closest(".card") ||
+    form.closest(".wrap") ||
+    form.closest("main") ||
+    form.parentElement;
+
+  if(shell){
+    shell.classList.add("start-premium-shell");
+  }
+
+  form.classList.add("start-premium-form");
+
+  if(title){
+    title.classList.add("start-premium-title");
+
+    if(!document.querySelector(".start-premium-hero")){
+      const hero = document.createElement("section");
+      hero.className = "start-premium-hero";
+
+      const kicker = document.createElement("div");
+      kicker.className = "start-premium-kicker";
+      kicker.textContent = "🚌 Yeni operasyon";
+
+      const clonedTitle = document.createElement("h1");
+      clonedTitle.className = "start-premium-title";
+      clonedTitle.textContent = "Yeni Sefer Başlat";
+
+      const route = new URLSearchParams(location.search).get("route") || "";
+      const routeDiv = document.createElement("div");
+      routeDiv.className = "start-premium-route";
+      routeDiv.textContent = route ? ("Seçili hat: " + route) : "Sefer bilgilerini doldur";
+
+      hero.appendChild(kicker);
+      hero.appendChild(clonedTitle);
+      hero.appendChild(routeDiv);
+
+      title.style.display = "none";
+
+      if(shell){
+        shell.insertBefore(hero, shell.firstChild);
+      }else{
+        form.parentElement.insertBefore(hero, form);
+      }
+    }
+  }
+
+  /* Route query geldiyse formdaki route alanına yaz */
+  const routeParam = new URLSearchParams(location.search).get("route");
+  if(routeParam){
+    const routeInput = form.querySelector('[name="route"]');
+    if(routeInput){
+      routeInput.value = routeParam;
+    }
+  }
+
+  /* Butonları aksiyon satırına al */
+  const buttons = Array.from(form.querySelectorAll('button, input[type="submit"], a.btn, a.button'));
+  if(buttons.length && !form.querySelector(".start-premium-actions")){
+    const actions = document.createElement("div");
+    actions.className = "start-premium-actions";
+
+    buttons.forEach(btn => actions.appendChild(btn));
+    form.appendChild(actions);
+  }
+
+  /* Vazgeç linki normal a ise buton gibi görünsün */
+  form.querySelectorAll("a").forEach(a => {
+    if(/vazgeç|vazgec|iptal/i.test(txt(a))){
+      a.classList.add("start-secondary-btn");
+    }
+  });
+})();
 </script>
 
 {% endblock %}

@@ -1,0 +1,811 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  background:
+    radial-gradient(circle at 18% 0%, rgba(37,99,235,.20), transparent 34%),
+    radial-gradient(circle at 96% 28%, rgba(20,184,166,.14), transparent 35%),
+    linear-gradient(180deg,#061524,#0b1726 45%,#08111d) !important;
+  color:#eaf2ff;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+.route-edit-shell{
+  width:min(94vw,720px);
+  margin:18px auto 34px;
+  padding:18px;
+  border-radius:34px;
+  background:linear-gradient(180deg,rgba(15,31,49,.96),rgba(8,20,34,.96));
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow:0 28px 80px rgba(0,0,0,.42);
+}
+
+.route-edit-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.back-btn{
+  min-height:58px;
+  padding:0 22px;
+  border-radius:22px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  text-decoration:none;
+  background:linear-gradient(180deg,#334155,#1e293b);
+  border:1px solid rgba(148,163,184,.22);
+  color:#f8fbff;
+  font-size:18px;
+  font-weight:950;
+  box-shadow:0 14px 28px rgba(0,0,0,.24);
+}
+
+.route-pill{
+  min-height:42px;
+  padding:0 14px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(37,99,235,.16);
+  border:1px solid rgba(96,165,250,.30);
+  color:#93c5fd;
+  font-size:13px;
+  font-weight:950;
+  letter-spacing:.35px;
+}
+
+.route-hero{
+  margin-bottom:18px;
+}
+
+.route-hero h1{
+  margin:0;
+  color:#f8fbff;
+  font-size:44px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-1.2px;
+}
+
+.route-hero p{
+  margin:10px 0 0;
+  color:#aab8ca;
+  font-size:15px;
+  line-height:1.35;
+  font-weight:800;
+}
+
+.route-card{
+  border-radius:30px;
+  padding:18px;
+  background:linear-gradient(180deg,#132338,#0d1a2b);
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow:0 18px 42px rgba(0,0,0,.28);
+}
+
+.error-box{
+  margin-bottom:14px;
+  padding:14px;
+  border-radius:20px;
+  background:rgba(239,68,68,.14);
+  border:1px solid rgba(248,113,113,.28);
+  color:#fecaca;
+  font-size:15px;
+  font-weight:850;
+}
+
+.form-group{
+  margin-bottom:18px;
+}
+
+.route-label{
+  display:block;
+  margin:0 0 10px;
+  color:#dbeafe;
+  font-size:18px;
+  line-height:1.1;
+  font-weight:950;
+}
+
+.route-input,
+.route-textarea{
+  width:100%;
+  background:#0a1624;
+  border:1px solid rgba(148,163,184,.24);
+  color:#f8fbff;
+  border-radius:24px;
+  padding:17px 18px;
+  outline:none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.03),
+    0 12px 28px rgba(0,0,0,.18);
+}
+
+.route-input{
+  min-height:64px;
+  font-size:18px;
+  font-weight:900;
+}
+
+.route-textarea{
+  min-height:330px;
+  max-height:52vh;
+  resize:vertical;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:16px;
+  line-height:1.38;
+  font-weight:750;
+}
+
+.route-input::placeholder,
+.route-textarea::placeholder{
+  color:#7f8ea3;
+}
+
+.route-input:focus,
+.route-textarea:focus{
+  background:#0d1d30;
+  border-color:#60a5fa;
+  box-shadow:
+    0 0 0 4px rgba(96,165,250,.14),
+    0 14px 30px rgba(0,0,0,.22);
+}
+
+.preview-box{
+  margin-top:14px;
+  padding:16px;
+  border-radius:26px;
+  background:rgba(15,35,58,.92);
+  border:1px solid rgba(34,197,94,.22);
+  box-shadow:0 14px 30px rgba(0,0,0,.22);
+}
+
+.preview-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.preview-title{
+  color:#dbeafe;
+  font-size:17px;
+  font-weight:950;
+  line-height:1.15;
+}
+
+.preview-count{
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(34,197,94,.14);
+  border:1px solid rgba(34,197,94,.28);
+  color:#86efac;
+  font-size:14px;
+  font-weight:950;
+  white-space:nowrap;
+}
+
+.preview-list{
+  display:grid;
+  gap:9px;
+  max-height:260px;
+  overflow:auto;
+  padding-right:4px;
+}
+
+.preview-item{
+  min-height:46px;
+  display:grid;
+  grid-template-columns:20px 1fr;
+  align-items:center;
+  gap:11px;
+  padding:10px 13px;
+  border-radius:19px;
+  background:#0a1624;
+  border:1px solid rgba(148,163,184,.16);
+  color:#f8fbff;
+  font-size:16px;
+  font-weight:900;
+  line-height:1.25;
+}
+
+.preview-dot{
+  width:12px;
+  height:12px;
+  border-radius:999px;
+  background:#22c55e;
+  box-shadow:
+    0 0 0 5px rgba(34,197,94,.14),
+    0 0 18px rgba(34,197,94,.55);
+}
+
+.preview-empty{
+  padding:14px;
+  border-radius:18px;
+  background:#0a1624;
+  border:1px dashed rgba(148,163,184,.22);
+  color:#94a3b8;
+  font-size:15px;
+  font-weight:850;
+}
+
+.form-actions{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-top:24px;
+}
+
+.cancel-btn,
+.save-btn{
+  width:100%;
+  height:76px;
+  min-height:76px;
+  border:0;
+  border-radius:26px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  text-decoration:none;
+  font-family:inherit;
+  font-size:22px;
+  font-weight:950;
+  line-height:1;
+  cursor:pointer;
+}
+
+.cancel-btn{
+  background:linear-gradient(180deg,#334155,#1e293b);
+  border:1px solid rgba(148,163,184,.22);
+  color:#f8fbff;
+  box-shadow:0 16px 30px rgba(0,0,0,.25);
+}
+
+.save-btn{
+  background:linear-gradient(145deg,#38bdf8,#2563eb);
+  color:#fff;
+  box-shadow:0 18px 34px rgba(37,99,235,.30);
+}
+
+@media(max-width:430px){
+  .route-edit-shell{
+    width:calc(100vw - 24px);
+    padding:16px;
+    border-radius:30px;
+  }
+
+  .route-edit-top{
+    align-items:stretch;
+  }
+
+  .back-btn{
+    min-height:56px;
+    padding:0 18px;
+  }
+
+  .route-pill{
+    display:none;
+  }
+
+  .route-hero h1{
+    font-size:38px;
+  }
+
+  .route-card{
+    padding:16px;
+    border-radius:28px;
+  }
+
+  .route-input{
+    min-height:62px;
+    font-size:17px;
+  }
+
+  .route-textarea{
+    min-height:300px;
+    max-height:46vh;
+    font-size:15px;
+  }
+
+  .preview-list{
+    max-height:230px;
+  }
+
+  .form-actions{
+    gap:14px;
+  }
+
+  .cancel-btn,
+  .save-btn{
+    height:72px;
+    min-height:72px;
+    border-radius:24px;
+    font-size:20px;
+  }
+}
+</style>
+
+<main class="route-edit-shell">
+
+  <div class="route-edit-top">
+    <a class="back-btn" href="{{ url_for('routes_list') }}">← Hatlar</a>
+    <div class="route-pill">🛣️ Hat düzenleme</div>
+  </div>
+
+  <section class="route-hero">
+    <h1>Hattı Düzenle</h1>
+    <p>Hat adını ve durak sırasını buradan güncelle. Her satır bir durak olarak kaydedilir.</p>
+  </section>
+
+  <section class="route-card">
+    {% if error %}
+      <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('route_edit', rid=route['id']) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <div class="form-group">
+        <label class="route-label" for="routeName">Hat adı</label>
+        <input
+          class="route-input"
+          id="routeName"
+          type="text"
+          name="name"
+          value="{{ route['name'] if route else '' }}"
+          placeholder="Örn: Denizli – İstanbul"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="route-label" for="routeStops">Duraklar</label>
+        <textarea
+          class="route-textarea"
+          id="routeStops"
+          name="stops"
+          rows="12"
+          placeholder="Denizli Otogar&#10;Sarayköy&#10;Buldan&#10;..."
+        >{{ stops_text or '' }}</textarea>
+
+        <div class="preview-box">
+          <div class="preview-head">
+            <div class="preview-title">🟢 Hat durak önizlemesi</div>
+            <div class="preview-count" id="routeStopCount">0 durak</div>
+          </div>
+          <div class="preview-list" id="routeStopList"></div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a class="cancel-btn" href="{{ url_for('routes_list') }}">Vazgeç</a>
+        <button class="save-btn" type="submit">Kaydet</button>
+      </div>
+    </form>
+  </section>
+
+</main>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  const textarea = document.getElementById("routeStops");
+  const list = document.getElementById("routeStopList");
+  const count = document.getElementById("routeStopCount");
+
+  function escapeHtml(text){
+    return text
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function renderStops(){
+    const stops = textarea.value
+      .split(/\n+/)
+      .map(x => x.trim())
+      .filter(Boolean);
+
+    count.textContent = stops.length + " durak";
+
+    if(stops.length === 0){
+      list.innerHTML = '<div class="preview-empty">Durak yazınca burada yeşil noktalı hat önizlemesi oluşacak.</div>';
+      return;
+    }
+
+    list.innerHTML = stops.map(stop => `
+      <div class="preview-item">
+        <span class="preview-dot"></span>
+        <span>${escapeHtml(stop)}</span>
+      </div>
+    `).join("");
+  }
+
+  textarea.addEventListener("input", renderStops);
+  renderStops();
+});
+</script>
+
+
+
+<!-- LOCAL COORDS UI START -->
+<style id="local-coords-ui-style">
+.local-coords-box{
+  margin-top:18px;
+  padding:16px;
+  border-radius:24px;
+  background:rgba(8,18,32,.78);
+  border:1px solid rgba(96,165,250,.25);
+  box-shadow:0 16px 34px rgba(0,0,0,.25);
+  color:#eaf2ff;
+}
+
+.local-coords-head h3{
+  margin:0;
+  color:#f8fbff;
+  font-size:22px;
+  line-height:1.1;
+  font-weight:950;
+}
+
+.local-coords-head p{
+  margin:6px 0 0;
+  color:#94a3b8;
+  font-size:14px;
+  line-height:1.35;
+  font-weight:800;
+}
+
+.local-coords-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:14px;
+}
+
+.local-coords-btn{
+  min-height:58px;
+  border:0;
+  border-radius:20px;
+  padding:0 14px;
+  font-size:16px;
+  font-weight:950;
+  color:#fff;
+  cursor:pointer;
+}
+
+.local-coords-btn.primary{
+  background:linear-gradient(145deg,#38bdf8,#2563eb);
+  box-shadow:0 14px 28px rgba(37,99,235,.25);
+}
+
+.local-coords-btn.green{
+  background:linear-gradient(145deg,#22c55e,#15803d);
+  box-shadow:0 14px 28px rgba(21,128,61,.20);
+}
+
+.local-coords-progress{
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:18px;
+  background:#071423;
+  border:1px solid rgba(148,163,184,.16);
+  color:#cbd5e1;
+  font-size:14px;
+  font-weight:850;
+}
+
+.local-coords-list{
+  margin-top:12px;
+  display:grid;
+  gap:10px;
+  max-height:420px;
+  overflow:auto;
+  padding-right:3px;
+}
+
+.local-coord-item{
+  display:grid;
+  grid-template-columns:30px 1fr;
+  gap:10px;
+  align-items:start;
+  padding:12px;
+  border-radius:18px;
+  background:#071423;
+  border:1px solid rgba(148,163,184,.14);
+}
+
+.local-coord-icon{
+  width:26px;
+  height:26px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  font-weight:950;
+}
+
+.local-coord-icon.saved{background:rgba(34,197,94,.18);color:#86efac;}
+.local-coord-icon.copied{background:rgba(34,197,94,.18);color:#86efac;}
+.local-coord-icon.candidate{background:rgba(245,158,11,.18);color:#fbbf24;}
+.local-coord-icon.missing{background:rgba(239,68,68,.18);color:#fca5a5;}
+
+.local-coord-main b{
+  display:block;
+  color:#f8fbff;
+  font-size:15px;
+  line-height:1.2;
+  font-weight:950;
+}
+
+.local-coord-main span{
+  display:block;
+  margin-top:4px;
+  color:#94a3b8;
+  font-size:13px;
+  line-height:1.25;
+  font-weight:750;
+}
+
+.local-coord-main small{
+  display:block;
+  margin-top:5px;
+  color:#60a5fa;
+  font-size:12px;
+  line-height:1.25;
+  font-weight:800;
+}
+
+.local-coord-manual{
+  display:grid;
+  grid-template-columns:1fr 1fr auto;
+  gap:8px;
+  margin-top:10px;
+}
+
+.local-coord-manual input{
+  min-height:46px !important;
+  border-radius:15px !important;
+  padding:10px 12px !important;
+  font-size:14px !important;
+}
+
+.local-coord-save{
+  min-height:46px;
+  border:0;
+  border-radius:15px;
+  padding:0 14px;
+  color:#fff;
+  font-size:14px;
+  font-weight:950;
+  background:linear-gradient(145deg,#22c55e,#15803d);
+}
+
+@media(max-width:430px){
+  .local-coords-actions{
+    grid-template-columns:1fr;
+  }
+
+  .local-coord-manual{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+
+<script id="local-coords-ui-js">
+document.addEventListener("DOMContentLoaded", function(){
+  const form = document.querySelector("form");
+  const textarea = document.querySelector("textarea[name='stops'], textarea");
+  const nameInput = document.querySelector("input[name='name']");
+
+  if(!form || !textarea || document.getElementById("localCoordsBox")) return;
+
+  const box = document.createElement("div");
+  box.id = "localCoordsBox";
+  box.className = "local-coords-box";
+  box.innerHTML = `
+    <div class="local-coords-head">
+      <h3>📍 Kayıtlı Koordinatlar</h3>
+      <p>İnternetten aramaz. Daha önce kayıtlı durak koordinatlarını baz alır. Eksik olanları elle girersin.</p>
+    </div>
+
+    <div class="local-coords-actions">
+      <button type="button" class="local-coords-btn primary" id="btnLocalCoordCheck">Koordinatları Kontrol Et</button>
+      <button type="button" class="local-coords-btn green" id="btnLocalCoordCopy">Kayıtlılardan Doldur</button>
+    </div>
+
+    <div class="local-coords-progress" id="localCoordsProgress">
+      Hazır. Önce “Koordinatları Kontrol Et” diyebilirsin.
+    </div>
+
+    <div class="local-coords-list" id="localCoordsList"></div>
+  `;
+
+  textarea.insertAdjacentElement("afterend", box);
+
+  const progress = document.getElementById("localCoordsProgress");
+  const list = document.getElementById("localCoordsList");
+
+  function parseStops(){
+    return textarea.value
+      .split(/\n|,/)
+      .map(x => x.trim())
+      .filter(Boolean);
+  }
+
+  function esc(x){
+    return String(x || "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;");
+  }
+
+  function iconFor(status){
+    if(status === "saved") return "✓";
+    if(status === "copied") return "✓";
+    if(status === "candidate") return "!";
+    return "×";
+  }
+
+  function itemHtml(item){
+    const cls = item.status || "missing";
+    const coord = item.lat && item.lng ? `${item.lat}, ${item.lng}` : "";
+    const source = item.source_route ? `Kaynak: ${item.source_route} / ${item.source_stop || item.stop}` : "";
+
+    const manual = item.status === "missing" ? `
+      <div class="local-coord-manual">
+        <input type="number" step="0.000001" placeholder="Lat" data-lat-for="${esc(item.stop)}">
+        <input type="number" step="0.000001" placeholder="Lng" data-lng-for="${esc(item.stop)}">
+        <button type="button" class="local-coord-save" data-save-stop="${esc(item.stop)}">Kaydet</button>
+      </div>
+    ` : "";
+
+    return `
+      <div class="local-coord-item">
+        <div class="local-coord-icon ${cls}">${iconFor(item.status)}</div>
+        <div class="local-coord-main">
+          <b>${esc(item.stop)}</b>
+          <span>${esc(item.msg || "")}${coord ? " · " + coord : ""}</span>
+          ${source ? `<small>${esc(source)}</small>` : ""}
+          ${manual}
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadStatus(autoCopy){
+    const routeName = nameInput ? nameInput.value.trim() : "";
+    const stops = parseStops();
+
+    if(!routeName){
+      alert("Önce hat adını yaz.");
+      return;
+    }
+
+    if(stops.length === 0){
+      alert("Durak listesi boş.");
+      return;
+    }
+
+    progress.textContent = autoCopy
+      ? "Kayıtlı durak koordinatları bu hatta kopyalanıyor..."
+      : "Koordinatlar kontrol ediliyor...";
+
+    list.innerHTML = "";
+
+    try{
+      const res = await fetch({{ url_for('api_route_coord_status', rid=route['id']) | tojson }}, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": {{ csrf_token | tojson }}
+        },
+        body: JSON.stringify({
+          route_name: routeName,
+          stops: stops,
+          auto_copy: autoCopy
+        })
+      });
+
+      const j = await res.json();
+
+      if(!j.ok){
+        progress.textContent = "Hata: " + (j.msg || "İşlem başarısız");
+        return;
+      }
+
+      progress.textContent =
+        `Sonuç: ${j.total} durak · ${j.saved} kayıtlı · ${j.copied} kopyalandı · ${j.missing} eksik`;
+
+      list.innerHTML = j.items.map(itemHtml).join("");
+      bindManualButtons();
+
+    }catch(e){
+      progress.textContent = "Bağlantı hatası: " + e.message;
+    }
+  }
+
+  function bindManualButtons(){
+    document.querySelectorAll("[data-save-stop]").forEach(btn => {
+      if(btn.dataset.bound) return;
+      btn.dataset.bound = "1";
+
+      btn.addEventListener("click", async function(){
+        const stop = this.dataset.saveStop;
+        const routeName = nameInput ? nameInput.value.trim() : "";
+
+        const latEl = document.querySelector(`[data-lat-for="${CSS.escape(stop)}"]`);
+        const lngEl = document.querySelector(`[data-lng-for="${CSS.escape(stop)}"]`);
+
+        const lat = latEl ? latEl.value : "";
+        const lng = lngEl ? lngEl.value : "";
+
+        if(!lat || !lng){
+          alert("Lat ve Lng gir.");
+          return;
+        }
+
+        try{
+          const res = await fetch({{ url_for('api_route_coord_save_manual', rid=route['id']) | tojson }}, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-Token": {{ csrf_token | tojson }}
+            },
+            body: JSON.stringify({
+              route_name: routeName,
+              stop: stop,
+              lat: lat,
+              lng: lng
+            })
+          });
+
+          const j = await res.json();
+
+          if(!j.ok){
+            alert(j.msg || "Kayıt hatası");
+            return;
+          }
+
+          progress.textContent = `${stop} koordinatı kaydedildi.`;
+          loadStatus(false);
+
+        }catch(e){
+          alert("Bağlantı hatası: " + e.message);
+        }
+      });
+    });
+  }
+
+  document.getElementById("btnLocalCoordCheck").addEventListener("click", function(){
+    loadStatus(false);
+  });
+
+  document.getElementById("btnLocalCoordCopy").addEventListener("click", function(){
+    if(!confirm("Aynı isimle daha önce kayıtlı durak koordinatları bu hatta kopyalansın mı?")) return;
+    loadStatus(true);
+  });
+});
+</script>
+<!-- LOCAL COORDS UI END -->
+
+{% endblock %}

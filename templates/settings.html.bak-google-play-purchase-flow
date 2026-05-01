@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ayarlar</title>
+
+  <style>
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 34%),
+        linear-gradient(180deg,#f8fbff,#eaf3ff);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:#0f172a;
+    }
+
+    .settings-shell{
+      width:min(94vw,720px);
+      margin:18px auto 28px;
+      padding:16px;
+      border-radius:30px;
+      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
+      border:1px solid rgba(255,255,255,.82);
+      box-shadow:0 28px 80px rgba(15,23,42,.18);
+    }
+
+    .settings-hero{
+      padding:24px 20px;
+      border-radius:26px;
+      background:linear-gradient(145deg,#2563eb,#06b6d4);
+      color:#fff;
+      box-shadow:0 18px 38px rgba(37,99,235,.22);
+      margin-bottom:14px;
+    }
+
+    .settings-hero h1{
+      margin:0;
+      font-size:34px;
+      line-height:1;
+      font-weight:950;
+    }
+
+    .settings-hero p{
+      margin:8px 0 0;
+      font-size:15px;
+      font-weight:700;
+      color:rgba(255,255,255,.88);
+    }
+
+    .settings-list{
+      overflow:hidden;
+      border-radius:24px;
+      background:#fff;
+      border:1px solid #e5edf6;
+      box-shadow:0 14px 34px rgba(15,23,42,.10);
+    }
+
+    .settings-item{
+      min-height:72px;
+      display:grid;
+      grid-template-columns:46px 1fr 30px;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      border-bottom:1px solid #e5edf6;
+      text-decoration:none;
+      color:#10203a;
+    }
+
+    .settings-item:last-child{
+      border-bottom:none;
+    }
+
+    .settings-ico{
+      width:42px;
+      height:42px;
+      display:grid;
+      place-items:center;
+      border-radius:16px;
+      background:#eff6ff;
+      font-size:22px;
+    }
+
+    .settings-title{
+      font-size:17px;
+      font-weight:950;
+      line-height:1.05;
+    }
+
+    .settings-desc{
+      margin-top:4px;
+      font-size:13px;
+      color:#64748b;
+      font-weight:650;
+      line-height:1.2;
+    }
+
+    .settings-arrow{
+      font-size:30px;
+      font-weight:900;
+      color:#64748b;
+      justify-self:end;
+    }
+
+    .back-btn{
+      margin-top:14px;
+      min-height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:21px;
+      background:#fff;
+      color:#2563eb;
+      border:1px solid #e5edf6;
+      box-shadow:0 12px 28px rgba(15,23,42,.10);
+      text-decoration:none;
+      font-size:17px;
+      font-weight:950;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="settings-shell">
+    <section class="settings-hero">
+      <h1>⚙️ Ayarlar</h1>
+      <p>Panel şifresi, görünüm ve sistem tercihleri.</p>
+    </section>
+
+    <section class="settings-list">
+
+      <a class="settings-item" href="/ayarlar/paket-talepleri">
+        <span class="settings-ico">🧾</span>
+        <span>
+          <div class="settings-title">Paket Talepleri</div>
+          <div class="settings-desc">Kullanıcı paket yükseltme talepleri</div>
+        </span>
+        <span class="settings-arrow">›</span>
+      </a>
+
+
+      <a class="settings-item" href="/ayarlar/abonelik">
+        <span class="settings-ico">💳</span>
+        <span>
+          <div class="settings-title">Abonelik</div>
+          <div class="settings-desc">30 gün deneme ve ödeme durumu</div>
+        </span>
+        <span class="settings-arrow">›</span>
+      </a>
+
+
+      <a class="settings-item" href="/ayarlar/profil">
+        <span class="settings-ico">👤</span>
+        <span>
+          <div class="settings-title">Profil Bilgileri</div>
+          <div class="settings-desc">Ad, cep telefonu ve fotoğraf</div>
+        </span>
+        <span class="settings-arrow">›</span>
+      </a>
+
+      <a class="settings-item" href="/ayarlar/sifre">
+        <span class="settings-ico">🔐</span>
+        <span>
+          <div class="settings-title">Şifre Değiştir</div>
+          <div class="settings-desc">Panel giriş şifresini güncelle</div>
+        </span>
+        <span class="settings-arrow">›</span>
+      </a>
+
+      <a class="settings-item" href="/ayarlar/kurtarma-kodu">
+        <span class="settings-ico">🧾</span>
+        <span>
+          <div class="settings-title">Kurtarma Kodu</div>
+          <div class="settings-desc">Şifre unutulursa hesabı kurtar</div>
+        </span>
+        <span class="settings-arrow">›</span>
+      </a>
+
+
+      <a class="settings-item" href="#">
+        <span class="settings-ico">🔊</span>
+        <span>
+          <div class="settings-title">Sesli Robot</div>
+          <div class="settings-desc">Sesli uyarı ve komut ayarları</div>
+        </span>
+        <span class="settings-arrow">›</span>
+      </a>
+
+      <a class="settings-item" href="/rapor-arsiv">
+        <span class="settings-ico">📁</span>
+        <span>
+          <div class="settings-title">Rapor Arşivi</div>
+          <div class="settings-desc">Bitmiş sefer dosyalarını görüntüle</div>
+        </span>
+        <span class="settings-arrow">›</span>
+      </a>
+
+      <a class="settings-item" href="/ayarlar/yedekleme">
+        <span class="settings-ico">💾</span>
+        <span>
+          <div class="settings-title">Yedekleme</div>
+          <div class="settings-desc">Veritabanı ve raporları yedekle</div>
+        </span>
+        <span class="settings-arrow">›</span>
+      </a>
+    </section>
+
+    <a class="back-btn" href="/">← Ana ekrana dön</a>
+  </main>
+</body>
+</html>

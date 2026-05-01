@@ -1,0 +1,478 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/seats/seats.css?v=38">
+
+
+
+<div class="seats-shell">
+  {% include "seats_parts/topbar.html" %}
+
+{% include "seats_parts/stats.html" %}
+
+<div class="layout">
+    <section class="board-card glass">
+      <div class="board-inner">
+        <div id="driveInlineDock">
+          <button id="driveModeToggle" type="button" aria-label="Sürüş modu">🚘 Sürüş</button>
+
+          <div id="driveSpeedChip" class="drive-speed-chip neutral">
+            <div class="drive-speed-top">
+              <span class="drive-speed-ico">🚦</span>
+              <b>0</b>
+              <span>km/h</span>
+            </div>
+            <div class="drive-speed-sub">Limit: —</div>
+          </div>
+        </div>
+
+        <div class="board-head">
+          <div class="board-title">
+            <div class="board-kicker">Canlı Operasyon Paneli</div>
+            <h2>Koltuk Planı</h2>
+            <small>Tek ekrandan yolcu, durak, iniş ve hızlı işlemleri yönet.</small>
+            <div class="selected-stop-chip">🎯 Seçili durak: <b id="selectedStopBadge">—</b></div>
+          </div>
+
+          <div class="board-head-right">
+            <div class="voice-row">
+              <button class="voice-command-btn" id="btnDeckAI" type="button" title="Sesli Komut">
+                🎤 <span>Sesli Komut</span>
+              </button>
+              <div class="voice-state" id="voiceStateBadge">Hazır</div>
+            </div>
+
+            <div class="legend">
+              <div class="mini-chip">🟢 Boş</div>
+              <div class="mini-chip">🔵 Bay</div>
+              <div class="mini-chip">🩷 Bayan</div>
+              <div class="mini-chip">🧳 Bagaj</div>
+              <div class="mini-chip">🔔 İniş</div>
+              <div class="mini-chip">🚌 Servis</div>
+            </div>
+          </div>
+        </div>
+
+        {% include "seats_parts/route_flow.html" %}
+
+{% include "seats_parts/deck.html" %}
+
+      </div>
+    </section>
+
+    <aside class="panel-card glass">
+      <div class="panel-handle"></div>
+
+      <div class="panel-tabs">
+        <button class="tab-btn active" type="button" data-tab="overview">Genel</button>
+        <button class="tab-btn" type="button" data-tab="route">Durak</button>
+        <button class="tab-btn" type="button" data-tab="eta">ETA</button>
+        <button class="tab-btn" type="button" data-tab="quick">İşlem</button>
+        <button class="tab-btn" type="button" data-tab="ai">Asistan</button>
+      </div>
+
+      <div class="tab-pane active" data-pane="overview">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Operasyon Özeti</h3>
+              <small id="miniLiveState">Hazır</small>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="k">Canlı Durak</div>
+                <div class="v" id="miniStop">—</div>
+                <div class="s">GPS veya manuel seçime göre</div>
+              </div>
+              <div class="metric-card">
+                <div class="k">Sonraki İşlem</div>
+                <div class="v" id="aiNextAction">—</div>
+                <div class="s">Sistem önerisi</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Saat</h3>
+              <small id="clockSub">—</small>
+            </div>
+            <div class="clock-big" id="clockMain">--:--:--</div>
+            <div class="clock-date" id="clockDate">—</div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Namaz Vakti</h3>
+              <small>Canlı</small>
+            </div>
+            <div class="prayer-line" id="prLine">Konum alınıyor…</div>
+          </div>
+
+          <div class="section-box">
+            <div class="speed-box" id="speedBox">
+              <div class="speed-left">
+                <div class="k">Hız / Limit</div>
+                <div class="speed-value"><b id="spVal">0</b><span>km/h</span></div>
+                <div class="speed-meta" id="spLimit">Limit: —</div>
+              </div>
+              <button class="tts-btn" id="ttsToggle" title="Sesli uyarı">🔊</button>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Rötar / ETA</h3>
+              <small id="routeNextTimed">—</small>
+            </div>
+            <div class="delay-main warn" id="delayMain">—</div>
+            <div class="delay-sub" id="delaySub">Saatli durak bekleniyor</div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Ekip</h3>
+              <small>Aktif sefer</small>
+            </div>
+            <div class="crew-list">
+              <div class="crew-item">🧑‍✈️ 1. Kaptan: <b>{{ trip['captain1'] or '-' }}</b></div>
+              <div class="crew-item">🧑‍✈️ 2. Kaptan: <b>{{ trip['captain2'] or '-' }}</b></div>
+              <div class="crew-item">🤝 Muavin: <b>{{ trip['attendant'] or '-' }}</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="route">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Canlı Durak Yönetimi</h3>
+              <small id="routeLiveStop">—</small>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Sıradaki Durak</span>
+                <select id="alertStop">
+                  <option value="">—</option>
+                </select>
+              </label>
+
+              <div class="field-row">
+                <label class="field">
+                  <span>Eşik (km)</span>
+                  <input type="number" id="alertRadius" min="0.1" step="0.1" value="3">
+                </label>
+
+                <label class="field">
+                  <span>Konum İzleme</span>
+                  <button class="btn primary" type="button" id="btnGeoWatch">KAPALI</button>
+                </label>
+              </div>
+
+              <div class="toggle-line">
+                <label><input type="checkbox" id="soundToggle" checked> Sesli yanıt</label>
+                <label><input type="checkbox" id="autoAdvanceToggle" checked> Oto ilerle</label>
+              </div>
+
+              <div class="action-grid">
+                <button class="btn warn" type="button" id="btnTriggerNow">Şimdi Uyar</button>
+                <button class="btn danger" type="button" id="btnOffloadNowPane">İnecekleri İndir</button>
+              </div>
+
+              <div class="muted" id="geoHint">Durak seç.</div>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Koordinat</h3>
+              <small>route_stop_coords</small>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Seçili Durak</span>
+                <input type="text" id="coordStopName" readonly>
+              </label>
+
+              <div class="field-row">
+                <label class="field">
+                  <span>Lat</span>
+                  <input type="number" id="coordLat" step="0.000001" placeholder="37.xxxxxx">
+                </label>
+                <label class="field">
+                  <span>Lng</span>
+                  <input type="number" id="coordLng" step="0.000001" placeholder="29.xxxxxx">
+                </label>
+              </div>
+
+              <button class="btn accent" type="button" id="btnSaveCoord">Koordinatı Kaydet</button>
+              <div class="muted">Bu kayıt route_stop_coords tablosuna yazılır.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="eta">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Saatli Garaj / Rötar</h3>
+              <small id="stEtaHint">Plan / ETA</small>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="k">Canlı Durak</div>
+                <div class="v" id="routeLiveStopCard">—</div>
+              </div>
+              <div class="metric-card">
+                <div class="k">Sonraki Saatli</div>
+                <div class="v" id="stEtaTarget">—</div>
+              </div>
+            </div>
+
+            <div class="timeline-list" id="etaTimeline" style="margin-top:12px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="quick">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Hızlı İşlemler</h3>
+              <small>Tek dokunuş</small>
+            </div>
+
+            <div class="action-grid">
+              <button class="btn primary" type="button" id="fabBulkPane">Toplu Giriş</button>
+              <button class="btn green" type="button" id="fabCashPane">Hızlı Tahsilat</button>
+              <button class="btn ghost" type="button" id="openStandingModalBtn">Ayakta Listesi</button>
+              <button class="btn dark" type="button" id="btnOpenRouteTab">Durak Sekmesi</button>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Ayakta Yolcular</h3>
+              <small id="quickStandingMeta">0 kişi</small>
+            </div>
+            <div class="standing-list" id="quickStandingList"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="ai">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>🧠 Operasyon Asistanı</h3>
+              <small>Canlı analiz</small>
+            </div>
+
+            <div class="ai-main" id="aiMain">Veriler hazırlanıyor…</div>
+            <div class="ai-sub" id="aiSub">Sistem canlı rota, durak ve rötar özetini hazırlıyor.</div>
+
+            <div class="ai-list" style="margin-top:12px;">
+              <div class="ai-item"><b>Sıradaki İşlem</b><span id="aiNextActionMirror">—</span></div>
+              <div class="ai-item"><b>Canlı Durak</b><span id="aiLiveStop">—</span></div>
+              <div class="ai-item"><b>Rötar Durumu</b><span id="aiDelay">—</span></div>
+              <div class="ai-item"><b>Yoğunluk</b><span id="aiDensity">—</span></div>
+              <div class="ai-item"><b>Servis</b><span id="aiService">—</span></div>
+              <div class="ai-item"><b>Emanet</b><span id="aiParcel">—</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+{% include "seats_parts/modals.html" %}
+
+
+<script>
+  window.SEATS_BOOT = {
+    csrf: {{ csrf_token | tojson | safe }},
+    routeName: {{ trip['route'] | tojson | safe }},
+    tripDate: {{ trip['date'] | tojson | safe }},
+    departureTime: {{ trip['departure_time'] | tojson | safe }},
+    tripKey: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
+
+    seatPositions: {{ seat_positions | tojson | safe }},
+    assigned: {{ assigned | tojson | safe }},
+    stopsMap: {{ stops_map | tojson | safe }},
+    boardsMapServer: {{ boards_map | tojson | safe }},
+    genders: {{ genders | tojson | safe }},
+    serviceMap: {{ service_map | tojson | safe }},
+    serviceNotes: {{ service_notes | tojson | safe }},
+    serverStops: {{ stops | tojson | safe }},
+
+    urls: {
+      hesap: {{ url_for('hesap_page') | tojson | safe }},
+      consignments: {{ url_for('consignments_page') | tojson | safe }}
+    }
+  };
+</script>
+
+<script src="/static/seats/bags.js?v=1"></script>
+<script src="/static/seats/voice-commands.js?v=1"></script>
+<script src="/static/seats/standing.js?v=1"></script>
+<script src="/static/seats/seats.js?v=25"></script>
+<script src="/static/seats/drive-controls.js?v=2"></script>
+
+<style id="drive-quick-menu-final-style">
+/* =========================================================
+   SÜRÜŞ MODU HIZLI MENÜ - FINAL
+========================================================= */
+
+#driveQuickDock{
+  display:none;
+}
+
+/* JS bu classı verince görünür */
+body.drive-quick-active #driveQuickDock{
+  display:grid !important;
+  grid-template-columns:repeat(4, minmax(0,1fr));
+  gap:8px;
+  width:100%;
+  margin:10px 0 0;
+  padding:8px;
+  border-radius:22px;
+  background:rgba(8,18,32,.86);
+  border:1px solid rgba(96,165,250,.24);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.04),
+    0 14px 28px rgba(0,0,0,.24);
+}
+
+#driveQuickDock .dq-btn{
+  min-height:48px;
+  border-radius:18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  text-decoration:none;
+  color:#f8fbff;
+  background:linear-gradient(180deg,rgba(30,58,95,.98),rgba(15,31,49,.98));
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow:0 10px 20px rgba(0,0,0,.20);
+  font-size:18px;
+  font-weight:950;
+}
+
+#driveQuickDock .dq-btn span{
+  font-size:10px;
+  line-height:1;
+  font-weight:950;
+  color:#dbeafe;
+}
+
+@media(max-width:430px){
+  body.drive-quick-active #driveQuickDock{
+    gap:7px;
+    padding:7px;
+    border-radius:20px;
+  }
+
+  #driveQuickDock .dq-btn{
+    min-height:44px;
+    border-radius:16px;
+    font-size:17px;
+  }
+
+  #driveQuickDock .dq-btn span{
+    font-size:10px;
+  }
+}
+</style>
+
+<script id="drive-quick-menu-final-js">
+(function(){
+  function makeDock(){
+    if(document.getElementById("driveQuickDock")) return;
+
+    const speedChip = document.getElementById("driveSpeedChip");
+    const dockParent = speedChip ? speedChip.parentElement : null;
+
+    if(!dockParent) return;
+
+    const dock = document.createElement("div");
+    dock.id = "driveQuickDock";
+    dock.innerHTML = `
+      <a class="dq-btn" href="/">🏠<span>Ana</span></a>
+      <a class="dq-btn" href="/hesap">💵<span>Hesap</span></a>
+      <a class="dq-btn" href="/emanetler">📦<span>Emanet</span></a>
+      <a class="dq-btn" href="/yolcu-kontrolu">👥<span>Yolcu</span></a>
+    `;
+
+    speedChip.insertAdjacentElement("afterend", dock);
+  }
+
+  function isDriveMode(){
+    const btn = document.getElementById("driveModeToggle");
+    const txt = (btn ? btn.textContent : "").toLowerCase();
+
+    // Sürüş modunda buton genelde "Normal" yazar
+    if(txt.includes("normal")) return true;
+
+    // Bazı sürümlerde body/html classı olabilir
+    const bodyCls = document.body.className.toLowerCase();
+    const htmlCls = document.documentElement.className.toLowerCase();
+
+    return (
+      bodyCls.includes("drive") ||
+      bodyCls.includes("surus") ||
+      htmlCls.includes("drive") ||
+      htmlCls.includes("surus")
+    );
+  }
+
+  function sync(){
+    makeDock();
+    document.body.classList.toggle("drive-quick-active", isDriveMode());
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    sync();
+
+    const btn = document.getElementById("driveModeToggle");
+    if(btn){
+      btn.addEventListener("click", function(){
+        setTimeout(sync, 50);
+        setTimeout(sync, 200);
+        setTimeout(sync, 500);
+      });
+
+      new MutationObserver(sync).observe(btn, {
+        childList:true,
+        subtree:true,
+        characterData:true,
+        attributes:true
+      });
+    }
+
+    new MutationObserver(sync).observe(document.body, {
+      attributes:true,
+      attributeFilter:["class"]
+    });
+
+    // İlk açılışta veya geç yüklenen JS varsa yakalasın
+    let n = 0;
+    const t = setInterval(function(){
+      sync();
+      n++;
+      if(n > 20) clearInterval(t);
+    }, 250);
+  });
+})();
+</script>
+
+{% endblock %}

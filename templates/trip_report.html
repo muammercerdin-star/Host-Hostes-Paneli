@@ -1,0 +1,1105 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  body{
+    background:#06101c;
+    color:#eaf2ff;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  }
+
+  .report-wrap{
+    max-width:1040px;
+    margin:0 auto;
+    padding:14px 12px 42px;
+  }
+
+  .hero{
+    background:linear-gradient(145deg,rgba(37,99,235,.24),rgba(15,23,42,.96));
+    border:1px solid rgba(148,163,184,.22);
+    border-radius:26px;
+    padding:18px;
+    box-shadow:0 18px 55px rgba(0,0,0,.42);
+  }
+
+  .hero h1{
+    margin:0 0 6px;
+    font-size:32px;
+    letter-spacing:-.04em;
+  }
+
+  .muted{ color:rgba(226,232,240,.66); }
+
+  .actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:14px;
+  }
+
+  .btn{
+    border:1px solid rgba(148,163,184,.24);
+    background:rgba(15,23,42,.82);
+    color:#fff;
+    border-radius:999px;
+    padding:10px 14px;
+    font-weight:950;
+    text-decoration:none;
+    cursor:pointer;
+    min-height:42px;
+  }
+
+  .btn.green{ background:linear-gradient(180deg,#22c55e,#15803d); }
+  .btn.blue{ background:linear-gradient(180deg,#3b82f6,#1d4ed8); }
+
+  .summary-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin:14px 0;
+  }
+
+  .sum-card{
+    background:rgba(15,23,42,.78);
+    border:1px solid rgba(148,163,184,.18);
+    border-radius:18px;
+    padding:14px;
+  }
+
+  .sum-card .k{
+    font-size:13px;
+    color:rgba(226,232,240,.62);
+    font-weight:850;
+  }
+
+  .sum-card .v{
+    font-size:30px;
+    font-weight:1000;
+    margin-top:4px;
+  }
+
+  .section-card{
+    margin-top:14px;
+    background:linear-gradient(180deg,rgba(20,35,55,.88),rgba(8,16,29,.94));
+    border:1px solid rgba(148,163,184,.18);
+    border-radius:26px;
+    padding:14px;
+    box-shadow:0 18px 55px rgba(0,0,0,.35);
+  }
+
+  .section-head{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:12px;
+  }
+
+  .section-head h2{
+    margin:0;
+    font-size:25px;
+    letter-spacing:-.03em;
+  }
+
+  .legend{
+    display:flex;
+    gap:7px;
+    flex-wrap:wrap;
+    font-size:12px;
+    color:rgba(226,232,240,.78);
+  }
+
+  .lg{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    background:rgba(15,23,42,.62);
+    border:1px solid rgba(148,163,184,.18);
+    border-radius:999px;
+    padding:6px 8px;
+    font-weight:800;
+  }
+
+  .dot{
+    width:11px;
+    height:11px;
+    border-radius:999px;
+    display:inline-block;
+  }
+
+  .dot.zero{ background:#16a34a; }
+  .dot.one{ background:#2563eb; }
+  .dot.two{ background:#a855f7; }
+  .dot.hot{ background:#f59e0b; }
+
+  .deck-report{
+    position:relative;
+    display:grid;
+    grid-template-columns:1fr 74px 1fr 1fr;
+    gap:22px 18px;
+    padding:20px 12px 22px;
+    border-radius:24px;
+    background:
+      radial-gradient(circle at 50% 0%,rgba(59,130,246,.14),transparent 38%),
+      rgba(2,6,23,.26);
+    border:1px solid rgba(148,163,184,.13);
+    overflow:hidden;
+  }
+
+  .corridor{
+    grid-column:2;
+    grid-row:1 / 14;
+    background:linear-gradient(180deg,#7f1d1d,#991b1b,#7f1d1d);
+    border-radius:28px;
+    opacity:.9;
+    min-height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:inset 0 0 22px rgba(0,0,0,.35);
+  }
+
+  .corridor span{
+    writing-mode:vertical-rl;
+    letter-spacing:.34em;
+    font-weight:1000;
+    color:#fff;
+    opacity:.9;
+    font-size:13px;
+  }
+
+  .door{
+    grid-column:3 / 5;
+    border:none;
+    border-radius:18px;
+    min-height:48px;
+    background:linear-gradient(180deg,#b7791f,#8a5a12);
+    color:#fff;
+    font-weight:1000;
+    letter-spacing:.06em;
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.16),0 8px 20px rgba(0,0,0,.26);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+
+  .seat-tile{
+    position:relative;
+    border:none;
+    min-height:58px;
+    border-radius:22px;
+    color:#fff;
+    font-weight:1000;
+    font-size:28px;
+    line-height:1;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,.20),
+      inset 0 -2px 0 rgba(0,0,0,.18),
+      0 12px 20px rgba(0,0,0,.30);
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+
+  .seat-tile.sold-0{ background:linear-gradient(180deg,#22c55e,#15803d); }
+  .seat-tile.sold-1{ background:linear-gradient(180deg,#3b82f6,#1d4ed8); }
+  .seat-tile.sold-2{ background:linear-gradient(180deg,#d946ef,#9333ea); }
+  .seat-tile.sold-3{ background:linear-gradient(180deg,#f59e0b,#b45309); }
+
+  .seat-tile.active-now{
+    outline:4px solid rgba(34,197,94,.42);
+    box-shadow:
+      0 0 0 7px rgba(34,197,94,.12),
+      inset 0 2px 0 rgba(255,255,255,.20),
+      0 12px 20px rgba(0,0,0,.32);
+  }
+
+  .sale-badge{
+    position:absolute;
+    top:-12px;
+    right:-10px;
+    min-width:35px;
+    height:28px;
+    padding:0 9px;
+    border-radius:999px;
+    background:#0f172a;
+    border:1px solid rgba(147,197,253,.55);
+    color:#bfdbfe;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:1000;
+    box-shadow:0 6px 16px rgba(0,0,0,.35);
+  }
+
+  .money-badge{
+    position:absolute;
+    left:50%;
+    bottom:-18px;
+    transform:translateX(-50%);
+    border-radius:999px;
+    background:rgba(2,6,23,.9);
+    border:1px solid rgba(148,163,184,.22);
+    padding:3px 7px;
+    font-size:11px;
+    color:rgba(226,232,240,.86);
+    white-space:nowrap;
+    font-weight:850;
+  }
+
+  .seat-hint{
+    margin-top:10px;
+    font-size:13px;
+    color:rgba(226,232,240,.64);
+  }
+
+  .stop-card{
+    margin-top:12px;
+    background:rgba(15,23,42,.70);
+    border:1px solid rgba(148,163,184,.16);
+    border-radius:22px;
+    padding:13px;
+  }
+
+  .stop-head{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    border-bottom:1px solid rgba(148,163,184,.14);
+    padding-bottom:9px;
+    margin-bottom:9px;
+  }
+
+  .stop-name{
+    font-size:23px;
+    font-weight:1000;
+    letter-spacing:-.03em;
+  }
+
+  .stop-summary{
+    color:rgba(226,232,240,.68);
+    font-weight:800;
+    margin-top:2px;
+  }
+
+  .stop-lines{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .box{
+    background:rgba(2,6,23,.38);
+    border:1px solid rgba(148,163,184,.12);
+    border-radius:16px;
+    padding:10px;
+  }
+
+  .box h3{
+    margin:0 0 8px;
+    font-size:15px;
+  }
+
+  .row{
+    padding:8px 0;
+    border-top:1px solid rgba(148,163,184,.1);
+    font-size:14px;
+    line-height:1.35;
+  }
+
+  .row:first-of-type{ border-top:0; }
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    border-radius:999px;
+    padding:4px 8px;
+    background:rgba(59,130,246,.18);
+    font-weight:950;
+    margin-right:4px;
+  }
+
+  .empty{
+    color:rgba(226,232,240,.43);
+    font-size:13px;
+    padding:6px 0;
+  }
+
+  .modal-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.62);
+    z-index:9998;
+    display:none;
+  }
+
+  .seat-modal{
+    position:fixed;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:min(94vw,560px);
+    max-height:86vh;
+    overflow:auto;
+    background:#07111f;
+    color:#eaf2ff;
+    border:1px solid rgba(148,163,184,.22);
+    border-radius:26px;
+    box-shadow:0 30px 90px rgba(0,0,0,.65);
+    z-index:9999;
+    display:none;
+  }
+
+  .modal-head{
+    position:sticky;
+    top:0;
+    background:linear-gradient(180deg,#0f2440,#07111f);
+    padding:16px;
+    border-bottom:1px solid rgba(148,163,184,.16);
+    z-index:1;
+  }
+
+  .modal-title{
+    font-size:26px;
+    font-weight:1000;
+    letter-spacing:-.03em;
+  }
+
+  .modal-close{
+    position:absolute;
+    right:12px;
+    top:12px;
+    width:42px;
+    height:42px;
+    border-radius:999px;
+    border:1px solid rgba(148,163,184,.2);
+    background:rgba(15,23,42,.9);
+    color:#fff;
+    font-size:22px;
+    font-weight:1000;
+  }
+
+  .modal-body{
+    padding:14px;
+  }
+
+  .seat-stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-bottom:12px;
+  }
+
+  .seat-stat{
+    background:rgba(15,23,42,.72);
+    border:1px solid rgba(148,163,184,.14);
+    border-radius:16px;
+    padding:10px;
+  }
+
+  .seat-stat .k{
+    color:rgba(226,232,240,.58);
+    font-size:12px;
+    font-weight:850;
+  }
+
+  .seat-stat .v{
+    font-size:22px;
+    font-weight:1000;
+    margin-top:3px;
+  }
+
+  .timeline{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .tl-item{
+    background:rgba(15,23,42,.68);
+    border:1px solid rgba(148,163,184,.14);
+    border-radius:17px;
+    padding:11px;
+  }
+
+  .tl-kind{
+    font-weight:1000;
+    margin-bottom:4px;
+  }
+
+  .tl-kind.board{ color:#86efac; }
+  .tl-kind.offload{ color:#fca5a5; }
+
+  .tl-main{
+    font-size:15px;
+    font-weight:850;
+  }
+
+  .tl-sub{
+    margin-top:4px;
+    color:rgba(226,232,240,.62);
+    font-size:13px;
+  }
+
+  @media(max-width:720px){
+    .summary-grid{ grid-template-columns:repeat(2,1fr); }
+    .deck-report{
+      grid-template-columns:1fr 64px 1fr 1fr;
+      gap:24px 14px;
+      padding:18px 9px 22px;
+    }
+    .seat-tile{
+      min-height:52px;
+      font-size:25px;
+      border-radius:20px;
+    }
+    .stop-lines{ grid-template-columns:1fr; }
+    .hero h1{ font-size:29px; }
+    .section-head{ align-items:flex-start; flex-direction:column; }
+  }
+
+  @media(max-width:390px){
+    .deck-report{
+      grid-template-columns:1fr 58px 1fr 1fr;
+      gap:23px 10px;
+    }
+    .seat-tile{
+      min-height:49px;
+      font-size:23px;
+    }
+    .corridor span{ font-size:12px; }
+  }
+
+  @media print{
+    body{ background:white; color:black; }
+    .actions,.seat-hint,.modal-backdrop,.seat-modal{ display:none !important; }
+    .hero,.section-card,.stop-card,.sum-card,.box{
+      box-shadow:none;
+      background:white;
+      color:black;
+      border-color:#ddd;
+    }
+    .muted,.empty{ color:#555; }
+    .corridor{ background:#ddd; color:#111; }
+  }
+</style>
+
+<script>
+  window.REPORT_ARCHIVE_BASE = {{ archive_base|default('', true)|tojson }};
+</script>
+
+<div class="report-wrap">
+  <div class="hero">
+    <h1>📄 Sefer Raporu</h1>
+    <div class="muted" id="tripInfo">Rapor yükleniyor...</div>
+
+    <div class="actions">
+      <a class="btn" href="/seats">← Koltuk ekranı</a>
+      <button class="btn blue" type="button" onclick="window.print()">🖨 Yazdır</button>
+      <button class="btn green" type="button" id="shareBtn">📲 WhatsApp</button>
+      <button class="btn" type="button" id="csvBtn">⬇ CSV indir</button>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="sum-card"><div class="k">Toplam Binen</div><div class="v" id="totalBoard">0</div></div>
+    <div class="sum-card"><div class="k">Toplam İnen</div><div class="v" id="totalOff">0</div></div>
+    <div class="sum-card"><div class="k">Tekrar Satılan Koltuk</div><div class="v" id="resoldSeats">0</div></div>
+    <div class="sum-card"><div class="k">Toplam Tahsilat</div><div class="v" id="totalMoney">₺0</div></div>
+  </div>
+
+  <section class="section-card">
+    <div class="section-head">
+      <div>
+        <h2>🚌 Koltuk Hareket Haritası</h2>
+        <div class="muted">Koltuğa dokununca o koltuğun tüm biniş/iniş geçmişi açılır.</div>
+      </div>
+      <div class="legend">
+        <span class="lg"><span class="dot zero"></span> 0 satış</span>
+        <span class="lg"><span class="dot one"></span> 1 satış</span>
+        <span class="lg"><span class="dot two"></span> 2 satış</span>
+        <span class="lg"><span class="dot hot"></span> 3+ satış</span>
+      </div>
+    </div>
+
+    <div class="deck-report" id="seatReportDeck">
+      <div class="corridor"><span>KORİDOR</span></div>
+    </div>
+
+    <div class="seat-hint">
+      Rozetlerdeki <b>×2</b>, <b>×3</b> işareti koltuğun sefer boyunca kaç kere satıldığını gösterir.
+    </div>
+  </section>
+
+  <section class="section-card">
+    <div class="section-head">
+      <div>
+        <h2>📍 Durak Bazlı Rapor</h2>
+        <div class="muted">Binenler, inenler ve ayakta işlemler duraklara göre listelenir.</div>
+      </div>
+    </div>
+    <div id="stopReportList"></div>
+  </section>
+</div>
+
+<div class="modal-backdrop" id="seatModalBackdrop"></div>
+<div class="seat-modal" id="seatModal">
+  <div class="modal-head">
+    <button class="modal-close" type="button" id="seatModalClose">×</button>
+    <div class="modal-title" id="seatModalTitle">Koltuk</div>
+    <div class="muted" id="seatModalSub">Hareket geçmişi</div>
+  </div>
+  <div class="modal-body" id="seatModalBody"></div>
+</div>
+
+<script>
+let REPORT_DATA = null;
+let SEAT_HISTORY = {};
+
+const SEAT_LAYOUT = [
+  {type:"seat", no:1,  c:1, r:1},  {type:"seat", no:3,  c:3, r:1},  {type:"seat", no:4,  c:4, r:1},
+  {type:"seat", no:5,  c:1, r:2},  {type:"seat", no:7,  c:3, r:2},  {type:"seat", no:8,  c:4, r:2},
+  {type:"seat", no:9,  c:1, r:3},  {type:"seat", no:11, c:3, r:3},  {type:"seat", no:12, c:4, r:3},
+  {type:"seat", no:13, c:1, r:4},  {type:"seat", no:15, c:3, r:4},  {type:"seat", no:16, c:4, r:4},
+  {type:"seat", no:17, c:1, r:5},  {type:"seat", no:19, c:3, r:5},  {type:"seat", no:20, c:4, r:5},
+  {type:"seat", no:21, c:1, r:6},  {type:"seat", no:23, c:3, r:6},  {type:"seat", no:24, c:4, r:6},
+  {type:"seat", no:25, c:1, r:7},  {type:"door", c:"3 / 5", r:7},
+  {type:"seat", no:29, c:1, r:8},  {type:"seat", no:27, c:3, r:8},  {type:"seat", no:28, c:4, r:8},
+  {type:"seat", no:31, c:1, r:9},  {type:"seat", no:33, c:3, r:9},  {type:"seat", no:34, c:4, r:9},
+  {type:"seat", no:35, c:1, r:10}, {type:"seat", no:37, c:3, r:10}, {type:"seat", no:38, c:4, r:10},
+  {type:"seat", no:39, c:1, r:11}, {type:"seat", no:41, c:3, r:11}, {type:"seat", no:42, c:4, r:11},
+  {type:"seat", no:43, c:1, r:12}, {type:"seat", no:45, c:3, r:12}, {type:"seat", no:46, c:4, r:12},
+                                  {type:"seat", no:49, c:3, r:13}, {type:"seat", no:50, c:4, r:13},
+  {type:"seat", no:51, c:1, r:14}, {type:"seat", no:52, c:2, r:14}, {type:"seat", no:53, c:3, r:14}, {type:"seat", no:54, c:4, r:14}
+];
+
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g, m => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
+  }[m]));
+}
+
+function money(v){
+  const n = Number(v || 0);
+  return "₺" + n.toFixed(0);
+}
+
+function niceGender(g){
+  if(g === "bay") return "Bay";
+  if(g === "bayan") return "Bayan";
+  return g || "";
+}
+
+function nicePayment(p){
+  const m = { nakit:"Nakit", iban:"IBAN", online:"Online", pos:"POS", ucretsiz:"Ücretsiz" };
+  return m[p] || p || "";
+}
+
+function eventLine(item, type){
+  const m = item.meta || {};
+  const seat = m.seat_no ? `Koltuk ${m.seat_no}` : "";
+  const from = m.from_stop || "";
+  const to = m.to_stop || "";
+  const gender = niceGender(m.gender);
+  const pay = nicePayment(m.payment);
+  const amount = Number(m.amount || m.total_amount || 0) ? ` · ${money(m.amount || m.total_amount)}` : "";
+  const pax = Number(m.pax || 0);
+
+  if(type === "standing"){
+    return `<div class="row"><span class="badge">${pax || 1} kişi</span> ${esc(from)} → ${esc(to)}${pay ? " · " + esc(pay) : ""}${esc(amount)}<br><small class="muted">${esc(item.ts || "")}</small></div>`;
+  }
+
+  return `<div class="row"><span class="badge">${esc(seat || "Koltuk")}</span> ${esc(from)} → ${esc(to)}${gender ? " · " + esc(gender) : ""}${pay ? " · " + esc(pay) : ""}${esc(amount)}<br><small class="muted">${esc(item.ts || "")}</small></div>`;
+}
+
+function renderBox(title, items, type){
+  const rows = (items || []).map(x => eventLine(x, type)).join("");
+  return `
+    <div class="box">
+      <h3>${title}</h3>
+      ${rows || '<div class="empty">Kayıt yok</div>'}
+    </div>
+  `;
+}
+
+function flattenEvents(data){
+  const events = [];
+
+  (data.stops || []).forEach(stop => {
+    ["board","offload","standing_add","standing_off","parcel_deliver"].forEach(type => {
+      (stop[type] || []).forEach(item => {
+        events.push({
+          ...item,
+          type,
+          stop_name: stop.stop_name
+        });
+      });
+    });
+  });
+
+  events.sort((a,b) => Number(a.id || 0) - Number(b.id || 0));
+  return events;
+}
+
+function buildSeatHistory(data){
+  const hist = {};
+  const events = flattenEvents(data);
+
+  events.forEach(e => {
+    const m = e.meta || {};
+    const no = Number(m.seat_no || 0);
+    if(!no) return;
+
+    if(!hist[no]){
+      hist[no] = {
+        seat_no: no,
+        events: [],
+        board_count: 0,
+        offload_count: 0,
+        total_amount: 0,
+        active: false,
+        last_route: ""
+      };
+    }
+
+    const h = hist[no];
+    h.events.push(e);
+
+    if(e.type === "board"){
+      h.board_count += 1;
+      h.total_amount += Number(m.amount || 0);
+      h.active = true;
+      h.last_route = `${m.from_stop || "-"} → ${m.to_stop || "-"}`;
+    }
+
+    if(e.type === "offload"){
+      h.offload_count += 1;
+      h.active = false;
+    }
+  });
+
+  return hist;
+}
+
+function renderSeatDeck(){
+  const deck = document.getElementById("seatReportDeck");
+  deck.innerHTML = `<div class="corridor"><span>KORİDOR</span></div>`;
+
+  SEAT_LAYOUT.forEach(item => {
+    if(item.type === "door"){
+      const d = document.createElement("div");
+      d.className = "door";
+      d.textContent = "KAPI";
+      d.style.gridColumn = item.c;
+      d.style.gridRow = item.r;
+      deck.appendChild(d);
+      return;
+    }
+
+    const h = SEAT_HISTORY[item.no] || { board_count:0, total_amount:0, active:false };
+    const sold = Number(h.board_count || 0);
+
+    let cls = "sold-0";
+    if(sold === 1) cls = "sold-1";
+    else if(sold === 2) cls = "sold-2";
+    else if(sold >= 3) cls = "sold-3";
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `seat-tile ${cls} ${h.active ? "active-now" : ""}`;
+    btn.style.gridColumn = item.c;
+    btn.style.gridRow = item.r;
+    btn.dataset.seat = item.no;
+
+    btn.innerHTML = `
+      ${item.no}
+      ${sold > 0 ? `<span class="sale-badge">×${sold}</span>` : ""}
+      ${Number(h.total_amount || 0) > 0 ? `<span class="money-badge">${money(h.total_amount)}</span>` : ""}
+    `;
+
+    btn.addEventListener("click", () => openSeatReport(item.no));
+    deck.appendChild(btn);
+  });
+}
+
+function seatStatusText(h){
+  if(!h || !h.events.length) return "Bu koltuk için hareket yok.";
+  return h.active ? "Son durum: koltuk seferde dolu görünüyor." : "Son durum: koltuk boş / yolcu inmiş görünüyor.";
+}
+
+function openSeatReport(seatNo){
+  const h = SEAT_HISTORY[seatNo] || {
+    seat_no: seatNo,
+    events: [],
+    board_count: 0,
+    offload_count: 0,
+    total_amount: 0,
+    active: false
+  };
+
+  document.getElementById("seatModalTitle").textContent = `Koltuk ${seatNo} Raporu`;
+  document.getElementById("seatModalSub").textContent = seatStatusText(h);
+
+  const timeline = h.events.map(e => {
+    const m = e.meta || {};
+    const isBoard = e.type === "board";
+    const title = isBoard ? "🟢 Bindi" : "🔴 İndi";
+    const kindCls = isBoard ? "board" : "offload";
+    const route = isBoard
+      ? `${m.from_stop || "-"} → ${m.to_stop || "-"}`
+      : `${m.to_stop || e.stop_name || "-"} durağında indi`;
+
+    const extra = [
+      niceGender(m.gender),
+      nicePayment(m.payment),
+      Number(m.amount || 0) ? money(m.amount) : ""
+    ].filter(Boolean).join(" · ");
+
+    return `
+      <div class="tl-item">
+        <div class="tl-kind ${kindCls}">${title}</div>
+        <div class="tl-main">${esc(route)}</div>
+        <div class="tl-sub">${esc(extra || "Detay yok")} · ${esc(e.ts || "")}</div>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("seatModalBody").innerHTML = `
+    <div class="seat-stats">
+      <div class="seat-stat"><div class="k">Satış</div><div class="v">${h.board_count || 0}</div></div>
+      <div class="seat-stat"><div class="k">İniş</div><div class="v">${h.offload_count || 0}</div></div>
+      <div class="seat-stat"><div class="k">Tahsilat</div><div class="v">${money(h.total_amount || 0)}</div></div>
+    </div>
+
+    <div class="timeline">
+      ${timeline || '<div class="empty">Bu koltuk için henüz kayıt yok.</div>'}
+    </div>
+  `;
+
+  document.getElementById("seatModalBackdrop").style.display = "block";
+  document.getElementById("seatModal").style.display = "block";
+}
+
+function closeSeatReport(){
+  document.getElementById("seatModalBackdrop").style.display = "none";
+  document.getElementById("seatModal").style.display = "none";
+}
+
+function renderStopReport(data){
+  const html = (data.stops || []).map(stop => {
+    const s = stop.summary || {};
+
+    return `
+      <section class="stop-card">
+        <div class="stop-head">
+          <div>
+            <div class="stop-name">${esc(stop.stop_name)}</div>
+            <div class="stop-summary">
+              Binen ${s.board_count || 0} · İnen ${s.offload_count || 0} ·
+              Ayakta binen ${s.standing_board_count || 0} · Ayakta inen ${s.standing_off_count || 0}
+            </div>
+          </div>
+          <div class="muted" style="font-weight:900;text-align:right">Durak<br>özeti</div>
+        </div>
+
+        <div class="stop-lines">
+          ${renderBox("🟢 Binenler", stop.board, "seat")}
+          ${renderBox("🔴 İnenler", stop.offload, "seat")}
+          ${renderBox("🧍 Ayakta Binen", stop.standing_add, "standing")}
+          ${renderBox("⬇ Ayakta İnen", stop.standing_off, "standing")}
+        </div>
+      </section>
+    `;
+  }).join("");
+
+  document.getElementById("stopReportList").innerHTML = html || `
+    <div class="stop-card">
+      <div class="empty">Henüz rapor kaydı yok.</div>
+    </div>
+  `;
+}
+
+function renderReport(data){
+  REPORT_DATA = data;
+  SEAT_HISTORY = buildSeatHistory(data);
+
+  const trip = data.trip || {};
+  document.getElementById("tripInfo").textContent =
+    `${trip.route || "-"} · Plaka: ${trip.plate || "-"} · Tarih: ${trip.date || "-"} · Çıkış: ${trip.departure_time || "-"}`;
+
+  const events = flattenEvents(data);
+
+  let totalBoard = 0;
+  let totalOff = 0;
+  let totalMoney = 0;
+
+  Object.values(SEAT_HISTORY).forEach(h => {
+    totalBoard += Number(h.board_count || 0);
+    totalOff += Number(h.offload_count || 0);
+    totalMoney += Number(h.total_amount || 0);
+  });
+
+  const resoldSeats = Object.values(SEAT_HISTORY).filter(h => Number(h.board_count || 0) >= 2).length;
+
+  document.getElementById("totalBoard").textContent = totalBoard;
+  document.getElementById("totalOff").textContent = totalOff;
+  document.getElementById("resoldSeats").textContent = resoldSeats;
+  document.getElementById("totalMoney").textContent = money(totalMoney);
+
+  renderSeatDeck();
+  renderStopReport(data);
+}
+
+function buildShareText(){
+  const data = REPORT_DATA || {};
+  const trip = data.trip || {};
+  const lines = [];
+
+  lines.push("📄 Sefer Raporu");
+  lines.push(`${trip.route || "-"} · ${trip.plate || "-"}`);
+  lines.push(`${trip.date || "-"} ${trip.departure_time || ""}`);
+  lines.push("");
+
+  lines.push("🚌 Koltuk Hareketleri");
+  Object.values(SEAT_HISTORY)
+    .sort((a,b) => a.seat_no - b.seat_no)
+    .forEach(h => {
+      if(!h.board_count) return;
+      lines.push(`Koltuk ${h.seat_no}: ${h.board_count} satış · ${h.offload_count} iniş · ${money(h.total_amount)}`);
+    });
+
+  lines.push("");
+
+  (data.stops || []).forEach(stop => {
+    const s = stop.summary || {};
+    lines.push(`📍 ${stop.stop_name}`);
+    lines.push(`Binen: ${s.board_count || 0} · İnen: ${s.offload_count || 0} · Ayakta binen: ${s.standing_board_count || 0} · Ayakta inen: ${s.standing_off_count || 0}`);
+    lines.push("");
+  });
+
+  return lines.join("\n");
+}
+
+function downloadCsv(){
+  const rows = [["koltuk","islem","nereden","nereye","cinsiyet","odeme","tutar","zaman"]];
+
+  Object.values(SEAT_HISTORY)
+    .sort((a,b) => a.seat_no - b.seat_no)
+    .forEach(h => {
+      h.events.forEach(e => {
+        const m = e.meta || {};
+        rows.push([
+          h.seat_no,
+          e.type === "board" ? "bindi" : "indi",
+          m.from_stop || "",
+          m.to_stop || e.stop_name || "",
+          niceGender(m.gender),
+          nicePayment(m.payment),
+          m.amount || "",
+          e.ts || ""
+        ]);
+      });
+    });
+
+  const csv = "\ufeff" + rows.map(r => r.map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "koltuk-hareket-raporu.csv";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("seatModalClose").addEventListener("click", closeSeatReport);
+document.getElementById("seatModalBackdrop").addEventListener("click", closeSeatReport);
+
+document.getElementById("shareBtn").addEventListener("click", () => {
+  const text = encodeURIComponent(buildShareText());
+  window.open(`https://wa.me/?text=${text}`, "_blank");
+});
+
+document.getElementById("csvBtn").addEventListener("click", downloadCsv);
+
+const REPORT_API_URL = window.REPORT_ARCHIVE_BASE
+  ? `/api/trip-report/archive/${encodeURIComponent(window.REPORT_ARCHIVE_BASE)}`
+  : "/api/trip-report";
+
+fetch(REPORT_API_URL)
+  .then(r => r.json())
+  .then(j => {
+    if(!j.ok) throw new Error(j.msg || "Rapor alınamadı");
+    renderReport(j);
+  })
+  .catch(err => {
+    document.getElementById("stopReportList").innerHTML =
+      `<div class="stop-card"><div class="empty">Rapor yüklenemedi: ${esc(err.message)}</div></div>`;
+  });
+</script>
+
+
+
+<style>
+  .embedded-archive{
+    margin:18px auto 34px;
+    background:linear-gradient(145deg,rgba(15,23,42,.96),rgba(30,41,59,.82));
+    border:1px solid rgba(148,163,184,.22);
+    border-radius:26px;
+    padding:18px;
+    box-shadow:0 18px 45px rgba(0,0,0,.35);
+  }
+
+  .embedded-archive-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+  }
+
+  .embedded-archive h2{
+    margin:0;
+    font-size:30px;
+    line-height:1.05;
+    color:#f8fafc;
+  }
+
+  .embedded-archive p{
+    margin:6px 0 0;
+    color:rgba(226,232,240,.66);
+    font-size:17px;
+  }
+
+  .archive-open-all{
+    flex:0 0 auto;
+    text-decoration:none;
+    color:#fff;
+    font-weight:950;
+    border-radius:999px;
+    padding:11px 14px;
+    background:linear-gradient(180deg,#2563eb,#1d4ed8);
+    border:1px solid rgba(147,197,253,.36);
+    box-shadow:0 10px 24px rgba(37,99,235,.28);
+  }
+
+  .embedded-archive-list{
+    display:grid;
+    gap:10px;
+  }
+
+  .embedded-archive-item{
+    background:rgba(2,6,23,.44);
+    border:1px solid rgba(148,163,184,.18);
+    border-radius:20px;
+    padding:13px;
+  }
+
+  .embedded-archive-title{
+    font-size:20px;
+    font-weight:1000;
+    color:#f8fafc;
+    line-height:1.15;
+    margin-bottom:10px;
+  }
+
+  .embedded-archive-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .embedded-archive-actions a{
+    text-decoration:none;
+    color:#fff;
+    font-weight:950;
+    border-radius:999px;
+    padding:9px 12px;
+    background:rgba(15,23,42,.86);
+    border:1px solid rgba(148,163,184,.22);
+  }
+
+  .embedded-archive-actions a.primary{
+    background:linear-gradient(180deg,#3b82f6,#1d4ed8);
+  }
+
+  .embedded-archive-empty{
+    color:rgba(226,232,240,.62);
+    background:rgba(2,6,23,.34);
+    border:1px solid rgba(148,163,184,.14);
+    border-radius:18px;
+    padding:14px;
+  }
+
+  @media(max-width:620px){
+    .embedded-archive{
+      margin-left:0;
+      margin-right:0;
+      border-radius:24px;
+    }
+
+    .embedded-archive-head{
+      display:block;
+    }
+
+    .archive-open-all{
+      display:inline-flex;
+      margin-top:12px;
+    }
+
+    .embedded-archive h2{
+      font-size:28px;
+    }
+  }
+</style>
+
+<section class="embedded-archive" id="embeddedArchiveBox">
+  <div class="embedded-archive-head">
+    <div>
+      <h2>📁 Sefer Rapor Arşivi</h2>
+      <p>Biten sefer raporlarına buradan hızlıca ulaş.</p>
+    </div>
+    <a class="archive-open-all" href="/rapor-arsiv">Tümünü Aç</a>
+  </div>
+
+  <div class="embedded-archive-list" id="embeddedArchiveList">
+    <div class="embedded-archive-empty">Arşiv yükleniyor...</div>
+  </div>
+</section>
+
+<script>
+(function(){
+  const box = document.getElementById("embeddedArchiveList");
+  if(!box) return;
+
+  fetch("/api/report-archive")
+    .then(r => r.json())
+    .then(j => {
+      const items = (j && j.ok && Array.isArray(j.items)) ? j.items.slice(0, 5) : [];
+
+      if(!items.length){
+        box.innerHTML = `<div class="embedded-archive-empty">Henüz arşivlenmiş sefer raporu yok.</div>`;
+        return;
+      }
+
+      box.innerHTML = items.map(it => `
+        <div class="embedded-archive-item">
+          <div class="embedded-archive-title">${it.title || it.base || "Sefer raporu"}</div>
+          <div class="embedded-archive-actions">
+            <a class="primary" href="${it.view}">📄 Aç</a>
+            <a href="${it.txt}">TXT</a>
+            <a href="${it.csv}">CSV</a>
+          </div>
+        </div>
+      `).join("");
+    })
+    .catch(() => {
+      box.innerHTML = `<div class="embedded-archive-empty">Arşiv listesi yüklenemedi.</div>`;
+    });
+})();
+</script>
+
+
+{% endblock %}

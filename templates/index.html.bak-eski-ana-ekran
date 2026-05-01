@@ -1,0 +1,419 @@
+
+
+
+
+
+
+
+{%extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .wrap{max-width:980px;margin:22px auto}
+  .panel{background:#2b3036;color:#e6edf3;border-radius:18px;padding:18px 18px 26px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+
+  /* Şık rozet şeklinde hat seçimi */
+  .route-select{position:relative;display:inline-block;margin:6px 4px 16px}
+  .route-badge{
+    display:inline-flex;align-items:center;gap:10px;
+    background:#3a4047;border:1px solid #46505a;color:#fff;
+    padding:10px 14px;border-radius:14px;font-weight:800
+  }
+  .route-badge .caret{font-weight:900;opacity:.85}
+  /* görünmez select; rozete tıklayınca açılır */
+  .route-select select{
+    position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer
+  }
+
+  /* Kart ızgarası */
+  .grid{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+  @media (min-width: 720px){ .grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  .card{background:#3a4047;border:1px solid #46505a;border-radius:16px;padding:14px 16px;text-decoration:none;color:#e6edf3;display:block;min-height:92px}
+  .card:hover{filter:brightness(1.06)}
+  .card.blue{background:#0d6efd;border-color:#0b5ed7}
+  .title{font-weight:800;font-size:17px;margin-bottom:4px}
+  .desc{opacity:.85;font-size:14px}
+
+  .lock{margin-top:16px}
+  .lock button{
+    appearance:none;background:#3a4047;border:1px solid #46505a;color:#fff;
+    padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer
+  }
+</style>
+
+<div class="wrap">
+  <div class="panel">
+    <!-- Şık rozetli hat seçimi -->
+    <div class="route-select">
+      <div class="route-badge">
+        <span id="routeText">{{ current_route }}</span>
+        <span class="caret">▾</span>
+      </div>
+      <select onchange="changeRoute(this.value)">
+        {% for r in all_routes %}
+          <option value="{{ r }}" {{ 'selected' if r==current_route else '' }}>{{ r }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="grid">
+      <a class="card" href="{{ url_for('trip_start') }}">
+        <div class="title">SEFER BAŞLAT</div>
+        <div class="desc">Yeni sefer başlat</div>
+      </a>
+
+      <a class="card" href="{{ url_for('continue_trip') }}">
+        <div class="title">DEVAM EDEN SEFER</div>
+        <div class="desc">Aktif sefer varsa koltuklara git</div>
+      </a>
+
+      <a class="card" href="{{ url_for('seats_page') }}">
+        <div class="title">HIZLI KOLTUK</div>
+        <div class="desc">Koltuk ekranına git</div>
+      </a>
+
+      <a class="card" href="{{ url_for('passenger_control') }}">
+        <div class="title">YOLCU KONTROLÜ</div>
+        <div class="desc">Koltuk kontrol ekranı</div>
+      </a>
+
+<a class="card" href="{{ url_for('hesap_page') }}">
+  <div class="title">HESAP</div>
+  <div class="desc">Sefer kasa / giriş-çıkış / kalan</div>
+</a>
+      <a class="card" href="{{ url_for('consignments_page') }}">
+        <div class="title">EMANETLER</div>
+        <div class="desc">Emanet kayıt ve teslim işlemleri</div>
+      </a>
+
+      <a class="card blue" href="{{ url_for('add_route') }}">
+        <div class="title">HAT EKLE</div>
+        <div class="desc">Yeni hat ve durakları tanımla</div>
+      </a>
+
+      <a class="card" href="{{ url_for('routes_list') }}">
+        <div class="title">HATLAR</div>
+        <div class="desc">Hatları listele / düzenle</div>
+      </a>
+
+      
+      <a class="card report-card" href="/sefer-raporu-son">
+        <div class="title">SEFER RAPORLARI</div>
+        <div class="sub">Biten sefer raporlarını aç</div>
+      </a>
+
+<a class="card" href="{{ url_for('fare_query') }}">
+        <div class="title">FİYAT SORGU</div>
+        <div class="desc">Biniş/iniş seç, fiyatı gör</div>
+      </a>
+    </div>
+
+    <!-- SADECE BİR KİLİTLE BUTONU -->
+    <div class="lock">
+      <form method="post" action="{{ url_for('logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit">KİLİTLE</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const csrf = "{{ csrf_token }}";
+  async function changeRoute(route){
+    try{
+      const res = await fetch('{{ url_for("set_route") }}', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+        body: JSON.stringify({route})
+      });
+      const j = await res.json();
+      if(!j.ok){ alert(j.msg || 'Hata'); return; }
+      document.getElementById('routeText').textContent = route;
+      // İstersen sayfayı tazele: location.reload();
+    }catch(e){
+      alert('Bağlantı hatası');
+    }
+  }
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style id="home-sarikiz-final">
+/* =========================================================
+   SARIKIZ ANA EKRAN FINAL TASARIM
+========================================================= */
+
+body{
+  background:linear-gradient(180deg,#f8fbff,#eaf3ff) !important;
+  color:#0f172a !important;
+}
+
+/* Dış alan */
+html body .wrap{
+  width:calc(100vw - 24px) !important;
+  max-width:720px !important;
+  margin:14px auto 24px !important;
+  padding:0 !important;
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+}
+
+html body .wrap .panel{
+  padding:16px !important;
+  border-radius:26px !important;
+  background:linear-gradient(180deg,#f8fbff,#edf6ff) !important;
+  border:1px solid rgba(148,163,184,.18) !important;
+  box-shadow:0 24px 60px rgba(15,23,42,.16) !important;
+}
+
+/* Rota */
+html body .route-select{
+  margin-bottom:14px !important;
+}
+
+html body .route-badge{
+  width:100% !important;
+  min-height:54px !important;
+  border-radius:18px !important;
+  background:#fff !important;
+  color:#0f172a !important;
+  border:1px solid rgba(148,163,184,.22) !important;
+  box-shadow:0 10px 24px rgba(15,23,42,.08) !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding:0 16px !important;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important;
+  font-size:17px !important;
+  font-weight:850 !important;
+}
+
+/* Grid tek kolon */
+html body .wrap .panel .grid{
+  display:flex !important;
+  flex-direction:column !important;
+  grid-template-columns:none !important;
+  gap:10px !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+
+/* Genel kart temizliği */
+html body .wrap .panel .grid > a.card{
+  position:relative !important;
+  overflow:hidden !important;
+  text-decoration:none !important;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important;
+  transform:none !important;
+}
+
+/* ÜST 2 FOTOĞRAFLI KART */
+html body .wrap .panel .grid > a.card:nth-child(1),
+html body .wrap .panel .grid > a.card:nth-child(2){
+  width:100% !important;
+  height:118px !important;
+  min-height:118px !important;
+  padding:0 !important;
+  border-radius:20px !important;
+  border:none !important;
+  box-shadow:0 16px 34px rgba(15,23,42,.16) !important;
+}
+
+html body .wrap .panel .grid > a.card:nth-child(1){
+  background:url("/static/img/home-bus-card.jpg") center / cover no-repeat !important;
+}
+
+html body .wrap .panel .grid > a.card:nth-child(2){
+  background:url("/static/img/home-seat-card.jpg") center / cover no-repeat !important;
+}
+
+/* Görselde yazı olduğu için üst 2 kartın HTML yazılarını gizle */
+html body .wrap .panel .grid > a.card:nth-child(1) .title,
+html body .wrap .panel .grid > a.card:nth-child(1) .desc,
+html body .wrap .panel .grid > a.card:nth-child(1) .sub,
+html body .wrap .panel .grid > a.card:nth-child(1) b,
+html body .wrap .panel .grid > a.card:nth-child(1) small,
+html body .wrap .panel .grid > a.card:nth-child(2) .title,
+html body .wrap .panel .grid > a.card:nth-child(2) .desc,
+html body .wrap .panel .grid > a.card:nth-child(2) .sub,
+html body .wrap .panel .grid > a.card:nth-child(2) b,
+html body .wrap .panel .grid > a.card:nth-child(2) small{
+  opacity:0 !important;
+}
+
+/* Eski efektleri kapat */
+html body .wrap .panel .grid > a.card:nth-child(1)::before,
+html body .wrap .panel .grid > a.card:nth-child(1)::after,
+html body .wrap .panel .grid > a.card:nth-child(2)::before,
+html body .wrap .panel .grid > a.card:nth-child(2)::after{
+  display:none !important;
+}
+
+/* ALT BEYAZ LİSTE */
+html body .wrap .panel .grid > a.card:nth-child(n+3){
+  width:100% !important;
+  min-height:55px !important;
+  height:auto !important;
+  padding:8px 40px 8px 52px !important;
+  border-radius:0 !important;
+  background:#fff !important;
+  color:#10203a !important;
+  border:none !important;
+  border-bottom:1px solid #e5eaf2 !important;
+  box-shadow:none !important;
+}
+
+/* Liste ilk/son yuvarlak */
+html body .wrap .panel .grid > a.card:nth-child(3){
+  margin-top:6px !important;
+  border-top-left-radius:20px !important;
+  border-top-right-radius:20px !important;
+}
+
+html body .wrap .panel .grid > a.card:last-of-type{
+  border-bottom-left-radius:20px !important;
+  border-bottom-right-radius:20px !important;
+  border-bottom:none !important;
+  margin-bottom:14px !important;
+}
+
+/* Liste yazıları */
+html body .wrap .panel .grid > a.card:nth-child(n+3) .title,
+html body .wrap .panel .grid > a.card:nth-child(n+3) b{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important;
+  font-size:16px !important;
+  line-height:1.05 !important;
+  font-weight:950 !important;
+  color:#10203a !important;
+  margin:0 0 3px !important;
+  text-shadow:none !important;
+}
+
+html body .wrap .panel .grid > a.card:nth-child(n+3) .desc,
+html body .wrap .panel .grid > a.card:nth-child(n+3) .sub,
+html body .wrap .panel .grid > a.card:nth-child(n+3) small{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important;
+  font-size:13px !important;
+  line-height:1.15 !important;
+  font-weight:600 !important;
+  color:#60738f !important;
+}
+
+/* Liste oku */
+html body .wrap .panel .grid > a.card:nth-child(n+3)::after{
+  content:"›" !important;
+  display:block !important;
+  position:absolute !important;
+  right:14px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  color:#64748b !important;
+  font-size:30px !important;
+  font-weight:850 !important;
+}
+
+/* Liste ikonları */
+.home-final-ico{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  font-size:20px;
+}
+
+/* Kilitle */
+html body .lock{
+  margin-top:0 !important;
+}
+
+html body .lock button,
+html body .lock a,
+html body button.lock-btn,
+html body .logout-btn{
+  width:100% !important;
+  min-height:56px !important;
+  border-radius:20px !important;
+  background:#fff !important;
+  color:#5b3fd6 !important;
+  border:1px solid #e5eaf2 !important;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important;
+  font-size:17px !important;
+  font-weight:950 !important;
+  box-shadow:0 12px 28px rgba(15,23,42,.10) !important;
+}
+
+/* Basma efekti */
+html body .wrap .panel .grid > a.card:active{
+  transform:scale(.988) !important;
+}
+
+@media(max-width:420px){
+  html body .wrap .panel{
+    padding:14px !important;
+  }
+
+  html body .wrap .panel .grid > a.card:nth-child(1),
+  html body .wrap .panel .grid > a.card:nth-child(2){
+    height:112px !important;
+    min-height:112px !important;
+  }
+
+  html body .wrap .panel .grid > a.card:nth-child(n+3){
+    min-height:53px !important;
+  }
+}
+</style>
+
+<script id="home-sarikiz-final-icons">
+(function(){
+  const icons = [
+    ["HIZLI KOLTUK","💺"],
+    ["YOLCU KONTROLÜ","👥"],
+    ["YOLCU KONTROLU","👥"],
+    ["HESAP","💵"],
+    ["EMANETLER","📦"],
+    ["HAT EKLE","🛣️"],
+    ["HATLAR","🗺️"],
+    ["SEFER RAPORLARI","📁"],
+    ["FİYAT SORGU","🏷️"],
+    ["FIYAT SORGU","🏷️"]
+  ];
+
+  function norm(x){
+    return String(x || "").replace(/\s+/g," ").trim().toUpperCase();
+  }
+
+  document.querySelectorAll(".wrap .panel .grid > a.card:nth-child(n+3)").forEach(card => {
+    card.querySelectorAll(".home-final-ico").forEach(x => x.remove());
+
+    const title = card.querySelector(".title, b");
+    if(!title) return;
+
+    const t = norm(title.textContent);
+    const hit = icons.find(([k]) => t.includes(k));
+    if(!hit) return;
+
+    const ico = document.createElement("span");
+    ico.className = "home-final-ico";
+    ico.textContent = hit[1];
+    card.prepend(ico);
+  });
+})();
+</script>

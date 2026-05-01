@@ -1,0 +1,415 @@
+{
+  "ok": true,
+  "trip": {
+    "id": 268,
+    "date": "2026-04-29",
+    "route": "Denizli-İstanbul (Vardön)",
+    "departure_time": "21:17",
+    "plate": "45KH999",
+    "captain1": "Ethem Eryılmaz",
+    "captain2": "Recep Furan",
+    "attendant": "Muammer Çerdin",
+    "note": ""
+  },
+  "stops": [
+    {
+      "stop_name": "Denizli",
+      "board": [
+        {
+          "id": 23,
+          "event": "board",
+          "ts": "2026-04-29 21:31:09",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 3,
+            "from_stop": "Denizli",
+            "to_stop": "",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 24,
+          "event": "board",
+          "ts": "2026-04-29 22:09:42",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 1,
+            "from_stop": "Denizli",
+            "to_stop": "Gebze Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 25,
+          "event": "board",
+          "ts": "2026-04-29 22:09:50",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 4,
+            "from_stop": "Denizli",
+            "to_stop": "Mustafa Kemal paşa",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 26,
+          "event": "board",
+          "ts": "2026-04-29 22:10:10",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 3,
+            "from_stop": "Denizli",
+            "to_stop": "Sarıgöl",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 27,
+          "event": "board",
+          "ts": "2026-04-29 22:10:19",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 5,
+            "from_stop": "Denizli",
+            "to_stop": "Sarayköy",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 28,
+          "event": "board",
+          "ts": "2026-04-29 22:10:25",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 7,
+            "from_stop": "Denizli",
+            "to_stop": "Dadağlı",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 29,
+          "event": "board",
+          "ts": "2026-04-29 22:10:49",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 8,
+            "from_stop": "Denizli",
+            "to_stop": "Dindarlı",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        }
+      ],
+      "offload": [],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 7,
+        "offload_count": 0,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Gebze Garaj",
+      "board": [],
+      "offload": [
+        {
+          "id": 30,
+          "event": "offload",
+          "ts": "2026-04-29 23:49:49",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 1,
+            "from_stop": "Denizli",
+            "to_stop": "Gebze Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "final_trip_offload"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Sarıgöl",
+      "board": [],
+      "offload": [
+        {
+          "id": 31,
+          "event": "offload",
+          "ts": "2026-04-29 23:49:49",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 3,
+            "from_stop": "Denizli",
+            "to_stop": "Sarıgöl",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "final_trip_offload"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Mustafa Kemal paşa",
+      "board": [],
+      "offload": [
+        {
+          "id": 32,
+          "event": "offload",
+          "ts": "2026-04-29 23:49:49",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 4,
+            "from_stop": "Denizli",
+            "to_stop": "Mustafa Kemal paşa",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "final_trip_offload"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Sarayköy",
+      "board": [],
+      "offload": [
+        {
+          "id": 33,
+          "event": "offload",
+          "ts": "2026-04-29 23:49:49",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 5,
+            "from_stop": "Denizli",
+            "to_stop": "Sarayköy",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "final_trip_offload"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Dadağlı",
+      "board": [],
+      "offload": [
+        {
+          "id": 34,
+          "event": "offload",
+          "ts": "2026-04-29 23:49:49",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 7,
+            "from_stop": "Denizli",
+            "to_stop": "Dadağlı",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "final_trip_offload"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Dindarlı",
+      "board": [],
+      "offload": [
+        {
+          "id": 35,
+          "event": "offload",
+          "ts": "2026-04-29 23:49:49",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 8,
+            "from_stop": "Denizli",
+            "to_stop": "Dindarlı",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "final_trip_offload"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    }
+  ]
+}

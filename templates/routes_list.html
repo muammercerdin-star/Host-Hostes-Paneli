@@ -1,113 +1,484 @@
 {% extends "base.html" %}
 {% block content %}
 <link rel="stylesheet" href="/static/style.css">
+
 <style>
-  .panel{max-width:920px;margin:24px auto;background:#2b3036;color:#e6edf3;border-radius:16px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
-  table{width:100%;border-collapse:collapse;margin-top:12px}
-  th,td{padding:12px 10px;border-bottom:1px solid #40464d;vertical-align:middle}
-  th{color:#f1f1f1;text-align:left}
-  td{color:#eaeaea}
-  a.btn,button.btn{padding:8px 14px;border-radius:8px;font-weight:700;color:#fff;text-decoration:none;margin:0;display:inline-block;border:none;cursor:pointer}
-  .btn.red{background:#d9534f}
-  .btn.blue{background:#0275d8}
-  .btn.green{background:#5cb85c}
-  .btn.gray{background:#6c757d}
-  .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-  form.inline{display:inline}
-  h2{font-size:24px;color:#fff;margin:0}
-  h3{font-size:20px;color:#5bc0de;margin-top:20px}
-  .actions{width:390px;text-align:right}
-  .actions-wrap{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap}
-  .pill{font-size:.85em;background:#4b5563;color:#fff;padding:2px 6px;border-radius:6px;margin-left:6px}
-  .subnote{margin-top:8px;color:#b8c2cc;font-size:13px;line-height:1.4}
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  background:
+    radial-gradient(circle at 18% 0%, rgba(37,99,235,.20), transparent 34%),
+    radial-gradient(circle at 96% 28%, rgba(20,184,166,.14), transparent 35%),
+    linear-gradient(180deg,#061524,#0b1726 45%,#08111d) !important;
+  color:#eaf2ff;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+.routes-shell{
+  width:min(94vw,760px);
+  margin:18px auto 34px;
+  padding:18px;
+  border-radius:34px;
+  background:linear-gradient(180deg,rgba(15,31,49,.96),rgba(8,20,34,.96));
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow:0 28px 80px rgba(0,0,0,.42);
+}
+
+.routes-top{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.top-btn{
+  min-height:58px;
+  border-radius:22px;
+  padding:0 18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  border:1px solid rgba(148,163,184,.22);
+  color:#f8fbff;
+  font-size:17px;
+  font-weight:950;
+  box-shadow:0 14px 28px rgba(0,0,0,.24);
+}
+
+.top-btn.home{
+  background:linear-gradient(180deg,#334155,#1e293b);
+}
+
+.top-btn.new{
+  background:linear-gradient(145deg,#38bdf8,#2563eb);
+  border:0;
+  color:#fff;
+  box-shadow:0 16px 34px rgba(37,99,235,.28);
+}
+
+.routes-hero{
+  margin-bottom:18px;
+}
+
+.routes-hero h1{
+  margin:0;
+  color:#f8fbff;
+  font-size:44px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-1.2px;
+}
+
+.routes-hero p{
+  margin:10px 0 0;
+  color:#aab8ca;
+  font-size:15px;
+  line-height:1.35;
+  font-weight:800;
+}
+
+.summary-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.summary-card{
+  min-height:88px;
+  border-radius:24px;
+  padding:15px;
+  background:linear-gradient(180deg,#132338,#0d1a2b);
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow:0 14px 30px rgba(0,0,0,.24);
+}
+
+.summary-label{
+  color:#94a3b8;
+  font-size:14px;
+  font-weight:900;
+}
+
+.summary-value{
+  margin-top:8px;
+  color:#f8fbff;
+  font-size:31px;
+  line-height:1;
+  font-weight:950;
+}
+
+.section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:22px 2px 12px;
+}
+
+.section-head h2{
+  margin:0;
+  color:#f8fbff;
+  font-size:28px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-.6px;
+}
+
+.section-pill{
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(37,99,235,.16);
+  border:1px solid rgba(96,165,250,.30);
+  color:#93c5fd;
+  font-size:13px;
+  font-weight:950;
+  white-space:nowrap;
+}
+
+.routes-list{
+  display:grid;
+  gap:13px;
+}
+
+.route-card{
+  border-radius:30px;
+  padding:16px;
+  background:linear-gradient(180deg,#132338,#0d1a2b);
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow:0 18px 42px rgba(0,0,0,.28);
+}
+
+.route-main{
+  display:grid;
+  grid-template-columns:58px 1fr;
+  gap:13px;
+  align-items:center;
+  margin-bottom:14px;
+}
+
+.route-icon{
+  width:58px;
+  height:58px;
+  border-radius:21px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(145deg,#1e3a5f,#10243b);
+  border:1px solid rgba(148,163,184,.18);
+  font-size:30px;
+}
+
+.route-name{
+  color:#f8fbff;
+  font-size:24px;
+  line-height:1.08;
+  font-weight:950;
+  letter-spacing:-.3px;
+  word-break:break-word;
+}
+
+.route-sub{
+  margin-top:6px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  align-items:center;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  min-height:30px;
+  padding:0 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:950;
+}
+
+.badge.dynamic{
+  background:rgba(34,197,94,.14);
+  border:1px solid rgba(34,197,94,.28);
+  color:#86efac;
+}
+
+.badge.fixed{
+  background:rgba(148,163,184,.14);
+  border:1px solid rgba(148,163,184,.24);
+  color:#cbd5e1;
+}
+
+.badge.special{
+  background:rgba(245,158,11,.16);
+  border:1px solid rgba(245,158,11,.30);
+  color:#fcd34d;
+}
+
+.route-actions{
+  display:grid;
+  gap:10px;
+}
+
+.route-actions.dynamic-actions{
+  grid-template-columns:1fr 1fr;
+}
+
+.route-actions.fixed-actions{
+  grid-template-columns:1fr 1fr;
+}
+
+.action-link,
+.action-btn{
+  width:100%;
+  min-height:56px;
+  border:0;
+  border-radius:20px;
+  padding:0 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  text-decoration:none;
+  font-family:inherit;
+  font-size:16px;
+  font-weight:950;
+  line-height:1;
+  cursor:pointer;
+  color:#fff;
+}
+
+.action-link.select,
+.action-btn.select{
+  background:linear-gradient(145deg,#22c55e,#16a34a);
+  box-shadow:0 14px 28px rgba(34,197,94,.20);
+}
+
+.action-link.edit{
+  background:linear-gradient(145deg,#38bdf8,#2563eb);
+  box-shadow:0 14px 28px rgba(37,99,235,.22);
+}
+
+.action-link.time{
+  background:linear-gradient(180deg,#64748b,#334155);
+  box-shadow:0 14px 28px rgba(0,0,0,.20);
+}
+
+.action-btn.delete{
+  background:linear-gradient(145deg,#fb7185,#ef4444);
+  box-shadow:0 14px 28px rgba(239,68,68,.22);
+}
+
+.delete-form{
+  margin:0;
+  width:100%;
+}
+
+.empty-card{
+  border-radius:28px;
+  padding:22px 18px;
+  background:linear-gradient(180deg,#132338,#0d1a2b);
+  border:1px dashed rgba(96,165,250,.30);
+  color:#aab8ca;
+  font-size:16px;
+  font-weight:850;
+  text-align:center;
+}
+
+.info-box{
+  margin-bottom:13px;
+  padding:14px;
+  border-radius:22px;
+  background:rgba(37,99,235,.13);
+  border:1px solid rgba(96,165,250,.26);
+  color:#bfdbfe;
+  font-size:14px;
+  font-weight:850;
+  line-height:1.38;
+}
+
+@media(max-width:430px){
+  .routes-shell{
+    width:calc(100vw - 24px);
+    padding:16px;
+    border-radius:30px;
+  }
+
+  .routes-top{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .top-btn{
+    min-height:56px;
+    font-size:16px;
+    padding:0 12px;
+  }
+
+  .routes-hero h1{
+    font-size:38px;
+  }
+
+  .summary-grid{
+    gap:10px;
+  }
+
+  .summary-card{
+    min-height:82px;
+    padding:13px;
+  }
+
+  .summary-value{
+    font-size:28px;
+  }
+
+  .route-card{
+    padding:15px;
+    border-radius:28px;
+  }
+
+  .route-name{
+    font-size:22px;
+  }
+
+  .route-actions.dynamic-actions{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .action-link,
+  .action-btn{
+    min-height:54px;
+    border-radius:19px;
+    font-size:15px;
+  }
+}
 </style>
 
-<div class="panel">
-  <div class="row">
-    <a class="btn gray" href="{{ url_for('index') }}">← Ana Sayfa</a>
-    <h2>Hatlar</h2>
-    <a class="btn blue" href="{{ url_for('add_route') }}" aria-label="Yeni hat ekle">+ Yeni Hat</a>
+<main class="routes-shell">
+
+  <div class="routes-top">
+    <a class="top-btn home" href="{{ url_for('index') }}">← Ana Sayfa</a>
+    <a class="top-btn new" href="{{ url_for('add_route') }}">+ Yeni Hat</a>
   </div>
 
-  <h3>Dinamik Hatlar</h3>
-  <table role="table" aria-label="Dinamik hatlar">
-    <tr>
-      <th scope="col">Ad</th>
-      <th scope="col" class="actions">İşlem</th>
-    </tr>
+  <section class="routes-hero">
+    <h1>Hatlar</h1>
+    <p>Kayıtlı güzergâhları seç, düzenle, saatlerini yönet veya yeni hat oluştur.</p>
+  </section>
+
+  <section class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-label">Dinamik Hat</div>
+      <div class="summary-value">{{ routes|length }}</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">Sabit Hat</div>
+      <div class="summary-value">{{ builtin_routes|length }}</div>
+    </div>
+  </section>
+
+  <div class="section-head">
+    <h2>Dinamik Hatlar</h2>
+    <span class="section-pill">Yönetilebilir</span>
+  </div>
+
+  <section class="routes-list">
     {% for r in routes %}
-      <tr>
-        <td>{{ r.name }}</td>
-        <td class="actions">
-          <div class="actions-wrap">
-            <a class="btn blue" href="{{ url_for('route_edit', rid=r.id) }}">Düzenle</a>
-            <a class="btn gray" href="{{ url_for('route_schedule_edit', rid=r.id) }}">Saatler</a>
-
-            <form class="inline" method="post" action="{{ url_for('route_delete', rid=r.id) }}"
-                  onsubmit="return confirm('Bu hattı silmek istiyor musun?')">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-              <button class="btn red" type="submit">Sil</button>
-            </form>
-
-            <button class="btn green" type="button"
-                    onclick="setRoute({{ r.name | tojson }})">Seç</button>
+      <article class="route-card">
+        <div class="route-main">
+          <div class="route-icon">🛣️</div>
+          <div>
+            <div class="route-name">{{ r.name }}</div>
+            <div class="route-sub">
+              <span class="badge dynamic">Dinamik</span>
+              <span class="badge fixed">Düzenlenebilir</span>
+            </div>
           </div>
-        </td>
-      </tr>
-    {% else %}
-      <tr><td colspan="2">Kayıtlı dinamik hat yok.</td></tr>
-    {% endfor %}
-  </table>
+        </div>
 
-  <h3>Sabit Hatlar</h3>
-  <div class="subnote">
+        <div class="route-actions dynamic-actions">
+          <button class="action-btn select" type="button" onclick="setRoute({{ r.name | tojson }})">Seç</button>
+
+          <a class="action-link edit" href="{{ url_for('route_edit', rid=r.id) }}">Düzenle</a>
+
+          <a class="action-link time" href="{{ url_for('route_schedule_edit', rid=r.id) }}">Saatler</a>
+
+          <form class="delete-form" method="post" action="{{ url_for('route_delete', rid=r.id) }}"
+                onsubmit="return confirm('Bu hattı silmek istiyor musun?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="action-btn delete" type="submit">Sil</button>
+          </form>
+        </div>
+      </article>
+    {% else %}
+      <div class="empty-card">
+        Henüz kayıtlı dinamik hat yok. “+ Yeni Hat” ile ilk hattını oluşturabilirsin.
+      </div>
+    {% endfor %}
+  </section>
+
+  <div class="section-head">
+    <h2>Sabit Hatlar</h2>
+    <span class="section-pill">Hazır</span>
+  </div>
+
+  <div class="info-box">
     Sabit hatlarda saat ekranına geçmeden önce hattı bir kez <b>Düzenle</b> ile açıp dinamik hale getirmen daha sağlıklı olur.
   </div>
-  <table role="table" aria-label="Sabit hatlar">
-    <tr>
-      <th scope="col">Ad</th>
-      <th scope="col" class="actions">İşlem</th>
-    </tr>
+
+  <section class="routes-list">
     {% for r in builtin_routes %}
-      <tr>
-        <td>
-          {{ r.name }}
-          {% if r.overridden %}<span class="pill">ÖZEL</span>{% endif %}
-        </td>
-        <td class="actions">
-          <div class="actions-wrap">
-            <a class="btn blue" href="{{ url_for('builtin_route_edit', name=r.name) }}">Düzenle</a>
-            <button class="btn green" type="button"
-                    onclick="setRoute({{ r.name | tojson }})">Seç</button>
+      <article class="route-card">
+        <div class="route-main">
+          <div class="route-icon">🚌</div>
+          <div>
+            <div class="route-name">{{ r.name }}</div>
+            <div class="route-sub">
+              <span class="badge fixed">Sabit hat</span>
+              {% if r.overridden %}
+                <span class="badge special">Özel</span>
+              {% endif %}
+            </div>
           </div>
-        </td>
-      </tr>
+        </div>
+
+        <div class="route-actions fixed-actions">
+          <button class="action-btn select" type="button" onclick="setRoute({{ r.name | tojson }})">Seç</button>
+          <a class="action-link edit" href="{{ url_for('builtin_route_edit', name=r.name) }}">Düzenle</a>
+        </div>
+      </article>
     {% endfor %}
-  </table>
-</div>
+  </section>
+
+</main>
 
 <script>
-  const csrf = {{ csrf_token | tojson }};
+const csrf = {{ csrf_token | tojson }};
 
-  async function setRoute(route){
-    try{
-      const res = await fetch('{{ url_for("set_route") }}', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrf
-        },
-        body: JSON.stringify({ route })
-      });
-      const j = await res.json();
-      if (j.ok){
-        window.location = '{{ url_for("index") }}';
-      }else{
-        alert('Hata: ' + (j.msg || 'Bilinmeyen hata'));
-      }
-    }catch(e){
-      alert('Bağlantı hatası');
+async function setRoute(route){
+  try{
+    const res = await fetch('{{ url_for("set_route") }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrf
+      },
+      body: JSON.stringify({ route })
+    });
+
+    const j = await res.json();
+
+    if(j.ok){
+      window.location = '{{ url_for("index") }}';
+    }else{
+      alert('Hata: ' + (j.msg || 'Bilinmeyen hata'));
     }
+  }catch(e){
+    alert('Bağlantı hatası');
   }
+}
 </script>
 {% endblock %}

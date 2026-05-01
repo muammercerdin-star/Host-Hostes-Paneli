@@ -1,0 +1,59 @@
+SEFER RAPORU
+==================================
+Hat: Denizli-İstanbul (Vardön)
+Plaka: 45KH999
+Tarih: 2026-04-29
+Çıkış: 21:17
+
+Toplam Binen: 7
+Toplam İnen: 6
+Ayakta Binen: 0
+Ayakta İnen: 0
+
+Durak: Denizli
+----------------------------------
+Binen 7 | İnen 0 | Ayakta binen 0 | Ayakta inen 0
+Binenler:
+  + Koltuk 3 | Denizli -> - | - | nakit | 2026-04-29 21:31:09
+  + Koltuk 1 | Denizli -> Gebze Garaj | bay | nakit | 2026-04-29 22:09:42
+  + Koltuk 4 | Denizli -> Mustafa Kemal paşa | bay | nakit | 2026-04-29 22:09:50
+  + Koltuk 3 | Denizli -> Sarıgöl | bayan | nakit | 2026-04-29 22:10:10
+  + Koltuk 5 | Denizli -> Sarayköy | bay | nakit | 2026-04-29 22:10:19
+  + Koltuk 7 | Denizli -> Dadağlı | bay | nakit | 2026-04-29 22:10:25
+  + Koltuk 8 | Denizli -> Dindarlı | bayan | nakit | 2026-04-29 22:10:49
+
+Durak: Gebze Garaj
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 1 | Denizli -> Gebze Garaj | bay | nakit | 2026-04-29 23:49:49
+
+Durak: Sarıgöl
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 3 | Denizli -> Sarıgöl | bayan | nakit | 2026-04-29 23:49:49
+
+Durak: Mustafa Kemal paşa
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 4 | Denizli -> Mustafa Kemal paşa | bay | nakit | 2026-04-29 23:49:49
+
+Durak: Sarayköy
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 5 | Denizli -> Sarayköy | bay | nakit | 2026-04-29 23:49:49
+
+Durak: Dadağlı
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 7 | Denizli -> Dadağlı | bay | nakit | 2026-04-29 23:49:49
+
+Durak: Dindarlı
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 8 | Denizli -> Dindarlı | bayan | nakit | 2026-04-29 23:49:49

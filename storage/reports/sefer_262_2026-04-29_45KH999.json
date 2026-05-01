@@ -1,0 +1,94 @@
+{
+  "ok": true,
+  "trip": {
+    "id": 262,
+    "date": "2026-04-29",
+    "route": "Denizli-İstanbul (Vardön)",
+    "departure_time": "16:12",
+    "plate": "45KH999",
+    "captain1": "Ethem Eryılmaz",
+    "captain2": "Recep Furan",
+    "attendant": "Muammer Çerdin",
+    "note": ""
+  },
+  "stops": [
+    {
+      "stop_name": "Denizli",
+      "board": [
+        {
+          "id": 23,
+          "event": "board",
+          "ts": "2026-04-29 20:06:08",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 1,
+            "from_stop": "Denizli",
+            "to_stop": "Esenler Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        }
+      ],
+      "offload": [],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 1,
+        "offload_count": 0,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Esenler Otogar",
+      "board": [],
+      "offload": [
+        {
+          "id": 24,
+          "event": "offload",
+          "ts": "2026-04-29 20:08:00",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 1,
+            "from_stop": "Denizli",
+            "to_stop": "Esenler Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "final_trip_offload"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    }
+  ]
+}

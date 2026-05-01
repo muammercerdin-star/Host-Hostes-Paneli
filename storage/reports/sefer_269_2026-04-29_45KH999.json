@@ -1,0 +1,214 @@
+{
+  "ok": true,
+  "trip": {
+    "id": 269,
+    "date": "2026-04-29",
+    "route": "İstanbul-Denizli(Vardön)",
+    "departure_time": "23:50",
+    "plate": "45KH999",
+    "captain1": "Ethem Eryılmaz",
+    "captain2": "Recep Furan",
+    "attendant": "Muammer Çerdin",
+    "note": ""
+  },
+  "stops": [
+    {
+      "stop_name": "Esenler Otogar",
+      "board": [
+        {
+          "id": 23,
+          "event": "board",
+          "ts": "2026-04-30 00:11:40",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 1,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Ahmetli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 24,
+          "event": "board",
+          "ts": "2026-04-30 00:11:47",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 3,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Bursa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 25,
+          "event": "board",
+          "ts": "2026-04-30 00:11:58",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 4,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        }
+      ],
+      "offload": [],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 3,
+        "offload_count": 0,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Ahmetli",
+      "board": [],
+      "offload": [
+        {
+          "id": 26,
+          "event": "offload",
+          "ts": "2026-04-30 09:07:09",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 1,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Ahmetli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "final_trip_offload"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Bursa Otogar",
+      "board": [],
+      "offload": [
+        {
+          "id": 27,
+          "event": "offload",
+          "ts": "2026-04-30 09:07:09",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 3,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Bursa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "final_trip_offload"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Manisa Otogar",
+      "board": [],
+      "offload": [
+        {
+          "id": 28,
+          "event": "offload",
+          "ts": "2026-04-30 09:07:09",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 4,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "final_trip_offload"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Abonelik</title>
+
+  <style>
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 34%),
+        linear-gradient(180deg,#f8fbff,#eaf3ff);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:#0f172a;
+    }
+
+    .shell{
+      width:min(94vw,720px);
+      margin:18px auto 28px;
+      padding:16px;
+      border-radius:30px;
+      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
+      border:1px solid rgba(255,255,255,.82);
+      box-shadow:0 28px 80px rgba(15,23,42,.18);
+    }
+
+    .hero{
+      padding:24px 20px;
+      border-radius:26px;
+      background:linear-gradient(145deg,#2563eb,#06b6d4);
+      color:#fff;
+      box-shadow:0 18px 38px rgba(37,99,235,.22);
+      margin-bottom:14px;
+    }
+
+    .hero h1{
+      margin:0;
+      font-size:34px;
+      line-height:1;
+      font-weight:950;
+    }
+
+    .hero p{
+      margin:8px 0 0;
+      font-size:15px;
+      font-weight:700;
+      color:rgba(255,255,255,.88);
+    }
+
+    .card{
+      border-radius:26px;
+      background:#fff;
+      border:1px solid #e5edf6;
+      box-shadow:0 14px 34px rgba(15,23,42,.10);
+      padding:18px;
+      margin-bottom:14px;
+    }
+
+    .status{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px;
+      border-radius:22px;
+      margin-bottom:14px;
+      border:1px solid #e5edf6;
+      background:#f8fbff;
+    }
+
+    .status strong{
+      font-size:18px;
+      font-weight:950;
+    }
+
+    .pill{
+      padding:10px 13px;
+      border-radius:999px;
+      font-size:14px;
+      font-weight:950;
+      white-space:nowrap;
+    }
+
+    .trial{
+      background:#eff6ff;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+    }
+
+    .active{
+      background:#dcfce7;
+      color:#047857;
+      border:1px solid #86efac;
+    }
+
+    .expired{
+      background:#fef2f2;
+      color:#b91c1c;
+      border:1px solid #fecaca;
+    }
+
+    .big-number{
+      text-align:center;
+      padding:18px;
+      border-radius:24px;
+      background:linear-gradient(145deg,#eff6ff,#ffffff);
+      border:1px dashed rgba(37,99,235,.35);
+      margin-bottom:14px;
+    }
+
+    .big-number b{
+      display:block;
+      font-size:48px;
+      line-height:1;
+      color:#2563eb;
+      font-weight:950;
+    }
+
+    .big-number span{
+      display:block;
+      margin-top:8px;
+      color:#64748b;
+      font-size:15px;
+      font-weight:850;
+    }
+
+    .alert{
+      padding:13px 14px;
+      border-radius:18px;
+      margin-bottom:14px;
+      font-size:15px;
+      font-weight:850;
+      line-height:1.3;
+    }
+
+    .ok{
+      background:#ecfdf5;
+      color:#047857;
+      border:1px solid #a7f3d0;
+    }
+
+    .err{
+      background:#fef2f2;
+      color:#b91c1c;
+      border:1px solid #fecaca;
+    }
+
+    .info{
+      background:#eff6ff;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+    }
+
+    label{
+      display:block;
+      margin:0 0 7px 4px;
+      color:#334155;
+      font-size:15px;
+      font-weight:900;
+    }
+
+    select{
+      width:100%;
+      min-height:58px;
+      border-radius:20px;
+      border:1px solid rgba(148,163,184,.26);
+      background:#f8fbff;
+      color:#0f172a;
+      padding:0 16px;
+      outline:none;
+      font-size:18px;
+      font-weight:750;
+      margin-bottom:12px;
+    }
+
+    .btn{
+      width:100%;
+      min-height:58px;
+      border:0;
+      border-radius:21px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      font-size:17px;
+      font-weight:950;
+      font-family:inherit;
+      margin-top:10px;
+    }
+
+    .primary{
+      color:#fff;
+      background:linear-gradient(145deg,#38bdf8,#2563eb);
+      box-shadow:0 16px 34px rgba(37,99,235,.26);
+    }
+
+    .danger{
+      color:#fff;
+      background:linear-gradient(145deg,#fb923c,#ef4444);
+      box-shadow:0 16px 34px rgba(239,68,68,.18);
+    }
+
+    .secondary{
+      color:#2563eb;
+      background:#f8fbff;
+      border:1px solid #e5edf6;
+    }
+
+    .detail{
+      display:grid;
+      gap:8px;
+      color:#475569;
+      font-size:15px;
+      font-weight:750;
+      line-height:1.35;
+    }
+
+    .detail b{
+      color:#0f172a;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <section class="hero">
+      <h1>💳 Abonelik</h1>
+      {% if info.status == "active" %}
+        <p>Aboneliğiniz aktif. Paket ve ödeme durumunu buradan takip edebilirsiniz.</p>
+      {% elif info.status == "trial" and not info.expired %}
+        <p>30 gün ücretsiz deneme süreniz devam ediyor.</p>
+      {% else %}
+        <p>Deneme süreniz sona erdi. Devam etmek için abonelik gereklidir.</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      {% if msg %}
+        <div class="alert ok">{{ msg }}</div>
+      {% endif %}
+
+      {% if error %}
+        <div class="alert err">{{ error }}</div>
+      {% endif %}
+
+      <div class="status">
+        <strong>Durum</strong>
+
+        {% if info.status == "active" %}
+          <span class="pill active">AKTİF</span>
+        {% elif info.status == "trial" and not info.expired %}
+          <span class="pill trial">DENEME</span>
+        {% else %}
+          <span class="pill expired">SÜRE BİTTİ</span>
+        {% endif %}
+      </div>
+
+      {% if info.status == "trial" and not info.expired %}
+        <div class="big-number">
+          <b>{{ info.days_left }}</b>
+          <span>gün ücretsiz kullanım kaldı</span>
+        </div>
+      {% elif info.status == "active" %}
+        <div class="alert ok">
+          Abonelik aktif. Uygulamayı kullanmaya devam edebilirsin.
+        </div>
+      {% else %}
+        <div class="alert err">
+          Ücretsiz deneme süreniz sona erdi. Uygulamayı kullanmaya devam etmek için abonelik gereklidir.
+        </div>
+      {% endif %}
+
+      <div class="detail">
+        <div><b>Paket:</b> {{ info.plan }}</div>
+
+        {% if info.status == "active" %}
+          <div><b>Abonelik Başlangıcı:</b> {{ info.subscription_started_text }}</div>
+          <div><b>Son Ödeme:</b> {{ info.last_payment_text }}</div>
+          <div><b>Ödeme Durumu:</b> Aktif</div>
+        {% else %}
+          <div><b>Deneme Başlangıcı:</b> {{ info.trial_started_text }}</div>
+          <div><b>Deneme Bitişi:</b> {{ info.trial_ends_text }}</div>
+          <div><b>Ödeme Yöntemi:</b> {{ "Eklendi" if info.payment_method_added else "Henüz eklenmedi" }}</div>
+        {% endif %}
+      </div>
+    </section>
+
+    {% if dev_mode %}
+<section class="card">
+      <div class="alert info">
+        Ödeme altyapısı bağlandığında kullanıcı burada “30 gün ücretsiz başla” ekranından kartını ekleyerek deneme üyeliğini başlatacak. Şimdilik test için manuel işlem butonları aktiftir.
+      </div>
+
+      <form method="post">
+        {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+        <input type="hidden" name="action" value="activate_manual">
+
+        <label>Paket</label>
+        <select name="plan">
+          <option value="Standart">Standart</option>
+          <option value="Pro">Pro</option>
+          <option value="Sınırsız">Sınırsız</option>
+        </select>
+
+        <button class="btn primary" type="submit">Test: Aboneliği Aktif Et</button>
+      </form>
+
+      <form method="post" onsubmit="return confirm('Test için deneme süresi bitmiş hale getirilsin mi?');">
+        {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+        <input type="hidden" name="action" value="expire_test">
+        <button class="btn danger" type="submit">Test: Deneme Süresini Bitir</button>
+      </form>
+
+      <form method="post" onsubmit="return confirm('Deneme süresi yeniden başlatılsın mı?');">
+        {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+        <input type="hidden" name="action" value="restart_trial">
+        <button class="btn secondary" type="submit">Test: Denemeyi Yeniden Başlat</button>
+      </form>
+    </section>
+{% endif %}
+
+    <a class="btn secondary" href="/ayarlar">← Ayarlara dön</a>
+  </main>
+</body>
+</html>

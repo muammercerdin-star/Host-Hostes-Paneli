@@ -1,0 +1,37 @@
+SEFER RAPORU
+==================================
+Hat: İstanbul-Denizli(Vardön)
+Plaka: 45KH999
+Tarih: 2026-04-29
+Çıkış: 23:50
+
+Toplam Binen: 3
+Toplam İnen: 3
+Ayakta Binen: 0
+Ayakta İnen: 0
+
+Durak: Esenler Otogar
+----------------------------------
+Binen 3 | İnen 0 | Ayakta binen 0 | Ayakta inen 0
+Binenler:
+  + Koltuk 1 | Esenler Otogar -> Ahmetli | bay | nakit | 2026-04-30 00:11:40
+  + Koltuk 3 | Esenler Otogar -> Bursa Otogar | bayan | nakit | 2026-04-30 00:11:47
+  + Koltuk 4 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-04-30 00:11:58
+
+Durak: Ahmetli
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 1 | Esenler Otogar -> Ahmetli | bay | nakit | 2026-04-30 09:07:09
+
+Durak: Bursa Otogar
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 3 | Esenler Otogar -> Bursa Otogar | bayan | nakit | 2026-04-30 09:07:09
+
+Durak: Manisa Otogar
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 4 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-04-30 09:07:09

@@ -1,0 +1,837 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+
+<style>
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body{
+  background:
+    radial-gradient(circle at 18% 0%, rgba(37,99,235,.14), transparent 34%),
+    radial-gradient(circle at 100% 30%, rgba(14,165,233,.16), transparent 32%),
+    linear-gradient(180deg,#f8fbff,#eaf3ff) !important;
+  color:#0f172a;
+}
+
+.emanet-shell{
+  width:min(94vw,720px);
+  margin:18px auto 34px;
+  padding:16px;
+  border-radius:32px;
+  background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
+  border:1px solid rgba(255,255,255,.85);
+  box-shadow:0 28px 80px rgba(15,23,42,.16);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+.emanet-hero{
+  position:relative;
+  overflow:hidden;
+  border-radius:28px;
+  padding:24px 22px;
+  min-height:170px;
+  color:#fff;
+  background:
+    radial-gradient(circle at 92% 18%, rgba(255,255,255,.20), transparent 26%),
+    linear-gradient(145deg,#2563eb,#06b6d4);
+  box-shadow:0 20px 42px rgba(37,99,235,.24);
+  margin-bottom:14px;
+}
+
+.emanet-hero-row{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+.emanet-hero-icon{
+  width:72px;
+  height:72px;
+  border-radius:24px;
+  display:grid;
+  place-items:center;
+  background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.24);
+  box-shadow:0 14px 30px rgba(15,23,42,.18);
+  font-size:38px;
+  flex:0 0 auto;
+}
+
+.emanet-hero h1{
+  margin:0;
+  font-size:42px;
+  line-height:.95;
+  font-weight:950;
+  letter-spacing:-1.2px;
+}
+
+.emanet-hero p{
+  margin:10px 0 0;
+  font-size:16px;
+  line-height:1.35;
+  font-weight:800;
+  color:rgba(255,255,255,.92);
+}
+
+.emanet-top-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.emanet-nav{
+  min-height:58px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  background:#fff;
+  border:1px solid #e5edf6;
+  color:#2563eb;
+  text-decoration:none;
+  font-size:17px;
+  font-weight:950;
+  box-shadow:0 12px 26px rgba(15,23,42,.06);
+}
+
+.emanet-nav.dark{
+  color:#0f172a;
+}
+
+.emanet-card{
+  border-radius:28px;
+  background:#fff;
+  border:1px solid #e5edf6;
+  box-shadow:0 14px 34px rgba(15,23,42,.08);
+  padding:18px;
+  margin-bottom:14px;
+}
+
+.card-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.card-title h2{
+  margin:0;
+  font-size:26px;
+  line-height:1;
+  font-weight:950;
+  color:#0f172a;
+  letter-spacing:-.5px;
+}
+
+.card-pill{
+  padding:8px 11px;
+  border-radius:999px;
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  color:#1d4ed8;
+  font-size:13px;
+  font-weight:950;
+  white-space:nowrap;
+}
+
+.emanet-form{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:11px;
+}
+
+.field-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:11px;
+}
+
+.emanet-input,
+.emanet-select{
+  width:100%;
+  min-height:58px;
+  border:1px solid #dbe7f3;
+  border-radius:21px;
+  background:#f8fbff;
+  color:#0f172a;
+  padding:0 16px;
+  font:inherit;
+  font-size:16px;
+  font-weight:850;
+  outline:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.70);
+}
+
+.emanet-input::placeholder{
+  color:#94a3b8;
+}
+
+.emanet-input:focus,
+.emanet-select:focus{
+  border-color:#60a5fa;
+  box-shadow:0 0 0 4px rgba(96,165,250,.18);
+  background:#fff;
+}
+
+.pay-add-row{
+  display:grid;
+  grid-template-columns:1fr 120px;
+  gap:11px;
+}
+
+.btn{
+  border:0;
+  cursor:pointer;
+  font:inherit;
+  text-decoration:none;
+}
+
+.btn-add{
+  min-height:58px;
+  border-radius:21px;
+  color:#fff;
+  background:linear-gradient(145deg,#22c55e,#16a34a);
+  box-shadow:0 14px 28px rgba(34,197,94,.22);
+  font-size:18px;
+  font-weight:950;
+}
+
+.note-box{
+  margin-top:13px;
+  padding:13px 14px;
+  border-radius:20px;
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  color:#1d4ed8;
+  font-size:14px;
+  font-weight:850;
+  line-height:1.35;
+}
+
+.items-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:18px 2px 12px;
+}
+
+.items-head h2{
+  margin:0;
+  font-size:29px;
+  line-height:1;
+  font-weight:950;
+  color:#0f172a;
+}
+
+.count-badge{
+  min-width:44px;
+  height:38px;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  background:#fff;
+  border:1px solid #e5edf6;
+  color:#2563eb;
+  font-size:17px;
+  font-weight:950;
+  box-shadow:0 10px 22px rgba(15,23,42,.06);
+}
+
+.cons-card{
+  border-radius:28px;
+  background:#fff;
+  border:1px solid #e5edf6;
+  box-shadow:0 14px 34px rgba(15,23,42,.08);
+  padding:16px;
+  margin-bottom:13px;
+}
+
+.cons-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:13px;
+}
+
+.cons-main{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+
+.cons-icon{
+  width:58px;
+  height:58px;
+  border-radius:21px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(145deg,#eff6ff,#dbeafe);
+  font-size:30px;
+  flex:0 0 auto;
+}
+
+.cons-name{
+  font-size:23px;
+  line-height:1.05;
+  font-weight:950;
+  color:#0f172a;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.cons-code{
+  margin-top:5px;
+  color:#64748b;
+  font-size:13px;
+  font-weight:850;
+}
+
+.photo-btn{
+  min-height:44px;
+  border-radius:17px;
+  padding:0 12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#f8fbff;
+  border:1px solid #e5edf6;
+  color:#2563eb;
+  font-size:13px;
+  font-weight:950;
+  white-space:nowrap;
+}
+
+.cons-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:9px;
+}
+
+.cons-line{
+  display:grid;
+  grid-template-columns:34px 1fr;
+  gap:10px;
+  align-items:start;
+  padding:11px 12px;
+  border-radius:19px;
+  background:#f8fbff;
+  border:1px solid #edf2f7;
+}
+
+.cons-key{
+  font-size:20px;
+  line-height:1;
+}
+
+.cons-val{
+  min-width:0;
+  color:#0f172a;
+  font-size:15px;
+  font-weight:850;
+  line-height:1.3;
+  overflow-wrap:anywhere;
+}
+
+.cons-val small{
+  display:block;
+  margin-bottom:3px;
+  color:#64748b;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:.25px;
+  text-transform:uppercase;
+}
+
+.status-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 10px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:950;
+  background:#f1f5f9;
+  color:#475569;
+}
+
+.status-badge.yüklendi{
+  background:#eff6ff;
+  color:#1d4ed8;
+}
+
+.status-badge.teslim{
+  background:#ecfdf5;
+  color:#047857;
+}
+
+.status-badge.bekliyor{
+  background:#fff7ed;
+  color:#c2410c;
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:13px;
+}
+
+.action-btn{
+  min-height:50px;
+  border-radius:18px;
+  color:#fff;
+  font-size:15px;
+  font-weight:950;
+}
+
+.action-btn.blue{ background:linear-gradient(145deg,#38bdf8,#2563eb); }
+.action-btn.green{ background:linear-gradient(145deg,#22c55e,#16a34a); }
+.action-btn.gray{ background:linear-gradient(145deg,#64748b,#334155); }
+.action-btn.red{ background:linear-gradient(145deg,#fb7185,#ef4444); }
+
+.empty-card{
+  border-radius:28px;
+  background:#fff;
+  border:1px dashed #bfdbfe;
+  padding:24px 18px;
+  text-align:center;
+  color:#64748b;
+  font-size:17px;
+  font-weight:850;
+  box-shadow:0 14px 34px rgba(15,23,42,.06);
+}
+
+/* Modal */
+.mback{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.55);
+  backdrop-filter:blur(12px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+  padding:16px;
+}
+
+.modal{
+  width:min(680px,94vw);
+  max-height:88vh;
+  overflow:auto;
+  background:#fff;
+  border:1px solid rgba(255,255,255,.85);
+  border-radius:30px;
+  padding:18px;
+  box-shadow:0 30px 90px rgba(15,23,42,.30);
+}
+
+.mhead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:13px;
+}
+
+.mhead h3{
+  margin:0;
+  font-size:24px;
+  line-height:1.1;
+  font-weight:950;
+  color:#0f172a;
+}
+
+.close-btn{
+  min-width:54px;
+  height:54px;
+  border-radius:999px;
+  background:#fff1f2;
+  color:#dc2626;
+  font-size:22px;
+  font-weight:950;
+}
+
+.upload-row{
+  display:grid;
+  grid-template-columns:1fr 110px;
+  gap:10px;
+  align-items:center;
+}
+
+.file-input{
+  width:100%;
+  min-height:56px;
+  border-radius:20px;
+  border:1px solid #dbe7f3;
+  background:#f8fbff;
+  padding:13px;
+  color:#0f172a;
+  font-weight:850;
+}
+
+.upload-btn{
+  min-height:56px;
+  border-radius:20px;
+  color:#fff;
+  background:linear-gradient(145deg,#22c55e,#16a34a);
+  font-size:16px;
+  font-weight:950;
+}
+
+.mmsg{
+  display:block;
+  margin-top:10px;
+  color:#2563eb;
+  font-size:14px;
+  font-weight:850;
+}
+
+.photo-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:10px;
+  margin-top:13px;
+}
+
+.thumb{
+  border:1px solid #e5edf6;
+  border-radius:18px;
+  overflow:hidden;
+  background:#f8fbff;
+  box-shadow:0 10px 24px rgba(15,23,42,.08);
+}
+
+.thumb img{
+  width:100%;
+  height:116px;
+  object-fit:cover;
+  display:block;
+}
+
+@media(min-width:720px){
+  .cons-grid{ grid-template-columns:1fr 1fr; }
+}
+
+@media(max-width:430px){
+  .emanet-shell{
+    width:calc(100vw - 24px);
+    padding:14px;
+    border-radius:30px;
+  }
+
+  .emanet-hero{
+    padding:22px 18px;
+  }
+
+  .emanet-hero-icon{
+    width:64px;
+    height:64px;
+    font-size:34px;
+  }
+
+  .emanet-hero h1{
+    font-size:36px;
+  }
+
+  .field-row{
+    grid-template-columns:1fr;
+  }
+
+  .pay-add-row{
+    grid-template-columns:1fr 104px;
+  }
+
+  .cons-name{
+    font-size:21px;
+  }
+
+  .actions{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .upload-row{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+
+<main class="emanet-shell">
+
+  <section class="emanet-hero">
+    <div class="emanet-hero-row">
+      <div class="emanet-hero-icon">📦</div>
+      <div>
+        <h1>Emanetler</h1>
+        <p>Emanet kayıt, teslim, ücret ve fotoğraf takibini tek ekrandan yönet.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="emanet-top-actions">
+    <a class="emanet-nav" href="{{ url_for('index') }}">← Ana sayfa</a>
+    <a class="emanet-nav dark" href="{{ url_for('seats_page') }}">💺 Koltuklar</a>
+  </div>
+
+  <section class="emanet-card">
+    <div class="card-title">
+      <h2>Yeni Emanet</h2>
+      <span class="card-pill">{{ trip["route"] }}</span>
+    </div>
+
+    <div class="emanet-form">
+      <input class="emanet-input" id="f_item" placeholder="Eşya adı">
+      <div class="field-row">
+        <input class="emanet-input" id="f_from" placeholder="Gönderen">
+        <input class="emanet-input" id="f_to" placeholder="Alıcı">
+      </div>
+
+      <div class="field-row">
+        <select class="emanet-select" id="f_from_stop">
+          <option value="">Çıkış durağı seç</option>
+          {% for s in stops %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+        </select>
+
+        <select class="emanet-select" id="f_to_stop">
+          <option value="">Varış durağı seç</option>
+          {% for s in stops %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <div class="field-row">
+        <input class="emanet-input" id="f_amount" type="number" step="0.01" placeholder="Tutar">
+        <div class="pay-add-row">
+          <select class="emanet-select" id="f_payment">
+            <option value="nakit">Nakit</option>
+            <option value="pos">POS</option>
+            <option value="iban">IBAN</option>
+            <option value="online">Online</option>
+            <option value="ucretsiz">Ücretsiz</option>
+          </select>
+          <button class="btn btn-add" onclick="createCons()">Ekle</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="note-box">
+      Fotoğrafları “Görüntüle / Yükle” ile yönet. Durumu butonlardan hızlıca güncelleyebilirsin.
+    </div>
+  </section>
+
+  <div class="items-head">
+    <h2>Aktif Kayıtlar</h2>
+    <div class="count-badge">{{ items|length }}</div>
+  </div>
+
+  {% if items %}
+    {% for r in items %}
+      <article class="cons-card">
+        <div class="cons-top">
+          <div class="cons-main">
+            <div class="cons-icon">📦</div>
+            <div style="min-width:0">
+              <div class="cons-name">{{ r.item_name }}</div>
+              <div class="cons-code">KOD: {{ r.code }}</div>
+            </div>
+          </div>
+
+          <button class="btn photo-btn" onclick='openPhotos({{ r.id }}, {{ r.code|tojson }})'>
+            📷 Fotoğraf
+          </button>
+        </div>
+
+        <div class="cons-grid">
+          <div class="cons-line">
+            <div class="cons-key">👤</div>
+            <div class="cons-val">
+              <small>Kimden → Kime</small>
+              {{ r.from_name }} → {{ r.to_name }}
+            </div>
+          </div>
+
+          <div class="cons-line">
+            <div class="cons-key">📍</div>
+            <div class="cons-val">
+              <small>Durak</small>
+              {{ r.from_stop or '-' }} → {{ r.to_stop or '-' }}
+            </div>
+          </div>
+
+          <div class="cons-line">
+            <div class="cons-key">💵</div>
+            <div class="cons-val">
+              <small>Tutar</small>
+              ₺{{ '%.2f'|format(r.amount or 0) }}
+            </div>
+          </div>
+
+          <div class="cons-line">
+            <div class="cons-key">✅</div>
+            <div class="cons-val">
+              <small>Durum</small>
+              <span class="status-badge {{ r.status }}">{{ r.status }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn action-btn blue"  onclick="setStatus({{ r.id }}, 'yüklendi')">Yüklendi</button>
+          <button class="btn action-btn green" onclick="setStatus({{ r.id }}, 'teslim')">Teslim</button>
+          <button class="btn action-btn gray"  onclick="setStatus({{ r.id }}, 'bekliyor')">Bekliyor</button>
+          <button class="btn action-btn red"   onclick="delCons({{ r.id }})">Sil</button>
+        </div>
+      </article>
+    {% endfor %}
+  {% else %}
+    <div class="empty-card">
+      Henüz emanet kaydı yok. İlk kaydı yukarıdaki formdan ekleyebilirsin.
+    </div>
+  {% endif %}
+
+</main>
+
+<!-- Fotoğraf Modalı -->
+<div id="mback" class="mback" onclick="if(event.target.id==='mback') hideModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="mhead">
+      <h3 id="mtitle">Emanet Fotoğrafları</h3>
+      <button class="btn close-btn" onclick="hideModal()">×</button>
+    </div>
+
+    <div class="upload-row">
+      <input class="file-input" id="fileInput" type="file" accept="image/*" capture="environment">
+      <button class="btn upload-btn" onclick="uploadSelected()">Yükle</button>
+    </div>
+
+    <span id="mmsg" class="mmsg"></span>
+    <div id="grid" class="photo-grid"></div>
+  </div>
+</div>
+
+<script>
+const csrf = {{ csrf_token|tojson }};
+let currentConsId = null, currentCode = '';
+
+async function createCons(){
+  const payload = {
+    item_name:  document.getElementById('f_item').value.trim(),
+    from_name:  document.getElementById('f_from').value.trim(),
+    to_name:    document.getElementById('f_to').value.trim(),
+    from_stop:  document.getElementById('f_from_stop').value,
+    to_stop:    document.getElementById('f_to_stop').value,
+    amount:     document.getElementById('f_amount').value,
+    payment:    document.getElementById('f_payment').value
+  };
+
+  const res = await fetch('{{ url_for("api_consignments") }}', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+    body:JSON.stringify(payload)
+  });
+
+  const j = await res.json();
+  if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+}
+
+async function setStatus(id, status){
+  const res = await fetch(`/api/consignments/${id}/status`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+    body:JSON.stringify({status})
+  });
+
+  const j = await res.json();
+  if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+}
+
+async function delCons(id){
+  if(!confirm('Silinsin mi?')) return;
+
+  const res = await fetch(`/api/consignments/${id}`, {
+    method:'DELETE',
+    headers:{'X-CSRF-Token':csrf}
+  });
+
+  const j = await res.json();
+  if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+}
+
+/* -------- Photos Modal -------- */
+function showModal(){
+  document.getElementById('mback').style.display='flex';
+}
+
+function hideModal(){
+  document.getElementById('mback').style.display='none';
+}
+
+async function openPhotos(cid, code){
+  currentConsId = cid;
+  currentCode = code;
+
+  document.getElementById('mtitle').innerText = `Emanet ${code} – Fotoğraflar`;
+  document.getElementById('grid').innerHTML = '';
+  document.getElementById('mmsg').innerText = 'Yükleniyor…';
+
+  showModal();
+
+  const res = await fetch(`/api/consignments/${cid}/photos`, {
+    headers:{'X-CSRF-Token':csrf}
+  });
+
+  const j = await res.json();
+  document.getElementById('mmsg').innerText = '';
+
+  if(!j.ok){
+    document.getElementById('mmsg').innerText = j.msg || 'Hata';
+    return;
+  }
+
+  if(j.items.length === 0){
+    document.getElementById('grid').innerHTML =
+      '<div style="color:#64748b;font-weight:850;padding:10px">Henüz fotoğraf yok.</div>';
+    return;
+  }
+
+  const grid = document.getElementById('grid');
+
+  j.items.forEach(p=>{
+    const d = document.createElement('div');
+    d.className = 'thumb';
+    d.innerHTML = `<a href="${p.url}" target="_blank"><img src="${p.url}" alt="foto"></a>`;
+    grid.appendChild(d);
+  });
+}
+
+async function uploadSelected(){
+  const f = document.getElementById('fileInput').files[0];
+
+  if(!f || !currentConsId) return;
+
+  document.getElementById('mmsg').innerText = 'Yükleniyor…';
+
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('role','pickup');
+
+  const res = await fetch(`/api/consignments/${currentConsId}/photos`, {
+    method:'POST',
+    headers:{'X-CSRF-Token':csrf},
+    body: fd
+  });
+
+  const j = await res.json();
+
+  if(j.ok){
+    openPhotos(currentConsId, currentCode);
+  }else{
+    document.getElementById('mmsg').innerText = j.msg || 'Yükleme hatası';
+  }
+}
+</script>
+{% endblock %}

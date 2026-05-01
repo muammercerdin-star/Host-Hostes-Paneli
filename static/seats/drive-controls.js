@@ -1,3 +1,39 @@
+
+/* =========================================================
+   HIZLI KOLTUK → OTOMATİK SÜRÜŞ MODU
+   /seats?drive=1 ile gelirse sürüş modunu açar
+========================================================= */
+(function autoOpenDriveModeFromUrl(){
+  try{
+    const params = new URLSearchParams(window.location.search);
+    const drive = params.get("drive");
+
+    if(drive !== "1") return;
+
+    const boot = window.SEATS_BOOT || {};
+    const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+    const key = "driveMode:" + tripKey;
+
+    localStorage.setItem(key, "1");
+    document.body.classList.add("drive-mode");
+
+    setTimeout(() => {
+      try{
+        if(typeof renderRouteStrip === "function") renderRouteStrip();
+        if(typeof updateCompactHeader === "function") updateCompactHeader();
+      }catch(_){}
+    }, 120);
+
+    // Adres çubuğundan ?drive=1 temizle, ama mod açık kalsın
+    if(window.history && window.history.replaceState){
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  }catch(e){
+    console.warn("Hızlı koltuk sürüş modu açılamadı:", e);
+  }
+})();
+
 /* =========================================================
    DRIVE CONTROLS
    Sürüş modu + hız kutusu + ses açık/sessiz

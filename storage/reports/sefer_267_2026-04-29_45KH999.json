@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "trip": {
+    "id": 267,
+    "date": "2026-04-29",
+    "route": "Denizli – İzmir",
+    "departure_time": "21:16",
+    "plate": "45KH999",
+    "captain1": "Ethem Eryılmaz",
+    "captain2": "",
+    "attendant": "Muammer Çerdin",
+    "note": ""
+  },
+  "stops": []
+}

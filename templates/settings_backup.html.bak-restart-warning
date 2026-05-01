@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yedekleme</title>
+
+  <style>
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 34%),
+        linear-gradient(180deg,#f8fbff,#eaf3ff);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:#0f172a;
+    }
+
+    .shell{
+      width:min(94vw,720px);
+      margin:18px auto 28px;
+      padding:16px;
+      border-radius:30px;
+      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
+      border:1px solid rgba(255,255,255,.82);
+      box-shadow:0 28px 80px rgba(15,23,42,.18);
+    }
+
+    .hero{
+      padding:24px 20px;
+      border-radius:26px;
+      background:linear-gradient(145deg,#2563eb,#06b6d4);
+      color:#fff;
+      box-shadow:0 18px 38px rgba(37,99,235,.22);
+      margin-bottom:14px;
+    }
+
+    .hero h1{
+      margin:0;
+      font-size:34px;
+      line-height:1;
+      font-weight:950;
+    }
+
+    .hero p{
+      margin:8px 0 0;
+      font-size:15px;
+      font-weight:700;
+      color:rgba(255,255,255,.88);
+    }
+
+    .card{
+      border-radius:26px;
+      background:#fff;
+      border:1px solid #e5edf6;
+      box-shadow:0 14px 34px rgba(15,23,42,.10);
+      padding:18px;
+      margin-bottom:14px;
+    }
+
+    .alert{
+      padding:13px 14px;
+      border-radius:18px;
+      margin-bottom:14px;
+      font-size:15px;
+      font-weight:850;
+      line-height:1.3;
+    }
+
+    .ok{
+      background:#ecfdf5;
+      color:#047857;
+      border:1px solid #a7f3d0;
+    }
+
+    .info{
+      background:#eff6ff;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+    }
+
+    .create-btn{
+      width:100%;
+      min-height:62px;
+      border:0;
+      border-radius:23px;
+      background:linear-gradient(145deg,#38bdf8,#2563eb);
+      color:#fff;
+      font-size:19px;
+      font-weight:950;
+      box-shadow:0 16px 34px rgba(37,99,235,.26);
+      font-family:inherit;
+    }
+
+    .backup-list{
+      overflow:hidden;
+      border-radius:24px;
+      background:#fff;
+      border:1px solid #e5edf6;
+      box-shadow:0 14px 34px rgba(15,23,42,.10);
+    }
+
+    .backup-item{
+      padding:16px;
+      border-bottom:1px solid #e5edf6;
+    }
+
+    .backup-item:last-child{
+      border-bottom:none;
+    }
+
+    .backup-title{
+      font-size:16px;
+      font-weight:950;
+      color:#0f172a;
+      word-break:break-word;
+    }
+
+    .backup-meta{
+      margin-top:5px;
+      color:#64748b;
+      font-size:13px;
+      font-weight:750;
+    }
+
+    .backup-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:9px;
+      margin-top:12px;
+    }
+
+    .btn{
+      min-height:48px;
+      border-radius:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      border:0;
+      font-size:15px;
+      font-weight:950;
+      font-family:inherit;
+    }
+
+    .download{
+      background:#eff6ff;
+      color:#2563eb;
+      border:1px solid #bfdbfe;
+    }
+
+    .delete{
+      background:#fef2f2;
+      color:#dc2626;
+      border:1px solid #fecaca;
+    }
+
+    .back-btn{
+      margin-top:14px;
+      min-height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:21px;
+      background:#fff;
+      color:#2563eb;
+      border:1px solid #e5edf6;
+      box-shadow:0 12px 28px rgba(15,23,42,.10);
+      text-decoration:none;
+      font-size:17px;
+      font-weight:950;
+    }
+
+    .empty{
+      padding:18px;
+      color:#64748b;
+      font-size:15px;
+      font-weight:750;
+      line-height:1.35;
+      text-align:center;
+    }
+
+    @media(max-width:420px){
+      .shell{
+        width:calc(100vw - 24px);
+        margin:14px auto 24px;
+        padding:14px;
+      }
+
+      .hero h1{
+        font-size:31px;
+      }
+    }
+  
+    .err{
+      background:#fef2f2;
+      color:#b91c1c;
+      border:1px solid #fecaca;
+    }
+
+    .restore-file{
+      width:100%;
+      min-height:58px;
+      border-radius:20px;
+      border:1px solid rgba(148,163,184,.26);
+      background:#f8fbff;
+      color:#0f172a;
+      padding:15px;
+      outline:none;
+      font-size:15px;
+      font-weight:750;
+      margin-bottom:12px;
+    }
+
+    .restore-btn{
+      width:100%;
+      min-height:58px;
+      border:0;
+      border-radius:21px;
+      background:linear-gradient(145deg,#fb923c,#ef4444);
+      color:#fff;
+      font-size:18px;
+      font-weight:950;
+      box-shadow:0 16px 34px rgba(239,68,68,.18);
+      font-family:inherit;
+    }
+
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <section class="hero">
+      <h1>💾 Yedekleme</h1>
+      <p>Veritabanı, raporlar ve yüklenen dosyaları tek zip dosyasına al.</p>
+    </section>
+
+    <section class="card">
+      {% if created %}
+        <div class="alert ok">Yedek oluşturuldu: {{ created }}</div>
+      {% endif %}
+
+      {% if deleted %}
+        <div class="alert ok">Yedek silindi: {{ deleted }}</div>
+      {% endif %}
+
+      <div class="alert info">
+        Yedek dosyası; sefer kayıtlarını, raporları, profil fotoğraflarını ve yüklenen dosyaları içerir.
+      </div>
+
+      <form method="post" action="/ayarlar/yedekleme/olustur">
+        {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+        <button class="create-btn" type="submit">＋ Yeni Yedek Oluştur</button>
+      </form>
+    </section>
+
+
+    <section class="card" id="restoreBackupCard">
+      {% if restored %}
+        <div class="alert ok">
+          Yedek geri yüklendi: {{ restored }}<br>
+          Geri yüklemeden önce acil yedek oluşturuldu: {{ emergency }}
+        </div>
+      {% endif %}
+
+      {% if restore_error %}
+        <div class="alert err">{{ restore_error }}</div>
+      {% endif %}
+
+      <div class="alert info">
+        Geri yükleme yapmadan önce sistem otomatik olarak mevcut halin acil yedeğini alır.
+      </div>
+
+      <form method="post" action="/ayarlar/yedekleme/geri-yukle" enctype="multipart/form-data"
+            onsubmit="return confirm('Bu yedek geri yüklenecek. Mevcut veriler seçilen yedekle değiştirilecek. Devam edilsin mi?');">
+        {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+
+        <input class="restore-file" type="file" name="backup_file" accept=".zip" required>
+        <button class="restore-btn" type="submit">↩ Yedekten Geri Yükle</button>
+      </form>
+    </section>
+
+    <section class="backup-list">
+      {% if items %}
+        {% for item in items %}
+          <div class="backup-item">
+            <div class="backup-title">📦 {{ item.name }}</div>
+            <div class="backup-meta">{{ item.size }} · {{ item.mtime }}</div>
+
+            <div class="backup-actions">
+              <a class="btn download" href="/ayarlar/yedekleme/indir/{{ item.name }}">İndir</a>
+
+              <form method="post" action="/ayarlar/yedekleme/sil/{{ item.name }}" onsubmit="return confirm('Bu yedek silinsin mi?');">
+                {% if csrf_token is defined %}
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                {% endif %}
+                <button class="btn delete" type="submit" style="width:100%;">Sil</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty">
+          Henüz yedek yok. İlk yedeği oluşturmak için yukarıdaki butona bas.
+        </div>
+      {% endif %}
+    </section>
+
+    <a class="back-btn" href="/ayarlar">← Ayarlara dön</a>
+  </main>
+</body>
+</html>

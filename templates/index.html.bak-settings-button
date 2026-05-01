@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Muavin Paneli</title>
+
+  <style>
+    :root{
+      --bg:#eef6ff;
+      --text:#0d1b33;
+      --muted:#61728a;
+      --line:#e5edf6;
+      --blue:#1677ff;
+      --purple:#6d5dfc;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(22,119,255,.14), transparent 32%),
+        linear-gradient(180deg,#f8fbff,#eaf3ff);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+    }
+
+    .home-shell{
+      width:min(94vw,720px);
+      margin:18px auto 28px;
+      padding:16px;
+      border-radius:28px;
+      background:linear-gradient(180deg,#f8fbff,#edf6ff);
+      border:1px solid rgba(148,163,184,.18);
+      box-shadow:0 24px 60px rgba(15,23,42,.16);
+    }
+
+    .route-card{
+      height:54px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:0 18px;
+      margin-bottom:14px;
+      border-radius:19px;
+      background:#fff;
+      border:1px solid rgba(148,163,184,.22);
+      box-shadow:0 10px 24px rgba(15,23,42,.08);
+      font-weight:900;
+      font-size:17px;
+      color:#0f172a;
+    }
+
+    .route-card .pin{
+      color:#1677ff;
+      font-size:22px;
+    }
+
+    .route-card .caret{
+      margin-left:auto;
+      color:#334155;
+      font-size:16px;
+    }
+
+    .hero-link{
+      display:block;
+      width:100%;
+      height:118px;
+      margin-bottom:10px;
+      border-radius:21px;
+      overflow:hidden;
+      text-decoration:none;
+      box-shadow:0 16px 34px rgba(15,23,42,.16);
+      background:#dbeafe;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    .hero-link:active{
+      transform:scale(.99);
+    }
+
+    .hero-link img{
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+    }
+
+    .menu-list{
+      margin-top:12px;
+      overflow:hidden;
+      border-radius:22px;
+      background:#fff;
+      border:1px solid rgba(226,232,240,.92);
+      box-shadow:0 14px 34px rgba(15,23,42,.10);
+    }
+
+    .menu-item{
+      min-height:58px;
+      display:grid;
+      grid-template-columns:42px 1fr 26px;
+      align-items:center;
+      gap:0;
+      padding:8px 12px 8px 14px;
+      color:#10203a;
+      text-decoration:none;
+      border-bottom:1px solid var(--line);
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    .menu-item:last-child{
+      border-bottom:none;
+    }
+
+    .menu-item:active{
+      background:#f1f7ff;
+    }
+
+    .ico{
+      width:30px;
+      height:30px;
+      display:grid;
+      place-items:center;
+      font-size:21px;
+    }
+
+    .menu-title{
+      font-size:16px;
+      line-height:1.05;
+      font-weight:950;
+      color:#10203a;
+      margin-bottom:3px;
+    }
+
+    .menu-desc{
+      font-size:13px;
+      line-height:1.15;
+      font-weight:600;
+      color:var(--muted);
+    }
+
+    .arrow{
+      justify-self:end;
+      font-size:30px;
+      line-height:1;
+      font-weight:800;
+      color:#64748b;
+    }
+
+    .lock-btn{
+      margin-top:14px;
+      min-height:58px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      width:100%;
+      border-radius:21px;
+      background:#fff;
+      color:var(--purple);
+      border:1px solid rgba(226,232,240,.95);
+      box-shadow:0 12px 28px rgba(15,23,42,.10);
+      text-decoration:none;
+      font-size:17px;
+      font-weight:950;
+      letter-spacing:.2px;
+    }
+
+    .lock-btn:active{
+      transform:scale(.99);
+    }
+
+    @media(max-width:420px){
+      .home-shell{
+        width:calc(100vw - 24px);
+        margin:14px auto 24px;
+        padding:14px;
+        border-radius:26px;
+      }
+
+      .hero-link{
+        height:112px;
+        border-radius:20px;
+      }
+
+      .menu-item{
+        min-height:55px;
+      }
+
+      .menu-title{
+        font-size:15.5px;
+      }
+
+      .menu-desc{
+        font-size:12.8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="home-shell">
+
+    {% set current_route = selected_route if selected_route is defined and selected_route else (active_trip.route if active_trip is defined and active_trip else 'Denizli – İstanbul') %}
+
+    {% set current_route = selected_route if selected_route is defined and selected_route else (active_trip.route if active_trip is defined and active_trip else 'Denizli – İstanbul') %}
+
+    <div class="route-form route-premium">
+      <button class="route-picker-premium" id="routePickerBtn" type="button">
+        <span class="route-pin">📍</span>
+        <span class="route-name" id="routePickerText">{{ current_route }}</span>
+        <span class="route-caret">⌄</span>
+      </button>
+
+      <select id="homeRouteSelect" name="route" hidden>
+        {% if all_routes is defined and all_routes %}
+          {% for r in all_routes %}
+            <option value="{{ r }}" {% if r == current_route %}selected{% endif %}>{{ r }}</option>
+          {% endfor %}
+        {% else %}
+          <option value="{{ current_route }}">{{ current_route }}</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <div class="route-sheet-backdrop" id="routeSheetBackdrop"></div>
+
+    <section class="route-sheet" id="routeSheet" aria-hidden="true">
+      <div class="route-sheet-handle"></div>
+
+      <div class="route-sheet-head">
+        <div>
+          <div class="route-sheet-kicker">Aktif hat seçimi</div>
+          <h2>Güzergâh Seç</h2>
+        </div>
+        <button class="route-sheet-close" id="routeSheetClose" type="button">×</button>
+      </div>
+
+      <div class="route-sheet-list">
+        {% if all_routes is defined and all_routes %}
+          {% for r in all_routes %}
+            <button class="route-option {% if r == current_route %}active{% endif %}" type="button" data-route="{{ r }}">
+              <span class="route-option-icon">🚌</span>
+              <span class="route-option-text">
+                <b>{{ r }}</b>
+                <small>Bu hat ile sefer başlat</small>
+              </span>
+              <span class="route-option-check">✓</span>
+            </button>
+          {% endfor %}
+        {% else %}
+          <button class="route-option active" type="button" data-route="{{ current_route }}">
+            <span class="route-option-icon">🚌</span>
+            <span class="route-option-text">
+              <b>{{ current_route }}</b>
+              <small>Bu hat ile sefer başlat</small>
+            </span>
+            <span class="route-option-check">✓</span>
+          </button>
+        {% endif %}
+      </div>
+    </section>
+
+<a id="homeTripStart" class="hero-link" data-base="{{ url_for('trip_start') }}" href="{{ url_for('trip_start') }}" aria-label="Sefer Başlat">
+      <img src="{{ url_for('static', filename='img/home-bus-card.jpg') }}" alt="Sefer Başlat">
+    </a>
+
+    <a class="hero-link" href="{{ url_for('continue_trip') }}" aria-label="Devam Eden Sefer">
+      <img src="{{ url_for('static', filename='img/home-seat-card.jpg') }}" alt="Devam Eden Sefer">
+    </a>
+
+    <section class="menu-list">
+      <a class="menu-item" href="{{ url_for('seats_page') }}?drive=1">
+        <span class="ico">💺</span>
+        <span>
+          <div class="menu-title">HIZLI KOLTUK</div>
+          <div class="menu-desc">Koltuk ekranına git</div>
+        </span>
+        <span class="arrow">›</span>
+      </a>
+
+      <a class="menu-item" href="{{ url_for('passenger_control') }}">
+        <span class="ico">👥</span>
+        <span>
+          <div class="menu-title">YOLCU KONTROLÜ</div>
+          <div class="menu-desc">Koltuk kontrol ekranı</div>
+        </span>
+        <span class="arrow">›</span>
+      </a>
+
+      <a class="menu-item" href="{{ url_for('hesap_page') }}">
+        <span class="ico">💵</span>
+        <span>
+          <div class="menu-title">HESAP</div>
+          <div class="menu-desc">Sefer kasa / giriş-çıkış / kalan</div>
+        </span>
+        <span class="arrow">›</span>
+      </a>
+
+      <a class="menu-item" href="{{ url_for('consignments_page') }}">
+        <span class="ico">📦</span>
+        <span>
+          <div class="menu-title">EMANETLER</div>
+          <div class="menu-desc">Emanet kayıt ve teslim işlemleri</div>
+        </span>
+        <span class="arrow">›</span>
+      </a>
+
+      <a class="menu-item" href="{{ url_for('add_route') }}">
+        <span class="ico">🛣️</span>
+        <span>
+          <div class="menu-title">HAT EKLE</div>
+          <div class="menu-desc">Yeni hat ve durakları tanımla</div>
+        </span>
+        <span class="arrow">›</span>
+      </a>
+
+      <a class="menu-item" href="{{ url_for('routes_list') }}">
+        <span class="ico">🗺️</span>
+        <span>
+          <div class="menu-title">HATLAR</div>
+          <div class="menu-desc">Hatları listele / düzenle</div>
+        </span>
+        <span class="arrow">›</span>
+      </a>
+
+      <a class="menu-item" href="/sefer-raporu-son">
+        <span class="ico">📁</span>
+        <span>
+          <div class="menu-title">SEFER RAPORLARI</div>
+          <div class="menu-desc">Biten sefer raporlarını aç</div>
+        </span>
+        <span class="arrow">›</span>
+      </a>
+
+      <a class="menu-item" href="{{ url_for('fare_query') }}">
+        <span class="ico">🏷️</span>
+        <span>
+          <div class="menu-title">FİYAT SORGU</div>
+          <div class="menu-desc">Biniş/iniş seç, fiyatı gör</div>
+        </span>
+        <span class="arrow">›</span>
+      </a>
+    </section>
+
+    <form class="lock-form" method="post" action="{{ url_for('logout') }}">
+      {% if csrf_token is defined %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      {% endif %}
+      <button class="lock-btn" type="submit">🔒 KİLİTLE</button>
+    </form>
+
+</main>
+
+<style id="home-route-lock-fix">
+.route-form{
+  margin-bottom:14px;
+}
+
+.route-picker{
+  height:54px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:0 16px;
+  border-radius:19px;
+  background:#fff;
+  border:1px solid rgba(148,163,184,.22);
+  box-shadow:0 10px 24px rgba(15,23,42,.08);
+}
+
+.route-picker .pin{
+  font-size:22px;
+}
+
+#homeRouteSelect{
+  flex:1;
+  min-width:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#0f172a;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  font-size:17px;
+  font-weight:900;
+  appearance:none;
+  -webkit-appearance:none;
+}
+
+.route-picker .caret{
+  color:#334155;
+  font-size:18px;
+  pointer-events:none;
+}
+
+.lock-form{
+  margin:0;
+  padding:0;
+}
+
+.lock-form .lock-btn{
+  cursor:pointer;
+}
+</style>
+
+<script id="home-route-link-fix">
+(function(){
+  const routeSelect = document.getElementById("homeRouteSelect");
+  const startLink = document.getElementById("homeTripStart");
+
+  function syncStartLink(){
+    if(!routeSelect || !startLink) return;
+
+    const route = routeSelect.value || "";
+    const base = startLink.dataset.base || startLink.getAttribute("href") || "/sefer-baslat";
+
+    startLink.href = base + "?route=" + encodeURIComponent(route);
+
+    try{
+      localStorage.setItem("homeSelectedRoute", route);
+    }catch(_){}
+  }
+
+  if(routeSelect){
+    try{
+      const saved = localStorage.getItem("homeSelectedRoute");
+      if(saved){
+        const opt = Array.from(routeSelect.options).find(o => o.value === saved);
+        if(opt) routeSelect.value = saved;
+      }
+    }catch(_){}
+
+    routeSelect.addEventListener("change", syncStartLink);
+    syncStartLink();
+  }
+})();
+</script>
+
+
+<style id="premium-route-picker-style">
+/* =========================================================
+   PREMIUM ROTA SEÇİCİ
+========================================================= */
+
+.route-premium{
+  margin-bottom:14px;
+}
+
+.route-picker-premium{
+  width:100%;
+  height:58px;
+  border:0;
+  outline:0;
+  border-radius:22px;
+  padding:0 16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(59,130,246,.13), transparent 28%),
+    linear-gradient(145deg,#ffffff,#f3f8ff);
+  color:#0f172a;
+  box-shadow:
+    0 14px 34px rgba(15,23,42,.11),
+    inset 0 1px 0 rgba(255,255,255,.92);
+  border:1px solid rgba(148,163,184,.20);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+.route-pin{
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  background:linear-gradient(145deg,#eff6ff,#dbeafe);
+  font-size:21px;
+}
+
+.route-name{
+  flex:1;
+  min-width:0;
+  text-align:left;
+  font-size:19px;
+  font-weight:950;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.route-caret{
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:#eef4fb;
+  color:#334155;
+  font-size:18px;
+  font-weight:900;
+}
+
+.route-sheet-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:9990;
+  background:rgba(2,6,23,.45);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  display:none;
+}
+
+.route-sheet-backdrop.show{
+  display:block;
+}
+
+.route-sheet{
+  position:fixed;
+  left:50%;
+  bottom:14px;
+  transform:translateX(-50%) translateY(120%);
+  z-index:9991;
+  width:min(94vw,680px);
+  max-height:78vh;
+  overflow:hidden;
+  border-radius:30px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(59,130,246,.16), transparent 34%),
+    linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
+  border:1px solid rgba(255,255,255,.8);
+  box-shadow:
+    0 30px 80px rgba(2,6,23,.35),
+    inset 0 1px 0 rgba(255,255,255,.95);
+  transition:transform .22s ease;
+}
+
+.route-sheet.show{
+  transform:translateX(-50%) translateY(0);
+}
+
+.route-sheet-handle{
+  width:54px;
+  height:5px;
+  border-radius:999px;
+  background:#cbd5e1;
+  margin:12px auto 8px;
+}
+
+.route-sheet-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:8px 20px 14px;
+  border-bottom:1px solid rgba(148,163,184,.18);
+}
+
+.route-sheet-kicker{
+  color:#2563eb;
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+}
+
+.route-sheet-head h2{
+  margin:3px 0 0;
+  font-size:28px;
+  line-height:1;
+  color:#0f172a;
+  font-weight:950;
+}
+
+.route-sheet-close{
+  width:44px !important;
+  height:44px !important;
+  min-height:44px !important;
+  margin:0 !important;
+  border-radius:999px !important;
+  border:1px solid rgba(148,163,184,.22) !important;
+  background:#fff !important;
+  color:#0f172a !important;
+  box-shadow:0 10px 22px rgba(15,23,42,.10) !important;
+  font-size:28px !important;
+  font-weight:800 !important;
+  padding:0 !important;
+}
+
+.route-sheet-list{
+  padding:12px;
+  overflow:auto;
+  max-height:calc(78vh - 105px);
+}
+
+.route-option{
+  width:100%;
+  min-height:74px;
+  margin:0 0 10px;
+  padding:12px;
+  display:grid;
+  grid-template-columns:48px 1fr 34px;
+  align-items:center;
+  gap:12px;
+  border-radius:22px;
+  border:1px solid rgba(148,163,184,.18);
+  background:linear-gradient(145deg,#ffffff,#f6faff);
+  box-shadow:0 10px 24px rgba(15,23,42,.07);
+  color:#0f172a;
+  text-align:left;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+.route-option-icon{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  border-radius:18px;
+  background:linear-gradient(145deg,#eff6ff,#dbeafe);
+  font-size:24px;
+}
+
+.route-option-text b{
+  display:block;
+  font-size:18px;
+  line-height:1.1;
+  font-weight:950;
+  color:#0f172a;
+}
+
+.route-option-text small{
+  display:block;
+  margin-top:4px;
+  font-size:13px;
+  font-weight:650;
+  color:#64748b;
+}
+
+.route-option-check{
+  width:32px;
+  height:32px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:#e2e8f0;
+  color:transparent;
+  font-weight:950;
+}
+
+.route-option.active{
+  border-color:rgba(20,184,166,.48);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(20,184,166,.20), transparent 34%),
+    linear-gradient(145deg,#ecfdf5,#ffffff);
+  box-shadow:0 14px 30px rgba(20,184,166,.15);
+}
+
+.route-option.active .route-option-icon{
+  background:linear-gradient(145deg,#2dd4bf,#0f766e);
+  color:#fff;
+}
+
+.route-option.active .route-option-check{
+  background:linear-gradient(145deg,#14b8a6,#0f766e);
+  color:#fff;
+}
+
+@media(max-width:420px){
+  .route-sheet{
+    width:calc(100vw - 20px);
+    bottom:10px;
+    border-radius:28px;
+  }
+
+  .route-sheet-head h2{
+    font-size:25px;
+  }
+
+  .route-option{
+    min-height:70px;
+    border-radius:20px;
+  }
+
+  .route-option-text b{
+    font-size:17px;
+  }
+}
+</style>
+
+<script id="premium-route-picker-script">
+(function(){
+  const btn = document.getElementById("routePickerBtn");
+  const text = document.getElementById("routePickerText");
+  const select = document.getElementById("homeRouteSelect");
+  const sheet = document.getElementById("routeSheet");
+  const backdrop = document.getElementById("routeSheetBackdrop");
+  const closeBtn = document.getElementById("routeSheetClose");
+  const startLink = document.getElementById("homeTripStart");
+
+  if(!btn || !select || !sheet || !backdrop) return;
+
+  function openSheet(){
+    backdrop.classList.add("show");
+    sheet.classList.add("show");
+    sheet.setAttribute("aria-hidden", "false");
+  }
+
+  function closeSheet(){
+    sheet.classList.remove("show");
+    backdrop.classList.remove("show");
+    sheet.setAttribute("aria-hidden", "true");
+  }
+
+  function syncStartLink(route){
+    if(!startLink) return;
+    const base = startLink.dataset.base || startLink.getAttribute("href") || "/sefer-baslat";
+    startLink.href = base.split("?")[0] + "?route=" + encodeURIComponent(route || "");
+  }
+
+  function setRoute(route){
+    if(!route) return;
+
+    select.value = route;
+    if(text) text.textContent = route;
+
+    document.querySelectorAll(".route-option").forEach(x => {
+      x.classList.toggle("active", x.dataset.route === route);
+    });
+
+    try{
+      localStorage.setItem("homeSelectedRoute", route);
+    }catch(_){}
+
+    syncStartLink(route);
+  }
+
+  btn.addEventListener("click", openSheet);
+  backdrop.addEventListener("click", closeSheet);
+  if(closeBtn) closeBtn.addEventListener("click", closeSheet);
+
+  document.querySelectorAll(".route-option").forEach(opt => {
+    opt.addEventListener("click", () => {
+      setRoute(opt.dataset.route || "");
+      closeSheet();
+    });
+  });
+
+  try{
+    const saved = localStorage.getItem("homeSelectedRoute");
+    if(saved && Array.from(select.options).some(o => o.value === saved)){
+      setRoute(saved);
+    }else{
+      setRoute(select.value);
+    }
+  }catch(_){
+    setRoute(select.value);
+  }
+})();
+</script>
+
+
+<style id="active-trip-guard-style">
+/* =========================================================
+   AKTİF SEFER VARKEN SEFER BAŞLAT KİLİDİ
+========================================================= */
+
+.active-trip-locked{
+  position:relative;
+}
+
+.active-trip-locked::after{
+  content:"Aktif sefer var";
+  position:absolute;
+  right:12px;
+  top:10px;
+  z-index:5;
+  padding:7px 11px;
+  border-radius:999px;
+  background:rgba(15,23,42,.82);
+  color:#fff;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.2px;
+  box-shadow:0 8px 20px rgba(15,23,42,.24);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+.active-trip-locked img{
+  filter:saturate(.92) brightness(.92);
+}
+
+.trip-guard-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  display:none;
+  background:rgba(2,6,23,.45);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+.trip-guard-backdrop.show{
+  display:block;
+}
+
+.trip-guard-modal{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%, -50%) scale(.96);
+  z-index:10001;
+  width:min(90vw,520px);
+  display:none;
+  border-radius:30px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(59,130,246,.18), transparent 34%),
+    linear-gradient(180deg,#ffffff,#f1f8ff);
+  border:1px solid rgba(255,255,255,.86);
+  box-shadow:0 30px 90px rgba(2,6,23,.36);
+  padding:22px;
+  color:#0f172a;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+.trip-guard-modal.show{
+  display:block;
+  animation:tripGuardIn .16s ease forwards;
+}
+
+@keyframes tripGuardIn{
+  to{ transform:translate(-50%, -50%) scale(1); }
+}
+
+.trip-guard-icon{
+  width:62px;
+  height:62px;
+  display:grid;
+  place-items:center;
+  border-radius:22px;
+  background:linear-gradient(145deg,#fef3c7,#f59e0b);
+  font-size:31px;
+  margin-bottom:14px;
+  box-shadow:0 14px 28px rgba(245,158,11,.20);
+}
+
+.trip-guard-modal h2{
+  margin:0 0 8px;
+  font-size:27px;
+  line-height:1.05;
+  font-weight:950;
+  color:#0f172a;
+}
+
+.trip-guard-modal p{
+  margin:0;
+  color:#64748b;
+  font-size:16px;
+  line-height:1.35;
+  font-weight:650;
+}
+
+.trip-guard-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:18px;
+}
+
+.trip-guard-actions button,
+.trip-guard-actions a{
+  min-height:54px;
+  border-radius:18px;
+  border:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  font-size:15px;
+  font-weight:950;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+.trip-guard-go{
+  background:linear-gradient(145deg,#22c55e,#0f9f6e);
+  color:#fff;
+  box-shadow:0 14px 30px rgba(34,197,94,.22);
+}
+
+.trip-guard-ok{
+  background:#e2e8f0;
+  color:#334155;
+}
+
+@media(max-width:420px){
+  .trip-guard-modal{
+    border-radius:26px;
+    padding:20px;
+  }
+
+  .trip-guard-actions{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+
+<script id="active-trip-guard-script">
+(function(){
+  const HAS_ACTIVE_TRIP = {% if active_trip is defined and active_trip %}true{% else %}false{% endif %};
+  const ACTIVE_TRIP_ROUTE = {% if active_trip is defined and active_trip %}{{ active_trip.route|tojson }}{% else %}""{% endif %};
+
+  if(!HAS_ACTIVE_TRIP) return;
+
+  const startLink =
+    document.getElementById("homeTripStart") ||
+    document.querySelector(".hero-link");
+
+  const continueLink =
+    Array.from(document.querySelectorAll(".hero-link"))[1] ||
+    document.querySelector('a[href*="continue"]') ||
+    document.querySelector('a[href*="seats"]');
+
+  const routeBtn = document.getElementById("routePickerBtn");
+  const routeText = document.getElementById("routePickerText");
+  const routeSelect = document.getElementById("homeRouteSelect");
+
+  /* Aktif sefer varsa üst rota yazısı aktif seferin rotası olsun */
+  if(ACTIVE_TRIP_ROUTE){
+    if(routeText) routeText.textContent = ACTIVE_TRIP_ROUTE;
+    if(routeSelect){
+      const opt = Array.from(routeSelect.options).find(o => o.value === ACTIVE_TRIP_ROUTE);
+      if(opt) routeSelect.value = ACTIVE_TRIP_ROUTE;
+    }
+    try{
+      localStorage.setItem("homeSelectedRoute", ACTIVE_TRIP_ROUTE);
+    }catch(_){}
+  }
+
+  if(startLink){
+    startLink.classList.add("active-trip-locked");
+    startLink.setAttribute("aria-disabled", "true");
+  }
+
+  function ensureModal(){
+    let backdrop = document.getElementById("tripGuardBackdrop");
+    let modal = document.getElementById("tripGuardModal");
+
+    if(backdrop && modal) return {backdrop, modal};
+
+    backdrop = document.createElement("div");
+    backdrop.id = "tripGuardBackdrop";
+    backdrop.className = "trip-guard-backdrop";
+
+    modal = document.createElement("section");
+    modal.id = "tripGuardModal";
+    modal.className = "trip-guard-modal";
+    modal.innerHTML = `
+      <div class="trip-guard-icon">⚠️</div>
+      <h2>Aktif sefer var</h2>
+      <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+      <div class="trip-guard-actions">
+        <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+        <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+      </div>
+    `;
+
+    document.body.appendChild(backdrop);
+    document.body.appendChild(modal);
+
+    const close = () => {
+      backdrop.classList.remove("show");
+      modal.classList.remove("show");
+    };
+
+    backdrop.addEventListener("click", close);
+    modal.querySelector("#tripGuardOk").addEventListener("click", close);
+
+    const go = modal.querySelector("#tripGuardGo");
+    if(go && continueLink){
+      go.href = continueLink.getAttribute("href") || "/seats";
+    }
+
+    return {backdrop, modal};
+  }
+
+  function showGuard(){
+    const {backdrop, modal} = ensureModal();
+    backdrop.classList.add("show");
+    modal.classList.add("show");
+  }
+
+  /* Sefer başlatı engelle */
+  if(startLink){
+    startLink.addEventListener("click", function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      showGuard();
+      return false;
+    }, true);
+  }
+
+  /* Aktif sefer varken rota listesini de açtırma */
+  if(routeBtn){
+    routeBtn.addEventListener("click", function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      showGuard();
+      return false;
+    }, true);
+  }
+})();
+</script>
+
+</body>
+</html>

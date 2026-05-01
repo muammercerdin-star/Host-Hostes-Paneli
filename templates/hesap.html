@@ -7,256 +7,904 @@
 
   <style>
     :root{
-      --bg:#0b1115;
-      --card:#11171c;
-      --card2:#0f161b;
-      --border:#22303a;
-      --border2:#2a3946;
-      --text:#e6edf3;
-      --muted:#a8b3bd;
-      --muted2:#7f8b96;
-      --primary:#1f6b2d;
-      --primary2:#2a8d3d;
-      --danger:#7b1f1f;
-      --danger2:#9a2a2a;
+      --bg:#eef4fb;
+      --bg2:#f8fbff;
+      --card:#ffffffdd;
+      --card2:#f7fbff;
+      --border:#dce7f2;
+      --border2:#cbd8e6;
+      --text:#0f172a;
+      --muted:#64748b;
+      --muted2:#94a3b8;
+
+      --primary:#16a34a;
+      --primary2:#0f8f3e;
+      --danger:#ef4444;
+      --danger2:#dc2626;
+      --blue:#2563eb;
       --warn:#d4a100;
-      --shadow:0 0 12px #0004;
-      --radius:14px;
-      --radius2:12px;
-      --pad:14px;
-      --tap:44px;
+
+      --shadow:0 18px 42px rgba(15,23,42,.13);
+      --shadow2:0 8px 24px rgba(15,23,42,.10);
+      --radius:28px;
+      --radius2:22px;
+      --pad:18px;
+      --tap:46px;
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Roboto,Segoe UI,Arial;
-  background:var(--bg);
-  color:var(--text);
-  -webkit-font-smoothing:antialiased;
-  padding-bottom: 0 !important; /* artık buraya güvenmiyoruz */
-}
+
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Roboto,Segoe UI,Arial;
+      background:
+        radial-gradient(circle at top left, #dbeafe 0, transparent 36%),
+        radial-gradient(circle at top right, #dcfce7 0, transparent 32%),
+        linear-gradient(180deg,#f8fbff 0%,#eef4fb 45%,#eaf1f8 100%);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      padding-bottom:0 !important;
+    }
+
     a{color:inherit;text-decoration:none}
 
-.container{
-  max-width:980px;
-  margin:auto;
-  padding:14px 14px calc(18px + var(--footer-h, 140px)) ; /* 👈 EN ÖNEMLİSİ */
-}
-    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .container{
+      max-width:980px;
+      margin:auto;
+      padding:16px 14px calc(18px + var(--footer-h, 150px));
+    }
 
-    /* ✅ Sticky Topbar */
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+
+    /* ÜST BAR */
     .topbar{
-      position:sticky; top:0; z-index:20;
-      background:rgba(11,17,21,.86);
-      backdrop-filter: blur(10px);
-      border-bottom:1px solid var(--border);
-      padding:10px 0 10px;
-      margin:0 0 12px;
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:rgba(248,251,255,.78);
+      backdrop-filter:blur(16px);
+      border-bottom:1px solid rgba(203,216,230,.75);
+      padding:12px 0;
+      margin:0 0 14px;
+      box-shadow:0 8px 26px rgba(15,23,42,.06);
     }
-    .topbar-inner{max-width:980px;margin:auto;padding:0 14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .topbar-left{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .topbar-title{font-weight:900;letter-spacing:.2px}
-    .meta-line{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+    .topbar-inner{
+      max-width:980px;
+      margin:auto;
+      padding:0 14px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+
+    .topbar-left{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .topbar-title{
+      font-weight:1000;
+      letter-spacing:.2px;
+      font-size:18px;
+      color:#0f172a;
+    }
+
+    .meta-line{
+      display:flex;
+      gap:7px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:5px;
+    }
+
     .pill{
-      font-size:12px;color:var(--muted);
-      border:1px solid var(--border);
-      background:#0c141a;
-      padding:6px 10px;border-radius:999px;
+      font-size:12px;
+      color:#475569;
+      border:1px solid #dbe5ef;
+      background:#ffffffcc;
+      padding:7px 10px;
+      border-radius:999px;
+      box-shadow:0 5px 14px rgba(15,23,42,.05);
+      font-weight:800;
     }
+
     .kalan-pill{
-      display:flex;gap:8px;align-items:center;
-      border:1px solid var(--border2);
-      background:linear-gradient(180deg,#0c141a,#0b1217);
-      padding:10px 12px;border-radius:999px;
-      box-shadow:var(--shadow);
-      font-weight:900;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      border:1px solid #d7e3ee;
+      background:linear-gradient(180deg,#ffffff,#f4f8fc);
+      padding:12px 15px;
+      border-radius:999px;
+      box-shadow:var(--shadow2);
+      font-weight:1000;
+      color:#0f172a;
     }
-    .kalan-pill small{color:var(--muted);font-weight:700}
-    .pos{color:#29d884}
-    .neg{color:#ff5454}
+
+    .kalan-pill small{
+      color:#64748b;
+      font-weight:900;
+      font-size:11px;
+      letter-spacing:.4px;
+    }
+
+    .pos{color:#0ea35a}
+    .neg{color:#ef4444}
     .warn{color:var(--warn)}
 
+    /* KARTLAR */
     .card{
       background:var(--card);
-      border:1px solid var(--border);
+      border:1px solid rgba(220,231,242,.92);
       border-radius:var(--radius);
       padding:var(--pad);
-      margin:12px 0;
+      margin:14px 0;
       box-shadow:var(--shadow);
+      backdrop-filter:blur(14px);
     }
+
     .muted{color:var(--muted);font-size:12px}
     .muted2{color:var(--muted2);font-size:12px}
-    .h{font-weight:900;letter-spacing:.2px;margin:0 0 10px;font-size:14px}
 
-    .badge{
-      display:inline-flex;gap:6px;align-items:center;
-      background:#0c141a;border:1px solid #2b3a46;color:#c8d1d9;
-      padding:6px 10px;border-radius:999px;font-size:12px;
-      margin:6px 6px 0 0;
+    .h{
+      font-weight:1000;
+      letter-spacing:.2px;
+      margin:0 0 10px;
+      font-size:16px;
+      color:#0f172a;
     }
 
-    /* Özet kutuları */
+    .badge{
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+      background:#ffffff;
+      border:1px solid #dbe5ef;
+      color:#475569;
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      margin:6px 6px 0 0;
+      box-shadow:0 5px 14px rgba(15,23,42,.05);
+    }
+
+    /* ÖZET */
     .kasa{
       display:grid;
       grid-template-columns:repeat(4,1fr);
-      gap:10px;
-      margin-bottom:10px;
+      gap:12px;
+      margin-bottom:4px;
     }
+
     .box{
-      background:var(--card2);
-      border:1px solid var(--border);
-      border-radius:var(--radius2);
-      padding:10px 10px 8px;
-      min-height:74px;
-      display:flex;flex-direction:column;justify-content:space-between;
+      background:linear-gradient(180deg,#ffffff,#f7fbff);
+      border:1px solid #dce7f2;
+      border-radius:24px;
+      padding:14px 14px 12px;
+      min-height:88px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      box-shadow:0 10px 24px rgba(15,23,42,.08);
     }
-    .box .label{font-size:12px;color:var(--muted)}
-    .box .num{font-size:18px;font-weight:900;letter-spacing:.3px}
+
+    .box .label{
+      font-size:12px;
+      color:#64748b;
+      font-weight:850;
+    }
+
+    .box .num{
+      font-size:20px;
+      font-weight:1000;
+      letter-spacing:.2px;
+      color:#0f172a;
+    }
 
     .alertbar{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:10px 12px;border-radius:12px;margin-top:10px;
-      border:1px solid #3a2b2b;
-      background:linear-gradient(180deg,#1a1111,#120c0c);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:13px 14px;
+      border-radius:20px;
+      margin-top:12px;
+      border:1px solid #fecaca;
+      background:linear-gradient(180deg,#fff5f5,#ffecec);
+      box-shadow:0 8px 22px rgba(239,68,68,.12);
     }
-    .alertbar strong{color:#ff6b6b}
-    .alertbar .mini{font-size:12px;color:#f0baba}
 
-    label{font-size:12px;color:var(--muted);display:block;margin:10px 0 6px}
+    .alertbar strong{color:#dc2626}
+    .alertbar .mini{font-size:12px;color:#991b1b}
+
+    label{
+      font-size:12px;
+      color:#64748b;
+      display:block;
+      margin:12px 0 7px;
+      font-weight:900;
+    }
+
     input,select,textarea,button{
       width:100%;
-      padding:12px 12px;
-      border-radius:12px;
-      border:1px solid var(--border2);
-      background:#0b1217;
-      color:var(--text);
+      padding:13px 13px;
+      border-radius:18px;
+      border:1px solid #d5e1ec;
+      background:#ffffff;
+      color:#0f172a;
       outline:none;
       min-height:var(--tap);
+      font:inherit;
     }
-    textarea{resize:vertical}
-    input:focus,select:focus,textarea:focus{border-color:#3a5466;box-shadow:0 0 0 3px #0ea5e91c}
 
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    @media (max-width: 900px){
+    textarea{resize:vertical}
+
+    input:focus,
+    select:focus,
+    textarea:focus{
+      border-color:#93c5fd;
+      box-shadow:0 0 0 4px rgba(37,99,235,.12);
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    @media (max-width:900px){
       .kasa{grid-template-columns:repeat(2,1fr)}
       .grid2{grid-template-columns:1fr}
     }
 
-    .btnrow{display:flex;gap:8px;flex-wrap:wrap}
+    /* BUTONLAR */
+    .btnrow{
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
+    }
+
     .btn{
-      display:inline-flex;align-items:center;justify-content:center;
+      width:auto;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
       min-height:var(--tap);
-      padding:10px 12px;border-radius:12px;
-      border:1px solid var(--border2);
-      background:#0b1217;
+      padding:11px 14px;
+      border-radius:18px;
+      border:1px solid #d5e1ec;
+      background:#ffffff;
+      color:#0f172a;
       cursor:pointer;
       user-select:none;
       transition:.15s;
-      font-weight:800;
+      font-weight:950;
       font-size:14px;
+      box-shadow:0 6px 16px rgba(15,23,42,.07);
     }
+
     .btn:hover{transform:translateY(-1px)}
-    .btn.primary{background:var(--primary);border-color:#2a7b3a}
-    .btn.primary:hover{background:var(--primary2)}
-    .btn.danger{background:var(--danger);border-color:#8a2a2a}
-    .btn.danger:hover{background:var(--danger2)}
-    .btn.ghost{background:transparent}
-    .btn.small{font-size:12px;padding:8px 10px;min-height:38px;border-radius:10px;font-weight:800}
 
-    .quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .btn.primary{
+      background:linear-gradient(180deg,#22c55e,#16a34a);
+      border-color:#16a34a;
+      color:#fff;
+    }
+
+    .btn.primary:hover{background:linear-gradient(180deg,#16a34a,#0f8f3e)}
+
+    .btn.danger{
+      background:linear-gradient(180deg,#ff5a5a,#ef4444);
+      border-color:#ef4444;
+      color:#fff;
+    }
+
+    .btn.danger:hover{background:linear-gradient(180deg,#ef4444,#dc2626)}
+
+    .btn.ghost{
+      background:#ffffffaa;
+      color:#334155;
+    }
+
+    .btn.small{
+      font-size:12px;
+      padding:9px 11px;
+      min-height:40px;
+      border-radius:15px;
+      font-weight:950;
+    }
+
+    /* HIZLI TUTAR */
+    .quick{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
     .chip{
-      border:1px solid #2f4353;background:#0c141a;color:#cfe3f2;
-      padding:8px 10px;border-radius:999px;font-size:12px;
-      cursor:pointer;user-select:none;
+      border:1px solid #d5e1ec;
+      background:#ffffff;
+      color:#2563eb;
+      padding:9px 12px;
+      border-radius:999px;
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
       transition:.15s;
-      font-weight:800;
+      font-weight:1000;
+      box-shadow:0 5px 14px rgba(15,23,42,.06);
     }
-    .chip:hover{transform:translateY(-1px);border-color:#3b5870}
-    .chip.warn{border-color:#5c4a1a;color:#ffe39a}
 
-    /* ✅ Tek panel / tablar */
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+    .chip:hover{
+      transform:translateY(-1px);
+      border-color:#bfdbfe;
+      background:#eff6ff;
+    }
+
+    .chip.warn{
+      border-color:#fde68a;
+      background:#fffbeb;
+      color:#b45309;
+    }
+
+    /* TABLAR */
+    .tabs{
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
+      margin:0 0 12px;
+      background:#eef5fb;
+      border:1px solid #dce7f2;
+      padding:7px;
+      border-radius:999px;
+    }
+
     .tab{
-      border:1px solid var(--border2);
-      background:#0c141a;
-      color:#cfe3f2;
-      padding:10px 12px;border-radius:999px;
-      font-weight:900;font-size:13px;
-      cursor:pointer;user-select:none;
+      width:auto;
+      flex:1 1 auto;
+      border:0;
+      background:transparent;
+      color:#475569;
+      padding:11px 13px;
+      border-radius:999px;
+      font-weight:1000;
+      font-size:13px;
+      cursor:pointer;
+      user-select:none;
       transition:.15s;
+      box-shadow:none;
     }
+
     .tab.active{
-      background:linear-gradient(180deg,#1f6b2d,#174f22);
-      border-color:#2a7b3a;
+      background:linear-gradient(180deg,#ffffff,#f7fbff);
+      color:#0f172a;
+      box-shadow:0 8px 18px rgba(15,23,42,.10);
+      border:1px solid #dce7f2;
     }
-    .tab small{color:#d8e7dd;font-weight:700}
+
+    .tab small{
+      color:#64748b;
+      font-weight:850;
+    }
+
     .tabpanels > .panel{display:none}
     .tabpanels > .panel.active{display:block}
 
-    /* Toolbar / arama */
+    /* TOOLBAR */
     .toolbar{
-      display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;
-      margin:14px 0 6px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin:16px 0 8px;
     }
-    .toolbar .left{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .toolbar .right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+    .toolbar .left{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .toolbar .right{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
     .searchwrap{
-      display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
       width:min(540px,100%);
     }
-    .searchwrap input{min-height:40px;padding:10px 12px;border-radius:12px}
 
-    /* ✅ Hareketler: masaüstünde tablo, mobilde kart */
-    .table{width:100%;border-collapse:collapse}
-    th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;font-size:13px;vertical-align:top}
-    th{color:var(--muted);font-weight:800}
-    tr.in td{color:#44d38f}
-    tr.out td{color:#ff7070}
-    td.amount{white-space:nowrap;font-weight:900}
-    td.note{color:var(--text)}
-    .right{display:flex;gap:8px;align-items:center;justify-content:flex-end}
-
-    .moves-cards{display:none}
-    .move-card{
-      background:var(--card2);
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:12px;
-      display:flex;gap:10px;align-items:flex-start;justify-content:space-between;
-      margin:10px 0;
+    .searchwrap input{
+      min-height:42px;
+      padding:11px 13px;
+      border-radius:17px;
     }
-    .move-left{min-width:0}
-    .move-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .move-dir{font-weight:900}
-    .move-cat{font-weight:900}
-    .move-note{color:var(--text);opacity:.92;margin-top:4px;font-size:13px;word-break:break-word}
-    .move-time{color:var(--muted2);font-size:12px;margin-top:6px}
-    .move-amt{font-weight:1000;white-space:nowrap}
 
-    @media (max-width: 720px){
+    /* TABLO */
+    .table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+    }
+
+    th,td{
+      border-bottom:1px solid #e2eaf3;
+      padding:11px 8px;
+      text-align:left;
+      font-size:13px;
+      vertical-align:top;
+    }
+
+    th{
+      color:#64748b;
+      font-weight:1000;
+    }
+
+    tr.in td{color:#0ea35a}
+    tr.out td{color:#ef4444}
+
+    td.amount{
+      white-space:nowrap;
+      font-weight:1000;
+    }
+
+    td.note{color:#0f172a}
+
+    .right{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    /* MOBİL KART HAREKETLER */
+    .moves-cards{display:none}
+
+    .move-card{
+      background:linear-gradient(180deg,#ffffff,#f8fbff);
+      border:1px solid #dce7f2;
+      border-radius:24px;
+      padding:14px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+      margin:10px 0;
+      box-shadow:0 8px 22px rgba(15,23,42,.07);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .move-card::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:12px;
+      bottom:12px;
+      width:5px;
+      border-radius:999px;
+      background:#94a3b8;
+    }
+
+    .move-card.in::before{background:#16a34a}
+    .move-card.out::before{background:#ef4444}
+
+    .move-card.in .move-amt,
+    .move-card.in .move-dir{color:#16a34a}
+
+    .move-card.out .move-amt,
+    .move-card.out .move-dir{color:#ef4444}
+
+    .move-left{min-width:0;padding-left:6px}
+
+    .move-top{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .move-dir{
+      font-weight:1000;
+      font-size:18px;
+    }
+
+    .move-cat{
+      font-weight:1000;
+      color:#0f172a;
+    }
+
+    .move-note{
+      color:#334155;
+      opacity:.96;
+      margin-top:5px;
+      font-size:13px;
+      word-break:break-word;
+      font-weight:700;
+    }
+
+    .move-time{
+      color:#94a3b8;
+      font-size:12px;
+      margin-top:7px;
+      font-weight:750;
+    }
+
+    .move-amt{
+      font-weight:1000;
+      white-space:nowrap;
+      color:#0f172a;
+    }
+
+    @media (max-width:720px){
       .moves-table{display:none}
       .moves-cards{display:block}
+
+      .topbar-inner{
+        align-items:flex-start;
+      }
+
+      .kalan-pill{
+        width:100%;
+        justify-content:space-between;
+      }
+
+      .tabs{
+        border-radius:24px;
+      }
+
+      .tab{
+        flex:1 1 100%;
+      }
+
+      .toolbar .right,
+      .searchwrap{
+        width:100%;
+      }
+
+      .searchwrap input{
+        flex:1 1 100%;
+      }
+
+      .searchwrap .btn,
+      .toolbar .right > .btn,
+      .toolbar .right > a{
+        flex:1 1 calc(50% - 8px);
+      }
     }
 
-    /* fixed footer */
+    /* FOOTER */
     .footerbar{
       position:fixed;
-      left:0;right:0;bottom:0;
-      background:rgba(11,17,21,.92);
-      backdrop-filter: blur(10px);
-      border-top:1px solid var(--border);
+      left:0;
+      right:0;
+      bottom:0;
+      background:rgba(248,251,255,.88);
+      backdrop-filter:blur(18px);
+      border-top:1px solid rgba(203,216,230,.9);
       padding:10px max(10px, env(safe-area-inset-left)) calc(10px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-right));
+      box-shadow:0 -12px 34px rgba(15,23,42,.10);
+      z-index:30;
     }
+
     .footergrid{
-      max-width:980px;margin:auto;
-      display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+      max-width:980px;
+      margin:auto;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
     }
-    .footergrid .btn{font-size:14px;padding:12px;border-radius:14px}
+
+    .footergrid .btn{
+      width:100%;
+      font-size:13px;
+      padding:12px 8px;
+      border-radius:18px;
+      min-height:50px;
+    }
+
+    .footergrid form{
+      margin:0;
+    }
+
+    .footergrid form .btn{
+      width:100%;
+    }
+
+    @media (max-width:520px){
+      .footergrid{
+        grid-template-columns:repeat(2,1fr);
+      }
+    }
 
     .fadeIn{animation:fadein .35s ease}
-    @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+    @keyframes fadein{
+      from{opacity:0;transform:translateY(6px)}
+      to{opacity:1;transform:none}
+    }
+  
+/* =========================================================
+   KASA KUTULARINI BELİRGİNLEŞTİRME
+   Açık tema kalsın ama kartlar daha net ayrılsın
+========================================================= */
+
+.card{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.94), rgba(243,248,254,.92));
+  border:1px solid #cbd9e8;
+  box-shadow:
+    0 18px 38px rgba(15,23,42,.16),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.kasa{
+  gap:14px;
+}
+
+.box{
+  position:relative;
+  overflow:hidden;
+  border:1px solid #c5d5e6;
+  background:
+    linear-gradient(180deg,#ffffff 0%,#eef5fc 100%);
+  box-shadow:
+    0 12px 26px rgba(15,23,42,.13),
+    inset 0 1px 0 rgba(255,255,255,.95);
+}
+
+.box::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:5px;
+  background:#94a3b8;
+}
+
+.box:nth-child(1)::before{
+  background:#2563eb;
+}
+
+.box:nth-child(2)::before{
+  background:#16a34a;
+}
+
+.box:nth-child(3)::before{
+  background:#ef4444;
+}
+
+.box:nth-child(4)::before{
+  background:#0ea35a;
+}
+
+.box:nth-child(1){
+  background:linear-gradient(180deg,#ffffff 0%,#eff6ff 100%);
+}
+
+.box:nth-child(2){
+  background:linear-gradient(180deg,#ffffff 0%,#ecfdf5 100%);
+}
+
+.box:nth-child(3){
+  background:linear-gradient(180deg,#ffffff 0%,#fff1f2 100%);
+}
+
+.box:nth-child(4){
+  background:linear-gradient(180deg,#ffffff 0%,#ecfdf5 100%);
+}
+
+.box .label{
+  color:#64748b;
+  font-size:13px;
+  font-weight:950;
+}
+
+.box .num{
+  color:#0f172a;
+  text-shadow:0 1px 0 rgba(255,255,255,.7);
+}
+
+.box:nth-child(2) .num{
+  color:#0f9f55;
+}
+
+.box:nth-child(3) .num{
+  color:#ef4444;
+}
+
+.box:nth-child(4) .num{
+  color:#0ea35a;
+}
+
+.kalan-pill{
+  background:
+    linear-gradient(180deg,#ffffff 0%,#ecfdf5 100%);
+  border:1px solid #b7e4ca;
+  box-shadow:
+    0 12px 26px rgba(14,163,90,.14),
+    inset 0 1px 0 rgba(255,255,255,.95);
+}
+
+.kalan-pill span{
+  font-size:20px;
+}
+
+.tabs{
+  background:#dfeaf5;
+  border-color:#c7d8e8;
+}
+
+.tab.active{
+  background:linear-gradient(180deg,#ffffff,#edf5fd);
+  border:1px solid #cbd9e8;
+}
+
+.move-card{
+  border-color:#cbd9e8;
+  box-shadow:
+    0 10px 24px rgba(15,23,42,.12),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+  
+/* =========================================================
+   ÖZEL KATEGORİ SEÇİCİ
+   Telefonun kendi beyaz select listesini devre dışı bırakır
+========================================================= */
+
+.native-select-hidden{
+  display:none !important;
+}
+
+.fake-select{
+  width:100%;
+  min-height:58px;
+  border-radius:22px;
+  border:1px solid #cbd9e8;
+  background:
+    linear-gradient(180deg,#ffffff 0%,#f4f9ff 100%);
+  box-shadow:
+    0 10px 24px rgba(15,23,42,.10),
+    inset 0 1px 0 rgba(255,255,255,.95);
+  color:#0f172a;
+  font-weight:900;
+  font-size:20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:0 18px;
+}
+
+.fake-select::after{
+  content:"⌄";
+  font-size:24px;
+  color:#475569;
+  line-height:1;
+}
+
+.cat-picker-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.40);
+  backdrop-filter:blur(6px);
+  z-index:9998;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:18px;
+}
+
+.cat-picker-sheet{
+  width:min(680px,100%);
+  max-height:min(78vh,720px);
+  overflow:hidden;
+  border-radius:34px;
+  background:
+    linear-gradient(180deg,#ffffff 0%,#eef5fc 100%);
+  border:1px solid #cbd9e8;
+  box-shadow:0 26px 70px rgba(15,23,42,.30);
+  display:flex;
+  flex-direction:column;
+}
+
+.cat-picker-head{
+  padding:18px 18px 12px;
+  border-bottom:1px solid #dce7f2;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.cat-picker-title{
+  font-weight:1000;
+  font-size:22px;
+  color:#0f172a;
+}
+
+.cat-picker-close{
+  width:46px;
+  height:46px;
+  min-height:46px;
+  border-radius:999px;
+  border:1px solid #d5e1ec;
+  background:#ffffff;
+  color:#334155;
+  font-weight:1000;
+  font-size:22px;
+  box-shadow:0 8px 18px rgba(15,23,42,.08);
+}
+
+.cat-picker-list{
+  overflow:auto;
+  padding:10px 12px 18px;
+}
+
+.cat-picker-option{
+  width:100%;
+  min-height:62px;
+  margin:8px 0;
+  border-radius:22px;
+  border:1px solid #d5e1ec;
+  background:#ffffff;
+  color:#0f172a;
+  font-size:20px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  box-shadow:0 8px 20px rgba(15,23,42,.08);
+}
+
+.cat-picker-option.active{
+  border-color:#16a34a;
+  background:linear-gradient(180deg,#ecfdf5 0%,#ffffff 100%);
+  color:#0f9f55;
+}
+
+.cat-picker-option.active::after{
+  content:"✓";
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  background:#16a34a;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  font-weight:1000;
+}
+
+body.cat-picker-open{
+  overflow:hidden;
+}
+
   </style>
 </head>
 
@@ -345,7 +993,7 @@ body{
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
             <label>Kategori</label>
-            <select name="category" id="cat_in">
+            <select class="native-select-hidden" name="category" id="cat_in">
               {% for k in categories_in %}<option value="{{k}}">{{k}}</option>{% endfor %}
             </select>
 
@@ -377,7 +1025,7 @@ body{
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
             <label>Kategori</label>
-            <select name="category" id="cat_out">
+            <select class="native-select-hidden" name="category" id="cat_out">
               {% for k in categories_out %}<option value="{{k}}">{{k}}</option>{% endfor %}
             </select>
 
@@ -461,7 +1109,7 @@ body{
     <!-- SON HAREKETLER TOOLBAR -->
     <div class="toolbar">
       <div class="left">
-        <div class="h" style="margin:0">📋 Son Hareketler</div>
+        <div class="h" style="margin:0">📋 İşlem Dökümü</div>
         <span class="muted2">Gösterilen: <span id="moveCount">0</span> kayıt</span>
       </div>
 
@@ -532,7 +1180,7 @@ body{
       <a class="btn primary" href="{{ url_for('hesap_page') }}">🧾 Hesap</a>
       <form method="post" action="{{ url_for('end_trip') }}" style="margin:0">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button class="btn danger" type="submit">⛔ Seferi Bitir</button>
+        <button class="btn danger" type="submit" onclick="return confirm(\'Seferi bitirmek istediğine emin misin?\')">⛔ Seferi Bitir</button>
       </form>
     </div>
   </div>
@@ -584,6 +1232,110 @@ body{
     catIn?.addEventListener("change", e => localStorage.setItem("cat_in", e.target.value));
     catOut?.addEventListener("change", e => localStorage.setItem("cat_out", e.target.value));
 
+
+    // ✅ Telefonun kendi select ekranı yerine özel kategori seçici
+    function installPrettySelect(selectId, title){
+      const select = getEl(selectId);
+      if(!select) return;
+
+      if(select.dataset.prettyInstalled === "1") return;
+      select.dataset.prettyInstalled = "1";
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "fake-select";
+      btn.setAttribute("aria-haspopup", "dialog");
+
+      function selectedText(){
+        const opt = select.options[select.selectedIndex];
+        return opt ? opt.textContent.trim() : "Seç";
+      }
+
+      function sync(){
+        btn.textContent = selectedText();
+      }
+
+      sync();
+      select.insertAdjacentElement("afterend", btn);
+
+      select.addEventListener("change", sync);
+
+      btn.addEventListener("click", () => {
+        openCategoryPicker(select, title || "Kategori seç", sync);
+      });
+    }
+
+    function closeCategoryPicker(){
+      document.body.classList.remove("cat-picker-open");
+      document.querySelectorAll(".cat-picker-backdrop").forEach(x => x.remove());
+    }
+
+    function openCategoryPicker(select, title, afterSelect){
+      closeCategoryPicker();
+
+      document.body.classList.add("cat-picker-open");
+
+      const backdrop = document.createElement("div");
+      backdrop.className = "cat-picker-backdrop";
+
+      const sheet = document.createElement("div");
+      sheet.className = "cat-picker-sheet";
+      sheet.setAttribute("role", "dialog");
+      sheet.setAttribute("aria-modal", "true");
+
+      const head = document.createElement("div");
+      head.className = "cat-picker-head";
+
+      const titleEl = document.createElement("div");
+      titleEl.className = "cat-picker-title";
+      titleEl.textContent = title;
+
+      const closeBtn = document.createElement("button");
+      closeBtn.type = "button";
+      closeBtn.className = "cat-picker-close";
+      closeBtn.textContent = "×";
+      closeBtn.addEventListener("click", closeCategoryPicker);
+
+      head.appendChild(titleEl);
+      head.appendChild(closeBtn);
+
+      const list = document.createElement("div");
+      list.className = "cat-picker-list";
+
+      Array.from(select.options).forEach(opt => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "cat-picker-option" + (opt.value === select.value ? " active" : "");
+        item.textContent = opt.textContent.trim();
+
+        item.addEventListener("click", () => {
+          select.value = opt.value;
+          select.dispatchEvent(new Event("change", { bubbles:true }));
+          if(typeof afterSelect === "function") afterSelect();
+          closeCategoryPicker();
+        });
+
+        list.appendChild(item);
+      });
+
+      sheet.appendChild(head);
+      sheet.appendChild(list);
+      backdrop.appendChild(sheet);
+      document.body.appendChild(backdrop);
+
+      backdrop.addEventListener("click", e => {
+        if(e.target === backdrop) closeCategoryPicker();
+      });
+    }
+
+    installPrettySelect("cat_in", "Giriş kategorisi seç");
+    installPrettySelect("cat_out", "Çıkış kategorisi seç");
+
+    document.addEventListener("keydown", e => {
+      if(e.key === "Escape") closeCategoryPicker();
+    });
+
+
     // --- Table search filter (tablo + kart sayımı) ---
     const q = getEl('q');
     const movesBody = getEl('movesBody');
@@ -631,14 +1383,14 @@ body{
         return;
       }
       const lines = [];
-      lines.push("🧾 SEFER KASA – Son Hareketler");
+      lines.push("🧾 SEFER KASA – İşlem Dökümü");
       const route = TRIP?.route || "";
       const date  = TRIP?.date || "";
       const dep   = TRIP?.departure_time || "";
       lines.push(`Hat: ${route}  Tarih: ${date}  Kalkış: ${dep}`);
       lines.push("--------------------------------------------------");
 
-      MOVES.forEach(m=>{
+      MOVES.slice().reverse().forEach(m=>{
         const dir = (m.direction === '+' || m.direction === 'in') ? '+' : '-';
         const created = m.created_at || m.created || "";
         const cat = m.category || "";

@@ -4247,3 +4247,672 @@ body.drive-mode .route-stop.done.has-flow-summary .meta.done-summary{
   }
 }
 
+
+
+/* =========================================================
+   FINAL BUTTON BALANCE PATCH
+   Koltuk ekranındaki Sürüş / Sesli Komut / Hazır / mini işlem
+   butonlarını dengeli hizalar.
+========================================================= */
+
+.board-card .board-inner{
+  position:relative;
+}
+
+/* Sürüş butonu üst sağda düzgün dursun */
+#driveInlineDock{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  gap:10px !important;
+  margin:0 0 12px 0 !important;
+  min-height:54px !important;
+}
+
+#driveModeToggle{
+  min-width:156px !important;
+  height:54px !important;
+  padding:0 20px !important;
+  border-radius:999px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  font-size:17px !important;
+  font-weight:950 !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+  box-shadow:0 14px 28px rgba(37,99,235,.35) !important;
+}
+
+/* Hız çipi görünürse aynı boyda dursun */
+#driveSpeedChip{
+  min-height:54px !important;
+  border-radius:999px !important;
+}
+
+/* Board başlık alanı: üst üste binmeleri engelle */
+.board-head{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:16px !important;
+  align-items:start !important;
+}
+
+.board-title{
+  min-width:0 !important;
+}
+
+/* Seçili durak chipi daha dengeli */
+.selected-stop-chip{
+  width:100% !important;
+  max-width:100% !important;
+  min-height:58px !important;
+  display:grid !important;
+  grid-template-columns:auto 1fr !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding:12px 18px !important;
+  border-radius:24px !important;
+  font-size:18px !important;
+  line-height:1.15 !important;
+}
+
+.selected-stop-chip b{
+  display:block !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+}
+
+/* Sesli Komut + Hazır aynı satırda dengeli */
+.board-head-right{
+  width:100% !important;
+}
+
+.voice-row{
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:minmax(0, 1fr) 128px !important;
+  gap:12px !important;
+  align-items:center !important;
+}
+
+.voice-command-btn{
+  width:100% !important;
+  min-width:0 !important;
+  height:68px !important;
+  padding:0 18px !important;
+  border-radius:26px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:12px !important;
+  font-size:22px !important;
+  font-weight:950 !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+}
+
+.voice-command-btn span{
+  display:inline-block !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+}
+
+.voice-state{
+  height:68px !important;
+  min-width:0 !important;
+  border-radius:26px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 14px !important;
+  font-size:19px !important;
+  font-weight:950 !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+}
+
+/* Mini işlem butonları: 3 kolon dengeli */
+.legend{
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:repeat(3, minmax(0, 1fr)) !important;
+  gap:10px !important;
+  margin-top:14px !important;
+}
+
+.mini-chip{
+  width:100% !important;
+  min-height:50px !important;
+  padding:0 10px !important;
+  border-radius:999px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+  font-size:16px !important;
+  font-weight:950 !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+}
+
+/* Mobilde taşmayı azalt */
+@media(max-width:430px){
+  #driveInlineDock{
+    min-height:50px !important;
+    margin-bottom:10px !important;
+  }
+
+  #driveModeToggle{
+    min-width:132px !important;
+    height:50px !important;
+    font-size:15px !important;
+    padding:0 16px !important;
+  }
+
+  .selected-stop-chip{
+    min-height:54px !important;
+    font-size:16px !important;
+    padding:11px 14px !important;
+  }
+
+  .voice-row{
+    grid-template-columns:minmax(0, 1fr) 104px !important;
+    gap:10px !important;
+  }
+
+  .voice-command-btn{
+    height:62px !important;
+    font-size:18px !important;
+    border-radius:24px !important;
+  }
+
+  .voice-state{
+    height:62px !important;
+    font-size:17px !important;
+    border-radius:24px !important;
+  }
+
+  .legend{
+    grid-template-columns:repeat(3, minmax(0, 1fr)) !important;
+    gap:9px !important;
+  }
+
+  .mini-chip{
+    min-height:46px !important;
+    font-size:14px !important;
+    padding:0 7px !important;
+  }
+}
+
+/* Çok dar ekranda 2 kolon güvenlik */
+@media(max-width:360px){
+  .legend{
+    grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .voice-row{
+    grid-template-columns:1fr !important;
+  }
+
+  .voice-state{
+    width:100% !important;
+  }
+}
+
+/* =========================================================
+   FIX: DURAK AKIŞI ÜST SATIR ORTALAMA / SES BUTONU KAYMASIN
+========================================================= */
+
+.route-live-row{
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:minmax(96px, .85fr) minmax(0, 1.45fr) auto !important;
+  align-items:center !important;
+  gap:8px !important;
+  overflow:hidden !important;
+}
+
+.route-live-row > *{
+  min-width:0 !important;
+}
+
+/* Canlı / Sıradaki kutuları */
+.route-live-row .mini-chip{
+  min-width:0 !important;
+  max-width:100% !important;
+  height:58px !important;
+  padding:0 12px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  text-align:center !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* Mini chip içindeki yazılar da ortalı ve taşmasız */
+.route-live-row .mini-chip *{
+  min-width:0 !important;
+  max-width:100% !important;
+  text-align:center !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* Sıradaki durak uzun olunca ses butonunu itmesin */
+.route-live-row .mini-chip:nth-child(2){
+  justify-self:stretch !important;
+}
+
+/* Ses butonu sağda sabit kalsın */
+#nightVoiceToggle{
+  justify-self:end !important;
+  flex-shrink:0 !important;
+  min-width:100px !important;
+  max-width:108px !important;
+  height:54px !important;
+  padding:0 10px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:5px !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* Mobilde daha sıkı */
+@media(max-width:430px){
+  .route-live-row{
+    grid-template-columns:minmax(92px, .75fr) minmax(0, 1.35fr) auto !important;
+    gap:7px !important;
+  }
+
+  .route-live-row .mini-chip{
+    height:56px !important;
+    padding:0 10px !important;
+    font-size:14px !important;
+  }
+
+  #nightVoiceToggle{
+    min-width:92px !important;
+    max-width:100px !important;
+    height:52px !important;
+    font-size:13px !important;
+  }
+}
+
+@media(max-width:380px){
+  .route-live-row{
+    grid-template-columns:minmax(84px, .7fr) minmax(0, 1.25fr) auto !important;
+    gap:6px !important;
+  }
+
+  .route-live-row .mini-chip{
+    font-size:13px !important;
+    padding:0 8px !important;
+  }
+
+  #nightVoiceToggle{
+    min-width:86px !important;
+    max-width:94px !important;
+    font-size:12px !important;
+    padding:0 7px !important;
+  }
+}
+
+
+/* =========================================================
+   REAL FIX: DURAK AKIŞI CANLI / SIRADAKİ / SES SATIRI
+   Kaynak: templates/seats_parts/route_flow.html
+========================================================= */
+
+.route-strip-meta{
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:minmax(0, 0.85fr) minmax(0, 1.35fr) auto !important;
+  align-items:center !important;
+  gap:10px !important;
+  overflow:hidden !important;
+}
+
+.route-strip-meta .route-pill{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  height:48px !important;
+  padding:0 12px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+  overflow:hidden !important;
+  white-space:nowrap !important;
+  text-overflow:ellipsis !important;
+  box-sizing:border-box !important;
+}
+
+.route-strip-meta .route-pill b{
+  min-width:0 !important;
+  max-width:100% !important;
+  display:inline-block !important;
+  overflow:hidden !important;
+  white-space:nowrap !important;
+  text-overflow:ellipsis !important;
+  text-align:center !important;
+  vertical-align:bottom !important;
+}
+
+#routeMiniLive,
+#routeMiniNext{
+  overflow:hidden !important;
+  white-space:nowrap !important;
+  text-overflow:ellipsis !important;
+  text-align:center !important;
+}
+
+#nightVoiceToggle{
+  width:96px !important;
+  min-width:96px !important;
+  max-width:96px !important;
+  height:48px !important;
+  padding:0 10px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:5px !important;
+  overflow:hidden !important;
+  white-space:nowrap !important;
+  font-size:14px !important;
+  font-weight:900 !important;
+  box-sizing:border-box !important;
+}
+
+/* Dar ekranda ses butonu yazıyı itmesin, ikon moduna düşsün */
+@media(max-width:430px){
+  .route-strip-meta{
+    grid-template-columns:minmax(0, .8fr) minmax(0, 1.25fr) 50px !important;
+    gap:8px !important;
+  }
+
+  #nightVoiceToggle{
+    width:50px !important;
+    min-width:50px !important;
+    max-width:50px !important;
+    padding:0 !important;
+    font-size:0 !important;
+    border-radius:999px !important;
+  }
+
+  #nightVoiceToggle .nv-ico,
+  #nightVoiceToggle span:first-child{
+    font-size:20px !important;
+    margin:0 !important;
+  }
+
+  #nightVoiceToggle span:not(:first-child){
+    display:none !important;
+  }
+
+  .route-strip-meta .route-pill{
+    height:46px !important;
+    padding:0 10px !important;
+    font-size:14px !important;
+  }
+}
+
+
+/* =========================================================
+   FIX: Koltuk modalı telefonda ekrana sığsın
+   Kaynak: templates/seats_parts/modals.html -> #seatModal
+========================================================= */
+
+#seatModal{
+  position:fixed !important;
+  left:50% !important;
+  top:calc(env(safe-area-inset-top, 0px) + 8px) !important;
+  bottom:auto !important;
+  transform:translateX(-50%) !important;
+
+  width:calc(100vw - 24px) !important;
+  max-width:680px !important;
+
+  max-height:calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 18px) !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior:contain !important;
+  -webkit-overflow-scrolling:touch !important;
+
+  padding:16px !important;
+  border-radius:26px !important;
+  z-index:9999 !important;
+}
+
+#seatModal h3{
+  margin:0 0 12px !important;
+  font-size:34px !important;
+  line-height:1.05 !important;
+}
+
+#seatModal .field-grid{
+  gap:12px !important;
+}
+
+#seatModal .field-row{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:10px !important;
+}
+
+#seatModal .field span,
+#seatModal .muted{
+  font-size:16px !important;
+  line-height:1.15 !important;
+}
+
+#seatModal .field input,
+#seatModal .field select{
+  min-height:54px !important;
+  height:54px !important;
+  padding:0 16px !important;
+  font-size:18px !important;
+  border-radius:18px !important;
+}
+
+#seatModal .radio-row{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  gap:10px 14px !important;
+}
+
+#seatModal .radio-row label{
+  font-size:17px !important;
+  line-height:1.1 !important;
+  white-space:nowrap !important;
+}
+
+#seatModal .radio-row input,
+#seatModal .check-row input{
+  width:24px !important;
+  height:24px !important;
+  margin-right:7px !important;
+}
+
+#seatModal .check-row{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:10px !important;
+}
+
+#seatModal .check-row label{
+  font-size:17px !important;
+  line-height:1.15 !important;
+}
+
+#seatModal .action-grid{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:10px !important;
+}
+
+#seatModal .btn{
+  min-height:56px !important;
+  height:auto !important;
+  padding:12px 14px !important;
+  border-radius:18px !important;
+  font-size:17px !important;
+  line-height:1.1 !important;
+}
+
+#seatModal > .modal-actions{
+  position:sticky !important;
+  bottom:-16px !important;
+  z-index:5 !important;
+
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:8px !important;
+
+  margin:14px -16px -16px !important;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+
+  background:linear-gradient(
+    180deg,
+    rgba(8,18,32,0),
+    rgba(8,18,32,.94) 22%,
+    rgba(8,18,32,.98)
+  ) !important;
+  backdrop-filter:blur(12px) !important;
+}
+
+@media(max-width:430px){
+  #seatModal{
+    width:calc(100vw - 18px) !important;
+    padding:14px !important;
+    border-radius:24px !important;
+  }
+
+  #seatModal h3{
+    font-size:31px !important;
+  }
+
+  #seatModal .field input,
+  #seatModal .field select{
+    min-height:50px !important;
+    height:50px !important;
+    font-size:17px !important;
+  }
+
+  #seatModal .radio-row label,
+  #seatModal .check-row label{
+    font-size:16px !important;
+  }
+
+  #seatModal .btn{
+    min-height:52px !important;
+    font-size:16px !important;
+  }
+
+  #seatModal > .modal-actions{
+    margin-left:-14px !important;
+    margin-right:-14px !important;
+    margin-bottom:-14px !important;
+    padding-left:14px !important;
+    padding-right:14px !important;
+  }
+}
+
+
+
+/* =========================================================
+   DRIVE TOP ETA CHIP
+   Sürüş modu üst rötar / ETA kutusu
+========================================================= */
+#driveInlineDock{
+  gap:10px;
+}
+
+.drive-eta-chip{
+  min-width:180px;
+  max-width:260px;
+  padding:12px 14px;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.12);
+  background:linear-gradient(180deg, rgba(20,31,48,.92), rgba(8,15,27,.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 10px 24px rgba(0,0,0,.28);
+  color:#eaf2ff;
+  overflow:hidden;
+}
+
+.drive-eta-top{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:15px;
+  font-weight:900;
+  line-height:1.1;
+  white-space:nowrap;
+}
+
+.drive-eta-top b{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.drive-eta-sub{
+  margin-top:5px;
+  font-size:12px;
+  font-weight:800;
+  color:rgba(234,242,255,.72);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.drive-eta-chip.good{
+  border-color:rgba(34,197,94,.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 0 0 1px rgba(34,197,94,.16),
+    0 10px 24px rgba(0,0,0,.28);
+}
+
+.drive-eta-chip.warn{
+  border-color:rgba(245,158,11,.55);
+}
+
+.drive-eta-chip.bad{
+  border-color:rgba(239,68,68,.60);
+}
+
+@media(max-width:720px){
+  .drive-eta-chip{
+    min-width:0;
+    max-width:none;
+    width:100%;
+    padding:10px 12px;
+    border-radius:18px;
+  }
+
+  .drive-eta-top{
+    font-size:13px;
+  }
+
+  .drive-eta-sub{
+    font-size:11px;
+  }
+}

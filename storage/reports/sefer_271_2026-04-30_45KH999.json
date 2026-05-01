@@ -1,0 +1,2638 @@
+{
+  "ok": true,
+  "trip": {
+    "id": 271,
+    "date": "2026-04-30",
+    "route": "İstanbul-Denizli(Vardön)",
+    "departure_time": "23:29",
+    "plate": "45KH999",
+    "captain1": "Ethem Eryılmaz",
+    "captain2": "Recep Furan",
+    "attendant": "Muammer Çerdin",
+    "note": ""
+  },
+  "stops": [
+    {
+      "stop_name": "Esenler Otogar",
+      "board": [
+        {
+          "id": 23,
+          "event": "board",
+          "ts": "2026-05-01 00:10:43",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 3,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 24,
+          "event": "board",
+          "ts": "2026-05-01 00:10:51",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 4,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 25,
+          "event": "board",
+          "ts": "2026-05-01 00:11:09",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 7,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Akhisar Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 26,
+          "event": "board",
+          "ts": "2026-05-01 00:11:20",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 8,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Akhisar Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 27,
+          "event": "board",
+          "ts": "2026-05-01 00:11:34",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 5,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 28,
+          "event": "board",
+          "ts": "2026-05-01 00:11:50",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 11,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Kavaklıdere",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 29,
+          "event": "board",
+          "ts": "2026-05-01 00:12:06",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 12,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Kavaklıdere",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 30,
+          "event": "board",
+          "ts": "2026-05-01 00:12:23",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 9,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 31,
+          "event": "board",
+          "ts": "2026-05-01 00:12:37",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 15,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 32,
+          "event": "board",
+          "ts": "2026-05-01 00:12:45",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 16,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 33,
+          "event": "board",
+          "ts": "2026-05-01 00:12:58",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 19,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 34,
+          "event": "board",
+          "ts": "2026-05-01 00:13:06",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 20,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 35,
+          "event": "board",
+          "ts": "2026-05-01 00:13:20",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 17,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Alaşehir OTOGAR",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 36,
+          "event": "board",
+          "ts": "2026-05-01 00:13:30",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 17,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Alaşehir STADYUM",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 37,
+          "event": "board",
+          "ts": "2026-05-01 00:13:42",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 24,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Salihli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 38,
+          "event": "board",
+          "ts": "2026-05-01 00:13:58",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 25,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 39,
+          "event": "board",
+          "ts": "2026-05-01 00:14:08",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 27,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Mustafa Kemal paşa",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 40,
+          "event": "board",
+          "ts": "2026-05-01 00:14:24",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 28,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Akhisar Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 41,
+          "event": "board",
+          "ts": "2026-05-01 00:14:47",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 33,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Özdilek AVM",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 42,
+          "event": "board",
+          "ts": "2026-05-01 00:14:57",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 34,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Özdilek AVM",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 43,
+          "event": "board",
+          "ts": "2026-05-01 00:15:11",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 31,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Balıkesir Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 44,
+          "event": "board",
+          "ts": "2026-05-01 00:15:29",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 41,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Akhisar Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 45,
+          "event": "board",
+          "ts": "2026-05-01 00:15:37",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 42,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Akhisar Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 46,
+          "event": "board",
+          "ts": "2026-05-01 00:15:51",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 39,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 47,
+          "event": "board",
+          "ts": "2026-05-01 00:16:15",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 49,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 48,
+          "event": "board",
+          "ts": "2026-05-01 00:16:28",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 50,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 49,
+          "event": "board",
+          "ts": "2026-05-01 00:16:41",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 51,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Sarayköy",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 50,
+          "event": "board",
+          "ts": "2026-05-01 00:16:52",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 52,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 51,
+          "event": "board",
+          "ts": "2026-05-01 00:17:02",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 53,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 52,
+          "event": "board",
+          "ts": "2026-05-01 00:17:12",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 54,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 53,
+          "event": "board",
+          "ts": "2026-05-01 00:18:28",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 33,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 54,
+          "event": "board",
+          "ts": "2026-05-01 00:18:36",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 34,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        }
+      ],
+      "offload": [],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 32,
+        "offload_count": 0,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Alibeyköy",
+      "board": [
+        {
+          "id": 55,
+          "event": "board",
+          "ts": "2026-05-01 00:33:10",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 1,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Sarıgöl",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 56,
+          "event": "board",
+          "ts": "2026-05-01 00:35:37",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 13,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 57,
+          "event": "board",
+          "ts": "2026-05-01 00:35:52",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 21,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Sarıgöl",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 58,
+          "event": "board",
+          "ts": "2026-05-01 00:36:11",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 23,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Salihli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 59,
+          "event": "board",
+          "ts": "2026-05-01 00:36:30",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 29,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 60,
+          "event": "board",
+          "ts": "2026-05-01 00:38:11",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 45,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Balıkesir Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 61,
+          "event": "board",
+          "ts": "2026-05-01 00:38:24",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 46,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Balıkesir Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        }
+      ],
+      "offload": [],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 7,
+        "offload_count": 0,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Gebze Garaj",
+      "board": [
+        {
+          "id": 62,
+          "event": "board",
+          "ts": "2026-05-01 02:05:52",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 35,
+            "from_stop": "Gebze Garaj",
+            "to_stop": "Salihli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 63,
+          "event": "board",
+          "ts": "2026-05-01 02:06:05",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 37,
+            "from_stop": "Gebze Garaj",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 64,
+          "event": "board",
+          "ts": "2026-05-01 02:06:23",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 38,
+            "from_stop": "Gebze Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 65,
+          "event": "board",
+          "ts": "2026-05-01 02:06:40",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 43,
+            "from_stop": "Gebze Garaj",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        }
+      ],
+      "offload": [],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 4,
+        "offload_count": 0,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Mustafa Kemal paşa",
+      "board": [],
+      "offload": [
+        {
+          "id": 66,
+          "event": "offload",
+          "ts": "2026-05-01 04:47:36",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 27,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Mustafa Kemal paşa",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_single"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Susurluk",
+      "board": [
+        {
+          "id": 67,
+          "event": "board",
+          "ts": "2026-05-01 04:47:53",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 27,
+            "from_stop": "Susurluk",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        }
+      ],
+      "offload": [],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 1,
+        "offload_count": 0,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Balıkesir Otogar",
+      "board": [],
+      "offload": [
+        {
+          "id": 68,
+          "event": "offload",
+          "ts": "2026-05-01 05:22:21",
+          "seats_for_stop": 3,
+          "meta": {
+            "seat_no": 31,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Balıkesir Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 69,
+          "event": "offload",
+          "ts": "2026-05-01 05:22:21",
+          "seats_for_stop": 3,
+          "meta": {
+            "seat_no": 45,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Balıkesir Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 70,
+          "event": "offload",
+          "ts": "2026-05-01 05:22:21",
+          "seats_for_stop": 3,
+          "meta": {
+            "seat_no": 46,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Balıkesir Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 3,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Akhisar Garaj",
+      "board": [],
+      "offload": [
+        {
+          "id": 71,
+          "event": "offload",
+          "ts": "2026-05-01 07:06:37",
+          "seats_for_stop": 5,
+          "meta": {
+            "seat_no": 7,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Akhisar Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 72,
+          "event": "offload",
+          "ts": "2026-05-01 07:06:37",
+          "seats_for_stop": 5,
+          "meta": {
+            "seat_no": 8,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Akhisar Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 73,
+          "event": "offload",
+          "ts": "2026-05-01 07:06:37",
+          "seats_for_stop": 5,
+          "meta": {
+            "seat_no": 28,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Akhisar Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 74,
+          "event": "offload",
+          "ts": "2026-05-01 07:06:37",
+          "seats_for_stop": 5,
+          "meta": {
+            "seat_no": 41,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Akhisar Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 75,
+          "event": "offload",
+          "ts": "2026-05-01 07:06:37",
+          "seats_for_stop": 5,
+          "meta": {
+            "seat_no": 42,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Akhisar Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 5,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Manisa Otogar",
+      "board": [
+        {
+          "id": 85,
+          "event": "board",
+          "ts": "2026-05-01 07:19:38",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 9,
+            "from_stop": "Manisa Otogar",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 86,
+          "event": "board",
+          "ts": "2026-05-01 07:20:19",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 31,
+            "from_stop": "Manisa Otogar",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        }
+      ],
+      "offload": [
+        {
+          "id": 76,
+          "event": "offload",
+          "ts": "2026-05-01 07:12:25",
+          "seats_for_stop": 9,
+          "meta": {
+            "seat_no": 3,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 77,
+          "event": "offload",
+          "ts": "2026-05-01 07:12:25",
+          "seats_for_stop": 9,
+          "meta": {
+            "seat_no": 5,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 78,
+          "event": "offload",
+          "ts": "2026-05-01 07:12:25",
+          "seats_for_stop": 9,
+          "meta": {
+            "seat_no": 9,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 79,
+          "event": "offload",
+          "ts": "2026-05-01 07:12:25",
+          "seats_for_stop": 9,
+          "meta": {
+            "seat_no": 15,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 80,
+          "event": "offload",
+          "ts": "2026-05-01 07:12:25",
+          "seats_for_stop": 9,
+          "meta": {
+            "seat_no": 16,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 81,
+          "event": "offload",
+          "ts": "2026-05-01 07:12:25",
+          "seats_for_stop": 9,
+          "meta": {
+            "seat_no": 19,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 82,
+          "event": "offload",
+          "ts": "2026-05-01 07:12:25",
+          "seats_for_stop": 9,
+          "meta": {
+            "seat_no": 20,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 83,
+          "event": "offload",
+          "ts": "2026-05-01 07:12:25",
+          "seats_for_stop": 9,
+          "meta": {
+            "seat_no": 43,
+            "from_stop": "Gebze Garaj",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 84,
+          "event": "offload",
+          "ts": "2026-05-01 07:12:25",
+          "seats_for_stop": 9,
+          "meta": {
+            "seat_no": 50,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Manisa Otogar",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 2,
+        "offload_count": 9,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Turgutlu Garaj",
+      "board": [
+        {
+          "id": 95,
+          "event": "board",
+          "ts": "2026-05-01 07:48:00",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 5,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 96,
+          "event": "board",
+          "ts": "2026-05-01 07:48:14",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 13,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 97,
+          "event": "board",
+          "ts": "2026-05-01 07:48:20",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 15,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 98,
+          "event": "board",
+          "ts": "2026-05-01 07:48:26",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 16,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 99,
+          "event": "board",
+          "ts": "2026-05-01 07:48:38",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 19,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 100,
+          "event": "board",
+          "ts": "2026-05-01 07:48:48",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 20,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 101,
+          "event": "board",
+          "ts": "2026-05-01 07:49:15",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 7,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Alaşehir OTOGAR",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        }
+      ],
+      "offload": [
+        {
+          "id": 87,
+          "event": "offload",
+          "ts": "2026-05-01 07:45:04",
+          "seats_for_stop": 8,
+          "meta": {
+            "seat_no": 13,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 88,
+          "event": "offload",
+          "ts": "2026-05-01 07:45:04",
+          "seats_for_stop": 8,
+          "meta": {
+            "seat_no": 25,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 89,
+          "event": "offload",
+          "ts": "2026-05-01 07:45:04",
+          "seats_for_stop": 8,
+          "meta": {
+            "seat_no": 29,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 90,
+          "event": "offload",
+          "ts": "2026-05-01 07:45:04",
+          "seats_for_stop": 8,
+          "meta": {
+            "seat_no": 33,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 91,
+          "event": "offload",
+          "ts": "2026-05-01 07:45:04",
+          "seats_for_stop": 8,
+          "meta": {
+            "seat_no": 34,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 92,
+          "event": "offload",
+          "ts": "2026-05-01 07:45:04",
+          "seats_for_stop": 8,
+          "meta": {
+            "seat_no": 37,
+            "from_stop": "Gebze Garaj",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 93,
+          "event": "offload",
+          "ts": "2026-05-01 07:45:04",
+          "seats_for_stop": 8,
+          "meta": {
+            "seat_no": 39,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 94,
+          "event": "offload",
+          "ts": "2026-05-01 07:45:04",
+          "seats_for_stop": 8,
+          "meta": {
+            "seat_no": 49,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Turgutlu Garaj",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 7,
+        "offload_count": 8,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Salihli",
+      "board": [
+        {
+          "id": 105,
+          "event": "board",
+          "ts": "2026-05-01 08:18:42",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 3,
+            "from_stop": "Salihli",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 106,
+          "event": "board",
+          "ts": "2026-05-01 08:19:12",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 29,
+            "from_stop": "Salihli",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 107,
+          "event": "board",
+          "ts": "2026-05-01 08:19:25",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 35,
+            "from_stop": "Salihli",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        },
+        {
+          "id": 111,
+          "event": "board",
+          "ts": "2026-05-01 08:50:31",
+          "seats_for_stop": 0,
+          "meta": {
+            "seat_no": 8,
+            "from_stop": "Salihli",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "board_single"
+          }
+        }
+      ],
+      "offload": [
+        {
+          "id": 102,
+          "event": "offload",
+          "ts": "2026-05-01 08:17:07",
+          "seats_for_stop": 3,
+          "meta": {
+            "seat_no": 23,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Salihli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 103,
+          "event": "offload",
+          "ts": "2026-05-01 08:17:07",
+          "seats_for_stop": 3,
+          "meta": {
+            "seat_no": 24,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Salihli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 104,
+          "event": "offload",
+          "ts": "2026-05-01 08:17:07",
+          "seats_for_stop": 3,
+          "meta": {
+            "seat_no": 35,
+            "from_stop": "Gebze Garaj",
+            "to_stop": "Salihli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 4,
+        "offload_count": 3,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Kavaklıdere",
+      "board": [],
+      "offload": [
+        {
+          "id": 108,
+          "event": "offload",
+          "ts": "2026-05-01 08:37:19",
+          "seats_for_stop": 2,
+          "meta": {
+            "seat_no": 11,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Kavaklıdere",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_single"
+          }
+        },
+        {
+          "id": 109,
+          "event": "offload",
+          "ts": "2026-05-01 08:37:21",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 12,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Kavaklıdere",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_single"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 2,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Alaşehir STADYUM",
+      "board": [],
+      "offload": [
+        {
+          "id": 110,
+          "event": "offload",
+          "ts": "2026-05-01 08:48:53",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 17,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Alaşehir STADYUM",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_single"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Alaşehir OTOGAR",
+      "board": [],
+      "offload": [
+        {
+          "id": 112,
+          "event": "offload",
+          "ts": "2026-05-01 08:50:34",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 7,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Alaşehir OTOGAR",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_single"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Sarıgöl",
+      "board": [],
+      "offload": [
+        {
+          "id": 113,
+          "event": "offload",
+          "ts": "2026-05-01 09:34:34",
+          "seats_for_stop": 2,
+          "meta": {
+            "seat_no": 1,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Sarıgöl",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 114,
+          "event": "offload",
+          "ts": "2026-05-01 09:34:34",
+          "seats_for_stop": 2,
+          "meta": {
+            "seat_no": 21,
+            "from_stop": "Alibeyköy",
+            "to_stop": "Sarıgöl",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 2,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Sarayköy",
+      "board": [],
+      "offload": [
+        {
+          "id": 115,
+          "event": "offload",
+          "ts": "2026-05-01 09:34:58",
+          "seats_for_stop": 1,
+          "meta": {
+            "seat_no": 51,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Sarayköy",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 1,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    },
+    {
+      "stop_name": "Denizli",
+      "board": [],
+      "offload": [
+        {
+          "id": 116,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:01",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 3,
+            "from_stop": "Salihli",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 117,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:01",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 4,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 118,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:01",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 5,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 119,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:01",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 8,
+            "from_stop": "Salihli",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 120,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:01",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 9,
+            "from_stop": "Manisa Otogar",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 121,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:01",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 13,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 122,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:02",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 15,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 123,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:02",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 16,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 124,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:02",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 19,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 125,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:02",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 20,
+            "from_stop": "Turgutlu Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 126,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:02",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 27,
+            "from_stop": "Susurluk",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 127,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:02",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 29,
+            "from_stop": "Salihli",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 128,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:02",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 31,
+            "from_stop": "Manisa Otogar",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 129,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:02",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 35,
+            "from_stop": "Salihli",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 130,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:02",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 38,
+            "from_stop": "Gebze Garaj",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 131,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:02",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 52,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 132,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:02",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 53,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bayan",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        },
+        {
+          "id": 133,
+          "event": "offload",
+          "ts": "2026-05-01 09:35:02",
+          "seats_for_stop": 18,
+          "meta": {
+            "seat_no": 54,
+            "from_stop": "Esenler Otogar",
+            "to_stop": "Denizli",
+            "ticket_type": "biletsiz",
+            "payment": "nakit",
+            "amount": 0.0,
+            "gender": "bay",
+            "service": 0,
+            "service_note": "",
+            "passenger_name": "",
+            "passenger_phone": "",
+            "source": "seat",
+            "action": "offload_bulk"
+          }
+        }
+      ],
+      "standing_add": [],
+      "standing_off": [],
+      "parcel_deliver": [],
+      "pass_stop": [],
+      "other": [],
+      "summary": {
+        "board_count": 0,
+        "offload_count": 18,
+        "standing_board_count": 0,
+        "standing_off_count": 0,
+        "parcel_count": 0
+      }
+    }
+  ]
+}

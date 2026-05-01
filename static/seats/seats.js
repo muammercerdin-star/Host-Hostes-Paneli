@@ -853,6 +853,10 @@ function renderRouteStrip(){
     actualSchedule.map(x => [norm(x.stop), x.plan || ""])
   );
 
+  const etaMap = new Map(
+    (speedState.etaItems || []).map(x => [norm(x.stop), x])
+  );
+
   list.forEach(stop => {
     const seatCt = seatCounts[stop] || 0;
     const standingCt = standingCounts[stop] || 0;
@@ -900,20 +904,26 @@ function renderRouteStrip(){
     item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done has-flow-summary" : ""} ${liveDangerOn && isLive ? "live-danger" : ""} ${isNextWarn ? "next-warning" : ""} ${isFlowGreen ? "flow-green" : ""}`;
     if(isLive){routeFocusItem = item;}   
 
+    const etaItem = etaMap.get(norm(stop));
     const planText = plan || "—";
-    const kmValue = kmText || "—";
+    const etaText = etaItem && plan ? fmtHour(etaItem.etaDate) : "";
+    const delayText = etaItem && plan ? etaItem.badgeText : "";
+    const kmValue = kmText || (etaItem && Number.isFinite(etaItem.km) ? `${etaItem.km.toFixed(1)} km` : "—");
+
+    const timeText = etaText ? `${planText} → ${etaText}` : planText;
+    const statusText = delayText ? `${kmValue} · ${delayText}` : kmValue;
 
     item.innerHTML = `
   <div class="name">${stop}</div>
   <div class="meta ${isDone ? "done-summary" : ""}">${metaLine1} · ${metaLine2}</div>
   <div class="extra">
     <div class="extra-line">
-      <span class="extra-k">Saat</span>
-      <span class="extra-v">${planText}</span>
+      <span class="extra-k">Plan/ETA</span>
+      <span class="extra-v">${timeText}</span>
     </div>
     <div class="extra-line">
-      <span class="extra-k">Mesafe</span>
-      <span class="extra-v">${kmValue}</span>
+      <span class="extra-k">Durum</span>
+      <span class="extra-v">${statusText}</span>
     </div>
   </div>
    `;
@@ -1665,12 +1675,14 @@ function buildEtaModel(){
     }
 
     const now = new Date();
-    const liveIdx = indexOfStopByName(speedState.liveStop);
+    const liveName = getDisplayLiveStop();
+    const liveIdx = indexOfStopByName(liveName);
     const selectedIdx = indexOfStopByName(getSelectedStopName());
 
     let anchor = null;
+
     if(liveIdx >= 0){
-      anchor = [...items].reverse().find(x => x.routeIndex >= 0 && x.routeIndex <= liveIdx) || items[0];
+      anchor = [...items].reverse().find(x => x.routeIndex >= 0 && x.routeIndex < liveIdx) || items[0];
     }else if(selectedIdx >= 0){
       anchor = [...items].reverse().find(x => x.routeIndex >= 0 && x.routeIndex <= selectedIdx) || items[0];
     }else{
@@ -1679,22 +1691,53 @@ function buildEtaModel(){
 
     const globalDelayMin = minutesDiff(now, anchor.planDate);
 
+    function effectiveEtaSpeedKmh(){
+      const current = Number(speedState.current || 0);
+
+      const hist = (speedState.history || [])
+        .map(x => Number(x))
+        .filter(x => Number.isFinite(x) && x >= 15);
+
+      let avg = 0;
+      if(hist.length){
+        avg = hist.reduce((a,b) => a + b, 0) / hist.length;
+      }
+
+      let chosen = 70;
+
+      // Araç gerçekten hareket ediyorsa anlık hız daha değerlidir.
+      if(Number.isFinite(current) && current >= 25){
+        chosen = current;
+      }else if(avg >= 20){
+        chosen = avg;
+      }
+
+      // Çok uç değerleri kırp.
+      return Math.min(95, Math.max(35, chosen));
+    }
+
+    function applyEtaBadge(item){
+      let badgeCls = "good";
+
+      if(item.passed) badgeCls = "info";
+      else if(item.delayMin > 15) badgeCls = "bad";
+      else if(item.delayMin > 0) badgeCls = "warn";
+
+      item.badgeCls = badgeCls;
+      item.badgeText = item.passed ? "Geçildi" : fmtSignedMin(item.delayMin);
+      return item;
+    }
+
     const model = items.map(item => {
       const etaDate = new Date(item.planDate.getTime() + globalDelayMin * 60000);
       const delayMin = minutesDiff(etaDate, item.planDate);
 
+      // Örn: Denizli'de sefer başladıysa hedef Denizli değil Sarayköy olur.
       const passed = liveIdx >= 0
         ? (item.routeIndex >= 0 && item.routeIndex < liveIdx)
         : etaDate.getTime() < now.getTime() - (5 * 60000);
 
-      let badgeCls = "good";
-      if(passed) badgeCls = "info";
-      else if(delayMin > 15) badgeCls = "bad";
-      else if(delayMin > 0) badgeCls = "warn";
-
-      const badgeText = passed ? "Geçildi" : fmtSignedMin(delayMin);
-
-      const activeName = getSelectedStopName();
+      const activeName = getSelectedStopName() || liveName;
       const active = activeName
         ? norm(activeName) === norm(item.stop)
         : (!passed && item === (
@@ -1705,32 +1748,81 @@ function buildEtaModel(){
             )) || items[items.length - 1]
           ));
 
-      return {
+      return applyEtaBadge({
         stop: item.stop,
         plan: fmtHour(item.planDate),
         planDate: item.planDate,
         etaDate,
         delayMin,
-        badgeCls,
-        badgeText,
         passed,
-        active
-      };
+        active,
+        km: NaN,
+        speedKmh: NaN,
+        travelMin: NaN,
+        etaMode: "schedule-shift"
+      });
     });
+
+    // Asıl akıllı hesap: sıradaki saatli durağa kalan km + efektif hız.
+    const nextTimedForDistance = model.find(x => !x.passed) || model[model.length - 1];
+
+    if(nextTimedForDistance && currentCoords && !nextTimedForDistance.passed){
+      const km = stopDistanceKmByName(nextTimedForDistance.stop);
+
+      if(Number.isFinite(km)){
+        const speedKmh = effectiveEtaSpeedKmh();
+        const travelMin = Math.max(1, Math.round((km / speedKmh) * 60));
+        const etaDate = new Date(now.getTime() + travelMin * 60000);
+        const delayMin = minutesDiff(etaDate, nextTimedForDistance.planDate);
+
+        nextTimedForDistance.km = km;
+        nextTimedForDistance.speedKmh = speedKmh;
+        nextTimedForDistance.travelMin = travelMin;
+        nextTimedForDistance.etaDate = etaDate;
+        nextTimedForDistance.delayMin = delayMin;
+        nextTimedForDistance.etaMode = "gps-distance";
+
+        applyEtaBadge(nextTimedForDistance);
+      }
+    }
 
     speedState.etaItems = model;
 
     const nextTimed = model.find(x => !x.passed) || model[model.length - 1];
+
     setText("#routeNextTimed", nextTimed?.stop || "—");
     setText("#stEtaTarget", nextTimed?.stop || "—");
-    setText("#stEtaHint", nextTimed ? `Plan ${nextTimed.plan} · ETA ${fmtHour(nextTimed.etaDate)}` : "Plan / ETA");
+
+    const kmInfo = nextTimed && Number.isFinite(nextTimed.km)
+      ? ` · ${nextTimed.km.toFixed(1)} km`
+      : "";
+
+    const speedInfo = nextTimed && Number.isFinite(nextTimed.speedKmh)
+      ? ` · ${Math.round(nextTimed.speedKmh)} km/h`
+      : "";
+
+    setText(
+      "#stEtaHint",
+      nextTimed
+        ? `Plan ${nextTimed.plan} · ETA ${fmtHour(nextTimed.etaDate)}${kmInfo}`
+        : "Plan / ETA"
+    );
 
     const delayEl = $("#delayMain");
+
     if(nextTimed && delayEl){
       const diff = nextTimed.delayMin;
       delayEl.textContent = fmtSignedMin(diff);
       delayEl.className = "delay-main " + (diff <= 0 ? "good" : diff <= 15 ? "warn" : "bad");
-      setText("#delaySub", `${nextTimed.stop} · plan ${nextTimed.plan} · ETA ${fmtHour(nextTimed.etaDate)}`);
+
+      const modeText = nextTimed.etaMode === "gps-distance"
+        ? "GPS/km hesabı"
+        : "Saat kaydırma";
+
+      setText(
+        "#delaySub",
+        `${nextTimed.stop} · plan ${nextTimed.plan} · ETA ${fmtHour(nextTimed.etaDate)}${kmInfo}${speedInfo} · ${modeText}`
+      );
     }
 
     return model;
@@ -2131,6 +2223,7 @@ function initTabs(){
         }
 
         renderTimeline();
+        renderRouteStrip();
         renderAI();
       }, () => {
         spVal.textContent = "0";
@@ -2358,9 +2451,59 @@ function initTabs(){
       else if(serverStops?.length) setSelectedStop(serverStops[0], { silent:true, voiceReply:false });
 
       renderTimeline();
+      renderRouteStrip();
       renderAI();
       updateCompactHeader();
     }catch(e){
       toast(e.message || "Başlangıç yükleme hatası");
     }
   })();
+
+
+/* =========================================================
+   DRIVE TOP ETA MIRROR
+   Paneldeki Rötar / ETA bilgisini üst sürüş kutusuna taşır
+========================================================= */
+(function(){
+  function q(sel){ return document.querySelector(sel); }
+
+  function etaClassFromText(text){
+    const t = String(text || "").toLowerCase();
+    if(t.includes("rötar") || t.includes("rotar") || t.includes("geç")) return "bad";
+    if(t.includes("erken") || t.includes("tam saat")) return "good";
+    if(t.includes("bekleniyor") || t.includes("saat yok") || t.includes("—")) return "neutral";
+    return "warn";
+  }
+
+  function syncDriveEtaChip(){
+    const chip = q("#driveEtaChip");
+    const main = q("#driveEtaMain");
+    const sub = q("#driveEtaSub");
+
+    if(!chip || !main || !sub) return;
+
+    const delayMain = (q("#delayMain")?.textContent || "").trim();
+    const delaySub = (q("#delaySub")?.textContent || "").trim();
+    const target = (q("#routeNextTimed")?.textContent || "").trim();
+
+    let mainText = delayMain && delayMain !== "—" ? delayMain : "Rötar";
+    let subText = delaySub && delaySub !== "—" ? delaySub : "ETA bekleniyor";
+
+    if(target && target !== "—" && !subText.includes(target)){
+      subText = target + " · " + subText;
+    }
+
+    main.textContent = mainText;
+    sub.textContent = subText;
+
+    chip.classList.remove("good","warn","bad","neutral");
+    chip.classList.add(etaClassFromText(mainText + " " + subText));
+  }
+
+  window.syncDriveEtaChip = syncDriveEtaChip;
+
+  document.addEventListener("DOMContentLoaded", function(){
+    syncDriveEtaChip();
+    setInterval(syncDriveEtaChip, 1500);
+  });
+})();

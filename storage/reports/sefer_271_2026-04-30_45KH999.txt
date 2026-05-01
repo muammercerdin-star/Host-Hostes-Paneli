@@ -1,0 +1,205 @@
+SEFER RAPORU
+==================================
+Hat: İstanbul-Denizli(Vardön)
+Plaka: 45KH999
+Tarih: 2026-04-30
+Çıkış: 23:29
+
+Toplam Binen: 57
+Toplam İnen: 54
+Ayakta Binen: 0
+Ayakta İnen: 0
+
+Durak: Esenler Otogar
+----------------------------------
+Binen 32 | İnen 0 | Ayakta binen 0 | Ayakta inen 0
+Binenler:
+  + Koltuk 3 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-05-01 00:10:43
+  + Koltuk 4 | Esenler Otogar -> Denizli | bay | nakit | 2026-05-01 00:10:51
+  + Koltuk 7 | Esenler Otogar -> Akhisar Garaj | bayan | nakit | 2026-05-01 00:11:09
+  + Koltuk 8 | Esenler Otogar -> Akhisar Garaj | bayan | nakit | 2026-05-01 00:11:20
+  + Koltuk 5 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-05-01 00:11:34
+  + Koltuk 11 | Esenler Otogar -> Kavaklıdere | bay | nakit | 2026-05-01 00:11:50
+  + Koltuk 12 | Esenler Otogar -> Kavaklıdere | bayan | nakit | 2026-05-01 00:12:06
+  + Koltuk 9 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-05-01 00:12:23
+  + Koltuk 15 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-05-01 00:12:37
+  + Koltuk 16 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-05-01 00:12:45
+  + Koltuk 19 | Esenler Otogar -> Manisa Otogar | bayan | nakit | 2026-05-01 00:12:58
+  + Koltuk 20 | Esenler Otogar -> Manisa Otogar | bayan | nakit | 2026-05-01 00:13:06
+  + Koltuk 17 | Esenler Otogar -> Alaşehir OTOGAR | bayan | nakit | 2026-05-01 00:13:20
+  + Koltuk 17 | Esenler Otogar -> Alaşehir STADYUM | bayan | nakit | 2026-05-01 00:13:30
+  + Koltuk 24 | Esenler Otogar -> Salihli | bayan | nakit | 2026-05-01 00:13:42
+  + Koltuk 25 | Esenler Otogar -> Turgutlu Garaj | bay | nakit | 2026-05-01 00:13:58
+  + Koltuk 27 | Esenler Otogar -> Mustafa Kemal paşa | bay | nakit | 2026-05-01 00:14:08
+  + Koltuk 28 | Esenler Otogar -> Akhisar Garaj | bay | nakit | 2026-05-01 00:14:24
+  + Koltuk 33 | Esenler Otogar -> Özdilek AVM | bay | nakit | 2026-05-01 00:14:47
+  + Koltuk 34 | Esenler Otogar -> Özdilek AVM | bayan | nakit | 2026-05-01 00:14:57
+  + Koltuk 31 | Esenler Otogar -> Balıkesir Otogar | bay | nakit | 2026-05-01 00:15:11
+  + Koltuk 41 | Esenler Otogar -> Akhisar Garaj | bay | nakit | 2026-05-01 00:15:29
+  + Koltuk 42 | Esenler Otogar -> Akhisar Garaj | bay | nakit | 2026-05-01 00:15:37
+  + Koltuk 39 | Esenler Otogar -> Turgutlu Garaj | bay | nakit | 2026-05-01 00:15:51
+  + Koltuk 49 | Esenler Otogar -> Turgutlu Garaj | bayan | nakit | 2026-05-01 00:16:15
+  + Koltuk 50 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-05-01 00:16:28
+  + Koltuk 51 | Esenler Otogar -> Sarayköy | bay | nakit | 2026-05-01 00:16:41
+  + Koltuk 52 | Esenler Otogar -> Denizli | bay | nakit | 2026-05-01 00:16:52
+  + Koltuk 53 | Esenler Otogar -> Denizli | bayan | nakit | 2026-05-01 00:17:02
+  + Koltuk 54 | Esenler Otogar -> Denizli | bay | nakit | 2026-05-01 00:17:12
+  + Koltuk 33 | Esenler Otogar -> Turgutlu Garaj | bay | nakit | 2026-05-01 00:18:28
+  + Koltuk 34 | Esenler Otogar -> Turgutlu Garaj | bayan | nakit | 2026-05-01 00:18:36
+
+Durak: Alibeyköy
+----------------------------------
+Binen 7 | İnen 0 | Ayakta binen 0 | Ayakta inen 0
+Binenler:
+  + Koltuk 1 | Alibeyköy -> Sarıgöl | bayan | nakit | 2026-05-01 00:33:10
+  + Koltuk 13 | Alibeyköy -> Turgutlu Garaj | bayan | nakit | 2026-05-01 00:35:37
+  + Koltuk 21 | Alibeyköy -> Sarıgöl | bay | nakit | 2026-05-01 00:35:52
+  + Koltuk 23 | Alibeyköy -> Salihli | bayan | nakit | 2026-05-01 00:36:11
+  + Koltuk 29 | Alibeyköy -> Turgutlu Garaj | bay | nakit | 2026-05-01 00:36:30
+  + Koltuk 45 | Alibeyköy -> Balıkesir Otogar | bay | nakit | 2026-05-01 00:38:11
+  + Koltuk 46 | Alibeyköy -> Balıkesir Otogar | bayan | nakit | 2026-05-01 00:38:24
+
+Durak: Gebze Garaj
+----------------------------------
+Binen 4 | İnen 0 | Ayakta binen 0 | Ayakta inen 0
+Binenler:
+  + Koltuk 35 | Gebze Garaj -> Salihli | bay | nakit | 2026-05-01 02:05:52
+  + Koltuk 37 | Gebze Garaj -> Turgutlu Garaj | bay | nakit | 2026-05-01 02:06:05
+  + Koltuk 38 | Gebze Garaj -> Denizli | bay | nakit | 2026-05-01 02:06:23
+  + Koltuk 43 | Gebze Garaj -> Manisa Otogar | bay | nakit | 2026-05-01 02:06:40
+
+Durak: Mustafa Kemal paşa
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 27 | Esenler Otogar -> Mustafa Kemal paşa | bay | nakit | 2026-05-01 04:47:36
+
+Durak: Susurluk
+----------------------------------
+Binen 1 | İnen 0 | Ayakta binen 0 | Ayakta inen 0
+Binenler:
+  + Koltuk 27 | Susurluk -> Denizli | bay | nakit | 2026-05-01 04:47:53
+
+Durak: Balıkesir Otogar
+----------------------------------
+Binen 0 | İnen 3 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 31 | Esenler Otogar -> Balıkesir Otogar | bay | nakit | 2026-05-01 05:22:21
+  - Koltuk 45 | Alibeyköy -> Balıkesir Otogar | bay | nakit | 2026-05-01 05:22:21
+  - Koltuk 46 | Alibeyköy -> Balıkesir Otogar | bayan | nakit | 2026-05-01 05:22:21
+
+Durak: Akhisar Garaj
+----------------------------------
+Binen 0 | İnen 5 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 7 | Esenler Otogar -> Akhisar Garaj | bayan | nakit | 2026-05-01 07:06:37
+  - Koltuk 8 | Esenler Otogar -> Akhisar Garaj | bayan | nakit | 2026-05-01 07:06:37
+  - Koltuk 28 | Esenler Otogar -> Akhisar Garaj | bay | nakit | 2026-05-01 07:06:37
+  - Koltuk 41 | Esenler Otogar -> Akhisar Garaj | bay | nakit | 2026-05-01 07:06:37
+  - Koltuk 42 | Esenler Otogar -> Akhisar Garaj | bay | nakit | 2026-05-01 07:06:37
+
+Durak: Manisa Otogar
+----------------------------------
+Binen 2 | İnen 9 | Ayakta binen 0 | Ayakta inen 0
+Binenler:
+  + Koltuk 9 | Manisa Otogar -> Denizli | bay | nakit | 2026-05-01 07:19:38
+  + Koltuk 31 | Manisa Otogar -> Denizli | bayan | nakit | 2026-05-01 07:20:19
+İnenler:
+  - Koltuk 3 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-05-01 07:12:25
+  - Koltuk 5 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-05-01 07:12:25
+  - Koltuk 9 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-05-01 07:12:25
+  - Koltuk 15 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-05-01 07:12:25
+  - Koltuk 16 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-05-01 07:12:25
+  - Koltuk 19 | Esenler Otogar -> Manisa Otogar | bayan | nakit | 2026-05-01 07:12:25
+  - Koltuk 20 | Esenler Otogar -> Manisa Otogar | bayan | nakit | 2026-05-01 07:12:25
+  - Koltuk 43 | Gebze Garaj -> Manisa Otogar | bay | nakit | 2026-05-01 07:12:25
+  - Koltuk 50 | Esenler Otogar -> Manisa Otogar | bay | nakit | 2026-05-01 07:12:25
+
+Durak: Turgutlu Garaj
+----------------------------------
+Binen 7 | İnen 8 | Ayakta binen 0 | Ayakta inen 0
+Binenler:
+  + Koltuk 5 | Turgutlu Garaj -> Denizli | bayan | nakit | 2026-05-01 07:48:00
+  + Koltuk 13 | Turgutlu Garaj -> Denizli | bayan | nakit | 2026-05-01 07:48:14
+  + Koltuk 15 | Turgutlu Garaj -> Denizli | bayan | nakit | 2026-05-01 07:48:20
+  + Koltuk 16 | Turgutlu Garaj -> Denizli | bayan | nakit | 2026-05-01 07:48:26
+  + Koltuk 19 | Turgutlu Garaj -> Denizli | bay | nakit | 2026-05-01 07:48:38
+  + Koltuk 20 | Turgutlu Garaj -> Denizli | bay | nakit | 2026-05-01 07:48:48
+  + Koltuk 7 | Turgutlu Garaj -> Alaşehir OTOGAR | bayan | nakit | 2026-05-01 07:49:15
+İnenler:
+  - Koltuk 13 | Alibeyköy -> Turgutlu Garaj | bayan | nakit | 2026-05-01 07:45:04
+  - Koltuk 25 | Esenler Otogar -> Turgutlu Garaj | bay | nakit | 2026-05-01 07:45:04
+  - Koltuk 29 | Alibeyköy -> Turgutlu Garaj | bay | nakit | 2026-05-01 07:45:04
+  - Koltuk 33 | Esenler Otogar -> Turgutlu Garaj | bay | nakit | 2026-05-01 07:45:04
+  - Koltuk 34 | Esenler Otogar -> Turgutlu Garaj | bayan | nakit | 2026-05-01 07:45:04
+  - Koltuk 37 | Gebze Garaj -> Turgutlu Garaj | bay | nakit | 2026-05-01 07:45:04
+  - Koltuk 39 | Esenler Otogar -> Turgutlu Garaj | bay | nakit | 2026-05-01 07:45:04
+  - Koltuk 49 | Esenler Otogar -> Turgutlu Garaj | bayan | nakit | 2026-05-01 07:45:04
+
+Durak: Salihli
+----------------------------------
+Binen 4 | İnen 3 | Ayakta binen 0 | Ayakta inen 0
+Binenler:
+  + Koltuk 3 | Salihli -> Denizli | bay | nakit | 2026-05-01 08:18:42
+  + Koltuk 29 | Salihli -> Denizli | bayan | nakit | 2026-05-01 08:19:12
+  + Koltuk 35 | Salihli -> Denizli | bayan | nakit | 2026-05-01 08:19:25
+  + Koltuk 8 | Salihli -> Denizli | bayan | nakit | 2026-05-01 08:50:31
+İnenler:
+  - Koltuk 23 | Alibeyköy -> Salihli | bayan | nakit | 2026-05-01 08:17:07
+  - Koltuk 24 | Esenler Otogar -> Salihli | bayan | nakit | 2026-05-01 08:17:07
+  - Koltuk 35 | Gebze Garaj -> Salihli | bay | nakit | 2026-05-01 08:17:07
+
+Durak: Kavaklıdere
+----------------------------------
+Binen 0 | İnen 2 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 11 | Esenler Otogar -> Kavaklıdere | bay | nakit | 2026-05-01 08:37:19
+  - Koltuk 12 | Esenler Otogar -> Kavaklıdere | bayan | nakit | 2026-05-01 08:37:21
+
+Durak: Alaşehir STADYUM
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 17 | Esenler Otogar -> Alaşehir STADYUM | bayan | nakit | 2026-05-01 08:48:53
+
+Durak: Alaşehir OTOGAR
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 7 | Turgutlu Garaj -> Alaşehir OTOGAR | bayan | nakit | 2026-05-01 08:50:34
+
+Durak: Sarıgöl
+----------------------------------
+Binen 0 | İnen 2 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 1 | Alibeyköy -> Sarıgöl | bayan | nakit | 2026-05-01 09:34:34
+  - Koltuk 21 | Alibeyköy -> Sarıgöl | bay | nakit | 2026-05-01 09:34:34
+
+Durak: Sarayköy
+----------------------------------
+Binen 0 | İnen 1 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 51 | Esenler Otogar -> Sarayköy | bay | nakit | 2026-05-01 09:34:58
+
+Durak: Denizli
+----------------------------------
+Binen 0 | İnen 18 | Ayakta binen 0 | Ayakta inen 0
+İnenler:
+  - Koltuk 3 | Salihli -> Denizli | bay | nakit | 2026-05-01 09:35:01
+  - Koltuk 4 | Esenler Otogar -> Denizli | bay | nakit | 2026-05-01 09:35:01
+  - Koltuk 5 | Turgutlu Garaj -> Denizli | bayan | nakit | 2026-05-01 09:35:01
+  - Koltuk 8 | Salihli -> Denizli | bayan | nakit | 2026-05-01 09:35:01
+  - Koltuk 9 | Manisa Otogar -> Denizli | bay | nakit | 2026-05-01 09:35:01
+  - Koltuk 13 | Turgutlu Garaj -> Denizli | bayan | nakit | 2026-05-01 09:35:01
+  - Koltuk 15 | Turgutlu Garaj -> Denizli | bayan | nakit | 2026-05-01 09:35:02
+  - Koltuk 16 | Turgutlu Garaj -> Denizli | bayan | nakit | 2026-05-01 09:35:02
+  - Koltuk 19 | Turgutlu Garaj -> Denizli | bay | nakit | 2026-05-01 09:35:02
+  - Koltuk 20 | Turgutlu Garaj -> Denizli | bay | nakit | 2026-05-01 09:35:02
+  - Koltuk 27 | Susurluk -> Denizli | bay | nakit | 2026-05-01 09:35:02
+  - Koltuk 29 | Salihli -> Denizli | bayan | nakit | 2026-05-01 09:35:02
+  - Koltuk 31 | Manisa Otogar -> Denizli | bayan | nakit | 2026-05-01 09:35:02
+  - Koltuk 35 | Salihli -> Denizli | bayan | nakit | 2026-05-01 09:35:02
+  - Koltuk 38 | Gebze Garaj -> Denizli | bay | nakit | 2026-05-01 09:35:02
+  - Koltuk 52 | Esenler Otogar -> Denizli | bay | nakit | 2026-05-01 09:35:02
+  - Koltuk 53 | Esenler Otogar -> Denizli | bayan | nakit | 2026-05-01 09:35:02
+  - Koltuk 54 | Esenler Otogar -> Denizli | bay | nakit | 2026-05-01 09:35:02
