@@ -16,3 +16,8 @@ media/
 
 # Node/Vendor (varsa)
 node_modules/
+
+# Local backups
+storage/backups/
+templates/*.bak*
+*.zip

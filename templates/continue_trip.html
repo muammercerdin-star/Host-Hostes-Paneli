@@ -820,6 +820,48 @@
 }
 </style>
 
+
+<style id="final-image-card-stabilizer">
+/* Final görsel kart düzeltmesi:
+   Görselin içindeki yazılar kullanılacağı için HTML içeriği yer kaplamasın. */
+
+.hero .kicker,
+.hero h1,
+.hero p,
+.hero .trip-pill{
+  display:none !important;
+}
+
+.primary-actions .seat-visual-card .seat-visual-ico,
+.primary-actions .seat-visual-card .seat-visual-text,
+.primary-actions .seat-visual-card .seat-visual-arrow{
+  display:none !important;
+}
+
+/* Görsel kartların yüksekliği sabit/dengeli kalsın */
+.hero{
+  height:170px !important;
+  min-height:170px !important;
+}
+
+.primary-actions .seat-visual-card{
+  height:124px !important;
+  min-height:124px !important;
+}
+
+@media(max-width:430px){
+  .hero{
+    height:162px !important;
+    min-height:162px !important;
+  }
+
+  .primary-actions .seat-visual-card{
+    height:116px !important;
+    min-height:116px !important;
+  }
+}
+</style>
+
 </head>
 
 <body>
