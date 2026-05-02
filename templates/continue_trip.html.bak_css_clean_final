@@ -303,8 +303,254 @@
     }
   </style>
 
+<style id="continue-hero-compact">
+/* Devam eden sefer üst fotoğraflı kartı küçültme */
+.hero{
+  min-height:170px !important;
+  padding:18px 18px !important;
+  border-radius:26px !important;
+  margin-bottom:12px !important;
+}
+
+.kicker{
+  padding:7px 11px !important;
+  font-size:12px !important;
+  margin-bottom:10px !important;
+}
+
+.hero h1{
+  font-size:31px !important;
+  line-height:1 !important;
+  max-width:70% !important;
+}
+
+.hero p{
+  margin-top:8px !important;
+  font-size:14px !important;
+  line-height:1.25 !important;
+  max-width:72% !important;
+}
+
+.trip-pill{
+  margin-top:12px !important;
+  padding:9px 11px !important;
+  border-radius:16px !important;
+  font-size:13px !important;
+}
+
+@media(max-width:430px){
+  .hero{
+    min-height:162px !important;
+    padding:17px 16px !important;
+    border-radius:24px !important;
+  }
+
+  .hero h1{
+    font-size:28px !important;
+    max-width:72% !important;
+  }
+
+  .hero p{
+    font-size:13px !important;
+    max-width:74% !important;
+  }
+
+  .trip-pill{
+    font-size:12px !important;
+    padding:8px 10px !important;
+  }
+}
+</style>
 
 
+<style id="seat-visual-card-final">
+.primary-actions .seat-visual-card{
+  position:relative !important;
+  min-height:154px !important;
+  border-radius:30px !important;
+  overflow:hidden !important;
+  padding:24px 26px !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:24px !important;
+  color:#fff !important;
+  text-decoration:none !important;
+  isolation:isolate !important;
+  background:
+    linear-gradient(90deg,
+      rgba(0,102,255,.98) 0%,
+      rgba(0,102,255,.88) 34%,
+      rgba(0,102,255,.45) 56%,
+      rgba(0,0,0,.14) 100%
+    ),
+    url("/static/img/seat-card.jpg") center right / cover no-repeat !important;
+  box-shadow:
+    0 18px 42px rgba(0,88,220,.26),
+    inset 0 1px 0 rgba(255,255,255,.22) !important;
+}
+
+.primary-actions .seat-visual-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,.22), transparent 28%),
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.12));
+}
+
+.primary-actions .seat-visual-ico{
+  width:96px;
+  height:96px;
+  min-width:96px;
+  border-radius:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.22);
+  backdrop-filter:blur(8px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.20);
+  z-index:2;
+}
+
+.primary-actions .seat-visual-ico span{
+  font-size:54px;
+  filter:drop-shadow(0 8px 12px rgba(0,0,0,.22));
+}
+
+.primary-actions .seat-visual-text{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  max-width:360px;
+  padding-right:82px;
+}
+
+.primary-actions .seat-visual-card .big-title{
+  color:#fff !important;
+  font-size:35px !important;
+  line-height:1.02 !important;
+  font-weight:950 !important;
+  letter-spacing:.3px !important;
+  text-shadow:0 2px 10px rgba(0,0,0,.20);
+}
+
+.primary-actions .seat-visual-card .big-desc{
+  margin-top:8px !important;
+  color:rgba(255,255,255,.95) !important;
+  font-size:20px !important;
+  line-height:1.22 !important;
+  font-weight:650 !important;
+  text-shadow:0 2px 8px rgba(0,0,0,.18);
+}
+
+.primary-actions .seat-visual-arrow{
+  position:absolute;
+  right:34px;
+  top:50%;
+  transform:translateY(-50%);
+  width:78px;
+  height:78px;
+  border-radius:999px;
+  background:#fff;
+  color:#1874e8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:58px;
+  font-weight:900;
+  line-height:1;
+  box-shadow:0 14px 28px rgba(0,0,0,.22);
+  z-index:3;
+}
+
+@media(max-width:700px){
+  .primary-actions .seat-visual-card{
+    min-height:152px !important;
+    border-radius:28px !important;
+    padding:22px 24px !important;
+    gap:20px !important;
+    background:
+      linear-gradient(90deg,
+        rgba(0,102,255,.98) 0%,
+        rgba(0,102,255,.88) 46%,
+        rgba(0,102,255,.36) 68%,
+        rgba(0,0,0,.18) 100%
+      ),
+      url("/static/img/seat-card.jpg") center right / cover no-repeat !important;
+  }
+
+  .primary-actions .seat-visual-ico{
+    width:92px;
+    height:92px;
+    min-width:92px;
+  }
+
+  .primary-actions .seat-visual-ico span{
+    font-size:50px;
+  }
+
+  .primary-actions .seat-visual-text{
+    max-width:260px;
+    padding-right:72px;
+  }
+
+  .primary-actions .seat-visual-card .big-title{
+    font-size:31px !important;
+  }
+
+  .primary-actions .seat-visual-card .big-desc{
+    font-size:19px !important;
+  }
+
+  .primary-actions .seat-visual-arrow{
+    right:26px;
+    width:72px;
+    height:72px;
+    font-size:54px;
+  }
+}
+
+@media(max-width:420px){
+  .primary-actions .seat-visual-card{
+    min-height:142px !important;
+    padding:20px 18px !important;
+    gap:16px !important;
+  }
+
+  .primary-actions .seat-visual-ico{
+    width:78px;
+    height:78px;
+    min-width:78px;
+    border-radius:24px;
+  }
+
+  .primary-actions .seat-visual-ico span{
+    font-size:44px;
+  }
+
+  .primary-actions .seat-visual-text{
+    padding-right:58px;
+  }
+
+  .primary-actions .seat-visual-card .big-title{
+    font-size:27px !important;
+  }
+
+  .primary-actions .seat-visual-card .big-desc{
+    font-size:17px !important;
+  }
+
+  .primary-actions .seat-visual-arrow{
+    right:18px;
+    width:58px;
+    height:58px;
+    font-size:44px;
+  }
+}
+</style>
 
 
 <style id="end-trip-modal-final">
@@ -702,8 +948,107 @@
 
 
 
+<style id="hero-red-same-position-final">
+/* =========================================================
+   HERO MAVİ TONU KIRMIZIYA ÇEVİR
+   Otobüs görselinin yeri / size / position ayarına dokunmaz
+========================================================= */
+
+.hero{
+  /* Sadece renk katmanı değişiyor.
+     background-position ve background-size mevcut nerede duruyorsa aynen kalır. */
+  background-image:
+    linear-gradient(90deg,
+      rgba(128,18,32,.97) 0%,
+      rgba(160,28,45,.88) 42%,
+      rgba(130,30,50,.50) 62%,
+      rgba(4,10,22,.18) 82%,
+      rgba(4,10,22,.05) 100%
+    ),
+    url("/static/img/home-bus-card.jpg") !important;
+
+  box-shadow:
+    0 20px 44px rgba(128,18,32,.22),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+
+/* Yazılar kırmızı zeminde net kalsın */
+.hero h1,
+.hero p{
+  text-shadow:0 3px 16px rgba(0,0,0,.34) !important;
+}
+
+.kicker{
+  background:rgba(255,255,255,.18) !important;
+  border:1px solid rgba(255,255,255,.27) !important;
+}
+
+.trip-pill{
+  background:rgba(255,255,255,.95) !important;
+  color:#111827 !important;
+  box-shadow:0 10px 24px rgba(80,10,20,.20) !important;
+}
+</style>
 
 
+<style id="ghost-text-hide-final">
+/* =========================================================
+   ARKA PLANDAKİ SİLİK YAZILARI BASTIRMA
+   Görsel konumlarına dokunmaz
+========================================================= */
+
+/* Üst hero kartındaki silik yazıları bastır */
+.hero::after{
+  content:"" !important;
+  position:absolute !important;
+  inset:0 !important;
+  z-index:1 !important;
+  pointer-events:none !important;
+  background:
+    linear-gradient(90deg,
+      rgba(60,0,12,.10) 0%,
+      rgba(90,0,18,.16) 38%,
+      rgba(0,0,0,.22) 66%,
+      rgba(0,0,0,.16) 100%
+    ) !important;
+}
+
+/* Hero içeriği perdenin üstünde kalsın */
+.kicker,
+.hero h1,
+.hero p,
+.trip-pill{
+  position:relative !important;
+  z-index:2 !important;
+}
+
+/* Koltuklara Git kartındaki silik yazıları bastır */
+.primary-actions .seat-visual-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,
+      rgba(0,86,220,.30) 0%,
+      rgba(0,86,220,.36) 42%,
+      rgba(0,0,0,.28) 72%,
+      rgba(0,0,0,.34) 100%
+    );
+}
+
+/* Koltuk kartı içerikleri perdenin üstünde kalsın */
+.primary-actions .seat-visual-ico,
+.primary-actions .seat-visual-text{
+  position:relative !important;
+  z-index:2 !important;
+}
+
+.primary-actions .seat-visual-arrow{
+  z-index:3 !important;
+}
+</style>
 
 
 <style id="new-final-card-images">
