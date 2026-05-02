@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "trip": {
+    "id": 274,
+    "date": "2026-05-02",
+    "route": "Denizli-İstanbul (Vardön)",
+    "departure_time": "01:17",
+    "plate": "45KH999",
+    "captain1": "Ethem Eryılmaz",
+    "captain2": "Recep Furan ",
+    "attendant": "Muammer Çerdin ",
+    "note": ""
+  },
+  "stops": []
+}

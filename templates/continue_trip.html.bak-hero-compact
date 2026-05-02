@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Devam Eden Sefer</title>
+
+  <style>
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(37,99,235,.14), transparent 34%),
+        radial-gradient(circle at 100% 30%, rgba(14,165,233,.16), transparent 32%),
+        linear-gradient(180deg,#f8fbff,#eaf3ff);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:#0f172a;
+    }
+
+    a{ color:inherit; text-decoration:none; }
+
+    .shell{
+      width:min(94vw,720px);
+      margin:18px auto 30px;
+      padding:16px;
+      border-radius:32px;
+      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
+      border:1px solid rgba(255,255,255,.85);
+      box-shadow:0 28px 80px rgba(15,23,42,.16);
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:28px;
+      min-height:220px;
+      padding:24px 22px;
+      color:#fff;
+      background:
+        linear-gradient(90deg,rgba(15,94,230,.96) 0%,rgba(15,94,230,.78) 44%,rgba(15,23,42,.20) 74%),
+        url("/static/img/home-bus-card.jpg") center/cover no-repeat;
+      box-shadow:0 20px 42px rgba(37,99,235,.24);
+      margin-bottom:14px;
+    }
+
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 13px;
+      border-radius:999px;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.24);
+      font-size:13px;
+      font-weight:950;
+      letter-spacing:.4px;
+      text-transform:uppercase;
+      margin-bottom:14px;
+    }
+
+    .hero h1{
+      margin:0;
+      font-size:39px;
+      line-height:.98;
+      font-weight:1000;
+      letter-spacing:-1px;
+      text-shadow:0 2px 14px rgba(0,0,0,.22);
+      max-width:74%;
+    }
+
+    .hero p{
+      margin:10px 0 0;
+      font-size:16px;
+      line-height:1.35;
+      font-weight:800;
+      color:rgba(255,255,255,.92);
+      max-width:76%;
+    }
+
+    .trip-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      margin-top:16px;
+      padding:11px 13px;
+      border-radius:18px;
+      background:rgba(255,255,255,.92);
+      color:#0f172a;
+      font-size:14px;
+      font-weight:950;
+      box-shadow:0 10px 24px rgba(15,23,42,.16);
+      max-width:100%;
+    }
+
+    .primary-actions{
+      display:grid;
+      gap:12px;
+      margin:14px 0;
+    }
+
+    .big-action{
+      min-height:92px;
+      border-radius:26px;
+      padding:16px 18px;
+      display:grid;
+      grid-template-columns:58px 1fr 52px;
+      align-items:center;
+      gap:14px;
+      color:#fff;
+      background:linear-gradient(145deg,#38bdf8,#2563eb);
+      box-shadow:0 16px 34px rgba(37,99,235,.22);
+    }
+
+    .big-action.drive{
+      background:linear-gradient(145deg,#22c55e,#0ea5e9);
+      box-shadow:0 16px 34px rgba(14,165,233,.20);
+    }
+
+    .big-action.cash{
+      background:linear-gradient(145deg,#334155,#0f172a);
+      box-shadow:0 16px 34px rgba(15,23,42,.20);
+    }
+
+    .big-ico{
+      width:58px;
+      height:58px;
+      border-radius:21px;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.23);
+      font-size:30px;
+    }
+
+    .big-title{
+      display:block;
+      font-size:24px;
+      font-weight:1000;
+      line-height:1.05;
+    }
+
+    .big-desc{
+      display:block;
+      margin-top:5px;
+      font-size:14px;
+      color:rgba(255,255,255,.86);
+      font-weight:800;
+      line-height:1.25;
+    }
+
+    .arrow{
+      width:52px;
+      height:52px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.92);
+      color:#2563eb;
+      font-size:34px;
+      font-weight:1000;
+    }
+
+    .quick-list{
+      overflow:hidden;
+      border-radius:26px;
+      background:#fff;
+      border:1px solid #e5edf6;
+      box-shadow:0 14px 34px rgba(15,23,42,.08);
+      margin-bottom:14px;
+    }
+
+    .quick-item{
+      min-height:78px;
+      padding:13px 15px;
+      display:grid;
+      grid-template-columns:48px 1fr 34px;
+      align-items:center;
+      gap:12px;
+      border-bottom:1px solid #e5edf6;
+    }
+
+    .quick-item:last-child{ border-bottom:0; }
+
+    .qico{
+      width:48px;
+      height:48px;
+      border-radius:18px;
+      display:grid;
+      place-items:center;
+      background:#eff6ff;
+      font-size:25px;
+    }
+
+    .qtitle{
+      display:block;
+      font-size:19px;
+      font-weight:1000;
+      color:#0f172a;
+      line-height:1.05;
+    }
+
+    .qdesc{
+      display:block;
+      margin-top:5px;
+      color:#64748b;
+      font-size:13px;
+      font-weight:800;
+      line-height:1.2;
+    }
+
+    .qarr{
+      color:#64748b;
+      font-size:34px;
+      font-weight:900;
+      line-height:1;
+      justify-self:end;
+    }
+
+    .danger-zone{
+      border-radius:26px;
+      padding:16px;
+      background:#fff;
+      border:1px solid #fee2e2;
+      box-shadow:0 14px 34px rgba(239,68,68,.08);
+      margin-bottom:14px;
+    }
+
+    .danger-btn{
+      width:100%;
+      min-height:58px;
+      border:0;
+      border-radius:21px;
+      color:#fff;
+      background:linear-gradient(145deg,#fb7185,#ef4444);
+      box-shadow:0 14px 30px rgba(239,68,68,.22);
+      font-family:inherit;
+      font-size:17px;
+      font-weight:1000;
+    }
+
+    .bottom-home{
+      min-height:62px;
+      border-radius:24px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#fff;
+      border:1px solid #e5edf6;
+      color:#2563eb;
+      font-size:18px;
+      font-weight:1000;
+      box-shadow:0 12px 26px rgba(15,23,42,.06);
+    }
+
+    @media(max-width:430px){
+      .shell{
+        width:calc(100vw - 24px);
+        padding:14px;
+        border-radius:30px;
+      }
+
+      .hero{
+        min-height:205px;
+        padding:20px 18px;
+      }
+
+      .hero h1{
+        font-size:33px;
+        max-width:78%;
+      }
+
+      .hero p{
+        max-width:80%;
+        font-size:14px;
+      }
+
+      .big-action{
+        min-height:86px;
+        grid-template-columns:52px 1fr 48px;
+        gap:12px;
+      }
+
+      .big-ico{
+        width:52px;
+        height:52px;
+        font-size:27px;
+      }
+
+      .big-title{
+        font-size:21px;
+      }
+
+      .big-desc{
+        font-size:13px;
+      }
+
+      .arrow{
+        width:48px;
+        height:48px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+
+    <section class="hero">
+      <div class="kicker">🟢 Devam Eden Sefer</div>
+      <h1>{{ trip["route"] }}</h1>
+      <p>Aktif sefer hazır. İstediğin ekrana hızlıca geç.</p>
+
+      <div class="trip-pill">
+        🚌 {{ trip["plate"] or "Plaka yok" }} · {{ trip["date"] }} · {{ trip["departure_time"] }}
+      </div>
+    </section>
+
+    <section class="primary-actions">
+      <a class="big-action" href="{{ url_for('seats_page') }}">
+        <span class="big-ico">💺</span>
+        <span>
+          <span class="big-title">Koltuklara Git</span>
+          <span class="big-desc">Yolcu, koltuk ve iniş-biniş işlemleri</span>
+        </span>
+        <span class="arrow">›</span>
+      </a>
+
+      <a class="big-action drive" href="{{ url_for('seats_page') }}?drive=1">
+        <span class="big-ico">🚘</span>
+        <span>
+          <span class="big-title">Sürüş Modunu Aç</span>
+          <span class="big-desc">Durak akışı, hız ve sesli takip ekranı</span>
+        </span>
+        <span class="arrow">›</span>
+      </a>
+
+      <a class="big-action cash" href="{{ url_for('hesap_page') }}">
+        <span class="big-ico">💵</span>
+        <span>
+          <span class="big-title">Hesap / Kasa</span>
+          <span class="big-desc">Giriş-çıkış, kalan ve sefer kasası</span>
+        </span>
+        <span class="arrow">›</span>
+      </a>
+    </section>
+
+    <section class="quick-list">
+      <a class="quick-item" href="{{ url_for('passenger_control') }}">
+        <span class="qico">👥</span>
+        <span>
+          <span class="qtitle">Yolcu Kontrolü</span>
+          <span class="qdesc">Binen-inen ve kontrol ekranı</span>
+        </span>
+        <span class="qarr">›</span>
+      </a>
+
+      <a class="quick-item" href="{{ url_for('consignments_page') }}">
+        <span class="qico">📦</span>
+        <span>
+          <span class="qtitle">Emanetler</span>
+          <span class="qdesc">Emanet kayıt ve teslim işlemleri</span>
+        </span>
+        <span class="qarr">›</span>
+      </a>
+
+      <a class="quick-item" href="/sefer-raporu-son">
+        <span class="qico">📁</span>
+        <span>
+          <span class="qtitle">Sefer Raporları</span>
+          <span class="qdesc">Biten sefer raporlarını aç</span>
+        </span>
+        <span class="qarr">›</span>
+      </a>
+    </section>
+
+    <section class="danger-zone">
+      <form method="post" action="{{ url_for('end_trip') }}" onsubmit="return confirm('Bu sefer sonlandırılsın mı?');">
+        {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+        <button class="danger-btn" type="submit">⛔ Seferi Bitir</button>
+      </form>
+    </section>
+
+    <a class="bottom-home" href="/">← Ana ekrana dön</a>
+
+  </main>
+</body>
+</html>

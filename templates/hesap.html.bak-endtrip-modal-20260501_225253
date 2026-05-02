@@ -781,87 +781,6 @@
         font-size:21px;
       }
     }
-
-    /* Özel sefer bitirme onay penceresi */
-    .app-confirm-backdrop[hidden]{
-      display:none !important;
-    }
-
-    .app-confirm-backdrop{
-      position:fixed;
-      inset:0;
-      z-index:9999;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-      background:rgba(15,23,42,.46);
-      backdrop-filter:blur(8px);
-    }
-
-    .app-confirm-box{
-      width:min(520px,100%);
-      border-radius:34px;
-      border:1px solid #cbd9e8;
-      background:linear-gradient(180deg,#ffffff 0%,#eef5fc 100%);
-      box-shadow:0 28px 80px rgba(15,23,42,.34);
-      padding:22px;
-      color:#0f172a;
-      animation:confirmPop .18s ease;
-    }
-
-    .app-confirm-icon{
-      width:62px;
-      height:62px;
-      border-radius:22px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:32px;
-      background:linear-gradient(180deg,#fff1f2,#ffffff);
-      border:1px solid #fecaca;
-      box-shadow:0 10px 24px rgba(239,68,68,.14);
-      margin-bottom:12px;
-    }
-
-    .app-confirm-title{
-      font-size:24px;
-      font-weight:1000;
-      letter-spacing:.2px;
-      margin-bottom:8px;
-    }
-
-    .app-confirm-text{
-      color:#64748b;
-      font-size:15px;
-      line-height:1.45;
-      font-weight:750;
-      margin-bottom:16px;
-    }
-
-    .app-confirm-actions{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-top:8px;
-    }
-
-    .app-confirm-actions .btn{
-      width:100%;
-      min-height:54px;
-      border-radius:20px;
-      font-size:15px;
-    }
-
-    body.app-confirm-open{
-      overflow:hidden;
-    }
-
-    @keyframes confirmPop{
-      from{opacity:0;transform:scale(.96) translateY(8px)}
-      to{opacity:1;transform:scale(1) translateY(0)}
-    }
-
   </style>
 </head>
 
@@ -890,24 +809,7 @@
   </div>
 
   <div class="container fadeIn">
-  
-  <div class="app-confirm-backdrop" id="endTripConfirm" hidden>
-    <div class="app-confirm-box" role="dialog" aria-modal="true" aria-labelledby="endTripConfirmTitle">
-      <div class="app-confirm-icon">⛔</div>
-      <div class="app-confirm-title" id="endTripConfirmTitle">Sefer bitirilsin mi?</div>
-      <div class="app-confirm-text">
-        Bu işlem aktif seferi kapatır. Koltuklar, ayakta yolcular ve durak akışı temizlenir.
-        Sefer raporu oluşturulduktan sonra rapor ekranına yönlendirilirsin.
-      </div>
-
-      <div class="app-confirm-actions">
-        <button class="btn ghost" type="button" id="btnEndTripCancel">Vazgeç</button>
-        <button class="btn danger" type="button" id="btnEndTripYes">Evet, Bitir</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
+    <script>
       const MOVES = {{ moves|tojson|safe }};
       const SUMS  = {{ sums|tojson|safe }};
       const TRIP  = {{ trip|tojson|safe }};
@@ -1152,9 +1054,9 @@
       <a class="btn" href="{{ url_for('consignments_page') }}">📦 Emanet</a>
       <a class="btn primary" href="{{ url_for('hesap_page') }}">🧾 Hesap</a>
 
-      <form id="endTripForm" method="post" action="{{ url_for('end_trip') }}">
+      <form method="post" action="{{ url_for('end_trip') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button class="btn danger" type="button" id="btnEndTripOpen">⛔ Seferi Bitir</button>
+        <button class="btn danger" type="submit" onclick="return confirm('Seferi bitirmek istediğine emin misin?')">⛔ Seferi Bitir</button>
       </form>
     </div>
   </div>
@@ -1403,33 +1305,6 @@
       const text = encodeURIComponent(lines.join("\n"));
       window.open("https://wa.me/?text=" + text, "_blank");
     }
-
-
-    function openEndTripConfirm(){
-      const modal = getEl("endTripConfirm");
-      if(!modal) return;
-      modal.hidden = false;
-      document.body.classList.add("app-confirm-open");
-    }
-
-    function closeEndTripConfirm(){
-      const modal = getEl("endTripConfirm");
-      if(!modal) return;
-      modal.hidden = true;
-      document.body.classList.remove("app-confirm-open");
-    }
-
-    getEl("btnEndTripOpen")?.addEventListener("click", openEndTripConfirm);
-    getEl("btnEndTripCancel")?.addEventListener("click", closeEndTripConfirm);
-
-    getEl("btnEndTripYes")?.addEventListener("click", () => {
-      const form = getEl("endTripForm");
-      if(form) form.submit();
-    });
-
-    getEl("endTripConfirm")?.addEventListener("click", e => {
-      if(e.target && e.target.id === "endTripConfirm") closeEndTripConfirm();
-    });
 
     function fixFooterGap(){
       const fb = document.querySelector(".footerbar");

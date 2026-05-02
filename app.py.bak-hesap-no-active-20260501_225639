@@ -1939,14 +1939,7 @@ def cash_sums(trip_id: int):
 def hesap_page():
     tid = get_active_trip()
     if not tid:
-        return render_template(
-            "no_active_trip.html",
-            title="Hesap",
-            message="Hesap ekranını açmak için önce aktif bir sefer başlatmalısın.",
-            action_text="Yeni Sefer Başlat",
-            action_url=url_for("trip_start"),
-            home_url=url_for("index"),
-        )
+        return redirect(url_for("trip_start"))
 
     db = get_db()
     trip_row = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()

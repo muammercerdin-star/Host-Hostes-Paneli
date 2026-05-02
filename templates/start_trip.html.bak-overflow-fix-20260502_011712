@@ -203,59 +203,6 @@
       grid-template-columns:1fr 1fr;
     }
   }
-
-  /* TAŞMA DÜZELTME */
-  *,
-  *::before,
-  *::after{
-    box-sizing:border-box;
-  }
-
-  html,
-  body{
-    width:100%;
-    max-width:100%;
-    overflow-x:hidden;
-  }
-
-  .trip-start-shell{
-    width:min(720px, calc(100vw - 24px)) !important;
-    max-width:calc(100vw - 24px) !important;
-    overflow:hidden;
-  }
-
-  .trip-form,
-  .trip-field{
-    min-width:0;
-    max-width:100%;
-  }
-
-  .trip-field{
-    grid-template-columns:150px minmax(0, 1fr);
-  }
-
-  .trip-field input,
-  .trip-btn{
-    max-width:100%;
-    min-width:0;
-  }
-
-  @media(max-width:520px){
-    .trip-start-shell{
-      width:calc(100vw - 24px) !important;
-      max-width:calc(100vw - 24px) !important;
-      padding:14px !important;
-    }
-
-    .trip-field{
-      grid-template-columns:minmax(0, 1fr) !important;
-    }
-
-    .trip-actions{
-      grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
-    }
-  }
-
 </style>
 
 <div class="trip-start-shell">
