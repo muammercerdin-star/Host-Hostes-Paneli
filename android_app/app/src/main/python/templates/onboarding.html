@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Muavin Asistanı Tanıtım</title>
+
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(37,99,235,.14), transparent 34%),
+        radial-gradient(circle at 100% 30%, rgba(14,165,233,.16), transparent 32%),
+        linear-gradient(180deg,#f8fbff,#eaf3ff);
+      color:#0f172a;
+      overflow:hidden;
+    }
+
+    .onboard-shell{
+      width:100vw;
+      height:100dvh;
+      padding:calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom));
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      min-height:46px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      min-width:0;
+      color:#0f172a;
+      font-size:18px;
+      font-weight:1000;
+      letter-spacing:-.3px;
+    }
+
+    .brand-mark{
+      width:42px;
+      height:42px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      background:#fff;
+      box-shadow:0 12px 28px rgba(15,23,42,.08);
+    }
+
+    .skip{
+      border:0;
+      height:42px;
+      padding:0 16px;
+      border-radius:999px;
+      background:#fff;
+      color:#2563eb;
+      font-size:14px;
+      font-weight:950;
+      box-shadow:0 10px 24px rgba(15,23,42,.06);
+    }
+
+    .viewport{
+      flex:1;
+      min-height:0;
+      border-radius:30px;
+      overflow:hidden;
+      background:#fff;
+      box-shadow:0 24px 70px rgba(15,23,42,.14);
+      position:relative;
+    }
+
+    .slides{
+      height:100%;
+      display:flex;
+      transition:transform .28s ease;
+      will-change:transform;
+    }
+
+    .slide{
+      min-width:100%;
+      height:100%;
+      background:#fff;
+    }
+
+    .slide img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+
+    .bottom{
+      display:grid;
+      gap:9px;
+    }
+
+    .dots{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+    }
+
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:#cbd5e1;
+      transition:.2s ease;
+    }
+
+    .dot.active{
+      width:30px;
+      background:#2563eb;
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 56px;
+      gap:10px;
+      align-items:center;
+    }
+
+    .primary{
+      border:0;
+      height:54px;
+      border-radius:19px;
+      color:#fff;
+      background:linear-gradient(135deg,#22c55e,#0ea5e9);
+      font-size:16px;
+      font-weight:1000;
+      box-shadow:0 16px 30px rgba(14,165,233,.22);
+    }
+
+    .next{
+      border:0;
+      width:56px;
+      height:54px;
+      border-radius:19px;
+      color:#fff;
+      background:#2563eb;
+      font-size:32px;
+      font-weight:1000;
+      box-shadow:0 14px 28px rgba(37,99,235,.24);
+      line-height:1;
+    }
+
+    .counter{
+      text-align:center;
+      color:#64748b;
+      font-size:13px;
+      font-weight:900;
+    }
+
+    @media(max-width:430px){
+      .onboard-shell{
+        padding:calc(8px + env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom));
+      }
+
+      .viewport{
+        border-radius:28px;
+      }
+
+      .primary{
+        height:52px;
+        border-radius:18px;
+      }
+
+      .next{
+        width:54px;
+        height:52px;
+        border-radius:18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="onboard-shell">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">🚌</div>
+        <span>Muavin Asistanı</span>
+      </div>
+
+      <button class="skip" id="skipBtn" type="button">Geç</button>
+    </div>
+
+    <section class="viewport">
+      <div class="slides" id="slides">
+        <div class="slide"><img src="/static/img/onboarding/slides/onboarding_1.png" alt="Muavin Asistanı"></div>
+        <div class="slide"><img src="/static/img/onboarding/slides/onboarding_2.png" alt="Koltuk Yönetimi"></div>
+        <div class="slide"><img src="/static/img/onboarding/slides/onboarding_3.png" alt="Emanet İşlemleri"></div>
+        <div class="slide"><img src="/static/img/onboarding/slides/onboarding_4.png" alt="Canlı Konum Takibi"></div>
+        <div class="slide"><img src="/static/img/onboarding/slides/onboarding_5.png" alt="Kasa ve Gelir Takibi"></div>
+        <div class="slide"><img src="/static/img/onboarding/slides/onboarding_6.png" alt="Sefer Raporları"></div>
+        <div class="slide"><img src="/static/img/onboarding/slides/onboarding_7.png" alt="Sesli Komut Desteği"></div>
+      </div>
+    </section>
+
+    <div class="bottom">
+      <div class="dots" id="dots"></div>
+      <div class="counter" id="counter">1 / 7</div>
+
+      <div class="actions">
+        <button class="primary" id="startBtn" type="button">Tanıtımı Tamamla</button>
+        <button class="next" id="nextBtn" type="button">›</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const TOTAL = 7;
+    let index = 0;
+
+    const slides = document.getElementById("slides");
+    const dots = document.getElementById("dots");
+    const counter = document.getElementById("counter");
+    const nextBtn = document.getElementById("nextBtn");
+    const startBtn = document.getElementById("startBtn");
+    const skipBtn = document.getElementById("skipBtn");
+
+    for(let i=0;i<TOTAL;i++){
+      const d = document.createElement("span");
+      d.className = "dot" + (i === 0 ? " active" : "");
+      dots.appendChild(d);
+    }
+
+    function render(){
+      slides.style.transform = `translateX(${-index * 100}%)`;
+      counter.textContent = `${index + 1} / ${TOTAL}`;
+
+      [...dots.children].forEach((d,i)=>{
+        d.classList.toggle("active", i === index);
+      });
+
+      nextBtn.textContent = index === TOTAL - 1 ? "✓" : "›";
+      startBtn.textContent = index === TOTAL - 1 ? "Kuruluma Geç" : "Tanıtımı Tamamla";
+    }
+
+    function finish(){
+      try{
+        localStorage.setItem("muavin_onboarding_seen", "1");
+      }catch(e){}
+      window.location.href = "/kurulum";
+    }
+
+    nextBtn.addEventListener("click", ()=>{
+      if(index < TOTAL - 1){
+        index++;
+        render();
+      }else{
+        finish();
+      }
+    });
+
+    startBtn.addEventListener("click", finish);
+    skipBtn.addEventListener("click", finish);
+
+    let startX = 0;
+
+    slides.addEventListener("touchstart", e=>{
+      startX = e.touches[0].clientX;
+    }, {passive:true});
+
+    slides.addEventListener("touchend", e=>{
+      const endX = e.changedTouches[0].clientX;
+      const diff = endX - startX;
+
+      if(Math.abs(diff) < 45) return;
+
+      if(diff < 0 && index < TOTAL - 1){
+        index++;
+      }else if(diff > 0 && index > 0){
+        index--;
+      }
+
+      render();
+    }, {passive:true});
+
+    render();
+  </script>
+</body>
+</html>

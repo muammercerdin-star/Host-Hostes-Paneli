@@ -1,6 +1,17 @@
 <!doctype html>
 <html lang="tr">
 <head>
+
+<script id="onboarding-first-run-redirect">
+  (function(){
+    try{
+      if(localStorage.getItem("muavin_onboarding_seen") !== "1"){
+        window.location.replace("/tanitim");
+      }
+    }catch(e){}
+  })();
+</script>
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>İlk Kurulum</title>

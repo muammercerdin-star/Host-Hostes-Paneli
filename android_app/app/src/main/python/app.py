@@ -1222,6 +1222,11 @@ def resolve_ai_command(command: str):
 # Auth sayfaları
 # =========================================================
 
+
+@app.route("/tanitim")
+def onboarding_page():
+    return render_template("onboarding.html")
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if not admin_profile_exists():
