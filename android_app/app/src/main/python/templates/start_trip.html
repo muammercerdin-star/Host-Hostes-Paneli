@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  body{
+    background:
+      radial-gradient(circle at 18% 0%, rgba(59,130,246,.14), transparent 34%),
+      radial-gradient(circle at 100% 18%, rgba(20,184,166,.12), transparent 30%),
+      linear-gradient(180deg,#f8fbff,#eaf3ff) !important;
+    color:#0f172a !important;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important;
+  }
+
+  .trip-start-shell{
+    width:min(94vw,720px);
+    margin:18px auto 34px;
+    padding:16px;
+    border-radius:30px;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(59,130,246,.12), transparent 34%),
+      linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
+    border:1px solid rgba(255,255,255,.82);
+    box-shadow:0 28px 80px rgba(15,23,42,.18);
+    color:#0f172a;
+  }
+
+  .trip-hero{
+    min-height:118px;
+    margin-bottom:18px;
+    padding:22px 20px;
+    border-radius:26px;
+    background:
+      linear-gradient(90deg,rgba(11,94,235,.96),rgba(11,94,235,.72),rgba(11,94,235,.15)),
+      url("/static/img/home-bus-card.jpg") center right / cover no-repeat;
+    box-shadow:0 18px 38px rgba(15,23,42,.18);
+    color:#fff;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .trip-hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(90deg,rgba(0,0,0,.14),transparent 62%);
+    pointer-events:none;
+  }
+
+  .trip-kicker,
+  .trip-title,
+  .trip-route{
+    position:relative;
+    z-index:1;
+  }
+
+  .trip-kicker{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    border-radius:999px;
+    background:rgba(255,255,255,.18);
+    font-size:13px;
+    font-weight:900;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+  }
+
+  .trip-title{
+    margin:14px 0 6px;
+    font-size:36px;
+    line-height:1;
+    font-weight:1000;
+    color:#fff;
+    text-shadow:0 3px 16px rgba(0,0,0,.28);
+  }
+
+  .trip-route{
+    margin-top:8px;
+    color:rgba(255,255,255,.92);
+    font-size:15px;
+    font-weight:800;
+  }
+
+  .trip-form{
+    display:grid;
+    gap:14px;
+  }
+
+  .trip-field{
+    display:grid;
+    grid-template-columns:150px 1fr;
+    align-items:center;
+    gap:12px;
+  }
+
+  .trip-field label{
+    margin:0;
+    color:#334155;
+    font-size:15px;
+    line-height:1.1;
+    font-weight:950;
+  }
+
+  .trip-field input{
+    width:100%;
+    min-height:56px;
+    border-radius:20px;
+    border:1px solid rgba(148,163,184,.26);
+    background:#fff;
+    color:#0f172a;
+    padding:0 16px;
+    font-size:18px;
+    font-weight:800;
+    outline:none;
+    box-shadow:
+      0 10px 22px rgba(15,23,42,.07),
+      inset 0 1px 0 rgba(255,255,255,.92);
+  }
+
+  .trip-field input::placeholder{
+    color:#9aa5ae;
+    font-weight:850;
+  }
+
+  .trip-field input:focus{
+    border-color:rgba(37,99,235,.75);
+    box-shadow:
+      0 0 0 4px rgba(37,99,235,.12),
+      0 12px 26px rgba(15,23,42,.10);
+  }
+
+  .trip-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:6px;
+  }
+
+  .trip-btn{
+    min-height:58px;
+    border-radius:22px;
+    padding:0 18px;
+    border:0;
+    font-size:17px;
+    font-weight:1000;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 14px 28px rgba(15,23,42,.14);
+    cursor:pointer;
+  }
+
+  .trip-btn-primary{
+    background:linear-gradient(145deg,#38bdf8,#2563eb);
+    color:#fff;
+  }
+
+  .trip-btn-secondary{
+    background:linear-gradient(145deg,#ffffff,#e2e8f0);
+    color:#334155;
+    border:1px solid rgba(148,163,184,.28);
+  }
+
+  .trip-note{
+    margin-top:12px;
+    color:#64748b;
+    font-size:12px;
+    font-weight:800;
+    text-align:center;
+  }
+
+  @media(max-width:520px){
+    .trip-start-shell{
+      width:calc(100vw - 24px);
+      margin:14px auto 24px;
+      padding:14px;
+      border-radius:28px;
+    }
+
+    .trip-hero{
+      min-height:112px;
+      border-radius:24px;
+      padding:20px 18px;
+    }
+
+    .trip-title{
+      font-size:31px;
+    }
+
+    .trip-field{
+      grid-template-columns:1fr;
+      gap:7px;
+    }
+
+    .trip-field label{
+      font-size:14px;
+      padding-left:4px;
+    }
+
+    .trip-actions{
+      grid-template-columns:1fr 1fr;
+    }
+  }
+
+  /* TAŞMA DÜZELTME */
+  *,
+  *::before,
+  *::after{
+    box-sizing:border-box;
+  }
+
+  html,
+  body{
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+  }
+
+  .trip-start-shell{
+    width:min(720px, calc(100vw - 24px)) !important;
+    max-width:calc(100vw - 24px) !important;
+    overflow:hidden;
+  }
+
+  .trip-form,
+  .trip-field{
+    min-width:0;
+    max-width:100%;
+  }
+
+  .trip-field{
+    grid-template-columns:150px minmax(0, 1fr);
+  }
+
+  .trip-field input,
+  .trip-btn{
+    max-width:100%;
+    min-width:0;
+  }
+
+  @media(max-width:520px){
+    .trip-start-shell{
+      width:calc(100vw - 24px) !important;
+      max-width:calc(100vw - 24px) !important;
+      padding:14px !important;
+    }
+
+    .trip-field{
+      grid-template-columns:minmax(0, 1fr) !important;
+    }
+
+    .trip-actions{
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    }
+  }
+
+</style>
+
+<div class="trip-start-shell">
+  <section class="trip-hero">
+    <div class="trip-kicker">🚌 Yeni operasyon</div>
+    <h1 class="trip-title">Yeni Sefer Başlat</h1>
+    <div class="trip-route">
+      Seçili hat: {{ current_route or "Hat seçilmedi" }}
+    </div>
+  </section>
+
+  <form id="startForm" class="trip-form" method="post" action="{{ url_for('trip_start') }}">
+    <input type="hidden" id="routeInput" name="route" value="{{ current_route }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" id="date" name="date">
+    <input type="hidden" id="departure_time" name="departure_time">
+
+    <div class="trip-field">
+      <label for="dt">Tarih & Saat</label>
+      <input id="dt" name="dt" type="datetime-local" required>
+    </div>
+
+    <div class="trip-field">
+      <label for="plate">Plaka</label>
+      <input id="plate" name="plate" type="text" placeholder="Örn: 35 ABC 123">
+    </div>
+
+    <div class="trip-field">
+      <label for="captain1">1. Kaptan</label>
+      <input id="captain1" name="captain1" type="text" autocomplete="off">
+    </div>
+
+    <div class="trip-field">
+      <label for="captain2">2. Kaptan</label>
+      <input id="captain2" name="captain2" type="text" autocomplete="off">
+    </div>
+
+    <div class="trip-field">
+      <label for="attendant">Muavin</label>
+      <input id="attendant" name="attendant" type="text" autocomplete="off">
+    </div>
+
+    <div class="trip-field">
+      <label for="note">Not</label>
+      <input id="note" name="note" type="text" placeholder="Opsiyonel">
+    </div>
+
+    <div class="trip-actions">
+      <button class="trip-btn trip-btn-primary" type="submit">🚀 Seferi Başlat</button>
+      <a href="{{ url_for('index') }}" class="trip-btn trip-btn-secondary">Vazgeç</a>
+    </div>
+
+    <div class="trip-note">
+      Sefer başlatıldığında koltuk, hesap, emanet ve durak akışı bu hatta göre açılır.
+    </div>
+  </form>
+</div>
+
+<script>
+  (function(){
+    const dt = document.getElementById("dt");
+    const dateInput = document.getElementById("date");
+    const timeInput = document.getElementById("departure_time");
+    const routeInput = document.getElementById("routeInput");
+    const form = document.getElementById("startForm");
+
+    const srvNow = {{ (now|default('', true))|tojson|safe }};
+    const routeParam = new URLSearchParams(location.search).get("route");
+
+    if(routeParam && routeInput){
+      routeInput.value = routeParam;
+    }
+
+    function pad(n){
+      return String(n).padStart(2, "0");
+    }
+
+    function toLocalValue(d){
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    if(dt){
+      if(srvNow && String(srvNow).includes(" ")){
+        const [dPart, tPart] = String(srvNow).split(" ");
+        const [Y,M,D] = dPart.split("-").map(x => parseInt(x,10));
+        const [h,m] = tPart.split(":").map(x => parseInt(x,10));
+        dt.value = toLocalValue(new Date(Y, M - 1, D, h, m));
+      }else{
+        dt.value = toLocalValue(new Date());
+      }
+    }
+
+    form?.addEventListener("submit", function(){
+      const raw = dt?.value || "";
+      if(!raw || !raw.includes("T")) return;
+
+      const [d,t] = raw.split("T");
+      dateInput.value = d;
+      timeInput.value = t;
+    });
+  })();
+</script>
+
+{% endblock %}

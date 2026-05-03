@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kurtarma Kodu</title>
+
+  <style>
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 34%),
+        linear-gradient(180deg,#f8fbff,#eaf3ff);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:#0f172a;
+    }
+
+    .shell{
+      width:min(94vw,720px);
+      margin:18px auto 28px;
+      padding:16px;
+      border-radius:30px;
+      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
+      border:1px solid rgba(255,255,255,.82);
+      box-shadow:0 28px 80px rgba(15,23,42,.18);
+    }
+
+    .hero{
+      padding:24px 20px;
+      border-radius:26px;
+      background:linear-gradient(145deg,#2563eb,#06b6d4);
+      color:#fff;
+      box-shadow:0 18px 38px rgba(37,99,235,.22);
+      margin-bottom:14px;
+    }
+
+    .hero h1{
+      margin:0;
+      font-size:34px;
+      line-height:1;
+      font-weight:950;
+    }
+
+    .hero p{
+      margin:8px 0 0;
+      font-size:15px;
+      font-weight:700;
+      color:rgba(255,255,255,.88);
+    }
+
+    .card{
+      border-radius:26px;
+      background:#fff;
+      border:1px solid #e5edf6;
+      box-shadow:0 14px 34px rgba(15,23,42,.10);
+      padding:18px;
+    }
+
+    .alert{
+      padding:13px 14px;
+      border-radius:18px;
+      margin-bottom:14px;
+      font-size:15px;
+      font-weight:850;
+      line-height:1.3;
+    }
+
+    .alert.ok{
+      background:#ecfdf5;
+      color:#047857;
+      border:1px solid #a7f3d0;
+    }
+
+    .alert.warn{
+      background:#fffbeb;
+      color:#92400e;
+      border:1px solid #fde68a;
+    }
+
+    .code-box{
+      margin:16px 0;
+      padding:18px;
+      border-radius:22px;
+      background:linear-gradient(145deg,#eff6ff,#ffffff);
+      border:1px dashed rgba(37,99,235,.45);
+      text-align:center;
+    }
+
+    .code-label{
+      color:#64748b;
+      font-size:13px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.4px;
+      margin-bottom:8px;
+    }
+
+    .code{
+      font-size:25px;
+      line-height:1.15;
+      font-weight:950;
+      color:#0f172a;
+      word-break:break-word;
+      letter-spacing:.5px;
+    }
+
+    .small{
+      color:#64748b;
+      font-size:14px;
+      line-height:1.35;
+      font-weight:650;
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:16px;
+    }
+
+    .btn{
+      min-height:58px;
+      border:0;
+      border-radius:21px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      font-size:17px;
+      font-weight:950;
+      font-family:inherit;
+    }
+
+    .btn.primary{
+      color:#fff;
+      background:linear-gradient(145deg,#38bdf8,#2563eb);
+      box-shadow:0 16px 34px rgba(37,99,235,.26);
+    }
+
+    .btn.secondary{
+      color:#2563eb;
+      background:#f8fbff;
+      border:1px solid #e5edf6;
+    }
+
+    .btn.danger{
+      color:#fff;
+      background:linear-gradient(145deg,#fb923c,#ef4444);
+      box-shadow:0 16px 34px rgba(239,68,68,.18);
+    }
+
+    @media(max-width:420px){
+      .shell{
+        width:calc(100vw - 24px);
+        margin:14px auto 24px;
+        padding:14px;
+      }
+
+      .code{
+        font-size:21px;
+      }
+
+      .actions{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <section class="hero">
+      <h1>🧾 Kurtarma Kodu</h1>
+      <p>Şifre unutulursa bu kodla yeni şifre belirlenir.</p>
+    </section>
+
+    <section class="card">
+      {% if msg %}
+        <div class="alert ok">{{ msg }}</div>
+      {% endif %}
+
+      {% if error %}
+        <div class="alert warn">{{ error }}</div>
+      {% endif %}
+
+      {% if code %}
+        <div class="code-box">
+          <div class="code-label">Kurtarma kodun</div>
+          <div class="code" id="recoveryCode">{{ code }}</div>
+        </div>
+
+        <p class="small">
+          Bu kod güvenlik için sadece şimdi gösterilir. Bir yere not et veya fotoğrafını çek.
+        </p>
+
+        <div class="actions">
+          <button class="btn primary" type="button" onclick="copyCode()">Kodu Kopyala</button>
+          <a class="btn secondary" href="/ayarlar">← Geri</a>
+        </div>
+      {% else %}
+        <div class="alert warn">
+          Kurtarma kodu daha önce oluşturulmuş. Güvenlik için eski kod tekrar gösterilmez.
+        </div>
+
+        {% if updated_at %}
+          <p class="small">Son oluşturma zamanı: <b>{{ updated_at }}</b></p>
+        {% endif %}
+
+        <p class="small">
+          Eski kodu kaybettiysen yeni kod oluşturabilirsin. Yeni kod oluşturulunca eski kod geçersiz olur.
+        </p>
+
+        <form method="post" class="actions" onsubmit="return confirm('Yeni kurtarma kodu oluşturulsun mu? Eski kod geçersiz olacak.');">
+          {% if csrf_token is defined %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          {% endif %}
+          <input type="hidden" name="action" value="generate">
+          <button class="btn danger" type="submit">Yeni Kod Oluştur</button>
+          <a class="btn secondary" href="/ayarlar">← Geri</a>
+        </form>
+      {% endif %}
+    </section>
+  </main>
+
+  <script>
+    function copyCode(){
+      const el = document.getElementById("recoveryCode");
+      if(!el) return;
+
+      const code = el.textContent.trim();
+
+      if(navigator.clipboard){
+        navigator.clipboard.writeText(code).then(() => alert("Kurtarma kodu kopyalandı."));
+      }else{
+        alert(code);
+      }
+    }
+  </script>
+</body>
+</html>

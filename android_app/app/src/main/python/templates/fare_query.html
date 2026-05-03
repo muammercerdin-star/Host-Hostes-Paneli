@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/style.css"/>
+
+<style>
+  .wrap{max-width:900px;margin:18px auto}
+  .card{background:#1e2327;border:1px solid #3b4248;border-radius:14px;padding:14px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .label{font-weight:700;margin-bottom:4px}
+  select,button,input{width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e8edf2}
+  .toolbar{display:flex;gap:8px;margin-bottom:12px}
+  .btn{border:none;cursor:pointer}
+  .btn.primary{background:#2563eb;color:#fff}
+  .btn.gray{background:#475569;color:#fff}
+  .btn.green{background:#16a34a;color:#fff}
+  .price-box{display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;padding:22px;border-radius:14px;background:#0f172a;border:1px dashed #334155;min-height:84px}
+  .muted{opacity:.85}
+  .hint{font-size:13px;color:#cbd5e1}
+  .split{height:1px;background:rgba(255,255,255,.08);margin:12px 0}
+</style>
+
+<div class="wrap">
+  <div class="toolbar">
+    <a class="btn gray" style="width:auto;padding:10px 14px" href="{{ url_for('index') }}">← Ana Sayfa</a>
+    <div style="margin-left:auto"></div>
+    <a class="btn gray" style="width:auto;padding:10px 14px"
+       href="{{ url_for('fare_admin') }}?route={{ current_route|urlencode }}&from={{ from_stop|urlencode }}&to={{ to_stop|urlencode }}">
+      Fiyatı Güncelle
+    </a>
+  </div>
+
+  <h2 style="margin:0 0 10px 0">Bilet Fiyat Sorgu</h2>
+
+  <form class="card" method="get" action="{{ url_for('fare_query') }}">
+    <div class="row3">
+      <div>
+        <div class="label">Hat</div>
+        <select name="route" id="routeSel">
+          {% for r in routes %}
+            <option value="{{ r }}" {{ 'selected' if r==current_route else '' }}>{{ r }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <div class="label">Biniş</div>
+        <select name="from" id="fromSel" required>
+          <option value="">Seç</option>
+          {% for s in stops %}
+            <option value="{{ s }}" {{ 'selected' if s==from_stop else '' }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <div class="label">İniş</div>
+        <select name="to" id="toSel" required>
+          <option value="">Seç</option>
+          {% for s in stops %}
+            <option value="{{ s }}" {{ 'selected' if s==to_stop else '' }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="split"></div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn gray" type="button" onclick="swapStops()">Biniş ↔ İniş</button>
+      <button class="btn primary" type="submit">Fiyatı Gör</button>
+    </div>
+  </form>
+
+  <div style="height:10px"></div>
+
+  <div class="card">
+    <div class="label">Sonuç</div>
+    {% if price is not none %}
+      <div class="price-box">{{ '%.0f TL'|format(price) }}</div>
+      <div class="hint" style="margin-top:8px">
+        {% if msg %}{{ msg }}{% else %}
+          Hesaplama yöntemi:
+          {% if method=='direct' %}doğrudan kayıt{% elif method=='summed' %}ardışık segment toplamı{% else %}-{% endif %}
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="price-box muted">Henüz seçim yapılmadı veya fiyat bulunamadı.</div>
+      {% if msg %}<div class="hint" style="margin-top:8px">{{ msg }}</div>{% endif %}
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  function swapStops(){
+    const f=document.getElementById('fromSel'), t=document.getElementById('toSel');
+    const fv=f.value, tv=t.value; f.value=tv; t.value=fv;
+  }
+
+  // Hat değişince biniş/iniş temizlensin ve form GET ile gönderilsin
+  document.getElementById('routeSel').addEventListener('change', function(){
+    document.getElementById('fromSel').value = '';
+    document.getElementById('toSel').value = '';
+    this.form.submit();
+  });
+</script>
+{% endblock %}

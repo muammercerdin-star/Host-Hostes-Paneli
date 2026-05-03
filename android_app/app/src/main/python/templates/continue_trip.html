@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Devam Eden Sefer</title>
+
+  <style>
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    :root{
+      --blue:#2563eb;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e5edf6;
+      --danger:#ef4444;
+      --card-radius:26px;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(37,99,235,.14), transparent 34%),
+        radial-gradient(circle at 100% 30%, rgba(14,165,233,.16), transparent 32%),
+        linear-gradient(180deg,#f8fbff,#eaf3ff);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button{
+      font-family:inherit;
+    }
+
+    .sr-only{
+      position:absolute !important;
+      width:1px !important;
+      height:1px !important;
+      padding:0 !important;
+      margin:-1px !important;
+      overflow:hidden !important;
+      clip:rect(0,0,0,0) !important;
+      white-space:nowrap !important;
+      border:0 !important;
+    }
+
+    .shell{
+      width:calc(100vw - 14px);
+      max-width:720px;
+      margin:6px auto 12px;
+      padding:9px;
+      border-radius:28px;
+      background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(241,248,255,.96));
+      border:1px solid rgba(255,255,255,.86);
+      box-shadow:0 24px 70px rgba(15,23,42,.14);
+    }
+
+    /* ÜST HERO — hazır görsel */
+    .hero{
+      position:relative;
+      height:162px;
+      min-height:162px;
+      border-radius:25px;
+      overflow:hidden;
+      margin-bottom:9px;
+      background:url("/static/img/home-bus-card-final.png") center / cover no-repeat;
+      box-shadow:0 20px 44px rgba(120,18,32,.20);
+    }
+
+    .primary-actions{
+      display:grid;
+      gap:8px;
+      margin:9px 0;
+    }
+
+    .big-action{
+      position:relative;
+      overflow:hidden;
+      min-height:74px;
+      border-radius:23px;
+      padding:11px 14px;
+      display:grid;
+      grid-template-columns:46px 1fr 44px;
+      align-items:center;
+      gap:11px;
+      color:#fff;
+      background:linear-gradient(145deg,#38bdf8,#2563eb);
+      box-shadow:0 16px 34px rgba(37,99,235,.22);
+      transition:transform .12s ease, filter .12s ease;
+    }
+
+    .big-action:active,
+    .quick-item:active,
+    .danger-btn:active,
+    .bottom-home:active{
+      transform:scale(.985);
+      filter:brightness(.98);
+    }
+
+    /* Koltuklara Git — hazır görsel */
+    .seat-visual-card{
+      height:116px;
+      min-height:116px;
+      padding:0;
+      border-radius:24px;
+      background:url("/static/img/seat-card-final.png") center / cover no-repeat;
+      box-shadow:0 18px 42px rgba(0,88,220,.22);
+    }
+
+    /* Sürüş Modu — hazır görsel */
+    .big-action.drive{
+      min-height:84px;
+      border-radius:23px;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.10), rgba(0,0,0,.04)),
+        url("/static/img/drive-mode-card.png") center / cover no-repeat;
+      box-shadow:0 18px 42px rgba(14,165,233,.22);
+    }
+
+    .big-action.cash{
+      min-height:76px;
+      background:linear-gradient(145deg,#334155,#0f172a);
+      box-shadow:0 16px 34px rgba(15,23,42,.20);
+    }
+
+    .big-ico{
+      width:46px;
+      height:46px;
+      border-radius:17px;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.23);
+      font-size:23px;
+    }
+
+    .big-title{
+      display:block;
+      font-size:20px;
+      font-weight:1000;
+      line-height:1;
+    }
+
+    .big-desc{
+      display:block;
+      margin-top:4px;
+      font-size:12px;
+      color:rgba(255,255,255,.86);
+      font-weight:800;
+      line-height:1.12;
+    }
+
+    .arrow{
+      width:44px;
+      height:44px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.92);
+      color:var(--blue);
+      font-size:30px;
+      font-weight:1000;
+    }
+
+    .quick-list{
+      overflow:hidden;
+      border-radius:23px;
+      background:#fff;
+      border:1px solid var(--line);
+      box-shadow:0 14px 34px rgba(15,23,42,.08);
+      margin-bottom:8px;
+    }
+
+    .quick-item{
+      min-height:54px;
+      padding:8px 12px;
+      display:grid;
+      grid-template-columns:40px 1fr 28px;
+      align-items:center;
+      gap:10px;
+      border-bottom:1px solid var(--line);
+      transition:transform .12s ease, filter .12s ease;
+    }
+
+    .quick-item:last-child{
+      border-bottom:0;
+    }
+
+    .qico{
+      width:40px;
+      height:40px;
+      border-radius:15px;
+      display:grid;
+      place-items:center;
+      background:#eff6ff;
+      font-size:20px;
+    }
+
+    .qtitle{
+      display:block;
+      font-size:16px;
+      font-weight:1000;
+      color:var(--text);
+      line-height:1;
+    }
+
+    .qdesc{
+      display:block;
+      margin-top:3px;
+      color:var(--muted);
+      font-size:11.2px;
+      font-weight:800;
+      line-height:1.08;
+    }
+
+    .qarr{
+      color:var(--muted);
+      font-size:28px;
+      font-weight:900;
+      line-height:1;
+      justify-self:end;
+    }
+
+    .danger-zone{
+      border-radius:20px;
+      padding:7px;
+      background:#fff;
+      border:1px solid #fee2e2;
+      box-shadow:0 14px 34px rgba(239,68,68,.08);
+      margin-bottom:7px;
+    }
+
+    .danger-btn{
+      width:100%;
+      min-height:40px;
+      border:0;
+      border-radius:16px;
+      color:#fff;
+      background:linear-gradient(145deg,#fb7185,#ef4444);
+      box-shadow:0 12px 26px rgba(239,68,68,.20);
+      font-size:13.5px;
+      font-weight:950;
+      cursor:pointer;
+      transition:transform .12s ease, filter .12s ease;
+    }
+
+    .bottom-home{
+      min-height:40px;
+      border-radius:17px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#fff;
+      border:1px solid var(--line);
+      color:var(--blue);
+      font-size:14px;
+      font-weight:950;
+      box-shadow:0 12px 26px rgba(15,23,42,.06);
+      transition:transform .12s ease, filter .12s ease;
+    }
+
+    /* SEFERİ BİTİR MODALI */
+    .end-trip-overlay{
+      position:fixed;
+      inset:0;
+      z-index:99999;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+      background:rgba(9,15,28,.68);
+      backdrop-filter:blur(12px);
+    }
+
+    .end-trip-overlay.show{
+      display:flex;
+    }
+
+    .end-trip-box{
+      width:min(92vw,430px);
+      border-radius:34px;
+      overflow:hidden;
+      background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(242,246,255,.97));
+      border:1px solid rgba(255,255,255,.75);
+      box-shadow:
+        0 30px 80px rgba(0,0,0,.38),
+        inset 0 1px 0 rgba(255,255,255,.9);
+      animation:endTripIn .18s ease-out both;
+    }
+
+    @keyframes endTripIn{
+      from{
+        transform:translateY(18px) scale(.96);
+        opacity:0;
+      }
+      to{
+        transform:translateY(0) scale(1);
+        opacity:1;
+      }
+    }
+
+    .end-trip-top{
+      padding:24px 24px 14px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .end-trip-mark{
+      width:60px;
+      height:60px;
+      border-radius:22px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:31px;
+      background:linear-gradient(135deg,#ffe8ed,#ffd4dd);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .end-trip-title{
+      margin:0;
+      color:#111827;
+      font-size:25px;
+      line-height:1.05;
+      font-weight:950;
+      letter-spacing:-.3px;
+    }
+
+    .end-trip-small{
+      margin:5px 0 0;
+      color:var(--muted);
+      font-size:14px;
+      font-weight:750;
+    }
+
+    .end-trip-content{
+      padding:4px 24px 22px;
+    }
+
+    .end-trip-text{
+      margin:0;
+      color:#334155;
+      font-size:17px;
+      line-height:1.45;
+      font-weight:650;
+    }
+
+    .end-trip-note{
+      margin-top:14px;
+      padding:13px 14px;
+      border-radius:18px;
+      background:rgba(239,68,68,.08);
+      color:#991b1b;
+      font-size:14px;
+      line-height:1.35;
+      font-weight:800;
+    }
+
+    .end-trip-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      padding:0 24px 24px;
+    }
+
+    .end-trip-btn{
+      height:55px;
+      border:0;
+      border-radius:19px;
+      font-size:16px;
+      font-weight:950;
+      cursor:pointer;
+    }
+
+    .end-trip-cancel{
+      background:#eef2f7;
+      color:#334155;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .end-trip-ok{
+      color:#fff;
+      background:linear-gradient(135deg,#ef4444,#b91c1c);
+      box-shadow:0 14px 28px rgba(185,28,28,.25);
+    }
+
+    .end-trip-btn:active{
+      transform:scale(.98);
+    }
+
+    @media(max-width:430px){
+      .shell{
+        width:calc(100vw - 12px);
+        margin-top:5px;
+        padding:8px;
+        border-radius:26px;
+      }
+
+      .hero{
+        height:158px;
+        min-height:158px;
+        border-radius:24px;
+      }
+
+      .seat-visual-card{
+        height:113px;
+        min-height:113px;
+        border-radius:23px;
+      }
+
+      .big-action.drive{
+        min-height:80px;
+      }
+
+      .big-action.cash{
+        min-height:72px;
+      }
+
+      .quick-item{
+        min-height:52px;
+      }
+
+      .end-trip-box{
+        border-radius:28px;
+      }
+
+      .end-trip-top{
+        padding:22px 20px 12px;
+      }
+
+      .end-trip-content{
+        padding:4px 20px 20px;
+      }
+
+      .end-trip-actions{
+        padding:0 20px 22px;
+      }
+
+      .end-trip-title{
+        font-size:23px;
+      }
+    }
+  </style>
+
+<style id="end-trip-modal-premium-v2">
+/* =========================================================
+   SEFERİ BİTİR MODAL - PREMIUM FINAL V2
+========================================================= */
+
+.end-trip-overlay{
+  background:
+    radial-gradient(circle at 50% 25%, rgba(37,99,235,.18), transparent 34%),
+    rgba(8,15,28,.72) !important;
+  backdrop-filter:blur(16px) saturate(1.08) !important;
+  -webkit-backdrop-filter:blur(16px) saturate(1.08) !important;
+  padding:20px !important;
+}
+
+.end-trip-box{
+  width:min(92vw, 410px) !important;
+  border-radius:34px !important;
+  overflow:hidden !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255,255,255,.96), transparent 30%),
+    linear-gradient(180deg,#ffffff 0%,#f7faff 58%,#eef4ff 100%) !important;
+  border:1px solid rgba(255,255,255,.86) !important;
+  box-shadow:
+    0 34px 90px rgba(0,0,0,.40),
+    0 0 0 1px rgba(255,255,255,.72) inset !important;
+}
+
+.end-trip-top{
+  padding:24px 24px 12px !important;
+  display:grid !important;
+  grid-template-columns:62px 1fr !important;
+  align-items:center !important;
+  gap:16px !important;
+}
+
+.end-trip-mark{
+  width:62px !important;
+  height:62px !important;
+  border-radius:22px !important;
+  font-size:30px !important;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255,255,255,.75), transparent 32%),
+    linear-gradient(135deg,#ffe5ea,#ffd1dc) !important;
+  box-shadow:
+    0 14px 28px rgba(239,68,68,.16),
+    inset 0 1px 0 rgba(255,255,255,.92) !important;
+}
+
+.end-trip-title{
+  margin:0 !important;
+  color:#0f172a !important;
+  font-size:28px !important;
+  line-height:1.03 !important;
+  font-weight:1000 !important;
+  letter-spacing:-.7px !important;
+}
+
+.end-trip-small{
+  margin:6px 0 0 !important;
+  color:#64748b !important;
+  font-size:14px !important;
+  line-height:1.2 !important;
+  font-weight:850 !important;
+}
+
+.end-trip-content{
+  padding:4px 24px 20px !important;
+}
+
+.end-trip-text{
+  margin:0 !important;
+  color:#334155 !important;
+  font-size:17px !important;
+  line-height:1.45 !important;
+  font-weight:750 !important;
+}
+
+.end-trip-note{
+  margin-top:14px !important;
+  padding:13px 14px !important;
+  border-radius:20px !important;
+  background:
+    linear-gradient(180deg,rgba(254,226,226,.92),rgba(255,241,242,.94)) !important;
+  border:1px solid rgba(252,165,165,.22) !important;
+  color:#991b1b !important;
+  font-size:14px !important;
+  line-height:1.35 !important;
+  font-weight:900 !important;
+}
+
+.end-trip-actions{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:12px !important;
+  padding:0 24px 24px !important;
+}
+
+.end-trip-btn{
+  height:56px !important;
+  border:0 !important;
+  border-radius:20px !important;
+  font-size:16px !important;
+  font-weight:1000 !important;
+  cursor:pointer !important;
+}
+
+.end-trip-cancel{
+  color:#334155 !important;
+  background:
+    linear-gradient(180deg,#ffffff,#eef3fb) !important;
+  border:1px solid rgba(148,163,184,.20) !important;
+  box-shadow:
+    0 12px 24px rgba(15,23,42,.08),
+    inset 0 1px 0 rgba(255,255,255,.92) !important;
+}
+
+.end-trip-ok{
+  color:#fff !important;
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255,255,255,.22), transparent 30%),
+    linear-gradient(135deg,#fb4458 0%,#dc2626 52%,#b91c1c 100%) !important;
+  box-shadow:
+    0 16px 30px rgba(185,28,28,.28),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+
+.end-trip-btn:active{
+  transform:scale(.975) !important;
+}
+
+@media(max-width:420px){
+  .end-trip-overlay{
+    padding:18px !important;
+  }
+
+  .end-trip-box{
+    width:min(94vw, 390px) !important;
+    border-radius:30px !important;
+  }
+
+  .end-trip-top{
+    padding:22px 20px 10px !important;
+    grid-template-columns:58px 1fr !important;
+    gap:14px !important;
+  }
+
+  .end-trip-mark{
+    width:58px !important;
+    height:58px !important;
+    border-radius:20px !important;
+    font-size:28px !important;
+  }
+
+  .end-trip-title{
+    font-size:25px !important;
+  }
+
+  .end-trip-content{
+    padding:4px 20px 18px !important;
+  }
+
+  .end-trip-text{
+    font-size:16px !important;
+  }
+
+  .end-trip-actions{
+    padding:0 20px 22px !important;
+    gap:10px !important;
+  }
+
+  .end-trip-btn{
+    height:52px !important;
+    border-radius:18px !important;
+    font-size:15px !important;
+  }
+}
+</style>
+
+</head>
+
+<body>
+  <main class="shell">
+
+    <section class="hero" aria-label="Devam eden sefer bilgisi">
+      <div class="sr-only">Devam Eden Sefer</div>
+      <h1 class="sr-only">{{ trip["route"] }}</h1>
+      <p class="sr-only">Aktif sefer hazır. İstediğin ekrana hızlıca geç.</p>
+      <div class="sr-only">
+        {{ trip["plate"] or "Plaka yok" }}
+        {% if trip["date"] and "-" in trip["date"] %}
+          {{ trip["date"].split("-")[2] }}.{{ trip["date"].split("-")[1] }}.{{ trip["date"].split("-")[0] }}
+        {% else %}
+          {{ trip["date"] }}
+        {% endif %}
+        {{ trip["departure_time"] }}
+      </div>
+    </section>
+
+    <section class="primary-actions">
+      <a class="big-action seat-visual-card" href="{{ url_for('seats_page') }}" aria-label="Koltuklara Git">
+        <span class="sr-only">Koltuklara Git - Yolcu, koltuk ve iniş-biniş işlemleri</span>
+      </a>
+
+      <a class="big-action drive" href="{{ url_for('seats_page') }}?drive=1" aria-label="Sürüş Modunu Aç">
+        <span class="sr-only">Sürüş Modunu Aç - Durak akışı, hız ve sesli takip ekranı</span>
+      </a>
+
+      <a class="big-action cash" href="{{ url_for('hesap_page') }}">
+        <span class="big-ico">💵</span>
+        <span>
+          <span class="big-title">Hesap / Kasa</span>
+          <span class="big-desc">Giriş-çıkış, kalan ve sefer kasası</span>
+        </span>
+        <span class="arrow">›</span>
+      </a>
+    </section>
+
+    <section class="quick-list">
+      <a class="quick-item" href="{{ url_for('passenger_control') }}">
+        <span class="qico">👥</span>
+        <span>
+          <span class="qtitle">Yolcu Kontrolü</span>
+          <span class="qdesc">Binen-inen ve kontrol ekranı</span>
+        </span>
+        <span class="qarr">›</span>
+      </a>
+
+      <a class="quick-item" href="{{ url_for('consignments_page') }}">
+        <span class="qico">📦</span>
+        <span>
+          <span class="qtitle">Emanetler</span>
+          <span class="qdesc">Emanet kayıt ve teslim işlemleri</span>
+        </span>
+        <span class="qarr">›</span>
+      </a>
+
+      <a class="quick-item" href="/sefer-raporu-son">
+        <span class="qico">📁</span>
+        <span>
+          <span class="qtitle">Sefer Raporları</span>
+          <span class="qdesc">Biten sefer raporlarını aç</span>
+        </span>
+        <span class="qarr">›</span>
+      </a>
+    </section>
+
+    <section class="danger-zone">
+      <form id="endTripForm" method="post" action="{{ url_for('end_trip') }}">
+        {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+        <button class="danger-btn" type="submit">⛔ Seferi Bitir</button>
+      </form>
+    </section>
+
+    <a class="bottom-home" href="/">← Ana ekrana dön</a>
+
+  </main>
+
+  <div class="end-trip-overlay" id="endTripOverlay" aria-hidden="true">
+    <div class="end-trip-box" role="dialog" aria-modal="true" aria-labelledby="endTripTitle">
+      <div class="end-trip-top">
+        <div class="end-trip-mark">⛔</div>
+        <div>
+          <h2 class="end-trip-title" id="endTripTitle">Seferi bitirelim mi?</h2>
+          <p class="end-trip-small">Aktif sefer sonlandırılacak.</p>
+        </div>
+      </div>
+
+      <div class="end-trip-content">
+        <p class="end-trip-text">
+          Sefer tamamlandıysa işlemi bitirebilirsin. Emin değilsen iptal edip ekrana dönebilirsin.
+        </p>
+        <div class="end-trip-note">
+          Bitirilen sefer aktif ekrandan kalkar, raporlardan görüntülenir.
+        </div>
+      </div>
+
+      <div class="end-trip-actions">
+        <button type="button" class="end-trip-btn end-trip-cancel" id="endTripCancel">İptal</button>
+        <button type="button" class="end-trip-btn end-trip-ok" id="endTripOk">Seferi Bitir</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const form = document.getElementById("endTripForm");
+      const overlay = document.getElementById("endTripOverlay");
+      const cancel = document.getElementById("endTripCancel");
+      const ok = document.getElementById("endTripOk");
+
+      if(!form || !overlay || !cancel || !ok) return;
+
+      let confirmed = false;
+
+      function openModal(){
+        overlay.classList.add("show");
+        overlay.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeModal(){
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+      }
+
+      form.addEventListener("submit", function(e){
+        if(confirmed) return;
+        e.preventDefault();
+        openModal();
+      });
+
+      cancel.addEventListener("click", closeModal);
+
+      overlay.addEventListener("click", function(e){
+        if(e.target === overlay) closeModal();
+      });
+
+      document.addEventListener("keydown", function(e){
+        if(e.key === "Escape" && overlay.classList.contains("show")){
+          closeModal();
+        }
+      });
+
+      ok.addEventListener("click", function(){
+        confirmed = true;
+        closeModal();
+        form.submit();
+      });
+    })();
+  </script>
+</body>
+</html>

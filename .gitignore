@@ -21,3 +21,12 @@ node_modules/
 storage/backups/
 templates/*.bak*
 *.zip
+
+# APK payload temp
+apk_payload/
+apk_payload_files.txt
+
+# Local Android build outputs
+android_app/.gradle/
+android_app/app/build/
+android_app/build/

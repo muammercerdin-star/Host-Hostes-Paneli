@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/style.css"/>
+<style>
+  .wrap{max-width:900px;margin:18px auto}
+  .card{background:#1e2327;border:1px solid #3b4248;border-radius:14px;padding:14px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .label{font-weight:700;margin-bottom:4px}
+  input,select,button{width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e8edf2}
+  .toolbar{display:flex;gap:8px;margin-bottom:12px}
+  .btn{border:none;cursor:pointer}
+  .btn.gray{background:#475569;color:#fff}
+  .btn.primary{background:#2563eb;color:#fff}
+  .btn.green{background:#16a34a;color:#fff}
+  .list{margin-top:10px;border-top:1px dashed rgba(255,255,255,.08)}
+  .item{display:grid;grid-template-columns:40px 1fr 1fr 120px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.08)}
+  .item:hover{background:rgba(255,255,255,.03);cursor:pointer}
+  .price{font-weight:900;text-align:right}
+  .muted{opacity:.85}
+  .tools{display:flex;gap:8px;align-items:end;justify-content:flex-end}
+</style>
+
+<div class="wrap">
+  <div class="toolbar">
+    <a class="btn gray" style="width:auto;padding:10px 14px" href="{{ url_for('index') }}">← Ana Sayfa</a>
+    <a class="btn gray" style="width:auto;padding:10px 14px"
+       href="{{ url_for('fare_query') }}?route={{ current_route|urlencode }}&from={{ from_stop|urlencode }}&to={{ to_stop|urlencode }}">
+      ← Sorgu Ekranı
+    </a>
+  </div>
+
+  <h2 style="margin:0 0 10px 0">Fiyat Yönetimi</h2>
+
+  <form class="card" method="post" action="{{ url_for('fare_admin') }}" id="fareForm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="row3">
+      <div>
+        <div class="label">Hat</div>
+        <select name="route" id="routeSel">
+          {% for r in routes %}
+            <option value="{{ r }}" {{ 'selected' if r==current_route else '' }}>{{ r }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <div class="label">Biniş</div>
+        <select name="from" id="fromSel" required>
+          {% for s in stops %}
+            <option value="{{ s }}" {{ 'selected' if s==from_stop else '' }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <div class="label">İniş</div>
+        <select name="to" id="toSel" required>
+          {% for s in stops %}
+            <option value="{{ s }}" {{ 'selected' if s==to_stop else '' }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 220px;gap:10px;margin-top:10px">
+      <div>
+        <div class="label">Fiyat (TL)</div>
+        <input type="number" step="0.01" name="price" id="priceInp" value="{{ current_price or '' }}" placeholder="ör. 250" required>
+      </div>
+      <div class="tools">
+        <button class="btn gray" type="button" onclick="swap()">Biniş ↔ İniş</button>
+        <button class="btn primary" type="submit">Kaydet / Güncelle</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="card" style="margin-top:12px">
+    <div style="display:flex;align-items:end;gap:10px">
+      <div class="label" style="margin:0">Bu hatta kayıtlı tüm segmentler</div>
+      <div style="margin-left:auto;width:260px">
+        <div class="label" style="font-weight:600;margin-bottom:6px">Listede ara</div>
+        <input type="text" id="filterInp" placeholder="Durak adında ara…">
+      </div>
+    </div>
+
+    <div class="list" id="fareList">
+      {% for f in fare_list %}
+        <div class="item" data-from="{{ f.from_stop }}" data-to="{{ f.to_stop }}" data-price="{{ '%.2f'|format(f.price) }}">
+          <div>{{ loop.index }}.</div>
+          <div>{{ f.from_stop }}</div>
+          <div>{{ f.to_stop }}</div>
+          <div class="price">{{ '%.0f TL'|format(f.price) }}</div>
+        </div>
+      {% else %}
+        <div class="item"><div style="grid-column:1/5" class="muted">Henüz fiyat kaydı yok.</div></div>
+      {% endfor %}
+    </div>
+
+    <div class="muted" style="margin-top:8px;font-size:13px">
+      İpucu: Bir satıra tıklarsan form otomatik dolar; düzenleyip “Kaydet / Güncelle”ye basabilirsin.
+    </div>
+  </div>
+</div>
+
+<script>
+  function swap(){
+    const from=document.getElementById('fromSel');
+    const to  =document.getElementById('toSel');
+    const fv=from.value, tv=to.value; from.value=tv; to.value=fv;
+  }
+
+  // Hat değişince biniş/iniş temizlensin ve form POST ile gönderilsin (yeni hattın durakları gelsin)
+  document.getElementById('routeSel').addEventListener('change', function(){
+    document.getElementById('fromSel').selectedIndex = 0;
+    document.getElementById('toSel').selectedIndex   = 0;
+    document.getElementById('priceInp').value = '';
+    document.getElementById('fareForm').submit();
+  });
+
+  // Liste satırına tıklayınca forma doldur
+  document.getElementById('fareList')?.addEventListener('click', function(e){
+    const row = e.target.closest('.item'); if(!row) return;
+    document.getElementById('fromSel').value = row.dataset.from;
+    document.getElementById('toSel').value   = row.dataset.to;
+    document.getElementById('priceInp').value= row.dataset.price;
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  // Canlı filtre
+  document.getElementById('filterInp')?.addEventListener('input', function(){
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#fareList .item').forEach(el=>{
+      if(!el.dataset.from){ return; } // boş satır için
+      const txt = (el.dataset.from + ' ' + el.dataset.to).toLowerCase();
+      el.style.display = txt.includes(q) ? '' : 'none';
+    });
+  });
+</script>
+{% endblock %}
+

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Yeni Sefer</h2>
+<form method="post" action="/sefer-baslat">
+  <label>Tarih:</label>
+  <input type="date" name="date" required><br>
+
+  <label>Hat (örn. Denizli→İstanbul):</label>
+  <input type="text" name="route" required><br>
+
+  <label>Kalkış Saati:</label>
+  <input type="time" name="departure_time" required><br>
+
+  <label>Plaka:</label>
+  <input type="text" name="plate"><br>
+
+  <button type="submit">Seferi Başlat</button>
+</form>
+{% endblock %}

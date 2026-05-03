@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oturum Aç</title>
+
+  <style>
+    :root{
+      --bg:#eef6ff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --blue:#1677ff;
+      --line:#e5edf6;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 34%),
+        radial-gradient(circle at 100% 18%, rgba(20,184,166,.10), transparent 30%),
+        linear-gradient(180deg,#f8fbff,#eaf3ff);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+
+    .login-shell{
+      width:min(94vw,520px);
+      border-radius:32px;
+      padding:16px;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(59,130,246,.12), transparent 34%),
+        linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
+      border:1px solid rgba(255,255,255,.82);
+      box-shadow:0 28px 80px rgba(15,23,42,.18);
+    }
+
+    .login-hero{
+      height:138px;
+      border-radius:26px;
+      overflow:hidden;
+      margin-bottom:16px;
+      background:#0b5eeb;
+      box-shadow:0 16px 34px rgba(15,23,42,.16);
+      position:relative;
+    }
+
+    .login-hero img{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center right;
+      display:block;
+    }
+
+    .login-hero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:1;
+      background:
+        linear-gradient(90deg,
+          rgba(8,91,230,1) 0%,
+          rgba(8,91,230,.98) 34%,
+          rgba(8,91,230,.55) 49%,
+          rgba(8,91,230,.08) 60%,
+          transparent 78%
+        );
+    }
+
+    .login-hero::after{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:47%;
+      z-index:2;
+      background:
+        radial-gradient(circle at 22% 50%, rgba(255,255,255,.13), transparent 28%),
+        linear-gradient(90deg,#0759e6 0%, #0759e6 72%, rgba(7,89,230,.42) 100%);
+    }
+
+    .login-hero-cover{
+      position:absolute;
+      inset:auto auto 0 0;
+      top:0;
+      bottom:0;
+      width:48%;
+      z-index:3;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding-left:14px;
+      padding-right:6px;
+      color:#fff;
+    }
+
+    .login-hero-icon{
+      width:36px;
+      height:36px;
+      min-width:36px;
+      display:grid;
+      place-items:center;
+      border-radius:999px;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.22);
+      font-size:18px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
+    }
+
+    .login-hero-title{
+      font-size:16.5px;
+      line-height:1;
+      font-weight:950;
+      letter-spacing:.1px;
+      white-space:nowrap;
+      text-shadow:0 3px 14px rgba(0,0,0,.26);
+    }
+
+    .login-hero-sub{
+      margin-top:4px;
+      font-size:10.5px;
+      line-height:1.12;
+      font-weight:750;
+      color:rgba(255,255,255,.88);
+      white-space:nowrap;
+    }
+
+    .login-card{
+      border-radius:28px;
+      background:#fff;
+      border:1px solid rgba(226,232,240,.96);
+      box-shadow:0 16px 38px rgba(15,23,42,.10);
+      padding:24px 22px 22px;
+    }
+
+    .login-head{
+      text-align:center;
+      margin-bottom:22px;
+    }
+
+    .profile-photo{
+      width:92px;
+      height:92px;
+      margin:0 auto 12px;
+      border-radius:32px;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      background:linear-gradient(145deg,#eff6ff,#dbeafe);
+      color:#2563eb;
+      font-size:42px;
+      box-shadow:0 12px 28px rgba(37,99,235,.14);
+      border:1px solid rgba(219,234,254,.9);
+    }
+
+    .profile-photo img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    h1{
+      margin:0;
+      font-size:34px;
+      line-height:1;
+      font-weight:950;
+      color:#0f172a;
+      letter-spacing:-.6px;
+    }
+
+    .profile-name{
+      margin-top:9px;
+      font-size:18px;
+      font-weight:950;
+      color:#0f172a;
+    }
+
+    .profile-phone{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:14px;
+      font-weight:750;
+    }
+
+    .login-sub{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:15px;
+      font-weight:650;
+    }
+
+    .field{ margin-bottom:16px; }
+
+    label{
+      display:block;
+      margin:0 0 8px 4px;
+      color:#334155;
+      font-size:15px;
+      font-weight:900;
+    }
+
+    .password-box{ position:relative; }
+
+    input[type="password"],
+    input[type="text"]{
+      width:100%;
+      min-height:58px;
+      border-radius:20px;
+      border:1px solid rgba(148,163,184,.26);
+      background:#f8fbff;
+      color:#0f172a;
+      padding:0 56px 0 16px;
+      outline:none;
+      font-size:19px;
+      font-weight:750;
+      box-shadow:
+        0 10px 22px rgba(15,23,42,.06),
+        inset 0 1px 0 rgba(255,255,255,.92);
+    }
+
+    input:focus{
+      border-color:rgba(37,99,235,.75);
+      box-shadow:
+        0 0 0 4px rgba(37,99,235,.12),
+        0 12px 26px rgba(15,23,42,.10);
+      background:#fff;
+    }
+
+    .eye-btn{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform:translateY(-50%);
+      width:42px;
+      height:42px;
+      border:0;
+      border-radius:15px;
+      background:#eef4fb;
+      display:grid;
+      place-items:center;
+      font-size:20px;
+      cursor:pointer;
+    }
+
+    .login-btn{
+      width:100%;
+      min-height:60px;
+      border:0;
+      border-radius:22px;
+      background:linear-gradient(145deg,#38bdf8,#2563eb);
+      color:#fff;
+      font-size:19px;
+      font-weight:950;
+      box-shadow:0 16px 34px rgba(37,99,235,.26);
+      cursor:pointer;
+    }
+
+    .forgot-link{
+      margin-top:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:42px;
+      color:#2563eb;
+      text-decoration:none;
+      font-size:15px;
+      font-weight:900;
+    }
+
+    .error-box{
+      margin-bottom:14px;
+      padding:12px 14px;
+      border-radius:18px;
+      background:#fef2f2;
+      color:#b91c1c;
+      font-size:14px;
+      font-weight:800;
+      border:1px solid #fecaca;
+    }
+
+    .hint{
+      margin-top:14px;
+      text-align:center;
+      color:#94a3b8;
+      font-size:13px;
+      font-weight:650;
+    }
+
+    @media(max-width:420px){
+      body{
+        align-items:center;
+        padding:14px;
+      }
+
+      .login-shell{
+        width:100%;
+        border-radius:30px;
+        padding:14px;
+      }
+
+      .login-hero{
+        height:126px;
+        border-radius:24px;
+      }
+
+      .login-card{
+        border-radius:26px;
+        padding:22px 18px 20px;
+      }
+
+      h1{ font-size:31px; }
+
+      .login-hero-cover{
+        width:48%;
+        padding-left:13px;
+        gap:7px;
+      }
+
+      .login-hero-icon{
+        width:34px;
+        height:34px;
+        min-width:34px;
+        font-size:17px;
+      }
+
+      .login-hero-title{ font-size:15.5px; }
+      .login-hero-sub{ font-size:10px; }
+      .login-hero::after{ width:47%; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="login-shell">
+
+    <div class="login-hero">
+      <img src="{{ url_for('static', filename='img/home-bus-card.jpg') }}" alt="Sarıkız">
+      <div class="login-hero-cover">
+        <div class="login-hero-icon">🔐</div>
+        <div>
+          <div class="login-hero-title">OTURUM AÇ</div>
+          <div class="login-hero-sub">Panele güvenli giriş</div>
+        </div>
+      </div>
+    </div>
+
+    <section class="login-card">
+      <div class="login-head">
+        <div class="profile-photo">
+          {% if admin_profile and admin_profile.photo_path %}
+            <img src="{{ admin_profile.photo_path }}" alt="Profil">
+          {% else %}
+            👤
+          {% endif %}
+        </div>
+
+        <h1>Oturum Aç</h1>
+
+        {% if admin_profile %}
+          <div class="profile-name">{{ admin_profile.full_name }}</div>
+          {% if admin_profile.phone %}
+            <div class="profile-phone">{{ admin_profile.phone }}</div>
+          {% endif %}
+        {% else %}
+          <div class="login-sub">Muavin paneline erişmek için şifre gir.</div>
+        {% endif %}
+      </div>
+
+      {% if error is defined and error %}
+        <div class="error-box">{{ error }}</div>
+      {% endif %}
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for msg in messages %}
+            <div class="error-box">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="post">
+        {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+
+        <div class="field">
+          <label for="password">Şifre</label>
+          <div class="password-box">
+            <input id="password" name="password" type="password" autocomplete="current-password" autofocus>
+            <button class="eye-btn" id="togglePass" type="button" aria-label="Şifreyi göster">👁️</button>
+          </div>
+        </div>
+
+        <button class="login-btn" type="submit">Giriş</button>
+      </form>
+
+      <a class="forgot-link" href="/sifre-unuttum">Şifremi unuttum</a>
+
+      <div class="hint">Sarıkız Host/Hostes Paneli</div>
+    </section>
+
+  </main>
+
+  <script>
+    (function(){
+      const input = document.getElementById("password");
+      const btn = document.getElementById("togglePass");
+
+      if(!input || !btn) return;
+
+      btn.addEventListener("click", function(){
+        const show = input.type === "password";
+        input.type = show ? "text" : "password";
+        btn.textContent = show ? "🙈" : "👁️";
+        input.focus();
+      });
+    })();
+  </script>
+</body>
+</html>

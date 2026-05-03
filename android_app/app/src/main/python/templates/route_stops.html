@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .panel{max-width:760px;margin:24px auto;background:#2b3036;color:#e6edf3;border-radius:16px;padding:18px}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{padding:8px 10px;border-bottom:1px solid #3a4046}
+  input[type="number"]{background:#222;border:1px solid #444;border-radius:8px;color:#fff;padding:6px 8px;width:120px}
+  .btn{background:#1f6feb;border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+  .btn.gray{background:#555}
+  .ok{color:#90ee90}
+  .warn{color:#ffd27f}
+</style>
+
+<div class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <a class="btn gray" href="{{ url_for('index') }}">← Ana sayfa</a>
+    <h2>Durak Koordinatları — {{ route_name }}</h2>
+  </div>
+
+  <p class="warn">Not: Bu sayfa aktif seferin (veya seçili hattın) duraklarını listeler. Her durak için enlem-boylam girip “Kaydet”e bas.</p>
+
+  <table id="tbl">
+    <thead>
+      <tr><th>#</th><th>Durak</th><th>Lat</th><th>Lng</th><th>Kaydet</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+const csrf = "{{ csrf_token }}";
+const routeName = "{{ route_name }}";
+
+function el(tag, props={}, ...kids){
+  const e = document.createElement(tag);
+  Object.assign(e, props);
+  kids.forEach(k=>e.append(k));
+  return e;
+}
+
+async function loadStops(){
+  // Aktif sefer varsa /api/stops döner (name, lat, lng, seq)
+  // Aktif sefer yoksa bu sayfayı kullanmadan önce bir sefer başlatman gerekir.
+  const r = await fetch('/api/stops');
+  const j = await r.json();
+  if(!j.ok){ alert(j.msg || 'Duraklar alınamadı'); return; }
+  const tbody = document.querySelector('#tbl tbody');
+  tbody.innerHTML = '';
+  (j.stops||[]).sort((a,b)=> (a.seq||0)-(b.seq||0)).forEach((s,idx)=>{
+    const tr = el('tr');
+    const lat = el('input', {type:'number', step:'0.000001', value: (s.lat ?? ''), placeholder:'36.8'});
+    const lng = el('input', {type:'number', step:'0.000001', value: (s.lng ?? ''), placeholder:'30.7'});
+    const btn = el('button', {className:'btn', innerText:'Kaydet'});
+    btn.addEventListener('click', async ()=>{
+      if(lat.value==='' || lng.value===''){ alert('Lat/Lng gir'); return; }
+      try{
+        const res = await fetch('/api/route-stop', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','X-CSRF-Token': csrf},
+          body: JSON.stringify({
+            route: routeName,
+            stop_name: s.name,
+            lat: parseFloat(lat.value),
+            lng: parseFloat(lng.value)
+          })
+        });
+        const jj = await res.json();
+        if(jj.ok){ btn.innerText='Kaydedildi'; setTimeout(()=>btn.innerText='Kaydet', 1000); }
+        else { alert(jj.msg || 'Hata'); }
+      }catch(e){ alert('Bağlantı hatası'); }
+    });
+
+    tr.append(
+      el('td',{innerText:String(idx+1)}),
+      el('td',{innerText:s.name}),
+      el('td',{}, lat),
+      el('td',{}, lng),
+      el('td',{}, btn)
+    );
+    tbody.append(tr);
+  });
+}
+loadStops();
+</script>
+{% endblock %}

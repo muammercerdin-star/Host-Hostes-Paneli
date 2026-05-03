@@ -1,0 +1,1324 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/seats/seats.css?v=41">
+<link rel="stylesheet" href="/static/seats/seats-final.css?v=2">
+
+<div class="seats-shell">
+  {% include "seats_parts/topbar.html" %}
+  {% include "seats_parts/stats.html" %}
+
+  <div class="layout">
+    <section class="board-card glass">
+      <div class="board-inner">
+
+        <div id="driveInlineDock">
+          <button id="driveModeToggle" type="button" aria-label="Sürüş modu">🚘 Sürüş</button>
+
+          <div id="driveSpeedChip" class="drive-speed-chip neutral">
+            <div class="drive-speed-top">
+              <span class="drive-speed-ico">🚦</span>
+              <b>0</b>
+              <span>km/h</span>
+            </div>
+            <div class="drive-speed-sub">Limit: —</div>
+          </div>
+
+          <div id="driveEtaChip" class="drive-eta-chip neutral">
+            <div class="drive-eta-top">
+              <span>⏱️</span>
+              <b id="driveEtaMain">Rötar</b>
+            </div>
+            <div class="drive-eta-sub" id="driveEtaSub">ETA bekleniyor</div>
+          </div>
+</div>
+
+        <div class="board-head">
+          <div class="board-title">
+            <div class="board-kicker">Canlı Operasyon Paneli</div>
+            <h2>Koltuk Planı</h2>
+            <small>Tek ekrandan yolcu, durak, iniş ve hızlı işlemleri yönet.</small>
+            <div class="selected-stop-chip">🎯 Seçili durak: <b id="selectedStopBadge">—</b></div>
+          </div>
+
+          <div class="board-head-right">
+            <div class="voice-row">
+              <button class="voice-command-btn" id="btnDeckAI" type="button" title="Sesli Komut">
+                🎤 <span>Sesli Komut</span>
+              </button>
+              <div class="voice-state" id="voiceStateBadge">Hazır</div>
+            </div>
+
+            <div class="legend">
+              <div class="mini-chip">🟢 Boş</div>
+              <div class="mini-chip">🔵 Bay</div>
+              <div class="mini-chip">🩷 Bayan</div>
+              <div class="mini-chip">🧳 Bagaj</div>
+              <div class="mini-chip">🔔 İniş</div>
+              <div class="mini-chip">🚌 Servis</div>
+            </div>
+          </div>
+        </div>
+
+        {% include "seats_parts/route_flow.html" %}
+        {% include "seats_parts/deck.html" %}
+
+      </div>
+    </section>
+
+    <aside class="panel-card glass">
+      <div class="panel-handle"></div>
+
+      <div class="panel-tabs">
+        <button class="tab-btn active" type="button" data-tab="overview">Genel</button>
+        <button class="tab-btn" type="button" data-tab="route">Durak</button>
+        <button class="tab-btn" type="button" data-tab="eta">ETA</button>
+        <button class="tab-btn" type="button" data-tab="quick">İşlem</button>
+        <button class="tab-btn" type="button" data-tab="ai">Asistan</button>
+      </div>
+
+      <div class="tab-pane active" data-pane="overview">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Operasyon Özeti</h3>
+              <small id="miniLiveState">Hazır</small>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="k">Canlı Durak</div>
+                <div class="v" id="miniStop">—</div>
+                <div class="s">GPS veya manuel seçime göre</div>
+              </div>
+              <div class="metric-card">
+                <div class="k">Sonraki İşlem</div>
+                <div class="v" id="aiNextAction">—</div>
+                <div class="s">Sistem önerisi</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Saat</h3>
+              <small id="clockSub">—</small>
+            </div>
+            <div class="clock-big" id="clockMain">--:--:--</div>
+            <div class="clock-date" id="clockDate">—</div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Namaz Vakti</h3>
+              <small>Canlı</small>
+            </div>
+            <div class="prayer-line" id="prLine">Konum alınıyor…</div>
+          </div>
+
+          <div class="section-box">
+            <div class="speed-box" id="speedBox">
+              <div class="speed-left">
+                <div class="k">Hız / Limit</div>
+                <div class="speed-value"><b id="spVal">0</b><span>km/h</span></div>
+                <div class="speed-meta" id="spLimit">Limit: —</div>
+              </div>
+              <button class="tts-btn" id="ttsToggle" title="Sesli uyarı">🔊</button>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Rötar / ETA</h3>
+              <small id="routeNextTimed">—</small>
+            </div>
+            <div class="delay-main warn" id="delayMain">—</div>
+            <div class="delay-sub" id="delaySub">Saatli durak bekleniyor</div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Ekip</h3>
+              <small>Aktif sefer</small>
+            </div>
+            <div class="crew-list">
+              <div class="crew-item">🧑‍✈️ 1. Kaptan: <b>{{ trip['captain1'] or '-' }}</b></div>
+              <div class="crew-item">🧑‍✈️ 2. Kaptan: <b>{{ trip['captain2'] or '-' }}</b></div>
+              <div class="crew-item">🤝 Muavin: <b>{{ trip['attendant'] or '-' }}</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="route">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Canlı Durak Yönetimi</h3>
+              <small id="routeLiveStop">—</small>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Sıradaki Durak</span>
+                <select id="alertStop">
+                  <option value="">—</option>
+                </select>
+              </label>
+
+              <div class="field-row">
+                <label class="field">
+                  <span>Eşik (km)</span>
+                  <input type="number" id="alertRadius" min="0.1" step="0.1" value="3">
+                </label>
+
+                <label class="field">
+                  <span>Konum İzleme</span>
+                  <button class="btn primary" type="button" id="btnGeoWatch">KAPALI</button>
+                </label>
+              </div>
+
+              <div class="toggle-line">
+                <label><input type="checkbox" id="soundToggle" checked> Sesli yanıt</label>
+                <label><input type="checkbox" id="autoAdvanceToggle" checked> Oto ilerle</label>
+              </div>
+
+              <div class="action-grid">
+                <button class="btn warn" type="button" id="btnTriggerNow">Şimdi Uyar</button>
+                <button class="btn danger" type="button" id="btnOffloadNowPane">İnecekleri İndir</button>
+              </div>
+
+              <div class="muted" id="geoHint">Durak seç.</div>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Koordinat</h3>
+              <small>route_stop_coords</small>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Seçili Durak</span>
+                <input type="text" id="coordStopName" readonly>
+              </label>
+
+              <div class="field-row">
+                <label class="field">
+                  <span>Lat</span>
+                  <input type="number" id="coordLat" step="0.000001" placeholder="37.xxxxxx">
+                </label>
+                <label class="field">
+                  <span>Lng</span>
+                  <input type="number" id="coordLng" step="0.000001" placeholder="29.xxxxxx">
+                </label>
+              </div>
+
+              <button class="btn accent" type="button" id="btnSaveCoord">Koordinatı Kaydet</button>
+              <div class="muted">Bu kayıt route_stop_coords tablosuna yazılır.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="eta">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Saatli Garaj / Rötar</h3>
+              <small id="stEtaHint">Plan / ETA</small>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="k">Canlı Durak</div>
+                <div class="v" id="routeLiveStopCard">—</div>
+              </div>
+              <div class="metric-card">
+                <div class="k">Sonraki Saatli</div>
+                <div class="v" id="stEtaTarget">—</div>
+              </div>
+            </div>
+
+            <div class="timeline-list" id="etaTimeline" style="margin-top:12px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="quick">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Hızlı İşlemler</h3>
+              <small>Tek dokunuş</small>
+            </div>
+
+            <div class="action-grid">
+              <button class="btn primary" type="button" id="fabBulkPane">Toplu Giriş</button>
+              <button class="btn green" type="button" id="fabCashPane">Hızlı Tahsilat</button>
+              <button class="btn ghost" type="button" id="openStandingModalBtn">Ayakta Listesi</button>
+              <button class="btn dark" type="button" id="btnOpenRouteTab">Durak Sekmesi</button>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <div class="section-head">
+              <h3>Ayakta Yolcular</h3>
+              <small id="quickStandingMeta">0 kişi</small>
+            </div>
+            <div class="standing-list" id="quickStandingList"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="ai">
+        <div class="pane-grid">
+          <div class="section-box">
+            <div class="section-head">
+              <h3>🧠 Operasyon Asistanı</h3>
+              <small>Canlı analiz</small>
+            </div>
+
+            <div class="ai-main" id="aiMain">Veriler hazırlanıyor…</div>
+            <div class="ai-sub" id="aiSub">Sistem canlı rota, durak ve rötar özetini hazırlıyor.</div>
+
+            <div class="ai-list" style="margin-top:12px;">
+              <div class="ai-item"><b>Sıradaki İşlem</b><span id="aiNextActionMirror">—</span></div>
+              <div class="ai-item"><b>Canlı Durak</b><span id="aiLiveStop">—</span></div>
+              <div class="ai-item"><b>Rötar Durumu</b><span id="aiDelay">—</span></div>
+              <div class="ai-item"><b>Yoğunluk</b><span id="aiDensity">—</span></div>
+              <div class="ai-item"><b>Servis</b><span id="aiService">—</span></div>
+              <div class="ai-item"><b>Emanet</b><span id="aiParcel">—</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+{% include "seats_parts/modals.html" %}
+
+<script>
+  window.SEATS_BOOT = {
+    csrf: {{ csrf_token | tojson | safe }},
+    routeName: {{ trip['route'] | tojson | safe }},
+    tripDate: {{ trip['date'] | tojson | safe }},
+    departureTime: {{ trip['departure_time'] | tojson | safe }},
+    tripKey: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
+
+    seatPositions: {{ seat_positions | tojson | safe }},
+    assigned: {{ assigned | tojson | safe }},
+    stopsMap: {{ stops_map | tojson | safe }},
+    boardsMapServer: {{ boards_map | tojson | safe }},
+    genders: {{ genders | tojson | safe }},
+    serviceMap: {{ service_map | tojson | safe }},
+    serviceNotes: {{ service_notes | tojson | safe }},
+    serverStops: {{ stops | tojson | safe }},
+
+    urls: {
+      hesap: {{ url_for('hesap_page') | tojson | safe }},
+      consignments: {{ url_for('consignments_page') | tojson | safe }}
+    }
+  };
+</script>
+
+<script src="/static/seats/bags.js?v=1"></script>
+<script src="/static/seats/voice-commands.js?v=1"></script>
+<script src="/static/seats/standing.js?v=1"></script>
+<script src="/static/seats/seats.js?v=offload-modal-final-1"></script>
+<script src="/static/seats/drive-controls.js?v=2"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style id="drive-mode-actions-independent-style">
+/* =========================================================
+   SÜRÜŞ MODU ÜST HIZLI MENÜ - BAĞIMSIZ FINAL
+   driveInlineDock içine girmez, kendi kendine görünür.
+========================================================= */
+
+.board-inner{
+  position:relative !important;
+}
+
+#driveModeActionsDock{
+  display:none;
+  position:absolute;
+  z-index:9999;
+
+  width:238px;
+  height:50px;
+  padding:7px;
+
+  border-radius:22px;
+  background:rgba(5,15,28,.95);
+  border:1px solid rgba(96,165,250,.28);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.05),
+    0 16px 34px rgba(0,0,0,.38);
+
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+}
+
+#driveModeActionsDock .dma-btn{
+  width:38px;
+  height:38px;
+  min-width:38px;
+  min-height:38px;
+
+  border-radius:15px;
+  border:1px solid rgba(148,163,184,.20);
+  background:linear-gradient(180deg,rgba(31,63,102,.98),rgba(13,28,48,.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    0 9px 18px rgba(0,0,0,.24);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  color:#fff;
+  text-decoration:none;
+  font-size:21px;
+  line-height:1;
+  cursor:pointer;
+  padding:0;
+}
+
+#driveModeActionsDock .dma-btn.danger{
+  background:linear-gradient(180deg,rgba(239,68,68,.95),rgba(127,29,29,.95));
+  border-color:rgba(248,113,113,.35);
+}
+
+#driveModeActionsDock .dma-btn:active{
+  transform:scale(.94);
+}
+
+@media(max-width:430px){
+  #driveModeActionsDock{
+    width:218px;
+    height:46px;
+    padding:6px;
+    gap:6px;
+    border-radius:20px;
+  }
+
+  #driveModeActionsDock .dma-btn{
+    width:34px;
+    height:34px;
+    min-width:34px;
+    min-height:34px;
+    border-radius:13px;
+    font-size:20px;
+  }
+}
+</style>
+
+<script id="drive-mode-actions-independent-js">
+(function(){
+  function isDriveMode(){
+    const btn = document.getElementById("driveModeToggle");
+    const txt = (btn ? btn.textContent : "").toLowerCase();
+
+    // Sürüş modunda buton "Normal" oluyor
+    if(txt.includes("normal")) return true;
+
+    const bodyCls = document.body.className.toLowerCase();
+    const htmlCls = document.documentElement.className.toLowerCase();
+
+    return (
+      bodyCls.includes("drive") ||
+      bodyCls.includes("surus") ||
+      htmlCls.includes("drive") ||
+      htmlCls.includes("surus")
+    );
+  }
+
+  function ensureDock(){
+    let dock = document.getElementById("driveModeActionsDock");
+    if(dock) return dock;
+
+    dock = document.createElement("div");
+    dock.id = "driveModeActionsDock";
+    dock.innerHTML = `
+      <a class="dma-btn" href="{{ url_for('index') }}" title="Ana Sayfa">🏠</a>
+      <a class="dma-btn" href="{{ url_for('hesap_page') }}" title="Hesap">💵</a>
+      <a class="dma-btn" href="{{ url_for('consignments_page') }}" title="Emanetler">📦</a>
+      <a class="dma-btn" id="dmaAiBtn" href="/ai-console" title="AI Console">🧠</a>
+      <button class="dma-btn danger" type="button" id="dmaEndBtn" title="Seferi Bitir">🏁</button>
+    `;
+
+    const board = document.querySelector(".board-inner");
+    if(board){
+      board.appendChild(dock);
+    }
+
+    return dock;
+  }
+
+  function clickFirst(selectors){
+    for(const sel of selectors){
+      const el = document.querySelector(sel);
+      if(el){
+        el.click();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function bindButtons(){
+    const ai = document.getElementById("dmaAiBtn");
+    const end = document.getElementById("dmaEndBtn");
+
+    if(ai && !ai.dataset.bound){
+      ai.dataset.bound = "1";
+      ai.addEventListener("click", function(e){
+        e.preventDefault();
+        window.location.href = "/ai-console";
+      });
+    }
+
+    if(end && !end.dataset.bound){
+      end.dataset.bound = "1";
+      end.addEventListener("click", function(){
+        openFinishTripModal(); return;
+
+        const clicked = clickFirst([
+          "#endTripBtn",
+          "#btnEndTrip",
+          "[data-action='end-trip']",
+          "a[href*='end_trip']",
+          "a[href*='sefer-bitir']"
+        ]);
+
+        if(!clicked){
+          window.location.href = "/end_trip";
+        }
+      });
+    }
+  }
+
+  function placeDock(){
+    const dock = ensureDock();
+    if(!dock) return;
+
+    const active = isDriveMode();
+
+    if(!active){
+      dock.style.display = "none";
+      return;
+    }
+
+    /* Dock artık hesaplanıp sağa-sola gezdirilmiyor.
+       Normal HTML akışındaki yerinde sabit duracak. */
+    dock.style.display = "flex";
+    dock.style.left = "";
+    dock.style.top = "";
+    dock.style.right = "";
+    dock.style.bottom = "";
+    dock.style.width = "";
+    dock.style.position = "";
+    dock.style.transform = "";
+  }
+
+  function boot(){
+    ensureDock();
+    bindButtons();
+    placeDock();
+
+    const btn = document.getElementById("driveModeToggle");
+    if(btn){
+      btn.addEventListener("click", function(){
+        setTimeout(placeDock, 50);
+        setTimeout(placeDock, 250);
+        setTimeout(placeDock, 700);
+      });
+
+      new MutationObserver(placeDock).observe(btn, {
+        childList:true,
+        subtree:true,
+        characterData:true,
+        attributes:true
+      });
+    }
+
+    new MutationObserver(placeDock).observe(document.body, {
+      attributes:true,
+      attributeFilter:["class"]
+    });
+
+    window.addEventListener("resize", placeDock);
+    window.addEventListener("orientationchange", function(){
+      setTimeout(placeDock, 300);
+    });
+
+    let n = 0;
+    const t = setInterval(function(){
+      ensureDock();
+      bindButtons();
+      placeDock();
+      n++;
+      if(n > 30) clearInterval(t);
+    }, 250);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
+})();
+</script>
+
+
+<!-- Premium Sefer Bitir Modal -->
+<div id="finishTripPremiumModal" class="finish-modal-backdrop" aria-hidden="true">
+  <div class="finish-modal-card" role="dialog" aria-modal="true">
+    <button class="finish-modal-close" type="button" id="finishTripCloseBtn">×</button>
+
+    <div class="finish-modal-icon">🏁</div>
+
+    <div class="finish-modal-kicker">SEFER FİNALİ</div>
+    <h2>Seferi Bitir</h2>
+
+    <p class="finish-modal-text">
+      Bu seferi bitirme ekranına geçmek üzeresin.
+      Devam etmeden önce hesap, emanet ve yolcu kontrolünü gözden geçirmen önerilir.
+    </p>
+
+    <div class="finish-modal-trip">
+      <div>
+        <span>Hat</span>
+        <b>{{ trip['route'] }}</b>
+      </div>
+      <div>
+        <span>Plaka</span>
+        <b>{{ trip['plate'] }}</b>
+      </div>
+    </div>
+
+    <div class="finish-modal-warning">
+      ⚠️ Bu işlem sefer kapanış ekranına yönlendirir.
+    </div>
+
+    <div class="finish-modal-actions">
+      <button type="button" class="finish-btn cancel" id="finishTripCancelBtn">Vazgeç</button>
+      <button type="button" class="finish-btn done" id="finishTripGoBtn">Seferi Bitir</button>
+    </div>
+  </div>
+</div>
+
+<style id="finish-trip-premium-modal-style">
+.finish-modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(2,8,18,.72);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+
+.finish-modal-backdrop.show{
+  display:flex;
+}
+
+.finish-modal-card{
+  position:relative;
+  width:min(92vw,430px);
+  padding:28px 24px 22px;
+  border-radius:34px;
+  color:#0f172a;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(96,165,250,.22), transparent 34%),
+    linear-gradient(180deg,#ffffff,#f4f8ff);
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:
+    0 32px 80px rgba(0,0,0,.45),
+    inset 0 0 0 1px rgba(255,255,255,.70);
+  animation:finishPop .18s ease-out;
+}
+
+@keyframes finishPop{
+  from{ transform:translateY(18px) scale(.96); opacity:.2; }
+  to{ transform:translateY(0) scale(1); opacity:1; }
+}
+
+.finish-modal-close{
+  position:absolute;
+  right:18px;
+  top:18px;
+  width:52px;
+  height:52px;
+  border:0;
+  border-radius:50%;
+  background:#fff;
+  color:#111827;
+  font-size:34px;
+  font-weight:950;
+  box-shadow:0 14px 32px rgba(15,23,42,.14);
+}
+
+.finish-modal-icon{
+  width:78px;
+  height:78px;
+  border-radius:26px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:42px;
+  background:linear-gradient(145deg,#e0f2fe,#bfdbfe);
+  box-shadow:0 18px 34px rgba(37,99,235,.18);
+  margin-bottom:18px;
+}
+
+.finish-modal-kicker{
+  color:#2563eb;
+  font-size:15px;
+  font-weight:950;
+  letter-spacing:.6px;
+  margin-bottom:4px;
+}
+
+.finish-modal-card h2{
+  margin:0;
+  color:#0f172a;
+  font-size:38px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-1px;
+}
+
+.finish-modal-text{
+  margin:16px 0 18px;
+  color:#64748b;
+  font-size:18px;
+  line-height:1.35;
+  font-weight:800;
+}
+
+.finish-modal-trip{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:16px 0;
+}
+
+.finish-modal-trip div{
+  padding:14px;
+  border-radius:20px;
+  background:#eef6ff;
+  border:1px solid rgba(147,197,253,.45);
+}
+
+.finish-modal-trip span{
+  display:block;
+  color:#64748b;
+  font-size:13px;
+  font-weight:900;
+  margin-bottom:5px;
+}
+
+.finish-modal-trip b{
+  display:block;
+  color:#0f172a;
+  font-size:16px;
+  line-height:1.15;
+  font-weight:950;
+}
+
+.finish-modal-warning{
+  padding:14px 16px;
+  border-radius:20px;
+  color:#1d4ed8;
+  background:#eaf3ff;
+  border:1px solid rgba(96,165,250,.34);
+  font-size:15px;
+  line-height:1.25;
+  font-weight:900;
+}
+
+.finish-modal-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:18px;
+}
+
+.finish-btn{
+  height:62px;
+  border:0;
+  border-radius:22px;
+  font-size:18px;
+  font-weight:950;
+  cursor:pointer;
+}
+
+.finish-btn.cancel{
+  color:#2563eb;
+  background:#f8fbff;
+  border:1px solid rgba(148,163,184,.24);
+  box-shadow:0 12px 26px rgba(15,23,42,.08);
+}
+
+.finish-btn.done{
+  color:#fff;
+  background:linear-gradient(145deg,#38bdf8,#2563eb);
+  box-shadow:0 16px 34px rgba(37,99,235,.28);
+}
+
+@media(max-width:430px){
+  .finish-modal-card{
+    padding:26px 20px 20px;
+    border-radius:32px;
+  }
+
+  .finish-modal-card h2{
+    font-size:34px;
+  }
+
+  .finish-modal-text{
+    font-size:16px;
+  }
+
+  .finish-modal-trip{
+    grid-template-columns:1fr;
+  }
+
+  .finish-btn{
+    height:58px;
+    font-size:16px;
+  }
+}
+</style>
+
+<script id="finish-trip-premium-modal-js">
+function openFinishTripModal(){
+  const modal = document.getElementById("finishTripPremiumModal");
+  if(!modal) return;
+  modal.classList.add("show");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeFinishTripModal(){
+  const modal = document.getElementById("finishTripPremiumModal");
+  if(!modal) return;
+  modal.classList.remove("show");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  document.getElementById("finishTripCloseBtn")?.addEventListener("click", closeFinishTripModal);
+  document.getElementById("finishTripCancelBtn")?.addEventListener("click", closeFinishTripModal);
+
+  document.getElementById("finishTripPremiumModal")?.addEventListener("click", function(e){
+    if(e.target.id === "finishTripPremiumModal"){
+      closeFinishTripModal();
+    }
+  });
+
+  document.getElementById("finishTripGoBtn")?.addEventListener("click", function(){
+    window.location.href = "/end_trip";
+  });
+});
+</script>
+
+
+<style id="drive-dock-stability-final">
+/* =========================================================
+   SÜRÜŞ / HIZ / RÖTAR SATIRI SABİTLEME
+   Üste binme ve sağa-sola kayma sorununu çözer.
+========================================================= */
+
+#driveInlineDock{
+  position:relative !important;
+  inset:auto !important;
+  left:auto !important;
+  right:auto !important;
+  top:auto !important;
+  bottom:auto !important;
+  transform:none !important;
+
+  width:100% !important;
+  max-width:100% !important;
+  min-height:46px !important;
+
+  display:flex !important;
+  align-items:stretch !important;
+  gap:8px !important;
+
+  margin:0 0 12px 0 !important;
+  padding:0 !important;
+  z-index:4 !important;
+
+  overflow:hidden !important;
+}
+
+/* Eğer JS gerçekten gizlemek isterse buna izin ver */
+#driveInlineDock[style*="display: none"],
+#driveInlineDock[style*="display:none"]{
+  display:none !important;
+}
+
+#driveInlineDock > *{
+  position:relative !important;
+  left:auto !important;
+  right:auto !important;
+  top:auto !important;
+  bottom:auto !important;
+  transform:none !important;
+  margin:0 !important;
+  min-width:0 !important;
+}
+
+/* Sürüş butonu */
+#driveModeToggle{
+  flex:0 0 88px !important;
+  height:46px !important;
+  min-height:46px !important;
+  border-radius:17px !important;
+  padding:0 10px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:6px !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+
+  font-size:13px !important;
+  font-weight:950 !important;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8) !important;
+  color:#fff !important;
+  border:1px solid rgba(147,197,253,.20) !important;
+  box-shadow:0 10px 24px rgba(37,99,235,.22), inset 0 1px 0 rgba(255,255,255,.15) !important;
+}
+
+/* Hız ve rötar kutuları */
+#driveSpeedChip,
+#driveEtaChip,
+.drive-speed-chip,
+.drive-eta-chip{
+  position:relative !important;
+  height:46px !important;
+  min-height:46px !important;
+  border-radius:17px !important;
+  padding:7px 10px !important;
+
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:center !important;
+
+  background:rgba(255,255,255,.07) !important;
+  border:1px solid rgba(148,163,184,.16) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08) !important;
+
+  overflow:hidden !important;
+}
+
+#driveSpeedChip,
+.drive-speed-chip{
+  flex:1 1 105px !important;
+}
+
+#driveEtaChip,
+.drive-eta-chip{
+  flex:1.25 1 130px !important;
+}
+
+/* İç yazılar taşmasın */
+.drive-speed-top,
+.drive-eta-top{
+  display:flex !important;
+  align-items:center !important;
+  gap:5px !important;
+  min-width:0 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  line-height:1 !important;
+}
+
+.drive-speed-top b,
+.drive-eta-top b{
+  min-width:0 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+}
+
+.drive-speed-sub,
+.drive-eta-sub{
+  margin-top:3px !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+  font-size:10.5px !important;
+  line-height:1 !important;
+  color:rgba(226,232,240,.62) !important;
+}
+
+/* Dock başlığın üstüne binmesin */
+.board-head{
+  position:relative !important;
+  z-index:3 !important;
+  clear:both !important;
+  margin-top:0 !important;
+}
+
+.board-title{
+  position:relative !important;
+  z-index:3 !important;
+}
+
+.board-title h2{
+  margin-top:0 !important;
+}
+
+/* Rötar yazısı kesinlikle başlık alanında serbest dolaşmasın */
+#driveEtaChip *,
+.drive-eta-chip *{
+  max-width:100% !important;
+}
+
+/* Mobilde daha da kontrollü */
+@media(max-width:430px){
+  #driveInlineDock{
+    gap:6px !important;
+    margin-bottom:10px !important;
+  }
+
+  #driveModeToggle{
+    flex:0 0 82px !important;
+    height:43px !important;
+    min-height:43px !important;
+    font-size:12.5px !important;
+    border-radius:16px !important;
+  }
+
+  #driveSpeedChip,
+  #driveEtaChip,
+  .drive-speed-chip,
+  .drive-eta-chip{
+    height:43px !important;
+    min-height:43px !important;
+    border-radius:16px !important;
+    padding:6px 8px !important;
+  }
+
+  #driveSpeedChip,
+  .drive-speed-chip{
+    flex:1 1 95px !important;
+  }
+
+  #driveEtaChip,
+  .drive-eta-chip{
+    flex:1.15 1 112px !important;
+  }
+
+  .drive-speed-top,
+  .drive-eta-top{
+    font-size:12px !important;
+  }
+
+  .drive-speed-sub,
+  .drive-eta-sub{
+    font-size:10px !important;
+  }
+}
+</style>
+
+
+
+
+<!-- OFFLOAD CONFIRM MODAL START -->
+<style id="offload-confirm-modal-style">
+.offload-overlay{
+  position:fixed;
+  inset:0;
+  z-index:999999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:
+    radial-gradient(circle at 50% 25%, rgba(37,99,235,.18), transparent 34%),
+    rgba(8,15,28,.72);
+  backdrop-filter:blur(16px) saturate(1.08);
+  -webkit-backdrop-filter:blur(16px) saturate(1.08);
+}
+
+.offload-overlay.show{
+  display:flex;
+}
+
+.offload-box{
+  width:min(92vw,410px);
+  border-radius:34px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255,255,255,.96), transparent 30%),
+    linear-gradient(180deg,#ffffff 0%,#f7faff 58%,#eef4ff 100%);
+  border:1px solid rgba(255,255,255,.86);
+  box-shadow:
+    0 34px 90px rgba(0,0,0,.40),
+    0 0 0 1px rgba(255,255,255,.72) inset;
+  animation:offloadPop .18s ease-out both;
+}
+
+@keyframes offloadPop{
+  from{ transform:translateY(18px) scale(.96); opacity:0; }
+  to{ transform:translateY(0) scale(1); opacity:1; }
+}
+
+.offload-top{
+  padding:24px 24px 12px;
+  display:grid;
+  grid-template-columns:62px 1fr;
+  align-items:center;
+  gap:16px;
+}
+
+.offload-mark{
+  width:62px;
+  height:62px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255,255,255,.75), transparent 32%),
+    linear-gradient(135deg,#e0f2fe,#bfdbfe);
+  box-shadow:
+    0 14px 28px rgba(37,99,235,.16),
+    inset 0 1px 0 rgba(255,255,255,.92);
+}
+
+.offload-title{
+  margin:0;
+  color:#0f172a;
+  font-size:28px;
+  line-height:1.03;
+  font-weight:1000;
+  letter-spacing:-.7px;
+}
+
+.offload-small{
+  margin:6px 0 0;
+  color:#64748b;
+  font-size:14px;
+  line-height:1.2;
+  font-weight:850;
+}
+
+.offload-content{
+  padding:4px 24px 20px;
+}
+
+.offload-text{
+  margin:0;
+  color:#334155;
+  font-size:17px;
+  line-height:1.45;
+  font-weight:750;
+}
+
+.offload-stop{
+  margin-top:14px;
+  padding:14px 15px;
+  border-radius:20px;
+  background:linear-gradient(180deg,rgba(239,246,255,.96),rgba(219,234,254,.92));
+  border:1px solid rgba(147,197,253,.32);
+  color:#1e3a8a;
+  font-size:15px;
+  line-height:1.35;
+  font-weight:950;
+}
+
+.offload-note{
+  margin-top:12px;
+  padding:13px 14px;
+  border-radius:20px;
+  background:linear-gradient(180deg,rgba(254,243,199,.90),rgba(255,251,235,.94));
+  border:1px solid rgba(251,191,36,.24);
+  color:#92400e;
+  font-size:13.5px;
+  line-height:1.35;
+  font-weight:850;
+}
+
+.offload-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  padding:0 24px 24px;
+}
+
+.offload-btn{
+  height:56px;
+  border:0;
+  border-radius:20px;
+  font-size:16px;
+  font-weight:1000;
+  cursor:pointer;
+  font-family:inherit;
+}
+
+.offload-cancel{
+  color:#334155;
+  background:linear-gradient(180deg,#ffffff,#eef3fb);
+  border:1px solid rgba(148,163,184,.20);
+  box-shadow:
+    0 12px 24px rgba(15,23,42,.08),
+    inset 0 1px 0 rgba(255,255,255,.92);
+}
+
+.offload-ok{
+  color:#fff;
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255,255,255,.22), transparent 30%),
+    linear-gradient(135deg,#22c55e 0%,#16a34a 52%,#15803d 100%);
+  box-shadow:
+    0 16px 30px rgba(22,163,74,.28),
+    inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.offload-btn:active{
+  transform:scale(.975);
+}
+
+@media(max-width:420px){
+  .offload-overlay{ padding:18px; }
+  .offload-box{ width:min(94vw,390px); border-radius:30px; }
+  .offload-top{ padding:22px 20px 10px; grid-template-columns:58px 1fr; gap:14px; }
+  .offload-mark{ width:58px; height:58px; border-radius:20px; font-size:28px; }
+  .offload-title{ font-size:25px; }
+  .offload-content{ padding:4px 20px 18px; }
+  .offload-text{ font-size:16px; }
+  .offload-actions{ padding:0 20px 22px; gap:10px; }
+  .offload-btn{ height:52px; border-radius:18px; font-size:15px; }
+}
+</style>
+
+<div class="offload-overlay" id="offloadConfirmModal" aria-hidden="true">
+  <div class="offload-box" role="dialog" aria-modal="true" aria-labelledby="offloadConfirmTitle">
+    <div class="offload-top">
+      <div class="offload-mark">🔔</div>
+      <div>
+        <h2 class="offload-title" id="offloadConfirmTitle">İnecekleri indirelim mi?</h2>
+        <p class="offload-small">Seçili durak işlemi yapılacak.</p>
+      </div>
+    </div>
+
+    <div class="offload-content">
+      <p class="offload-text" id="offloadConfirmText">
+        Bu durakta inecek yolcu ve ilgili işlemler sistem tarafından tamamlanacak.
+      </p>
+
+      <div class="offload-stop">
+        🎯 Durak: <span id="offloadConfirmStop">—</span>
+      </div>
+
+      <div class="offload-note">
+        Emin değilsen iptal edip koltuk planına dönebilirsin.
+      </div>
+    </div>
+
+    <div class="offload-actions">
+      <button type="button" class="offload-btn offload-cancel" id="offloadConfirmCancel">İptal</button>
+      <button type="button" class="offload-btn offload-ok" id="offloadConfirmOk">İndir</button>
+    </div>
+  </div>
+</div>
+
+<script id="offload-confirm-modal-js">
+(function(){
+  let resolver = null;
+
+  const modal = document.getElementById("offloadConfirmModal");
+  const stopEl = document.getElementById("offloadConfirmStop");
+  const textEl = document.getElementById("offloadConfirmText");
+  const cancelBtn = document.getElementById("offloadConfirmCancel");
+  const okBtn = document.getElementById("offloadConfirmOk");
+
+  if(!modal || !stopEl || !cancelBtn || !okBtn) return;
+
+  function close(result){
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden","true");
+    document.body.style.overflow = "";
+
+    if(resolver){
+      resolver(result);
+      resolver = null;
+    }
+  }
+
+  window.askOffloadConfirm = function(stop, info){
+    stopEl.textContent = stop || "seçili durak";
+
+    const count = Number(info?.count || 0);
+    if(textEl){
+      textEl.textContent = count > 0
+        ? `Bu durakta ${count} yolcu indirilecek.
+Yolcu, ayakta yolcu ve ilgili işlemler tamamlanacak.`
+        : "Bu durakta inecek yolcu bulunuyor.
+Yolcu, ayakta yolcu ve ilgili işlemler tamamlanacak.";
+    }
+
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden","false");
+    document.body.style.overflow = "hidden";
+
+    return new Promise(resolve => {
+      resolver = resolve;
+    });
+  };
+
+  cancelBtn.addEventListener("click", () => close(false));
+  okBtn.addEventListener("click", () => close(true));
+
+  modal.addEventListener("click", function(e){
+    if(e.target === modal) close(false);
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && modal.classList.contains("show")){
+      close(false);
+    }
+  });
+})();
+</script>
+<!-- OFFLOAD CONFIRM MODAL END -->
+
+
+
+
+
+
+
+
+
+{% endblock %}

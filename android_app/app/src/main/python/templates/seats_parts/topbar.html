@@ -1,0 +1,39 @@
+<div class="topbar glass">
+    <div class="route-meta">
+      <div class="route-title-row">
+        <div class="route-badge">🚌</div>
+        <div class="route-title-wrap">
+          <div class="route-title">{{ trip['route'] }}</div>
+          <div class="route-sub">
+            Plaka: <b>{{ trip['plate'] or '-' }}</b>
+            · Sefer Tarihi: <b>
+              {% if trip['date'] and '-' in trip['date'] %}
+                {{ trip['date'].split('-')[2] }}.{{ trip['date'].split('-')[1] }}.{{ trip['date'].split('-')[0] }}
+              {% else %}
+                {{ trip['date'] or '-' }}
+              {% endif %}
+            </b>
+            · Çıkış: <b>{{ trip['departure_time'] or '-' }}</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="route-live-row">
+        <div class="mini-chip">📍 <span>Durak</span> <b id="topLiveStop">—</b></div>
+        <div class="mini-chip">🚦 <span>Hız</span> <b id="topSpeed">0 km/h</b></div>
+        <div class="mini-chip">🕒 <span>Saat</span> <b id="topClock">--:--</b></div>
+        <div class="mini-chip">🎯 <span>Doluluk</span> <b id="topOcc">0%</b></div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <a href="{{ url_for('index') }}" class="icon-btn" title="Ana Sayfa">🏠</a>
+      <a href="{{ url_for('hesap_page') }}" class="icon-btn" title="Hesap">💵</a>
+      <a href="{{ url_for('consignments_page') }}" class="icon-btn" title="Emanetler">📦</a>
+      <a href="{{ url_for('logout') }}" class="icon-btn" title="AI Console">🧠</a>
+      <form method="post" action="{{ url_for('end_trip') }}" onsubmit="return confirm('Sefer sonlandırılsın mı?')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="icon-btn" title="Seferi Sonlandır">⛔</button>
+      </form>
+    </div>
+  </div>

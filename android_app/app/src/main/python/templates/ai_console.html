@@ -1,0 +1,2608 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+
+<script>
+  window.CSRF_TOKEN = {{ csrf_token|tojson }};
+  window.PREFILL_CMD = {{ request.args.get('cmd', '')|tojson }};
+  window.ACTIVE_ROUTE = {{ (active_trip['route'] if active_trip else '')|tojson }};
+  window.SEAT_CAPACITY = 40;
+</script>
+
+<style>
+  :root{
+    --bg:#0b1117;
+    --bg-2:#101821;
+    --bg-3:#121d27;
+    --panel:#18232d;
+    --panel-2:#1d2a35;
+    --soft:#0f171e;
+    --line:rgba(255,255,255,.08);
+    --line-2:rgba(255,255,255,.05);
+    --text:#edf4fb;
+    --muted:#9bb0c4;
+
+    --brand:#22c55e;
+    --brand-2:#15803d;
+    --brand-soft:rgba(34,197,94,.14);
+
+    --info:#38bdf8;
+    --info-2:#0284c7;
+    --info-soft:rgba(56,189,248,.14);
+
+    --warn:#f59e0b;
+    --warn-2:#d97706;
+    --warn-soft:rgba(245,158,11,.14);
+
+    --danger:#ef4444;
+    --danger-2:#b91c1c;
+    --danger-soft:rgba(239,68,68,.14);
+
+    --purple:#8b5cf6;
+    --purple-2:#6d28d9;
+    --purple-soft:rgba(139,92,246,.14);
+
+    --shadow:0 24px 56px rgba(0,0,0,.30);
+    --radius:24px;
+    --radius-sm:18px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    color:var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(56,189,248,.10), transparent 22%),
+      radial-gradient(circle at top right, rgba(139,92,246,.12), transparent 24%),
+      linear-gradient(180deg,#091017 0%, #0d151d 100%);
+  }
+
+  .ai2-shell{
+    width:min(1460px, 96vw);
+    margin:18px auto 82px;
+    display:grid;
+    gap:16px;
+  }
+
+  .glass{
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015)),
+      linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    border-radius:var(--radius);
+    backdrop-filter:blur(12px);
+  }
+
+  .hero{
+    padding:18px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:16px;
+    align-items:center;
+  }
+
+  .hero-left{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    min-width:0;
+  }
+
+  .hero-badge{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    display:grid;
+    place-items:center;
+    font-size:28px;
+    background:linear-gradient(135deg, var(--purple-soft), rgba(255,255,255,.05));
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 12px 30px rgba(0,0,0,.18);
+  }
+
+  .hero-title{
+    margin:0;
+    font-size:28px;
+    line-height:1.05;
+    font-weight:900;
+    letter-spacing:-.02em;
+  }
+
+  .hero-sub{
+    margin:6px 0 0;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.5;
+  }
+
+  .hero-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+
+  .btn,.icon-btn,.chip,.mode-btn,.intent-pill,.soft-btn{
+    border:none;
+    cursor:pointer;
+    transition:.16s ease;
+    font:inherit;
+    text-decoration:none;
+  }
+
+  .btn:hover,
+  .icon-btn:hover,
+  .chip:hover,
+  .mode-btn:hover,
+  .intent-pill:hover,
+  .soft-btn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.05);
+  }
+
+  .btn{
+    min-height:46px;
+    padding:12px 15px;
+    border-radius:15px;
+    color:#fff;
+    font-weight:900;
+    box-shadow:0 12px 28px rgba(0,0,0,.18);
+  }
+
+  .btn.brand{background:linear-gradient(180deg,var(--brand),var(--brand-2))}
+  .btn.info{background:linear-gradient(180deg,var(--info),var(--info-2))}
+  .btn.warn{background:linear-gradient(180deg,var(--warn),var(--warn-2)); color:#281e0c}
+  .btn.danger{background:linear-gradient(180deg,var(--danger),var(--danger-2))}
+  .btn.dark{
+    background:#121b23;
+    color:var(--text);
+    border:1px solid var(--line);
+  }
+  .btn.ghost{
+    background:rgba(255,255,255,.04);
+    color:var(--text);
+    border:1px solid var(--line);
+  }
+
+  .icon-btn{
+    width:46px;
+    height:46px;
+    border-radius:15px;
+    display:grid;
+    place-items:center;
+    background:#121b23;
+    border:1px solid var(--line);
+    color:#fff;
+    font-size:19px;
+  }
+
+  .summary-grid{
+    display:grid;
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    gap:12px;
+  }
+
+  .summary-card{
+    padding:14px;
+    border-radius:20px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015)),
+      #121b23;
+    border:1px solid var(--line-2);
+  }
+
+  .summary-card .k{
+    color:var(--muted);
+    font-size:12px;
+    font-weight:700;
+    margin-bottom:8px;
+  }
+
+  .summary-card .v{
+    font-size:23px;
+    line-height:1.05;
+    font-weight:900;
+  }
+
+  .summary-card .s{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.35;
+  }
+
+  .summary-card.mode{ background:linear-gradient(135deg, rgba(139,92,246,.14), rgba(139,92,246,.05)); }
+  .summary-card.conf{ background:linear-gradient(135deg, rgba(56,189,248,.14), rgba(56,189,248,.05)); }
+  .summary-card.intent{ background:linear-gradient(135deg, rgba(34,197,94,.14), rgba(34,197,94,.05)); }
+  .summary-card.learn{ background:linear-gradient(135deg, rgba(245,158,11,.14), rgba(245,158,11,.05)); }
+  .summary-card.route{ background:linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); }
+  .summary-card.pending{ background:linear-gradient(135deg, rgba(239,68,68,.14), rgba(239,68,68,.05)); }
+
+  .layout{
+    display:grid;
+    grid-template-columns:minmax(0, 1.2fr) 420px;
+    gap:16px;
+    align-items:start;
+  }
+
+  .stack{
+    display:grid;
+    gap:16px;
+  }
+
+  .section-card{
+    overflow:hidden;
+  }
+
+  .section-head{
+    padding:16px 18px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .section-title{
+    margin:0;
+    font-size:18px;
+    line-height:1.1;
+    font-weight:900;
+  }
+
+  .section-sub{
+    margin:4px 0 0;
+    color:var(--muted);
+    font-size:12px;
+  }
+
+  .section-body{
+    padding:16px;
+    display:grid;
+    gap:14px;
+  }
+
+  .mode-switch{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .mode-btn{
+    min-height:40px;
+    padding:10px 14px;
+    border-radius:999px;
+    background:#111920;
+    color:var(--text);
+    border:1px solid var(--line);
+    font-size:13px;
+    font-weight:800;
+  }
+
+  .mode-btn.active{
+    background:var(--brand-soft);
+    border-color:rgba(34,197,94,.35);
+    color:#dbffe6;
+  }
+
+  .composer{
+    background:#0d141b;
+    border:1px solid #202d38;
+    border-radius:22px;
+    overflow:hidden;
+  }
+
+  .quick-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    padding:14px 14px 0;
+  }
+
+  .chip{
+    background:#141d25;
+    color:var(--text);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:8px 12px;
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .composer-body{
+    padding:14px;
+    display:grid;
+    gap:12px;
+  }
+
+  .input-row{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto auto;
+    gap:10px;
+  }
+
+  .cmd-input,
+  .smart-input,
+  .smart-select{
+    width:100%;
+    border-radius:18px;
+    border:1px solid var(--line);
+    background:#121b23;
+    color:var(--text);
+    padding:14px 15px;
+    outline:none;
+    font:inherit;
+  }
+
+  .cmd-input{
+    min-height:96px;
+    resize:vertical;
+  }
+
+  .cmd-input:focus,
+  .smart-input:focus,
+  .smart-select:focus{
+    border-color:rgba(56,189,248,.42);
+    box-shadow:0 0 0 4px rgba(56,189,248,.08);
+  }
+
+  .mic-btn{
+    min-width:62px;
+    border-radius:18px;
+    background:#121b23;
+    border:1px solid var(--line);
+    color:#fff;
+    font-size:22px;
+    font-weight:900;
+  }
+
+  .mic-btn.listening{
+    background:linear-gradient(180deg,var(--danger),var(--danger-2));
+    border-color:rgba(239,68,68,.42);
+    animation:micPulse 1s ease-in-out infinite;
+  }
+
+  @keyframes micPulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(239,68,68,0); }
+    50%{ box-shadow:0 0 0 11px rgba(239,68,68,.18); }
+  }
+
+  .helper-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .helper-text{
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.45;
+  }
+
+  .helper-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .soft-btn{
+    min-height:40px;
+    padding:10px 12px;
+    border-radius:14px;
+    background:#121b23;
+    color:var(--text);
+    border:1px solid var(--line);
+    font-size:13px;
+    font-weight:800;
+  }
+
+  .route-strip{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .mini-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    min-height:36px;
+    padding:8px 12px;
+    border-radius:999px;
+    background:#111922;
+    border:1px solid var(--line);
+    color:#fff;
+    font-size:12px;
+    font-weight:800;
+  }
+
+  .pipeline{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:10px;
+  }
+
+  .pipe-step{
+    position:relative;
+    min-height:78px;
+    border-radius:18px;
+    border:1px solid var(--line);
+    background:#121b23;
+    padding:12px;
+    overflow:hidden;
+  }
+
+  .pipe-step .n{
+    color:var(--muted);
+    font-size:11px;
+    font-weight:800;
+    margin-bottom:8px;
+  }
+
+  .pipe-step .t{
+    font-size:14px;
+    font-weight:900;
+    line-height:1.2;
+  }
+
+  .pipe-step .d{
+    margin-top:6px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.35;
+  }
+
+  .pipe-step.active{
+    border-color:rgba(56,189,248,.34);
+    box-shadow:0 0 0 2px rgba(56,189,248,.16) inset;
+    background:linear-gradient(135deg, rgba(56,189,248,.12), rgba(56,189,248,.03));
+  }
+
+  .pipe-step.done{
+    border-color:rgba(34,197,94,.32);
+    box-shadow:0 0 0 2px rgba(34,197,94,.14) inset;
+    background:linear-gradient(135deg, rgba(34,197,94,.12), rgba(34,197,94,.03));
+  }
+
+  .flow-card{
+    display:none;
+    background:#10171f;
+    border:1px solid var(--line);
+    border-radius:22px;
+    padding:16px;
+  }
+
+  .flow-card.open{
+    display:block;
+  }
+
+  .mini-title{
+    margin:0 0 8px;
+    font-size:15px;
+    font-weight:900;
+  }
+
+  .mini-sub{
+    margin:0 0 12px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.45;
+  }
+
+  .preview-text{
+    background:#0d141b;
+    border:1px solid var(--line-2);
+    border-radius:16px;
+    padding:12px 13px;
+    line-height:1.55;
+  }
+
+  .badges{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    min-height:32px;
+    padding:7px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:900;
+    border:1px solid rgba(255,255,255,.08);
+    background:#0f151b;
+    color:#d8e7f3;
+  }
+
+  .badge.good{
+    background:var(--brand-soft);
+    border-color:rgba(34,197,94,.34);
+    color:#d8ffe2;
+  }
+
+  .badge.info{
+    background:var(--info-soft);
+    border-color:rgba(56,189,248,.34);
+    color:#d9f3ff;
+  }
+
+  .badge.warn{
+    background:var(--warn-soft);
+    border-color:rgba(245,158,11,.34);
+    color:#ffe7b5;
+  }
+
+  .badge.err{
+    background:var(--danger-soft);
+    border-color:rgba(239,68,68,.34);
+    color:#ffd7d3;
+  }
+
+  .resolver-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    margin-top:12px;
+  }
+
+  .resolver-item{
+    background:#0d141b;
+    border:1px solid var(--line-2);
+    border-radius:16px;
+    padding:12px;
+  }
+
+  .resolver-item.full{
+    grid-column:1/-1;
+  }
+
+  .resolver-item .k{
+    color:var(--muted);
+    font-size:12px;
+    margin-bottom:6px;
+  }
+
+  .resolver-item .v{
+    font-size:14px;
+    line-height:1.5;
+    font-weight:800;
+    word-break:break-word;
+  }
+
+  .preview-list{
+    display:grid;
+    gap:8px;
+    margin-top:12px;
+  }
+
+  .preview-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:11px 12px;
+    border-radius:14px;
+    background:#0d141b;
+    border:1px solid var(--line-2);
+    font-size:13px;
+  }
+
+  .preview-row b{
+    font-size:13px;
+  }
+
+  .card-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:12px;
+  }
+
+  .intent-grid{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .intent-pill{
+    min-height:42px;
+    padding:10px 13px;
+    border-radius:14px;
+    background:#121b23;
+    border:1px solid var(--line);
+    color:var(--text);
+    font-size:13px;
+    font-weight:900;
+  }
+
+  .intent-pill.active{
+    background:var(--purple-soft);
+    border-color:rgba(139,92,246,.34);
+    color:#f0e7ff;
+  }
+
+  .smart-grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .smart-grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+  }
+
+  .field{
+    display:grid;
+    gap:6px;
+  }
+
+  .field label{
+    color:var(--muted);
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .toggle-box{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px 13px;
+    border-radius:16px;
+    background:#0d141b;
+    border:1px solid var(--line-2);
+  }
+
+  .toggle-box label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    font-weight:800;
+  }
+
+  .log-wrap{
+    background:#0b1117;
+    border:1px solid #1d2a35;
+    border-radius:22px;
+    overflow:hidden;
+  }
+
+  .log{
+    min-height:360px;
+    max-height:62vh;
+    overflow:auto;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    scroll-behavior:smooth;
+  }
+
+  .msg{
+    max-width:92%;
+    padding:12px 14px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.06);
+    box-shadow:0 10px 26px rgba(0,0,0,.18);
+  }
+
+  .msg.user{
+    align-self:flex-end;
+    background:linear-gradient(180deg,#163222,#0f2418);
+    border-color:rgba(34,197,94,.26);
+  }
+
+  .msg.sys{
+    align-self:flex-start;
+    background:linear-gradient(180deg,#18222d,#121b23);
+    border-color:rgba(255,255,255,.08);
+  }
+
+  .msg.ok{
+    align-self:flex-start;
+    background:linear-gradient(180deg,#102417,#0d1d13);
+    border-color:rgba(34,197,94,.22);
+  }
+
+  .msg.warn{
+    align-self:flex-start;
+    background:linear-gradient(180deg,#2a210e,#211809);
+    border-color:rgba(245,158,11,.22);
+  }
+
+  .msg.err{
+    align-self:flex-start;
+    background:linear-gradient(180deg,#2a1615,#211110);
+    border-color:rgba(239,68,68,.24);
+  }
+
+  .msg.info{
+    align-self:flex-start;
+    background:linear-gradient(180deg,#122232,#0f1b27);
+    border-color:rgba(56,189,248,.22);
+  }
+
+  .msg-head{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:6px;
+    color:var(--muted);
+    font-size:12px;
+    font-weight:900;
+  }
+
+  .msg-body{
+    font-size:14px;
+    line-height:1.56;
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+
+  .side-card{
+    overflow:hidden;
+  }
+
+  .side-body{
+    padding:16px;
+    display:grid;
+    gap:14px;
+  }
+
+  .mini-panel{
+    background:#121b23;
+    border:1px solid var(--line-2);
+    border-radius:20px;
+    padding:14px;
+  }
+
+  .mini-panel .h{
+    margin:0 0 10px;
+    font-size:14px;
+    font-weight:900;
+  }
+
+  .legend-list{
+    display:grid;
+    gap:8px;
+  }
+
+  .legend-item{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+    padding:11px 12px;
+    border-radius:14px;
+    background:#0f151c;
+    border:1px solid var(--line-2);
+    font-size:13px;
+  }
+
+  .legend-item b{
+    font-size:13px;
+  }
+
+  .table-wrap{
+    overflow:auto;
+  }
+
+  .table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+
+  .table th,
+  .table td{
+    text-align:left;
+    vertical-align:top;
+    padding:10px 8px;
+    border-bottom:1px solid var(--line-2);
+  }
+
+  .table th{
+    color:var(--muted);
+    font-weight:900;
+  }
+
+  .ops-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .tiny-btn{
+    min-height:34px;
+    padding:7px 10px;
+    border-radius:12px;
+    font-size:12px;
+    font-weight:900;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding:16px;
+    border-radius:16px;
+    border:1px dashed var(--line);
+    background:#0f151c;
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  .search-input{
+    width:100%;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:#101820;
+    color:var(--text);
+    padding:11px 12px;
+    outline:none;
+    font:inherit;
+    margin-bottom:10px;
+  }
+
+  .learned-count{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:6px;
+  }
+
+  .undo-box{
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px;
+    border-radius:18px;
+    background:linear-gradient(135deg, rgba(56,189,248,.14), rgba(56,189,248,.05));
+    border:1px solid rgba(56,189,248,.22);
+  }
+
+  .undo-box.open{
+    display:flex;
+  }
+
+  .undo-box b{
+    display:block;
+    font-size:14px;
+  }
+
+  .undo-box small{
+    display:block;
+    color:var(--muted);
+    margin-top:4px;
+    line-height:1.35;
+  }
+
+  @media (max-width: 1180px){
+    .layout{ grid-template-columns:1fr; }
+  }
+
+  @media (max-width: 980px){
+    .summary-grid{
+      grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+    .pipeline{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+  }
+
+  @media (max-width: 760px){
+    .hero{
+      grid-template-columns:1fr;
+      padding:16px;
+    }
+    .hero-actions{
+      justify-content:flex-start;
+    }
+    .summary-grid{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+    .input-row,
+    .smart-grid-2,
+    .smart-grid-3,
+    .resolver-grid{
+      grid-template-columns:1fr;
+    }
+    .msg{ max-width:100%; }
+    .pipeline{
+      grid-template-columns:1fr;
+    }
+  }
+
+  @media (max-width: 520px){
+    .summary-grid{
+      grid-template-columns:1fr;
+    }
+  }
+</style>
+
+<div class="ai2-shell">
+  <section class="glass hero">
+    <div class="hero-left">
+      <div class="hero-badge">🧠</div>
+      <div>
+        <h1 class="hero-title">AI Console v2</h1>
+        <p class="hero-sub">
+          Komutu çöz, önizle, güvenliyse uygula, gerekiyorsa öğret.
+          Deterministic parser + learned command + kontrollü aksiyon akışı.
+        </p>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <a href="{{ url_for('seats_page') }}" class="icon-btn" title="Koltuk planı">🚌</a>
+      <a href="{{ url_for('index') }}" class="icon-btn" title="Ana sayfa">🏠</a>
+      <button type="button" class="btn ghost" id="btnScrollLearned">Öğrenilenlere git</button>
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <div class="summary-card mode glass">
+      <div class="k">Aktif mod</div>
+      <div class="v" id="statMode">Normal</div>
+      <div class="s">Normal / Öğretme</div>
+    </div>
+
+    <div class="summary-card conf glass">
+      <div class="k">Son güven</div>
+      <div class="v" id="statConfidence">-</div>
+      <div class="s">Resolver confidence</div>
+    </div>
+
+    <div class="summary-card intent glass">
+      <div class="k">Son intent</div>
+      <div class="v" id="statIntent">-</div>
+      <div class="s">Çözülen niyet</div>
+    </div>
+
+    <div class="summary-card learn glass">
+      <div class="k">Öğrenilen komut</div>
+      <div class="v" id="statLearned">0</div>
+      <div class="s">Toplam kayıt</div>
+    </div>
+
+    <div class="summary-card route glass">
+      <div class="k">Aktif hat</div>
+      <div class="v" id="statRoute">-</div>
+      <div class="s">Mevcut sefer</div>
+    </div>
+
+    <div class="summary-card pending glass">
+      <div class="k">Bekleyen aksiyon</div>
+      <div class="v" id="statPending">Yok</div>
+      <div class="s">Preview / form / öğretme</div>
+    </div>
+  </section>
+
+  <section class="layout">
+    <main class="stack">
+      <section class="glass section-card">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Komut bestecisi</h2>
+            <p class="section-sub">Yaz, konuş, önizle, sonra sistemin ne anladığını gör.</p>
+          </div>
+
+          <div class="mode-switch" id="modeSwitch">
+            <button type="button" class="mode-btn active" data-mode="normal">Normal kullanım</button>
+            <button type="button" class="mode-btn" data-mode="teach">Öğretme modu</button>
+          </div>
+        </div>
+
+        <div class="section-body">
+          <div class="composer">
+            <div class="quick-row">
+              <button type="button" class="chip" data-fill="7-8 numarayı boşalt">7-8 numarayı boşalt</button>
+              <button type="button" class="chip" data-fill="12 numaraya yolcu ekle">12 numaraya yolcu ekle</button>
+              <button type="button" class="chip" data-fill="arka dörtlü servis tamam">arka dörtlü servis tamam</button>
+              <button type="button" class="chip" data-fill="ayakta 3 yaz">ayakta 3 yaz</button>
+              <button type="button" class="chip" data-fill="kaç boş koltuk var">kaç boş koltuk var</button>
+            </div>
+
+            <div class="composer-body">
+              <div class="input-row">
+                <textarea id="commandInput" class="cmd-input" placeholder="Komut yaz... örn: 7 ile 8 numarayı boşalt"></textarea>
+                <button type="button" id="micBtn" class="mic-btn" title="Sesli komut">🎤</button>
+                <button type="button" id="sendBtn" class="btn brand">Çalıştır</button>
+              </div>
+
+              <div class="helper-row">
+                <div class="helper-text">
+                  Sistem önce learned map, sonra parser, sonra suggestion / preview akışını çalıştırır.
+                </div>
+                <div class="helper-actions">
+                  <button type="button" class="soft-btn" id="btnClearLog">Konsolu temizle</button>
+                  <button type="button" class="soft-btn" id="btnOpenTeach">Komut öğret</button>
+                </div>
+              </div>
+
+              <div class="route-strip">
+                <div class="mini-pill">🛣️ Hat <b id="routeMiniRoute">-</b></div>
+                <div class="mini-pill">🪑 Dolu <b id="routeMiniSeats">0</b></div>
+                <div class="mini-pill">🧍 Ayakta <b id="routeMiniStanding">0</b></div>
+                <div class="mini-pill">📦 Emanet <b id="routeMiniParcel">0</b></div>
+              </div>
+
+              <div class="flow-card" id="voicePreview">
+                <h3 class="mini-title">Sesli komut önizleme</h3>
+                <p class="mini-sub">Algılanan metni istersen doğrudan çalıştır, istersen sadece alana al.</p>
+                <div class="preview-text" id="voicePreviewText">-</div>
+                <div class="card-actions">
+                  <button type="button" class="btn brand" id="btnVoiceUseRun">Kullan ve çalıştır</button>
+                  <button type="button" class="btn dark" id="btnVoiceUseOnly">Sadece alana yaz</button>
+                  <button type="button" class="btn warn" id="btnVoiceRetry">Tekrar dinle</button>
+                  <button type="button" class="btn ghost" id="btnVoiceCancel">İptal</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pipeline" id="pipeline">
+            <div class="pipe-step active" data-step="input">
+              <div class="n">01</div>
+              <div class="t">Komut alındı</div>
+              <div class="d">Yazı veya ses metni hazırlanır.</div>
+            </div>
+            <div class="pipe-step" data-step="resolve">
+              <div class="n">02</div>
+              <div class="t">Çözümleme</div>
+              <div class="d">Learned map ve parser intent üretir.</div>
+            </div>
+            <div class="pipe-step" data-step="preview">
+              <div class="n">03</div>
+              <div class="t">Önizleme</div>
+              <div class="d">Riskli aksiyonlarda uygulama öncesi kontrol.</div>
+            </div>
+            <div class="pipe-step" data-step="action">
+              <div class="n">04</div>
+              <div class="t">Aksiyon</div>
+              <div class="d">Gerekli alanlar tamamlanıp işlem yürür.</div>
+            </div>
+            <div class="pipe-step" data-step="learn">
+              <div class="n">05</div>
+              <div class="t">Öğrenme</div>
+              <div class="d">Yanlış anlaşılmış söyleyiş kalıcı map’e eklenir.</div>
+            </div>
+          </div>
+
+          <div class="flow-card" id="resolverCard">
+            <h3 class="mini-title">Resolver çıktısı</h3>
+            <p class="mini-sub">Sistem komutu bu şekilde yorumladı.</p>
+
+            <div class="badges">
+              <span class="badge info" id="badgeStatus">Durum: -</span>
+              <span class="badge" id="badgeConfidence">Güven: -</span>
+            </div>
+
+            <div class="resolver-grid">
+              <div class="resolver-item">
+                <div class="k">Komut</div>
+                <div class="v" id="rvCommand">-</div>
+              </div>
+              <div class="resolver-item">
+                <div class="k">Intent</div>
+                <div class="v" id="rvIntent">-</div>
+              </div>
+              <div class="resolver-item">
+                <div class="k">Kaynak</div>
+                <div class="v" id="rvSource">-</div>
+              </div>
+              <div class="resolver-item">
+                <div class="k">Pattern</div>
+                <div class="v" id="rvPattern">-</div>
+              </div>
+              <div class="resolver-item full">
+                <div class="k">Çıkarılan koltuk / sayı</div>
+                <div class="v" id="rvSeats">-</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-card" id="suggestCard">
+            <h3 class="mini-title">Düşük / orta güven sonucu</h3>
+            <p class="mini-sub" id="suggestSub">Sistem emin değil. Onaylayabilir ya da doğru intenti elle seçebilirsin.</p>
+            <div class="card-actions">
+              <button type="button" class="btn info" id="btnAcceptSuggestion">Evet, doğru</button>
+              <button type="button" class="btn warn" id="btnRejectSuggestion">Hayır, ben seçeyim</button>
+            </div>
+          </div>
+
+          <div class="flow-card" id="previewCard">
+            <h3 class="mini-title" id="previewTitle">Uygulama önizlemesi</h3>
+            <p class="mini-sub" id="previewSub">Sistem bunu yapmaya hazırlanıyor.</p>
+
+            <div class="badges" id="previewBadges"></div>
+            <div class="preview-list" id="previewList"></div>
+
+            <div class="card-actions">
+              <button type="button" class="btn brand" id="btnPreviewConfirm">Uygula</button>
+              <button type="button" class="btn ghost" id="btnPreviewCancel">İptal</button>
+            </div>
+          </div>
+
+          <div class="flow-card" id="actionCard">
+            <h3 class="mini-title" id="actionTitle">Ek bilgi gerekli</h3>
+            <p class="mini-sub" id="actionSub">Bu intent uygulanabilir ama birkaç alan eksik.</p>
+
+            <div class="badges">
+              <span class="badge info" id="actionIntentBadge">Intent: -</span>
+            </div>
+
+            <datalist id="routeStopsList"></datalist>
+
+            <div class="smart-grid-2" style="margin-top:12px">
+              <div class="field">
+                <label for="acSeats">Koltuklar / sayı</label>
+                <input id="acSeats" class="smart-input" type="text" placeholder="örn: 7,8,9">
+              </div>
+              <div class="field">
+                <label for="acAmount">Tutar</label>
+                <input id="acAmount" class="smart-input" type="number" step="0.01" min="0" placeholder="0">
+              </div>
+            </div>
+
+            <div class="smart-grid-2">
+              <div class="field">
+                <label for="acFrom">Biniş durağı</label>
+                <input id="acFrom" class="smart-input" list="routeStopsList" type="text" placeholder="örn: Alaşehir Otogar">
+              </div>
+              <div class="field">
+                <label for="acTo">İniş durağı</label>
+                <input id="acTo" class="smart-input" list="routeStopsList" type="text" placeholder="örn: Salihli Garaj">
+              </div>
+            </div>
+
+            <div class="smart-grid-3">
+              <div class="field">
+                <label for="acPayment">Ödeme</label>
+                <select id="acPayment" class="smart-select">
+                  <option value="nakit">nakit</option>
+                  <option value="iban">iban</option>
+                  <option value="online">online</option>
+                  <option value="pos">pos</option>
+                  <option value="ucretsiz">ucretsiz</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="acTicketType">Bilet tipi</label>
+                <select id="acTicketType" class="smart-select">
+                  <option value="biletsiz">biletsiz</option>
+                  <option value="biletli">biletli</option>
+                  <option value="ucretsiz">ucretsiz</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="acService">Servis</label>
+                <select id="acService" class="smart-select">
+                  <option value="0">hayır</option>
+                  <option value="1">evet</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="smart-grid-3" id="seatExtras">
+              <div class="field">
+                <label for="acGender">Cinsiyet</label>
+                <select id="acGender" class="smart-select">
+                  <option value="">boş</option>
+                  <option value="bay">bay</option>
+                  <option value="bayan">bayan</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="acPairOk">Yan yana istisna</label>
+                <select id="acPairOk" class="smart-select">
+                  <option value="0">hayır</option>
+                  <option value="1">evet</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="acNote">Not</label>
+                <input id="acNote" class="smart-input" type="text" placeholder="opsiyonel not">
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button type="button" class="btn brand" id="btnRunAction">Uygula</button>
+              <button type="button" class="btn info" id="btnRunActionAndLearn">Uygula ve söyleyişi öğren</button>
+              <button type="button" class="btn ghost" id="btnActionCancel">İptal</button>
+            </div>
+          </div>
+
+          <div class="flow-card" id="teachCard">
+            <h3 class="mini-title" id="teachTitle">Bu komutun doğru intenti hangisi?</h3>
+            <p class="mini-sub">İfadeyi intent ile eşleştir. İstersen sadece öğret, istersen öğretip hemen uygula.</p>
+
+            <div class="field">
+              <label for="teachPhrase">Öğretilecek ifade</label>
+              <input id="teachPhrase" class="smart-input" type="text" placeholder="örn: 7 ile 8 insin">
+            </div>
+
+            <div class="field">
+              <label>Intent seç</label>
+              <div class="intent-grid" id="teachIntentGrid"></div>
+            </div>
+
+            <div class="card-actions">
+              <button type="button" class="btn brand" id="btnTeachOnly">Sadece öğret</button>
+              <button type="button" class="btn info" id="btnTeachAndRun">Öğret ve uygula</button>
+              <button type="button" class="btn ghost" id="btnTeachCancel">İptal</button>
+            </div>
+          </div>
+
+          <div class="undo-box" id="undoBox">
+            <div>
+              <b id="undoTitle">Son aksiyonu geri al</b>
+              <small id="undoSub">Sadece desteklenen son mutasyon için geçerlidir.</small>
+            </div>
+            <button type="button" class="btn warn" id="btnUndoLast">Geri al</button>
+          </div>
+
+          <div class="log-wrap">
+            <div class="section-head" style="padding:14px 16px">
+              <div>
+                <h3 class="section-title" style="font-size:16px">Konsol</h3>
+                <p class="section-sub">Canlı akış ve sistem notları</p>
+              </div>
+            </div>
+            <div class="log" id="consoleLog"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="stack" id="learnedSection">
+      <section class="glass side-card">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Operasyon özeti</h2>
+            <p class="section-sub">AI Console’un aktif seferden aldığı canlı veriler.</p>
+          </div>
+          <div class="badges">
+            <span class="badge info" id="sideModeBadge">Mod: Normal</span>
+            <span class="badge good" id="sideCountBadge">0 kayıt</span>
+          </div>
+        </div>
+
+        <div class="side-body">
+          <div class="mini-panel">
+            <h3 class="h">📡 Canlı metrikler</h3>
+            <div class="legend-list" id="liveStatsList">
+              <div class="legend-item"><b>Dolu koltuk</b><span id="liveSeatCount">0</span></div>
+              <div class="legend-item"><b>Ayakta</b><span id="liveStandingCount">0</span></div>
+              <div class="legend-item"><b>Emanet</b><span id="liveParcelCount">0</span></div>
+              <div class="legend-item"><b>Toplam yolcu</b><span id="liveTotalPax">0</span></div>
+              <div class="legend-item"><b>Boş koltuk</b><span id="liveEmptySeats">0</span></div>
+            </div>
+          </div>
+
+          <div class="mini-panel">
+            <h3 class="h">🎯 Intent listesi</h3>
+            <div class="legend-list" id="intentLegend"></div>
+          </div>
+
+          <div class="mini-panel">
+            <h3 class="h">⚡ Hızlı mantık</h3>
+            <div class="legend-list">
+              <div class="legend-item"><b>1</b><span>Learned map ara</span></div>
+              <div class="legend-item"><b>2</b><span>Parser ile intent bul</span></div>
+              <div class="legend-item"><b>3</b><span>Güven düşükse suggestion ver</span></div>
+              <div class="legend-item"><b>4</b><span>Riskliyse preview aç</span></div>
+              <div class="legend-item"><b>5</b><span>Eksikse action form aç</span></div>
+            </div>
+          </div>
+
+          <div class="mini-panel">
+            <h3 class="h">📚 Öğrenilen komutlar</h3>
+            <input id="learnedSearch" class="search-input" type="text" placeholder="İfade veya intent ara">
+            <div id="learnedEmpty" class="empty-state">Henüz öğrenilen komut yok</div>
+
+            <div id="learnedWrap" class="table-wrap" style="display:none">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>İfade</th>
+                    <th>Intent</th>
+                    <th>Pattern</th>
+                    <th>İşlem</th>
+                  </tr>
+                </thead>
+                <tbody id="learnedTbody"></tbody>
+              </table>
+            </div>
+
+            <div class="learned-count" id="learnedCountText">0 kayıt</div>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </section>
+</div>
+
+<script>
+(() => {
+  const state = {
+    mode: 'normal',
+    intents: [],
+    learned: [],
+    learnedFiltered: [],
+    lastResolve: null,
+    selectedIntent: null,
+    pendingPhrase: '',
+    pendingSuggestion: null,
+    pendingAction: null,
+    pendingPreview: null,
+    editingLearningId: null,
+    lastConfidence: 0,
+    lastIntent: '-',
+    voiceText: '',
+    recognition: null,
+    listening: false,
+    runtime: {
+      route: window.ACTIVE_ROUTE || '',
+      stops: [],
+      seats: [],
+      standingSummary: { count:0, revenue:0 },
+      standingItems: [],
+      parcelItems: []
+    },
+    lastUndo: null
+  };
+
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+  const els = {
+    modeSwitch: $('#modeSwitch'),
+    statMode: $('#statMode'),
+    statConfidence: $('#statConfidence'),
+    statIntent: $('#statIntent'),
+    statLearned: $('#statLearned'),
+    statRoute: $('#statRoute'),
+    statPending: $('#statPending'),
+
+    sideModeBadge: $('#sideModeBadge'),
+    sideCountBadge: $('#sideCountBadge'),
+
+    routeMiniRoute: $('#routeMiniRoute'),
+    routeMiniSeats: $('#routeMiniSeats'),
+    routeMiniStanding: $('#routeMiniStanding'),
+    routeMiniParcel: $('#routeMiniParcel'),
+
+    liveSeatCount: $('#liveSeatCount'),
+    liveStandingCount: $('#liveStandingCount'),
+    liveParcelCount: $('#liveParcelCount'),
+    liveTotalPax: $('#liveTotalPax'),
+    liveEmptySeats: $('#liveEmptySeats'),
+
+    btnScrollLearned: $('#btnScrollLearned'),
+    commandInput: $('#commandInput'),
+    sendBtn: $('#sendBtn'),
+    micBtn: $('#micBtn'),
+    btnClearLog: $('#btnClearLog'),
+    btnOpenTeach: $('#btnOpenTeach'),
+    consoleLog: $('#consoleLog'),
+
+    voicePreview: $('#voicePreview'),
+    voicePreviewText: $('#voicePreviewText'),
+    btnVoiceUseRun: $('#btnVoiceUseRun'),
+    btnVoiceUseOnly: $('#btnVoiceUseOnly'),
+    btnVoiceRetry: $('#btnVoiceRetry'),
+    btnVoiceCancel: $('#btnVoiceCancel'),
+
+    resolverCard: $('#resolverCard'),
+    badgeStatus: $('#badgeStatus'),
+    badgeConfidence: $('#badgeConfidence'),
+    rvCommand: $('#rvCommand'),
+    rvIntent: $('#rvIntent'),
+    rvSource: $('#rvSource'),
+    rvPattern: $('#rvPattern'),
+    rvSeats: $('#rvSeats'),
+
+    suggestCard: $('#suggestCard'),
+    suggestSub: $('#suggestSub'),
+    btnAcceptSuggestion: $('#btnAcceptSuggestion'),
+    btnRejectSuggestion: $('#btnRejectSuggestion'),
+
+    previewCard: $('#previewCard'),
+    previewTitle: $('#previewTitle'),
+    previewSub: $('#previewSub'),
+    previewBadges: $('#previewBadges'),
+    previewList: $('#previewList'),
+    btnPreviewConfirm: $('#btnPreviewConfirm'),
+    btnPreviewCancel: $('#btnPreviewCancel'),
+
+    teachCard: $('#teachCard'),
+    teachTitle: $('#teachTitle'),
+    teachPhrase: $('#teachPhrase'),
+    teachIntentGrid: $('#teachIntentGrid'),
+    btnTeachOnly: $('#btnTeachOnly'),
+    btnTeachAndRun: $('#btnTeachAndRun'),
+    btnTeachCancel: $('#btnTeachCancel'),
+
+    actionCard: $('#actionCard'),
+    actionTitle: $('#actionTitle'),
+    actionSub: $('#actionSub'),
+    actionIntentBadge: $('#actionIntentBadge'),
+    routeStopsList: $('#routeStopsList'),
+    acSeats: $('#acSeats'),
+    acFrom: $('#acFrom'),
+    acTo: $('#acTo'),
+    acPayment: $('#acPayment'),
+    acAmount: $('#acAmount'),
+    acTicketType: $('#acTicketType'),
+    acService: $('#acService'),
+    acGender: $('#acGender'),
+    acPairOk: $('#acPairOk'),
+    acNote: $('#acNote'),
+    seatExtras: $('#seatExtras'),
+    btnRunAction: $('#btnRunAction'),
+    btnRunActionAndLearn: $('#btnRunActionAndLearn'),
+    btnActionCancel: $('#btnActionCancel'),
+
+    intentLegend: $('#intentLegend'),
+    learnedSearch: $('#learnedSearch'),
+    learnedEmpty: $('#learnedEmpty'),
+    learnedWrap: $('#learnedWrap'),
+    learnedTbody: $('#learnedTbody'),
+    learnedCountText: $('#learnedCountText'),
+
+    undoBox: $('#undoBox'),
+    undoTitle: $('#undoTitle'),
+    undoSub: $('#undoSub'),
+    btnUndoLast: $('#btnUndoLast')
+  };
+
+  init();
+
+  async function init(){
+    bindEvents();
+    setPipeline('input');
+    seedWelcome();
+    initVoiceInput();
+
+    await Promise.all([
+      loadIntents(),
+      loadLearned(),
+      loadRuntimeData()
+    ]);
+
+    updateTopStats();
+    renderStopsDatalist();
+
+    if (window.PREFILL_CMD) {
+      els.commandInput.value = window.PREFILL_CMD;
+      addMessage('info', 'Seats sayfasından komut geldi. Otomatik çalıştırılıyor.');
+      await runCommand(window.PREFILL_CMD);
+    }
+  }
+
+  function bindEvents(){
+    els.sendBtn.addEventListener('click', () => runCommand());
+    els.btnClearLog.addEventListener('click', clearConsole);
+    els.btnOpenTeach.addEventListener('click', () => openTeachCard(''));
+    els.btnScrollLearned.addEventListener('click', () => {
+      document.getElementById('learnedSection')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+
+    els.commandInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        runCommand();
+      }
+    });
+
+    els.modeSwitch.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-mode]');
+      if (!btn) return;
+      setMode(btn.dataset.mode);
+    });
+
+    $$('.chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        els.commandInput.value = btn.dataset.fill || '';
+        els.commandInput.focus();
+      });
+    });
+
+    els.btnAcceptSuggestion.addEventListener('click', acceptSuggestedIntent);
+    els.btnRejectSuggestion.addEventListener('click', () => openTeachCard(state.pendingPhrase || '', state.pendingSuggestion?.intent || null));
+
+    els.btnTeachOnly.addEventListener('click', async () => {
+      await saveLearning(false);
+    });
+
+    els.btnTeachAndRun.addEventListener('click', async () => {
+      await saveLearning(true);
+    });
+
+    els.btnTeachCancel.addEventListener('click', closeTeachCard);
+
+    els.btnRunAction.addEventListener('click', async () => {
+      await runPendingAction(false);
+    });
+
+    els.btnRunActionAndLearn.addEventListener('click', async () => {
+      await runPendingAction(true);
+    });
+
+    els.btnActionCancel.addEventListener('click', closeActionCard);
+
+    els.btnPreviewConfirm.addEventListener('click', async () => {
+      await executePreview();
+    });
+
+    els.btnPreviewCancel.addEventListener('click', () => {
+      closePreviewCard();
+      addMessage('sys', 'Önizleme iptal edildi.');
+      setPipeline('resolve');
+    });
+
+    els.btnVoiceUseRun.addEventListener('click', async () => {
+      const text = state.voiceText || '';
+      closeVoicePreview();
+      if (!text) return;
+      els.commandInput.value = text;
+      await runCommand(text);
+    });
+
+    els.btnVoiceUseOnly.addEventListener('click', () => {
+      const text = state.voiceText || '';
+      closeVoicePreview();
+      if (!text) return;
+      els.commandInput.value = text;
+      els.commandInput.focus();
+    });
+
+    els.btnVoiceRetry.addEventListener('click', () => {
+      closeVoicePreview();
+      startVoiceRecognition();
+    });
+
+    els.btnVoiceCancel.addEventListener('click', closeVoicePreview);
+
+    els.learnedSearch.addEventListener('input', renderLearned);
+    els.btnUndoLast.addEventListener('click', undoLastAction);
+  }
+
+  function setMode(mode){
+    state.mode = mode === 'teach' ? 'teach' : 'normal';
+    $$('#modeSwitch .mode-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === state.mode);
+    });
+    updateTopStats();
+    addMessage('sys', `Mod değişti: ${state.mode === 'teach' ? 'Öğretme modu' : 'Normal kullanım'}`);
+  }
+
+  async function api(url, options = {}){
+    const headers = Object.assign(
+      { 'X-CSRF-Token': window.CSRF_TOKEN },
+      options.headers || {}
+    );
+
+    const cfg = Object.assign(
+      { credentials:'same-origin', headers },
+      options
+    );
+
+    if (cfg.body && typeof cfg.body !== 'string') {
+      headers['Content-Type'] = 'application/json';
+      cfg.body = JSON.stringify(Object.assign({}, cfg.body, { csrf_token: window.CSRF_TOKEN }));
+    }
+
+    const res = await fetch(url, cfg);
+    const ct = res.headers.get('content-type') || '';
+    let data = {};
+
+    if (ct.includes('application/json')) {
+      data = await res.json().catch(() => ({}));
+    } else {
+      const txt = await res.text().catch(() => '');
+      throw new Error(txt || `İstek başarısız (${res.status})`);
+    }
+
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.msg || data.error || `İstek başarısız (${res.status})`);
+    }
+
+    return data;
+  }
+
+  async function loadIntents(){
+    const data = await api('/api/ai/intents', { method:'GET' });
+    state.intents = data.items || [];
+    renderIntentLegend();
+    renderTeachIntents();
+  }
+
+  async function loadLearned(){
+    const data = await api('/api/ai/learned', { method:'GET' });
+    state.learned = data.items || [];
+    renderLearned();
+    updateTopStats();
+  }
+
+  async function loadRuntimeData(){
+    const [stopsData, seatsData, standingSummary, standingItems, parcels] = await Promise.all([
+      api('/api/stops', { method:'GET' }).catch(() => ({ stops:[] })),
+      api('/api/seats/list', { method:'GET' }).catch(() => ({ items:[] })),
+      api('/api/standing', { method:'GET' }).catch(() => ({ count:0, revenue:0 })),
+      api('/api/standing/list', { method:'GET' }).catch(() => ({ items:[] })),
+      api('/api/parcels?status=bekliyor', { method:'GET' }).catch(() => ({ items:[] }))
+    ]);
+
+    state.runtime.route = stopsData.route || state.runtime.route || window.ACTIVE_ROUTE || '';
+    state.runtime.stops = Array.isArray(stopsData.stops) ? stopsData.stops : [];
+    state.runtime.seats = Array.isArray(seatsData.items) ? seatsData.items : [];
+    state.runtime.standingSummary = {
+      count: Number(standingSummary.count || 0),
+      revenue: Number(standingSummary.revenue || 0)
+    };
+    state.runtime.standingItems = Array.isArray(standingItems.items) ? standingItems.items : [];
+    state.runtime.parcelItems = Array.isArray(parcels.items) ? parcels.items : [];
+
+    renderStopsDatalist();
+    updateLiveStats();
+    updateTopStats();
+  }
+
+  function renderStopsDatalist(){
+    if (!els.routeStopsList) return;
+    els.routeStopsList.innerHTML = '';
+    state.runtime.stops.forEach(stop => {
+      const opt = document.createElement('option');
+      opt.value = stop;
+      els.routeStopsList.appendChild(opt);
+    });
+  }
+
+  function updateLiveStats(){
+    const seats = state.runtime.seats.length;
+    const standing = Number(state.runtime.standingSummary.count || 0);
+    const parcel = state.runtime.parcelItems.reduce((acc, x) => acc + Number(x.count || 0), 0);
+    const total = seats + standing;
+    const empty = Math.max(0, Number(window.SEAT_CAPACITY || 40) - seats);
+
+    els.routeMiniRoute.textContent = state.runtime.route || '-';
+    els.routeMiniSeats.textContent = String(seats);
+    els.routeMiniStanding.textContent = String(standing);
+    els.routeMiniParcel.textContent = String(parcel);
+
+    els.liveSeatCount.textContent = String(seats);
+    els.liveStandingCount.textContent = String(standing);
+    els.liveParcelCount.textContent = String(parcel);
+    els.liveTotalPax.textContent = String(total);
+    els.liveEmptySeats.textContent = String(empty);
+  }
+
+  function renderIntentLegend(){
+    els.intentLegend.innerHTML = '';
+    state.intents.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'legend-item';
+      row.innerHTML = `
+        <span><b>${escapeHtml(item.title)}</b></span>
+        <span class="muted">${escapeHtml(item.key)}</span>
+      `;
+      els.intentLegend.appendChild(row);
+    });
+  }
+
+  function renderTeachIntents(){
+    els.teachIntentGrid.innerHTML = '';
+    state.intents.forEach(item => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'intent-pill' + (state.selectedIntent === item.key ? ' active' : '');
+      btn.textContent = item.title;
+      btn.addEventListener('click', () => {
+        state.selectedIntent = item.key;
+        renderTeachIntents();
+      });
+      els.teachIntentGrid.appendChild(btn);
+    });
+  }
+
+  function renderLearned(){
+    const q = norm(els.learnedSearch.value || '');
+    state.learnedFiltered = !q
+      ? state.learned.slice()
+      : state.learned.filter(item => {
+          return norm(item.phrase).includes(q) ||
+                 norm(item.intent).includes(q) ||
+                 norm(intentTitle(item.intent) || '').includes(q) ||
+                 norm(item.pattern || '').includes(q);
+        });
+
+    els.learnedTbody.innerHTML = '';
+
+    if (!state.learnedFiltered.length) {
+      els.learnedEmpty.style.display = 'block';
+      els.learnedWrap.style.display = 'none';
+      els.learnedCountText.textContent = q ? 'Aramaya uygun kayıt yok' : '0 kayıt';
+      return;
+    }
+
+    els.learnedEmpty.style.display = 'none';
+    els.learnedWrap.style.display = 'block';
+    els.learnedCountText.textContent = `${state.learnedFiltered.length} kayıt`;
+
+    state.learnedFiltered.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(item.phrase)}</td>
+        <td>${escapeHtml(intentTitle(item.intent) || item.intent)}</td>
+        <td>${escapeHtml(item.pattern || '-')}</td>
+        <td>
+          <div class="ops-row">
+            <button type="button" class="btn dark tiny-btn" data-edit="${item.id}">Düzenle</button>
+            <button type="button" class="btn danger tiny-btn" data-del="${item.id}">Sil</button>
+          </div>
+        </td>
+      `;
+      els.learnedTbody.appendChild(tr);
+    });
+
+    $$('[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => openEditLearning(btn.dataset.edit));
+    });
+
+    $$('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => deleteLearning(btn.dataset.del));
+    });
+  }
+
+  function seedWelcome(){
+    addMessage('sys', 'AI Console v2 hazır.\nKomut yaz veya mikrofonla söyle.\nAkış: resolve → preview / action → execute → learn.');
+  }
+
+  async function runCommand(forcedText = ''){
+    const text = String(forcedText || els.commandInput.value || '').trim();
+    if (!text) return;
+
+    addMessage('user', text);
+    els.commandInput.value = '';
+
+    state.pendingPhrase = text;
+    state.pendingSuggestion = null;
+    state.pendingAction = null;
+    state.pendingPreview = null;
+    state.editingLearningId = null;
+    state.selectedIntent = null;
+
+    closeTeachCard();
+    closeActionCard();
+    closePreviewCard();
+    hideSuggestion();
+    clearUndo(false);
+
+    setPipeline('resolve');
+
+    try {
+      const data = await api('/api/ai/resolve', {
+        method:'POST',
+        body:{ command:text }
+      });
+
+      const result = data.result || {};
+      state.lastResolve = result;
+      state.lastConfidence = Number(result.confidence || 0);
+      state.lastIntent = result.intent ? (intentTitle(result.intent) || result.intent) : '-';
+      updateTopStats();
+      renderResolver(result);
+
+      if (result.status === 'matched') {
+        addMessage('ok', formatResolveText(result));
+        await routeResolved(result);
+        return;
+      }
+
+      if (result.status === 'suggest') {
+        state.pendingSuggestion = result.suggestion || { intent: result.intent, pattern: result.pattern };
+        addMessage('warn', `Komut kesin çözülemedi.\nTahmin: ${intentTitle(result.intent) || result.intent}`);
+        showSuggestion(result);
+        return;
+      }
+
+      addMessage('err', 'Bu komut tanımlı değil.\nİstersen öğretme kartından doğru intenti kaydedelim.');
+      if (state.mode === 'teach') {
+        openTeachCard(text);
+        setPipeline('learn');
+      } else {
+        setPipeline('resolve');
+      }
+    } catch (err) {
+      addMessage('err', err.message || 'Komut çözümlenemedi.');
+      setPipeline('resolve');
+    }
+  }
+
+  async function routeResolved(result){
+    const intent = result.intent;
+
+    if (intent === 'query') {
+      await answerQuery(result.command || '');
+      setPipeline('action');
+      return;
+    }
+
+    if (intent === 'seat_remove_single' || intent === 'seat_remove_group' || intent === 'service_mark') {
+      openPreviewCard(result);
+      setPipeline('preview');
+      return;
+    }
+
+    if (intent === 'seat_add_single' || intent === 'seat_add_group' || intent === 'standing_add') {
+      openActionCard(result, 'Bu işlem için birkaç alan gerekli');
+      addMessage('info', 'Form alanlarını doldurup uygula.');
+      setPipeline('action');
+      return;
+    }
+
+    addMessage('warn', 'Bu intent için aksiyon bağlı değil.');
+    setPipeline('resolve');
+  }
+
+  function renderResolver(result){
+    els.resolverCard.classList.add('open');
+
+    els.badgeStatus.className = 'badge info';
+    els.badgeStatus.textContent = 'Durum: ' + (result.status || '-');
+
+    els.badgeConfidence.className = 'badge ' + confidenceClass(result.confidence || 0);
+    els.badgeConfidence.textContent = 'Güven: ' + Math.round((result.confidence || 0) * 100) + '%';
+
+    els.rvCommand.textContent = result.command || '-';
+    els.rvIntent.textContent = intentTitle(result.intent) || result.intent || '-';
+    els.rvSource.textContent = result.source || '-';
+    els.rvPattern.textContent = result.pattern || '-';
+    els.rvSeats.textContent = Array.isArray(result.seats) && result.seats.length ? result.seats.join(', ') : 'çıkarım yok';
+  }
+
+  function showSuggestion(result){
+    els.suggestCard.classList.add('open');
+    els.suggestSub.textContent = `Sistem bu komutu "${intentTitle(result.intent) || result.intent}" olarak tahmin etti.`;
+  }
+
+  function hideSuggestion(){
+    els.suggestCard.classList.remove('open');
+  }
+
+  async function acceptSuggestedIntent(){
+    if (!state.pendingPhrase || !state.pendingSuggestion?.intent) return;
+    state.selectedIntent = state.pendingSuggestion.intent;
+    await saveLearning(true);
+  }
+
+  function openPreviewCard(result){
+    state.pendingPreview = result;
+    els.previewCard.classList.add('open');
+
+    const intent = result.intent;
+    const seats = Array.isArray(result.seats) ? result.seats : [];
+    const seatRows = state.runtime.seats.filter(x => seats.includes(Number(x.seat_no)));
+
+    els.previewBadges.innerHTML = '';
+    els.previewList.innerHTML = '';
+
+    const addBadge = (txt, cls='info') => {
+      const el = document.createElement('span');
+      el.className = `badge ${cls}`;
+      el.textContent = txt;
+      els.previewBadges.appendChild(el);
+    };
+
+    if (intent === 'seat_remove_single' || intent === 'seat_remove_group') {
+      els.previewTitle.textContent = 'Boşaltma önizlemesi';
+      els.previewSub.textContent = 'Silme işleminden önce etkilenecek koltukları kontrol et.';
+      addBadge('Riskli aksiyon', 'err');
+      addBadge(`Koltuk: ${seats.length}`, 'warn');
+
+      if (!seatRows.length) {
+        const row = document.createElement('div');
+        row.className = 'preview-row';
+        row.innerHTML = `<span>Kayıt bulunamadı</span><span>Boş koltuk olabilir</span>`;
+        els.previewList.appendChild(row);
+      }
+
+      seatRows.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'preview-row';
+        row.innerHTML = `
+          <div><b>Koltuk ${item.seat_no}</b></div>
+          <div>${escapeHtml(item.from_stop || '—')} → ${escapeHtml(item.to_stop || item.stop || '—')}</div>
+        `;
+        els.previewList.appendChild(row);
+      });
+
+      return;
+    }
+
+    if (intent === 'service_mark') {
+      els.previewTitle.textContent = 'Servis işaretleme önizlemesi';
+      els.previewSub.textContent = 'Bu koltuklarda servis alanı aktif olacak.';
+      addBadge('Servis mark', 'info');
+      addBadge(`Koltuk: ${seats.length}`, 'info');
+
+      seats.forEach(no => {
+        const row = document.createElement('div');
+        row.className = 'preview-row';
+        row.innerHTML = `
+          <div><b>Koltuk ${no}</b></div>
+          <div>${seatRows.find(x => Number(x.seat_no) === Number(no))?.service ? 'Zaten servisli' : 'Servis işaretlenecek'}</div>
+        `;
+        els.previewList.appendChild(row);
+      });
+
+      return;
+    }
+  }
+
+  function closePreviewCard(){
+    els.previewCard.classList.remove('open');
+    state.pendingPreview = null;
+  }
+
+  function openTeachCard(phrase = '', preselectedIntent = null){
+    els.teachCard.classList.add('open');
+    els.teachTitle.textContent = state.editingLearningId ? 'Komutu düzenle' : 'Bu komutun doğru intenti hangisi?';
+    els.teachPhrase.value = phrase || state.pendingPhrase || '';
+    state.selectedIntent = preselectedIntent || state.selectedIntent || null;
+    renderTeachIntents();
+  }
+
+  function closeTeachCard(){
+    els.teachCard.classList.remove('open');
+  }
+
+  function openActionCard(result, title = ''){
+    state.pendingAction = result;
+    els.actionCard.classList.add('open');
+
+    const intent = result.intent || state.selectedIntent || '';
+    const seats = Array.isArray(result.seats) ? result.seats : [];
+
+    els.actionTitle.textContent = title || 'Ek bilgiyle aksiyon uygula';
+    els.actionSub.textContent = `Çözülen intent: ${intentTitle(intent) || intent}`;
+    els.actionIntentBadge.textContent = 'Intent: ' + (intentTitle(intent) || intent || '-');
+
+    els.acSeats.value = seats.join(',');
+    els.acFrom.value = '';
+    els.acTo.value = '';
+    els.acPayment.value = 'nakit';
+    els.acAmount.value = '';
+    els.acTicketType.value = 'biletsiz';
+    els.acService.value = '0';
+    els.acGender.value = '';
+    els.acPairOk.value = '0';
+    els.acNote.value = '';
+
+    if (intent === 'standing_add') {
+      els.seatExtras.style.display = 'none';
+      els.actionSub.textContent = 'Ayakta kayıt için biniş, iniş, adet ve ücret gir.';
+      els.acSeats.value = String(inferStandingCount(result.command, seats));
+      els.acTicketType.value = 'biletsiz';
+      els.acService.value = '0';
+    } else {
+      els.seatExtras.style.display = 'grid';
+    }
+
+    updateTopStats();
+  }
+
+  function closeActionCard(){
+    els.actionCard.classList.remove('open');
+    state.pendingAction = null;
+    updateTopStats();
+  }
+
+  async function saveLearning(andThenRun = false){
+    const phrase = String(els.teachPhrase.value || state.pendingPhrase || '').trim();
+    const intentKey = state.selectedIntent || state.pendingSuggestion?.intent;
+
+    if (!phrase) {
+      addMessage('err', 'Önce öğretilecek ifadeyi gir.');
+      return;
+    }
+
+    if (!intentKey) {
+      addMessage('err', 'Önce intent seç.');
+      return;
+    }
+
+    try {
+      const url = state.editingLearningId
+        ? `/api/ai/learned/${state.editingLearningId}`
+        : '/api/ai/learn';
+
+      const method = state.editingLearningId ? 'PUT' : 'POST';
+
+      await api(url, {
+        method,
+        body: {
+          phrase,
+          intent: intentKey,
+          pattern: intentPattern(intentKey)
+        }
+      });
+
+      await loadLearned();
+
+      addMessage('ok', `${state.editingLearningId ? 'Güncellendi' : 'Öğrenildi'}:\n"${phrase}" → ${intentTitle(intentKey) || intentKey}`);
+
+      const synthetic = buildSyntheticResultFromSelection(intentKey);
+      state.pendingPhrase = phrase;
+      state.lastIntent = intentTitle(intentKey) || intentKey;
+      state.lastConfidence = 1;
+      state.pendingSuggestion = null;
+      state.editingLearningId = null;
+      updateTopStats();
+      hideSuggestion();
+      closeTeachCard();
+
+      if (andThenRun) {
+        await routeResolved(synthetic);
+      } else {
+        setPipeline('learn');
+      }
+    } catch (err) {
+      addMessage('err', err.message || 'Öğrenme kaydedilemedi.');
+    }
+  }
+
+  function buildSyntheticResultFromSelection(intentKey){
+    const base = state.lastResolve || {};
+    return {
+      status:'matched',
+      source:'manual_teach',
+      intent:intentKey,
+      pattern:intentPattern(intentKey),
+      confidence:1,
+      seats:Array.isArray(base.seats) ? base.seats : [],
+      command: state.pendingPhrase || base.command || ''
+    };
+  }
+
+  async function executePreview(){
+    const result = state.pendingPreview;
+    if (!result) return;
+
+    try {
+      if (result.intent === 'seat_remove_single' || result.intent === 'seat_remove_group') {
+        const seats = Array.isArray(result.seats) ? result.seats : [];
+        if (!seats.length) throw new Error('Boşaltılacak koltuk bulunamadı.');
+
+        const snapshot = state.runtime.seats
+          .filter(x => seats.includes(Number(x.seat_no)))
+          .map(x => ({ ...x }));
+
+        const data = await api('/api/seats/offload', {
+          method:'POST',
+          body:{ seats }
+        });
+
+        setUndo({
+          type:'seat_restore',
+          label:`Koltuk boşaltma geri alma`,
+          sub:`Silinen koltuklar: ${(data.deleted || seats).join(', ')}`,
+          payload:{ seats:snapshot }
+        });
+
+        addMessage('ok', `Boşaltma uygulandı.\nSilinen koltuklar: ${(data.deleted || seats).join(', ')}`);
+        closePreviewCard();
+        await loadRuntimeData();
+        setPipeline('action');
+        return;
+      }
+
+      if (result.intent === 'service_mark') {
+        const seats = Array.isArray(result.seats) ? result.seats : [];
+        if (!seats.length) throw new Error('Servis işaretlenecek koltuk bulunamadı.');
+
+        const data = await api('/api/seats/service', {
+          method:'POST',
+          body:{
+            seats,
+            service:1,
+            service_note:'AI Console v2'
+          }
+        });
+
+        addMessage('ok', `Servis işlendi.\nKoltuklar: ${(data.updated || seats).join(', ')}`);
+        closePreviewCard();
+        await loadRuntimeData();
+        setPipeline('action');
+        return;
+      }
+
+      throw new Error('Bu preview tipi yürütülemiyor.');
+    } catch (err) {
+      addMessage('err', err.message || 'Önizleme aksiyonu uygulanamadı.');
+    }
+  }
+
+  async function runPendingAction(andLearn = false){
+    const result = state.pendingAction;
+    if (!result) {
+      addMessage('err', 'Bekleyen aksiyon yok.');
+      return;
+    }
+
+    const intent = result.intent;
+    const seats = parseSeatCsv(els.acSeats.value);
+    const from = canonicalStop(els.acFrom.value.trim());
+    const to = canonicalStop(els.acTo.value.trim());
+    const payment = els.acPayment.value;
+    const amount = Number(els.acAmount.value || 0);
+    const ticketType = els.acTicketType.value;
+    const service = Number(els.acService.value || 0);
+    const gender = els.acGender.value;
+    const pairOk = els.acPairOk.value === '1';
+    const note = els.acNote.value.trim();
+
+    try {
+      if (intent === 'seat_add_single') {
+        if (seats.length !== 1) throw new Error('Tek koltuk ekleme için tam 1 koltuk gerekli.');
+
+        await api('/api/seat', {
+          method:'POST',
+          body:{
+            seat_no: seats[0],
+            from_stop: from,
+            to_stop: to,
+            payment,
+            amount,
+            ticket_type: ticketType,
+            gender,
+            pair_ok: pairOk,
+            service,
+            service_note: note
+          }
+        });
+
+        addMessage('ok', `Koltuk kaydedildi: ${seats[0]}`);
+      } else if (intent === 'seat_add_group') {
+        if (!seats.length) throw new Error('Toplu koltuk ekleme için koltuk listesi gerekli.');
+
+        await api('/api/seats/bulk', {
+          method:'POST',
+          body:{
+            seats,
+            from_stop: from,
+            to_stop: to,
+            payment,
+            amount,
+            ticket_type: ticketType,
+            service,
+            service_note: note
+          }
+        });
+
+        addMessage('ok', `Toplu koltuk kaydı yapıldı: ${seats.join(', ')}`);
+      } else if (intent === 'standing_add') {
+        const count = Number(els.acSeats.value || inferStandingCount(result.command, seats) || 1);
+        if (!from || !to) throw new Error('Ayakta kayıt için biniş ve iniş durağı gerekli.');
+
+        await api('/api/standing', {
+          method:'POST',
+          body:{
+            from_stop: from,
+            to_stop: to,
+            count,
+            price: amount,
+            payment,
+            note
+          }
+        });
+
+        addMessage('ok', `Ayakta kayıt işlendi. Adet: ${count}`);
+      } else {
+        throw new Error('Bu intent için form aksiyonu tanımlı değil.');
+      }
+
+      if (andLearn && state.pendingPhrase && intent) {
+        state.selectedIntent = intent;
+        els.teachPhrase.value = state.pendingPhrase;
+        await saveLearning(false);
+      }
+
+      closeActionCard();
+      await loadRuntimeData();
+      setPipeline('action');
+    } catch (err) {
+      addMessage('err', err.message || 'Aksiyon uygulanamadı.');
+    }
+  }
+
+  async function answerQuery(command){
+    await loadRuntimeData();
+
+    const text = norm(command);
+    const seats = state.runtime.seats;
+    const standingCount = Number(state.runtime.standingSummary.count || 0);
+    const totalPax = seats.length + standingCount;
+    const emptySeats = Math.max(0, Number(window.SEAT_CAPACITY || 40) - seats.length);
+    const stopMention = findStopMention(command);
+
+    if (/(bos koltuk|boş koltuk)/.test(text)) {
+      addMessage('info', `Şu an ${emptySeats} boş koltuk var.`);
+      return;
+    }
+
+    if (/(toplam yolcu|kac yolcu|kaç yolcu)/.test(text)) {
+      addMessage('info', `Toplam ${totalPax} yolcu var.\nOturan: ${seats.length}\nAyakta: ${standingCount}`);
+      return;
+    }
+
+    if (/(ayakta)/.test(text)) {
+      addMessage('info', `Ayakta ${standingCount} kişi var.\nTahsilat: ${fmtTL(state.runtime.standingSummary.revenue || 0)}`);
+      return;
+    }
+
+    if (stopMention && /(kac|kaç|iner|inecek|inis|iniş)/.test(text)) {
+      const seatCt = seats.filter(x => norm(x.to_stop || x.stop || '') === norm(stopMention)).length;
+      const standingCt = state.runtime.standingItems.reduce((acc, x) => {
+        return acc + (norm(x.to || '') === norm(stopMention) ? Number(x.count || 0) : 0);
+      }, 0);
+      const parcelCt = state.runtime.parcelItems.reduce((acc, x) => {
+        return acc + (norm(x.to || '') === norm(stopMention) ? Number(x.count || 0) : 0);
+      }, 0);
+
+      addMessage(
+        'info',
+        `${stopMention} için işlem özeti:\n` +
+        `Koltuk: ${seatCt}\n` +
+        `Ayakta: ${standingCt}\n` +
+        `Emanet: ${parcelCt}`
+      );
+      return;
+    }
+
+    if (/(servis)/.test(text) && /(kac|kaç)/.test(text)) {
+      const serviceCt = seats.filter(x => Number(x.service || 0) === 1).length;
+      addMessage('info', `Servis işaretli ${serviceCt} koltuk var.`);
+      return;
+    }
+
+    if (/(en yogun|en yoğun)/.test(text) && /(durak)/.test(text)) {
+      const map = {};
+      seats.forEach(x => {
+        const key = x.to_stop || x.stop || '';
+        if (!key) return;
+        map[key] = (map[key] || 0) + 1;
+      });
+      state.runtime.standingItems.forEach(x => {
+        const key = x.to || '';
+        if (!key) return;
+        map[key] = (map[key] || 0) + Number(x.count || 0);
+      });
+
+      const entries = Object.entries(map).sort((a,b) => b[1] - a[1]);
+      if (!entries.length) {
+        addMessage('info', 'Yoğunluk hesabı için veri yok.');
+        return;
+      }
+
+      addMessage('info', `En yoğun durak: ${entries[0][0]} (${entries[0][1]} kayıt)`);
+      return;
+    }
+
+    if (/(bayan|kadin|kadın)/.test(text) && /(hangi koltuk|koltuklar)/.test(text)) {
+      const rows = seats.filter(x => norm(x.gender || '') === 'bayan').map(x => x.seat_no);
+      addMessage('info', rows.length ? `Bayan görünen koltuklar: ${rows.join(', ')}` : 'Bayan işaretli koltuk yok.');
+      return;
+    }
+
+    if (/(erkek|bay)/.test(text) && /(hangi koltuk|koltuklar)/.test(text)) {
+      const rows = seats.filter(x => norm(x.gender || '') === 'bay').map(x => x.seat_no);
+      addMessage('info', rows.length ? `Bay görünen koltuklar: ${rows.join(', ')}` : 'Bay işaretli koltuk yok.');
+      return;
+    }
+
+    addMessage('info', 'Sorgu intenti çözüldü ama bu cümle için hazır cevap şablonu yok.');
+  }
+
+  function openEditLearning(id){
+    const item = state.learned.find(x => String(x.id) === String(id));
+    if (!item) return;
+
+    state.editingLearningId = item.id;
+    state.pendingPhrase = item.phrase;
+    state.selectedIntent = item.intent;
+    els.teachTitle.textContent = 'Komutu düzenle';
+    openTeachCard(item.phrase, item.intent);
+    setPipeline('learn');
+    addMessage('sys', `Düzenleme açıldı: "${item.phrase}"`);
+  }
+
+  async function deleteLearning(id){
+    try {
+      await api(`/api/ai/learned/${id}`, { method:'DELETE' });
+      await loadLearned();
+      addMessage('sys', 'Öğrenilen komut silindi.');
+    } catch (err) {
+      addMessage('err', err.message || 'Kayıt silinemedi.');
+    }
+  }
+
+  function setUndo(item){
+    state.lastUndo = item;
+    els.undoTitle.textContent = item.label || 'Son aksiyonu geri al';
+    els.undoSub.textContent = item.sub || '';
+    els.undoBox.classList.add('open');
+  }
+
+  function clearUndo(resetState = true){
+    if (resetState) state.lastUndo = null;
+    els.undoBox.classList.remove('open');
+    els.undoTitle.textContent = 'Son aksiyonu geri al';
+    els.undoSub.textContent = 'Sadece desteklenen son mutasyon için geçerlidir.';
+  }
+
+  async function undoLastAction(){
+    if (!state.lastUndo) return;
+
+    const item = state.lastUndo;
+
+    try {
+      if (item.type === 'seat_restore') {
+        const rows = Array.isArray(item.payload?.seats) ? item.payload.seats : [];
+        for (const row of rows) {
+          await api('/api/seat', {
+            method:'POST',
+            body:{
+              seat_no: row.seat_no,
+              from_stop: row.from_stop || '',
+              to_stop: row.to_stop || row.stop || '',
+              ticket_type: row.ticket_type || 'biletsiz',
+              payment: row.payment || 'nakit',
+              amount: Number(row.amount || 0),
+              gender: row.gender || '',
+              pair_ok: false,
+              service: Number(row.service || 0),
+              service_note: row.service_note || ''
+            }
+          });
+        }
+        addMessage('ok', 'Son boşaltma işlemi geri alındı.');
+        clearUndo(true);
+        await loadRuntimeData();
+        return;
+      }
+
+      addMessage('warn', 'Bu aksiyon için geri alma desteklenmiyor.');
+    } catch (err) {
+      addMessage('err', err.message || 'Geri alma başarısız.');
+    }
+  }
+
+  function updateTopStats(){
+    els.statMode.textContent = state.mode === 'teach' ? 'Öğretme' : 'Normal';
+    els.sideModeBadge.textContent = `Mod: ${state.mode === 'teach' ? 'Öğretme' : 'Normal'}`;
+    els.statConfidence.textContent = state.lastConfidence ? `${Math.round(state.lastConfidence * 100)}%` : '-';
+    els.statIntent.textContent = state.lastIntent || '-';
+    els.statLearned.textContent = String(state.learned.length);
+    els.statRoute.textContent = state.runtime.route || '-';
+    els.sideCountBadge.textContent = `${state.learned.length} kayıt`;
+
+    const pending =
+      state.pendingPreview ? 'Preview' :
+      state.pendingAction ? 'Form' :
+      (els.teachCard.classList.contains('open') ? 'Öğretme' : 'Yok');
+
+    els.statPending.textContent = pending;
+  }
+
+  function clearConsole(){
+    els.consoleLog.innerHTML = '';
+    closeVoicePreview();
+    closeTeachCard();
+    closeActionCard();
+    closePreviewCard();
+    hideSuggestion();
+    clearUndo(true);
+    els.resolverCard.classList.remove('open');
+
+    state.lastResolve = null;
+    state.lastConfidence = 0;
+    state.lastIntent = '-';
+    state.pendingPhrase = '';
+    state.pendingSuggestion = null;
+    state.pendingAction = null;
+    state.pendingPreview = null;
+    state.selectedIntent = null;
+    state.editingLearningId = null;
+
+    updateTopStats();
+    setPipeline('input');
+    seedWelcome();
+  }
+
+  function addMessage(kind, text){
+    const box = document.createElement('div');
+    box.className = `msg ${kind}`;
+    box.innerHTML = `
+      <div class="msg-head">${messageLabel(kind)}</div>
+      <div class="msg-body"></div>
+    `;
+    box.querySelector('.msg-body').textContent = text;
+    els.consoleLog.appendChild(box);
+    els.consoleLog.scrollTop = els.consoleLog.scrollHeight;
+  }
+
+  function messageLabel(kind){
+    if (kind === 'user') return 'Kullanıcı';
+    if (kind === 'ok') return 'Sistem • Başarılı';
+    if (kind === 'warn') return 'Sistem • Uyarı';
+    if (kind === 'err') return 'Sistem • Hata';
+    if (kind === 'info') return 'Sistem • Bilgi';
+    return 'Sistem';
+  }
+
+  function formatResolveText(result){
+    const seats = Array.isArray(result.seats) && result.seats.length ? `\nKoltuklar: ${result.seats.join(', ')}` : '';
+    return `Komut çözüldü\nIntent: ${intentTitle(result.intent) || result.intent}\nKaynak: ${result.source}\nPattern: ${result.pattern || '-'}${seats}`;
+  }
+
+  function intentTitle(key){
+    return state.intents.find(x => x.key === key)?.title || null;
+  }
+
+  function intentPattern(key){
+    return state.intents.find(x => x.key === key)?.pattern || '';
+  }
+
+  function confidenceClass(v){
+    if (v >= 0.80) return 'good';
+    if (v >= 0.45) return 'warn';
+    return 'err';
+  }
+
+  function parseSeatCsv(value){
+    return String(value || '')
+      .split(',')
+      .map(x => Number(String(x).trim()))
+      .filter(x => Number.isInteger(x) && x > 0);
+  }
+
+  function inferStandingCount(command, seats){
+    const nums = String(command || '').match(/\b\d+\b/g) || [];
+    if (nums.length) return Number(nums[0]) || 1;
+    return seats.length || 1;
+  }
+
+  function canonicalStop(raw){
+    const value = String(raw || '').trim();
+    if (!value) return '';
+    const found = state.runtime.stops.find(x => norm(x) === norm(value));
+    return found || value;
+  }
+
+  function findStopMention(text){
+    const ntext = norm(text);
+    let best = '';
+    state.runtime.stops.forEach(stop => {
+      const ns = norm(stop);
+      if (ns && ntext.includes(ns) && ns.length > best.length) best = stop;
+    });
+    return best;
+  }
+
+  function norm(s){
+    return String(s || '')
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toLowerCase();
+  }
+
+  function fmtTL(v){
+    return '₺' + Number(v || 0).toFixed(2);
+  }
+
+  function escapeHtml(str){
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function closeVoicePreview(){
+    state.voiceText = '';
+    els.voicePreview.classList.remove('open');
+    els.voicePreviewText.textContent = '-';
+  }
+
+  function setPipeline(step){
+    const order = ['input', 'resolve', 'preview', 'action', 'learn'];
+    $$('#pipeline .pipe-step').forEach(el => {
+      el.classList.remove('active', 'done');
+      const idx = order.indexOf(el.dataset.step);
+      const activeIdx = order.indexOf(step);
+      if (idx < activeIdx) el.classList.add('done');
+      if (idx === activeIdx) el.classList.add('active');
+    });
+  }
+
+  function initVoiceInput(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SR) {
+      els.micBtn.disabled = true;
+      els.micBtn.title = 'Bu tarayıcı ses tanımayı desteklemiyor';
+      addMessage('warn', 'Bu cihazda/tarayıcıda sesli komut desteklenmiyor.');
+      return;
+    }
+
+    state.recognition = new SR();
+    state.recognition.lang = 'tr-TR';
+    state.recognition.continuous = false;
+    state.recognition.interimResults = false;
+    state.recognition.maxAlternatives = 1;
+
+    state.recognition.onstart = () => {
+      state.listening = true;
+      els.micBtn.classList.add('listening');
+      els.micBtn.textContent = '🔴';
+      addMessage('sys', 'Dinliyorum...');
+    };
+
+    state.recognition.onend = () => {
+      state.listening = false;
+      els.micBtn.classList.remove('listening');
+      els.micBtn.textContent = '🎤';
+    };
+
+    state.recognition.onerror = (event) => {
+      addMessage('err', 'Sesli komut hatası: ' + (event.error || 'bilinmiyor'));
+    };
+
+    state.recognition.onresult = (event) => {
+      const text = event.results?.[0]?.[0]?.transcript?.trim() || '';
+      if (!text) {
+        addMessage('warn', 'Ses algılandı ama metin çıkarılamadı.');
+        return;
+      }
+
+      state.voiceText = text;
+      els.voicePreviewText.textContent = text;
+      els.voicePreview.classList.add('open');
+      addMessage('info', 'Sesli komut algılandı. Önizlemeden onaylayabilirsin.');
+    };
+
+    els.micBtn.addEventListener('click', () => {
+      if (!state.recognition) return;
+      if (state.listening) {
+        state.recognition.stop();
+        return;
+      }
+      startVoiceRecognition();
+    });
+  }
+
+  function startVoiceRecognition(){
+    try {
+      closeVoicePreview();
+      state.recognition.start();
+    } catch (_) {
+      addMessage('err', 'Mikrofon başlatılamadı.');
+    }
+  }
+})();
+</script>
+{% endblock %}

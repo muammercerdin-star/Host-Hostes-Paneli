@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>İlk Kurulum</title>
+
+  <style>
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 34%),
+        linear-gradient(180deg,#f8fbff,#eaf3ff);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:#0f172a;
+    }
+
+    .shell{
+      width:min(94vw,720px);
+      margin:18px auto 28px;
+      padding:16px;
+      border-radius:30px;
+      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
+      border:1px solid rgba(255,255,255,.82);
+      box-shadow:0 28px 80px rgba(15,23,42,.18);
+    }
+
+    .hero{
+      padding:24px 20px;
+      border-radius:26px;
+      background:linear-gradient(145deg,#2563eb,#06b6d4);
+      color:#fff;
+      box-shadow:0 18px 38px rgba(37,99,235,.22);
+      margin-bottom:14px;
+    }
+
+    .hero h1{
+      margin:0;
+      font-size:34px;
+      line-height:1;
+      font-weight:950;
+    }
+
+    .hero p{
+      margin:8px 0 0;
+      font-size:15px;
+      font-weight:700;
+      color:rgba(255,255,255,.88);
+    }
+
+    .card{
+      border-radius:26px;
+      background:#fff;
+      border:1px solid #e5edf6;
+      box-shadow:0 14px 34px rgba(15,23,42,.10);
+      padding:18px;
+    }
+
+    .alert{
+      padding:13px 14px;
+      border-radius:18px;
+      margin-bottom:14px;
+      font-size:15px;
+      font-weight:850;
+      background:#fef2f2;
+      color:#b91c1c;
+      border:1px solid #fecaca;
+    }
+
+    label{
+      display:block;
+      margin:0 0 7px 4px;
+      color:#334155;
+      font-size:15px;
+      font-weight:900;
+    }
+
+    .field{ margin-bottom:14px; }
+
+    input{
+      width:100%;
+      min-height:58px;
+      border-radius:20px;
+      border:1px solid rgba(148,163,184,.26);
+      background:#f8fbff;
+      color:#0f172a;
+      padding:0 16px;
+      outline:none;
+      font-size:18px;
+      font-weight:750;
+      box-shadow:
+        0 10px 22px rgba(15,23,42,.06),
+        inset 0 1px 0 rgba(255,255,255,.92);
+    }
+
+    input[type="file"]{
+      padding:15px;
+      min-height:auto;
+    }
+
+    input:focus{
+      border-color:rgba(37,99,235,.75);
+      box-shadow:
+        0 0 0 4px rgba(37,99,235,.12),
+        0 12px 26px rgba(15,23,42,.10);
+      background:#fff;
+    }
+
+    .btn{
+      width:100%;
+      min-height:60px;
+      border:0;
+      border-radius:22px;
+      background:linear-gradient(145deg,#38bdf8,#2563eb);
+      color:#fff;
+      font-size:19px;
+      font-weight:950;
+      box-shadow:0 16px 34px rgba(37,99,235,.26);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <section class="hero">
+      <h1>👤 İlk Kurulum</h1>
+      <p>Panel sahibini oluştur ve uygulamayı kişiselleştir.</p>
+    </section>
+
+    <section class="card">
+      {% if error %}
+        <div class="alert">{{ error }}</div>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data">
+        {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+
+        <div class="field">
+          <label>Ad Soyad</label>
+          <input name="full_name" type="text" placeholder="Örn: Muammer Çerdin" required>
+        </div>
+
+        <div class="field">
+          <label>Cep Telefonu</label>
+          <input name="phone" type="tel" placeholder="05xx xxx xx xx" required>
+        </div>
+
+        <div class="field">
+          <label>Profil Fotoğrafı</label>
+          <input name="profile_photo" type="file" accept="image/*">
+        </div>
+
+        <div class="field">
+          <label>Panel Şifresi</label>
+          <input name="password" type="password" required>
+        </div>
+
+        <div class="field">
+          <label>Şifre Tekrar</label>
+          <input name="password2" type="password" required>
+        </div>
+
+        <button class="btn" type="submit">Kurulumu Tamamla</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

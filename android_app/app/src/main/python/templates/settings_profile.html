@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profil Bilgileri</title>
+
+  <style>
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 34%),
+        linear-gradient(180deg,#f8fbff,#eaf3ff);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:#0f172a;
+    }
+
+    .shell{
+      width:min(94vw,720px);
+      margin:18px auto 28px;
+      padding:16px;
+      border-radius:30px;
+      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
+      border:1px solid rgba(255,255,255,.82);
+      box-shadow:0 28px 80px rgba(15,23,42,.18);
+    }
+
+    .hero{
+      padding:24px 20px;
+      border-radius:26px;
+      background:linear-gradient(145deg,#2563eb,#06b6d4);
+      color:#fff;
+      box-shadow:0 18px 38px rgba(37,99,235,.22);
+      margin-bottom:14px;
+    }
+
+    .hero h1{
+      margin:0;
+      font-size:34px;
+      line-height:1;
+      font-weight:950;
+    }
+
+    .hero p{
+      margin:8px 0 0;
+      font-size:15px;
+      font-weight:700;
+      color:rgba(255,255,255,.88);
+    }
+
+    .card{
+      border-radius:26px;
+      background:#fff;
+      border:1px solid #e5edf6;
+      box-shadow:0 14px 34px rgba(15,23,42,.10);
+      padding:18px;
+    }
+
+    .photo-preview{
+      width:104px;
+      height:104px;
+      margin:0 auto 16px;
+      border-radius:34px;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      background:#eff6ff;
+      font-size:46px;
+      box-shadow:0 12px 28px rgba(37,99,235,.14);
+    }
+
+    .photo-preview img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .alert{
+      padding:13px 14px;
+      border-radius:18px;
+      margin-bottom:14px;
+      font-size:15px;
+      font-weight:850;
+    }
+
+    .ok{
+      background:#ecfdf5;
+      color:#047857;
+      border:1px solid #a7f3d0;
+    }
+
+    .err{
+      background:#fef2f2;
+      color:#b91c1c;
+      border:1px solid #fecaca;
+    }
+
+    label{
+      display:block;
+      margin:0 0 7px 4px;
+      color:#334155;
+      font-size:15px;
+      font-weight:900;
+    }
+
+    .field{ margin-bottom:14px; }
+
+    input{
+      width:100%;
+      min-height:58px;
+      border-radius:20px;
+      border:1px solid rgba(148,163,184,.26);
+      background:#f8fbff;
+      color:#0f172a;
+      padding:0 16px;
+      outline:none;
+      font-size:18px;
+      font-weight:750;
+      box-shadow:
+        0 10px 22px rgba(15,23,42,.06),
+        inset 0 1px 0 rgba(255,255,255,.92);
+    }
+
+    input[type="file"]{
+      padding:15px;
+      min-height:auto;
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:16px;
+    }
+
+    .btn{
+      min-height:58px;
+      border:0;
+      border-radius:21px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      font-size:17px;
+      font-weight:950;
+      font-family:inherit;
+    }
+
+    .primary{
+      color:#fff;
+      background:linear-gradient(145deg,#38bdf8,#2563eb);
+      box-shadow:0 16px 34px rgba(37,99,235,.26);
+    }
+
+    .secondary{
+      color:#2563eb;
+      background:#f8fbff;
+      border:1px solid #e5edf6;
+    }
+
+    @media(max-width:420px){
+      .actions{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <section class="hero">
+      <h1>👤 Profil Bilgileri</h1>
+      <p>Panel sahibinin adı, telefonu ve fotoğrafı.</p>
+    </section>
+
+    <section class="card">
+      <div class="photo-preview">
+        {% if profile and profile.photo_path %}
+          <img src="{{ profile.photo_path }}" alt="Profil">
+        {% else %}
+          👤
+        {% endif %}
+      </div>
+
+      {% if msg %}
+        <div class="alert ok">{{ msg }}</div>
+      {% endif %}
+
+      {% if error %}
+        <div class="alert err">{{ error }}</div>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data">
+        {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+
+        <div class="field">
+          <label>Ad Soyad</label>
+          <input name="full_name" type="text" value="{{ profile.full_name if profile else '' }}" required>
+        </div>
+
+        <div class="field">
+          <label>Cep Telefonu</label>
+          <input name="phone" type="tel" value="{{ profile.phone if profile else '' }}" required>
+        </div>
+
+        <div class="field">
+          <label>Profil Fotoğrafı Değiştir</label>
+          <input name="profile_photo" type="file" accept="image/*">
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" type="submit">Kaydet</button>
+          <a class="btn secondary" href="/ayarlar">← Geri</a>
+        </div>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

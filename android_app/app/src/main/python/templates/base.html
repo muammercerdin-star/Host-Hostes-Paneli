@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{ title or "Muavin Asistanı" }}</title>
+
+  <!-- ✅ Yerel CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/icons.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='3') }}">
+</head>
+
+<body>
+
+  {% block content %}{% endblock %}
+
+  <!-- ✅ Yerel JS (sırası önemli) -->
+  <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+
+  <!-- Sayfa bazlı ek script alanı -->
+  {% block scripts %}{% endblock %}
+
+</body>
+</html>
