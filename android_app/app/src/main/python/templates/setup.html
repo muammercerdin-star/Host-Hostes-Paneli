@@ -1,37 +1,39 @@
 <!doctype html>
 <html lang="tr">
 <head>
+  <script id="onboarding-first-run-redirect">
+    (function(){
+      try{
+        var params = new URLSearchParams(window.location.search);
 
-<script id="onboarding-first-run-redirect">
-  (function(){
-    try{
-      var params = new URLSearchParams(window.location.search);
-      if(params.get("tanitim") === "1"){
-        localStorage.setItem("muavin_onboarding_seen", "1");
-        return;
-      }
+        if(params.get("tanitim") === "1"){
+          localStorage.setItem("muavin_onboarding_seen", "1");
+          return;
+        }
 
-      if(localStorage.getItem("muavin_onboarding_seen") !== "1"){
-        window.location.replace("/tanitim");
-      }
-    }catch(e){}
-  })();
-</script>
-
-
+        if(localStorage.getItem("muavin_onboarding_seen") !== "1"){
+          window.location.replace("/tanitim");
+        }
+      }catch(e){}
+    })();
+  </script>
 
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>İlk Kurulum</title>
 
   <style>
-    *{ box-sizing:border-box; }
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
 
     body{
       margin:0;
       min-height:100vh;
       background:
-        radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 34%),
+        radial-gradient(circle at 16% 0%, rgba(37,99,235,.16), transparent 34%),
+        radial-gradient(circle at 100% 28%, rgba(14,165,233,.15), transparent 32%),
         linear-gradient(180deg,#f8fbff,#eaf3ff);
       font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       color:#0f172a;
@@ -39,93 +41,256 @@
 
     .shell{
       width:min(94vw,720px);
-      margin:18px auto 28px;
-      padding:16px;
-      border-radius:30px;
-      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
-      border:1px solid rgba(255,255,255,.82);
-      box-shadow:0 28px 80px rgba(15,23,42,.18);
+      margin:14px auto 24px;
+      padding:14px;
+      border-radius:34px;
+      background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(241,248,255,.96));
+      border:1px solid rgba(255,255,255,.86);
+      box-shadow:0 28px 80px rgba(15,23,42,.16);
     }
 
     .hero{
-      padding:24px 20px;
-      border-radius:26px;
-      background:linear-gradient(145deg,#2563eb,#06b6d4);
+      position:relative;
+      overflow:hidden;
+      min-height:174px;
+      border-radius:30px;
+      padding:24px 22px;
       color:#fff;
-      box-shadow:0 18px 38px rgba(37,99,235,.22);
+      background:
+        radial-gradient(circle at 18% 15%, rgba(255,255,255,.22), transparent 28%),
+        linear-gradient(135deg,#2563eb 0%,#0ea5e9 55%,#14b8a6 100%);
+      box-shadow:
+        0 20px 44px rgba(37,99,235,.24),
+        inset 0 1px 0 rgba(255,255,255,.22);
+      margin-bottom:14px;
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      right:-34px;
+      bottom:-44px;
+      width:170px;
+      height:170px;
+      border-radius:50%;
+      background:rgba(255,255,255,.14);
+    }
+
+    .hero-kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:36px;
+      padding:7px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.24);
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.5px;
+      text-transform:uppercase;
       margin-bottom:14px;
     }
 
     .hero h1{
+      position:relative;
+      z-index:2;
       margin:0;
-      font-size:34px;
+      font-size:38px;
       line-height:1;
-      font-weight:950;
+      font-weight:1000;
+      letter-spacing:-1px;
+      text-shadow:0 3px 14px rgba(0,0,0,.18);
     }
 
     .hero p{
-      margin:8px 0 0;
-      font-size:15px;
-      font-weight:700;
-      color:rgba(255,255,255,.88);
+      position:relative;
+      z-index:2;
+      margin:10px 0 0;
+      max-width:78%;
+      color:rgba(255,255,255,.92);
+      font-size:16px;
+      line-height:1.32;
+      font-weight:750;
     }
 
     .card{
-      border-radius:26px;
+      border-radius:30px;
       background:#fff;
       border:1px solid #e5edf6;
-      box-shadow:0 14px 34px rgba(15,23,42,.10);
+      box-shadow:0 18px 44px rgba(15,23,42,.10);
       padding:18px;
     }
 
     .alert{
-      padding:13px 14px;
-      border-radius:18px;
+      padding:14px 15px;
+      border-radius:20px;
       margin-bottom:14px;
       font-size:15px;
+      line-height:1.35;
       font-weight:850;
       background:#fef2f2;
-      color:#b91c1c;
+      color:#991b1b;
       border:1px solid #fecaca;
     }
 
-    label{
-      display:block;
-      margin:0 0 7px 4px;
-      color:#334155;
-      font-size:15px;
-      font-weight:900;
+    .profile-box{
+      display:grid;
+      grid-template-columns:92px 1fr;
+      gap:14px;
+      align-items:center;
+      padding:14px;
+      border-radius:26px;
+      background:linear-gradient(180deg,#f8fbff,#eef6ff);
+      border:1px solid #e5edf6;
+      margin-bottom:16px;
     }
 
-    .field{ margin-bottom:14px; }
+    .avatar{
+      width:92px;
+      height:92px;
+      border-radius:28px;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,.90), transparent 34%),
+        linear-gradient(135deg,#dbeafe,#bfdbfe);
+      border:1px solid rgba(147,197,253,.45);
+      box-shadow:0 14px 30px rgba(37,99,235,.14);
+      color:#2563eb;
+      font-size:42px;
+      font-weight:1000;
+    }
+
+    .avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:none;
+    }
+
+    .profile-title{
+      margin:0;
+      color:#0f172a;
+      font-size:20px;
+      line-height:1.1;
+      font-weight:1000;
+      letter-spacing:-.3px;
+    }
+
+    .profile-desc{
+      margin:6px 0 12px;
+      color:#64748b;
+      font-size:13px;
+      line-height:1.35;
+      font-weight:750;
+    }
+
+    .file-input{
+      display:none;
+    }
+
+    .photo-btn{
+      width:max-content;
+      min-height:42px;
+      padding:0 14px;
+      border:0;
+      border-radius:15px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      color:#fff;
+      background:linear-gradient(135deg,#2563eb,#0ea5e9);
+      box-shadow:0 12px 24px rgba(37,99,235,.20);
+      font-size:14px;
+      font-weight:950;
+      cursor:pointer;
+    }
+
+    .form-grid{
+      display:grid;
+      gap:14px;
+    }
+
+    .field{
+      display:grid;
+      gap:7px;
+    }
+
+    label{
+      margin-left:4px;
+      color:#334155;
+      font-size:14px;
+      font-weight:950;
+    }
+
+    .input-wrap{
+      position:relative;
+    }
 
     input{
       width:100%;
       min-height:58px;
       border-radius:20px;
-      border:1px solid rgba(148,163,184,.26);
+      border:1px solid rgba(148,163,184,.28);
       background:#f8fbff;
       color:#0f172a;
       padding:0 16px;
       outline:none;
-      font-size:18px;
-      font-weight:750;
+      font-size:17px;
+      font-weight:800;
       box-shadow:
-        0 10px 22px rgba(15,23,42,.06),
+        0 10px 22px rgba(15,23,42,.05),
         inset 0 1px 0 rgba(255,255,255,.92);
     }
 
-    input[type="file"]{
-      padding:15px;
-      min-height:auto;
+    input::placeholder{
+      color:#94a3b8;
+      font-weight:800;
     }
 
     input:focus{
-      border-color:rgba(37,99,235,.75);
+      border-color:rgba(37,99,235,.72);
+      background:#fff;
       box-shadow:
         0 0 0 4px rgba(37,99,235,.12),
-        0 12px 26px rgba(15,23,42,.10);
-      background:#fff;
+        0 12px 26px rgba(15,23,42,.08);
+    }
+
+    .toggle-pass{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform:translateY(-50%);
+      width:42px;
+      height:42px;
+      border:0;
+      border-radius:14px;
+      background:#eef4fb;
+      color:#334155;
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .password-input{
+      padding-right:58px;
+    }
+
+    .trust{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      margin:16px 0 14px;
+      padding:13px 14px;
+      border-radius:20px;
+      background:linear-gradient(180deg,#eff6ff,#f8fbff);
+      border:1px solid #dbeafe;
+      color:#1e3a8a;
+      font-size:13px;
+      line-height:1.35;
+      font-weight:850;
     }
 
     .btn{
@@ -133,11 +298,79 @@
       min-height:60px;
       border:0;
       border-radius:22px;
-      background:linear-gradient(145deg,#38bdf8,#2563eb);
       color:#fff;
-      font-size:19px;
-      font-weight:950;
-      box-shadow:0 16px 34px rgba(37,99,235,.26);
+      background:linear-gradient(135deg,#22c55e,#0ea5e9,#2563eb);
+      font-size:18px;
+      font-weight:1000;
+      box-shadow:
+        0 18px 36px rgba(14,165,233,.24),
+        inset 0 1px 0 rgba(255,255,255,.18);
+      cursor:pointer;
+    }
+
+    .btn:active,
+    .photo-btn:active,
+    .toggle-pass:active{
+      transform:scale(.98);
+    }
+
+    @media(max-width:430px){
+      .shell{
+        width:calc(100vw - 18px);
+        margin:10px auto 18px;
+        padding:10px;
+        border-radius:30px;
+      }
+
+      .hero{
+        min-height:156px;
+        padding:22px 18px;
+        border-radius:27px;
+      }
+
+      .hero h1{
+        font-size:34px;
+      }
+
+      .hero p{
+        max-width:86%;
+        font-size:15px;
+      }
+
+      .card{
+        padding:15px;
+        border-radius:27px;
+      }
+
+      .profile-box{
+        grid-template-columns:78px 1fr;
+        gap:12px;
+        padding:12px;
+        border-radius:23px;
+      }
+
+      .avatar{
+        width:78px;
+        height:78px;
+        border-radius:24px;
+        font-size:36px;
+      }
+
+      .profile-title{
+        font-size:18px;
+      }
+
+      input{
+        min-height:54px;
+        border-radius:18px;
+        font-size:16px;
+      }
+
+      .btn{
+        min-height:56px;
+        border-radius:20px;
+        font-size:17px;
+      }
     }
   </style>
 </head>
@@ -145,8 +378,9 @@
 <body>
   <main class="shell">
     <section class="hero">
-      <h1>👤 İlk Kurulum</h1>
-      <p>Panel sahibini oluştur ve uygulamayı kişiselleştir.</p>
+      <div class="hero-kicker">🚌 Başlangıç</div>
+      <h1>İlk Kurulum</h1>
+      <p>Panel sahibini oluşturalım ve uygulamayı sana özel hale getirelim.</p>
     </section>
 
     <section class="card">
@@ -159,34 +393,92 @@
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         {% endif %}
 
-        <div class="field">
-          <label>Ad Soyad</label>
-          <input name="full_name" type="text" placeholder="Örn: Muammer Çerdin" required>
+        <div class="profile-box">
+          <div class="avatar" id="avatarBox">
+            <span id="avatarIcon">👤</span>
+            <img id="avatarPreview" alt="Profil fotoğrafı">
+          </div>
+
+          <div>
+            <h2 class="profile-title">Profilini oluşturalım</h2>
+            <p class="profile-desc">Fotoğraf ve iletişim bilgilerin sefer raporlarında kullanılabilir.</p>
+
+            <label class="photo-btn" for="profilePhotoInput">
+              📷 Fotoğraf Seç
+            </label>
+          </div>
         </div>
 
-        <div class="field">
-          <label>Cep Telefonu</label>
-          <input name="phone" type="tel" placeholder="05xx xxx xx xx" required>
+        <input
+          class="file-input"
+          id="profilePhotoInput"
+          name="profile_photo"
+          type="file"
+          accept="image/*"
+        >
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Ad Soyad</label>
+            <input name="full_name" type="text" placeholder="Örn: Muammer Çerdin" autocomplete="name" required>
+          </div>
+
+          <div class="field">
+            <label>Cep Telefonu</label>
+            <input name="phone" type="tel" placeholder="05xx xxx xx xx" autocomplete="tel" required>
+          </div>
+
+          <div class="field">
+            <label>Panel Şifresi</label>
+            <div class="input-wrap">
+              <input class="password-input" id="passwordInput" name="password" type="password" autocomplete="new-password" required>
+              <button class="toggle-pass" type="button" data-target="passwordInput">👁</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Şifre Tekrar</label>
+            <div class="input-wrap">
+              <input class="password-input" id="password2Input" name="password2" type="password" autocomplete="new-password" required>
+              <button class="toggle-pass" type="button" data-target="password2Input">👁</button>
+            </div>
+          </div>
         </div>
 
-        <div class="field">
-          <label>Profil Fotoğrafı</label>
-          <input name="profile_photo" type="file" accept="image/*">
-        </div>
-
-        <div class="field">
-          <label>Panel Şifresi</label>
-          <input name="password" type="password" required>
-        </div>
-
-        <div class="field">
-          <label>Şifre Tekrar</label>
-          <input name="password2" type="password" required>
+        <div class="trust">
+          <div>🔒</div>
+          <div>Bilgilerin cihazında güvenle saklanır. Şifreni unutursan kurtarma kodu ile yeniden erişim sağlayabilirsin.</div>
         </div>
 
         <button class="btn" type="submit">Kurulumu Tamamla</button>
       </form>
     </section>
   </main>
+
+  <script>
+    const fileInput = document.getElementById("profilePhotoInput");
+    const avatarPreview = document.getElementById("avatarPreview");
+    const avatarIcon = document.getElementById("avatarIcon");
+
+    fileInput?.addEventListener("change", function(){
+      const file = this.files && this.files[0];
+      if(!file) return;
+
+      const url = URL.createObjectURL(file);
+      avatarPreview.src = url;
+      avatarPreview.style.display = "block";
+      avatarIcon.style.display = "none";
+    });
+
+    document.querySelectorAll(".toggle-pass").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const target = document.getElementById(btn.dataset.target);
+        if(!target) return;
+
+        target.type = target.type === "password" ? "text" : "password";
+        btn.textContent = target.type === "password" ? "👁" : "🙈";
+      });
+    });
+  </script>
 </body>
 </html>

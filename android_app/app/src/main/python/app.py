@@ -998,6 +998,9 @@ def is_excluded_path(path: str) -> bool:
 
 @app.before_request
 def bootstrap_and_guard():
+    if request.path == "/kullanici-sifirla" or request.path == "/tanitim":
+        return None
+
     if request.path == "/tanitim" or request.path.startswith("/static/"):
         return None
 
@@ -1229,6 +1232,67 @@ def resolve_ai_command(command: str):
 @app.route("/tanitim")
 def onboarding_page():
     return render_template("onboarding.html")
+
+
+
+# =========================================================
+# Kullanıcı / Panel Sahibi Sıfırlama
+# =========================================================
+def reset_admin_owner():
+    db = get_db()
+
+    try:
+        ensure_admin_profile_table(db)
+        ensure_security_table(db)
+
+        prof = get_admin_profile()
+        photo_path = (prof or {}).get("photo_path", "")
+
+        # Profil fotoğrafını mümkünse sil
+        if photo_path and photo_path.startswith("/static/profile/"):
+            try:
+                target = Path(app.root_path) / photo_path.lstrip("/")
+                if target.exists():
+                    target.unlink()
+            except Exception:
+                pass
+
+        db.execute("DELETE FROM admin_profile WHERE id=1")
+        db.execute("DELETE FROM admin_security WHERE id=1")
+
+        # Kurtarma kodunu da temizle
+        try:
+            db.execute("DELETE FROM settings WHERE key IN (?, ?)", (
+                "recovery_code_hash",
+                "recovery_code_updated_at",
+            ))
+        except Exception:
+            pass
+
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+
+@app.route("/kullanici-sifirla", methods=["GET", "POST"])
+def reset_user_page():
+    if not admin_profile_exists():
+        return redirect(url_for("setup_page"))
+
+    error = ""
+
+    if request.method == "POST":
+        recovery_code = (request.form.get("recovery_code") or "").strip()
+
+        if not verify_recovery_code(recovery_code):
+            error = "Kurtarma kodu yanlış."
+        else:
+            reset_admin_owner()
+            session.clear()
+            return redirect(url_for("onboarding_page"))
+
+    return render_template("user_reset.html", error=error, csrf_token=get_csrf())
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
