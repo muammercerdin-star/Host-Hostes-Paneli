@@ -30,3 +30,27 @@ apk_payload_files.txt
 android_app/.gradle/
 android_app/app/build/
 android_app/build/
+
+# local/generated reports
+SEATS_AKTIF_HARITA.txt
+aktif_dosya_listesi.txt
+proje_dosya_listesi.txt
+proje_flask_baglanti_raporu.txt
+proje_template_haritasi.txt
+seats_aktif_harita.py
+seats_baglanti_haritasi.txt
+
+# database and generated storage
+db.sqlite3
+storage/reports/
+storage/backups/
+uploads/
+
+# temporary payloads
+apk_payload/
+apk_payload_files.txt
+
+# backup files
+*.bak
+*.bak*
+*.tmp
