@@ -22,6 +22,7 @@ android {
                 install "flask"
                 install "werkzeug"
                 install "requests"
+                install "pillow"
             }
         }
 
