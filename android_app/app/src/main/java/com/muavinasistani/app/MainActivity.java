@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.content.pm.PackageManager;
 
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
@@ -45,10 +44,20 @@ public class MainActivity extends Activity {
                 runOnUiThread(() -> {
                     webView.loadUrl("http://127.0.0.1:5000/");
                 });
+
             } catch (Exception e) {
+                String err = e.toString()
+                    .replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;");
+
                 runOnUiThread(() -> {
                     webView.loadData(
-                        "<h2>Muavin Asistanı başlatılamadı</h2><pre>" + e.toString() + "</pre>",
+                        "<html><body style='font-family:sans-serif;padding:24px;background:#f8fbff;color:#0f172a;'>" +
+                        "<h2>Muavin Asistanı başlatılamadı</h2>" +
+                        "<p>Flask sunucusu APK içinde açılırken hata verdi.</p>" +
+                        "<pre style='white-space:pre-wrap;background:#111827;color:#fff;padding:14px;border-radius:12px;'>" + err + "</pre>" +
+                        "</body></html>",
                         "text/html",
                         "UTF-8"
                     );
