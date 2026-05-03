@@ -3,6 +3,7 @@
 
 <link rel="stylesheet" href="/static/style.css">
 <link rel="stylesheet" href="/static/seats/seats.css?v=41">
+<link rel="stylesheet" href="/static/seats/seats-final.css?v=2">
 
 <div class="seats-shell">
   {% include "seats_parts/topbar.html" %}
@@ -327,7 +328,7 @@
 <script src="/static/seats/bags.js?v=1"></script>
 <script src="/static/seats/voice-commands.js?v=1"></script>
 <script src="/static/seats/standing.js?v=1"></script>
-<script src="/static/seats/seats.js?v=20260430_100321"></script>
+<script src="/static/seats/seats.js?v=offload-modal-final-1"></script>
 <script src="/static/seats/drive-controls.js?v=2"></script>
 
 
@@ -514,10 +515,7 @@
 
   function placeDock(){
     const dock = ensureDock();
-    const board = document.querySelector(".board-inner");
-    const speed = document.getElementById("driveSpeedChip");
-
-    if(!dock || !board || !speed) return;
+    if(!dock) return;
 
     const active = isDriveMode();
 
@@ -526,28 +524,16 @@
       return;
     }
 
+    /* Dock artık hesaplanıp sağa-sola gezdirilmiyor.
+       Normal HTML akışındaki yerinde sabit duracak. */
     dock.style.display = "flex";
-
-    const b = board.getBoundingClientRect();
-    const sp = speed.getBoundingClientRect();
-
-    const dockW = dock.offsetWidth || 218;
-
-    /*
-      Hız kutusunun altındaki boş sağ banda koyar.
-      Taşarsa otomatik sola çeker.
-    */
-    let left = (sp.right - b.left) - dockW;
-    let top = (sp.bottom - b.top) + 8;
-
-    const minLeft = 14;
-    const maxLeft = b.width - dockW - 14;
-
-    if(left < minLeft) left = minLeft;
-    if(left > maxLeft) left = maxLeft;
-
-    dock.style.left = left + "px";
-    dock.style.top = top + "px";
+    dock.style.left = "";
+    dock.style.top = "";
+    dock.style.right = "";
+    dock.style.bottom = "";
+    dock.style.width = "";
+    dock.style.position = "";
+    dock.style.transform = "";
   }
 
   function boot(){
@@ -854,5 +840,485 @@ document.addEventListener("DOMContentLoaded", function(){
   });
 });
 </script>
+
+
+<style id="drive-dock-stability-final">
+/* =========================================================
+   SÜRÜŞ / HIZ / RÖTAR SATIRI SABİTLEME
+   Üste binme ve sağa-sola kayma sorununu çözer.
+========================================================= */
+
+#driveInlineDock{
+  position:relative !important;
+  inset:auto !important;
+  left:auto !important;
+  right:auto !important;
+  top:auto !important;
+  bottom:auto !important;
+  transform:none !important;
+
+  width:100% !important;
+  max-width:100% !important;
+  min-height:46px !important;
+
+  display:flex !important;
+  align-items:stretch !important;
+  gap:8px !important;
+
+  margin:0 0 12px 0 !important;
+  padding:0 !important;
+  z-index:4 !important;
+
+  overflow:hidden !important;
+}
+
+/* Eğer JS gerçekten gizlemek isterse buna izin ver */
+#driveInlineDock[style*="display: none"],
+#driveInlineDock[style*="display:none"]{
+  display:none !important;
+}
+
+#driveInlineDock > *{
+  position:relative !important;
+  left:auto !important;
+  right:auto !important;
+  top:auto !important;
+  bottom:auto !important;
+  transform:none !important;
+  margin:0 !important;
+  min-width:0 !important;
+}
+
+/* Sürüş butonu */
+#driveModeToggle{
+  flex:0 0 88px !important;
+  height:46px !important;
+  min-height:46px !important;
+  border-radius:17px !important;
+  padding:0 10px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:6px !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+
+  font-size:13px !important;
+  font-weight:950 !important;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8) !important;
+  color:#fff !important;
+  border:1px solid rgba(147,197,253,.20) !important;
+  box-shadow:0 10px 24px rgba(37,99,235,.22), inset 0 1px 0 rgba(255,255,255,.15) !important;
+}
+
+/* Hız ve rötar kutuları */
+#driveSpeedChip,
+#driveEtaChip,
+.drive-speed-chip,
+.drive-eta-chip{
+  position:relative !important;
+  height:46px !important;
+  min-height:46px !important;
+  border-radius:17px !important;
+  padding:7px 10px !important;
+
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:center !important;
+
+  background:rgba(255,255,255,.07) !important;
+  border:1px solid rgba(148,163,184,.16) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08) !important;
+
+  overflow:hidden !important;
+}
+
+#driveSpeedChip,
+.drive-speed-chip{
+  flex:1 1 105px !important;
+}
+
+#driveEtaChip,
+.drive-eta-chip{
+  flex:1.25 1 130px !important;
+}
+
+/* İç yazılar taşmasın */
+.drive-speed-top,
+.drive-eta-top{
+  display:flex !important;
+  align-items:center !important;
+  gap:5px !important;
+  min-width:0 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  line-height:1 !important;
+}
+
+.drive-speed-top b,
+.drive-eta-top b{
+  min-width:0 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+}
+
+.drive-speed-sub,
+.drive-eta-sub{
+  margin-top:3px !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+  font-size:10.5px !important;
+  line-height:1 !important;
+  color:rgba(226,232,240,.62) !important;
+}
+
+/* Dock başlığın üstüne binmesin */
+.board-head{
+  position:relative !important;
+  z-index:3 !important;
+  clear:both !important;
+  margin-top:0 !important;
+}
+
+.board-title{
+  position:relative !important;
+  z-index:3 !important;
+}
+
+.board-title h2{
+  margin-top:0 !important;
+}
+
+/* Rötar yazısı kesinlikle başlık alanında serbest dolaşmasın */
+#driveEtaChip *,
+.drive-eta-chip *{
+  max-width:100% !important;
+}
+
+/* Mobilde daha da kontrollü */
+@media(max-width:430px){
+  #driveInlineDock{
+    gap:6px !important;
+    margin-bottom:10px !important;
+  }
+
+  #driveModeToggle{
+    flex:0 0 82px !important;
+    height:43px !important;
+    min-height:43px !important;
+    font-size:12.5px !important;
+    border-radius:16px !important;
+  }
+
+  #driveSpeedChip,
+  #driveEtaChip,
+  .drive-speed-chip,
+  .drive-eta-chip{
+    height:43px !important;
+    min-height:43px !important;
+    border-radius:16px !important;
+    padding:6px 8px !important;
+  }
+
+  #driveSpeedChip,
+  .drive-speed-chip{
+    flex:1 1 95px !important;
+  }
+
+  #driveEtaChip,
+  .drive-eta-chip{
+    flex:1.15 1 112px !important;
+  }
+
+  .drive-speed-top,
+  .drive-eta-top{
+    font-size:12px !important;
+  }
+
+  .drive-speed-sub,
+  .drive-eta-sub{
+    font-size:10px !important;
+  }
+}
+</style>
+
+
+
+
+<!-- OFFLOAD CONFIRM MODAL START -->
+<style id="offload-confirm-modal-style">
+.offload-overlay{
+  position:fixed;
+  inset:0;
+  z-index:999999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:
+    radial-gradient(circle at 50% 25%, rgba(37,99,235,.18), transparent 34%),
+    rgba(8,15,28,.72);
+  backdrop-filter:blur(16px) saturate(1.08);
+  -webkit-backdrop-filter:blur(16px) saturate(1.08);
+}
+
+.offload-overlay.show{
+  display:flex;
+}
+
+.offload-box{
+  width:min(92vw,410px);
+  border-radius:34px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255,255,255,.96), transparent 30%),
+    linear-gradient(180deg,#ffffff 0%,#f7faff 58%,#eef4ff 100%);
+  border:1px solid rgba(255,255,255,.86);
+  box-shadow:
+    0 34px 90px rgba(0,0,0,.40),
+    0 0 0 1px rgba(255,255,255,.72) inset;
+  animation:offloadPop .18s ease-out both;
+}
+
+@keyframes offloadPop{
+  from{ transform:translateY(18px) scale(.96); opacity:0; }
+  to{ transform:translateY(0) scale(1); opacity:1; }
+}
+
+.offload-top{
+  padding:24px 24px 12px;
+  display:grid;
+  grid-template-columns:62px 1fr;
+  align-items:center;
+  gap:16px;
+}
+
+.offload-mark{
+  width:62px;
+  height:62px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255,255,255,.75), transparent 32%),
+    linear-gradient(135deg,#e0f2fe,#bfdbfe);
+  box-shadow:
+    0 14px 28px rgba(37,99,235,.16),
+    inset 0 1px 0 rgba(255,255,255,.92);
+}
+
+.offload-title{
+  margin:0;
+  color:#0f172a;
+  font-size:28px;
+  line-height:1.03;
+  font-weight:1000;
+  letter-spacing:-.7px;
+}
+
+.offload-small{
+  margin:6px 0 0;
+  color:#64748b;
+  font-size:14px;
+  line-height:1.2;
+  font-weight:850;
+}
+
+.offload-content{
+  padding:4px 24px 20px;
+}
+
+.offload-text{
+  margin:0;
+  color:#334155;
+  font-size:17px;
+  line-height:1.45;
+  font-weight:750;
+}
+
+.offload-stop{
+  margin-top:14px;
+  padding:14px 15px;
+  border-radius:20px;
+  background:linear-gradient(180deg,rgba(239,246,255,.96),rgba(219,234,254,.92));
+  border:1px solid rgba(147,197,253,.32);
+  color:#1e3a8a;
+  font-size:15px;
+  line-height:1.35;
+  font-weight:950;
+}
+
+.offload-note{
+  margin-top:12px;
+  padding:13px 14px;
+  border-radius:20px;
+  background:linear-gradient(180deg,rgba(254,243,199,.90),rgba(255,251,235,.94));
+  border:1px solid rgba(251,191,36,.24);
+  color:#92400e;
+  font-size:13.5px;
+  line-height:1.35;
+  font-weight:850;
+}
+
+.offload-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  padding:0 24px 24px;
+}
+
+.offload-btn{
+  height:56px;
+  border:0;
+  border-radius:20px;
+  font-size:16px;
+  font-weight:1000;
+  cursor:pointer;
+  font-family:inherit;
+}
+
+.offload-cancel{
+  color:#334155;
+  background:linear-gradient(180deg,#ffffff,#eef3fb);
+  border:1px solid rgba(148,163,184,.20);
+  box-shadow:
+    0 12px 24px rgba(15,23,42,.08),
+    inset 0 1px 0 rgba(255,255,255,.92);
+}
+
+.offload-ok{
+  color:#fff;
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255,255,255,.22), transparent 30%),
+    linear-gradient(135deg,#22c55e 0%,#16a34a 52%,#15803d 100%);
+  box-shadow:
+    0 16px 30px rgba(22,163,74,.28),
+    inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.offload-btn:active{
+  transform:scale(.975);
+}
+
+@media(max-width:420px){
+  .offload-overlay{ padding:18px; }
+  .offload-box{ width:min(94vw,390px); border-radius:30px; }
+  .offload-top{ padding:22px 20px 10px; grid-template-columns:58px 1fr; gap:14px; }
+  .offload-mark{ width:58px; height:58px; border-radius:20px; font-size:28px; }
+  .offload-title{ font-size:25px; }
+  .offload-content{ padding:4px 20px 18px; }
+  .offload-text{ font-size:16px; }
+  .offload-actions{ padding:0 20px 22px; gap:10px; }
+  .offload-btn{ height:52px; border-radius:18px; font-size:15px; }
+}
+</style>
+
+<div class="offload-overlay" id="offloadConfirmModal" aria-hidden="true">
+  <div class="offload-box" role="dialog" aria-modal="true" aria-labelledby="offloadConfirmTitle">
+    <div class="offload-top">
+      <div class="offload-mark">🔔</div>
+      <div>
+        <h2 class="offload-title" id="offloadConfirmTitle">İnecekleri indirelim mi?</h2>
+        <p class="offload-small">Seçili durak işlemi yapılacak.</p>
+      </div>
+    </div>
+
+    <div class="offload-content">
+      <p class="offload-text" id="offloadConfirmText">
+        Bu durakta inecek yolcu ve ilgili işlemler sistem tarafından tamamlanacak.
+      </p>
+
+      <div class="offload-stop">
+        🎯 Durak: <span id="offloadConfirmStop">—</span>
+      </div>
+
+      <div class="offload-note">
+        Emin değilsen iptal edip koltuk planına dönebilirsin.
+      </div>
+    </div>
+
+    <div class="offload-actions">
+      <button type="button" class="offload-btn offload-cancel" id="offloadConfirmCancel">İptal</button>
+      <button type="button" class="offload-btn offload-ok" id="offloadConfirmOk">İndir</button>
+    </div>
+  </div>
+</div>
+
+<script id="offload-confirm-modal-js">
+(function(){
+  let resolver = null;
+
+  const modal = document.getElementById("offloadConfirmModal");
+  const stopEl = document.getElementById("offloadConfirmStop");
+  const textEl = document.getElementById("offloadConfirmText");
+  const cancelBtn = document.getElementById("offloadConfirmCancel");
+  const okBtn = document.getElementById("offloadConfirmOk");
+
+  if(!modal || !stopEl || !cancelBtn || !okBtn) return;
+
+  function close(result){
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden","true");
+    document.body.style.overflow = "";
+
+    if(resolver){
+      resolver(result);
+      resolver = null;
+    }
+  }
+
+  window.askOffloadConfirm = function(stop, info){
+    stopEl.textContent = stop || "seçili durak";
+
+    const count = Number(info?.count || 0);
+    if(textEl){
+      textEl.textContent = count > 0
+        ? `Bu durakta ${count} yolcu indirilecek.
+Yolcu, ayakta yolcu ve ilgili işlemler tamamlanacak.`
+        : "Bu durakta inecek yolcu bulunuyor.
+Yolcu, ayakta yolcu ve ilgili işlemler tamamlanacak.";
+    }
+
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden","false");
+    document.body.style.overflow = "hidden";
+
+    return new Promise(resolve => {
+      resolver = resolve;
+    });
+  };
+
+  cancelBtn.addEventListener("click", () => close(false));
+  okBtn.addEventListener("click", () => close(true));
+
+  modal.addEventListener("click", function(e){
+    if(e.target === modal) close(false);
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && modal.classList.contains("show")){
+      close(false);
+    }
+  });
+})();
+</script>
+<!-- OFFLOAD CONFIRM MODAL END -->
+
+
+
+
+
+
+
+
 
 {% endblock %}

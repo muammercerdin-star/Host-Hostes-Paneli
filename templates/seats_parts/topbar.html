@@ -6,7 +6,13 @@
           <div class="route-title">{{ trip['route'] }}</div>
           <div class="route-sub">
             Plaka: <b>{{ trip['plate'] or '-' }}</b>
-            · Sefer Tarihi: <b>{{ trip['date'] or '-' }}</b>
+            · Sefer Tarihi: <b>
+              {% if trip['date'] and '-' in trip['date'] %}
+                {{ trip['date'].split('-')[2] }}.{{ trip['date'].split('-')[1] }}.{{ trip['date'].split('-')[0] }}
+              {% else %}
+                {{ trip['date'] or '-' }}
+              {% endif %}
+            </b>
             · Çıkış: <b>{{ trip['departure_time'] or '-' }}</b>
           </div>
         </div>

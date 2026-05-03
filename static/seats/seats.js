@@ -1543,7 +1543,11 @@ function renderApproachPanel(stop, seats){
       return;
     }
 
-    const ok = confirm(`"${stop}" için işlemleri yapayım mı?`);
+    const ok = window.askOffloadConfirm
+      ? await window.askOffloadConfirm(stop, {
+          count: seats.length + Number(computeStandingCountsByStop()[stop] || 0)
+        })
+      : confirm(`"${stop}" için işlemleri yapayım mı?`);
     if(!ok) return;
 
     snapshotStopFlowSummary(stop, {

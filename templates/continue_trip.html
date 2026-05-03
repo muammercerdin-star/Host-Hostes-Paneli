@@ -6,7 +6,19 @@
   <title>Devam Eden Sefer</title>
 
   <style>
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    :root{
+      --blue:#2563eb;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e5edf6;
+      --danger:#ef4444;
+      --card-radius:26px;
+    }
 
     body{
       margin:0;
@@ -16,848 +28,603 @@
         radial-gradient(circle at 100% 30%, rgba(14,165,233,.16), transparent 32%),
         linear-gradient(180deg,#f8fbff,#eaf3ff);
       font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      color:#0f172a;
+      color:var(--text);
     }
 
-    a{ color:inherit; text-decoration:none; }
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button{
+      font-family:inherit;
+    }
+
+    .sr-only{
+      position:absolute !important;
+      width:1px !important;
+      height:1px !important;
+      padding:0 !important;
+      margin:-1px !important;
+      overflow:hidden !important;
+      clip:rect(0,0,0,0) !important;
+      white-space:nowrap !important;
+      border:0 !important;
+    }
 
     .shell{
-      width:min(94vw,720px);
-      margin:18px auto 30px;
-      padding:16px;
-      border-radius:32px;
-      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
-      border:1px solid rgba(255,255,255,.85);
-      box-shadow:0 28px 80px rgba(15,23,42,.16);
+      width:calc(100vw - 14px);
+      max-width:720px;
+      margin:6px auto 12px;
+      padding:9px;
+      border-radius:28px;
+      background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(241,248,255,.96));
+      border:1px solid rgba(255,255,255,.86);
+      box-shadow:0 24px 70px rgba(15,23,42,.14);
     }
 
+    /* ÜST HERO — hazır görsel */
     .hero{
       position:relative;
+      height:162px;
+      min-height:162px;
+      border-radius:25px;
       overflow:hidden;
-      border-radius:28px;
-      min-height:220px;
-      padding:24px 22px;
-      color:#fff;
-      background:
-        linear-gradient(90deg,rgba(15,94,230,.96) 0%,rgba(15,94,230,.78) 44%,rgba(15,23,42,.20) 74%),
-        url("/static/img/home-bus-card.jpg") center/cover no-repeat;
-      box-shadow:0 20px 42px rgba(37,99,235,.24);
-      margin-bottom:14px;
-    }
-
-    .kicker{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:9px 13px;
-      border-radius:999px;
-      background:rgba(255,255,255,.18);
-      border:1px solid rgba(255,255,255,.24);
-      font-size:13px;
-      font-weight:950;
-      letter-spacing:.4px;
-      text-transform:uppercase;
-      margin-bottom:14px;
-    }
-
-    .hero h1{
-      margin:0;
-      font-size:39px;
-      line-height:.98;
-      font-weight:1000;
-      letter-spacing:-1px;
-      text-shadow:0 2px 14px rgba(0,0,0,.22);
-      max-width:74%;
-    }
-
-    .hero p{
-      margin:10px 0 0;
-      font-size:16px;
-      line-height:1.35;
-      font-weight:800;
-      color:rgba(255,255,255,.92);
-      max-width:76%;
-    }
-
-    .trip-pill{
-      display:inline-flex;
-      align-items:center;
-      gap:7px;
-      margin-top:16px;
-      padding:11px 13px;
-      border-radius:18px;
-      background:rgba(255,255,255,.92);
-      color:#0f172a;
-      font-size:14px;
-      font-weight:950;
-      box-shadow:0 10px 24px rgba(15,23,42,.16);
-      max-width:100%;
+      margin-bottom:9px;
+      background:url("/static/img/home-bus-card-final.png") center / cover no-repeat;
+      box-shadow:0 20px 44px rgba(120,18,32,.20);
     }
 
     .primary-actions{
       display:grid;
-      gap:12px;
-      margin:14px 0;
+      gap:8px;
+      margin:9px 0;
     }
 
     .big-action{
-      min-height:92px;
-      border-radius:26px;
-      padding:16px 18px;
+      position:relative;
+      overflow:hidden;
+      min-height:74px;
+      border-radius:23px;
+      padding:11px 14px;
       display:grid;
-      grid-template-columns:58px 1fr 52px;
+      grid-template-columns:46px 1fr 44px;
       align-items:center;
-      gap:14px;
+      gap:11px;
       color:#fff;
       background:linear-gradient(145deg,#38bdf8,#2563eb);
       box-shadow:0 16px 34px rgba(37,99,235,.22);
+      transition:transform .12s ease, filter .12s ease;
     }
 
+    .big-action:active,
+    .quick-item:active,
+    .danger-btn:active,
+    .bottom-home:active{
+      transform:scale(.985);
+      filter:brightness(.98);
+    }
+
+    /* Koltuklara Git — hazır görsel */
+    .seat-visual-card{
+      height:116px;
+      min-height:116px;
+      padding:0;
+      border-radius:24px;
+      background:url("/static/img/seat-card-final.png") center / cover no-repeat;
+      box-shadow:0 18px 42px rgba(0,88,220,.22);
+    }
+
+    /* Sürüş Modu — hazır görsel */
     .big-action.drive{
-      background:linear-gradient(145deg,#22c55e,#0ea5e9);
-      box-shadow:0 16px 34px rgba(14,165,233,.20);
+      min-height:84px;
+      border-radius:23px;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.10), rgba(0,0,0,.04)),
+        url("/static/img/drive-mode-card.png") center / cover no-repeat;
+      box-shadow:0 18px 42px rgba(14,165,233,.22);
     }
 
     .big-action.cash{
+      min-height:76px;
       background:linear-gradient(145deg,#334155,#0f172a);
       box-shadow:0 16px 34px rgba(15,23,42,.20);
     }
 
     .big-ico{
-      width:58px;
-      height:58px;
-      border-radius:21px;
+      width:46px;
+      height:46px;
+      border-radius:17px;
       display:grid;
       place-items:center;
       background:rgba(255,255,255,.18);
       border:1px solid rgba(255,255,255,.23);
-      font-size:30px;
+      font-size:23px;
     }
 
     .big-title{
       display:block;
-      font-size:24px;
+      font-size:20px;
       font-weight:1000;
-      line-height:1.05;
+      line-height:1;
     }
 
     .big-desc{
       display:block;
-      margin-top:5px;
-      font-size:14px;
+      margin-top:4px;
+      font-size:12px;
       color:rgba(255,255,255,.86);
       font-weight:800;
-      line-height:1.25;
+      line-height:1.12;
     }
 
     .arrow{
-      width:52px;
-      height:52px;
+      width:44px;
+      height:44px;
       border-radius:999px;
       display:grid;
       place-items:center;
       background:rgba(255,255,255,.92);
-      color:#2563eb;
-      font-size:34px;
+      color:var(--blue);
+      font-size:30px;
       font-weight:1000;
     }
 
     .quick-list{
       overflow:hidden;
-      border-radius:26px;
+      border-radius:23px;
       background:#fff;
-      border:1px solid #e5edf6;
+      border:1px solid var(--line);
       box-shadow:0 14px 34px rgba(15,23,42,.08);
-      margin-bottom:14px;
+      margin-bottom:8px;
     }
 
     .quick-item{
-      min-height:78px;
-      padding:13px 15px;
+      min-height:54px;
+      padding:8px 12px;
       display:grid;
-      grid-template-columns:48px 1fr 34px;
+      grid-template-columns:40px 1fr 28px;
       align-items:center;
-      gap:12px;
-      border-bottom:1px solid #e5edf6;
+      gap:10px;
+      border-bottom:1px solid var(--line);
+      transition:transform .12s ease, filter .12s ease;
     }
 
-    .quick-item:last-child{ border-bottom:0; }
+    .quick-item:last-child{
+      border-bottom:0;
+    }
 
     .qico{
-      width:48px;
-      height:48px;
-      border-radius:18px;
+      width:40px;
+      height:40px;
+      border-radius:15px;
       display:grid;
       place-items:center;
       background:#eff6ff;
-      font-size:25px;
+      font-size:20px;
     }
 
     .qtitle{
       display:block;
-      font-size:19px;
+      font-size:16px;
       font-weight:1000;
-      color:#0f172a;
-      line-height:1.05;
+      color:var(--text);
+      line-height:1;
     }
 
     .qdesc{
       display:block;
-      margin-top:5px;
-      color:#64748b;
-      font-size:13px;
+      margin-top:3px;
+      color:var(--muted);
+      font-size:11.2px;
       font-weight:800;
-      line-height:1.2;
+      line-height:1.08;
     }
 
     .qarr{
-      color:#64748b;
-      font-size:34px;
+      color:var(--muted);
+      font-size:28px;
       font-weight:900;
       line-height:1;
       justify-self:end;
     }
 
     .danger-zone{
-      border-radius:26px;
-      padding:16px;
+      border-radius:20px;
+      padding:7px;
       background:#fff;
       border:1px solid #fee2e2;
       box-shadow:0 14px 34px rgba(239,68,68,.08);
-      margin-bottom:14px;
+      margin-bottom:7px;
     }
 
     .danger-btn{
       width:100%;
-      min-height:58px;
+      min-height:40px;
       border:0;
-      border-radius:21px;
+      border-radius:16px;
       color:#fff;
       background:linear-gradient(145deg,#fb7185,#ef4444);
-      box-shadow:0 14px 30px rgba(239,68,68,.22);
-      font-family:inherit;
-      font-size:17px;
-      font-weight:1000;
+      box-shadow:0 12px 26px rgba(239,68,68,.20);
+      font-size:13.5px;
+      font-weight:950;
+      cursor:pointer;
+      transition:transform .12s ease, filter .12s ease;
     }
 
     .bottom-home{
-      min-height:62px;
-      border-radius:24px;
+      min-height:40px;
+      border-radius:17px;
       display:flex;
       align-items:center;
       justify-content:center;
       background:#fff;
-      border:1px solid #e5edf6;
-      color:#2563eb;
-      font-size:18px;
-      font-weight:1000;
+      border:1px solid var(--line);
+      color:var(--blue);
+      font-size:14px;
+      font-weight:950;
       box-shadow:0 12px 26px rgba(15,23,42,.06);
+      transition:transform .12s ease, filter .12s ease;
+    }
+
+    /* SEFERİ BİTİR MODALI */
+    .end-trip-overlay{
+      position:fixed;
+      inset:0;
+      z-index:99999;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+      background:rgba(9,15,28,.68);
+      backdrop-filter:blur(12px);
+    }
+
+    .end-trip-overlay.show{
+      display:flex;
+    }
+
+    .end-trip-box{
+      width:min(92vw,430px);
+      border-radius:34px;
+      overflow:hidden;
+      background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(242,246,255,.97));
+      border:1px solid rgba(255,255,255,.75);
+      box-shadow:
+        0 30px 80px rgba(0,0,0,.38),
+        inset 0 1px 0 rgba(255,255,255,.9);
+      animation:endTripIn .18s ease-out both;
+    }
+
+    @keyframes endTripIn{
+      from{
+        transform:translateY(18px) scale(.96);
+        opacity:0;
+      }
+      to{
+        transform:translateY(0) scale(1);
+        opacity:1;
+      }
+    }
+
+    .end-trip-top{
+      padding:24px 24px 14px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .end-trip-mark{
+      width:60px;
+      height:60px;
+      border-radius:22px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:31px;
+      background:linear-gradient(135deg,#ffe8ed,#ffd4dd);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .end-trip-title{
+      margin:0;
+      color:#111827;
+      font-size:25px;
+      line-height:1.05;
+      font-weight:950;
+      letter-spacing:-.3px;
+    }
+
+    .end-trip-small{
+      margin:5px 0 0;
+      color:var(--muted);
+      font-size:14px;
+      font-weight:750;
+    }
+
+    .end-trip-content{
+      padding:4px 24px 22px;
+    }
+
+    .end-trip-text{
+      margin:0;
+      color:#334155;
+      font-size:17px;
+      line-height:1.45;
+      font-weight:650;
+    }
+
+    .end-trip-note{
+      margin-top:14px;
+      padding:13px 14px;
+      border-radius:18px;
+      background:rgba(239,68,68,.08);
+      color:#991b1b;
+      font-size:14px;
+      line-height:1.35;
+      font-weight:800;
+    }
+
+    .end-trip-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      padding:0 24px 24px;
+    }
+
+    .end-trip-btn{
+      height:55px;
+      border:0;
+      border-radius:19px;
+      font-size:16px;
+      font-weight:950;
+      cursor:pointer;
+    }
+
+    .end-trip-cancel{
+      background:#eef2f7;
+      color:#334155;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .end-trip-ok{
+      color:#fff;
+      background:linear-gradient(135deg,#ef4444,#b91c1c);
+      box-shadow:0 14px 28px rgba(185,28,28,.25);
+    }
+
+    .end-trip-btn:active{
+      transform:scale(.98);
     }
 
     @media(max-width:430px){
       .shell{
-        width:calc(100vw - 24px);
-        padding:14px;
-        border-radius:30px;
+        width:calc(100vw - 12px);
+        margin-top:5px;
+        padding:8px;
+        border-radius:26px;
       }
 
       .hero{
-        min-height:205px;
-        padding:20px 18px;
+        height:158px;
+        min-height:158px;
+        border-radius:24px;
       }
 
-      .hero h1{
-        font-size:33px;
-        max-width:78%;
+      .seat-visual-card{
+        height:113px;
+        min-height:113px;
+        border-radius:23px;
       }
 
-      .hero p{
-        max-width:80%;
-        font-size:14px;
+      .big-action.drive{
+        min-height:80px;
       }
 
-      .big-action{
-        min-height:86px;
-        grid-template-columns:52px 1fr 48px;
-        gap:12px;
+      .big-action.cash{
+        min-height:72px;
       }
 
-      .big-ico{
-        width:52px;
-        height:52px;
-        font-size:27px;
+      .quick-item{
+        min-height:52px;
       }
 
-      .big-title{
-        font-size:21px;
+      .end-trip-box{
+        border-radius:28px;
       }
 
-      .big-desc{
-        font-size:13px;
+      .end-trip-top{
+        padding:22px 20px 12px;
       }
 
-      .arrow{
-        width:48px;
-        height:48px;
+      .end-trip-content{
+        padding:4px 20px 20px;
+      }
+
+      .end-trip-actions{
+        padding:0 20px 22px;
+      }
+
+      .end-trip-title{
+        font-size:23px;
       }
     }
   </style>
 
+<style id="end-trip-modal-premium-v2">
+/* =========================================================
+   SEFERİ BİTİR MODAL - PREMIUM FINAL V2
+========================================================= */
 
-
-
-
-<style id="end-trip-modal-final">
 .end-trip-overlay{
-  position:fixed;
-  inset:0;
-  z-index:99999;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:22px;
-  background:rgba(9,15,28,.68);
-  backdrop-filter:blur(12px);
-}
-
-.end-trip-overlay.show{
-  display:flex;
+  background:
+    radial-gradient(circle at 50% 25%, rgba(37,99,235,.18), transparent 34%),
+    rgba(8,15,28,.72) !important;
+  backdrop-filter:blur(16px) saturate(1.08) !important;
+  -webkit-backdrop-filter:blur(16px) saturate(1.08) !important;
+  padding:20px !important;
 }
 
 .end-trip-box{
-  width:min(92vw, 430px);
-  border-radius:34px;
-  overflow:hidden;
+  width:min(92vw, 410px) !important;
+  border-radius:34px !important;
+  overflow:hidden !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,.98), rgba(242,246,255,.97));
-  border:1px solid rgba(255,255,255,.75);
+    radial-gradient(circle at 18% 0%, rgba(255,255,255,.96), transparent 30%),
+    linear-gradient(180deg,#ffffff 0%,#f7faff 58%,#eef4ff 100%) !important;
+  border:1px solid rgba(255,255,255,.86) !important;
   box-shadow:
-    0 30px 80px rgba(0,0,0,.38),
-    inset 0 1px 0 rgba(255,255,255,.9);
-  animation:endTripIn .18s ease-out both;
-}
-
-@keyframes endTripIn{
-  from{ transform:translateY(18px) scale(.96); opacity:0; }
-  to{ transform:translateY(0) scale(1); opacity:1; }
+    0 34px 90px rgba(0,0,0,.40),
+    0 0 0 1px rgba(255,255,255,.72) inset !important;
 }
 
 .end-trip-top{
-  padding:24px 24px 14px;
-  display:flex;
-  align-items:center;
-  gap:14px;
+  padding:24px 24px 12px !important;
+  display:grid !important;
+  grid-template-columns:62px 1fr !important;
+  align-items:center !important;
+  gap:16px !important;
 }
 
 .end-trip-mark{
-  width:60px;
-  height:60px;
-  border-radius:22px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:31px;
-  background:linear-gradient(135deg, #ffe8ed, #ffd4dd);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+  width:62px !important;
+  height:62px !important;
+  border-radius:22px !important;
+  font-size:30px !important;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255,255,255,.75), transparent 32%),
+    linear-gradient(135deg,#ffe5ea,#ffd1dc) !important;
+  box-shadow:
+    0 14px 28px rgba(239,68,68,.16),
+    inset 0 1px 0 rgba(255,255,255,.92) !important;
 }
 
 .end-trip-title{
-  margin:0;
-  color:#111827;
-  font-size:25px;
-  line-height:1.05;
-  font-weight:950;
-  letter-spacing:-.3px;
+  margin:0 !important;
+  color:#0f172a !important;
+  font-size:28px !important;
+  line-height:1.03 !important;
+  font-weight:1000 !important;
+  letter-spacing:-.7px !important;
 }
 
 .end-trip-small{
-  margin:5px 0 0;
-  color:#64748b;
-  font-size:14px;
-  font-weight:750;
+  margin:6px 0 0 !important;
+  color:#64748b !important;
+  font-size:14px !important;
+  line-height:1.2 !important;
+  font-weight:850 !important;
 }
 
 .end-trip-content{
-  padding:4px 24px 22px;
+  padding:4px 24px 20px !important;
 }
 
 .end-trip-text{
-  margin:0;
-  color:#334155;
-  font-size:17px;
-  line-height:1.45;
-  font-weight:650;
+  margin:0 !important;
+  color:#334155 !important;
+  font-size:17px !important;
+  line-height:1.45 !important;
+  font-weight:750 !important;
 }
 
 .end-trip-note{
-  margin-top:14px;
-  padding:13px 14px;
-  border-radius:18px;
-  background:rgba(239,68,68,.08);
-  color:#991b1b;
-  font-size:14px;
-  line-height:1.35;
-  font-weight:800;
+  margin-top:14px !important;
+  padding:13px 14px !important;
+  border-radius:20px !important;
+  background:
+    linear-gradient(180deg,rgba(254,226,226,.92),rgba(255,241,242,.94)) !important;
+  border:1px solid rgba(252,165,165,.22) !important;
+  color:#991b1b !important;
+  font-size:14px !important;
+  line-height:1.35 !important;
+  font-weight:900 !important;
 }
 
 .end-trip-actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  padding:0 24px 24px;
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:12px !important;
+  padding:0 24px 24px !important;
 }
 
 .end-trip-btn{
-  height:55px;
-  border:0;
-  border-radius:19px;
-  font-size:16px;
-  font-weight:950;
-  cursor:pointer;
+  height:56px !important;
+  border:0 !important;
+  border-radius:20px !important;
+  font-size:16px !important;
+  font-weight:1000 !important;
+  cursor:pointer !important;
 }
 
 .end-trip-cancel{
-  background:#eef2f7;
-  color:#334155;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+  color:#334155 !important;
+  background:
+    linear-gradient(180deg,#ffffff,#eef3fb) !important;
+  border:1px solid rgba(148,163,184,.20) !important;
+  box-shadow:
+    0 12px 24px rgba(15,23,42,.08),
+    inset 0 1px 0 rgba(255,255,255,.92) !important;
 }
 
 .end-trip-ok{
-  color:#fff;
-  background:linear-gradient(135deg, #ef4444, #b91c1c);
-  box-shadow:0 14px 28px rgba(185,28,28,.25);
+  color:#fff !important;
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255,255,255,.22), transparent 30%),
+    linear-gradient(135deg,#fb4458 0%,#dc2626 52%,#b91c1c 100%) !important;
+  box-shadow:
+    0 16px 30px rgba(185,28,28,.28),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
 }
 
 .end-trip-btn:active{
-  transform:scale(.98);
+  transform:scale(.975) !important;
 }
 
 @media(max-width:420px){
-  .end-trip-box{ border-radius:28px; }
-  .end-trip-top{ padding:22px 20px 12px; }
-  .end-trip-content{ padding:4px 20px 20px; }
-  .end-trip-actions{ padding:0 20px 22px; }
-  .end-trip-title{ font-size:23px; }
-}
-</style>
-
-
-<style id="drive-card-image-final">
-/* Sürüş Modunu Aç kartı görsel tasarım */
-.big-action.drive{
-  background:
-    linear-gradient(90deg, rgba(0,0,0,.10), rgba(0,0,0,.04)),
-    url("/static/img/drive-mode-card.png") center / cover no-repeat !important;
-  min-height:130px !important;
-  border-radius:26px !important;
-  color:#fff !important;
-  box-shadow:0 18px 42px rgba(14,165,233,.24) !important;
-}
-
-/* Görselin içinde yazı olduğu için mevcut yazıları gizle */
-.big-action.drive .big-ico,
-.big-action.drive .big-title,
-.big-action.drive .big-desc,
-.big-action.drive .arrow{
-  opacity:0 !important;
-}
-
-@media(max-width:430px){
-  .big-action.drive{
-    min-height:118px !important;
-    border-radius:24px !important;
-  }
-}
-</style>
-
-
-<style id="continue-balanced-fit-final">
-/* =========================================================
-   DEVAM EDEN SEFER - DENGELİ EKRANA SIĞDIRMA
-========================================================= */
-
-.shell{
-  width:calc(100vw - 18px) !important;
-  margin:8px auto 12px !important;
-  padding:10px !important;
-  border-radius:28px !important;
-}
-
-/* Üst hero biraz kısalır */
-.hero{
-  min-height:150px !important;
-  padding:15px 16px !important;
-  border-radius:25px !important;
-  margin-bottom:9px !important;
-}
-
-.kicker{
-  padding:6px 11px !important;
-  font-size:11px !important;
-  margin-bottom:8px !important;
-}
-
-.hero h1{
-  font-size:29px !important;
-  line-height:.98 !important;
-  max-width:72% !important;
-}
-
-.hero p{
-  margin-top:7px !important;
-  font-size:12.8px !important;
-  line-height:1.18 !important;
-  max-width:74% !important;
-}
-
-.trip-pill{
-  margin-top:10px !important;
-  padding:8px 10px !important;
-  border-radius:16px !important;
-  font-size:11.8px !important;
-}
-
-/* Kart aralıkları */
-.primary-actions{
-  gap:8px !important;
-  margin:9px 0 !important;
-}
-
-/* Koltuklara Git kartı */
-.primary-actions .seat-visual-card{
-  min-height:118px !important;
-  padding:16px 17px !important;
-  border-radius:24px !important;
-  gap:15px !important;
-}
-
-.primary-actions .seat-visual-ico{
-  width:68px !important;
-  height:68px !important;
-  min-width:68px !important;
-  border-radius:22px !important;
-}
-
-.primary-actions .seat-visual-ico span{
-  font-size:38px !important;
-}
-
-.primary-actions .seat-visual-text{
-  padding-right:58px !important;
-}
-
-.primary-actions .seat-visual-card .big-title{
-  font-size:27px !important;
-  line-height:1 !important;
-}
-
-.primary-actions .seat-visual-card .big-desc{
-  margin-top:5px !important;
-  font-size:15.5px !important;
-  line-height:1.13 !important;
-}
-
-.primary-actions .seat-visual-arrow{
-  width:56px !important;
-  height:56px !important;
-  right:18px !important;
-  font-size:43px !important;
-}
-
-/* Sürüş ve kasa */
-.big-action{
-  min-height:74px !important;
-  padding:11px 14px !important;
-  border-radius:23px !important;
-  grid-template-columns:46px 1fr 44px !important;
-  gap:11px !important;
-}
-
-.big-action.drive{
-  min-height:88px !important;
-  border-radius:23px !important;
-}
-
-.big-action.cash{
-  min-height:76px !important;
-}
-
-.big-ico{
-  width:46px !important;
-  height:46px !important;
-  border-radius:17px !important;
-  font-size:23px !important;
-}
-
-.big-title{
-  font-size:20px !important;
-  line-height:1 !important;
-}
-
-.big-desc{
-  margin-top:4px !important;
-  font-size:12px !important;
-  line-height:1.12 !important;
-}
-
-.arrow{
-  width:44px !important;
-  height:44px !important;
-  font-size:30px !important;
-}
-
-/* Alt liste */
-.quick-list{
-  border-radius:23px !important;
-  margin-bottom:9px !important;
-}
-
-.quick-item{
-  min-height:56px !important;
-  padding:8px 12px !important;
-  grid-template-columns:40px 1fr 28px !important;
-  gap:10px !important;
-}
-
-.qico{
-  width:40px !important;
-  height:40px !important;
-  border-radius:15px !important;
-  font-size:20px !important;
-}
-
-.qtitle{
-  font-size:16px !important;
-  line-height:1 !important;
-}
-
-.qdesc{
-  margin-top:3px !important;
-  font-size:11.2px !important;
-  line-height:1.08 !important;
-}
-
-.qarr{
-  font-size:28px !important;
-}
-
-/* Alt butonlar */
-.danger-zone{
-  padding:10px !important;
-  border-radius:23px !important;
-  margin-bottom:9px !important;
-}
-
-.danger-btn{
-  min-height:47px !important;
-  border-radius:18px !important;
-  font-size:15px !important;
-}
-
-.bottom-home{
-  min-height:47px !important;
-  border-radius:19px !important;
-  font-size:15.5px !important;
-}
-
-@media(max-width:430px){
-  .shell{
-    width:calc(100vw - 14px) !important;
-    margin-top:6px !important;
-    padding:9px !important;
+  .end-trip-overlay{
+    padding:18px !important;
   }
 
-  .hero{
-    min-height:145px !important;
-    padding:14px 15px !important;
+  .end-trip-box{
+    width:min(94vw, 390px) !important;
+    border-radius:30px !important;
   }
 
-  .hero h1{
+  .end-trip-top{
+    padding:22px 20px 10px !important;
+    grid-template-columns:58px 1fr !important;
+    gap:14px !important;
+  }
+
+  .end-trip-mark{
+    width:58px !important;
+    height:58px !important;
+    border-radius:20px !important;
     font-size:28px !important;
   }
 
-  .hero p{
-    font-size:12.3px !important;
+  .end-trip-title{
+    font-size:25px !important;
   }
 
-  .primary-actions .seat-visual-card{
-    min-height:112px !important;
-    padding:15px 16px !important;
+  .end-trip-content{
+    padding:4px 20px 18px !important;
   }
 
-  .big-action.drive{
-    min-height:84px !important;
+  .end-trip-text{
+    font-size:16px !important;
   }
 
-  .quick-item{
-    min-height:54px !important;
-  }
-}
-</style>
-
-
-
-
-
-
-
-
-
-
-
-
-<style id="new-final-card-images">
-/* =========================================================
-   YENİ OLUŞTURULAN FINAL KART GÖRSELLERİ
-   home-bus-card-final.png
-   seat-card-final.png
-========================================================= */
-
-/* ÜST DEVAM EDEN SEFER HERO */
-.hero{
-  min-height:170px !important;
-  padding:0 !important;
-  border-radius:26px !important;
-  overflow:hidden !important;
-  background:url("/static/img/home-bus-card-final.png") center / cover no-repeat !important;
-  box-shadow:0 20px 44px rgba(120,18,32,.20) !important;
-}
-
-/* Görselin içinde yazılar olduğu için HTML yazılarını gizliyoruz */
-.hero .kicker,
-.hero h1,
-.hero p,
-.hero .trip-pill{
-  opacity:0 !important;
-  pointer-events:none !important;
-}
-
-/* Koltuklara Git kartı */
-.primary-actions .seat-visual-card{
-  min-height:124px !important;
-  padding:0 !important;
-  border-radius:25px !important;
-  overflow:hidden !important;
-  background:url("/static/img/seat-card-final.png") center / cover no-repeat !important;
-  box-shadow:0 18px 42px rgba(0,88,220,.22) !important;
-}
-
-/* Görselin içinde ikon, yazı ve ok olduğu için HTML içeriğini gizliyoruz */
-.primary-actions .seat-visual-card .seat-visual-ico,
-.primary-actions .seat-visual-card .seat-visual-text,
-.primary-actions .seat-visual-card .seat-visual-arrow{
-  opacity:0 !important;
-  pointer-events:none !important;
-}
-
-/* Eski perde/katman etkilerini kapat */
-.hero::before,
-.hero::after,
-.primary-actions .seat-visual-card::before,
-.primary-actions .seat-visual-card::after{
-  display:none !important;
-}
-
-/* Mobil ince ayar */
-@media(max-width:430px){
-  .hero{
-    min-height:162px !important;
-    border-radius:25px !important;
-    background-position:center !important;
+  .end-trip-actions{
+    padding:0 20px 22px !important;
+    gap:10px !important;
   }
 
-  .primary-actions .seat-visual-card{
-    min-height:116px !important;
-    border-radius:24px !important;
-    background-position:center !important;
-  }
-}
-</style>
-
-
-<style id="bottom-buttons-compact-final">
-/* Alt butonları dengeli küçültme */
-.danger-zone{
-  padding:8px !important;
-  border-radius:20px !important;
-  margin-bottom:7px !important;
-}
-
-.danger-btn{
-  min-height:42px !important;
-  border-radius:16px !important;
-  font-size:14px !important;
-  font-weight:950 !important;
-}
-
-.bottom-home{
-  min-height:42px !important;
-  border-radius:17px !important;
-  font-size:14.5px !important;
-  font-weight:950 !important;
-}
-
-/* Alt kartların dış boşluğunu da biraz azalt */
-.quick-list{
-  margin-bottom:8px !important;
-}
-
-@media(max-width:430px){
-  .danger-zone{
-    padding:7px !important;
-    margin-bottom:7px !important;
-  }
-
-  .danger-btn{
-    min-height:40px !important;
-    font-size:13.5px !important;
-  }
-
-  .bottom-home{
-    min-height:40px !important;
-    font-size:14px !important;
-  }
-}
-</style>
-
-
-<style id="final-image-card-stabilizer">
-/* Final görsel kart düzeltmesi:
-   Görselin içindeki yazılar kullanılacağı için HTML içeriği yer kaplamasın. */
-
-.hero .kicker,
-.hero h1,
-.hero p,
-.hero .trip-pill{
-  display:none !important;
-}
-
-.primary-actions .seat-visual-card .seat-visual-ico,
-.primary-actions .seat-visual-card .seat-visual-text,
-.primary-actions .seat-visual-card .seat-visual-arrow{
-  display:none !important;
-}
-
-/* Görsel kartların yüksekliği sabit/dengeli kalsın */
-.hero{
-  height:170px !important;
-  min-height:170px !important;
-}
-
-.primary-actions .seat-visual-card{
-  height:124px !important;
-  min-height:124px !important;
-}
-
-@media(max-width:430px){
-  .hero{
-    height:162px !important;
-    min-height:162px !important;
-  }
-
-  .primary-actions .seat-visual-card{
-    height:116px !important;
-    min-height:116px !important;
+  .end-trip-btn{
+    height:52px !important;
+    border-radius:18px !important;
+    font-size:15px !important;
   }
 }
 </style>
@@ -867,43 +634,28 @@
 <body>
   <main class="shell">
 
-    <section class="hero">
-      <div class="kicker">🟢 Devam Eden Sefer</div>
-      <h1>{{ trip["route"] }}</h1>
-      <p>Aktif sefer hazır. İstediğin ekrana hızlıca geç.</p>
-
-      <div class="trip-pill">
-        🚌 {{ trip["plate"] or "Plaka yok" }} · 
+    <section class="hero" aria-label="Devam eden sefer bilgisi">
+      <div class="sr-only">Devam Eden Sefer</div>
+      <h1 class="sr-only">{{ trip["route"] }}</h1>
+      <p class="sr-only">Aktif sefer hazır. İstediğin ekrana hızlıca geç.</p>
+      <div class="sr-only">
+        {{ trip["plate"] or "Plaka yok" }}
         {% if trip["date"] and "-" in trip["date"] %}
           {{ trip["date"].split("-")[2] }}.{{ trip["date"].split("-")[1] }}.{{ trip["date"].split("-")[0] }}
         {% else %}
           {{ trip["date"] }}
         {% endif %}
-        · {{ trip["departure_time"] }}
+        {{ trip["departure_time"] }}
       </div>
     </section>
 
     <section class="primary-actions">
-      <a class="big-action seat-visual-card" href="{{ url_for('seats_page') }}">
-        <span class="seat-visual-ico">
-          <span>💺</span>
-        </span>
-
-        <span class="seat-visual-text">
-          <span class="big-title">Koltuklara Git</span>
-          <span class="big-desc">Yolcu, koltuk ve iniş-biniş işlemleri</span>
-        </span>
-
-        <span class="seat-visual-arrow">›</span>
+      <a class="big-action seat-visual-card" href="{{ url_for('seats_page') }}" aria-label="Koltuklara Git">
+        <span class="sr-only">Koltuklara Git - Yolcu, koltuk ve iniş-biniş işlemleri</span>
       </a>
 
-      <a class="big-action drive" href="{{ url_for('seats_page') }}?drive=1">
-        <span class="big-ico">🚌</span>
-        <span>
-          <span class="big-title">Sürüş Modunu Aç</span>
-          <span class="big-desc">Durak akışı, hız ve sesli takip ekranı</span>
-        </span>
-        <span class="arrow">›</span>
+      <a class="big-action drive" href="{{ url_for('seats_page') }}?drive=1" aria-label="Sürüş Modunu Aç">
+        <span class="sr-only">Sürüş Modunu Aç - Durak akışı, hız ve sesli takip ekranı</span>
       </a>
 
       <a class="big-action cash" href="{{ url_for('hesap_page') }}">
@@ -958,87 +710,79 @@
 
   </main>
 
-<!-- END TRIP MODAL FINAL START -->
-<div class="end-trip-overlay" id="endTripOverlay" aria-hidden="true">
-  <div class="end-trip-box" role="dialog" aria-modal="true">
-    <div class="end-trip-top">
-      <div class="end-trip-mark">⛔</div>
-      <div>
-        <h2 class="end-trip-title">Seferi bitirelim mi?</h2>
-        <p class="end-trip-small">Aktif sefer sonlandırılacak.</p>
+  <div class="end-trip-overlay" id="endTripOverlay" aria-hidden="true">
+    <div class="end-trip-box" role="dialog" aria-modal="true" aria-labelledby="endTripTitle">
+      <div class="end-trip-top">
+        <div class="end-trip-mark">⛔</div>
+        <div>
+          <h2 class="end-trip-title" id="endTripTitle">Seferi bitirelim mi?</h2>
+          <p class="end-trip-small">Aktif sefer sonlandırılacak.</p>
+        </div>
       </div>
-    </div>
 
-    <div class="end-trip-content">
-      <p class="end-trip-text">
-        Sefer tamamlandıysa işlemi bitirebilirsin. Emin değilsen iptal edip ekrana dönebilirsin.
-      </p>
-      <div class="end-trip-note">
-        Bitirilen sefer aktif ekrandan kalkar, raporlardan görüntülenir.
+      <div class="end-trip-content">
+        <p class="end-trip-text">
+          Sefer tamamlandıysa işlemi bitirebilirsin. Emin değilsen iptal edip ekrana dönebilirsin.
+        </p>
+        <div class="end-trip-note">
+          Bitirilen sefer aktif ekrandan kalkar, raporlardan görüntülenir.
+        </div>
       </div>
-    </div>
 
-    <div class="end-trip-actions">
-      <button type="button" class="end-trip-btn end-trip-cancel" id="endTripCancel">İptal</button>
-      <button type="button" class="end-trip-btn end-trip-ok" id="endTripOk">Seferi Bitir</button>
+      <div class="end-trip-actions">
+        <button type="button" class="end-trip-btn end-trip-cancel" id="endTripCancel">İptal</button>
+        <button type="button" class="end-trip-btn end-trip-ok" id="endTripOk">Seferi Bitir</button>
+      </div>
     </div>
   </div>
-</div>
-<!-- END TRIP MODAL FINAL END -->
 
+  <script>
+    (function(){
+      const form = document.getElementById("endTripForm");
+      const overlay = document.getElementById("endTripOverlay");
+      const cancel = document.getElementById("endTripCancel");
+      const ok = document.getElementById("endTripOk");
 
-<script id="end-trip-modal-final-js">
-(function(){
-  const form = document.getElementById("endTripForm");
-  const overlay = document.getElementById("endTripOverlay");
-  const cancel = document.getElementById("endTripCancel");
-  const ok = document.getElementById("endTripOk");
+      if(!form || !overlay || !cancel || !ok) return;
 
-  if(!form || !overlay || !cancel || !ok){
-    console.log("End trip modal elemanları bulunamadı.");
-    return;
-  }
+      let confirmed = false;
 
-  let confirmed = false;
+      function openModal(){
+        overlay.classList.add("show");
+        overlay.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
 
-  function openModal(){
-    overlay.classList.add("show");
-    overlay.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  }
+      function closeModal(){
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+      }
 
-  function closeModal(){
-    overlay.classList.remove("show");
-    overlay.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  }
+      form.addEventListener("submit", function(e){
+        if(confirmed) return;
+        e.preventDefault();
+        openModal();
+      });
 
-  form.addEventListener("submit", function(e){
-    if(confirmed) return;
-    e.preventDefault();
-    openModal();
-  });
+      cancel.addEventListener("click", closeModal);
 
-  cancel.addEventListener("click", closeModal);
+      overlay.addEventListener("click", function(e){
+        if(e.target === overlay) closeModal();
+      });
 
-  overlay.addEventListener("click", function(e){
-    if(e.target === overlay) closeModal();
-  });
+      document.addEventListener("keydown", function(e){
+        if(e.key === "Escape" && overlay.classList.contains("show")){
+          closeModal();
+        }
+      });
 
-  document.addEventListener("keydown", function(e){
-    if(e.key === "Escape" && overlay.classList.contains("show")){
-      closeModal();
-    }
-  });
-
-  ok.addEventListener("click", function(){
-    confirmed = true;
-    closeModal();
-    form.submit();
-  });
-})();
-</script>
-
+      ok.addEventListener("click", function(){
+        confirmed = true;
+        closeModal();
+        form.submit();
+      });
+    })();
+  </script>
 </body>
 </html>
-

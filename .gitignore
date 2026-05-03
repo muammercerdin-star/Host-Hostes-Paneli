@@ -54,3 +54,13 @@ apk_payload_files.txt
 *.bak
 *.bak*
 *.tmp
+
+# ignore local db and generated files
+db.sqlite3
+storage/reports/
+storage/backups/
+uploads/
+
+# old design trials
+static/seats/_archive_theme_trials/
+static/seats/seats-redesign.css
