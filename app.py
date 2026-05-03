@@ -998,6 +998,9 @@ def is_excluded_path(path: str) -> bool:
 
 @app.before_request
 def bootstrap_and_guard():
+    if request.path == "/tanitim" or request.path.startswith("/static/"):
+        return None
+
     # =====================================================
     # Paket özellik kilidi
     # Örn: Standart kullanıcı Pro özelliğe girerse paket ekranına yönlenir.

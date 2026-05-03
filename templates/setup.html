@@ -5,12 +5,20 @@
 <script id="onboarding-first-run-redirect">
   (function(){
     try{
+      var params = new URLSearchParams(window.location.search);
+      if(params.get("tanitim") === "1"){
+        localStorage.setItem("muavin_onboarding_seen", "1");
+        return;
+      }
+
       if(localStorage.getItem("muavin_onboarding_seen") !== "1"){
         window.location.replace("/tanitim");
       }
     }catch(e){}
   })();
 </script>
+
+
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
