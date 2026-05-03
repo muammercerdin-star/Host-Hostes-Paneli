@@ -5504,6 +5504,9 @@ def forgot_password_page():
 
 @app.route("/kurulum", methods=["GET", "POST"])
 def setup_page():
+    if request.method == "GET" and request.args.get("tanitim") != "1":
+        return redirect(url_for("onboarding_page"))
+
     # Profil varsa kurulum ekranını tekrar açtırma
     if admin_profile_exists():
         return redirect(url_for("login"))
