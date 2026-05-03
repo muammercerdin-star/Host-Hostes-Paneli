@@ -21,6 +21,7 @@ android {
             pip {
                 install "flask"
                 install "werkzeug"
+                install "requests"
             }
         }
 
