@@ -64,3 +64,48 @@ uploads/
 # old design trials
 static/seats/_archive_theme_trials/
 static/seats/seats-redesign.css
+
+# Local backup / old versions
+*.bak
+*.bak*
+*.tmp
+*.off
+*yedek*
+*hata*
+*calisan*
+*çalışan*
+*oncesi*
+*öncesi*
+
+# Runtime data
+db.sqlite3
+storage/reports/
+storage/backups/
+uploads/
+
+# Local reports / analysis
+tracked_junk.txt
+tracked_junk_safe.txt
+APP_INCELEME_RAPORU.txt
+SEATS_AKTIF_HARITA.txt
+GERCEK_AKTIF_DOSYALAR.txt
+ROUTE_HARITASI.txt
+TEMPLATE_BAGLANTI_HARITASI.txt
+SEATS_AKTIF_BAGLANTI.txt
+APK_ICI_DOSYALAR.txt
+android_python_files.txt
+aktif_dosya_listesi.txt
+proje_dosya_listesi.txt
+proje_flask_baglanti_raporu.txt
+proje_template_haritasi.txt
+seats_baglanti_haritasi.txt
+app_inceleme_raporu.py
+seats_aktif_harita.py
+
+# APK temporary / build
+apk_payload/
+apk_payload_files.txt
+tmp_muavin_icon/
+android_app/.gradle/
+android_app/build/
+android_app/app/build/
