@@ -3771,6 +3771,12 @@ def api_stops():
 
 
 
+
+def ensure_route_stop_coords_table(db=None):
+    db = db or get_db()
+    ensure_route_stop_coords_table(db)
+
+
 @app.route("/api/coords", methods=["GET", "POST", "DELETE"])
 def api_coords():
     """
@@ -6395,17 +6401,7 @@ def _parse_stops_local(raw):
 
 
 def _ensure_route_stop_coords_table_local():
-    db = get_db()
-    db.execute("""
-        CREATE TABLE IF NOT EXISTS route_stop_coords(
-            route TEXT NOT NULL,
-            stop TEXT NOT NULL,
-            lat REAL NOT NULL,
-            lng REAL NOT NULL,
-            PRIMARY KEY(route, stop)
-        )
-    """)
-    db.commit()
+    ensure_route_stop_coords_table()
 
 
 def _save_route_stop_coord_local(route_name, stop_name, lat, lng):
