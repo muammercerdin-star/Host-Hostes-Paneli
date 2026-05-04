@@ -1036,7 +1036,12 @@ if(routeFocusItem && live){
     updateCompactHeader();
 
     if(!silent && voiceReply){
-      speak(stopHumanVoiceSummary(canonical));
+      const msg = stopHumanVoiceSummary(canonical);
+      if(typeof speakOnce === "function"){
+        speakOnce(msg);
+      }else if(typeof speak === "function"){
+        speak(msg);
+      }
     }
 
     return true;
@@ -2430,7 +2435,7 @@ function initTabs(){
         toast("Canlı durak henüz yok");
         return;
       }
-      focusRouteStripStop(live);
+      focusRouteStripStop(live, { select:true, voice:true });
     });
   }
 
@@ -2444,7 +2449,7 @@ function initTabs(){
         toast("Sıradaki durak bulunamadı");
         return;
       }
-      focusRouteStripStop(next, { select:true, voice:false });
+      focusRouteStripStop(next, { select:true, voice:true });
     });
   }
 
