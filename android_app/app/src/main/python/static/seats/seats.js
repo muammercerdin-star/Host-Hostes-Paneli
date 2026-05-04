@@ -2554,3 +2554,103 @@ function initTabs(){
     setInterval(syncDriveEtaChip, 1500);
   });
 })();
+
+
+/* =========================================================
+   ROUTE FLOW DIRECT TTS PATCH
+   APK/WebView için Durak Akışı tıklamalarında doğrudan ses verir.
+========================================================= */
+(function(){
+  function routeDirectTtsEnabled(){
+    try{
+      return (localStorage.getItem("ttsEnabled") ?? "1") === "1";
+    }catch(e){
+      return true;
+    }
+  }
+
+  function speakRouteDirect(text){
+    const msg = String(text || "").trim();
+    if(!msg || !routeDirectTtsEnabled()) return;
+
+    // APK içinde Android TextToSpeech köprüsü
+    if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
+      try{
+        window.AndroidTTS.speak(msg);
+        return;
+      }catch(e){
+        console.warn("AndroidTTS route direct hata:", e);
+      }
+    }
+
+    // Tarayıcı fallback
+    try{
+      if(!("speechSynthesis" in window)) return;
+
+      window.speechSynthesis.cancel();
+
+      const u = new SpeechSynthesisUtterance(msg);
+      u.lang = "tr-TR";
+      u.rate = 0.95;
+      u.pitch = 1;
+
+      const voices = speechSynthesis.getVoices ? speechSynthesis.getVoices() : [];
+      const trVoice = voices.find(v =>
+        String(v.lang || "").toLowerCase().startsWith("tr") ||
+        String(v.name || "").toLowerCase().includes("turk")
+      );
+
+      if(trVoice) u.voice = trVoice;
+
+      speechSynthesis.speak(u);
+    }catch(e){
+      console.warn("route direct speech hata:", e);
+    }
+  }
+
+  function cleanText(x){
+    return String(x || "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  document.addEventListener("click", function(e){
+    const routeStop = e.target.closest && e.target.closest(".route-stop");
+    if(routeStop){
+      const stopName =
+        routeStop.dataset.stop ||
+        routeStop.querySelector(".name")?.textContent ||
+        "";
+
+      const stop = cleanText(stopName);
+
+      if(stop && stop !== "Rota hazırlanıyor"){
+        speakRouteDirect(stop + " seçildi.");
+      }
+
+      return;
+    }
+
+    const livePill = e.target.closest && e.target.closest(".route-pill");
+    if(livePill){
+      const liveEl = livePill.querySelector("#routeMiniLive");
+      const nextEl = livePill.querySelector("#routeMiniNext");
+
+      if(liveEl){
+        const live = cleanText(liveEl.textContent);
+        if(live && live !== "—" && live !== "-"){
+          speakRouteDirect("Canlı durak " + live + ".");
+        }
+        return;
+      }
+
+      if(nextEl){
+        const next = cleanText(nextEl.textContent);
+        if(next && next !== "—" && next !== "-"){
+          speakRouteDirect("Sıradaki durak " + next + ".");
+        }
+        return;
+      }
+    }
+  }, true);
+})();
