@@ -2129,9 +2129,15 @@ function initTabs(){
           setState("");
         }
 
-        renderTimeline();
-        renderRouteStrip();
-        renderAI();
+        // GPS çok sık veri gönderirse ağır renderları boğmasın.
+        // Timeline / route strip / AI panel en fazla 2.5 saniyede bir yenilenir.
+        const nowRender = Date.now();
+        if(!window.__seatsLastSpeedRenderAt || nowRender - window.__seatsLastSpeedRenderAt > 2500){
+          window.__seatsLastSpeedRenderAt = nowRender;
+          renderTimeline();
+          renderRouteStrip();
+          renderAI();
+        }
       }, () => {
         spVal.textContent = "0";
         spLimit.textContent = "GPS kapalı";
