@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 
+
+<link rel="stylesheet" href="/static/style.css">
+
 <style id="intent-legend-mobile-fix">
 /* =========================================================
-   AI Console - Intent listesi mobil taşma düzeltmesi
+   AI Console - Intent Listesi Mobil Taşma Düzeltmesi
    Sadece #intentLegend alanını etkiler.
 ========================================================= */
 
@@ -72,7 +75,6 @@
 }
 </style>
 
-<link rel="stylesheet" href="/static/style.css">
 
 <script>
   window.CSRF_TOKEN = {{ csrf_token|tojson }};
