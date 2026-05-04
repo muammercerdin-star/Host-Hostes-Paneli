@@ -930,6 +930,12 @@ function renderRouteStrip(){
 
 item.addEventListener("click", () => {
   setSelectedStop(stop, { silent:false, voiceReply:true });
+
+  // APK/WebView için ek garanti: durak kartı tıklamasında doğrudan TTS tetikle
+  try{
+    const msg = stopHumanVoiceSummary(stop);
+    if(typeof speakOnce === "function") speakOnce(msg);
+  }catch(_){}
 });
 
 wrap.appendChild(item);
