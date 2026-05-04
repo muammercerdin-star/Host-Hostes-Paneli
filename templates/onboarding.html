@@ -158,13 +158,6 @@
       line-height:1;
     }
 
-    .counter{
-      text-align:center;
-      color:#64748b;
-      font-size:13px;
-      font-weight:900;
-    }
-
     @media(max-width:430px){
       .onboard-shell{
         padding:calc(8px + env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom));
@@ -213,7 +206,6 @@
 
     <div class="bottom">
       <div class="dots" id="dots"></div>
-      <div class="counter" id="counter">1 / 7</div>
 
       <div class="actions">
         <button class="primary" id="startBtn" type="button">Tanıtımı Tamamla</button>
@@ -228,7 +220,7 @@
 
     const slides = document.getElementById("slides");
     const dots = document.getElementById("dots");
-    const counter = document.getElementById("counter");
+    
     const nextBtn = document.getElementById("nextBtn");
     const startBtn = document.getElementById("startBtn");
     const skipBtn = document.getElementById("skipBtn");
@@ -241,7 +233,6 @@
 
     function render(){
       slides.style.transform = `translateX(${-index * 100}%)`;
-      counter.textContent = `${index + 1} / ${TOTAL}`;
 
       [...dots.children].forEach((d,i)=>{
         d.classList.toggle("active", i === index);
