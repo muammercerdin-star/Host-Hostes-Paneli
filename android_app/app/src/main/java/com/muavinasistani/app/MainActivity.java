@@ -13,6 +13,7 @@ import android.provider.MediaStore;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
@@ -44,6 +45,9 @@ public class MainActivity extends Activity {
     private ValueCallback<Uri[]> filePathCallback;
     private Uri cameraImageUri;
 
+    private TextToSpeech tts;
+    private boolean ttsReady = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +69,17 @@ public class MainActivity extends Activity {
         settings.setGeolocationEnabled(true);
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
 
+        tts = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                tts.setLanguage(new Locale("tr", "TR"));
+                tts.setSpeechRate(0.95f);
+                tts.setPitch(1.0f);
+                ttsReady = true;
+            }
+        });
+
         webView.addJavascriptInterface(new VoiceBridge(), "AndroidVoice");
+        webView.addJavascriptInterface(new TtsBridge(), "AndroidTTS");
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -209,6 +223,39 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+
+    public class TtsBridge {
+        @JavascriptInterface
+        public void speak(String text) {
+            final String msg = text == null ? "" : text.trim();
+
+            if (msg.length() == 0) return;
+
+            runOnUiThread(() -> {
+                try {
+                    if (tts == null) return;
+
+                    if (!ttsReady) {
+                        tts.setLanguage(new Locale("tr", "TR"));
+                        ttsReady = true;
+                    }
+
+                    tts.stop();
+                    tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null, "muavin_tts");
+                } catch (Exception ignored) {}
+            });
+        }
+
+        @JavascriptInterface
+        public void stop() {
+            runOnUiThread(() -> {
+                try {
+                    if (tts != null) tts.stop();
+                } catch (Exception ignored) {}
+            });
+        }
+    }
+
     public class VoiceBridge {
         @JavascriptInterface
         public void startVoice() {
@@ -317,6 +364,19 @@ public class MainActivity extends Activity {
                     Manifest.permission.RECORD_AUDIO
             }, 100);
         }
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        try {
+            if (tts != null) {
+                tts.stop();
+                tts.shutdown();
+            }
+        } catch (Exception ignored) {}
+
+        super.onDestroy();
     }
 
     @Override

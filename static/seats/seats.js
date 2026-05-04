@@ -2130,12 +2130,44 @@ function initTabs(){
     }
 
     function speakOnce(text){
-      if(!ttsEnabled || !("speechSynthesis" in window)) return;
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = trVoice ? trVoice.lang : "tr-TR";
-      if(trVoice) u.voice = trVoice;
-      u.rate = 1;
-      speechSynthesis.speak(u);
+      if(!ttsEnabled) return;
+
+      const msg = String(text || "").trim();
+      if(!msg) return;
+
+      // APK içindeyse Android'in kendi TTS motorunu kullan.
+      if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
+        try{
+          window.AndroidTTS.speak(msg);
+          return;
+        }catch(e){
+          console.warn("AndroidTTS hata:", e);
+        }
+      }
+
+      // Tarayıcıda eski Web Speech TTS devam etsin.
+      if(!("speechSynthesis" in window)) return;
+
+      try{
+        speechSynthesis.cancel();
+
+        const u = new SpeechSynthesisUtterance(msg);
+        u.lang = "tr-TR";
+        u.rate = 0.95;
+        u.pitch = 1;
+
+        const voices = speechSynthesis.getVoices ? speechSynthesis.getVoices() : [];
+        const trVoice = voices.find(v =>
+          String(v.lang || "").toLowerCase().startsWith("tr") ||
+          String(v.name || "").toLowerCase().includes("turk")
+        );
+
+        if(trVoice) u.voice = trVoice;
+
+        speechSynthesis.speak(u);
+      }catch(e){
+        console.warn("speechSynthesis hata:", e);
+      }
     }
 
     function setState(cls){
