@@ -28,9 +28,6 @@ def wait_for_port(host="127.0.0.1", port=5000, timeout=25):
 
 
 def prepare_android_data_dir(app_files_dir=None):
-    """
-    APK içindeki sabit dosyaları Android'in yazılabilir app klasörüne hazırlar.
-    """
     base_dir = Path(__file__).resolve().parent
 
     if app_files_dir:
@@ -43,10 +40,8 @@ def prepare_android_data_dir(app_files_dir=None):
     db_path = data_dir / "db.sqlite3"
     seed_db = base_dir / "seed" / "db.sqlite3"
 
-    # DB ilk kez yoksa APK içindeki seed DB'den kopyala.
-    # Mevcut DB varsa üzerine yazma; kullanıcı verisi korunur.
     if not db_path.exists() and seed_db.exists():
-        shutil.copy2(str(seed_db), str(db_path))
+        shutil.copyfile(str(seed_db), str(db_path))
 
     uploads_dir = data_dir / "uploads" / "consignments"
     reports_dir = data_dir / "storage" / "reports"
@@ -59,8 +54,6 @@ def prepare_android_data_dir(app_files_dir=None):
     os.environ["DB_PATH"] = str(db_path)
     os.environ["UPLOAD_DIR"] = str(uploads_dir)
 
-    # Relative storage/... kullanan kodlar Android veri alanına yazsın diye
-    # çalışma dizinini data_dir yapıyoruz.
     os.chdir(str(data_dir))
 
     return base_dir, data_dir
@@ -72,8 +65,6 @@ def start_flask_server(app_files_dir=None):
     try:
         base_dir, data_dir = prepare_android_data_dir(app_files_dir)
 
-        # app.py, templates ve static APK içindeki base_dir altında.
-        # Python import yolu zaten base_dir'den gelir.
         from app import app
 
         app.run(

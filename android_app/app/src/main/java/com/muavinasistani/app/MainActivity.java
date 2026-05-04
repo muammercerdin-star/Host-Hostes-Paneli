@@ -153,7 +153,11 @@ public class MainActivity extends Activity {
         new Thread(() -> {
             try {
                 Python py = Python.getInstance();
-                py.getModule("android_server").callAttr("start_in_background", getFilesDir().getAbsolutePath());
+                File pyDataDir = new File(getExternalFilesDir(null), "pydata");
+                if (!pyDataDir.exists()) {
+                    pyDataDir.mkdirs();
+                }
+                py.getModule("android_server").callAttr("start_in_background", pyDataDir.getAbsolutePath());
 
                 runOnUiThread(() -> webView.loadUrl("http://127.0.0.1:5000/"));
 
