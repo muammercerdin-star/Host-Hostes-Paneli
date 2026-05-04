@@ -2367,53 +2367,7 @@ function initTabs(){
   })();
 
 
-/* =========================================================
-   DRIVE TOP ETA MIRROR
-   Paneldeki Rötar / ETA bilgisini üst sürüş kutusuna taşır
-========================================================= */
-(function(){
-  function q(sel){ return document.querySelector(sel); }
 
-  function etaClassFromText(text){
-    const t = String(text || "").toLowerCase();
-    if(t.includes("rötar") || t.includes("rotar") || t.includes("geç")) return "bad";
-    if(t.includes("erken") || t.includes("tam saat")) return "good";
-    if(t.includes("bekleniyor") || t.includes("saat yok") || t.includes("—")) return "neutral";
-    return "warn";
-  }
-
-  function syncDriveEtaChip(){
-    const chip = q("#driveEtaChip");
-    const main = q("#driveEtaMain");
-    const sub = q("#driveEtaSub");
-
-    if(!chip || !main || !sub) return;
-
-    const delayMain = (q("#delayMain")?.textContent || "").trim();
-    const delaySub = (q("#delaySub")?.textContent || "").trim();
-    const target = (q("#routeNextTimed")?.textContent || "").trim();
-
-    let mainText = delayMain && delayMain !== "—" ? delayMain : "Rötar";
-    let subText = delaySub && delaySub !== "—" ? delaySub : "ETA bekleniyor";
-
-    if(target && target !== "—" && !subText.includes(target)){
-      subText = target + " · " + subText;
-    }
-
-    main.textContent = mainText;
-    sub.textContent = subText;
-
-    chip.classList.remove("good","warn","bad","neutral");
-    chip.classList.add(etaClassFromText(mainText + " " + subText));
-  }
-
-  window.syncDriveEtaChip = syncDriveEtaChip;
-
-  document.addEventListener("DOMContentLoaded", function(){
-    syncDriveEtaChip();
-    setInterval(syncDriveEtaChip, 1500);
-  });
-})();
 
 
 
