@@ -1282,10 +1282,8 @@ document.addEventListener("DOMContentLoaded", function(){
     const count = Number(info?.count || 0);
     if(textEl){
       textEl.textContent = count > 0
-        ? `Bu durakta ${count} yolcu indirilecek.
-Yolcu, ayakta yolcu ve ilgili işlemler tamamlanacak.`
-        : "Bu durakta inecek yolcu bulunuyor.
-Yolcu, ayakta yolcu ve ilgili işlemler tamamlanacak.";
+        ? `Bu durakta ${count} yolcu indirilecek.\nYolcu, ayakta yolcu ve ilgili işlemler tamamlanacak.`
+        : "Bu durakta inecek yolcu bulunuyor.\nYolcu, ayakta yolcu ve ilgili işlemler tamamlanacak.";
     }
 
     modal.classList.add("show");
