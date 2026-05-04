@@ -1,5 +1,6 @@
 import os
 import socket
+import shutil
 import threading
 import time
 import traceback
@@ -26,13 +27,53 @@ def wait_for_port(host="127.0.0.1", port=5000, timeout=25):
     raise RuntimeError("Flask 25 saniye içinde 127.0.0.1:5000 üzerinde başlamadı.")
 
 
-def start_flask_server():
+def prepare_android_data_dir(app_files_dir=None):
+    """
+    APK içindeki sabit dosyaları Android'in yazılabilir app klasörüne hazırlar.
+    """
+    base_dir = Path(__file__).resolve().parent
+
+    if app_files_dir:
+        data_dir = Path(str(app_files_dir))
+    else:
+        data_dir = base_dir / "_android_data"
+
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    db_path = data_dir / "db.sqlite3"
+    seed_db = base_dir / "seed" / "db.sqlite3"
+
+    # DB ilk kez yoksa APK içindeki seed DB'den kopyala.
+    # Mevcut DB varsa üzerine yazma; kullanıcı verisi korunur.
+    if not db_path.exists() and seed_db.exists():
+        shutil.copy2(str(seed_db), str(db_path))
+
+    uploads_dir = data_dir / "uploads" / "consignments"
+    reports_dir = data_dir / "storage" / "reports"
+    backups_dir = data_dir / "storage" / "backups"
+
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    backups_dir.mkdir(parents=True, exist_ok=True)
+
+    os.environ["DB_PATH"] = str(db_path)
+    os.environ["UPLOAD_DIR"] = str(uploads_dir)
+
+    # Relative storage/... kullanan kodlar Android veri alanına yazsın diye
+    # çalışma dizinini data_dir yapıyoruz.
+    os.chdir(str(data_dir))
+
+    return base_dir, data_dir
+
+
+def start_flask_server(app_files_dir=None):
     global SERVER_ERROR
 
     try:
-        base_dir = Path(__file__).resolve().parent
-        os.chdir(str(base_dir))
+        base_dir, data_dir = prepare_android_data_dir(app_files_dir)
 
+        # app.py, templates ve static APK içindeki base_dir altında.
+        # Python import yolu zaten base_dir'den gelir.
         from app import app
 
         app.run(
@@ -48,8 +89,8 @@ def start_flask_server():
         print(SERVER_ERROR)
 
 
-def start_in_background():
-    t = threading.Thread(target=start_flask_server, daemon=True)
+def start_in_background(app_files_dir=None):
+    t = threading.Thread(target=start_flask_server, args=(app_files_dir,), daemon=True)
     t.start()
 
     wait_for_port("127.0.0.1", 5000, timeout=25)
