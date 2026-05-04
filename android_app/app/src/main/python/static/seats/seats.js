@@ -2625,7 +2625,15 @@ function initTabs(){
       const stop = cleanText(stopName);
 
       if(stop && stop !== "Rota hazırlanıyor"){
-        speakRouteDirect(stop + " seçildi.");
+        try{
+          if(typeof stopHumanVoiceSummary === "function"){
+            speakRouteDirect(stopHumanVoiceSummary(stop));
+          }else{
+            speakRouteDirect(stop + " seçildi.");
+          }
+        }catch(_){
+          speakRouteDirect(stop + " seçildi.");
+        }
       }
 
       return;
