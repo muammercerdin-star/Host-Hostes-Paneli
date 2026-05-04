@@ -1,0 +1,384 @@
+APP.PY İNCELEME RAPORU
+======================================================================
+Toplam satır: 6619
+
+1) IMPORTLAR
+----------------------------------------------------------------------
+1: import shutil
+2: import zipfile
+3: import os
+4: import csv
+5: import json
+6: import secrets
+7: import sqlite3
+8: import re
+9: from io import StringIO
+10: from pathlib import Path
+11: from datetime import datetime, timedelta
+12: from typing import Any, Optional, Tuple
+14: from flask import (
+28: from werkzeug.utils import secure_filename
+29: from werkzeug.security import generate_password_hash, check_password_hash
+31: from speedlimit import bp_speed
+32: from modules.bags import bp as bags_bp
+33: from modules.bags import bag_root, safe
+
+2) ROUTE HARİTASI
+----------------------------------------------------------------------
+1232: @app.route("/tanitim")
+1278: @app.route("/kullanici-sifirla", methods=["GET", "POST"])
+1297: @app.route("/login", methods=["GET", "POST"])
+1314: @app.route("/logout", methods=["GET", "POST"])
+1324: @app.route("/ai-console")
+1329: @app.route("/")
+1336: @app.route("/set-route", methods=["POST"])
+1350: @app.route("/sefer-baslat", methods=["GET", "POST"])
+1401: @app.route("/continue-trip")
+1489: @app.route("/seats")
+1534: @app.route("/yolcu-kontrol")
+1547: @app.route("/hatlar")
+1564: @app.route("/hat-ekle", methods=["GET", "POST"])
+1585: @app.route("/hat/<int:rid>/duzenle", methods=["GET", "POST"])
+1632: @app.route("/hat/builtin/duzenle")
+1646: @app.route("/hat/<int:rid>/sil", methods=["POST"])
+1658: @app.route("/hat/<int:rid>/saatler", methods=["GET", "POST"])
+1869: @app.route("/fiyat", methods=["GET"])
+1909: @app.route("/fiyat-g", methods=["GET", "POST"])
+2010: @app.route("/hesap")
+2120: @app.route("/hesap/moves.csv")
+3272: @app.route("/api/seats/list")
+3385: @app.route("/api/seat", methods=["POST", "DELETE"])
+3529: @app.route("/api/seats/bulk", methods=["POST", "DELETE"])
+3683: @app.route("/api/seats/offload", methods=["POST"])
+3848: @app.route("/api/stops")
+3859: @app.route("/api/coords", methods=["GET", "POST", "DELETE"])
+3998: @app.route("/api/walkon", methods=["GET", "POST", "DELETE"])
+4146: @app.route("/api/standing", methods=["GET", "POST", "DELETE"])
+4238: @app.route("/api/standing/list")
+4272: @app.route("/api/stats")
+4341: @app.route("/api/stoplog", methods=["GET", "POST"])
+4431: @app.route("/sefer-raporu")
+4436: @app.route("/api/trip-report")
+4537: @app.route("/olaylar")
+4542: @app.route("/api/events")
+4612: @app.route("/sefer-raporu/arsiv/<base>")
+4625: @app.route("/api/trip-report/archive/<base>")
+4645: @app.route("/api/report-archive")
+4683: @app.route("/sefer-raporu-son")
+4707: @app.route("/rapor-arsiv")
+4734: @app.route("/rapor-dosya/<base>/<kind>")
+4762: @app.route("/raporlar")
+4767: @app.route("/api/report/seat-stats")
+4852: @app.route("/emanetler")
+4873: @app.route("/api/consignments", methods=["GET", "POST"])
+4947: @app.route("/api/consignments/<int:cid>/photos", methods=["GET", "POST"])
+5018: @app.route("/api/consignments/<int:cid>", methods=["DELETE"])
+5043: @app.route("/u/<path:filename>")
+5100: @app.route("/bags/clear", methods=["DELETE"])
+5441: @app.route("/end-trip", methods=["GET", "POST"])
+5442: @app.route("/end_trip", methods=["GET", "POST"])
+5483: @app.route("/ayarlar/sifre", methods=["GET", "POST"])
+5510: @app.route("/ayarlar/kurtarma-kodu", methods=["GET", "POST"])
+5544: @app.route("/sifre-unuttum", methods=["GET", "POST"])
+5572: @app.route("/kurulum", methods=["GET", "POST"])
+5614: @app.route("/ayarlar/profil", methods=["GET", "POST"])
+5744: @app.route("/ayarlar/yedekleme")
+5770: @app.route("/ayarlar/yedekleme/indir/<filename>")
+6174: @app.route("/paket-gerekli")
+6187: @app.route("/ayarlar/abonelik", methods=["GET", "POST"])
+6229: @app.route("/abonelik-gerekli")
+6233: @app.route("/ayarlar")
+6315: @app.route("/ayarlar/paket-talepleri")
+6510: @app.route("/api/routes/<int:rid>/coord-status", methods=["POST"])
+6571: @app.route("/api/routes/<int:rid>/coord-save-manual", methods=["POST"])
+
+3) TEKRAR EDEN ROUTE VAR MI?
+----------------------------------------------------------------------
+Tekrar eden route görünmüyor.
+
+4) TEKRAR EDEN FONKSİYON VAR MI?
+----------------------------------------------------------------------
+ai_parse_default_command: satırlar 1147, 2453
+resolve_ai_command: satırlar 1175, 2614
+
+5) RİSKLİ / DİKKAT EDİLECEK SATIRLAR
+----------------------------------------------------------------------
+29: from werkzeug.security import generate_password_hash, check_password_hash
+48: app.secret_key = os.getenv("SECRET_KEY", "degistir-beni")
+50: DB_PATH = os.getenv("DB_PATH", "db.sqlite3")
+52: ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "yusuf")
+150: except Exception:
+160: password_hash TEXT NOT NULL,
+166: def get_admin_password_hash(db):
+168: row = db.execute("SELECT password_hash FROM admin_security WHERE id=1").fetchone()
+169: return row["password_hash"] if row else ""
+172: def verify_admin_password(password):
+173: password = (password or "").strip()
+174: if not password:
+178: saved_hash = get_admin_password_hash(db)
+183: return check_password_hash(saved_hash, password)
+184: except Exception:
+188: return password == ADMIN_PASSWORD
+191: def set_admin_password(new_password):
+192: new_password = (new_password or "").strip()
+193: if len(new_password) < 4:
+199: password_hash = generate_password_hash(new_password)
+202: INSERT INTO admin_security(id, password_hash, updated_at)
+205: password_hash=excluded.password_hash,
+207: """, (password_hash,))
+214: UPLOAD_DIR = os.getenv(
+215: "UPLOAD_DIR",
+224: app.register_blueprint(bags_bp)
+225: app.register_blueprint(bp_speed)
+339: except Exception:
+346: except Exception:
+351: Path(UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+426: g.db = sqlite3.connect(DB_PATH)
+483: passenger_name TEXT DEFAULT '',
+484: passenger_phone TEXT DEFAULT '',
+665: "passenger_name": "ALTER TABLE seats ADD COLUMN passenger_name TEXT DEFAULT ''",
+666: "passenger_phone": "ALTER TABLE seats ADD COLUMN passenger_phone TEXT DEFAULT ''",
+686: except Exception:
+701: except Exception:
+732: except Exception:
+738: settings_set("recovery_code_hash", generate_password_hash(code))
+752: return check_password_hash(saved_hash, code)
+753: except Exception:
+826: except Exception:
+827: pass
+1020: except Exception:
+1021: pass
+1042: except Exception:
+1043: pass
+1074: except Exception:
+1257: except Exception:
+1258: pass
+1269: except Exception:
+1270: pass
+1273: except Exception:
+1303: pwd = (request.form.get("password") or "").strip()
+1304: if verify_admin_password(pwd):
+1415: passenger_count = db.execute(
+1421: empty_seats = max(total_seats - passenger_count, 0)
+1422: occupancy = round((passenger_count / total_seats) * 100) if total_seats else 0
+1437: except Exception:
+1462: except Exception:
+1469: "passenger_count": passenger_count,
+1535: def passenger_control():
+1540: return render_template("passenger_control.html", trip=trip, stops=get_stops(trip["route"]))
+1610: except Exception:
+2256: "query_total_passengers": {
+2258: "pattern": "query + total_passengers",
+2390: except Exception:
+2476: return {"intent": "query_total_passengers", "pattern": ai_intent_pattern("query_total_passengers"), "confidence": 0.93}
+2515: return {"intent": "query_total_passengers", "pattern": ai_intent_pattern("query_total_passengers"), "confidence": 0.42}
+2713: if intent == "query_total_passengers":
+2804: gender, pair_ok, service, service_note, passenger_name, passenger_phone
+2817: passenger_name=excluded.passenger_name,
+2818: passenger_phone=excluded.passenger_phone
+3155: except Exception as e:
+3310: except Exception:
+3326: "passenger_name": d.get("passenger_name") or "",
+3327: "passenger_phone": d.get("passenger_phone") or "",
+3357: board, offload, standing_add, standing_off, parcel_deliver, pass_stop
+3368: except Exception:
+3373: except Exception:
+3441: passenger_name = (data.get("passenger_name") or "").strip()
+3442: passenger_phone = (data.get("passenger_phone") or "").strip()
+3457: gender, pair_ok, service, service_note, passenger_name, passenger_phone
+3470: passenger_name=excluded.passenger_name,
+3471: passenger_phone=excluded.passenger_phone
+3476: passenger_name, passenger_phone,
+3504: gender, pair_ok, service, service_note, passenger_name, passenger_phone
+3517: passenger_name=excluded.passenger_name,
+3518: passenger_phone=excluded.passenger_phone
+3523: passenger_name, passenger_phone,
+3643: gender, pair_ok, service, service_note, passenger_name, passenger_phone
+3656: passenger_name=excluded.passenger_name,
+3657: passenger_phone=excluded.passenger_phone
+3697: except Exception:
+3743: except Exception:
+3803: except Exception:
+3887: except Exception:
+3970: except Exception:
+4364: except Exception:
+4392: "parcel_deliver", "pass_stop",
+4408: except Exception:
+4471: "pass_stop": [],
+4490: except Exception:
+4523: elif event == "pass_stop":
+4524: g["pass_stop"].append(item)
+4574: except Exception:
+4637: except Exception as e:
+4663: except Exception:
+4664: pass
+4719: except Exception:
+4720: pass
+4997: save_path = Path(UPLOAD_DIR) / fname
+5029: (Path(UPLOAD_DIR) / r["file_path"]).unlink(missing_ok=True)
+5030: except Exception:
+5031: pass
+5046: return send_from_directory(UPLOAD_DIR, safe_name, as_attachment=False)
+5117: except Exception:
+5118: pass
+5122: except Exception:
+5123: pass
+5177: "pass_stop": [],
+5196: except Exception:
+5224: elif event == "pass_stop":
+5225: g["pass_stop"].append(item)
+5484: def settings_password_page():
+5489: old_password = (request.form.get("old_password") or "").strip()
+5490: new_password = (request.form.get("new_password") or "").strip()
+5491: new_password2 = (request.form.get("new_password2") or "").strip()
+5493: if not verify_admin_password(old_password):
+5495: elif len(new_password) < 4:
+5497: elif new_password != new_password2:
+5500: ok, text = set_admin_password(new_password)
+5506: return render_template("settings_password.html", msg=msg, error=error)
+5545: def forgot_password_page():
+5551: new_password = (request.form.get("new_password") or "").strip()
+5552: new_password2 = (request.form.get("new_password2") or "").strip()
+5556: elif len(new_password) < 4:
+5558: elif new_password != new_password2:
+5561: ok, text = set_admin_password(new_password)
+5568: return render_template("forgot_password.html", msg=msg, error=error)
+5586: password = (request.form.get("password") or "").strip()
+5587: password2 = (request.form.get("password2") or "").strip()
+5593: elif len(password) < 4:
+5595: elif password != password2:
+5601: ok, text = set_admin_password(password)
+5662: except Exception:
+5863: except Exception:
+5864: pass
+5871: except Exception:
+5872: pass
+5919: except Exception:
+5920: pass
+5946: except Exception:
+5947: pass
+5949: except Exception as e:
+5952: except Exception:
+5953: pass
+5958: except Exception:
+5959: pass
+5978: except Exception:
+6097: except Exception:
+6111: except Exception:
+6405: except Exception:
+6406: pass
+6427: except Exception:
+6428: pass
+6466: except Exception:
+6588: except Exception:
+
+6) VERİTABANI TABLO / INDEX OLUŞTURMA
+----------------------------------------------------------------------
+62: CREATE TABLE IF NOT EXISTS admin_profile(
+158: CREATE TABLE IF NOT EXISTS admin_security(
+447: CREATE TABLE IF NOT EXISTS trips(
+459: CREATE TABLE IF NOT EXISTS app_state(
+465: CREATE TABLE IF NOT EXISTS routes(
+471: CREATE TABLE IF NOT EXISTS seats(
+489: CREATE INDEX IF NOT EXISTS idx_seats_trip ON seats(trip_id);
+490: CREATE INDEX IF NOT EXISTS idx_seats_trip_to_stop ON seats(trip_id, to_stop);
+491: CREATE INDEX IF NOT EXISTS idx_seats_trip_from_stop ON seats(trip_id, from_stop);
+492: CREATE INDEX IF NOT EXISTS idx_seats_trip_payment ON seats(trip_id, payment);
+494: CREATE TABLE IF NOT EXISTS walk_on_sales(
+508: CREATE INDEX IF NOT EXISTS idx_walkon_trip ON walk_on_sales(trip_id);
+510: CREATE TABLE IF NOT EXISTS route_stop_coords(
+518: CREATE TABLE IF NOT EXISTS stop_logs(
+530: CREATE INDEX IF NOT EXISTS idx_stoplogs_trip_ts ON stop_logs(trip_id, ts);
+532: CREATE TABLE IF NOT EXISTS consignments(
+554: CREATE INDEX IF NOT EXISTS idx_cons_trip ON consignments(trip_id);
+555: CREATE INDEX IF NOT EXISTS idx_cons_status ON consignments(status);
+557: CREATE TABLE IF NOT EXISTS consignment_photos(
+568: CREATE TABLE IF NOT EXISTS fares(
+577: CREATE TABLE IF NOT EXISTS settings(
+582: CREATE TABLE IF NOT EXISTS cash_moves(
+593: CREATE INDEX IF NOT EXISTS idx_cash_moves_trip ON cash_moves(trip_id);
+595: CREATE TABLE IF NOT EXISTS learned_commands(
+606: CREATE INDEX IF NOT EXISTS idx_learned_commands_phrase_norm
+609: CREATE INDEX IF NOT EXISTS idx_learned_commands_skeleton
+612: CREATE INDEX IF NOT EXISTS idx_learned_commands_intent
+615: CREATE TABLE IF NOT EXISTS route_schedule_profiles(
+626: CREATE INDEX IF NOT EXISTS idx_route_schedule_profiles_route
+629: CREATE INDEX IF NOT EXISTS idx_route_schedule_profiles_route_direction
+632: CREATE TABLE IF NOT EXISTS route_schedule_items(
+646: CREATE INDEX IF NOT EXISTS idx_route_schedule_items_profile
+649: CREATE INDEX IF NOT EXISTS idx_route_schedule_items_profile_sort
+659: "from_stop": "ALTER TABLE seats ADD COLUMN from_stop TEXT DEFAULT ''",
+660: "to_stop": "ALTER TABLE seats ADD COLUMN to_stop TEXT DEFAULT ''",
+661: "gender": "ALTER TABLE seats ADD COLUMN gender TEXT DEFAULT ''",
+662: "pair_ok": "ALTER TABLE seats ADD COLUMN pair_ok INTEGER DEFAULT 0",
+663: "service": "ALTER TABLE seats ADD COLUMN service INTEGER DEFAULT 0",
+664: "service_note": "ALTER TABLE seats ADD COLUMN service_note TEXT DEFAULT ''",
+665: "passenger_name": "ALTER TABLE seats ADD COLUMN passenger_name TEXT DEFAULT ''",
+666: "passenger_phone": "ALTER TABLE seats ADD COLUMN passenger_phone TEXT DEFAULT ''",
+3870: CREATE TABLE IF NOT EXISTS route_stop_coords(
+6245: CREATE TABLE IF NOT EXISTS package_requests(
+6485: CREATE TABLE IF NOT EXISTS route_stop_coords(
+
+7) TEMPLATE KULLANIMLARI
+----------------------------------------------------------------------
+1234: return render_template("onboarding.html")
+1295: return render_template("user_reset.html", error=error, csrf_token=get_csrf())
+1309: return render_template("login.html", error="Hatalı şifre", csrf_token=get_csrf())
+1311: return render_template("login.html", csrf_token=get_csrf())
+1326: return render_template("ai_console.html")
+1333: return render_template("index.html", current_route=current_route, all_routes=routes)
+1394: return render_template(
+1481: return render_template(
+1520: return render_template(
+1540: return render_template("passenger_control.html", trip=trip, stops=get_stops(trip["route"]))
+1561: return render_template("routes_list.html", routes=rows, builtin_routes=builtin_routes)
+1582: return render_template("add_route.html")
+1613: return render_template("route_edit.html", route=row, stops_text=stops_text)
+1774: return render_template(
+1895: return render_template(
+1925: return render_template(
+1966: return render_template(
+2014: return render_template(
+2041: return render_template(
+4433: return render_template("trip_report.html")
+4539: return render_template("events.html")
+4622: return render_template("trip_report.html", archive_base=base)
+4731: return render_template("report_archive.html", items=items)
+4764: return render_template("reports.html", all_routes=all_route_names())
+4865: return render_template(
+5506: return render_template("settings_password.html", msg=msg, error=error)
+5535: return render_template(
+5568: return render_template("forgot_password.html", msg=msg, error=error)
+5609: return render_template("setup_done.html", recovery_code=recovery_code, full_name=full_name)
+5611: return render_template("setup.html", error=error)
+5634: return render_template("settings_profile.html", msg=msg, error=error, profile=prof)
+5753: return render_template(
+6180: return render_template(
+6218: return render_template(
+6231: return render_template("subscription_required.html", info=get_subscription_info())
+6235: return render_template("settings.html")
+6331: return render_template("settings_package_requests.html", rows=rows)
+
+8) API ROUTE'LARI
+----------------------------------------------------------------------
+3272: @app.route("/api/seats/list")
+3385: @app.route("/api/seat", methods=["POST", "DELETE"])
+3529: @app.route("/api/seats/bulk", methods=["POST", "DELETE"])
+3683: @app.route("/api/seats/offload", methods=["POST"])
+3848: @app.route("/api/stops")
+3859: @app.route("/api/coords", methods=["GET", "POST", "DELETE"])
+3998: @app.route("/api/walkon", methods=["GET", "POST", "DELETE"])
+4146: @app.route("/api/standing", methods=["GET", "POST", "DELETE"])
+4238: @app.route("/api/standing/list")
+4272: @app.route("/api/stats")
+4341: @app.route("/api/stoplog", methods=["GET", "POST"])
+4436: @app.route("/api/trip-report")
+4542: @app.route("/api/events")
+4625: @app.route("/api/trip-report/archive/<base>")
+4645: @app.route("/api/report-archive")
+4767: @app.route("/api/report/seat-stats")
+4873: @app.route("/api/consignments", methods=["GET", "POST"])
+4947: @app.route("/api/consignments/<int:cid>/photos", methods=["GET", "POST"])
+5018: @app.route("/api/consignments/<int:cid>", methods=["DELETE"])
+6510: @app.route("/api/routes/<int:rid>/coord-status", methods=["POST"])
+6571: @app.route("/api/routes/<int:rid>/coord-save-manual", methods=["POST"])
