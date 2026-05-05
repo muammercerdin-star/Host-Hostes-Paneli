@@ -1043,7 +1043,9 @@ if(routeFocusItem && live){
 
     if(!silent && voiceReply){
       const msg = stopHumanVoiceSummary(canonical);
-      if(typeof speakOnce === "function"){
+      if(window.SeatsSpeak){
+        window.SeatsSpeak(msg);
+      }else if(typeof speakOnce === "function"){
         speakOnce(msg);
       }else if(typeof speak === "function"){
         speak(msg);
@@ -1474,9 +1476,17 @@ function renderApproachPanel(stop, seats){
 
     openModal("#approachBackdrop", "#approachModal");
 
-    if(isFinalStop(stop)) speakFinalStopSequence(stop);
-    else{
-      speak(stopHumanVoiceSummary(stop));
+    if(isFinalStop(stop) && typeof speakFinalStopSequence === "function"){
+      speakFinalStopSequence(stop);
+    }else{
+      const msg = stopHumanVoiceSummary(stop);
+      if(window.SeatsSpeak){
+        window.SeatsSpeak(msg);
+      }else if(typeof speakOnce === "function"){
+        speakOnce(msg);
+      }else if(typeof speak === "function"){
+        speak(msg);
+      }
     }
 }
   async function bulkOffload(seatNums){
@@ -2006,17 +2016,11 @@ function initTabs(){
       const msg = String(text || "").trim();
       if(!msg) return;
 
-      // APK içindeyse Android'in kendi TTS motorunu kullan.
-      if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
-        try{
-          window.AndroidTTS.speak(msg);
-          return;
-        }catch(e){
-          console.warn("AndroidTTS hata:", e);
-        }
+      if(window.SeatsSpeak){
+        window.SeatsSpeak(msg);
+        return;
       }
 
-      // Tarayıcıda eski Web Speech TTS devam etsin.
       if(!("speechSynthesis" in window)) return;
 
       try{

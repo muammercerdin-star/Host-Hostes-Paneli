@@ -1,128 +1,16 @@
 /* =========================================================
-   VOICE / TTS MODULE
-   Durak akışı sesi, AndroidTTS köprüsü ve Ses Açık/Sessiz butonu.
+   SEATS UNIFIED VOICE MODULE
+   Tüm ses çıkışlarını tek merkezden yönetir.
+   Tarayıcıda speechSynthesis, APK’da AndroidTTS kullanır.
 ========================================================= */
 
 (function(){
-  function routeDirectTtsEnabled(){
-    try{
-      return (localStorage.getItem("ttsEnabled") ?? "1") === "1";
-    }catch(e){
-      return true;
-    }
-  }
-
-  function speakRouteDirect(text){
-    const msg = String(text || "").trim();
-    if(!msg || !routeDirectTtsEnabled()) return;
-
-    if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
-      try{
-        window.AndroidTTS.speak(msg);
-        return;
-      }catch(e){
-        console.warn("AndroidTTS route direct hata:", e);
-      }
-    }
-
-    try{
-      if(!("speechSynthesis" in window)) return;
-
-      window.speechSynthesis.cancel();
-
-      const u = new SpeechSynthesisUtterance(msg);
-      u.lang = "tr-TR";
-      u.rate = 0.95;
-      u.pitch = 1;
-
-      const voices = speechSynthesis.getVoices ? speechSynthesis.getVoices() : [];
-      const trVoice = voices.find(v =>
-        String(v.lang || "").toLowerCase().startsWith("tr") ||
-        String(v.name || "").toLowerCase().includes("turk")
-      );
-
-      if(trVoice) u.voice = trVoice;
-
-      speechSynthesis.speak(u);
-    }catch(e){
-      console.warn("route direct speech hata:", e);
-    }
-  }
-
-  function cleanText(x){
-    return String(x || "")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  document.addEventListener("click", function(e){
-    const routeStop = e.target.closest && e.target.closest(".route-stop");
-
-    if(routeStop){
-      const stopName =
-        routeStop.dataset.stop ||
-        routeStop.querySelector(".name")?.textContent ||
-        "";
-
-      const stop = cleanText(stopName);
-
-      if(stop && stop !== "Rota hazırlanıyor"){
-        try{
-          if(typeof stopHumanVoiceSummary === "function"){
-            speakRouteDirect(stopHumanVoiceSummary(stop));
-          }else{
-            speakRouteDirect(stop + " seçildi.");
-          }
-        }catch(_){
-          speakRouteDirect(stop + " seçildi.");
-        }
-      }
-
-      return;
-    }
-
-    const livePill = e.target.closest && e.target.closest(".route-pill");
-
-    if(livePill){
-      const liveEl = livePill.querySelector("#routeMiniLive");
-      const nextEl = livePill.querySelector("#routeMiniNext");
-
-      if(liveEl){
-        const live = cleanText(liveEl.textContent);
-
-        if(live && live !== "—" && live !== "-"){
-          speakRouteDirect("Canlı durak " + live + ".");
-        }
-
-        return;
-      }
-
-      if(nextEl){
-        const next = cleanText(nextEl.textContent);
-
-        if(next && next !== "—" && next !== "-"){
-          speakRouteDirect("Sıradaki durak " + next + ".");
-        }
-
-        return;
-      }
-    }
-  }, true);
-})();
-
-
-/* =========================================================
-   NIGHT VOICE SAFE BIND
-   Durak Akışı ses butonunu güvenli şekilde bağlar.
-========================================================= */
-
-(function(){
-  if(window.__nightVoiceSafeBind) return;
-  window.__nightVoiceSafeBind = true;
+  if(window.__SeatsVoiceUnifiedReady) return;
+  window.__SeatsVoiceUnifiedReady = true;
 
   const KEY = "ttsEnabled";
 
-  function isOn(){
+  function isEnabled(){
     try{
       return (localStorage.getItem(KEY) ?? "1") === "1";
     }catch(e){
@@ -130,21 +18,36 @@
     }
   }
 
-  function setOn(value){
+  function setEnabled(value){
     try{
       localStorage.setItem(KEY, value ? "1" : "0");
     }catch(e){}
+    syncButtons();
   }
 
-  function speakTest(text){
+  function stop(){
+    if(window.AndroidTTS && typeof window.AndroidTTS.stop === "function"){
+      try{ window.AndroidTTS.stop(); }catch(e){}
+    }
+
+    try{
+      if("speechSynthesis" in window) speechSynthesis.cancel();
+    }catch(e){}
+  }
+
+  function speak(text, opts = {}){
     const msg = String(text || "").trim();
     if(!msg) return;
+
+    if(!opts.force && !isEnabled()) return;
 
     if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
       try{
         window.AndroidTTS.speak(msg);
         return;
-      }catch(e){}
+      }catch(e){
+        console.warn("AndroidTTS hata:", e);
+      }
     }
 
     try{
@@ -166,34 +69,100 @@
       if(trVoice) u.voice = trVoice;
 
       speechSynthesis.speak(u);
-    }catch(e){}
+    }catch(e){
+      console.warn("speechSynthesis hata:", e);
+    }
   }
 
-  function stopVoice(){
-    if(window.AndroidTTS && typeof window.AndroidTTS.stop === "function"){
-      try{ window.AndroidTTS.stop(); }catch(e){}
+  function syncButtons(){
+    const on = isEnabled();
+
+    const nightBtn = document.getElementById("nightVoiceToggle");
+    if(nightBtn){
+      nightBtn.classList.toggle("is-off", !on);
+      nightBtn.dataset.voiceOn = on ? "1" : "0";
+      nightBtn.title = on ? "Durak akışı sesi açık" : "Durak akışı sesi kapalı";
+      nightBtn.innerHTML = on
+        ? '<span class="nv-ico">🔊</span><span>Ses Açık</span>'
+        : '<span class="nv-ico">🔇</span><span>Sessiz</span>';
     }
 
-    try{
-      if("speechSynthesis" in window) speechSynthesis.cancel();
-    }catch(e){}
+    const ttsBtn = document.getElementById("ttsToggle");
+    if(ttsBtn){
+      ttsBtn.classList.toggle("muted", !on);
+      ttsBtn.title = on ? "Sesli uyarı açık" : "Sesli uyarı kapalı";
+    }
   }
 
-  function syncNightButton(){
-    const btn = document.getElementById("nightVoiceToggle");
-    if(!btn) return;
-
-    const on = isOn();
-
-    btn.classList.toggle("is-off", !on);
-    btn.dataset.voiceOn = on ? "1" : "0";
-    btn.title = on ? "Durak akışı sesi açık" : "Durak akışı sesi kapalı";
-
-    btn.innerHTML = on
-      ? '<span class="nv-ico">🔊</span><span>Ses Açık</span>'
-      : '<span class="nv-ico">🔇</span><span>Sessiz</span>';
+  function cleanText(x){
+    return String(x || "")
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
+  // Dışarıya tek merkez olarak aç
+  window.SeatsSpeak = speak;
+  window.SeatsStopVoice = stop;
+  window.SeatsVoice = {
+    speak,
+    stop,
+    isEnabled,
+    setEnabled,
+    syncButtons
+  };
+
+  // Durak Akışı kartlarına doğrudan ses desteği
+  document.addEventListener("click", function(e){
+    const routeStop = e.target.closest && e.target.closest(".route-stop");
+
+    if(routeStop){
+      const stopName =
+        routeStop.dataset.stop ||
+        routeStop.querySelector(".name")?.textContent ||
+        "";
+
+      const stop = cleanText(stopName);
+
+      if(stop && stop !== "Rota hazırlanıyor"){
+        try{
+          if(typeof stopHumanVoiceSummary === "function"){
+            speak(stopHumanVoiceSummary(stop));
+          }else{
+            speak(stop + " seçildi.");
+          }
+        }catch(_){
+          speak(stop + " seçildi.");
+        }
+      }
+
+      return;
+    }
+
+    const livePill = e.target.closest && e.target.closest(".route-pill");
+
+    if(livePill){
+      const liveEl = livePill.querySelector("#routeMiniLive");
+      const nextEl = livePill.querySelector("#routeMiniNext");
+
+      if(liveEl){
+        const live = cleanText(liveEl.textContent);
+        if(live && live !== "—" && live !== "-"){
+          speak("Canlı durak " + live + ".");
+        }
+        return;
+      }
+
+      if(nextEl){
+        const next = cleanText(nextEl.textContent);
+        if(next && next !== "—" && next !== "-"){
+          speak("Sıradaki durak " + next + ".");
+        }
+        return;
+      }
+    }
+  }, true);
+
+  // Yeşil Ses Açık / Sessiz butonu
   document.addEventListener("click", function(e){
     const btn = e.target.closest && e.target.closest("#nightVoiceToggle");
     if(!btn) return;
@@ -201,31 +170,24 @@
     e.preventDefault();
     e.stopPropagation();
 
-    const next = !isOn();
-    setOn(next);
-    syncNightButton();
-
-    const ttsBtn = document.getElementById("ttsToggle");
-    if(ttsBtn){
-      ttsBtn.classList.toggle("muted", !next);
-      ttsBtn.title = next ? "Sesli uyarı açık" : "Sesli uyarı kapalı";
-    }
+    const next = !isEnabled();
+    setEnabled(next);
 
     if(next){
-      speakTest("Durak akışı sesi açık.");
+      speak("Durak akışı sesi açık.", { force:true });
     }else{
-      stopVoice();
+      stop();
     }
   }, false);
 
   function boot(){
-    syncNightButton();
+    syncButtons();
 
     let n = 0;
     const timer = setInterval(function(){
-      syncNightButton();
+      syncButtons();
       n++;
-      if(n >= 6) clearInterval(timer);
+      if(n >= 4) clearInterval(timer);
     }, 500);
   }
 
