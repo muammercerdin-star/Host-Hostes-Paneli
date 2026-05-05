@@ -1984,19 +1984,53 @@ function initTabs(){
     if(!spVal || !spLimit || !speedBox || !ttsBtn) return;
 
     const TTS_KEY = "ttsEnabled";
-    let ttsEnabled = (localStorage.getItem(TTS_KEY) ?? "1") === "1";
+
+    function readTtsEnabled(){
+      try{
+        return (localStorage.getItem(TTS_KEY) ?? "1") === "1";
+      }catch(_){
+        return true;
+      }
+    }
+
+    let ttsEnabled = readTtsEnabled();
 
     function syncTts(){
+      ttsEnabled = readTtsEnabled();
+
       ttsEnabled ? ttsBtn.classList.remove("muted") : ttsBtn.classList.add("muted");
+      ttsBtn.title = ttsEnabled ? "Sesli uyarı açık" : "Sesli uyarı kapalı";
+
+      if(window.SeatsVoice && typeof window.SeatsVoice.syncButtons === "function"){
+        window.SeatsVoice.syncButtons();
+      }
     }
 
     syncTts();
 
     ttsBtn.addEventListener("click", () => {
-      ttsEnabled = !ttsEnabled;
-      localStorage.setItem(TTS_KEY, ttsEnabled ? "1" : "0");
+      const next = !readTtsEnabled();
+
+      if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+        window.SeatsVoice.setEnabled(next);
+      }else{
+        localStorage.setItem(TTS_KEY, next ? "1" : "0");
+      }
+
+      ttsEnabled = next;
       syncTts();
-      if(ttsEnabled) speakOnce("Sesli uyarı açık.");
+
+      if(next){
+        if(window.SeatsSpeak){
+          window.SeatsSpeak("Sesli uyarı açık.", { force:true });
+        }else{
+          speakOnce("Sesli uyarı açık.");
+        }
+      }else{
+        if(window.SeatsStopVoice){
+          window.SeatsStopVoice();
+        }
+      }
     });
 
     let trVoice = null;
