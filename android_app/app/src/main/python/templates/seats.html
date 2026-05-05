@@ -3,7 +3,7 @@
 
 <link rel="stylesheet" href="/static/style.css">
 <link rel="stylesheet" href="/static/seats/seats.css?v=41">
-<link rel="stylesheet" href="/static/seats/seats-final.css?v=2">
+<link rel="stylesheet" href="/static/seats/seats-final.css?v=drive-premium-rollback-1">
 
 <div class="seats-shell">
   {% include "seats_parts/topbar.html" %}
@@ -47,6 +47,12 @@
               <button class="voice-command-btn" id="btnDeckAI" type="button" title="Sesli Komut">
                 🎤 <span>Sesli Komut</span>
               </button>
+
+              <div class="voice-seat-mini" id="voiceSeatMiniStats" title="Koltuk özeti">
+                <span>Dolu <b id="voiceSeatFilled">0</b></span>
+                <span>Boş <b id="voiceSeatEmpty">0</b></span>
+              </div>
+
               <div class="voice-state" id="voiceStateBadge">Hazır</div>
             </div>
 
@@ -328,7 +334,7 @@
 <script src="/static/seats/bags.js?v=1"></script>
 <script src="/static/seats/voice-commands.js?v=1"></script>
 <script src="/static/seats/standing.js?v=1"></script>
-<script src="/static/seats/seats.js?v=boarding-stop-logic-1"></script>
+<script src="/static/seats/seats.js?v=drive-premium-rollback-1"></script>
 <script src="/static/seats/seats-time-prayer.js?v=time-prayer-apk-1"></script>
 <script src="/static/seats/voice-tts.js?v=voice-owner-fix-1"></script>
 <script src="/static/seats/drive-eta-chip.js?v=1"></script>
