@@ -99,11 +99,25 @@
     const on = isDriveOn();
 
     document.body.classList.toggle("drive-mode", on);
+    document.documentElement.classList.toggle("drive-mode", on);
 
     if(btn){
-      btn.textContent = on ? "↩ Normal" : "🚘 Sürüş";
+      btn.innerHTML = on ? "↩ Normal" : "🚘 Sürüş";
       btn.title = on ? "Normal moda geç" : "Sürüş moduna geç";
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
     }
+
+    try{
+      if(typeof renderRouteStrip === "function") renderRouteStrip();
+      if(typeof updateCompactHeader === "function") updateCompactHeader();
+      if(typeof syncDriveEtaChip === "function") syncDriveEtaChip();
+    }catch(_){}
+
+    try{
+      window.dispatchEvent(new CustomEvent("driveModeChanged", {
+        detail:{ on }
+      }));
+    }catch(_){}
   }
 
   function bindDriveMode(){
@@ -117,16 +131,16 @@
 
     btn.dataset.driveBound = "1";
 
-    btn.addEventListener("click", () => {
-      localStorage.setItem(DRIVE_MODE_KEY, isDriveOn() ? "0" : "1");
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      const next = !isDriveOn();
+      localStorage.setItem(DRIVE_MODE_KEY, next ? "1" : "0");
+
       syncDriveMode();
 
-      setTimeout(() => {
-        try{
-          if(typeof renderRouteStrip === "function") renderRouteStrip();
-          if(typeof updateCompactHeader === "function") updateCompactHeader();
-        }catch(_){}
-      }, 80);
+      setTimeout(syncDriveMode, 80);
+      setTimeout(syncDriveMode, 250);
     });
 
     syncDriveMode();

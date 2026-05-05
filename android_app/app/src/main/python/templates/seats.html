@@ -332,7 +332,7 @@
 <script src="/static/seats/seats-time-prayer.js?v=1"></script>
 <script src="/static/seats/voice-tts.js?v=voice-owner-fix-1"></script>
 <script src="/static/seats/drive-eta-chip.js?v=1"></script>
-<script src="/static/seats/drive-controls.js?v=voice-owner-fix-1"></script>
+<script src="/static/seats/drive-controls.js?v=drive-toggle-fix-1"></script>
 
 
 
@@ -1203,5 +1203,77 @@
 })();
 </script>
 <!-- LIGHT SELECT PICKER END -->
+
+
+<!-- DRIVE MODE FORCE TOGGLE START -->
+<script id="drive-mode-force-toggle-js">
+(function(){
+  if(window.__driveModeForceToggleReady) return;
+  window.__driveModeForceToggleReady = true;
+
+  function driveKey(){
+    const boot = window.SEATS_BOOT || {};
+    const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+    return "driveMode:" + tripKey;
+  }
+
+  function isDriveOn(){
+    try{
+      return localStorage.getItem(driveKey()) === "1";
+    }catch(e){
+      return false;
+    }
+  }
+
+  function setDrive(on){
+    try{
+      localStorage.setItem(driveKey(), on ? "1" : "0");
+    }catch(e){}
+
+    document.body.classList.toggle("drive-mode", !!on);
+    document.documentElement.classList.toggle("drive-mode", !!on);
+
+    const btn = document.getElementById("driveModeToggle");
+    if(btn){
+      btn.innerHTML = on ? "↩ Normal" : "🚘 Sürüş";
+      btn.title = on ? "Normal moda geç" : "Sürüş moduna geç";
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    }
+
+    try{ if(typeof renderRouteStrip === "function") renderRouteStrip(); }catch(e){}
+    try{ if(typeof updateCompactHeader === "function") updateCompactHeader(); }catch(e){}
+    try{ if(typeof syncDriveEtaChip === "function") syncDriveEtaChip(); }catch(e){}
+
+    try{
+      window.dispatchEvent(new CustomEvent("driveModeChanged", { detail:{ on:!!on } }));
+    }catch(e){}
+  }
+
+  function sync(){
+    setDrive(isDriveOn());
+  }
+
+  // En üstten yakala: diğer click listener'lar aç-kapa karışıklığı yapmasın.
+  document.addEventListener("click", function(e){
+    const btn = e.target.closest && e.target.closest("#driveModeToggle");
+    if(!btn) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    setDrive(!isDriveOn());
+  }, true);
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", sync);
+  }else{
+    sync();
+  }
+
+  setTimeout(sync, 300);
+})();
+</script>
+<!-- DRIVE MODE FORCE TOGGLE END -->
 
 {% endblock %}
