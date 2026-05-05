@@ -79,7 +79,31 @@ const BAG_TRIP = TRIP_KEY;
 
   function setValue(sel, val){
     const el = $(sel);
-    if(el) el.value = val;
+    if(!el) return;
+
+    el.value = val;
+
+    // Özel select/picker kullanılıyorsa görünen buton yazısını da güncelle.
+    try{
+      const opt = el.options ? el.options[el.selectedIndex] : null;
+      const text = opt ? opt.textContent.trim() : (el.value || "—");
+      const trigger = el.nextElementSibling;
+
+      if(trigger && trigger.classList.contains("lsp-trigger")){
+        const t = trigger.querySelector(".lsp-text");
+        if(t) t.textContent = text || "—";
+      }
+
+      if(trigger && trigger.classList.contains("ios-select-trigger")){
+        const t = trigger.querySelector(".ios-select-text");
+        if(t) t.textContent = text || "—";
+      }
+
+      if(trigger && trigger.classList.contains("ios-wheel-trigger")){
+        const t = trigger.querySelector(".ios-wheel-text");
+        if(t) t.textContent = text || "—";
+      }
+    }catch(_){}
   }
 
   function show(el){
@@ -111,6 +135,12 @@ const BAG_TRIP = TRIP_KEY;
   let currentCoords = null;
   let lastApproachVoiceStop = "";
   let lastRouteStripCenteredStop = "";
+
+  // Biniş Yeri mantığı:
+  // live  → canlı durak takip edilir
+  // manual → kullanıcının tıkladığı durak kullanılır
+  let boardingStopMode = "live";
+  let boardingStopManual = "";
 
   const multiSelected = new Set();
   const ALERT_COOLDOWN_MS = 3 * 60 * 1000;
@@ -417,6 +447,36 @@ async function loadRouteScheduleFromApi(){
 
   function getSelectedStopName(){
     return ($("#alertStop")?.value || "").trim();
+  }
+
+  function setBoardingStopLiveMode(){
+    boardingStopMode = "live";
+    boardingStopManual = "";
+  }
+
+  function setBoardingStopManualMode(stopName){
+    const canonical = findCanonicalStopName(stopName) || String(stopName || "").trim();
+    if(!canonical) return;
+
+    boardingStopMode = "manual";
+    boardingStopManual = canonical;
+  }
+
+  function getBoardingStopDefault(seatNo){
+    const key = String(seatNo || "");
+
+    // Kayıtlı koltukta eski biniş yeri korunur.
+    if(assigned[key] && boardsMap[key]){
+      return boardsMap[key];
+    }
+
+    // Kullanıcı müdahale etmediyse canlı durak takip edilir.
+    if(boardingStopMode === "live"){
+      return getDisplayLiveStop() || getSelectedStopName() || "";
+    }
+
+    // Kullanıcı durak kartına tıkladıysa o durak kullanılır.
+    return boardingStopManual || getSelectedStopName() || getDisplayLiveStop() || "";
   }
 
   function isTimedStop(name){
@@ -929,13 +989,8 @@ function renderRouteStrip(){
    `;
 
 item.addEventListener("click", () => {
+  setBoardingStopManualMode(stop);
   setSelectedStop(stop, { silent:false, voiceReply:true });
-
-  // APK/WebView için ek garanti: durak kartı tıklamasında doğrudan TTS tetikle
-  try{
-    const msg = stopHumanVoiceSummary(stop);
-    if(typeof speakOnce === "function") speakOnce(msg);
-  }catch(_){}
 });
 
 wrap.appendChild(item);
@@ -1133,8 +1188,12 @@ if(routeFocusItem && live){
     if(seatEl) seatEl.classList.add("selected");
 
     setText("#seatTitle", "Koltuk " + seatNo);
-    setValue("#pickup", boardsMap[String(seatNo)] || getSelectedStopName() || "");
-    setValue("#dropoff", stopsMap[String(seatNo)] || "");
+
+    const seatKey = String(seatNo);
+    const pickupDefault = getBoardingStopDefault(seatNo);
+
+    setValue("#pickup", pickupDefault && pickupDefault !== "—" ? pickupDefault : "");
+    setValue("#dropoff", stopsMap[seatKey] || "");
 
     const pay = document.querySelector('input[name="pay"][value="nakit"]');
     if(pay) pay.checked = true;
@@ -1975,7 +2034,6 @@ function initTabs(){
   }
 
 
-
   (function initSpeed(){
     const spVal = $("#spVal");
     const spLimit = $("#spLimit");
@@ -2007,6 +2065,10 @@ function initTabs(){
     }
 
     syncTts();
+
+    window.addEventListener("ttsEnabledChanged", () => {
+      syncTts();
+    });
 
     ttsBtn.addEventListener("click", () => {
       const next = !readTtsEnabled();
@@ -2045,6 +2107,7 @@ function initTabs(){
     }
 
     function speakOnce(text){
+      ttsEnabled = readTtsEnabled();
       if(!ttsEnabled) return;
 
       const msg = String(text || "").trim();
@@ -2345,6 +2408,7 @@ function initTabs(){
         toast("Canlı durak henüz yok");
         return;
       }
+      setBoardingStopLiveMode();
       focusRouteStripStop(live, { select:true, voice:true });
     });
   }
@@ -2359,6 +2423,7 @@ function initTabs(){
         toast("Sıradaki durak bulunamadı");
         return;
       }
+      setBoardingStopManualMode(next);
       focusRouteStripStop(next, { select:true, voice:true });
     });
   }
