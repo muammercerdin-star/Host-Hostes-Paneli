@@ -22,7 +22,14 @@
     try{
       localStorage.setItem(KEY, value ? "1" : "0");
     }catch(e){}
+
     syncButtons();
+
+    try{
+      window.dispatchEvent(new CustomEvent("ttsEnabledChanged", {
+        detail:{ enabled: !!value }
+      }));
+    }catch(e){}
   }
 
   function stop(){
@@ -103,64 +110,17 @@
   // Dışarıya tek merkez olarak aç
   window.SeatsSpeak = speak;
   window.SeatsStopVoice = stop;
-  window.SeatsVoice = {
+
+  // voice-commands.js daha önce window.SeatsVoice içine komut fonksiyonları koymuş olabilir.
+  // Onları ezmeden, TTS yönetimini aynı objeye ekliyoruz.
+  window.SeatsVoice = Object.assign(window.SeatsVoice || {}, {
     speak,
     stop,
     isEnabled,
     setEnabled,
     syncButtons
-  };
+  });
 
-  // Durak Akışı kartlarına doğrudan ses desteği
-  document.addEventListener("click", function(e){
-    const routeStop = e.target.closest && e.target.closest(".route-stop");
-
-    if(routeStop){
-      const stopName =
-        routeStop.dataset.stop ||
-        routeStop.querySelector(".name")?.textContent ||
-        "";
-
-      const stop = cleanText(stopName);
-
-      if(stop && stop !== "Rota hazırlanıyor"){
-        try{
-          if(typeof stopHumanVoiceSummary === "function"){
-            speak(stopHumanVoiceSummary(stop));
-          }else{
-            speak(stop + " seçildi.");
-          }
-        }catch(_){
-          speak(stop + " seçildi.");
-        }
-      }
-
-      return;
-    }
-
-    const livePill = e.target.closest && e.target.closest(".route-pill");
-
-    if(livePill){
-      const liveEl = livePill.querySelector("#routeMiniLive");
-      const nextEl = livePill.querySelector("#routeMiniNext");
-
-      if(liveEl){
-        const live = cleanText(liveEl.textContent);
-        if(live && live !== "—" && live !== "-"){
-          speak("Canlı durak " + live + ".");
-        }
-        return;
-      }
-
-      if(nextEl){
-        const next = cleanText(nextEl.textContent);
-        if(next && next !== "—" && next !== "-"){
-          speak("Sıradaki durak " + next + ".");
-        }
-        return;
-      }
-    }
-  }, true);
 
   // Yeşil Ses Açık / Sessiz butonu
   document.addEventListener("click", function(e){

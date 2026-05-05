@@ -55,6 +55,11 @@
 
   function safeSpeak(msg){
     try{
+      if(window.SeatsSpeak){
+        window.SeatsSpeak(msg, { force:true });
+        return;
+      }
+
       if(typeof speak === "function") speak(msg);
     }catch(_){}
   }
@@ -157,7 +162,13 @@
   }
 
   function getVoiceEnabled(){
-    const saved = localStorage.getItem(VOICE_SOUND_KEY);
+    try{
+      if(window.SeatsVoice && typeof window.SeatsVoice.isEnabled === "function"){
+        return window.SeatsVoice.isEnabled();
+      }
+    }catch(_){}
+
+    const saved = localStorage.getItem("ttsEnabled");
     if(saved !== null) return saved === "1";
 
     const cb = document.getElementById("soundToggle");
@@ -167,6 +178,13 @@
   }
 
   function updateNightVoiceToggle(){
+    try{
+      if(window.SeatsVoice && typeof window.SeatsVoice.syncButtons === "function"){
+        window.SeatsVoice.syncButtons();
+        return;
+      }
+    }catch(_){}
+
     const btn = document.getElementById("nightVoiceToggle");
     if(!btn) return;
 
@@ -183,6 +201,31 @@
   }
 
   function setVoiceEnabled(on, opts={}){
+    const enabled = !!on;
+
+    try{
+      if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+        window.SeatsVoice.setEnabled(enabled);
+      }else{
+        localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+      }
+    }catch(_){
+      localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+    }
+
+    const cb = document.getElementById("soundToggle");
+    if(cb) cb.checked = enabled;
+
+    updateNightVoiceToggle();
+
+    if(!opts.silent){
+      safeToast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1600);
+    }
+
+    if(enabled && opts.announce){
+      setTimeout(() => safeSpeak("Sesli robot açık."), 80);
+    }
+  }){
     const enabled = !!on;
 
     localStorage.setItem(VOICE_SOUND_KEY, enabled ? "1" : "0");
@@ -202,12 +245,10 @@
   }
 
   function bindNightVoiceToggle(){
-    const btn = document.getElementById("nightVoiceToggle");
     const cb = document.getElementById("soundToggle");
 
     if(cb){
-      const saved = localStorage.getItem(VOICE_SOUND_KEY);
-      if(saved !== null) cb.checked = saved === "1";
+      cb.checked = getVoiceEnabled();
 
       if(cb.dataset.voiceBound !== "1"){
         cb.dataset.voiceBound = "1";
@@ -217,13 +258,10 @@
       }
     }
 
-    if(btn && btn.dataset.voiceBound !== "1"){
-      btn.dataset.voiceBound = "1";
-      btn.addEventListener("click", () => {
-        setVoiceEnabled(!getVoiceEnabled(), { announce:true });
-      });
-    }
-
+    /*
+      #nightVoiceToggle butonunun tek sahibi voice-tts.js.
+      Burada click event bağlamıyoruz; çift yönetim bozulma yapıyordu.
+    */
     updateNightVoiceToggle();
   }
 
