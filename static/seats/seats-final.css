@@ -957,186 +957,1226 @@ body:not(.drive-mode) #driveInlineDock{
 }
 
 
+
+
 /* =========================================================
-   VOICE MINI SEAT COUNTER
-   Sesli Komut yanında küçük Dolu / Boş göstergesi
+   DRIVE ROUTE STOP PIN ICON
+   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
 ========================================================= */
 
-.voice-row{
-  grid-template-columns:minmax(0,1fr) auto 84px !important;
+body.drive-mode .route-stop .name{
+  display:flex !important;
   align-items:center !important;
+  gap:8px !important;
 }
 
-.voice-seat-mini{
-  min-width:88px;
-  height:44px;
-  padding:5px 8px;
-  border-radius:17px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
+body.drive-mode .route-stop .name::before{
+  content:"📍";
+  width:24px;
+  height:24px;
+  min-width:24px;
+  display:inline-flex;
   align-items:center;
-  gap:5px;
-  background:rgba(255,255,255,.065);
-  border:1px solid rgba(148,163,184,.16);
+  justify-content:center;
+  border-radius:999px;
+  font-size:18px;
+  line-height:1;
+  filter:drop-shadow(0 6px 10px rgba(37,99,235,.25));
+}
+
+body.drive-mode .route-stop.active .name::before,
+body.drive-mode .route-stop.live-danger .name::before,
+body.drive-mode .route-stop.next-warning .name::before,
+body.drive-mode .route-stop.flow-green .name::before{
+  filter:drop-shadow(0 0 10px rgba(96,165,250,.55));
+}
+
+body.drive-mode .route-stop.done .name::before{
+  opacity:.72;
+}
+
+
+/* =========================================================
+   DRIVE ROUTE STOP BLUE PIN ICON FINAL
+   Emoji pin yerine 2. görseldeki gibi sade mavi konum ikonu.
+========================================================= */
+
+body.drive-mode .route-stop .name{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+}
+
+body.drive-mode .route-stop .name::before{
+  content:"" !important;
+  width:25px !important;
+  height:25px !important;
+  min-width:25px !important;
+  display:inline-block !important;
+
+  background:linear-gradient(180deg,#38bdf8,#2563eb) !important;
+
+  -webkit-mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z'/%3E%3C/svg%3E")
+    center / contain no-repeat !important;
+
+  mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z'/%3E%3C/svg%3E")
+    center / contain no-repeat !important;
+
+  filter:drop-shadow(0 6px 10px rgba(37,99,235,.40)) !important;
+}
+
+body.drive-mode .route-stop.active .name::before,
+body.drive-mode .route-stop.live-danger .name::before,
+body.drive-mode .route-stop.next-warning .name::before,
+body.drive-mode .route-stop.flow-green .name::before{
+  background:linear-gradient(180deg,#60a5fa,#1d4ed8) !important;
+  filter:
+    drop-shadow(0 0 10px rgba(96,165,250,.65))
+    drop-shadow(0 6px 12px rgba(37,99,235,.35)) !important;
+}
+
+body.drive-mode .route-stop.done .name::before{
+  opacity:.62 !important;
+}
+
+
+/* =========================================================
+   DRIVE ROUTE STOP PIN COLOR BOOST
+   Durak kartlarındaki konum ikonunu daha parlak mavi yapar.
+========================================================= */
+
+body.drive-mode .route-stop .name::before{
+  background:linear-gradient(180deg,#7dd3fc 0%,#38bdf8 42%,#2563eb 100%) !important;
+  opacity:1 !important;
+  filter:
+    drop-shadow(0 0 8px rgba(56,189,248,.72))
+    drop-shadow(0 6px 12px rgba(37,99,235,.48)) !important;
+}
+
+body.drive-mode .route-stop.done .name::before{
+  opacity:.95 !important;
+  background:linear-gradient(180deg,#60a5fa 0%,#38bdf8 50%,#1d4ed8 100%) !important;
+}
+
+body.drive-mode .route-stop.active .name::before,
+body.drive-mode .route-stop.live-danger .name::before,
+body.drive-mode .route-stop.next-warning .name::before,
+body.drive-mode .route-stop.flow-green .name::before{
+  background:linear-gradient(180deg,#bae6fd 0%,#38bdf8 36%,#1d4ed8 100%) !important;
+  filter:
+    drop-shadow(0 0 12px rgba(125,211,252,.95))
+    drop-shadow(0 0 22px rgba(37,99,235,.45)) !important;
+}
+
+
+/* =========================================================
+   DRIVE ROUTE CARD COLOR BOOST
+   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+========================================================= */
+
+body.drive-mode .route-stop{
+  opacity:1 !important;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(59,130,246,.18), transparent 34%),
+    linear-gradient(180deg, rgba(21,45,74,.92), rgba(10,24,42,.88)) !important;
+  border:1px solid rgba(96,165,250,.24) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.07),
-    0 8px 18px rgba(0,0,0,.12);
-  color:#eaf2ff;
+    0 14px 30px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
 }
 
-.voice-seat-mini span{
-  display:grid;
-  gap:2px;
-  text-align:center;
-  color:rgba(226,232,240,.62);
-  font-size:9px;
-  line-height:1;
-  font-weight:850;
-  white-space:nowrap;
+body.drive-mode .route-stop.done{
+  opacity:.86 !important;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(59,130,246,.14), transparent 34%),
+    linear-gradient(180deg, rgba(22,42,66,.82), rgba(9,22,38,.78)) !important;
+  border-color:rgba(96,165,250,.18) !important;
 }
 
-.voice-seat-mini b{
-  color:#fff;
-  font-size:14px;
-  line-height:1;
+body.drive-mode .route-stop.done .name{
+  opacity:1 !important;
+  color:rgba(238,247,255,.88) !important;
+}
+
+body.drive-mode .route-stop.done .meta,
+body.drive-mode .route-stop.done .extra-k,
+body.drive-mode .route-stop.done .extra-v{
+  color:rgba(226,232,240,.72) !important;
+}
+
+/* Seçili / canlı kart daha güçlü dursun */
+body.drive-mode .route-stop.active{
+  opacity:1 !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(96,165,250,.26), transparent 34%),
+    linear-gradient(180deg, rgba(31,74,118,.94), rgba(18,45,80,.90)) !important;
+  border-color:rgba(96,165,250,.54) !important;
+  box-shadow:
+    0 16px 34px rgba(37,99,235,.22),
+    0 0 0 1px rgba(96,165,250,.18) inset,
+    0 0 22px rgba(37,99,235,.18) !important;
+}
+
+body.drive-mode .route-stop.active .name,
+body.drive-mode .route-stop.active .meta,
+body.drive-mode .route-stop.active .extra-k,
+body.drive-mode .route-stop.active .extra-v{
+  color:#f8fbff !important;
+}
+
+/* Normal bekleyen kartlar da çok sönük kalmasın */
+body.drive-mode .route-stop:not(.active):not(.live-danger):not(.next-warning):not(.flow-green){
+  filter:saturate(1.12) brightness(1.06) !important;
+}
+
+
+/* =========================================================
+   DRIVE LIVE DANGER COLOR RESTORE
+   Canlı durak eşik km altına düşünce kırmızı uyarı geri gelsin.
+========================================================= */
+
+body.drive-mode .route-stop.live-danger{
+  opacity:1 !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(248,113,113,.34), transparent 38%),
+    linear-gradient(135deg, rgba(127,29,29,.98), rgba(239,68,68,.68)) !important;
+  border-color:rgba(248,113,113,.96) !important;
+  box-shadow:
+    0 0 0 1px rgba(248,113,113,.48),
+    0 0 24px rgba(239,68,68,.52),
+    0 16px 34px rgba(127,29,29,.34),
+    inset 0 1px 0 rgba(255,255,255,.16) !important;
+  filter:brightness(1.08) saturate(1.18) !important;
+  animation:liveStopBlink 0.9s linear infinite !important;
+}
+
+body.drive-mode .route-stop.live-danger .name,
+body.drive-mode .route-stop.live-danger .meta,
+body.drive-mode .route-stop.live-danger .extra-k,
+body.drive-mode .route-stop.live-danger .extra-v{
+  color:#fff !important;
+  opacity:1 !important;
+}
+
+body.drive-mode .route-stop.live-danger .name::before{
+  background:linear-gradient(180deg,#fecaca 0%,#f87171 45%,#dc2626 100%) !important;
+  filter:
+    drop-shadow(0 0 12px rgba(248,113,113,.95))
+    drop-shadow(0 0 22px rgba(239,68,68,.48)) !important;
+}
+
+/* Sıradaki uyarı sarı kalsın */
+body.drive-mode .route-stop.next-warning:not(.live-danger){
+  background:
+    radial-gradient(circle at 18% 0%, rgba(251,191,36,.25), transparent 38%),
+    linear-gradient(135deg, rgba(120,75,0,.96), rgba(245,158,11,.62)) !important;
+  border-color:rgba(251,191,36,.88) !important;
+  box-shadow:
+    0 0 0 1px rgba(251,191,36,.36),
+    0 0 18px rgba(245,158,11,.34),
+    inset 0 1px 0 rgba(255,255,255,.13) !important;
+}
+
+/* Sonraki güvenli akış yeşil kalsın */
+body.drive-mode .route-stop.flow-green:not(.live-danger):not(.next-warning){
+  background:
+    radial-gradient(circle at 18% 0%, rgba(74,222,128,.22), transparent 38%),
+    linear-gradient(135deg, rgba(20,83,45,.94), rgba(34,197,94,.48)) !important;
+  border-color:rgba(74,222,128,.72) !important;
+  box-shadow:
+    0 0 0 1px rgba(74,222,128,.30),
+    0 0 14px rgba(34,197,94,.24),
+    inset 0 1px 0 rgba(255,255,255,.11) !important;
+}
+
+
+/* =========================================================
+   NORMAL ROUTE STOP PIN ICON
+   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+========================================================= */
+
+body:not(.drive-mode) .route-stop .name{
+  display:flex !important;
+  align-items:center !important;
+  gap:9px !important;
+}
+
+body:not(.drive-mode) .route-stop .name::before{
+  content:"" !important;
+  width:24px !important;
+  height:24px !important;
+  min-width:24px !important;
+  display:inline-block !important;
+
+  background:linear-gradient(180deg,#7dd3fc 0%,#38bdf8 42%,#2563eb 100%) !important;
+
+  -webkit-mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z'/%3E%3C/svg%3E")
+    center / contain no-repeat !important;
+
+  mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z'/%3E%3C/svg%3E")
+    center / contain no-repeat !important;
+
+  filter:
+    drop-shadow(0 0 8px rgba(56,189,248,.60))
+    drop-shadow(0 6px 12px rgba(37,99,235,.38)) !important;
+}
+
+body:not(.drive-mode) .route-stop.done .name::before{
+  opacity:.85 !important;
+}
+
+body:not(.drive-mode) .route-stop.active .name::before,
+body:not(.drive-mode) .route-stop.live-danger .name::before,
+body:not(.drive-mode) .route-stop.next-warning .name::before,
+body:not(.drive-mode) .route-stop.flow-green .name::before{
+  background:linear-gradient(180deg,#bae6fd 0%,#38bdf8 36%,#1d4ed8 100%) !important;
+  filter:
+    drop-shadow(0 0 12px rgba(125,211,252,.95))
+    drop-shadow(0 0 22px rgba(37,99,235,.45)) !important;
+}
+
+
+/* =========================================================
+   NORMAL ROUTE PIN BRIGHT FINAL
+   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+========================================================= */
+
+body:not(.drive-mode) .route-stop .name::before{
+  background:linear-gradient(
+    180deg,
+    #dbeafe 0%,
+    #7dd3fc 24%,
+    #38bdf8 52%,
+    #2563eb 100%
+  ) !important;
+
+  opacity:1 !important;
+
+  filter:
+    brightness(1.35)
+    saturate(1.45)
+    drop-shadow(0 0 7px rgba(125,211,252,.95))
+    drop-shadow(0 0 16px rgba(37,99,235,.55))
+    drop-shadow(0 6px 10px rgba(37,99,235,.38)) !important;
+}
+
+/* Geçildi kartlarında da çok sönük kalmasın */
+body:not(.drive-mode) .route-stop.done .name::before{
+  opacity:1 !important;
+  background:linear-gradient(
+    180deg,
+    #bfdbfe 0%,
+    #60a5fa 34%,
+    #38bdf8 58%,
+    #1d4ed8 100%
+  ) !important;
+
+  filter:
+    brightness(1.18)
+    saturate(1.35)
+    drop-shadow(0 0 6px rgba(96,165,250,.70))
+    drop-shadow(0 5px 10px rgba(37,99,235,.30)) !important;
+}
+
+/* Seçili / canlı / uyarı kartında ikon daha güçlü parlasın */
+body:not(.drive-mode) .route-stop.active .name::before,
+body:not(.drive-mode) .route-stop.live-danger .name::before,
+body:not(.drive-mode) .route-stop.next-warning .name::before,
+body:not(.drive-mode) .route-stop.flow-green .name::before{
+  background:linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #bae6fd 20%,
+    #38bdf8 50%,
+    #1d4ed8 100%
+  ) !important;
+
+  filter:
+    brightness(1.45)
+    saturate(1.65)
+    drop-shadow(0 0 10px rgba(186,230,253,.95))
+    drop-shadow(0 0 22px rgba(37,99,235,.70))
+    drop-shadow(0 8px 14px rgba(37,99,235,.40)) !important;
+}
+
+
+/* =========================================================
+   NORMAL ROUTE CARD BACKGROUND BOOST
+   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+========================================================= */
+
+body:not(.drive-mode) .route-stop{
+  opacity:1 !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(59,130,246,.22), transparent 36%),
+    linear-gradient(180deg, rgba(24,50,82,.94), rgba(11,28,50,.90)) !important;
+  border-color:rgba(96,165,250,.28) !important;
+  box-shadow:
+    0 14px 30px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+  filter:saturate(1.18) brightness(1.08) !important;
+}
+
+/* Geçildi kartları tamamen solmasın */
+body:not(.drive-mode) .route-stop.done{
+  opacity:.92 !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(59,130,246,.18), transparent 36%),
+    linear-gradient(180deg, rgba(22,46,75,.90), rgba(10,25,45,.86)) !important;
+  border-color:rgba(96,165,250,.22) !important;
+  filter:saturate(1.15) brightness(1.04) !important;
+}
+
+/* Geçildi kartındaki yazılar biraz daha okunaklı */
+body:not(.drive-mode) .route-stop.done .name{
+  color:rgba(248,251,255,.88) !important;
+  opacity:1 !important;
+}
+
+body:not(.drive-mode) .route-stop.done .meta,
+body:not(.drive-mode) .route-stop.done .extra-k,
+body:not(.drive-mode) .route-stop.done .extra-v{
+  color:rgba(226,232,240,.74) !important;
+}
+
+/* Seçili/canlı kırmızı kart kendi rengini korusun */
+body:not(.drive-mode) .route-stop.live-danger{
+  background:
+    radial-gradient(circle at 18% 0%, rgba(248,113,113,.34), transparent 38%),
+    linear-gradient(135deg, rgba(127,29,29,.98), rgba(239,68,68,.68)) !important;
+  border-color:rgba(248,113,113,.96) !important;
+  filter:brightness(1.08) saturate(1.18) !important;
+}
+
+
+/* =========================================================
+   NORMAL ROUTE WARNING COLORS RESTORE
+   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+========================================================= */
+
+/* Canlı / tehlike: kırmızı */
+body:not(.drive-mode) .route-stop.live-danger{
+  opacity:1 !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(248,113,113,.38), transparent 38%),
+    linear-gradient(135deg, rgba(127,29,29,.98), rgba(239,68,68,.72)) !important;
+  border-color:rgba(248,113,113,.96) !important;
+  box-shadow:
+    0 0 0 1px rgba(248,113,113,.48),
+    0 0 24px rgba(239,68,68,.52),
+    0 16px 34px rgba(127,29,29,.34),
+    inset 0 1px 0 rgba(255,255,255,.16) !important;
+  filter:brightness(1.08) saturate(1.18) !important;
+  animation:liveStopBlink .9s linear infinite !important;
+}
+
+/* Sıradaki uyarı: turuncu */
+body:not(.drive-mode) .route-stop.next-warning:not(.live-danger){
+  opacity:1 !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(251,191,36,.34), transparent 38%),
+    linear-gradient(135deg, rgba(120,75,0,.98), rgba(245,158,11,.70)) !important;
+  border-color:rgba(251,191,36,.92) !important;
+  box-shadow:
+    0 0 0 1px rgba(251,191,36,.42),
+    0 0 22px rgba(245,158,11,.40),
+    0 16px 34px rgba(120,75,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.14) !important;
+  filter:brightness(1.08) saturate(1.18) !important;
+}
+
+/* Sonraki güvenli akış: yeşil */
+body:not(.drive-mode) .route-stop.flow-green:not(.live-danger):not(.next-warning){
+  opacity:1 !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(74,222,128,.30), transparent 38%),
+    linear-gradient(135deg, rgba(20,83,45,.96), rgba(34,197,94,.58)) !important;
+  border-color:rgba(74,222,128,.78) !important;
+  box-shadow:
+    0 0 0 1px rgba(74,222,128,.34),
+    0 0 18px rgba(34,197,94,.32),
+    0 16px 34px rgba(20,83,45,.24),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
+  filter:brightness(1.08) saturate(1.18) !important;
+}
+
+/* Bu renklerde yazılar net beyaz kalsın */
+body:not(.drive-mode) .route-stop.live-danger .name,
+body:not(.drive-mode) .route-stop.live-danger .meta,
+body:not(.drive-mode) .route-stop.live-danger .extra-k,
+body:not(.drive-mode) .route-stop.live-danger .extra-v,
+body:not(.drive-mode) .route-stop.next-warning .name,
+body:not(.drive-mode) .route-stop.next-warning .meta,
+body:not(.drive-mode) .route-stop.next-warning .extra-k,
+body:not(.drive-mode) .route-stop.next-warning .extra-v,
+body:not(.drive-mode) .route-stop.flow-green .name,
+body:not(.drive-mode) .route-stop.flow-green .meta,
+body:not(.drive-mode) .route-stop.flow-green .extra-k,
+body:not(.drive-mode) .route-stop.flow-green .extra-v{
+  color:#fff !important;
+  opacity:1 !important;
+}
+
+/* Pin ikonları da renge uysun */
+body:not(.drive-mode) .route-stop.live-danger .name::before{
+  background:linear-gradient(180deg,#fecaca 0%,#f87171 45%,#dc2626 100%) !important;
+}
+
+body:not(.drive-mode) .route-stop.next-warning .name::before{
+  background:linear-gradient(180deg,#fef3c7 0%,#fbbf24 45%,#d97706 100%) !important;
+}
+
+body:not(.drive-mode) .route-stop.flow-green .name::before{
+  background:linear-gradient(180deg,#bbf7d0 0%,#22c55e 48%,#15803d 100%) !important;
+}
+
+
+/* =========================================================
+   ROUTE LIVE / NEXT PILL BACKGROUND BOOST
+   Canlı ve Sıradaki durak kutularını daha canlı yapar.
+========================================================= */
+
+.route-pill:has(#routeMiniLive),
+.route-pill:has(#routeMiniNext){
+  background:
+    radial-gradient(circle at 18% 0%, rgba(96,165,250,.22), transparent 36%),
+    linear-gradient(180deg, rgba(30,58,92,.92), rgba(15,35,62,.86)) !important;
+  border-color:rgba(96,165,250,.28) !important;
+  box-shadow:
+    0 12px 26px rgba(0,0,0,.20),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+  color:#f8fbff !important;
+  filter:saturate(1.12) brightness(1.06) !important;
+}
+
+/* Canlı kutusu biraz yeşil vurgu alsın */
+.route-pill:has(#routeMiniLive){
+  background:
+    radial-gradient(circle at 18% 0%, rgba(34,197,94,.20), transparent 34%),
+    linear-gradient(180deg, rgba(26,67,72,.92), rgba(15,45,58,.86)) !important;
+  border-color:rgba(74,222,128,.30) !important;
+}
+
+/* Sıradaki kutusu mavi vurgu */
+.route-pill:has(#routeMiniNext){
+  background:
+    radial-gradient(circle at 18% 0%, rgba(59,130,246,.24), transparent 34%),
+    linear-gradient(180deg, rgba(30,58,92,.94), rgba(15,35,62,.88)) !important;
+  border-color:rgba(96,165,250,.32) !important;
+}
+
+.route-pill:has(#routeMiniLive) b,
+.route-pill:has(#routeMiniNext) b{
+  color:#ffffff !important;
+  font-weight:1000 !important;
+}
+
+.route-pill:has(#routeMiniLive)::before{
+  filter:
+    drop-shadow(0 0 8px rgba(74,222,128,.80))
+    drop-shadow(0 0 14px rgba(34,197,94,.42)) !important;
+}
+
+
+/* =========================================================
+   ROUTE MINI CLEAN TICKER SINGLE
+   Tek sistem: Canlı/Sıradaki sabit, durak adı TV altyazısı gibi akar.
+========================================================= */
+
+.route-strip-meta{
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:minmax(0,.9fr) minmax(0,1.25fr) 50px !important;
+  gap:8px !important;
+  align-items:center !important;
+  overflow:hidden !important;
+}
+
+.route-pill-live,
+.route-pill-next{
+  display:grid !important;
+  align-items:center !important;
+  justify-content:stretch !important;
+  overflow:hidden !important;
+  min-width:0 !important;
+}
+
+.route-pill-live{
+  grid-template-columns:10px auto minmax(0,1fr) !important;
+  gap:7px !important;
+}
+
+.route-pill-next{
+  grid-template-columns:auto minmax(0,1fr) !important;
+  gap:7px !important;
+}
+
+.route-mini-dot{
+  width:10px !important;
+  height:10px !important;
+  min-width:10px !important;
+  border-radius:999px !important;
+  display:inline-block !important;
+  background:linear-gradient(180deg,#4ade80,#16a34a) !important;
+  box-shadow:
+    0 0 0 3px rgba(34,197,94,.14),
+    0 0 12px rgba(34,197,94,.55) !important;
+}
+
+.route-mini-label{
+  white-space:nowrap !important;
+  color:#fff !important;
+  font-weight:1000 !important;
+}
+
+.route-name-window{
+  position:relative !important;
+  min-width:0 !important;
+  width:100% !important;
+  overflow:hidden !important;
+  white-space:nowrap !important;
+  display:block !important;
+}
+
+.route-name-window b,
+.route-pill .route-name-window b,
+.route-strip-meta .route-pill b{
+  display:inline-block !important;
+  width:auto !important;
+  max-width:none !important;
+  min-width:auto !important;
+  overflow:visible !important;
+  text-overflow:clip !important;
+  white-space:nowrap !important;
+  color:#fff !important;
+  font-weight:1000 !important;
+  padding-right:42px !important;
+  will-change:transform !important;
+  animation:routeCleanTickerSingle 8.5s linear infinite !important;
+}
+
+/* İkinci kopya: boşluk olmadan akış sağlar */
+.route-name-window b::after{
+  content:attr(data-marquee-text);
+  padding-left:42px;
+}
+
+/* Kayan yazı */
+@keyframes routeCleanTickerSingle{
+  0%{
+    transform:translateX(0);
+  }
+  100%{
+    transform:translateX(-50%);
+  }
+}
+
+/* Eski pseudo noktaları kesin kapat */
+.route-pill-live::before,
+.route-pill:has(#routeMiniLive)::before,
+#routeMiniLive::before,
+#routeMiniNext::before{
+  display:none !important;
+  content:none !important;
+}
+
+
+
+/* =========================================================
+   LIVE PILL RED TEXT WHEN DANGER
+   Canlı durak kırmızı uyarıdayken üst Canlı yazısını da kırmızı yapar.
+========================================================= */
+
+body.drive-mode .route-strip:has(.route-stop.live-danger) ~ *,
+body:not(.drive-mode) .route-strip:has(.route-stop.live-danger) ~ *{
+  /* no-op: sadece :has desteği için bırakıldı */
+}
+
+.route-strip-shell:has(.route-stop.live-danger) .route-pill-live{
+  background:
+    radial-gradient(circle at 18% 0%, rgba(248,113,113,.30), transparent 36%),
+    linear-gradient(180deg, rgba(127,29,29,.88), rgba(69,10,10,.84)) !important;
+  border-color:rgba(248,113,113,.72) !important;
+  box-shadow:
+    0 0 0 1px rgba(248,113,113,.28),
+    0 0 18px rgba(239,68,68,.34),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+
+.route-strip-shell:has(.route-stop.live-danger) .route-pill-live .route-mini-label,
+.route-strip-shell:has(.route-stop.live-danger) .route-pill-live #routeMiniLive{
+  color:#fecaca !important;
+  text-shadow:
+    0 0 8px rgba(248,113,113,.70),
+    0 0 18px rgba(239,68,68,.38) !important;
+}
+
+.route-strip-shell:has(.route-stop.live-danger) .route-mini-dot{
+  background:linear-gradient(180deg,#fecaca,#ef4444) !important;
+  box-shadow:
+    0 0 0 3px rgba(239,68,68,.18),
+    0 0 14px rgba(239,68,68,.70) !important;
+}
+
+
+/* =========================================================
+   NEXT PILL ORANGE WHEN WARNING
+   Sıradaki durak uyarı/turuncu kart olduğunda üst Sıradaki kutusu da turuncu olur.
+========================================================= */
+
+.route-strip-shell:has(.route-stop.next-warning) .route-pill-next{
+  background:
+    radial-gradient(circle at 18% 0%, rgba(251,191,36,.30), transparent 36%),
+    linear-gradient(180deg, rgba(120,75,0,.88), rgba(69,42,10,.84)) !important;
+  border-color:rgba(251,191,36,.72) !important;
+  box-shadow:
+    0 0 0 1px rgba(251,191,36,.28),
+    0 0 18px rgba(245,158,11,.34),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+
+.route-strip-shell:has(.route-stop.next-warning) .route-pill-next .route-mini-label,
+.route-strip-shell:has(.route-stop.next-warning) .route-pill-next #routeMiniNext{
+  color:#fef3c7 !important;
+  text-shadow:
+    0 0 8px rgba(251,191,36,.70),
+    0 0 18px rgba(245,158,11,.38) !important;
+}
+
+
+/* =========================================================
+   VOICE ROW ONE FINAL
+   Sesli Komut + Koltuk sayacı dengeli tek satır.
+========================================================= */
+
+.board-head-right .voice-row,
+body.drive-mode .board-head-right .voice-row,
+body:not(.drive-mode) .board-head-right .voice-row{
+  width:100% !important;
+  max-width:100% !important;
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) minmax(126px, 0.85fr) !important;
+  gap:10px !important;
+  align-items:center !important;
+  justify-content:stretch !important;
+}
+
+.board-head-right .voice-state{
+  display:none !important;
+}
+
+.board-head-right .voice-command-btn{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:none !important;
+  height:56px !important;
+  min-height:56px !important;
+  border-radius:22px !important;
+  padding:0 18px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:12px !important;
+
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,.22), transparent 28%),
+    linear-gradient(135deg,#8b5cf6 0%,#2563eb 100%) !important;
+  color:#fff !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+  box-shadow:
+    0 16px 34px rgba(37,99,235,.24),
+    inset 0 1px 0 rgba(255,255,255,.14) !important;
+
+  font-size:16px !important;
+  font-weight:1000 !important;
+  overflow:hidden !important;
+}
+
+.board-head-right .voice-command-btn::before,
+.board-head-right .voice-command-btn::after{
+  display:none !important;
+  content:none !important;
+}
+
+.board-head-right .voice-command-btn span{
+  min-width:0 !important;
+  max-width:100% !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+  font-size:16px !important;
+  font-weight:1000 !important;
+}
+
+.board-head-right .voice-seat-mini{
+  width:100% !important;
+  min-width:126px !important;
+  max-width:none !important;
+  height:56px !important;
+  min-height:56px !important;
+  border-radius:22px !important;
+  padding:0 13px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:9px !important;
+
+  background:
+    radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 36%),
+    rgba(255,255,255,.075) !important;
+  border:1px solid rgba(148,163,184,.18) !important;
+  box-shadow:
+    0 10px 22px rgba(0,0,0,.14),
+    inset 0 1px 0 rgba(255,255,255,.08) !important;
+  color:#eaf2ff !important;
+}
+
+/* Koltuk ikonu */
+.board-head-right .voice-seat-mini::before{
+  content:"🪑" !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:34px !important;
+  height:34px !important;
+  min-width:34px !important;
+  border-radius:13px !important;
+  background:rgba(255,255,255,.08) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+  font-size:18px !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+
+/* Dolu/Boş yazılarını sayıya dönüştür */
+.board-head-right .voice-seat-mini span{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-width:auto !important;
+  font-size:0 !important;
+  line-height:1 !important;
+}
+
+.board-head-right .voice-seat-mini span:first-child::before{
+  content:"Koltuk";
+  color:rgba(226,232,240,.72);
+  font-size:11px;
+  font-weight:950;
+  margin-right:7px;
+}
+
+.board-head-right .voice-seat-mini span:first-child::after{
+  content:" / ";
+  color:rgba(226,232,240,.50);
+  font-size:17px;
   font-weight:1000;
-  font-variant-numeric:tabular-nums;
+  margin:0 4px;
 }
 
-.voice-seat-mini span:first-child b{
-  color:#60a5fa;
+.board-head-right .voice-seat-mini b{
+  display:inline !important;
+  font-size:17px !important;
+  line-height:1 !important;
+  font-weight:1000 !important;
+  font-variant-numeric:tabular-nums !important;
 }
 
-.voice-seat-mini span:last-child b{
-  color:#86efac;
+.board-head-right .voice-seat-mini span:first-child b{
+  color:#60a5fa !important;
+}
+
+.board-head-right .voice-seat-mini span:last-child b{
+  color:#86efac !important;
 }
 
 @media(max-width:430px){
-  .voice-row{
-    grid-template-columns:minmax(0,1fr) 82px 74px !important;
+  .board-head-right .voice-row,
+  body.drive-mode .board-head-right .voice-row,
+  body:not(.drive-mode) .board-head-right .voice-row{
+    grid-template-columns:minmax(0,1fr) 126px !important;
     gap:8px !important;
   }
 
-  .voice-seat-mini{
-    min-width:82px;
-    height:42px;
-    padding:5px 7px;
-    border-radius:16px;
+  .board-head-right .voice-command-btn,
+  .board-head-right .voice-seat-mini{
+    height:54px !important;
+    min-height:54px !important;
+    border-radius:20px !important;
   }
 
-  .voice-seat-mini span{
-    font-size:8.5px;
+  .board-head-right .voice-command-btn{
+    padding:0 15px !important;
   }
 
-  .voice-seat-mini b{
-    font-size:13px;
+  .board-head-right .voice-command-btn span{
+    font-size:15px !important;
+  }
+
+  .board-head-right .voice-seat-mini{
+    min-width:126px !important;
+    padding:0 10px !important;
+    gap:7px !important;
+  }
+
+  .board-head-right .voice-seat-mini::before{
+    width:30px !important;
+    height:30px !important;
+    min-width:30px !important;
+    font-size:16px !important;
+  }
+
+  .board-head-right .voice-seat-mini span:first-child::before{
+    font-size:10px;
+    margin-right:5px;
+  }
+
+  .board-head-right .voice-seat-mini b{
+    font-size:16px !important;
   }
 }
 
 @media(max-width:370px){
-  .voice-row{
-    grid-template-columns:1fr 74px !important;
+  .board-head-right .voice-row,
+  body.drive-mode .board-head-right .voice-row,
+  body:not(.drive-mode) .board-head-right .voice-row{
+    grid-template-columns:minmax(0,1fr) 112px !important;
   }
 
-  .voice-seat-mini{
+  .board-head-right .voice-seat-mini{
+    min-width:112px !important;
+  }
+
+  .board-head-right .voice-seat-mini span:first-child::before{
     display:none !important;
   }
 }
 
 
+
 /* =========================================================
-   DRIVE MODE VOICE MINI COUNTER FINAL
-   Sesli Komut sağında Dolu / Boş küçük sayaç
+   VOICE SEAT COUNTER ICON FINAL
+   Sesli Komut yanındaki koltuk sayacı için temiz koltuk ikonu.
 ========================================================= */
 
-.voice-seat-mini{
-  min-width:86px;
-  height:44px;
-  padding:5px 8px;
-  border-radius:17px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  align-items:center;
-  gap:5px;
-  background:rgba(255,255,255,.075);
-  border:1px solid rgba(148,163,184,.18);
+.board-head-right .voice-seat-mini::before{
+  content:"" !important;
+
+  width:38px !important;
+  height:38px !important;
+  min-width:38px !important;
+  border-radius:15px !important;
+
+  display:inline-block !important;
+
+  background:
+    linear-gradient(180deg,#c7d2fe 0%,#60a5fa 45%,#2563eb 100%) !important;
+
+  -webkit-mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='black' d='M18 7c-4.4 0-8 3.6-8 8v26c0 5.5 4.5 10 10 10h24c5.5 0 10-4.5 10-10V23c0-4.4-3.6-8-8-8H28c-2.2 0-4 1.8-4 4v18h-6V15c0-1.1.9-2 2-2h8V7H18zm12 14h16c1.1 0 2 .9 2 2v18c0 2.2-1.8 4-4 4H20c-2.2 0-4-1.8-4-4v-2h14V21zM12 53c-2.2 0-4 1.8-4 4s1.8 4 4 4h40c2.2 0 4-1.8 4-4s-1.8-4-4-4H12z'/%3E%3C/svg%3E")
+    center / 27px 27px no-repeat !important;
+
+  mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='black' d='M18 7c-4.4 0-8 3.6-8 8v26c0 5.5 4.5 10 10 10h24c5.5 0 10-4.5 10-10V23c0-4.4-3.6-8-8-8H28c-2.2 0-4 1.8-4 4v18h-6V15c0-1.1.9-2 2-2h8V7H18zm12 14h16c1.1 0 2 .9 2 2v18c0 2.2-1.8 4-4 4H20c-2.2 0-4-1.8-4-4v-2h14V21zM12 53c-2.2 0-4 1.8-4 4s1.8 4 4 4h40c2.2 0 4-1.8 4-4s-1.8-4-4-4H12z'/%3E%3C/svg%3E")
+    center / 27px 27px no-repeat !important;
+
+  filter:
+    drop-shadow(0 0 8px rgba(96,165,250,.52))
+    drop-shadow(0 7px 12px rgba(37,99,235,.28)) !important;
+}
+
+/* İkonun arkasına cam hissi veren yuva */
+.board-head-right .voice-seat-mini{
+  position:relative !important;
+}
+
+.board-head-right .voice-seat-mini::after{
+  content:"";
+  position:absolute;
+  left:9px;
+  top:50%;
+  transform:translateY(-50%);
+  width:42px;
+  height:42px;
+  border-radius:16px;
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+  z-index:0;
+}
+
+.board-head-right .voice-seat-mini::before{
+  position:relative !important;
+  z-index:1 !important;
+}
+
+.board-head-right .voice-seat-mini span{
+  position:relative !important;
+  z-index:1 !important;
+}
+
+@media(max-width:430px){
+  .board-head-right .voice-seat-mini::before{
+    width:34px !important;
+    height:34px !important;
+    min-width:34px !important;
+    -webkit-mask-size:24px 24px !important;
+    mask-size:24px 24px !important;
+  }
+
+  .board-head-right .voice-seat-mini::after{
+    left:8px;
+    width:38px;
+    height:38px;
+    border-radius:14px;
+  }
+}
+
+
+/* =========================================================
+   VOICE SEAT ICON MATCH FINAL
+   Koltuk sayacı ikonunu 2. görseldeki gibi sade koltuk ikonuna çevirir.
+========================================================= */
+
+.board-head-right .voice-seat-mini::before{
+  content:"" !important;
+
+  width:40px !important;
+  height:40px !important;
+  min-width:40px !important;
+  border-radius:15px !important;
+
+  display:inline-block !important;
+
+  background:
+    linear-gradient(180deg,#9fb4cf 0%,#6f86a3 52%,#475569 100%) !important;
+
+  -webkit-mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='black' d='M20 8c-3.3 0-6 2.7-6 6v24c0 3.3 2.7 6 6 6h5v8h-7c-2.2 0-4 1.8-4 4s1.8 4 4 4h28c2.2 0 4-1.8 4-4s-1.8-4-4-4h-7v-8h5c3.3 0 6-2.7 6-6V20c0-3.3-2.7-6-6-6H32c-3.3 0-6 2.7-6 6v18h-6V14h10V8H20zm18 12h6v18H32V20h6z'/%3E%3C/svg%3E")
+    center / 31px 31px no-repeat !important;
+
+  mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='black' d='M20 8c-3.3 0-6 2.7-6 6v24c0 3.3 2.7 6 6 6h5v8h-7c-2.2 0-4 1.8-4 4s1.8 4 4 4h28c2.2 0 4-1.8 4-4s-1.8-4-4-4h-7v-8h5c3.3 0 6-2.7 6-6V20c0-3.3-2.7-6-6-6H32c-3.3 0-6 2.7-6 6v18h-6V14h10V8H20zm18 12h6v18H32V20h6z'/%3E%3C/svg%3E")
+    center / 31px 31px no-repeat !important;
+
+  filter:
+    drop-shadow(0 0 7px rgba(148,163,184,.30))
+    drop-shadow(0 7px 12px rgba(15,23,42,.35)) !important;
+}
+
+/* İkon arka yuvası biraz daha 2. görseldeki gibi koyu cam olsun */
+.board-head-right .voice-seat-mini::after{
+  content:"" !important;
+  position:absolute !important;
+  left:10px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+
+  width:44px !important;
+  height:44px !important;
+  border-radius:16px !important;
+
+  background:rgba(255,255,255,.050) !important;
+  border:1px solid rgba(148,163,184,.12) !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.08),
-    0 8px 18px rgba(0,0,0,.14);
-  color:#eaf2ff;
+    0 8px 18px rgba(0,0,0,.12) !important;
+
+  z-index:0 !important;
 }
 
-.voice-seat-mini span{
-  display:grid;
-  gap:2px;
-  text-align:center;
-  color:rgba(226,232,240,.65);
-  font-size:8.8px;
-  line-height:1;
-  font-weight:900;
-  white-space:nowrap;
+.board-head-right .voice-seat-mini{
+  position:relative !important;
 }
 
-.voice-seat-mini b{
-  color:#fff;
-  font-size:14px;
-  line-height:1;
-  font-weight:1000;
-  font-variant-numeric:tabular-nums;
+.board-head-right .voice-seat-mini::before{
+  position:relative !important;
+  z-index:1 !important;
 }
 
-.voice-seat-mini span:first-child b{
-  color:#60a5fa;
+.board-head-right .voice-seat-mini span{
+  position:relative !important;
+  z-index:1 !important;
 }
 
-.voice-seat-mini span:last-child b{
-  color:#86efac;
+@media(max-width:430px){
+  .board-head-right .voice-seat-mini::before{
+    width:36px !important;
+    height:36px !important;
+    min-width:36px !important;
+    -webkit-mask-size:28px 28px !important;
+    mask-size:28px 28px !important;
+  }
+
+  .board-head-right .voice-seat-mini::after{
+    left:8px !important;
+    width:40px !important;
+    height:40px !important;
+    border-radius:15px !important;
+  }
 }
 
-/* Sürüş modunda eski CSS'i ez */
-body.drive-mode .voice-row{
-  width:100% !important;
+
+/* =========================================================
+   VOICE SEAT EMOJI FINAL
+   Koltuk sayacı ikonunu 💺 emoji yapar.
+========================================================= */
+
+.board-head-right .voice-seat-mini::before{
+  content:"💺" !important;
+
+  width:40px !important;
+  height:40px !important;
+  min-width:40px !important;
+  border-radius:15px !important;
+
   display:grid !important;
-  grid-template-columns:minmax(0, 1fr) 86px !important;
-  gap:8px !important;
-  align-items:center !important;
-  justify-content:stretch !important;
+  place-items:center !important;
+
+  background:rgba(255,255,255,.060) !important;
+  border:1px solid rgba(148,163,184,.14) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 8px 18px rgba(0,0,0,.14) !important;
+
+  font-size:23px !important;
+  line-height:1 !important;
+
+  -webkit-mask:none !important;
+  mask:none !important;
+  filter:none !important;
+  color:inherit !important;
 }
 
-body.drive-mode .voice-seat-mini{
-  display:grid !important;
+.board-head-right .voice-seat-mini::after{
+  display:none !important;
+  content:none !important;
 }
 
-body.drive-mode .voice-state{
+@media(max-width:430px){
+  .board-head-right .voice-seat-mini::before{
+    width:36px !important;
+    height:36px !important;
+    min-width:36px !important;
+    border-radius:14px !important;
+    font-size:21px !important;
+  }
+}
+
+
+/* =========================================================
+   DRIVE MODE LEGEND FIXED SINGLE FINAL
+   Sürüş modunda Boş/Bay/Bayan/Bagaj/İniş/Servis barı
+   ekranın en altında sabit kalır.
+========================================================= */
+
+/* Normal modda legend gizli */
+body:not(.drive-mode) .board-head-right .legend{
   display:none !important;
 }
 
-body.drive-mode .voice-command-btn{
+/* Sürüş modunda legend sabit alt bar */
+body.drive-mode .board-head-right .legend{
+  position:fixed !important;
+  left:50% !important;
+  right:auto !important;
+  top:auto !important;
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 8px) !important;
+  transform:translateX(-50%) !important;
+
+  width:calc(100vw - 22px) !important;
+  max-width:720px !important;
+  min-height:58px !important;
+
+  z-index:99999 !important;
+
+  display:grid !important;
+  grid-template-columns:repeat(6, minmax(0,1fr)) !important;
+  align-items:center !important;
+  gap:7px !important;
+
+  margin:0 !important;
+  padding:9px 10px !important;
+
+  border-radius:22px !important;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(59,130,246,.16), transparent 34%),
+    linear-gradient(180deg, rgba(15,23,42,.96), rgba(2,8,23,.96)) !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+  box-shadow:
+    0 18px 42px rgba(0,0,0,.46),
+    inset 0 1px 0 rgba(255,255,255,.09) !important;
+
+  backdrop-filter:blur(14px) !important;
+  -webkit-backdrop-filter:blur(14px) !important;
+}
+
+body.drive-mode .board-head-right .legend .mini-chip{
   width:100% !important;
   min-width:0 !important;
-  max-width:none !important;
+  height:38px !important;
+  min-height:38px !important;
+
+  padding:0 4px !important;
+  border-radius:15px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+
+  color:#eaf2ff !important;
+  font-size:11px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
 }
 
-@media(max-width:390px){
-  body.drive-mode .voice-row{
-    grid-template-columns:1fr 78px !important;
-    gap:7px !important;
+/* Sabit alt bar koltukların üstünü kapatmasın */
+body.drive-mode .board-stage{
+  padding-bottom:82px !important;
+}
+
+body.drive-mode .deck{
+  padding-bottom:82px !important;
+}
+
+@media(max-width:430px){
+  body.drive-mode .board-head-right .legend{
+    width:calc(100vw - 16px) !important;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 6px) !important;
+    min-height:54px !important;
+    padding:8px 8px !important;
+    gap:5px !important;
+    border-radius:20px !important;
   }
 
-  .voice-seat-mini{
-    min-width:78px;
-    height:42px;
-    padding:5px 6px;
-    border-radius:16px;
+  body.drive-mode .board-head-right .legend .mini-chip{
+    height:34px !important;
+    min-height:34px !important;
+    font-size:10px !important;
+    padding:0 2px !important;
   }
 
-  .voice-seat-mini span{
-    font-size:8px;
-  }
-
-  .voice-seat-mini b{
-    font-size:13px;
+  body.drive-mode .board-stage,
+  body.drive-mode .deck{
+    padding-bottom:78px !important;
   }
 }
 
-
+@media(max-width:360px){
+  body.drive-mode .board-head-right .legend .mini-chip{
+    font-size:9px !important;
+  }
+}
