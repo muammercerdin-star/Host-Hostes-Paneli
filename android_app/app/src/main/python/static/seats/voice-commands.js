@@ -231,19 +231,18 @@ function speak(text){
   if(!msg) return;
 
   const soundToggle = $("#soundToggle");
+
   if(soundToggle && !soundToggle.checked) return;
 
-  let ttsEnabled = true;
   try{
-    const saved = localStorage.getItem("ttsEnabled");
-    if(saved === "0") ttsEnabled = false;
-  }catch(_){}
-
-  if(!ttsEnabled) return;
-
-  try{
-    if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
-      window.AndroidTTS.speak(msg);
+    if(typeof window.SeatsSpeak === "function"){
+      window.SeatsSpeak(msg);
+    }else if(
+      window.SeatsVoice &&
+      typeof window.SeatsVoice.speak === "function" &&
+      window.SeatsVoice.speak !== speak
+    ){
+      window.SeatsVoice.speak(msg);
     }else if("speechSynthesis" in window){
       speechSynthesis.cancel();
 
