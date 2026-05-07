@@ -14,7 +14,11 @@ const VOICE_HELP = [
   "bir sonraki durak",
   "rötar kaç",
   "hangi duraktayız",
-  "sesli yardım"
+  "sesli yardım",
+  "bu durakta işlem var mı",
+  "bu durakta kimler inecek",
+  "bu durakta bagaj var mı",
+  "inecekleri indir",
 ];
 
 function stopHumanVoiceSummary(stopName){
@@ -83,6 +87,132 @@ function stopHumanVoiceSummary(stopName){
 
   return msg;
 }
+
+/* --- voice stop ops helpers start --- */
+function stopOperationVoiceSummary(stopName){
+  const stop = String(stopName || "").trim();
+  if(!stop) return "Durak bilgisi bulunamadı.";
+
+  let seats = [];
+  let standingCt = 0;
+  let parcelCt = 0;
+  let serviceCt = 0;
+  let bagMsg = "";
+
+  try{
+    seats = seatsForStop(stop).map(Number).filter(Boolean);
+  }catch(_){
+    seats = [];
+  }
+
+  try{
+    standingCt = computeStandingCountsByStop()[stop] || 0;
+  }catch(_){
+    standingCt = 0;
+  }
+
+  try{
+    parcelCt = computeParcelCountsByStop()[stop] || 0;
+  }catch(_){
+    parcelCt = 0;
+  }
+
+  try{
+    serviceCt = seats.filter(n => !!serviceMap[String(n)]).length;
+  }catch(_){
+    serviceCt = 0;
+  }
+
+  try{
+    bagMsg = bagVoiceSummaryForStop(stop) || "";
+  }catch(_){
+    bagMsg = "";
+  }
+
+  const hasPassengerOps = seats.length > 0 || standingCt > 0;
+  const hasParcelOps = parcelCt > 0;
+  const hasServiceOps = serviceCt > 0;
+  const hasBagOps = !!String(bagMsg || "").trim();
+
+  if(!hasPassengerOps && !hasParcelOps && !hasServiceOps && !hasBagOps){
+    return `${stop} durağı için işlem görünmüyor.`;
+  }
+
+  let msg = `${stop} durağında işlem var. `;
+
+  if(hasPassengerOps){
+    msg += stopHumanVoiceSummary(stop);
+  }else{
+    msg += `${stop} durağında yolcu inişi görünmüyor.`;
+  }
+
+  if(hasServiceOps){
+    msg += ` Ayrıca ${serviceCt} servisli koltuk var.`;
+  }
+
+  return msg.trim();
+}
+
+function stopBagVoiceOnly(stopName){
+  const stop = String(stopName || "").trim();
+  if(!stop) return "Durak bilgisi bulunamadı.";
+
+  try{
+    const bagMsg = String(bagVoiceSummaryForStop(stop) || "").trim();
+    if(bagMsg) return `${stop} için ${bagMsg}`;
+  }catch(_){}
+
+  return `${stop} durağı için bagaj görünmüyor.`;
+}
+
+async function offloadSelectedStopByVoice(){
+  const stop = getSelectedStopName() || speedState.liveStop || "";
+  if(!stop){
+    toast("Önce durak seç");
+    speak("Önce durak seç.");
+    return true;
+  }
+
+  const seats = (() => {
+    try{
+      return seatsForStop(stop)
+        .map(Number)
+        .filter(n => !!assigned[String(n)]);
+    }catch(_){
+      return [];
+    }
+  })();
+
+  let standingCt = 0;
+  try{
+    standingCt = computeStandingCountsByStop()[stop] || 0;
+  }catch(_){
+    standingCt = 0;
+  }
+
+  if(!seats.length && !standingCt){
+    toast("Bu durakta indirilecek yolcu yok");
+    speak("Bu durakta indirilecek yolcu yok.");
+    return true;
+  }
+
+  const btn = $("#btnOffloadNowPane") || $("#btnOffloadNow");
+  if(btn){
+    btn.click();
+    speak(`${stop} için indirilecek yolcular işleme alındı.`);
+    return true;
+  }
+
+  if(typeof bulkOffload === "function" && seats.length){
+    await bulkOffload(seats);
+    speak(`${stop} için indirilecek yolcular indirildi.`);
+    return true;
+  }
+
+  speak("İndirme işlemi başlatılamadı.");
+  return true;
+}
+/* --- voice stop ops helpers end --- */
 
 function maybeSpeakApproachStop(stopName, km){
   if(!stopName) return;
@@ -261,6 +391,27 @@ function parseVoiceCommand(text){
 
   if(mentionedStop && /(durak|sec|seç)/.test(t)){
     return { type:"set_stop", stop: mentionedStop };
+  }
+
+
+  if(/(bu durakta islem var mi|bu durakta işlem var mı|secili durakta islem var mi|seçili durakta işlem var mı|bu durakta ne var)/.test(t)){
+    return { type:"ask_stop_ops" };
+  }
+
+  if(/(bu durakta kimler inecek|secili durakta kim inecek|seçili durakta kim inecek|inecekleri soyle|inecekleri söyle)/.test(t)){
+    return { type:"ask_selected_stop_passengers" };
+  }
+
+  if(mentionedStop && /(bagaj var mi|bagaj var mı)/.test(t)){
+    return { type:"ask_stop_bags", stop: mentionedStop };
+  }
+
+  if(/(bu durakta bagaj var mi|bu durakta bagaj var mı|secili durakta bagaj var mi|seçili durakta bagaj var mı|bagajli var mi|bagajlı var mı)/.test(t)){
+    return { type:"ask_stop_bags" };
+  }
+
+  if(/(inecekleri indir|bu durakta indir|secili duraktakileri indir|seçili duraktakileri indir)/.test(t)){
+    return { type:"offload_selected_stop" };
   }
 
   return { type:"unknown", raw:text };
@@ -504,6 +655,38 @@ async function handleLocalVoiceCommand(text){
     return true;
   }
 
+
+  if(cmd.type === "ask_stop_ops"){
+    const stop = getSelectedStopName() || speedState.liveStop || "";
+    const msg = stopOperationVoiceSummary(stop);
+
+    toast(msg, 4200);
+    speak(msg);
+    return true;
+  }
+
+  if(cmd.type === "ask_selected_stop_passengers"){
+    const stop = getSelectedStopName() || speedState.liveStop || "";
+    const msg = stopHumanVoiceSummary(stop);
+
+    toast(msg, 4200);
+    speak(msg);
+    return true;
+  }
+
+  if(cmd.type === "ask_stop_bags"){
+    const stop = cmd.stop || getSelectedStopName() || speedState.liveStop || "";
+    const msg = stopBagVoiceOnly(stop);
+
+    toast(msg, 4200);
+    speak(msg);
+    return true;
+  }
+
+  if(cmd.type === "offload_selected_stop"){
+    return await offloadSelectedStopByVoice();
+  }
+
   if(cmd.type === "ask_stop_count"){
     const stop = cmd.stop;
     const msg = stopHumanVoiceSummary(stop);
@@ -616,8 +799,28 @@ async function handleBasicVoiceCommand(text){
   }
 }
 
+function getVoiceCommandButtons(){
+  const out = [];
+  const mainBtn = $("#btnDeckAI");
+  const driveBtn = document.getElementById("btnDeckAIDrive");
+
+  if(mainBtn) out.push(mainBtn);
+  if(driveBtn) out.push(driveBtn);
+
+  return out;
+}
+
+function setVoiceCommandButtonsListening(buttons, on){
+  (buttons || []).forEach(btn => {
+    btn.classList.toggle("listening", !!on);
+    btn.innerHTML = on
+      ? '🔴 <span>Dinliyor</span>'
+      : '🎤 <span>Sesli Komut</span>';
+  });
+}
+
 function startDeckAIVoice(){
-  const btn = $("#btnDeckAI");
+  const buttons = getVoiceCommandButtons();
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if(!SR){
@@ -632,10 +835,7 @@ function startDeckAIVoice(){
   rec.interimResults = false;
   rec.maxAlternatives = 1;
 
-  if(btn){
-    btn.classList.add("listening");
-    btn.innerHTML = "🔴 <span>Dinliyor</span>";
-  }
+  setVoiceCommandButtonsListening(buttons, true);
 
   setVoiceBadge("Dinleniyor");
 
@@ -659,10 +859,7 @@ function startDeckAIVoice(){
   };
 
   rec.onend = () => {
-    if(btn){
-      btn.classList.remove("listening");
-      btn.innerHTML = "🎤 <span>Sesli Komut</span>";
-    }
+    setVoiceCommandButtonsListening(buttons, false);
 
     setTimeout(() => setVoiceBadge("Hazır"), 900);
   };
@@ -670,10 +867,7 @@ function startDeckAIVoice(){
   try{
     rec.start();
   }catch(_){
-    if(btn){
-      btn.classList.remove("listening");
-      btn.innerHTML = "🎤 <span>Sesli Komut</span>";
-    }
+    setVoiceCommandButtonsListening(buttons, false);
 
     setVoiceBadge("Başlatılamadı");
     toast("Mikrofon başlatılamadı");

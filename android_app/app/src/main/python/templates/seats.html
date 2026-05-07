@@ -348,7 +348,7 @@
 </script>
 
 <script src="/static/seats/bags.js?v=1"></script>
-<script src="/static/seats/voice-commands.js?v=1"></script>
+<script src="/static/seats/voice-commands.js?v=voice-button-state-fix-1"></script>
 <script src="/static/seats/standing.js?v=1"></script>
 <script src="/static/seats/seats.js?v=drive-premium-rollback-1"></script>
 <script src="/static/seats/route-marquee.js?v=route-clean-ticker-single-1"></script>
@@ -948,15 +948,11 @@
 
     fakeBtn.addEventListener("click", function(e){
       e.preventDefault();
+      e.stopPropagation();
 
-      try{
-        if(typeof window.startDeckAIVoice === "function"){
-          window.startDeckAIVoice();
-          return;
-        }
-      }catch(err){}
-
-      if(realBtn) realBtn.click();
+      if(realBtn){
+        realBtn.click();
+      }
     });
   }
 
