@@ -3,7 +3,7 @@
 
 <link rel="stylesheet" href="/static/style.css">
 <link rel="stylesheet" href="/static/seats/seats.css?v=41">
-<link rel="stylesheet" href="/static/seats/seats-final.css?v=legend-lift-rollback-1">
+<link rel="stylesheet" href="/static/seats/seats-final.css?v=drive-voice-real-width-test-1">
 
 <div class="seats-shell">
   {% include "seats_parts/topbar.html" %}
@@ -56,7 +56,23 @@
               <div class="voice-state" id="voiceStateBadge">Hazır</div>
             </div>
 
-            <div class="legend">
+<!-- DRIVE VOICE ROW START -->
+<div class="drive-voice-row" id="driveVoiceRow">
+  <button class="drive-voice-btn" id="btnDeckAIDrive" type="button" title="Sesli Komut">
+    🎤 <span>Sesli Komut</span>
+  </button>
+
+  <div class="drive-voice-seat" id="driveVoiceSeatCard" title="Koltuk özeti">
+    <span class="drive-voice-seat-ico">💺</span>
+    <span class="drive-voice-seat-values">
+      <b id="driveVoiceFilled">0</b>
+      <em>/</em>
+      <b id="driveVoiceEmpty">0</b>
+    </span>
+  </div>
+</div>
+<!-- DRIVE VOICE ROW END -->
+<div class="legend">
               <div class="mini-chip">🟢 Boş</div>
               <div class="mini-chip">🔵 Bay</div>
               <div class="mini-chip">🩷 Bayan</div>
@@ -474,7 +490,13 @@
 
     const board = document.querySelector(".board-inner");
     if(board){
-      board.appendChild(dock);
+      const routeShell = board.querySelector(".route-strip-shell");
+
+      if(routeShell){
+        board.insertBefore(dock, routeShell);
+      }else{
+        board.appendChild(dock);
+      }
     }
 
     return dock;
@@ -896,5 +918,80 @@
 })();
 </script>
 <!-- DRIVE MODE FORCE TOGGLE END -->
+
+
+
+
+<!-- DRIVE VOICE MIRROR SCRIPT START -->
+<script id="drive-voice-mirror-script">
+(function(){
+  function syncDriveVoiceStats(){
+    const oldFilled = document.getElementById("voiceSeatFilled");
+    const oldEmpty  = document.getElementById("voiceSeatEmpty");
+    const newFilled = document.getElementById("driveVoiceFilled");
+    const newEmpty  = document.getElementById("driveVoiceEmpty");
+
+    if(oldFilled && newFilled){
+      newFilled.textContent = (oldFilled.textContent || "0").trim();
+    }
+    if(oldEmpty && newEmpty){
+      newEmpty.textContent = (oldEmpty.textContent || "0").trim();
+    }
+  }
+
+  function bindDriveVoiceButton(){
+    const fakeBtn = document.getElementById("btnDeckAIDrive");
+    const realBtn = document.getElementById("btnDeckAI");
+
+    if(!fakeBtn || fakeBtn.dataset.bound === "1") return;
+    fakeBtn.dataset.bound = "1";
+
+    fakeBtn.addEventListener("click", function(e){
+      e.preventDefault();
+
+      try{
+        if(typeof window.startDeckAIVoice === "function"){
+          window.startDeckAIVoice();
+          return;
+        }
+      }catch(err){}
+
+      if(realBtn) realBtn.click();
+    });
+  }
+
+  function watchNode(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+
+    new MutationObserver(syncDriveVoiceStats).observe(el, {
+      childList:true,
+      characterData:true,
+      subtree:true
+    });
+  }
+
+  function boot(){
+    bindDriveVoiceButton();
+    syncDriveVoiceStats();
+    watchNode("voiceSeatFilled");
+    watchNode("voiceSeatEmpty");
+
+    setTimeout(syncDriveVoiceStats, 150);
+    setTimeout(syncDriveVoiceStats, 600);
+    setTimeout(syncDriveVoiceStats, 1400);
+
+    window.addEventListener("driveModeChanged", syncDriveVoiceStats);
+    window.addEventListener("resize", syncDriveVoiceStats);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
+})();
+</script>
+<!-- DRIVE VOICE MIRROR SCRIPT END -->
 
 {% endblock %}
