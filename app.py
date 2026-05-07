@@ -6522,6 +6522,12 @@ def api_route_coord_save_manual(rid):
 # === LOCAL COORDS MANAGER END ===
 
 
+
+@app.route("/rehber")
+def rehber_page():
+    return render_template("rehber.html")
+
+
 if __name__ == "__main__":
     with app.app_context():
         ensure_schema()

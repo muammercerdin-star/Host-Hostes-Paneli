@@ -1,0 +1,2116 @@
+{% extends "base.html" %}
+
+{% block title %}Kullanıcı Rehberi{% endblock %}
+
+{% block content %}
+<style>
+  :root{
+    --gd-bg:#07111f;
+    --gd-panel:#0f172a;
+    --gd-panel-2:#111c31;
+    --gd-line:rgba(255,255,255,.10);
+    --gd-soft:rgba(255,255,255,.06);
+    --gd-text:#eef5ff;
+    --gd-sub:rgba(226,232,240,.78);
+    --gd-blue:#2563eb;
+    --gd-blue-2:#1d4ed8;
+    --gd-purple:#8b5cf6;
+    --gd-green:#10b981;
+  }
+
+  .guide-shell{
+    max-width:1180px;
+    margin:0 auto;
+    padding:18px 14px 36px;
+  }
+
+
+
+  /* =========================================================
+     PHASE 3 PREMIUM SHOWCASE FINAL
+  ========================================================= */
+  .discover-top{
+    display:grid;
+    gap:18px;
+    margin-bottom:26px;
+  }
+
+  .discover-hero{
+    position:relative;
+    overflow:hidden;
+    border-radius:38px;
+    padding:22px 18px 18px;
+    color:var(--gd-text);
+    background:
+      radial-gradient(circle at 8% 10%, rgba(37,99,235,.42), transparent 31%),
+      radial-gradient(circle at 88% 10%, rgba(139,92,246,.28), transparent 30%),
+      radial-gradient(circle at 62% 104%, rgba(16,185,129,.13), transparent 34%),
+      linear-gradient(180deg, #0a1222 0%, #030712 100%);
+    border:1px solid rgba(255,255,255,.11);
+    box-shadow:
+      0 34px 78px rgba(0,0,0,.32),
+      inset 0 1px 0 rgba(255,255,255,.08);
+    isolation:isolate;
+  }
+
+  .discover-hero::before,
+  .discover-hero::after{
+    content:"";
+    position:absolute;
+    border-radius:999px;
+    filter:blur(34px);
+    opacity:.75;
+    z-index:0;
+    pointer-events:none;
+  }
+
+  .discover-hero::before{
+    width:240px;
+    height:240px;
+    right:-54px;
+    top:-42px;
+    background:rgba(59,130,246,.20);
+  }
+
+  .discover-hero::after{
+    width:210px;
+    height:210px;
+    left:-56px;
+    bottom:-58px;
+    background:rgba(139,92,246,.18);
+  }
+
+  .discover-glow-line{
+    position:absolute;
+    left:18px;
+    right:18px;
+    top:76px;
+    height:1px;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+    z-index:1;
+    pointer-events:none;
+  }
+
+  .discover-nav,
+  .discover-hero-grid{
+    position:relative;
+    z-index:2;
+  }
+
+  .discover-nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:16px;
+  }
+
+  .discover-back{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-height:42px;
+    padding:0 16px;
+    border-radius:16px;
+    text-decoration:none;
+    color:#fff;
+    font-weight:900;
+    background:linear-gradient(135deg,var(--gd-blue),var(--gd-blue-2));
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:
+      0 10px 26px rgba(37,99,235,.28),
+      inset 0 1px 0 rgba(255,255,255,.14);
+  }
+
+  .discover-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    min-height:36px;
+    padding:0 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:900;
+    color:#dbeafe;
+    background:rgba(255,255,255,.065);
+    border:1px solid rgba(255,255,255,.11);
+    backdrop-filter:blur(12px);
+  }
+
+  .discover-hero-grid{
+    display:grid;
+    grid-template-columns:1.02fr .98fr;
+    gap:18px;
+    align-items:center;
+  }
+
+  .discover-kicker{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    min-height:32px;
+    padding:0 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:1000;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#c7dcff;
+    background:rgba(255,255,255,.065);
+    border:1px solid rgba(255,255,255,.09);
+    margin-bottom:12px;
+  }
+
+  .discover-hero h1{
+    margin:0 0 10px;
+    font-size:clamp(34px, 5.4vw, 60px);
+    line-height:.99;
+    letter-spacing:-.052em;
+    font-weight:1000;
+    max-width:760px;
+  }
+
+  .discover-hero p{
+    margin:0;
+    max-width:660px;
+    color:var(--gd-sub);
+    font-size:15px;
+    line-height:1.74;
+  }
+
+  .discover-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:18px;
+  }
+
+  .discover-btn{
+    min-height:47px;
+    padding:0 18px;
+    border-radius:18px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    font-weight:1000;
+    border:1px solid transparent;
+    transition:transform .22s ease, box-shadow .22s ease, background .22s ease;
+  }
+
+  .discover-btn:hover{
+    transform:translateY(-2px);
+  }
+
+  .discover-btn.primary{
+    color:#fff;
+    background:linear-gradient(135deg,var(--gd-purple),var(--gd-blue));
+    box-shadow:
+      0 14px 30px rgba(37,99,235,.26),
+      inset 0 1px 0 rgba(255,255,255,.18);
+  }
+
+  .discover-btn.secondary{
+    color:#e8f0ff;
+    background:rgba(255,255,255,.065);
+    border-color:rgba(255,255,255,.11);
+  }
+
+  .hero-proof-grid{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0,1fr));
+    gap:10px;
+    margin-top:18px;
+  }
+
+  .hero-proof-card{
+    min-height:92px;
+    border-radius:24px;
+    padding:14px;
+    background:rgba(255,255,255,.058);
+    border:1px solid rgba(255,255,255,.105);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+    backdrop-filter:blur(12px);
+  }
+
+  .hero-proof-card b{
+    display:block;
+    margin-bottom:6px;
+    font-size:15px;
+    color:#fff;
+  }
+
+  .hero-proof-card span{
+    display:block;
+    color:rgba(227,235,248,.78);
+    font-size:13px;
+    line-height:1.45;
+  }
+
+  .discover-media{
+    position:relative;
+    min-height:430px;
+    border-radius:32px;
+    overflow:hidden;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.02)),
+      radial-gradient(circle at 50% 0%, rgba(59,130,246,.18), transparent 62%);
+    border:1px solid rgba(255,255,255,.11);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.07),
+      0 20px 48px rgba(0,0,0,.26);
+    padding:18px;
+  }
+
+  .media-orb{
+    position:absolute;
+    border-radius:999px;
+    filter:blur(26px);
+    opacity:.65;
+    pointer-events:none;
+  }
+
+  .media-orb.o1{
+    width:150px;
+    height:150px;
+    right:12px;
+    top:20px;
+    background:rgba(37,99,235,.22);
+  }
+
+  .media-orb.o2{
+    width:130px;
+    height:130px;
+    left:20px;
+    bottom:38px;
+    background:rgba(139,92,246,.20);
+  }
+
+  .discover-stack{
+    position:relative;
+    width:100%;
+    height:100%;
+    min-height:392px;
+  }
+
+  .phone-shot{
+    position:absolute;
+    border-radius:31px;
+    overflow:hidden;
+    background:#030712;
+    border:1px solid rgba(255,255,255,.13);
+    box-shadow:
+      0 20px 42px rgba(0,0,0,.34),
+      inset 0 1px 0 rgba(255,255,255,.07);
+  }
+
+  .phone-shot img{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+
+  .phone-shot.one{
+    width:53%;
+    height:100%;
+    left:2%;
+    top:0;
+    transform:rotate(-8deg);
+    z-index:2;
+    animation:gdFloatOne 6s ease-in-out infinite;
+  }
+
+  .phone-shot.two{
+    width:53%;
+    height:92%;
+    right:2%;
+    bottom:0;
+    transform:rotate(8deg);
+    z-index:3;
+    animation:gdFloatTwo 6.5s ease-in-out infinite;
+  }
+
+  .assistant-live-card{
+    position:absolute;
+    left:50%;
+    top:46%;
+    transform:translate(-50%, -50%);
+    z-index:7;
+    width:min(250px, 74%);
+    border-radius:24px;
+    padding:14px;
+    background:rgba(2,6,23,.76);
+    border:1px solid rgba(255,255,255,.13);
+    backdrop-filter:blur(16px);
+    box-shadow:0 18px 38px rgba(0,0,0,.34);
+  }
+
+  .assistant-live-card small{
+    display:inline-flex;
+    align-items:center;
+    min-height:26px;
+    padding:0 9px;
+    border-radius:999px;
+    color:#bfdbfe;
+    font-size:11px;
+    font-weight:1000;
+    letter-spacing:.07em;
+    text-transform:uppercase;
+    background:rgba(37,99,235,.18);
+    border:1px solid rgba(147,197,253,.16);
+    margin-bottom:9px;
+  }
+
+  .assistant-live-card b{
+    display:block;
+    color:#fff;
+    font-size:20px;
+    line-height:1.08;
+    letter-spacing:-.025em;
+    margin-bottom:6px;
+  }
+
+  .assistant-live-card span{
+    display:block;
+    color:rgba(226,232,240,.80);
+    font-size:13px;
+    line-height:1.5;
+  }
+
+  .phone-label{
+    position:absolute;
+    left:14px;
+    right:14px;
+    bottom:14px;
+    min-height:44px;
+    border-radius:17px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:8px 12px;
+    font-size:13px;
+    font-weight:900;
+    color:#fff;
+    background:rgba(7,17,31,.82);
+    border:1px solid rgba(255,255,255,.11);
+    backdrop-filter:blur(12px);
+    z-index:8;
+  }
+
+  .floating-pill{
+    position:absolute;
+    min-height:35px;
+    padding:0 12px;
+    border-radius:999px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:1000;
+    letter-spacing:.01em;
+    color:#fff;
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 14px 26px rgba(0,0,0,.26);
+    backdrop-filter:blur(12px);
+    z-index:6;
+    white-space:nowrap;
+  }
+
+  .floating-pill.blue{ background:rgba(37,99,235,.80); }
+  .floating-pill.purple{ background:rgba(139,92,246,.80); }
+  .floating-pill.green{ background:rgba(16,185,129,.76); }
+  .floating-pill.dark{ background:rgba(15,23,42,.78); }
+
+  .floating-pill.p1{ top:18px; left:8px; }
+  .floating-pill.p2{ top:82px; right:0; }
+  .floating-pill.p3{ bottom:76px; left:22px; }
+  .floating-pill.p4{ bottom:132px; right:12px; }
+
+  .discover-stats{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0,1fr));
+    gap:12px;
+  }
+
+  .stat-card{
+    min-height:130px;
+    border-radius:28px;
+    padding:16px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.97), rgba(248,250,252,.98));
+    border:1px solid rgba(15,23,42,.06);
+    box-shadow:
+      0 18px 42px rgba(15,23,42,.08),
+      inset 0 1px 0 rgba(255,255,255,.84);
+    transition:transform .22s ease, box-shadow .22s ease;
+  }
+
+  .stat-card:hover{
+    transform:translateY(-3px);
+    box-shadow:
+      0 24px 50px rgba(15,23,42,.11),
+      inset 0 1px 0 rgba(255,255,255,.84);
+  }
+
+  .stat-card strong{
+    display:block;
+    margin-bottom:8px;
+    font-size:clamp(28px, 4vw, 43px);
+    line-height:.95;
+    letter-spacing:-.045em;
+    font-weight:1000;
+    color:#0f172a;
+  }
+
+  .stat-card span{
+    display:block;
+    color:#475569;
+    font-size:14px;
+    line-height:1.55;
+    font-weight:700;
+  }
+
+  .command-ribbon{
+    display:grid;
+    grid-auto-flow:column;
+    grid-auto-columns:max-content;
+    gap:10px;
+    overflow-x:auto;
+    padding:12px;
+    border-radius:26px;
+    background:rgba(255,255,255,.72);
+    border:1px solid rgba(148,163,184,.18);
+    box-shadow:0 16px 38px rgba(15,23,42,.08);
+    backdrop-filter:blur(14px);
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .command-ribbon::-webkit-scrollbar{ height:8px; }
+  .command-ribbon::-webkit-scrollbar-thumb{
+    background:rgba(15,23,42,.13);
+    border-radius:999px;
+  }
+
+  .command-ribbon span{
+    min-height:40px;
+    padding:0 14px;
+    border-radius:999px;
+    display:inline-flex;
+    align-items:center;
+    font-size:13px;
+    font-weight:1000;
+    color:#0f172a;
+    background:
+      linear-gradient(180deg, rgba(241,245,249,.98), rgba(226,232,240,.94));
+    border:1px solid rgba(148,163,184,.24);
+    box-shadow:0 8px 18px rgba(15,23,42,.06);
+    white-space:nowrap;
+  }
+
+  .discover-section{
+    border-radius:34px;
+    padding:18px;
+    background:
+      linear-gradient(180deg, rgba(9,15,29,.97), rgba(4,9,20,.985));
+    border:1px solid rgba(255,255,255,.085);
+    box-shadow:
+      0 24px 56px rgba(0,0,0,.22),
+      inset 0 1px 0 rgba(255,255,255,.06);
+    color:#fff;
+  }
+
+  .discover-head{
+    display:flex;
+    align-items:end;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+  }
+
+  .discover-head h2{
+    margin:0;
+    font-size:clamp(25px, 4vw, 42px);
+    line-height:1.03;
+    letter-spacing:-.035em;
+    font-weight:1000;
+  }
+
+  .discover-head p{
+    margin:0;
+    color:rgba(226,232,240,.72);
+    font-size:14px;
+    line-height:1.56;
+    max-width:620px;
+  }
+
+  .showcase-grid{
+    display:grid;
+    grid-template-columns:1.16fr .84fr;
+    gap:12px;
+  }
+
+  .showcase-card{
+    position:relative;
+    overflow:hidden;
+    min-height:250px;
+    border-radius:30px;
+    padding:18px;
+    background:
+      radial-gradient(circle at 95% 0%, rgba(59,130,246,.15), transparent 32%),
+      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.05),
+      0 16px 36px rgba(0,0,0,.18);
+    transition:transform .24s ease, border-color .24s ease;
+  }
+
+  .showcase-card:hover{
+    transform:translateY(-4px);
+    border-color:rgba(255,255,255,.16);
+  }
+
+  .showcase-card.primary{
+    min-height:520px;
+    grid-row:span 2;
+  }
+
+  .showcase-tag{
+    display:inline-flex;
+    align-items:center;
+    min-height:30px;
+    padding:0 10px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:1000;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#dbeafe;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+    margin-bottom:12px;
+  }
+
+  .showcase-card h3{
+    margin:0 0 8px;
+    font-size:clamp(25px, 3.4vw, 38px);
+    line-height:1.03;
+    letter-spacing:-.035em;
+    font-weight:1000;
+  }
+
+  .showcase-card p{
+    margin:0;
+    color:rgba(226,232,240,.76);
+    font-size:14px;
+    line-height:1.62;
+    max-width:560px;
+  }
+
+  .showcase-screen{
+    position:relative;
+    overflow:hidden;
+    margin-top:16px;
+    min-height:250px;
+    border-radius:26px;
+    background:#020617;
+    border:1px solid rgba(255,255,255,.09);
+    box-shadow:0 14px 30px rgba(0,0,0,.24);
+  }
+
+  .showcase-card.primary .showcase-screen{
+    min-height:330px;
+  }
+
+  .showcase-screen img{
+    width:100%;
+    height:100%;
+    min-height:inherit;
+    object-fit:cover;
+    display:block;
+  }
+
+  .showcase-overlay{
+    position:absolute;
+    left:12px;
+    right:12px;
+    bottom:12px;
+    border-radius:18px;
+    padding:12px;
+    background:rgba(2,6,23,.76);
+    border:1px solid rgba(255,255,255,.10);
+    backdrop-filter:blur(12px);
+  }
+
+  .showcase-overlay b{
+    display:block;
+    font-size:15px;
+    margin-bottom:4px;
+  }
+
+  .showcase-overlay span{
+    display:block;
+    color:rgba(226,232,240,.78);
+    font-size:13px;
+    line-height:1.45;
+  }
+
+  .feature-row{
+    display:grid;
+    grid-auto-flow:column;
+    grid-auto-columns:minmax(280px, 72%);
+    gap:12px;
+    overflow-x:auto;
+    padding-bottom:6px;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .feature-row::-webkit-scrollbar{ height:8px; }
+  .feature-row::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.16);
+    border-radius:999px;
+  }
+
+  .feature-card{
+    scroll-snap-align:start;
+    min-height:232px;
+    border-radius:30px;
+    padding:18px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.05),
+      0 16px 36px rgba(0,0,0,.18);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    transition:transform .24s ease, border-color .24s ease;
+  }
+
+  .feature-card:hover{
+    transform:translateY(-4px);
+    border-color:rgba(255,255,255,.16);
+  }
+
+  .feature-card:nth-child(1){
+    background:
+      radial-gradient(circle at 100% 0%, rgba(59,130,246,.21), transparent 35%),
+      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  }
+
+  .feature-card:nth-child(2){
+    background:
+      radial-gradient(circle at 100% 0%, rgba(139,92,246,.21), transparent 35%),
+      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  }
+
+  .feature-card:nth-child(3){
+    background:
+      radial-gradient(circle at 100% 0%, rgba(16,185,129,.21), transparent 35%),
+      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  }
+
+  .feature-card:nth-child(4){
+    background:
+      radial-gradient(circle at 100% 0%, rgba(245,158,11,.19), transparent 35%),
+      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  }
+
+  .feature-card:nth-child(5){
+    background:
+      radial-gradient(circle at 100% 0%, rgba(236,72,153,.19), transparent 35%),
+      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  }
+
+  .feature-card:nth-child(6){
+    background:
+      radial-gradient(circle at 100% 0%, rgba(34,197,94,.19), transparent 35%),
+      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  }
+
+  .feature-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+
+  .feature-ico{
+    width:52px;
+    height:52px;
+    min-width:52px;
+    border-radius:18px;
+    display:grid;
+    place-items:center;
+    font-size:25px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.08);
+  }
+
+  .feature-badge{
+    min-height:30px;
+    padding:0 10px;
+    border-radius:999px;
+    display:inline-flex;
+    align-items:center;
+    font-size:11px;
+    font-weight:1000;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:#c7dcff;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+  }
+
+  .feature-card h3{
+    margin:14px 0 8px;
+    font-size:26px;
+    line-height:1.06;
+    letter-spacing:-.03em;
+    font-weight:1000;
+  }
+
+  .feature-card p{
+    margin:0;
+    color:rgba(226,232,240,.78);
+    line-height:1.65;
+    font-size:14px;
+  }
+
+  .feature-mini{
+    margin-top:16px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .feature-mini span{
+    min-height:30px;
+    padding:0 11px;
+    border-radius:999px;
+    display:inline-flex;
+    align-items:center;
+    font-size:12px;
+    font-weight:900;
+    color:#eaf2ff;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+  }
+
+  .workflow-grid{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0,1fr));
+    gap:12px;
+  }
+
+  .workflow-card{
+    min-height:180px;
+    border-radius:30px;
+    padding:18px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.05),
+      0 16px 34px rgba(0,0,0,.16);
+    transition:transform .24s ease, border-color .24s ease;
+  }
+
+  .workflow-card:hover{
+    transform:translateY(-4px);
+    border-color:rgba(255,255,255,.16);
+  }
+
+  .workflow-no{
+    width:44px;
+    height:44px;
+    border-radius:16px;
+    display:grid;
+    place-items:center;
+    font-weight:1000;
+    color:#fff;
+    background:linear-gradient(135deg,var(--gd-purple),var(--gd-blue));
+    box-shadow:0 12px 26px rgba(37,99,235,.20);
+    margin-bottom:14px;
+  }
+
+  .workflow-card h3{
+    margin:0 0 8px;
+    font-size:24px;
+    line-height:1.06;
+    letter-spacing:-.03em;
+    font-weight:1000;
+  }
+
+  .workflow-card p{
+    margin:0;
+    color:rgba(226,232,240,.76);
+    font-size:14px;
+    line-height:1.62;
+  }
+
+  .highlights{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0,1fr));
+    gap:12px;
+  }
+
+  .highlight-card{
+    min-height:350px;
+    border-radius:31px;
+    overflow:hidden;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.022));
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.05),
+      0 16px 34px rgba(0,0,0,.18);
+    display:flex;
+    flex-direction:column;
+    transition:transform .24s ease, border-color .24s ease;
+  }
+
+  .highlight-card:hover{
+    transform:translateY(-4px);
+    border-color:rgba(255,255,255,.16);
+  }
+
+  .highlight-text{
+    padding:18px 18px 10px;
+  }
+
+  .highlight-topline{
+    display:inline-flex;
+    align-items:center;
+    min-height:28px;
+    padding:0 10px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:1000;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#dbeafe;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+    margin-bottom:10px;
+  }
+
+  .highlight-text h3{
+    margin:0 0 8px;
+    font-size:30px;
+    line-height:1.04;
+    letter-spacing:-.03em;
+    font-weight:1000;
+    color:#fff;
+  }
+
+  .highlight-text p{
+    margin:0;
+    color:rgba(226,232,240,.76);
+    font-size:14px;
+    line-height:1.62;
+  }
+
+  .highlight-media{
+    position:relative;
+    overflow:hidden;
+    margin-top:auto;
+    padding:10px;
+    min-height:230px;
+  }
+
+  .highlight-media img{
+    width:100%;
+    height:210px;
+    object-fit:cover;
+    border-radius:24px;
+    display:block;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 12px 26px rgba(0,0,0,.22);
+    background:#020617;
+  }
+
+  .img-fallback{
+    position:absolute;
+    inset:0;
+    display:grid;
+    place-items:center;
+    text-align:center;
+    padding:18px;
+    color:#eaf2ff;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(37,99,235,.20), transparent 45%),
+      linear-gradient(180deg, rgba(15,23,42,.98), rgba(2,6,23,.98));
+    font-weight:1000;
+    letter-spacing:-.01em;
+  }
+
+  .img-fallback span{
+    display:block;
+    margin-top:6px;
+    color:rgba(226,232,240,.70);
+    font-size:13px;
+    font-weight:700;
+    line-height:1.45;
+  }
+
+  .revealable{
+    opacity:0;
+    transform:translateY(16px);
+    transition:opacity .58s ease, transform .58s ease;
+  }
+
+  .revealable.is-visible{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  @keyframes gdFloatOne{
+    0%,100%{ transform:rotate(-8deg) translateY(0); }
+    50%{ transform:rotate(-8deg) translateY(-8px); }
+  }
+
+  @keyframes gdFloatTwo{
+    0%,100%{ transform:rotate(8deg) translateY(0); }
+    50%{ transform:rotate(8deg) translateY(7px); }
+  }
+
+  @media (max-width:980px){
+    .discover-hero-grid,
+    .showcase-grid,
+    .highlights,
+    .workflow-grid{
+      grid-template-columns:1fr;
+    }
+
+    .showcase-card.primary{
+      grid-row:auto;
+      min-height:440px;
+    }
+
+    .discover-stats{
+      grid-template-columns:repeat(2, minmax(0,1fr));
+    }
+
+    .hero-proof-grid{
+      grid-template-columns:1fr;
+    }
+
+    .guide-grid,
+    .guide-quick,
+    .guide-top10{
+      grid-template-columns:1fr;
+    }
+
+    .guide-hero-top,
+    .discover-nav{
+      flex-direction:column;
+      align-items:flex-start;
+    }
+  }
+
+  @media (max-width:680px){
+    .discover-media{
+      min-height:360px;
+    }
+
+    .discover-stack{
+      min-height:322px;
+    }
+
+    .assistant-live-card{
+      width:min(225px, 78%);
+      top:48%;
+    }
+
+    .floating-pill{
+      font-size:11px;
+      min-height:32px;
+      padding:0 10px;
+    }
+
+    .floating-pill.p2{
+      top:72px;
+    }
+
+    .floating-pill.p4{
+      bottom:116px;
+    }
+  }
+
+  @media (max-width:560px){
+    .guide-shell{
+      padding:14px 10px 28px;
+    }
+
+    .discover-hero,
+    .discover-section,
+    .guide-card{
+      border-radius:25px;
+      padding:16px;
+    }
+
+    .discover-media{
+      min-height:330px;
+      border-radius:25px;
+      padding:14px;
+    }
+
+    .discover-stack{
+      min-height:300px;
+    }
+
+    .phone-shot{
+      border-radius:25px;
+    }
+
+    .phone-shot.one{ width:56%; left:0; }
+    .phone-shot.two{ width:56%; right:0; }
+
+    .assistant-live-card{
+      padding:12px;
+      border-radius:20px;
+    }
+
+    .assistant-live-card b{
+      font-size:17px;
+    }
+
+    .feature-row{
+      grid-auto-columns:minmax(252px, 90%);
+    }
+
+    .guide-card h2,
+    .discover-head h2{
+      font-size:22px;
+    }
+
+    .guide-card-ico,
+    .feature-ico{
+      width:48px;
+      height:48px;
+      min-width:48px;
+      border-radius:16px;
+      font-size:22px;
+    }
+
+    .guide-search input{
+      height:50px;
+      border-radius:16px;
+      font-size:14px;
+    }
+
+    .discover-stats{
+      grid-template-columns:1fr;
+    }
+
+    .showcase-card.primary,
+    .showcase-card{
+      min-height:auto;
+    }
+
+    .showcase-card.primary .showcase-screen,
+    .showcase-screen{
+      min-height:245px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .phone-shot.one,
+    .phone-shot.two{
+      animation:none;
+    }
+
+    .discover-btn,
+    .feature-card,
+    .showcase-card,
+    .highlight-card,
+    .workflow-card,
+    .stat-card,
+    .revealable{
+      transition:none;
+    }
+  }
+
+  /* =========================================================
+     EXISTING GUIDE
+  ========================================================= */
+  .guide-hero{
+    position:relative;
+    overflow:hidden;
+    border-radius:30px;
+    padding:22px 18px;
+    margin-bottom:16px;
+    background:
+      radial-gradient(circle at 12% 10%, rgba(59,130,246,.20), transparent 30%),
+      radial-gradient(circle at 88% 18%, rgba(16,185,129,.14), transparent 28%),
+      linear-gradient(180deg, rgba(15,23,42,.96), rgba(4,10,24,.94));
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:
+      0 22px 50px rgba(0,0,0,.18),
+      inset 0 1px 0 rgba(255,255,255,.10);
+    color:#eef5ff;
+  }
+
+  .guide-hero-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:14px;
+  }
+
+  .guide-back{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-height:42px;
+    padding:0 16px;
+    border-radius:16px;
+    text-decoration:none;
+    color:#fff;
+    font-weight:900;
+    background:linear-gradient(135deg,#2563eb,#1d4ed8);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:
+      0 10px 26px rgba(37,99,235,.30),
+      inset 0 1px 0 rgba(255,255,255,.14);
+  }
+
+  .guide-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    min-height:36px;
+    padding:0 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:900;
+    color:#dbeafe;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.10);
+  }
+
+  .guide-hero h1{
+    margin:0 0 8px;
+    font-size:clamp(28px, 4.8vw, 44px);
+    line-height:1.02;
+    letter-spacing:-.03em;
+    font-weight:1000;
+  }
+
+  .guide-hero p{
+    margin:0;
+    max-width:760px;
+    color:rgba(230,238,250,.84);
+    font-size:15px;
+    line-height:1.65;
+  }
+
+  .guide-quick{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0,1fr));
+    gap:10px;
+    margin-top:18px;
+  }
+
+  .guide-quick-card{
+    min-height:84px;
+    border-radius:22px;
+    padding:14px;
+    background:rgba(255,255,255,.055);
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+  }
+
+  .guide-quick-card b{
+    display:block;
+    margin-bottom:6px;
+    font-size:15px;
+    color:#fff;
+  }
+
+  .guide-quick-card span{
+    color:rgba(227,235,248,.78);
+    font-size:13px;
+    line-height:1.45;
+  }
+
+  .guide-search{
+    margin:14px 0 18px;
+    position:sticky;
+    top:10px;
+    z-index:20;
+    backdrop-filter:blur(10px);
+  }
+
+  .guide-search input{
+    width:100%;
+    height:54px;
+    border:none;
+    outline:none;
+    border-radius:18px;
+    padding:0 18px;
+    font-size:15px;
+    color:#0f172a;
+    background:rgba(255,255,255,.94);
+    box-shadow:0 12px 30px rgba(15,23,42,.12);
+  }
+
+  .guide-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:14px;
+  }
+
+  .guide-card{
+    border-radius:28px;
+    padding:18px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.90), rgba(248,250,252,.98));
+    border:1px solid rgba(15,23,42,.06);
+    box-shadow:
+      0 18px 42px rgba(15,23,42,.08),
+      inset 0 1px 0 rgba(255,255,255,.70);
+  }
+
+  .guide-card-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:14px;
+  }
+
+  .guide-card-ico{
+    width:52px;
+    height:52px;
+    min-width:52px;
+    border-radius:18px;
+    display:grid;
+    place-items:center;
+    font-size:25px;
+    background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+  }
+
+  .guide-card h2{
+    margin:0;
+    font-size:25px;
+    line-height:1.05;
+    color:#0f172a;
+    font-weight:1000;
+    letter-spacing:-.02em;
+  }
+
+  .guide-card-sub{
+    margin:5px 0 0;
+    color:#475569;
+    font-size:14px;
+    line-height:1.5;
+  }
+
+  .guide-lines{
+    display:grid;
+    gap:10px;
+  }
+
+  .guide-line{
+    border-radius:18px;
+    padding:13px 14px;
+    background:rgba(15,23,42,.03);
+    border:1px solid rgba(148,163,184,.18);
+  }
+
+  .guide-line b{
+    display:block;
+    color:#0f172a;
+    font-size:15px;
+    margin-bottom:4px;
+  }
+
+  .guide-line span{
+    display:block;
+    color:#475569;
+    font-size:14px;
+    line-height:1.55;
+  }
+
+  .guide-voice-list{
+    display:grid;
+    gap:10px;
+  }
+
+  .guide-voice-item{
+    border-radius:20px;
+    padding:13px 14px;
+    background:linear-gradient(180deg, rgba(37,99,235,.05), rgba(15,23,42,.02));
+    border:1px solid rgba(59,130,246,.16);
+  }
+
+  .guide-voice-item .cmd{
+    display:inline-flex;
+    align-items:center;
+    min-height:34px;
+    padding:0 12px;
+    border-radius:999px;
+    background:#0f172a;
+    color:#fff;
+    font-size:13px;
+    font-weight:900;
+    letter-spacing:.01em;
+    margin-bottom:8px;
+  }
+
+  .guide-voice-item p{
+    margin:0;
+    color:#475569;
+    font-size:14px;
+    line-height:1.55;
+  }
+
+  .guide-mini-title{
+    margin:16px 0 10px;
+    font-size:13px;
+    font-weight:1000;
+    color:#2563eb;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+  }
+
+  .guide-top10{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:10px;
+  }
+
+  .guide-chip{
+    min-height:48px;
+    border-radius:18px;
+    padding:0 14px;
+    display:flex;
+    align-items:center;
+    font-weight:900;
+    color:#0f172a;
+    background:linear-gradient(180deg, rgba(241,245,249,.92), rgba(226,232,240,.86));
+    border:1px solid rgba(148,163,184,.22);
+  }
+
+  .guide-note{
+    margin-top:18px;
+    border-radius:22px;
+    padding:16px;
+    background:linear-gradient(180deg, rgba(15,23,42,.95), rgba(2,6,23,.96));
+    color:#eef4ff;
+    border:1px solid rgba(255,255,255,.08);
+  }
+
+  .guide-note b{
+    display:block;
+    margin-bottom:7px;
+    font-size:16px;
+  }
+
+  .guide-note p{
+    margin:0;
+    color:rgba(226,232,240,.82);
+    font-size:14px;
+    line-height:1.6;
+  }
+
+  .guide-footer{
+    margin-top:16px;
+    text-align:center;
+    color:#64748b;
+    font-size:13px;
+  }
+
+  @media (max-width:980px){
+    .discover-hero-grid,
+    .highlights{
+      grid-template-columns:1fr;
+    }
+
+    .discover-stats{
+      grid-template-columns:repeat(2, minmax(0,1fr));
+    }
+
+    .guide-grid,
+    .guide-quick,
+    .guide-top10{
+      grid-template-columns:1fr;
+    }
+
+    .guide-hero-top,
+    .discover-nav{
+      flex-direction:column;
+      align-items:flex-start;
+    }
+  }
+
+  @media (max-width:560px){
+    .guide-shell{
+      padding:14px 10px 28px;
+    }
+
+    .discover-hero,
+    .discover-section,
+    .guide-card{
+      border-radius:24px;
+      padding:16px;
+    }
+
+    .discover-media{
+      min-height:280px;
+      border-radius:24px;
+      padding:14px;
+    }
+
+    .phone-shot.one{ width:56%; left:0; }
+    .phone-shot.two{ width:56%; right:0; }
+
+    .feature-row{
+      grid-auto-columns:minmax(250px, 90%);
+    }
+
+    .guide-card h2,
+    .discover-head h2{
+      font-size:22px;
+    }
+
+    .guide-card-ico,
+    .feature-ico{
+      width:48px;
+      height:48px;
+      min-width:48px;
+      border-radius:16px;
+      font-size:22px;
+    }
+
+    .guide-search input{
+      height:50px;
+      border-radius:16px;
+      font-size:14px;
+    }
+
+    .discover-stats{
+      grid-template-columns:1fr;
+    }
+  }
+</style>
+
+<div class="guide-shell">
+
+
+
+  <!-- =====================================================
+       PREMIUM TOP / PHASE 3
+  ====================================================== -->
+  <section class="discover-top">
+    <div class="discover-hero">
+      <div class="discover-glow-line"></div>
+
+      <div class="discover-nav">
+        <a href="{{ url_for('index') }}" class="discover-back">← Ana Menü</a>
+        <div class="discover-badge">Muavin Asistanı • Final Premium Vitrin</div>
+      </div>
+
+      <div class="discover-hero-grid">
+        <div>
+          <div class="discover-kicker">✨ Premium Rehber</div>
+          <h1>Muavin Asistanı’nı sahada vitrin gibi göster.</h1>
+          <p>
+            Koltuk planı, canlı durak, bagaj, emanet, hesap ve sesli komutlar
+            tek ekranda birleşir. Muavin için hızlı kullanım; işletme için daha
+            düzenli sefer yönetimi sunar.
+          </p>
+
+          <div class="discover-actions">
+            <a href="#discoverShowcase" class="discover-btn primary">Tanıtımı Gör</a>
+            <a href="#discoverFeatures" class="discover-btn secondary">Özellikleri İncele</a>
+            <a href="#guideVoiceSection" class="discover-btn secondary">Sesli Komutlar</a>
+          </div>
+
+          <div class="hero-proof-grid">
+            <div class="hero-proof-card">
+              <b>Canlı Durak</b>
+              <span>Seçili, canlı ve sıradaki durağı tek bakışta takip et.</span>
+            </div>
+            <div class="hero-proof-card">
+              <b>Sürüş Modu</b>
+              <span>Daha sade görünüm ve büyük kontrollerle hızlı kullanım.</span>
+            </div>
+            <div class="hero-proof-card">
+              <b>Sesli Yönetim</b>
+              <span>Komut ver, sistem bilgi söylesin veya işlemi başlatsın.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="discover-media">
+          <div class="media-orb o1"></div>
+          <div class="media-orb o2"></div>
+
+          <div class="discover-stack">
+            <div class="phone-shot one">
+              <img src="/static/img/home-seat-card.jpg" alt="Muavin Asistanı ana ekran">
+            </div>
+
+            <div class="phone-shot two">
+              <img src="/static/img/seat-card.jpg" alt="Muavin Asistanı koltuk ekranı">
+            </div>
+
+            <div class="floating-pill blue p1">🎤 Kaç yolcu var</div>
+            <div class="floating-pill purple p2">⏱️ Rötar kaç</div>
+            <div class="floating-pill green p3">📍 Hangi duraktayız</div>
+            <div class="floating-pill dark p4">🧳 Bu durakta bagaj var mı</div>
+
+            <div class="assistant-live-card">
+              <small>Canlı Özet</small>
+              <b>Alaşehir yaklaşımı</b>
+              <span>3 yolcu inecek • 1 bagaj var • sıradaki durak hazır.</span>
+            </div>
+
+            <div class="phone-label">Gerçek uygulama ekranlarıyla premium tanıtım</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="discover-stats">
+      <div class="stat-card">
+        <strong>10+</strong>
+        <span>Sesli komut ile bilgi alma ve işlem başlatma desteği</span>
+      </div>
+      <div class="stat-card">
+        <strong>Tek ekran</strong>
+        <span>Koltuk, durak, bagaj, servis ve hesap takibi bir arada</span>
+      </div>
+      <div class="stat-card">
+        <strong>Canlı takip</strong>
+        <span>Durak akışı, sıradaki durak ve rötar bilgisi tek bakışta</span>
+      </div>
+      <div class="stat-card">
+        <strong>Hızlı işlem</strong>
+        <span>Ayakta, servis, indirme ve emanet akışlarında pratik kullanım</span>
+      </div>
+    </div>
+
+    <div class="command-ribbon">
+      <span>🎤 Kaç yolcu var</span>
+      <span>📍 Hangi duraktayız</span>
+      <span>⏱️ Rötar kaç</span>
+      <span>🧳 Bu durakta bagaj var mı</span>
+      <span>👥 Ayakta kaç kişi var</span>
+      <span>🚌 Bir sonraki durak</span>
+      <span>📦 Emanet aç</span>
+      <span>💵 Hesap aç</span>
+      <span>🚏 Durak seç Alaşehir</span>
+      <span>⬇️ İnecekleri indir</span>
+    </div>
+
+    <div class="discover-section" id="discoverShowcase">
+      <div class="discover-head">
+        <div>
+          <h2>Ürünü ilk bakışta anlatan premium vitrin</h2>
+          <p>Rehber sayfası artık sadece anlatmıyor; uygulamanın değerini görsel olarak da hissettiriyor.</p>
+        </div>
+      </div>
+
+      <div class="showcase-grid">
+        <article class="showcase-card primary">
+          <div class="showcase-tag">Koltuk Yönetimi</div>
+          <h3>Yolcu, koltuk ve iniş bilgisi aynı yerde.</h3>
+          <p>
+            Koltuk planı üzerinden yolcu durumu, cinsiyet, iniş noktası, servis,
+            bagaj ve işlem akışı daha kontrollü yönetilir.
+          </p>
+
+          <div class="showcase-screen">
+            <img class="showcase-img" src="/static/img/seat-card.jpg" alt="Koltuk ekranı görseli">
+            <div class="showcase-overlay">
+              <b>Tek dokunuşla saha kontrolü</b>
+              <span>Yolcu ekle, indir, servis işle, bagajı gör ve durak akışına bağla.</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="showcase-card">
+          <div class="showcase-tag">Canlı Durak</div>
+          <h3>Yaklaşan durağı kaçırma.</h3>
+          <p>Canlı durak, sıradaki nokta ve rötar bilgisi sahada hızlı karar aldırır.</p>
+
+          <div class="showcase-screen">
+            <img class="showcase-img" src="/static/img/home-bus-card.jpg" alt="Canlı durak ekranı görseli">
+            <div class="showcase-overlay">
+              <b>Durak akışı</b>
+              <span>Seçili, canlı ve sıradaki durak net görünür.</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="showcase-card">
+          <div class="showcase-tag">Sesli Komut</div>
+          <h3>Eller serbest bilgi al.</h3>
+          <p>Muavin kısa komutlarla yolcu, rötar, durak, bagaj ve hesap bilgisine ulaşır.</p>
+
+          <div class="showcase-screen">
+            <img class="showcase-img" src="/static/img/home-seat-card.jpg" alt="Sesli komut ekranı görseli">
+            <div class="showcase-overlay">
+              <b>Konuş, sistem cevaplasın</b>
+              <span>“Kaç yolcu var”, “Rötar kaç”, “Bu durakta bagaj var mı”.</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <div class="discover-section" id="discoverFeatures">
+      <div class="discover-head">
+        <div>
+          <h2>Öne çıkan özellikler</h2>
+          <p>Apple hissiyatlı tanıtım; ama doğrudan sahada iş gören net özellikler.</p>
+        </div>
+      </div>
+
+      <div class="feature-row">
+        <article class="feature-card">
+          <div class="feature-top">
+            <div class="feature-ico">🎤</div>
+            <div class="feature-badge">Sesli Komut</div>
+          </div>
+          <div>
+            <h3>Eller serbest kullanım</h3>
+            <p>Kısa komutlarla bilgi al, durak yönet, işlem başlat. Sahada hız kaybetmeden çalış.</p>
+          </div>
+          <div class="feature-mini">
+            <span>Kaç yolcu var</span>
+            <span>Rötar kaç</span>
+            <span>Hangi duraktayız</span>
+          </div>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-top">
+            <div class="feature-ico">🚘</div>
+            <div class="feature-badge">Sürüş Modu</div>
+          </div>
+          <div>
+            <h3>Daha sade, daha hızlı</h3>
+            <p>Büyük kontrol alanları ve sürüşe uygun sade görünüm ile dikkat dağılmadan kullanım.</p>
+          </div>
+          <div class="feature-mini">
+            <span>Büyük buton</span>
+            <span>Canlı durak</span>
+            <span>Hız ve rötar</span>
+          </div>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-top">
+            <div class="feature-ico">📍</div>
+            <div class="feature-badge">Canlı Takip</div>
+          </div>
+          <div>
+            <h3>Durak akışı gözünün önünde</h3>
+            <p>Canlı durak, sıradaki nokta ve yoğunluk bilgisi ile inişleri kaçırmadan yönetim.</p>
+          </div>
+          <div class="feature-mini">
+            <span>Canlı durak</span>
+            <span>Sıradaki durak</span>
+            <span>Rötar</span>
+          </div>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-top">
+            <div class="feature-ico">💺</div>
+            <div class="feature-badge">Koltuk</div>
+          </div>
+          <div>
+            <h3>Tek dokunuşla koltuk işlemleri</h3>
+            <p>Yolcu ekle, indir, cinsiyet ata, servis işle ve tüm koltuk planını tek ekrandan yönet.</p>
+          </div>
+          <div class="feature-mini">
+            <span>Toplu giriş</span>
+            <span>İndirme</span>
+            <span>Servis</span>
+          </div>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-top">
+            <div class="feature-ico">📦</div>
+            <div class="feature-badge">Bagaj / Emanet</div>
+          </div>
+          <div>
+            <h3>Daha düzenli teslim süreci</h3>
+            <p>İniş durağına göre bagaj ve emanet bilgilerini daha kontrollü takip et.</p>
+          </div>
+          <div class="feature-mini">
+            <span>Bagaj takibi</span>
+            <span>Emanet</span>
+            <span>Teslim kontrolü</span>
+          </div>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-top">
+            <div class="feature-ico">💵</div>
+            <div class="feature-badge">Hesap</div>
+          </div>
+          <div>
+            <h3>Tahsilatı kolay yönet</h3>
+            <p>Sefer kasası, giriş çıkış ve kalan tutar bilgilerini tek yerde gör.</p>
+          </div>
+          <div class="feature-mini">
+            <span>Kasa</span>
+            <span>Tahsilat</span>
+            <span>Kontrol</span>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <div class="discover-section">
+      <div class="discover-head">
+        <div>
+          <h2>Sefer akışı daha anlaşılır</h2>
+          <p>Yeni gelen kullanıcı, uygulamanın mantığını üç adımda kavrar.</p>
+        </div>
+      </div>
+
+      <div class="workflow-grid">
+        <article class="workflow-card">
+          <div class="workflow-no">1</div>
+          <h3>Seferi başlat</h3>
+          <p>Güzergâh, plaka ve hareket bilgisini gir; aktif sefere geç.</p>
+        </article>
+
+        <article class="workflow-card">
+          <div class="workflow-no">2</div>
+          <h3>Sahayı yönet</h3>
+          <p>Koltuk, durak, bagaj, servis, ayakta yolcu ve hesap işlemlerini tek ekranda takip et.</p>
+        </article>
+
+        <article class="workflow-card">
+          <div class="workflow-no">3</div>
+          <h3>Seferi kapat</h3>
+          <p>Yolcu, tahsilat ve kalan işlemleri kontrol ederek seferi düzenli şekilde bitir.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="discover-section">
+      <div class="discover-head">
+        <div>
+          <h2>İşte öne çıkan başlıklar</h2>
+          <p>Tanıtım hissi güçlü, ama doğrudan uygulamanın gerçek gücünü gösteren kartlar.</p>
+        </div>
+      </div>
+
+      <div class="highlights">
+        <article class="highlight-card">
+          <div class="highlight-text">
+            <div class="highlight-topline">Sesli Komut</div>
+            <h3>Sesli komutlarla sahada hız kazan.</h3>
+            <p>Kısa komutlarla bilgi al, işlemi başlat ve ekranda daha az vakit kaybet.</p>
+          </div>
+          <div class="highlight-media">
+            <img src="/static/img/home-seat-card.jpg" alt="Sesli komut ve uygulama görünümü">
+          </div>
+        </article>
+
+        <article class="highlight-card">
+          <div class="highlight-text">
+            <div class="highlight-topline">Sürüş Modu</div>
+            <h3>Sürüş modunda dikkatin dağılmasın.</h3>
+            <p>Daha sade görünüm, daha büyük alanlar ve daha hızlı kontrol akışı.</p>
+          </div>
+          <div class="highlight-media">
+            <img src="/static/img/seat-card.jpg" alt="Sürüş modu ve koltuk ekranı">
+          </div>
+        </article>
+
+        <article class="highlight-card">
+          <div class="highlight-text">
+            <div class="highlight-topline">Canlı Takip</div>
+            <h3>Canlı durak takibiyle inişleri kaçırma.</h3>
+            <p>Seçili, canlı ve sıradaki durağı tek bakışta kontrol et.</p>
+          </div>
+          <div class="highlight-media">
+            <img src="/static/img/home-bus-card.jpg" alt="Canlı durak ve rota görünümü">
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <script>
+    (function guidePremiumFinalInit(){
+      const imgs = Array.from(document.querySelectorAll(".discover-top img"));
+
+      imgs.forEach(img => {
+        img.addEventListener("error", () => {
+          const box = img.closest(".phone-shot, .showcase-screen, .highlight-media");
+          if(!box) return;
+
+          img.style.display = "none";
+
+          if(box.querySelector(".img-fallback")) return;
+
+          const fallback = document.createElement("div");
+          fallback.className = "img-fallback";
+          fallback.innerHTML = "<div><b>Görsel hazırlanıyor</b><span>Bu alana uygulama ekran görüntüsü gelecek.</span></div>";
+          box.appendChild(fallback);
+        }, { once:true });
+      });
+
+      const revealItems = Array.from(document.querySelectorAll(
+        ".discover-top .stat-card, .discover-top .showcase-card, .discover-top .feature-card, .discover-top .workflow-card, .discover-top .highlight-card"
+      ));
+
+      if(!revealItems.length) return;
+
+      revealItems.forEach(el => el.classList.add("revealable"));
+
+      if(!("IntersectionObserver" in window)){
+        revealItems.forEach(el => el.classList.add("is-visible"));
+        return;
+      }
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting){
+            entry.target.classList.add("is-visible");
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold:.12 });
+
+      revealItems.forEach(el => io.observe(el));
+    })();
+    </script>
+  </section>
+
+  <!-- =====================================================
+       EXISTING GUIDE CONTENT
+  ====================================================== -->
+  <section class="guide-hero">
+    <div class="guide-hero-top">
+      <a href="{{ url_for('index') }}" class="guide-back">← Ana Menü</a>
+      <div class="guide-badge">📘 Kullanıcı Rehberi</div>
+    </div>
+
+    <h1>Muavin Asistanı Kullanım Rehberi</h1>
+    <p>
+      Uygulamayı hızlı öğren, sesli komutları keşfet, sürüş modunu doğru kullan
+      ve sahada işlemleri daha rahat yönet. Sefer başlatmadan koltuk planına,
+      durak takibinden sesli komutlara kadar temel kullanım bu sayfada.
+    </p>
+
+    <div class="guide-quick">
+      <div class="guide-quick-card">
+        <b>1 Dakikada Öğren</b>
+        <span>Yeni sefer, devam eden sefer, koltuk ekranı ve sefer bitirme adımları.</span>
+      </div>
+      <div class="guide-quick-card">
+        <b>Sesli Komutlar</b>
+        <span>Muavinin sahada en çok kullanacağı kısa ve net sesli komut örnekleri.</span>
+      </div>
+      <div class="guide-quick-card">
+        <b>Sorun Giderme</b>
+        <span>Mikrofon, ses, GPS ve durak takibi gibi durumlar için hızlı çözüm notları.</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="guide-search">
+    <input id="guideSearchInput" type="text" placeholder="Rehber içinde ara: sesli komut, bagaj, rötar, durak, emanet...">
+  </div>
+
+  <section class="guide-grid" id="guideCardsWrap">
+    <article class="guide-card guide-searchable">
+      <div class="guide-card-header">
+        <div class="guide-card-ico">🚀</div>
+        <div>
+          <h2>1 Dakikada Öğren</h2>
+          <div class="guide-card-sub">Uygulamayı ilk kez kullanıyorsan önce bu akışa bak.</div>
+        </div>
+      </div>
+
+      <div class="guide-lines">
+        <div class="guide-line">
+          <b>Yeni sefer başlat</b>
+          <span>Ana menüde Sefer Başlat kartından yeni sefer oluştur. Güzergâh, plaka ve çıkış bilgilerini girerek aktif sefere geç.</span>
+        </div>
+        <div class="guide-line">
+          <b>Devam eden sefere gir</b>
+          <span>Aktif sefer varsa Devam Eden Sefer kartından doğrudan koltuk ekranına geçebilirsin.</span>
+        </div>
+        <div class="guide-line">
+          <b>Koltuk ekranını kullan</b>
+          <span>Koltuk planı ekranında yolcu ekleme, indirme, ayakta yolcu, servis, durak ve bagaj işlemleri aynı ekrandan yapılır.</span>
+        </div>
+        <div class="guide-line">
+          <b>Seferi bitir</b>
+          <span>Sefer sonunda hesap ve yolcu durumunu kontrol edip sefer kapatma işlemini uygula.</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="guide-card guide-searchable" id="guideVoiceSection">
+      <div class="guide-card-header">
+        <div class="guide-card-ico">🎤</div>
+        <div>
+          <h2>Sesli Komutlar</h2>
+          <div class="guide-card-sub">Mikrofona bas, kısa ve net konuş. Sistem bilgi verir ya da işlem yapar.</div>
+        </div>
+      </div>
+
+      <div class="guide-mini-title">Bilgi Komutları</div>
+      <div class="guide-voice-list">
+        <div class="guide-voice-item"><div class="cmd">Kaç yolcu var</div><p>Toplam yolcu sayısını, oturan ve ayakta durumuyla birlikte söyler.</p></div>
+        <div class="guide-voice-item"><div class="cmd">Ayakta kaç kişi var</div><p>Ayakta yolcu sayısını ve ayakta tahsilatı söyler.</p></div>
+        <div class="guide-voice-item"><div class="cmd">Hangi duraktayız</div><p>Canlı veya seçili durak bilgisini verir.</p></div>
+        <div class="guide-voice-item"><div class="cmd">Rötar kaç</div><p>Bir sonraki saatli durağın gecikmesini söyler.</p></div>
+        <div class="guide-voice-item"><div class="cmd">Bir sonraki durak</div><p>Sıradaki saatli noktayı sesli söyler.</p></div>
+      </div>
+
+      <div class="guide-mini-title">Durak Komutları</div>
+      <div class="guide-voice-list">
+        <div class="guide-voice-item"><div class="cmd">Alaşehir kaç yolcu var</div><p>Belirtilen durakta inecek yolcu özetini söyler.</p></div>
+        <div class="guide-voice-item"><div class="cmd">Bu durakta işlem var mı</div><p>Seçili durakta yolcu, bagaj, emanet ve servis durumunu özetler.</p></div>
+        <div class="guide-voice-item"><div class="cmd">Bu durakta kimler inecek</div><p>Seçili duraktaki iniş durumunu sesli anlatır.</p></div>
+        <div class="guide-voice-item"><div class="cmd">Bu durakta bagaj var mı</div><p>Seçili durak için bagaj bilgisini söyler.</p></div>
+        <div class="guide-voice-item"><div class="cmd">Durak seç Alaşehir</div><p>Seçili durağı değiştirir.</p></div>
+        <div class="guide-voice-item"><div class="cmd">İnecekleri indir</div><p>Seçili duraktaki indirme akışını başlatır.</p></div>
+      </div>
+
+      <div class="guide-mini-title">Ekran ve Koltuk Komutları</div>
+      <div class="guide-voice-list">
+        <div class="guide-voice-item"><div class="cmd">Hesap aç</div><p>Hesap ekranını açar.</p></div>
+        <div class="guide-voice-item"><div class="cmd">Emanet aç</div><p>Emanet ekranını açar.</p></div>
+        <div class="guide-voice-item"><div class="cmd">12 bay yap</div><p>İlgili koltuğu bay olarak işaretler.</p></div>
+        <div class="guide-voice-item"><div class="cmd">15 bayan yap</div><p>İlgili koltuğu bayan olarak işaretler.</p></div>
+        <div class="guide-voice-item"><div class="cmd">18 numarayı boşalt</div><p>İlgili koltuk yolcusunu indirir.</p></div>
+        <div class="guide-voice-item"><div class="cmd">Sesli yardım</div><p>Temel sesli komutları sistemin kendisinden dinlersin.</p></div>
+      </div>
+    </article>
+
+    <article class="guide-card guide-searchable">
+      <div class="guide-card-header">
+        <div class="guide-card-ico">⚙️</div>
+        <div>
+          <h2>Sık Yapılan İşlemler</h2>
+          <div class="guide-card-sub">Sahada en çok kullanılan işlemler için kısa yol anlatımı.</div>
+        </div>
+      </div>
+
+      <div class="guide-lines">
+        <div class="guide-line"><b>Koltuğa yolcu ekleme</b><span>Koltuk seç, yolcu bilgilerini gir, biniş ve iniş noktasını kontrol et, kaydet.</span></div>
+        <div class="guide-line"><b>Toplu giriş</b><span>Birden fazla boş koltuğu seç, toplu giriş ekranını aç, bilgileri tek seferde işle.</span></div>
+        <div class="guide-line"><b>Ayakta yolcu ekleme</b><span>Ayakta satış ekranını aç, kişi sayısını gir, tahsilatı kaydet.</span></div>
+        <div class="guide-line"><b>Servis işaretleme</b><span>Koltuk seçerek ya da sesli komutla servis bilgisini işaretle.</span></div>
+        <div class="guide-line"><b>Durakta indirme</b><span>Önce seçili durağı kontrol et, sonra “İnecekleri indir” akışını kullan.</span></div>
+        <div class="guide-line"><b>Bagaj ve emanet kontrolü</b><span>İniş durağında yolcu özetine ek olarak bagaj ve emanet bilgisini kontrol et.</span></div>
+      </div>
+    </article>
+
+    <article class="guide-card guide-searchable">
+      <div class="guide-card-header">
+        <div class="guide-card-ico">🚘</div>
+        <div>
+          <h2>Sürüşte Kullanım</h2>
+          <div class="guide-card-sub">Sürüş modu daha sade, daha hızlı ve sahaya uygun görünüm sunar.</div>
+        </div>
+      </div>
+
+      <div class="guide-lines">
+        <div class="guide-line"><b>Sürüş modu ne işe yarar</b><span>Ekranı sadeleştirir. En gerekli alanları öne çıkarır. Sesli komut kullanımı daha rahat olur.</span></div>
+        <div class="guide-line"><b>Sesli komut butonu</b><span>Sürüş modunda büyük mor buton üzerinden hızlı sesli komut kullanılabilir.</span></div>
+        <div class="guide-line"><b>Hız ve rötar kutusu</b><span>Üst alanda anlık hız ve zaman durumu özetlenir. Sürüşte takip kolaylaşır.</span></div>
+        <div class="guide-line"><b>Canlı durak ve sıradaki durak</b><span>Durak akışı kutuları ile aktif nokta ve yaklaşan nokta hızlıca takip edilir.</span></div>
+        <div class="guide-line"><b>Öneri</b><span>Sürüşte komutları kısa ver: “Kaç yolcu var”, “Hangi duraktayız”, “Rötar kaç” gibi.</span></div>
+      </div>
+    </article>
+
+    <article class="guide-card guide-searchable">
+      <div class="guide-card-header">
+        <div class="guide-card-ico">🛠️</div>
+        <div>
+          <h2>Bir Şey Ters Gidiyorsa</h2>
+          <div class="guide-card-sub">Sık karşılaşılan durumlar için hızlı çözüm notları.</div>
+        </div>
+      </div>
+
+      <div class="guide-lines">
+        <div class="guide-line"><b>Mikrofon çalışmıyorsa</b><span>Mikrofon iznini kontrol et. Tarayıcı veya APK izinlerini tekrar ver.</span></div>
+        <div class="guide-line"><b>Sesli komut dinliyor ama işlem yapmıyorsa</b><span>Komutu daha kısa söyle. Durak adını ve koltuk numarasını net telaffuz et.</span></div>
+        <div class="guide-line"><b>APK’da ses çıkmıyorsa</b><span>Telefonun medya sesi, TTS motoru ve uygulama içi ses durumu açık mı kontrol et.</span></div>
+        <div class="guide-line"><b>Durak yanlış görünüyorsa</b><span>Seçili durak ile canlı durak durumunu karşılaştır. Gerekirse manuel durak seç.</span></div>
+        <div class="guide-line"><b>GPS çalışmıyorsa</b><span>Konum izni, internet bağlantısı ve canlı takip açık mı kontrol et.</span></div>
+      </div>
+    </article>
+
+    <article class="guide-card guide-searchable" style="grid-column:1 / -1;">
+      <div class="guide-card-header">
+        <div class="guide-card-ico">🔥</div>
+        <div>
+          <h2>Hazır Komut Listesi</h2>
+          <div class="guide-card-sub">Muavinin sahada en çok işine yarayacak 10 temel komut.</div>
+        </div>
+      </div>
+
+      <div class="guide-top10">
+        <div class="guide-chip">1. Kaç yolcu var</div>
+        <div class="guide-chip">2. Ayakta kaç kişi var</div>
+        <div class="guide-chip">3. Hangi duraktayız</div>
+        <div class="guide-chip">4. Rötar kaç</div>
+        <div class="guide-chip">5. Bir sonraki durak</div>
+        <div class="guide-chip">6. Alaşehir kaç yolcu var</div>
+        <div class="guide-chip">7. Bu durakta işlem var mı</div>
+        <div class="guide-chip">8. Bu durakta kimler inecek</div>
+        <div class="guide-chip">9. Bu durakta bagaj var mı</div>
+        <div class="guide-chip">10. İnecekleri indir</div>
+      </div>
+
+      <div class="guide-note">
+        <b>En doğru kullanım</b>
+        <p>
+          Mikrofona bastıktan sonra kısa ve tek komut ver. Uzun cümle yerine
+          net ifade kullan: “Rötar kaç”, “Durak seç Alaşehir”, “Bu durakta bagaj var mı”.
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <div class="guide-footer">
+    Muavin Asistanı • Kullanıcı Rehberi • Sesli komutlar ve saha kullanımı
+  </div>
+</div>
+
+<script>
+(function(){
+  const input = document.getElementById("guideSearchInput");
+  const cards = Array.from(document.querySelectorAll(".guide-searchable"));
+
+  if(!input || !cards.length) return;
+
+  function runFilter(){
+    const q = String(input.value || "").trim().toLowerCase();
+
+    cards.forEach(card => {
+      const text = String(card.textContent || "").toLowerCase();
+      card.style.display = !q || text.includes(q) ? "" : "none";
+    });
+  }
+
+  input.addEventListener("input", runFilter);
+})();
+</script>
+{% endblock %}
