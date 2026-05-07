@@ -231,18 +231,23 @@ function speak(text){
   if(!msg) return;
 
   const soundToggle = $("#soundToggle");
-
-  // Checkbox varsa ve kapalıysa konuşma.
-  // Checkbox bulunamazsa sistemi tamamen susturma.
   if(soundToggle && !soundToggle.checked) return;
 
+  let ttsEnabled = true;
   try{
-    if("speechSynthesis" in window){
-      // Android/Chrome bazen eski sesi kuyrukta kilitliyor; temizleyip başlatıyoruz.
+    const saved = localStorage.getItem("ttsEnabled");
+    if(saved === "0") ttsEnabled = false;
+  }catch(_){}
+
+  if(!ttsEnabled) return;
+
+  try{
+    if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
+      window.AndroidTTS.speak(msg);
+    }else if("speechSynthesis" in window){
       speechSynthesis.cancel();
 
       const u = new SpeechSynthesisUtterance(msg);
-
       const voices = speechSynthesis.getVoices ? speechSynthesis.getVoices() : [];
       const trVoice = voices.find(v => (v.lang || "").toLowerCase().startsWith("tr"));
 
