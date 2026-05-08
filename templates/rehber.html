@@ -198,11 +198,15 @@
   }
 
   .hero-device-stage{
-    position:relative;
-    width:min(980px, 100%);
-    min-height:430px;
-    margin:48px auto 0;
-  }
+      position:relative;
+      width:min(980px, 100%);
+      min-height:560px;
+      margin:48px auto 0;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      overflow:hidden;
+    }
 
   .hero-device{
     position:absolute;
@@ -223,32 +227,36 @@
   }
 
   .hero-device.main{
-    width:54%;
-    height:390px;
-    left:23%;
-    top:0;
-    z-index:3;
-  }
+      width:min(430px, 78%);
+      height:560px;
+      left:50%;
+      bottom:0;
+      top:auto;
+      transform:translateX(-50%);
+      z-index:3;
+    }
 
   .hero-device.left{
-    width:34%;
-    height:325px;
-    left:1%;
-    top:50px;
-    opacity:.82;
-    transform:rotate(-7deg);
-    z-index:2;
-  }
+      width:min(280px, 52%);
+      height:420px;
+      left:2%;
+      bottom:34px;
+      top:auto;
+      opacity:.28;
+      transform:rotate(-12deg);
+      z-index:1;
+    }
 
   .hero-device.right{
-    width:34%;
-    height:325px;
-    right:1%;
-    top:50px;
-    opacity:.82;
-    transform:rotate(7deg);
-    z-index:2;
-  }
+      width:min(280px, 52%);
+      height:420px;
+      right:2%;
+      bottom:34px;
+      top:auto;
+      opacity:.28;
+      transform:rotate(12deg);
+      z-index:1;
+    }
 
   .hero-floating{
     position:absolute;
@@ -482,13 +490,10 @@
   }
 
   .cinema-visual{
-    position:relative;
-    overflow:hidden;
-    min-height:620px;
-    border-radius:42px;
-    background:#101010;
-    border:1px solid rgba(255,255,255,.10);
-  }
+      position:relative;
+      overflow:visible;
+      padding-bottom:96px;
+    }
 
   .cinema-visual img{
     width:100%;
@@ -499,33 +504,43 @@
   }
 
   .visual-caption{
-    position:absolute;
-    left:18px;
-    right:18px;
-    bottom:18px;
-    border-radius:24px;
-    padding:18px;
-    background:rgba(0,0,0,.58);
-    border:1px solid rgba(255,255,255,.12);
-    backdrop-filter:blur(18px);
-  }
+      position:absolute;
+      left:24px;
+      right:24px;
+      bottom:-58px;
+      z-index:6;
+      border-radius:28px;
+      padding:20px 22px;
+      background:rgba(7,10,20,.86);
+      border:1px solid rgba(255,255,255,.08);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      box-shadow:0 20px 45px rgba(0,0,0,.32);
+      max-width:82%;
+    }
 
   .visual-caption b{
-    display:block;
-    font-size:18px;
-    letter-spacing:-.02em;
-  }
+      display:block;
+      margin-bottom:8px;
+      font-size:clamp(20px,2.6vw,28px);
+      line-height:1.08;
+      letter-spacing:-.03em;
+      color:#fff;
+    }
 
   .visual-caption span{
-    display:block;
-    margin-top:6px;
-    color:rgba(245,245,247,.72);
-    font-size:14px;
-    line-height:1.45;
-    font-weight:650;
-  }
+      display:block;
+      color:rgba(255,255,255,.82);
+      font-size:clamp(14px,1.7vw,18px);
+      line-height:1.45;
+      letter-spacing:-.01em;
+    }
 
-  .feature-scenes{
+  .apple-section#features{
+      padding-top:78px;
+    }
+
+    .feature-scenes{
     width:min(1180px, calc(100% - 28px));
     margin:0 auto;
     display:grid;
@@ -650,6 +665,7 @@
   }
 
   .guide-search{
+  overflow:hidden;
     position:sticky;
     top:64px;
     z-index:40;
@@ -911,6 +927,47 @@
   }
 
   @media (max-width:620px){
+      .cinema-visual{
+        padding-bottom:72px;
+      }
+
+      .visual-caption{
+        left:16px;
+        right:16px;
+        bottom:-46px;
+        padding:16px 16px;
+        border-radius:22px;
+        max-width:88%;
+      }
+
+      .visual-caption b{
+        font-size:17px;
+        margin-bottom:6px;
+      }
+
+      .visual-caption span{
+        font-size:13px;
+        line-height:1.4;
+      }
+
+    .visual-caption{
+      left:14px;
+      right:14px;
+      bottom:14px;
+      padding:16px 16px 14px;
+      border-radius:22px;
+      max-width:82%;
+    }
+
+    .visual-caption b{
+      font-size:18px;
+      margin-bottom:6px;
+    }
+
+    .visual-caption span{
+      font-size:13px;
+      line-height:1.4;
+    }
     .apple-top-nav-inner{
       min-height:50px;
     }
@@ -1034,6 +1091,1179 @@
       transition:none;
     }
   }
+
+  /* =========================================================
+     HERO V2 IMAGE FIX
+  ========================================================= */
+  .hero-device-stage-v2{
+    position:relative;
+    width:min(980px, 100%);
+    min-height:560px;
+    margin:72px auto 0;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  .hero-device-v2{
+    position:absolute;
+    overflow:hidden;
+    border-radius:34px;
+    background:#050505;
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:
+      0 28px 70px rgba(0,0,0,.48),
+      inset 0 1px 0 rgba(255,255,255,.08);
+  }
+
+  .hero-device-v2 img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  .hero-device-v2.main{
+    width:min(430px, 78%);
+    height:560px;
+    left:50%;
+    bottom:0;
+    transform:translateX(-50%);
+    z-index:3;
+  }
+
+  .hero-device-v2.left{
+    width:min(280px, 52%);
+    height:420px;
+    left:2%;
+    bottom:34px;
+    opacity:.28;
+    transform:rotate(-12deg);
+    z-index:1;
+  }
+
+  .hero-device-v2.right{
+    width:min(280px, 52%);
+    height:420px;
+    right:2%;
+    bottom:34px;
+    opacity:.28;
+    transform:rotate(12deg);
+    z-index:1;
+  }
+
+  @media (max-width:980px){
+    .hero-device-stage-v2{
+      min-height:500px;
+    }
+
+    .hero-device-v2.main{
+      width:min(390px, 80%);
+      height:500px;
+    }
+
+    .hero-device-v2.left,
+    .hero-device-v2.right{
+      width:240px;
+      height:360px;
+      bottom:34px;
+    }
+  }
+
+  @media (max-width:620px){
+    .hero-device-stage-v2{
+      min-height:440px;
+      margin-top:34px;
+    }
+
+    .hero-device-v2.main{
+      width:min(330px, 84%);
+      height:430px;
+      border-radius:28px;
+    }
+
+    .hero-device-v2.left,
+    .hero-device-v2.right{
+      width:180px;
+      height:290px;
+      bottom:36px;
+      border-radius:24px;
+    }
+
+    .hero-device-v2.left{
+      left:-2%;
+    }
+
+    .hero-device-v2.right{
+      right:-2%;
+    }
+  }
+
+
+/* === REHBER DETAIL DARK THEME OVERRIDE | START === */
+.guide-detail{
+  position:relative;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(37,99,235,.16), transparent 34%),
+    radial-gradient(circle at 85% 12%, rgba(168,85,247,.10), transparent 28%),
+    linear-gradient(180deg, #05070d 0%, #070b14 100%);
+  padding:88px 0 90px;
+}
+
+.guide-detail-wrap{
+  position:relative;
+  max-width:1200px;
+  margin:0 auto;
+  padding:0 22px;
+}
+
+.guide-detail-head{
+  margin-bottom:28px;
+}
+
+.guide-detail-head h2{
+  margin:0 0 14px;
+  color:#f8fafc;
+  letter-spacing:-.045em;
+  line-height:.96;
+  font-size:clamp(42px, 7vw, 84px);
+  font-weight:900;
+}
+
+.guide-detail-head p{
+  margin:0;
+  max-width:920px;
+  color:rgba(255,255,255,.64);
+  font-size:clamp(18px, 2.3vw, 30px);
+  line-height:1.18;
+  font-weight:700;
+  letter-spacing:-.03em;
+}
+
+.guide-search{
+  margin:26px 0 34px;
+}
+
+.guide-search input{
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  min-height:68px;
+  border:none;
+  outline:none;
+  padding:0 20px;
+  border-radius:999px;
+  background:rgba(255,255,255,.06);
+  color:#f8fafc;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 14px 40px rgba(0,0,0,.26);
+  font-size:clamp(15px, 1.8vw, 18px);
+  font-weight:700;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+
+.guide-search input::placeholder{
+  color:rgba(255,255,255,.42);
+}
+
+.guide-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:22px;
+}
+
+.guide-card{
+  position:relative;
+  overflow:hidden;
+  border-radius:36px;
+  padding:26px;
+  background:
+    linear-gradient(180deg, rgba(14,19,31,.96) 0%, rgba(8,11,18,.98) 100%);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:
+    0 24px 60px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  color:#f8fafc;
+}
+
+.guide-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at top right, rgba(59,130,246,.12), transparent 26%),
+    radial-gradient(circle at bottom left, rgba(168,85,247,.08), transparent 24%);
+}
+
+.guide-card-header{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:18px;
+}
+
+.guide-card-ico{
+  width:70px;
+  height:70px;
+  min-width:70px;
+  border-radius:22px;
+  display:grid;
+  place-items:center;
+  font-size:34px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.guide-card-header h3{
+  margin:0 0 6px;
+  color:#ffffff;
+  font-size:clamp(26px, 3vw, 40px);
+  line-height:1.02;
+  letter-spacing:-.04em;
+  font-weight:900;
+}
+
+.guide-card-sub{
+  color:rgba(255,255,255,.66);
+  font-size:16px;
+  line-height:1.45;
+  font-weight:600;
+}
+
+.guide-lines{
+  position:relative;
+  z-index:1;
+  display:grid;
+  gap:14px;
+}
+
+.guide-line{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:24px;
+  padding:18px 18px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+.guide-line b{
+  display:block;
+  margin-bottom:8px;
+  color:#ffffff;
+  font-size:17px;
+  font-weight:850;
+  letter-spacing:-.02em;
+}
+
+.guide-line span{
+  display:block;
+  color:rgba(255,255,255,.72);
+  font-size:15px;
+  line-height:1.55;
+  font-weight:600;
+}
+
+.guide-mini-title{
+  position:relative;
+  z-index:1;
+  margin:6px 0 12px;
+  color:#60a5fa;
+  font-size:13px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  font-weight:900;
+}
+
+.guide-voice-list{
+  position:relative;
+  z-index:1;
+  display:grid;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.guide-voice-item{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:22px;
+  padding:16px 16px;
+}
+
+.guide-voice-item .cmd{
+  display:inline-flex;
+  align-items:center;
+  min-height:36px;
+  padding:0 14px;
+  border-radius:999px;
+  background:rgba(59,130,246,.14);
+  color:#dbeafe;
+  border:1px solid rgba(96,165,250,.22);
+  font-size:14px;
+  font-weight:800;
+  margin-bottom:10px;
+}
+
+.guide-voice-item p{
+  margin:0;
+  color:rgba(255,255,255,.74);
+  font-size:15px;
+  line-height:1.5;
+  font-weight:600;
+}
+
+.guide-chip{
+  display:inline-flex;
+  align-items:center;
+  min-height:38px;
+  padding:0 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.07);
+  color:#e5e7eb;
+  font-size:14px;
+  font-weight:700;
+}
+
+.guide-note{
+  margin-top:18px;
+  padding:18px 18px;
+  border-radius:24px;
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.07);
+}
+
+.guide-note b{
+  display:block;
+  margin-bottom:8px;
+  color:#fff;
+  font-size:16px;
+}
+
+.guide-note p{
+  margin:0;
+  color:rgba(255,255,255,.72);
+  line-height:1.55;
+  font-size:15px;
+  font-weight:600;
+}
+
+.guide-footer{
+  margin-top:28px;
+  color:rgba(255,255,255,.42);
+  text-align:center;
+  font-size:13px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  font-weight:800;
+}
+
+@media (max-width: 980px){
+  .guide-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width: 620px){
+  .guide-detail{
+    padding:64px 0 68px;
+  }
+
+  .guide-detail-wrap{
+    padding:0 14px;
+  }
+
+  .guide-detail-head{
+    margin-bottom:22px;
+  }
+
+  .guide-detail-head h2{
+    font-size:clamp(34px, 12vw, 64px);
+    line-height:.94;
+  }
+
+  .guide-detail-head p{
+    font-size:clamp(16px, 5.2vw, 24px);
+    line-height:1.2;
+  }
+
+  .guide-search{
+    margin:22px 0 26px;
+  }
+
+  .guide-search input{
+    min-height:56px;
+    padding:0 16px;
+    font-size:14px;
+  }
+
+  .guide-card{
+    border-radius:28px;
+    padding:18px;
+  }
+
+  .guide-card-header{
+    gap:12px;
+    margin-bottom:14px;
+  }
+
+  .guide-card-ico{
+    width:56px;
+    height:56px;
+    min-width:56px;
+    border-radius:18px;
+    font-size:28px;
+  }
+
+  .guide-card-header h3{
+    font-size:clamp(20px, 7.6vw, 34px);
+  }
+
+  .guide-card-sub{
+    font-size:14px;
+  }
+
+  .guide-line{
+    border-radius:20px;
+    padding:14px 14px;
+  }
+
+  .guide-line b{
+    font-size:15px;
+  }
+
+  .guide-line span,
+  .guide-voice-item p,
+  .guide-note p{
+    font-size:14px;
+  }
+
+  .guide-voice-item{
+    border-radius:18px;
+    padding:14px;
+  }
+}
+/* === REHBER DETAIL DARK THEME OVERRIDE | END === */
+
+
+/* === QUICK GUIDE HUB | START === */
+.quick-guide-hub{
+  position:relative;
+  padding:34px 0 18px;
+}
+
+.quick-guide-wrap{
+  max-width:1200px;
+  margin:0 auto;
+  padding:0 22px;
+}
+
+.quick-guide-head{
+  margin-bottom:18px;
+  text-align:center;
+}
+
+.quick-guide-head h2{
+  margin:0 0 10px;
+  color:#f8fafc;
+  font-size:clamp(28px, 4vw, 48px);
+  line-height:1.02;
+  letter-spacing:-.045em;
+  font-weight:900;
+}
+
+.quick-guide-head p{
+  margin:0 auto;
+  max-width:760px;
+  color:rgba(255,255,255,.62);
+  font-size:clamp(15px, 2vw, 20px);
+  line-height:1.45;
+  font-weight:650;
+}
+
+.quick-guide-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:16px;
+}
+
+.quick-guide-card{
+  position:relative;
+  overflow:hidden;
+  text-decoration:none;
+  border-radius:28px;
+  padding:22px 20px;
+  background:
+    linear-gradient(180deg, rgba(14,19,31,.96) 0%, rgba(8,11,18,.98) 100%);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.04);
+  transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+
+.quick-guide-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at top right, rgba(59,130,246,.11), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(168,85,247,.08), transparent 22%);
+}
+
+.quick-guide-card:hover{
+  transform:translateY(-3px);
+  border-color:rgba(255,255,255,.14);
+  box-shadow:
+    0 24px 54px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.quick-guide-icon{
+  position:relative;
+  z-index:1;
+  width:60px;
+  height:60px;
+  border-radius:20px;
+  display:grid;
+  place-items:center;
+  margin-bottom:14px;
+  font-size:28px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  color:#fff;
+}
+
+.quick-guide-card h3{
+  position:relative;
+  z-index:1;
+  margin:0 0 8px;
+  color:#fff;
+  font-size:clamp(20px, 2.3vw, 28px);
+  line-height:1.04;
+  letter-spacing:-.035em;
+  font-weight:850;
+}
+
+.quick-guide-card p{
+  position:relative;
+  z-index:1;
+  margin:0;
+  color:rgba(255,255,255,.68);
+  font-size:15px;
+  line-height:1.5;
+  font-weight:600;
+}
+
+.quick-guide-card .go{
+  position:relative;
+  z-index:1;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-top:14px;
+  color:#60a5fa;
+  font-size:14px;
+  font-weight:800;
+}
+
+@media (max-width: 980px){
+  .quick-guide-grid{
+    grid-template-columns:repeat(2, minmax(0,1fr));
+  }
+}
+
+@media (max-width: 620px){
+  .quick-guide-hub{
+    padding:24px 0 10px;
+  }
+
+  .quick-guide-wrap{
+    padding:0 14px;
+  }
+
+  .quick-guide-head{
+    margin-bottom:14px;
+    text-align:left;
+  }
+
+  .quick-guide-head h2{
+    font-size:clamp(24px, 8vw, 36px);
+  }
+
+  .quick-guide-head p{
+    max-width:none;
+    font-size:14px;
+  }
+
+  .quick-guide-grid{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+  .quick-guide-card{
+    border-radius:22px;
+    padding:18px 16px;
+  }
+
+  .quick-guide-icon{
+    width:52px;
+    height:52px;
+    border-radius:16px;
+    margin-bottom:12px;
+    font-size:24px;
+  }
+
+  .quick-guide-card h3{
+    font-size:22px;
+  }
+
+  .quick-guide-card p{
+    font-size:14px;
+  }
+}
+/* === QUICK GUIDE HUB | END === */
+
+
+/* === GUIDE DETAIL POLISH | START === */
+.guide-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:24px;
+  align-items:start;
+}
+
+.guide-card{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+
+.guide-card::after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0 0;
+  height:1px;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+  opacity:.6;
+  pointer-events:none;
+}
+
+.guide-card-header{
+  align-items:flex-start;
+}
+
+.guide-card-header > div:last-child{
+  min-width:0;
+  flex:1;
+}
+
+.guide-card.guide-searchable{
+  scroll-margin-top:110px;
+}
+
+.guide-lines{
+  gap:12px;
+}
+
+.guide-line{
+  transition:transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.guide-line:hover{
+  transform:translateY(-2px);
+  border-color:rgba(255,255,255,.12);
+  background:rgba(255,255,255,.055);
+}
+
+.guide-voice-list{
+  gap:12px;
+}
+
+.guide-voice-item{
+  transition:transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.guide-voice-item:hover{
+  transform:translateY(-2px);
+  border-color:rgba(96,165,250,.24);
+  background:rgba(255,255,255,.055);
+}
+
+.guide-top10{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:12px;
+}
+
+.guide-chip{
+  min-height:44px;
+  justify-content:center;
+  text-align:center;
+  padding:10px 14px;
+  line-height:1.3;
+}
+
+.guide-card[style*="grid-column:1 / -1"]{
+  padding-top:28px;
+}
+
+.guide-card[style*="grid-column:1 / -1"] .guide-card-header{
+  margin-bottom:18px;
+}
+
+.guide-card[style*="grid-column:1 / -1"] .guide-note{
+  margin-top:20px;
+  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+}
+
+.guide-card-ico{
+  position:relative;
+}
+
+.guide-card-ico::after{
+  content:"";
+  position:absolute;
+  inset:-10px;
+  border-radius:26px;
+  background:radial-gradient(circle, rgba(96,165,250,.12), transparent 64%);
+  z-index:-1;
+}
+
+@media (max-width: 980px){
+  .guide-grid{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+
+  .guide-top10{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width: 620px){
+  .guide-grid{
+    gap:14px;
+  }
+
+  .guide-lines,
+  .guide-voice-list{
+    gap:10px;
+  }
+
+  .guide-top10{
+    gap:10px;
+  }
+
+  .guide-chip{
+    min-height:40px;
+    font-size:13px;
+  }
+}
+/* === GUIDE DETAIL POLISH | END === */
+
+
+/* === GUIDE FILTER BAR | START === */
+.guide-filter-bar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:0 0 18px;
+}
+
+.guide-filter-btn{
+  appearance:none;
+  border:none;
+  outline:none;
+  cursor:pointer;
+  min-height:40px;
+  padding:0 16px;
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  color:rgba(255,255,255,.76);
+  border:1px solid rgba(255,255,255,.08);
+  font-size:14px;
+  font-weight:750;
+  letter-spacing:-.01em;
+  transition:transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.guide-filter-btn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.07);
+  border-color:rgba(255,255,255,.12);
+  color:#fff;
+}
+
+.guide-filter-btn.active{
+  background:rgba(59,130,246,.16);
+  color:#dbeafe;
+  border-color:rgba(96,165,250,.28);
+  box-shadow:0 10px 24px rgba(37,99,235,.14);
+}
+
+@media (max-width: 620px){
+  .guide-filter-bar{
+    gap:8px;
+    margin:0 0 16px;
+  }
+
+  .guide-filter-btn{
+    min-height:36px;
+    padding:0 14px;
+    font-size:13px;
+  }
+}
+/* === GUIDE FILTER BAR | END === */
+
+
+/* === GUIDE ACCORDION | START === */
+.guide-card{
+  transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.guide-card.is-collapsed .guide-card-body{
+  display:none;
+}
+
+.guide-card-header{
+  cursor:pointer;
+  user-select:none;
+  position:relative;
+  padding-right:56px;
+}
+
+.guide-card-header::after{
+  content:"+";
+  position:absolute;
+  right:4px;
+  top:4px;
+  width:42px;
+  height:42px;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  color:#f8fafc;
+  font-size:24px;
+  font-weight:700;
+  line-height:1;
+  transition:transform .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.guide-card:not(.is-collapsed) .guide-card-header::after{
+  content:"–";
+  background:rgba(59,130,246,.10);
+  border-color:rgba(96,165,250,.22);
+  color:#dbeafe;
+}
+
+.guide-card-header:hover::after{
+  transform:scale(1.04);
+}
+
+.guide-card-body{
+  animation:guideFade .18s ease;
+}
+
+@keyframes guideFade{
+  from{ opacity:.0; transform:translateY(-4px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+
+@media (max-width: 620px){
+  .guide-card-header{
+    padding-right:48px;
+  }
+
+  .guide-card-header::after{
+    width:36px;
+    height:36px;
+    font-size:22px;
+    right:0;
+    top:0;
+  }
+}
+/* === GUIDE ACCORDION | END === */
+
+
+/* === GUIDE MINI NAV | START === */
+.guide-mini-nav{
+  position:sticky;
+  top:10px;
+  z-index:40;
+  margin:0 auto 18px;
+  max-width:1200px;
+  padding:0 22px;
+}
+
+.guide-mini-nav-inner{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  overflow-x:auto;
+  padding:10px;
+  border-radius:999px;
+  background:rgba(7,10,20,.72);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+
+.guide-mini-nav-inner::-webkit-scrollbar{
+  display:none;
+}
+
+.guide-mini-link{
+  flex:0 0 auto;
+  min-height:38px;
+  padding:0 16px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  text-decoration:none;
+  color:rgba(255,255,255,.78);
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.06);
+  font-size:14px;
+  font-weight:760;
+  letter-spacing:-.01em;
+  transition:transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.guide-mini-link:hover{
+  transform:translateY(-1px);
+  color:#fff;
+  background:rgba(255,255,255,.07);
+  border-color:rgba(255,255,255,.12);
+}
+
+.guide-mini-link.active{
+  color:#dbeafe;
+  background:rgba(59,130,246,.16);
+  border-color:rgba(96,165,250,.26);
+  box-shadow:0 10px 22px rgba(37,99,235,.14);
+}
+
+@media (max-width: 620px){
+  .guide-mini-nav{
+    top:8px;
+    margin:0 auto 14px;
+    padding:0 14px;
+  }
+
+  .guide-mini-nav-inner{
+    gap:8px;
+    padding:8px;
+  }
+
+  .guide-mini-link{
+    min-height:34px;
+    padding:0 14px;
+    font-size:13px;
+  }
+}
+/* === GUIDE MINI NAV | END === */
+
+
+/* === FINAL POLISH PHASE | START === */
+.guide-mini-nav{
+  margin:0 auto 20px;
+}
+
+.guide-mini-nav-inner{
+  box-shadow:
+    0 20px 44px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.guide-mini-link{
+  min-height:40px;
+  padding:0 17px;
+  color:rgba(255,255,255,.70);
+}
+
+.guide-mini-link.active{
+  color:#fff;
+  background:linear-gradient(180deg, rgba(59,130,246,.22), rgba(37,99,235,.14));
+  border-color:rgba(96,165,250,.30);
+  box-shadow:
+    0 10px 22px rgba(37,99,235,.18),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.quick-guide-head p,
+.section-head p,
+.guide-detail-head p{
+  max-width:820px;
+}
+
+.highlight-scroll{
+  gap:18px;
+}
+
+.apple-highlight{
+  border-radius:34px;
+}
+
+.highlight-img{
+  min-height:260px;
+}
+
+.highlight-img img{
+  width:100%;
+  height:260px;
+  object-fit:cover;
+  display:block;
+  border-radius:24px;
+}
+
+.scene-card{
+  border-radius:34px;
+}
+
+.scene-media{
+  min-height:300px;
+}
+
+.scene-media img{
+  width:100%;
+  height:300px;
+  object-fit:cover;
+  display:block;
+  border-radius:26px;
+}
+
+.cinema-visual img{
+  border-radius:34px;
+}
+
+.visual-caption{
+  max-width:76%;
+}
+
+.guide-search input::placeholder{
+  content:"";
+}
+
+.guide-card{
+  border-radius:34px;
+}
+
+.guide-card-header{
+  margin-bottom:16px;
+}
+
+.guide-card-header h3{
+  line-height:1.04;
+}
+
+.guide-card-sub{
+  color:rgba(255,255,255,.62);
+}
+
+.guide-line{
+  padding:18px 18px;
+}
+
+.guide-line span{
+  line-height:1.62;
+}
+
+.guide-voice-item p{
+  line-height:1.58;
+}
+
+.guide-note{
+  border-radius:22px;
+}
+
+.guide-chip{
+  min-height:42px;
+}
+
+@media (max-width: 980px){
+  .highlight-img{
+    min-height:230px;
+  }
+
+  .highlight-img img{
+    height:230px;
+  }
+
+  .scene-media{
+    min-height:260px;
+  }
+
+  .scene-media img{
+    height:260px;
+  }
+
+  .visual-caption{
+    max-width:84%;
+  }
+}
+
+@media (max-width: 620px){
+  .guide-mini-nav{
+    margin:0 auto 14px;
+  }
+
+  .guide-mini-link{
+    min-height:36px;
+    padding:0 14px;
+  }
+
+  .quick-guide-head p,
+  .section-head p,
+  .guide-detail-head p{
+    max-width:none;
+  }
+
+  .highlight-img{
+    min-height:210px;
+  }
+
+  .highlight-img img{
+    height:210px;
+    border-radius:20px;
+  }
+
+  .scene-media{
+    min-height:220px;
+  }
+
+  .scene-media img{
+    height:220px;
+    border-radius:20px;
+  }
+
+  .guide-card{
+    border-radius:26px;
+  }
+
+  .guide-line{
+    padding:14px 14px;
+  }
+
+  .visual-caption{
+    max-width:90%;
+  }
+}
+/* === FINAL POLISH PHASE | END === */
+
 </style>
 
 <div class="guide-shell">
@@ -1065,15 +2295,15 @@
           <a href="#guideDetail" class="apple-btn ghost">Kullanım rehberi</a>
         </div>
 
-        <div class="hero-device-stage">
-          <div class="hero-device left">
-            <img src="{{ url_for('static', filename='img/rehber-durak-akisi.png') }}" alt="Sefer başlat ekranı">
+        <div class="hero-device-stage-v2">
+          <div class="hero-device-v2 left">
+            <img src="{{ url_for('static', filename='img/rehber-promo-main.png') }}" alt="Sefer başlat ekranı">
           </div>
-          <div class="hero-device main">
+          <div class="hero-device-v2 main">
             <img src="{{ url_for('static', filename='img/rehber-promo-main.png') }}" alt="Koltuk ekranı">
           </div>
-          <div class="hero-device right">
-            <img src="{{ url_for('static', filename='img/rehber-voice-command.png') }}" alt="Devam eden sefer ekranı">
+          <div class="hero-device-v2 right">
+            <img src="{{ url_for('static', filename='img/rehber-promo-main.png') }}" alt="Devam eden sefer ekranı">
           </div>
 
           <div class="hero-floating f1">🎤 Kaç yolcu var</div>
@@ -1087,7 +2317,7 @@
     <section class="apple-section" id="highlights">
       <div class="section-head">
         <h2>İşte öne çıkan başlıklar.</h2>
-        <p>Muavin Asistanı’nı anlatmanın en sade yolu: büyük görsel, kısa mesaj, net fayda.</p>
+        <p>Muavin Asistanı’nın en güçlü tarafları: koltuk, durak ve yolcu akışını tek bakışta yönetebilmen.</p>
       </div>
 
       <div class="highlight-scroll">
@@ -1095,7 +2325,7 @@
           <h3>Koltuk planı. Tek bakışta tüm yolcular.</h3>
           <p>Yolcu, cinsiyet, iniş durağı, servis ve bagaj bilgisi aynı akışta görünür.</p>
           <div class="highlight-img">
-            <img src="{{ url_for('static', filename='img/rehber-promo-main.png') }}" alt="Koltuk planı">
+            <img src="{{ url_for('static', filename='img/rehber-seat-plan-card.png') }}" alt="Koltuk planı">
           </div>
         </article>
 
@@ -1103,7 +2333,7 @@
           <h3>Canlı durak. İnişleri kaçırma.</h3>
           <p>Seçili, canlı ve sıradaki durak bilgisi sahada hızlı karar aldırır.</p>
           <div class="highlight-img">
-            <img src="{{ url_for('static', filename='img/rehber-durak-akisi.png') }}" alt="Canlı durak">
+            <img src="{{ url_for('static', filename='img/rehber-durak-akisi-card.png') }}" alt="Canlı durak">
           </div>
         </article>
 
@@ -1111,7 +2341,7 @@
           <h3>Sesli komut. Ekrana daha az bak.</h3>
           <p>“Kaç yolcu var”, “Rötar kaç”, “Bu durakta bagaj var mı” gibi kısa komutlarla bilgi al.</p>
           <div class="highlight-img">
-            <img src="{{ url_for('static', filename='img/rehber-voice-command.png') }}" alt="Sesli komut">
+            <img src="{{ url_for('static', filename='img/rehber-voice-command-card.png') }}" alt="Sesli komut">
           </div>
         </article>
 
@@ -1119,7 +2349,7 @@
           <h3>Hesap ve tahsilat. Sefer sonunda netlik.</h3>
           <p>Ayakta yolcu, tahsilat, kasa ve kontrol akışlarını daha düzenli takip et.</p>
           <div class="highlight-img">
-            <img src="{{ url_for('static', filename='img/rehber-promo-main.png') }}" alt="Hesap ve tahsilat">
+            <img src="{{ url_for('static', filename='img/rehber-hesap-card.png') }}" alt="Hesap ve tahsilat">
           </div>
         </article>
       </div>
@@ -1132,8 +2362,7 @@
             <span class="tag">Saha için tasarım</span>
             <h2>Az dokunuş. Daha fazla kontrol.</h2>
             <p>
-              Sayfa, Apple tarzı sade bir ürün anlatımıyla başlar; sonra muavinin gerçekten
-              kullanacağı rehber bilgilerini altta düzenli şekilde sunar.
+              Sade tasarım ve net bilgi akışı sayesinde muavin, sahada ihtiyaç duyduğu kontrolü daha hızlı sağlar.
             </p>
           </div>
 
@@ -1158,7 +2387,7 @@
         </div>
 
         <div class="cinema-visual reveal">
-          <img src="{{ url_for('static', filename='img/rehber-promo-main.png') }}" alt="Muavin Asistanı uygulama ekranı">
+          <img src="{{ url_for('static', filename='img/rehber-cinema-main.png') }}" alt="Muavin Asistanı uygulama ekranı">
           <div class="visual-caption">
             <b>Koltuk ekranı merkezde.</b>
             <span>Çünkü sahadaki işin çoğu koltuk, durak ve yolcu bilgisinin etrafında döner.</span>
@@ -1187,7 +2416,7 @@
             </div>
           </div>
           <div class="scene-media">
-            <img src="{{ url_for('static', filename='img/rehber-promo-main.png') }}" alt="Koltuk yönetimi">
+            <img src="{{ url_for('static', filename='img/rehber-koltuk-yonetimi-card.png') }}" alt="Koltuk yönetimi">
           </div>
         </article>
 
@@ -1234,12 +2463,23 @@
           <p>Tanıtım bittiğinde kullanıcı burada uygulamayı adım adım öğrenir.</p>
         </div>
 
-        <div class="guide-search">
-          <input id="guideSearchInput" type="text" placeholder="Rehber içinde ara: sesli komut, bagaj, rötar, durak, emanet...">
+        
+          <div class="guide-filter-bar" id="guideFilterBar">
+            <button class="guide-filter-btn active" type="button" data-filter="all">Tümü</button>
+            <button class="guide-filter-btn" type="button" data-filter="baslangic">Başlangıç</button>
+            <button class="guide-filter-btn" type="button" data-filter="sesli">Sesli</button>
+            <button class="guide-filter-btn" type="button" data-filter="koltuk">Koltuk</button>
+            <button class="guide-filter-btn" type="button" data-filter="durak">Durak</button>
+            <button class="guide-filter-btn" type="button" data-filter="sorun">Sorun</button>
+          </div>
+
+
+          <div class="guide-search">
+          <input id="guideSearchInput" type="text" placeholder="Rehber içinde ara...">
         </div>
 
         <section class="guide-grid" id="guideCardsWrap">
-          <article class="guide-card guide-searchable">
+          <article class="guide-card guide-searchable" data-guide-cat="baslangic">
             <div class="guide-card-header">
               <div class="guide-card-ico">🚀</div>
               <div>
@@ -1248,7 +2488,11 @@
               </div>
             </div>
 
-            <div class="guide-lines">
+            <div class="guide-card-body">
+              <div class="guide-card-body">
+              <div class="guide-card-body">
+              <div class="guide-card-body">
+              <div class="guide-lines">
               <div class="guide-line"><b>Yeni sefer başlat</b><span>Ana menüde Sefer Başlat kartından yeni sefer oluştur. Güzergâh, plaka ve çıkış bilgilerini girerek aktif sefere geç.</span></div>
               <div class="guide-line"><b>Devam eden sefere gir</b><span>Aktif sefer varsa Devam Eden Sefer kartından doğrudan koltuk ekranına geçebilirsin.</span></div>
               <div class="guide-line"><b>Koltuk ekranını kullan</b><span>Koltuk planı ekranında yolcu ekleme, indirme, ayakta yolcu, servis, durak ve bagaj işlemleri aynı ekrandan yapılır.</span></div>
@@ -1256,7 +2500,7 @@
             </div>
           </article>
 
-          <article class="guide-card guide-searchable" id="guideVoiceSection">
+          <article class="guide-card guide-searchable" id="guideVoiceSection" data-guide-cat="sesli">
             <div class="guide-card-header">
               <div class="guide-card-ico">🎤</div>
               <div>
@@ -1265,7 +2509,8 @@
               </div>
             </div>
 
-            <div class="guide-mini-title">Bilgi Komutları</div>
+            <div class="guide-card-body">
+              <div class="guide-mini-title">Bilgi Komutları</div>
             <div class="guide-voice-list">
               <div class="guide-voice-item"><div class="cmd">Kaç yolcu var</div><p>Toplam yolcu sayısını, oturan ve ayakta durumuyla birlikte söyler.</p></div>
               <div class="guide-voice-item"><div class="cmd">Ayakta kaç kişi var</div><p>Ayakta yolcu sayısını ve ayakta tahsilatı söyler.</p></div>
@@ -1285,7 +2530,7 @@
             </div>
           </article>
 
-          <article class="guide-card guide-searchable">
+          <article class="guide-card guide-searchable" data-guide-cat="koltuk">
             <div class="guide-card-header">
               <div class="guide-card-ico">⚙️</div>
               <div>
@@ -1304,7 +2549,7 @@
             </div>
           </article>
 
-          <article class="guide-card guide-searchable">
+          <article class="guide-card guide-searchable" data-guide-cat="durak">
             <div class="guide-card-header">
               <div class="guide-card-ico">🚘</div>
               <div>
@@ -1322,7 +2567,7 @@
             </div>
           </article>
 
-          <article class="guide-card guide-searchable">
+          <article class="guide-card guide-searchable" data-guide-cat="sorun">
             <div class="guide-card-header">
               <div class="guide-card-ico">🛠️</div>
               <div>
@@ -1349,7 +2594,8 @@
               </div>
             </div>
 
-            <div class="guide-top10">
+            <div class="guide-card-body">
+              <div class="guide-top10">
               <div class="guide-chip">1. Kaç yolcu var</div>
               <div class="guide-chip">2. Ayakta kaç kişi var</div>
               <div class="guide-chip">3. Hangi duraktayız</div>
@@ -1370,7 +2616,7 @@
         </section>
 
         <div class="guide-footer">
-          Muavin Asistanı • Apple tarzı ürün tanıtımı + detaylı kullanım rehberi
+          Muavin Asistanı • + detaylı kullanım rehberi
         </div>
       </div>
     </section>
