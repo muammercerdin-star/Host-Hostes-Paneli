@@ -1708,8 +1708,11 @@
           const title = document.title || "Muavin Asistanı";
           window.PrintBridge.printPage(title);
           return;
+        } else {
+          alert("PrintBridge bulunamadı. Tarayıcı yazdırma deneniyor.");
         }
       }catch(err){
+        alert("PrintBridge hatası: " + err);
         console.log("PrintBridge error:", err);
       }
 

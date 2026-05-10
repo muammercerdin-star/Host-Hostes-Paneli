@@ -28,6 +28,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
@@ -277,6 +278,8 @@ public class MainActivity extends Activity {
 
             runOnUiThread(() -> {
                 try {
+                    Toast.makeText(MainActivity.this, "Yazdırma başlatılıyor...", Toast.LENGTH_SHORT).show();
+
                     PrintManager printManager = (PrintManager) getSystemService(PRINT_SERVICE);
                     if (printManager == null) {
                         showError("Yazdırma servisi bulunamadı.");
