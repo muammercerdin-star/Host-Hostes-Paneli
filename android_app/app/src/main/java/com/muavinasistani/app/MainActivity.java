@@ -3,6 +3,7 @@ package com.muavinasistani.app;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.ActivityNotFoundException;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -138,6 +139,46 @@ public class MainActivity extends Activity {
         });
 
         webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                Uri uri = request.getUrl();
+                String scheme = uri.getScheme() != null ? uri.getScheme().toLowerCase() : "";
+                String host = uri.getHost() != null ? uri.getHost().toLowerCase() : "";
+
+                if (("http".equals(scheme) || "https".equals(scheme)) &&
+                        ("127.0.0.1".equals(host) || "localhost".equals(host))) {
+                    return false;
+                }
+
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    showError("Bu bağlantı açılamadı:\n" + uri.toString());
+                }
+                return true;
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                Uri uri = Uri.parse(url);
+                String scheme = uri.getScheme() != null ? uri.getScheme().toLowerCase() : "";
+                String host = uri.getHost() != null ? uri.getHost().toLowerCase() : "";
+
+                if (("http".equals(scheme) || "https".equals(scheme)) &&
+                        ("127.0.0.1".equals(host) || "localhost".equals(host))) {
+                    return false;
+                }
+
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    showError("Bu bağlantı açılamadı:\n" + url);
+                }
+                return true;
+            }
+
             @Override
             public void onPageFinished(WebView view, String url) {
                 pageLoaded = true;
