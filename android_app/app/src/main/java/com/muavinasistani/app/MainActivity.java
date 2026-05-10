@@ -85,6 +85,7 @@ public class MainActivity extends Activity {
 
         webView.addJavascriptInterface(new VoiceBridge(), "AndroidVoice");
         webView.addJavascriptInterface(new TtsBridge(), "AndroidTTS");
+        webView.addJavascriptInterface(new PrintBridge(), "PrintBridge");
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
