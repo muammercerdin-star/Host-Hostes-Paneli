@@ -1701,7 +1701,27 @@
       const MOVES = {{ moves|tojson|safe }};
       const SUMS  = {{ sums|tojson|safe }};
       const TRIP  = {{ trip|tojson|safe }};
-    </script>
+    
+    function openPrintDialog(){
+      try{
+        if (window.PrintBridge && typeof window.PrintBridge.printPage === "function"){
+          const title = document.title || "Muavin Asistanı";
+          window.PrintBridge.printPage(title);
+          return;
+        }
+      }catch(err){
+        console.log("PrintBridge error:", err);
+      }
+
+      try{
+        window.print();
+      }catch(err){
+        alert("Yazdırma ekranı açılamadı.");
+      }
+    }
+
+
+  </script>
 
     <div class="card">
       <div class="kasa">
@@ -1880,7 +1900,7 @@
 
         <button class="btn small primary" type="button" onclick="shareWhatsapp()">WhatsApp</button>
         <a class="btn small" href="{{ url_for('hesap_moves_csv') }}">CSV</a>
-        <button class="btn small" type="button" onclick="window.print()">Yazdır/PDF</button>
+        <button class="btn small" type="button" onclick="openPrintDialog()">Yazdır/PDF</button>
       </div>
     </div>
 

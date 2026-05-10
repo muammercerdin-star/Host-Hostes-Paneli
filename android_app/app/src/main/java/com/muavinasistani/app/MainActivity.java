@@ -7,6 +7,9 @@ import android.content.ActivityNotFoundException;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.print.PrintManager;
+import android.print.PrintDocumentAdapter;
+import android.print.PrintAttributes;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -262,6 +265,35 @@ public class MainActivity extends Activity {
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    public class PrintBridge {
+        @JavascriptInterface
+        public void printPage(String jobName) {
+            final String safeJobName = (jobName == null || jobName.trim().isEmpty())
+                    ? "Muavin Asistani"
+                    : jobName.trim();
+
+            runOnUiThread(() -> {
+                try {
+                    PrintManager printManager = (PrintManager) getSystemService(PRINT_SERVICE);
+                    if (printManager == null) {
+                        showError("Yazdırma servisi bulunamadı.");
+                        return;
+                    }
+
+                    PrintDocumentAdapter adapter = webView.createPrintDocumentAdapter(safeJobName);
+                    printManager.print(
+                            safeJobName,
+                            adapter,
+                            new PrintAttributes.Builder().build()
+                    );
+                } catch (Exception e) {
+                    showError("Yazdırma ekranı açılamadı:\n" + e.toString());
+                }
+            });
+        }
     }
 
 

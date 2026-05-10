@@ -487,7 +487,27 @@
 
 <script>
   window.REPORT_ARCHIVE_BASE = {{ archive_base|default('', true)|tojson }};
-</script>
+
+    function openPrintDialog(){
+      try{
+        if (window.PrintBridge && typeof window.PrintBridge.printPage === "function"){
+          const title = document.title || "Muavin Asistanı";
+          window.PrintBridge.printPage(title);
+          return;
+        }
+      }catch(err){
+        console.log("PrintBridge error:", err);
+      }
+
+      try{
+        window.print();
+      }catch(err){
+        alert("Yazdırma ekranı açılamadı.");
+      }
+    }
+
+
+  </script>
 
 <div class="report-wrap">
   <div class="hero">
@@ -496,7 +516,7 @@
 
     <div class="actions">
       <a class="btn" href="/seats">← Koltuk ekranı</a>
-      <button class="btn blue" type="button" onclick="window.print()">🖨 Yazdır</button>
+      <button class="btn blue" type="button" onclick="openPrintDialog()">🖨 Yazdır</button>
       <button class="btn green" type="button" id="shareBtn">📲 WhatsApp</button>
       <button class="btn" type="button" id="csvBtn">⬇ CSV indir</button>
     </div>
