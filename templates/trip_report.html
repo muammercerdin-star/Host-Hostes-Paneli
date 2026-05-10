@@ -919,7 +919,7 @@ document.getElementById("seatModalBackdrop").addEventListener("click", closeSeat
 
 document.getElementById("shareBtn").addEventListener("click", () => {
   const text = encodeURIComponent(buildShareText());
-  window.open(`https://wa.me/?text=${text}`, "_blank");
+  window.location.href = `https://wa.me/?text=${text}`;
 });
 
 document.getElementById("csvBtn").addEventListener("click", downloadCsv);
