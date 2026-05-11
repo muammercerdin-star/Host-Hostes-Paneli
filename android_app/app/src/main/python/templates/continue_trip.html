@@ -1839,7 +1839,7 @@
 
             <div class="metric">
               <small>Kalan<br>mesafe</small>
-              <b id="liveDistanceValue">—</b>
+              <b id="liveDistanceValue" class="stop-distance-value" data-stop-name="{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or '' }}">{{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else live_current.distance) or "-" }}</b>
             </div>
 
             <div class="metric">
@@ -1884,7 +1884,7 @@
 
             <div class="metric">
               <small>Kalan<br>mesafe</small>
-              <b>{{ stop.distance }}</b>
+              <b class="stop-distance-value" data-stop-name="{{ stop.name }}">{{ stop.distance }}</b>
             </div>
 
             <div class="metric">
@@ -2011,103 +2011,6 @@
     })();
   </script>
 
-<script id="live-gps-speed-script">
-(function(){
-  const speedEl = document.getElementById("liveSpeedText");
-  if(!speedEl) return;
-
-  let lastPos = null;
-
-  function haversineMeters(a, b){
-    const R = 6371000;
-    const toRad = d => d * Math.PI / 180;
-
-    const lat1 = toRad(a.latitude);
-    const lat2 = toRad(b.latitude);
-    const dLat = toRad(b.latitude - a.latitude);
-    const dLon = toRad(b.longitude - a.longitude);
-
-    const x =
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1) * Math.cos(lat2) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-
-    return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
-  }
-
-  function setSpeed(kmh){
-    if(!Number.isFinite(kmh) || kmh < 1){
-      speedEl.textContent = "0 km/sa";
-      return;
-    }
-
-    speedEl.textContent = Math.round(kmh) + " km/sa";
-  }
-
-  function onPosition(pos){
-    const coords = pos.coords || {};
-    let kmh = null;
-
-    // Android / Chrome çoğu zaman speed değerini m/s olarak verir.
-    if(typeof coords.speed === "number" && Number.isFinite(coords.speed) && coords.speed >= 0){
-      kmh = coords.speed * 3.6;
-    }
-
-    // speed boş gelirse iki konum arasından hesapla.
-    if(kmh === null && lastPos){
-      const dt = (pos.timestamp - lastPos.timestamp) / 1000;
-      if(dt > 0){
-        const meters = haversineMeters(lastPos.coords, coords);
-        kmh = (meters / dt) * 3.6;
-      }
-    }
-
-    lastPos = {
-      coords: {
-        latitude: coords.latitude,
-        longitude: coords.longitude
-      },
-      timestamp: pos.timestamp || Date.now()
-    };
-
-    if(kmh !== null){
-      setSpeed(kmh);
-      try{ localStorage.setItem("lastLiveSpeedKmh", String(Math.round(kmh))); }catch(_){}
-    }
-  }
-
-  function onError(err){
-    try{
-      const cached = Number(localStorage.getItem("lastLiveSpeedKmh") || "");
-      if(Number.isFinite(cached)){
-        speedEl.textContent = cached + " km/sa";
-        return;
-      }
-    }catch(_){}
-
-    speedEl.textContent = "— km/sa";
-  }
-
-  if(!("geolocation" in navigator)){
-    speedEl.textContent = "GPS yok";
-    return;
-  }
-
-  try{
-    navigator.geolocation.watchPosition(
-      onPosition,
-      onError,
-      {
-        enableHighAccuracy:true,
-        maximumAge:1200,
-        timeout:10000
-      }
-    );
-  }catch(err){
-    speedEl.textContent = "— km/sa";
-  }
-})();
-</script>
 
 
 
@@ -2170,43 +2073,6 @@
 
 
 
-<script id="continue-trip-sync-from-seats">
-(function(){
-  const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
-
-  function sync(){
-    try{
-      const speed   = localStorage.getItem("continueTripSpeed:" + tripKey) || "0";
-      const liveStop = localStorage.getItem("continueTripLiveStop:" + tripKey) || "";
-      const gpsKm   = localStorage.getItem("continueTripGpsKm:" + tripKey) || "";
-
-      const speedEl = document.getElementById("liveSpeedValue");
-      const stopEl  = document.getElementById("liveCurrentStopName");
-      const distEl  = document.getElementById("liveDistanceValue");
-
-      if(speedEl){
-        speedEl.textContent = `${parseInt(speed || "0", 10) || 0} km/sa`;
-      }
-
-      if(stopEl && liveStop){
-        stopEl.textContent = liveStop;
-      }
-
-      if(distEl && gpsKm){
-        distEl.textContent = gpsKm;
-      }
-    }catch(_){}
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", sync);
-  }else{
-    sync();
-  }
-
-  setInterval(sync, 1000);
-})();
-</script>
 
 
 <script id="continue-trip-runtime-sync">
@@ -2234,7 +2100,7 @@
       const s = j && j.state ? j.state : null;
       if(!s) return;
 
-      const speedEl = document.getElementById("liveSpeedValue");
+      const speedEl = document.getElementById("liveSpeedText");
       const stopEl  = document.getElementById("liveCurrentStopName");
       const distEl  = document.getElementById("liveDistanceValue");
       const etaEl   = document.getElementById("liveEtaValue");
@@ -2266,6 +2132,219 @@
   }
 
   setInterval(sync, 1500);
+})();
+</script>
+
+
+<script id="continue-trip-gps-distance-and-speed">
+(function(){
+  const routeName = {{ trip["route"] | tojson | safe }};
+  const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
+  const runtimeGpsKm = {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }};
+
+  const speedEl = document.getElementById("liveSpeedText");
+  const distanceEls = () => Array.from(document.querySelectorAll(".stop-distance-value[data-stop-name]"));
+
+  let lastPos = null;
+  let cachedStops = [];
+
+  function haversineKm(a, b){
+    const R = 6371;
+    const toRad = d => d * Math.PI / 180;
+
+    const lat1 = toRad(a.lat);
+    const lat2 = toRad(b.lat);
+    const dLat = toRad(b.lat - a.lat);
+    const dLng = toRad(b.lng - a.lng);
+
+    const h =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function parseKmAny(value){
+    const raw = String(value ?? "").trim();
+    if(!raw) return NaN;
+
+    const cleaned = raw
+      .replace(/km/gi, "")
+      .replace(/m/gi, "")
+      .trim()
+      .replace(",", ".");
+
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : NaN;
+  }
+
+  function formatKm(km){
+    if(!Number.isFinite(km)) return "—";
+    if(km < 0) return "—";
+    if(km < 1) return `${Math.round(km * 1000)} m`;
+    return `${km.toFixed(2)} km`;
+  }
+
+  function setSpeed(kmh){
+    if(!speedEl) return;
+    if(!Number.isFinite(kmh) || kmh < 1){
+      speedEl.textContent = "0 km/sa";
+      return;
+    }
+    speedEl.textContent = `${Math.round(kmh)} km/sa`;
+  }
+
+  function normalize(s){
+    return String(s || "")
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .toLowerCase();
+  }
+
+  function findStopByName(name){
+    const key = normalize(name);
+    return cachedStops.find(s => normalize(s.name) === key) || null;
+  }
+
+  function seedFromCache(){
+    const liveEl = document.getElementById("liveDistanceValue");
+    if(!liveEl) return;
+
+    let seeded = "";
+    try{
+      seeded =
+        localStorage.getItem("continueTripGpsKm:" + tripKey) ||
+        localStorage.getItem("lastLiveGpsKm:" + tripKey) ||
+        "";
+    }catch(_){}
+
+    if(!seeded && runtimeGpsKm){
+      seeded = runtimeGpsKm;
+    }
+
+    const parsed = parseKmAny(seeded);
+    if(Number.isFinite(parsed)){
+      liveEl.textContent = formatKm(parsed);
+    }
+  }
+
+  async function loadStops(){
+    try{
+      const res = await fetch(`/api/stops?route=${encodeURIComponent(routeName)}&_=${Date.now()}`, {
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+      const j = await res.json();
+
+      let items = [];
+      if(Array.isArray(j)) items = j;
+      else if(Array.isArray(j.items)) items = j.items;
+      else if(Array.isArray(j.stops)) items = j.stops;
+
+      cachedStops = items
+        .map(x => ({
+          name: x.name || x.stop_name || "",
+          lat: Number(x.lat),
+          lng: Number(x.lng),
+        }))
+        .filter(x => x.name && Number.isFinite(x.lat) && Number.isFinite(x.lng));
+    }catch(err){
+      console.log("Durak koordinatları alınamadı:", err);
+      cachedStops = [];
+    }
+  }
+
+  function updateDistances(coords){
+    const current = {
+      lat: Number(coords.latitude),
+      lng: Number(coords.longitude),
+    };
+
+    distanceEls().forEach(el => {
+      const stopName = el.getAttribute("data-stop-name") || "";
+      const stop = findStopByName(stopName);
+      if(!stop) return;
+
+      const km = haversineKm(current, {
+        lat: stop.lat,
+        lng: stop.lng
+      });
+
+      el.textContent = formatKm(km);
+
+      if(el.id === "liveDistanceValue"){
+        try{
+          localStorage.setItem("continueTripGpsKm:" + tripKey, String(km));
+          localStorage.setItem("lastLiveGpsKm:" + tripKey, String(km));
+        }catch(_){}
+      }
+    });
+  }
+
+  function onPosition(pos){
+    const coords = pos.coords || {};
+    let kmh = null;
+
+    if(typeof coords.speed === "number" && Number.isFinite(coords.speed) && coords.speed >= 0){
+      kmh = coords.speed * 3.6;
+    }
+
+    if(kmh === null && lastPos){
+      const dt = (pos.timestamp - lastPos.timestamp) / 1000;
+      if(dt > 0){
+        const km = haversineKm(
+          { lat:lastPos.coords.latitude, lng:lastPos.coords.longitude },
+          { lat:coords.latitude, lng:coords.longitude }
+        );
+        kmh = (km / dt) * 3600;
+      }
+    }
+
+    lastPos = {
+      coords: {
+        latitude: coords.latitude,
+        longitude: coords.longitude
+      },
+      timestamp: pos.timestamp || Date.now()
+    };
+
+    if(kmh !== null){
+      setSpeed(kmh);
+    }
+
+    updateDistances(coords);
+  }
+
+  function onError(){
+    if(speedEl) speedEl.textContent = "— km/sa";
+  }
+
+  async function boot(){
+    seedFromCache();
+    await loadStops();
+
+    if(!("geolocation" in navigator)){
+      if(speedEl) speedEl.textContent = "GPS yok";
+      return;
+    }
+
+    navigator.geolocation.watchPosition(
+      onPosition,
+      onError,
+      {
+        enableHighAccuracy: true,
+        maximumAge: 1200,
+        timeout: 10000
+      }
+    );
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
 })();
 </script>
 

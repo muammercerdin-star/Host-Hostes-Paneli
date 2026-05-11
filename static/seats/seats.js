@@ -2501,7 +2501,7 @@ async function persistLiveRuntimeStateToServer(){
       if(liveStop && typeof stopDistanceKmByName === "function"){
         const km = stopDistanceKmByName(liveStop);
         if(Number.isFinite(km)){
-          gpsKm = km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(2)} km`;
+          gpsKm = String(km);
         }
       }
     }catch(_){}
