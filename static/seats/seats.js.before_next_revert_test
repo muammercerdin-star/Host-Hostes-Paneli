@@ -79,7 +79,31 @@ const BAG_TRIP = TRIP_KEY;
 
   function setValue(sel, val){
     const el = $(sel);
-    if(el) el.value = val;
+    if(!el) return;
+
+    el.value = val;
+
+    // Özel select/picker kullanılıyorsa görünen buton yazısını da güncelle.
+    try{
+      const opt = el.options ? el.options[el.selectedIndex] : null;
+      const text = opt ? opt.textContent.trim() : (el.value || "—");
+      const trigger = el.nextElementSibling;
+
+      if(trigger && trigger.classList.contains("lsp-trigger")){
+        const t = trigger.querySelector(".lsp-text");
+        if(t) t.textContent = text || "—";
+      }
+
+      if(trigger && trigger.classList.contains("ios-select-trigger")){
+        const t = trigger.querySelector(".ios-select-text");
+        if(t) t.textContent = text || "—";
+      }
+
+      if(trigger && trigger.classList.contains("ios-wheel-trigger")){
+        const t = trigger.querySelector(".ios-wheel-text");
+        if(t) t.textContent = text || "—";
+      }
+    }catch(_){}
   }
 
   function show(el){
@@ -111,6 +135,12 @@ const BAG_TRIP = TRIP_KEY;
   let currentCoords = null;
   let lastApproachVoiceStop = "";
   let lastRouteStripCenteredStop = "";
+
+  // Biniş Yeri mantığı:
+  // live  → canlı durak takip edilir
+  // manual → kullanıcının tıkladığı durak kullanılır
+  let boardingStopMode = "live";
+  let boardingStopManual = "";
 
   const multiSelected = new Set();
   const ALERT_COOLDOWN_MS = 3 * 60 * 1000;
@@ -419,6 +449,36 @@ async function loadRouteScheduleFromApi(){
     return ($("#alertStop")?.value || "").trim();
   }
 
+  function setBoardingStopLiveMode(){
+    boardingStopMode = "live";
+    boardingStopManual = "";
+  }
+
+  function setBoardingStopManualMode(stopName){
+    const canonical = findCanonicalStopName(stopName) || String(stopName || "").trim();
+    if(!canonical) return;
+
+    boardingStopMode = "manual";
+    boardingStopManual = canonical;
+  }
+
+  function getBoardingStopDefault(seatNo){
+    const key = String(seatNo || "");
+
+    // Kayıtlı koltukta eski biniş yeri korunur.
+    if(assigned[key] && boardsMap[key]){
+      return boardsMap[key];
+    }
+
+    // Kullanıcı müdahale etmediyse canlı durak takip edilir.
+    if(boardingStopMode === "live"){
+      return getDisplayLiveStop() || getSelectedStopName() || "";
+    }
+
+    // Kullanıcı durak kartına tıkladıysa o durak kullanılır.
+    return boardingStopManual || getSelectedStopName() || getDisplayLiveStop() || "";
+  }
+
   function isTimedStop(name){
     return getRouteSchedule().some(x => norm(x.stop) === norm(name));
   }
@@ -725,6 +785,10 @@ function setVoiceBadge(text){
 
     setText("#pillTotal", String(filled + standingCount));
     setText("#pillEmpty", String(empty));
+
+    setText("#voiceSeatFilled", String(filled));
+    setText("#voiceSeatEmpty", String(empty));
+
     setText("#pillStanding", String(standingCount));
     setText("#pillCash", fmtTL(standingRevenue));
     setText("#pillService", String(totalServiceCount()));
@@ -877,7 +941,7 @@ function renderRouteStrip(){
         lat: Number(stopObj.lat),
         lng: Number(stopObj.lng)
       });
-      kmText = `${km.toFixed(1)} km`;
+      kmText = `${km.toFixed(2)} km`;
     }
 
     let metaLine1 = "";
@@ -908,7 +972,7 @@ function renderRouteStrip(){
     const planText = plan || "—";
     const etaText = etaItem && plan ? fmtHour(etaItem.etaDate) : "";
     const delayText = etaItem && plan ? etaItem.badgeText : "";
-    const kmValue = kmText || (etaItem && Number.isFinite(etaItem.km) ? `${etaItem.km.toFixed(1)} km` : "—");
+    const kmValue = kmText || (etaItem && Number.isFinite(etaItem.km) ? `${etaItem.km.toFixed(2)} km` : "—");
 
     const timeText = etaText ? `${planText} → ${etaText}` : planText;
     const statusText = delayText ? `${kmValue} · ${delayText}` : kmValue;
@@ -929,13 +993,8 @@ function renderRouteStrip(){
    `;
 
 item.addEventListener("click", () => {
+  setBoardingStopManualMode(stop);
   setSelectedStop(stop, { silent:false, voiceReply:true });
-
-  // APK/WebView için ek garanti: durak kartı tıklamasında doğrudan TTS tetikle
-  try{
-    const msg = stopHumanVoiceSummary(stop);
-    if(typeof speakOnce === "function") speakOnce(msg);
-  }catch(_){}
 });
 
 wrap.appendChild(item);
@@ -1133,8 +1192,12 @@ if(routeFocusItem && live){
     if(seatEl) seatEl.classList.add("selected");
 
     setText("#seatTitle", "Koltuk " + seatNo);
-    setValue("#pickup", boardsMap[String(seatNo)] || getSelectedStopName() || "");
-    setValue("#dropoff", stopsMap[String(seatNo)] || "");
+
+    const seatKey = String(seatNo);
+    const pickupDefault = getBoardingStopDefault(seatNo);
+
+    setValue("#pickup", pickupDefault && pickupDefault !== "—" ? pickupDefault : "");
+    setValue("#dropoff", stopsMap[seatKey] || "");
 
     const pay = document.querySelector('input[name="pay"][value="nakit"]');
     if(pay) pay.checked = true;
@@ -1819,7 +1882,7 @@ function buildEtaModel(){
     setText("#stEtaTarget", nextTimed?.stop || "—");
 
     const kmInfo = nextTimed && Number.isFinite(nextTimed.km)
-      ? ` · ${nextTimed.km.toFixed(1)} km`
+      ? ` · ${nextTimed.km.toFixed(2)} km`
       : "";
 
     const speedInfo = nextTimed && Number.isFinite(nextTimed.speedKmh)
@@ -1975,7 +2038,6 @@ function initTabs(){
   }
 
 
-
   (function initSpeed(){
     const spVal = $("#spVal");
     const spLimit = $("#spLimit");
@@ -2007,6 +2069,10 @@ function initTabs(){
     }
 
     syncTts();
+
+    window.addEventListener("ttsEnabledChanged", () => {
+      syncTts();
+    });
 
     ttsBtn.addEventListener("click", () => {
       const next = !readTtsEnabled();
@@ -2045,6 +2111,7 @@ function initTabs(){
     }
 
     function speakOnce(text){
+      ttsEnabled = readTtsEnabled();
       if(!ttsEnabled) return;
 
       const msg = String(text || "").trim();
@@ -2345,6 +2412,7 @@ function initTabs(){
         toast("Canlı durak henüz yok");
         return;
       }
+      setBoardingStopLiveMode();
       focusRouteStripStop(live, { select:true, voice:true });
     });
   }
@@ -2359,6 +2427,7 @@ function initTabs(){
         toast("Sıradaki durak bulunamadı");
         return;
       }
+      setBoardingStopManualMode(next);
       focusRouteStripStop(next, { select:true, voice:true });
     });
   }
@@ -2411,10 +2480,59 @@ function initTabs(){
   })();
 
 
+/* =========================================================
+   LIVE RUNTIME STATE BRIDGE
+   Seats ekranındaki canlı veriyi backend'e yazar
+========================================================= */
+async function persistLiveRuntimeStateToServer(){
+  try{
+    const tripId = window.SEATS_BOOT?.tripId;
+    if(!tripId) return;
 
+    const liveStop =
+      (speedState && speedState.liveStop) ||
+      (typeof getDisplayLiveStop === "function" ? getDisplayLiveStop() : "") ||
+      "";
 
+    const speed = Math.round(Number((speedState && speedState.current) || 0)) || 0;
 
+    let gpsKm = "";
+    try{
+      if(liveStop && typeof stopDistanceKmByName === "function"){
+        const km = stopDistanceKmByName(liveStop);
+        if(Number.isFinite(km)){
+          gpsKm = String(km);
+        }
+      }
+    }catch(_){}
 
+    const etaMain = (document.getElementById("delayMain")?.textContent || "").trim();
+    const etaSub  = (document.getElementById("delaySub")?.textContent || "").trim();
 
+    const url =
+      `/api/live-runtime-state?write=1` +
+      `&trip_id=${encodeURIComponent(tripId)}` +
+      `&live_stop=${encodeURIComponent(liveStop)}` +
+      `&speed=${encodeURIComponent(speed)}` +
+      `&gps_km=${encodeURIComponent(gpsKm)}` +
+      `&eta_main=${encodeURIComponent(etaMain)}` +
+      `&eta_sub=${encodeURIComponent(etaSub)}`;
 
+    fetch(url, {
+      method: "GET",
+      credentials: "same-origin",
+      cache: "no-store"
+    }).catch(() => {});
+  }catch(_){}
+}
+
+if(!window.__liveRuntimeBridgeInterval){
+  window.__liveRuntimeBridgeInterval = setInterval(function(){
+    try{ persistLiveRuntimeStateToServer(); }catch(_){}
+  }, 1500);
+
+  window.addEventListener("beforeunload", function(){
+    try{ persistLiveRuntimeStateToServer(); }catch(_){}
+  });
+}
 

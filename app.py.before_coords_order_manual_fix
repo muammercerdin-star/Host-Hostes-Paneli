@@ -4252,44 +4252,23 @@ def _best_route_for_coords(db, requested_route: str) -> str:
 def _coords_items_for_route(db, route_name: str):
     best_route = _best_route_for_coords(db, route_name)
 
-    ordered_stops = get_stops(route_name) or get_stops(best_route) or []
-
     rows = db.execute(
-        "SELECT route, stop, lat, lng FROM route_stop_coords WHERE route=?",
+        "SELECT route, stop, lat, lng FROM route_stop_coords WHERE route=? ORDER BY stop",
         (best_route,),
     ).fetchall()
 
-    def norm_stop(v):
-        v = (v or "").strip().lower()
-        v = re.sub(r"\s+", " ", v)
-        return v
-
-    coord_map = {}
-    for r in rows:
-        key = norm_stop(r["stop"])
-        if key and key not in coord_map:
-            coord_map[key] = {
-                "route": r["route"],
-                "name": r["stop"],
-                "stop": r["stop"],
-                "lat": r["lat"],
-                "lng": r["lng"],
-            }
-
-    items = []
-    for stop_name in ordered_stops:
-        key = norm_stop(stop_name)
-        hit = coord_map.get(key)
-
-        items.append({
-            "route": best_route,
-            "name": stop_name,
-            "stop": stop_name,
-            "lat": (hit["lat"] if hit else None),
-            "lng": (hit["lng"] if hit else None),
-        })
-
+    items = [
+        {
+            "route": r["route"],
+            "name": r["stop"],
+            "stop": r["stop"],
+            "lat": r["lat"],
+            "lng": r["lng"],
+        }
+        for r in rows
+    ]
     return best_route, items
+
 
 @app.route("/api/stops")
 def api_stops():

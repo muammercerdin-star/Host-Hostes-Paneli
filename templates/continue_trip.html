@@ -2114,9 +2114,8 @@
         stopEl.textContent = s.live_stop;
       }
 
-      if(distEl){
-        distEl.textContent = formatGpsKm(s.gps_km);
-      }
+      // live km burada güncellenmesin.
+      // Bu alanı continue-trip-gps-distance-and-speed scripti hesaplıyor.
 
       if(etaEl && s.eta_main){
         etaEl.textContent = s.eta_main;
