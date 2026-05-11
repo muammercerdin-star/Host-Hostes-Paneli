@@ -725,6 +725,10 @@ function setVoiceBadge(text){
 
     setText("#pillTotal", String(filled + standingCount));
     setText("#pillEmpty", String(empty));
+    setText("#voiceSeatFilled", String(filled));
+    setText("#voiceSeatEmpty", String(empty));
+    setText("#driveVoiceFilled", String(filled));
+    setText("#driveVoiceEmpty", String(empty));
     setText("#pillStanding", String(standingCount));
     setText("#pillCash", fmtTL(standingRevenue));
     setText("#pillService", String(totalServiceCount()));
