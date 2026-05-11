@@ -327,6 +327,7 @@
   window.SEATS_BOOT = {
     csrf: {{ csrf_token | tojson | safe }},
     routeName: {{ trip['route'] | tojson | safe }},
+    tripId: {{ trip['id'] | tojson | safe }},
     tripDate: {{ trip['date'] | tojson | safe }},
     departureTime: {{ trip['departure_time'] | tojson | safe }},
     tripKey: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},

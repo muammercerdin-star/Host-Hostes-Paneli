@@ -1,0 +1,196 @@
+/* =========================================================
+   SEATS DASHBOARD TONE FIX
+   Fazla beyazlığı kırar: lacivert cam + premium operasyon modu
+========================================================= */
+
+body{
+  background:
+    radial-gradient(circle at 15% 0%, rgba(37,99,235,.22), transparent 34%),
+    radial-gradient(circle at 100% 30%, rgba(14,165,233,.16), transparent 30%),
+    linear-gradient(180deg,#dfeeff 0%,#d7e7f8 38%,#cddff2 100%) !important;
+}
+
+/* Üst sefer kartı: beyaz yerine lacivert cam */
+.topbar.glass{
+  background:
+    radial-gradient(circle at 12% 20%, rgba(37,99,235,.20), transparent 34%),
+    linear-gradient(135deg,rgba(15,32,52,.96),rgba(8,19,33,.95)) !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+  box-shadow:0 24px 60px rgba(15,23,42,.24) !important;
+  color:#f8fafc !important;
+}
+
+.route-title{
+  color:#f8fafc !important;
+}
+
+.route-sub{
+  color:rgba(226,232,240,.72) !important;
+}
+
+.route-sub b{
+  color:#ffffff !important;
+}
+
+.route-badge{
+  background:rgba(255,255,255,.08) !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+}
+
+/* Üstteki canlı chipler: beyaz değil koyu cam */
+.route-live-row .mini-chip{
+  background:rgba(255,255,255,.08) !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08) !important;
+  color:#f8fafc !important;
+}
+
+.route-live-row .mini-chip span{
+  color:rgba(226,232,240,.64) !important;
+}
+
+.route-live-row .mini-chip b{
+  color:#ffffff !important;
+}
+
+/* Üst ikonlar */
+.icon-btn{
+  background:rgba(255,255,255,.08) !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+  color:#f8fafc !important;
+}
+
+/* İstatistik kartları: daha tok */
+.status-pill{
+  background:
+    radial-gradient(circle at 100% 0%, rgba(37,99,235,.14), transparent 34%),
+    linear-gradient(135deg,rgba(15,32,52,.96),rgba(8,19,33,.95)) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  box-shadow:0 18px 42px rgba(15,23,42,.20) !important;
+}
+
+.status-pill.empty{
+  background:
+    radial-gradient(circle at 100% 0%, rgba(34,197,94,.16), transparent 34%),
+    linear-gradient(135deg,rgba(12,45,38,.96),rgba(8,28,28,.95)) !important;
+}
+
+.status-pill .k{
+  color:rgba(226,232,240,.65) !important;
+}
+
+.status-pill .v{
+  color:#f8fafc !important;
+}
+
+/* Ana koltuk kartı: beyaz yerine koyu operasyon paneli */
+.board-card.glass{
+  background:
+    radial-gradient(circle at 18% 0%, rgba(37,99,235,.16), transparent 34%),
+    linear-gradient(180deg,rgba(15,32,52,.96),rgba(8,19,33,.96)) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  box-shadow:0 22px 60px rgba(15,23,42,.25) !important;
+  color:#f8fafc !important;
+}
+
+/* Board başlıkları */
+.board-kicker{
+  background:rgba(37,99,235,.22) !important;
+  border:1px solid rgba(147,197,253,.18) !important;
+  color:#bfdbfe !important;
+}
+
+.board-title h2{
+  color:#f8fafc !important;
+}
+
+.selected-stop-chip{
+  background:rgba(255,255,255,.07) !important;
+  border:1px solid rgba(244,63,94,.36) !important;
+  color:#f8fafc !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+
+/* Sürüş / rötar satırı koyu cam */
+#driveModeToggle,
+#driveSpeedChip,
+#driveEtaChip,
+.drive-speed-chip,
+.drive-eta-chip{
+  background:rgba(255,255,255,.08) !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+  color:#f8fafc !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+
+#driveModeToggle{
+  background:linear-gradient(135deg,#2563eb,#1d4ed8) !important;
+}
+
+.drive-speed-top,
+.drive-eta-top{
+  color:#f8fafc !important;
+}
+
+.drive-speed-sub,
+.drive-eta-sub{
+  color:rgba(226,232,240,.62) !important;
+}
+
+/* Sesli komut ve legend */
+.voice-state{
+  background:rgba(255,255,255,.08) !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+  color:#f8fafc !important;
+}
+
+.legend .mini-chip{
+  background:rgba(255,255,255,.08) !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+  color:#f8fafc !important;
+}
+
+/* Durak akışı koyu cam */
+.route-flow,
+.stop-flow,
+#routeFlow,
+.route-flow-card{
+  background:rgba(255,255,255,.07) !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+  color:#f8fafc !important;
+}
+
+/* Sağ panel de hafif gri-beyaz kalabilir, ama patlamasın */
+.panel-card.glass{
+  background:rgba(248,251,255,.96) !important;
+  border:1px solid rgba(255,255,255,.90) !important;
+}
+
+/* Mobilde fazla karanlık olmasın diye dış zemin yumuşak kalır */
+@media(max-width:700px){
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(37,99,235,.18), transparent 34%),
+      linear-gradient(180deg,#e8f2ff 0%,#d7e7f8 100%) !important;
+  }
+}
+
+/* =========================================================
+   TOPLAM YOLCU KARTI TON DÜZELTME
+========================================================= */
+
+.status-row .status-pill.total{
+  background:
+    radial-gradient(circle at 100% 0%, rgba(37,99,235,.20), transparent 34%),
+    linear-gradient(135deg,rgba(15,32,52,.96),rgba(8,19,33,.95)) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  box-shadow:0 18px 42px rgba(15,23,42,.20) !important;
+}
+
+.status-row .status-pill.total .k{
+  color:rgba(226,232,240,.68) !important;
+}
+
+.status-row .status-pill.total .v{
+  color:#f8fafc !important;
+}

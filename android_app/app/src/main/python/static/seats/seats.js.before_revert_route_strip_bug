@@ -79,7 +79,31 @@ const BAG_TRIP = TRIP_KEY;
 
   function setValue(sel, val){
     const el = $(sel);
-    if(el) el.value = val;
+    if(!el) return;
+
+    el.value = val;
+
+    // Özel select/picker kullanılıyorsa görünen buton yazısını da güncelle.
+    try{
+      const opt = el.options ? el.options[el.selectedIndex] : null;
+      const text = opt ? opt.textContent.trim() : (el.value || "—");
+      const trigger = el.nextElementSibling;
+
+      if(trigger && trigger.classList.contains("lsp-trigger")){
+        const t = trigger.querySelector(".lsp-text");
+        if(t) t.textContent = text || "—";
+      }
+
+      if(trigger && trigger.classList.contains("ios-select-trigger")){
+        const t = trigger.querySelector(".ios-select-text");
+        if(t) t.textContent = text || "—";
+      }
+
+      if(trigger && trigger.classList.contains("ios-wheel-trigger")){
+        const t = trigger.querySelector(".ios-wheel-text");
+        if(t) t.textContent = text || "—";
+      }
+    }catch(_){}
   }
 
   function show(el){
@@ -109,8 +133,30 @@ const BAG_TRIP = TRIP_KEY;
   let snoozeUntil = 0;
   let lastApproach = { stop:null, seats:[] };
   let currentCoords = null;
+
+  function persistLastCoordsForContinueTrip(){
+    try{
+      if(!currentCoords) return;
+
+      const lat = Number(currentCoords.lat);
+      const lng = Number(currentCoords.lng);
+      if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+      localStorage.setItem("continueTripLastCoords:" + TRIP_KEY, JSON.stringify({
+        lat,
+        lng,
+        ts: Date.now()
+      }));
+    }catch(_){}
+  }
   let lastApproachVoiceStop = "";
   let lastRouteStripCenteredStop = "";
+
+  // Biniş Yeri mantığı:
+  // live  → canlı durak takip edilir
+  // manual → kullanıcının tıkladığı durak kullanılır
+  let boardingStopMode = "live";
+  let boardingStopManual = "";
 
   const multiSelected = new Set();
   const ALERT_COOLDOWN_MS = 3 * 60 * 1000;
@@ -185,6 +231,7 @@ const BAG_TRIP = TRIP_KEY;
   function persistVoiceState(){
     localStorage.setItem("liveStop:" + TRIP_KEY, speedState.liveStop || "");
     localStorage.setItem("passedStops:" + TRIP_KEY, JSON.stringify([...speedState.passedStops]));
+    persistLastCoordsForContinueTrip();
   }
 
   function loadVoiceState(){
@@ -216,10 +263,39 @@ const BAG_TRIP = TRIP_KEY;
     return a.slice(0, Math.max(0, Math.min(count, a.length)));
   }
 
-  function allStopsList(){
-    if(Array.isArray(cachedStops) && cachedStops.length) return cachedStops.map(x => x.name);
-    return Array.isArray(serverStops) ? serverStops.slice() : [];
+  
+function stopNameOf(item){
+  if(item == null) return "";
+  if(typeof item === "string") return item.trim();
+  if(typeof item === "object"){
+    return String(
+      item.name ||
+      item.stop ||
+      item.stop_name ||
+      item.label ||
+      ""
+    ).trim();
   }
+  return String(item).trim();
+}
+
+function allStopsList(){
+  if(Array.isArray(cachedStops) && cachedStops.length){
+    return cachedStops
+      .map(normalizeStopItem)
+      .filter(Boolean)
+      .map(x => x.name);
+  }
+
+  if(Array.isArray(serverStops)){
+    return serverStops
+      .map(normalizeStopItem)
+      .filter(Boolean)
+      .map(x => x.name);
+  }
+
+  return [];
+}
 
   function indexOfStopByName(name){
     const list = allStopsList();
@@ -228,16 +304,49 @@ const BAG_TRIP = TRIP_KEY;
   }
 
   function findStopByName(name){
-    const t = norm(name);
-    const list = Array.isArray(cachedStops)
-      ? cachedStops
-      : (Array.isArray(serverStops) ? serverStops.map(s => ({ name:s, lat:null, lng:null })) : []);
-    return list.find(x => norm(x?.name) === t) || null;
-  }
+  const t = norm(name);
+
+  const rawList = Array.isArray(cachedStops) && cachedStops.length
+    ? cachedStops
+    : (Array.isArray(serverStops) ? serverStops : []);
+
+  const list = rawList
+    .map(normalizeStopItem)
+    .filter(Boolean);
+
+  return list.find(x => norm(x.name) === t) || null;
+}
 
   function findCanonicalStopName(name){
     const s = findStopByName(name);
     return s?.name || "";
+  }
+
+  function normalizeStopItem(item){
+    if(!item) return null;
+
+    if(typeof item === "string"){
+      return { name:item, lat:null, lng:null };
+    }
+
+    if(typeof item === "object"){
+      const name =
+        item.name ||
+        item.stop ||
+        item.stop_name ||
+        item.label ||
+        "";
+
+      if(!name) return null;
+
+      return {
+        name: String(name),
+        lat: item.lat ?? null,
+        lng: item.lng ?? null
+      };
+    }
+
+    return null;
   }
 
   function hasCoord(stop){
@@ -263,7 +372,9 @@ function nearestStopByGps(maxKm = 15){
 
   let best = null;
 
-  for(const s of cachedStops){
+  for (const s of cachedStops) {
+        const stopName = stopNameOf(s);
+        if(!stopName) continue;
     if(!s || !hasCoord(s)) continue;
 
     const km = distKm(currentCoords, {
@@ -273,7 +384,7 @@ function nearestStopByGps(maxKm = 15){
 
     if(!best || km < best.km){
       best = {
-        name: s.name,
+        name: stopName,
         km
       };
     }
@@ -419,6 +530,36 @@ async function loadRouteScheduleFromApi(){
     return ($("#alertStop")?.value || "").trim();
   }
 
+  function setBoardingStopLiveMode(){
+    boardingStopMode = "live";
+    boardingStopManual = "";
+  }
+
+  function setBoardingStopManualMode(stopName){
+    const canonical = findCanonicalStopName(stopName) || String(stopName || "").trim();
+    if(!canonical) return;
+
+    boardingStopMode = "manual";
+    boardingStopManual = canonical;
+  }
+
+  function getBoardingStopDefault(seatNo){
+    const key = String(seatNo || "");
+
+    // Kayıtlı koltukta eski biniş yeri korunur.
+    if(assigned[key] && boardsMap[key]){
+      return boardsMap[key];
+    }
+
+    // Kullanıcı müdahale etmediyse canlı durak takip edilir.
+    if(boardingStopMode === "live"){
+      return getDisplayLiveStop() || getSelectedStopName() || "";
+    }
+
+    // Kullanıcı durak kartına tıkladıysa o durak kullanılır.
+    return boardingStopManual || getSelectedStopName() || getDisplayLiveStop() || "";
+  }
+
   function isTimedStop(name){
     return getRouteSchedule().some(x => norm(x.stop) === norm(name));
   }
@@ -447,7 +588,7 @@ async function loadRouteScheduleFromApi(){
       }
     }catch(_){}
 
-    cachedStops = stops;
+    cachedStops = (Array.isArray(stops) ? stops : []).map(normalizeStopItem).filter(Boolean);
     return stops;
   }
 
@@ -467,11 +608,13 @@ async function loadRouteScheduleFromApi(){
       o0.textContent = "—";
       el.appendChild(o0);
 
-      for(const s of cachedStops){
+      for (const s of cachedStops) {
+        const stopName = stopNameOf(s);
+        if(!stopName) continue;
         const o = document.createElement("option");
-        o.value = s.name;
-        o.dataset.label = s.name;
-        o.textContent = s.name + (hasCoord(s) ? " •" : "");
+        o.value = stopName;
+        o.dataset.label = stopName;
+        o.textContent = stopName + (hasCoord(s) ? " •" : "");
         el.appendChild(o);
       }
 
@@ -725,6 +868,10 @@ function setVoiceBadge(text){
 
     setText("#pillTotal", String(filled + standingCount));
     setText("#pillEmpty", String(empty));
+
+    setText("#voiceSeatFilled", String(filled));
+    setText("#voiceSeatEmpty", String(empty));
+
     setText("#pillStanding", String(standingCount));
     setText("#pillCash", fmtTL(standingRevenue));
     setText("#pillService", String(totalServiceCount()));
@@ -877,7 +1024,7 @@ function renderRouteStrip(){
         lat: Number(stopObj.lat),
         lng: Number(stopObj.lng)
       });
-      kmText = `${km.toFixed(1)} km`;
+      kmText = `${km.toFixed(2)} km`;
     }
 
     let metaLine1 = "";
@@ -908,7 +1055,7 @@ function renderRouteStrip(){
     const planText = plan || "—";
     const etaText = etaItem && plan ? fmtHour(etaItem.etaDate) : "";
     const delayText = etaItem && plan ? etaItem.badgeText : "";
-    const kmValue = kmText || (etaItem && Number.isFinite(etaItem.km) ? `${etaItem.km.toFixed(1)} km` : "—");
+    const kmValue = kmText || (etaItem && Number.isFinite(etaItem.km) ? `${etaItem.km.toFixed(2)} km` : "—");
 
     const timeText = etaText ? `${planText} → ${etaText}` : planText;
     const statusText = delayText ? `${kmValue} · ${delayText}` : kmValue;
@@ -929,13 +1076,8 @@ function renderRouteStrip(){
    `;
 
 item.addEventListener("click", () => {
+  setBoardingStopManualMode(stop);
   setSelectedStop(stop, { silent:false, voiceReply:true });
-
-  // APK/WebView için ek garanti: durak kartı tıklamasında doğrudan TTS tetikle
-  try{
-    const msg = stopHumanVoiceSummary(stop);
-    if(typeof speakOnce === "function") speakOnce(msg);
-  }catch(_){}
 });
 
 wrap.appendChild(item);
@@ -1074,6 +1216,7 @@ if(routeFocusItem && live){
     speedState.liveStop = canonical;
     markPassedStopsUntil(canonical);
     persistVoiceState();
+    persistLastCoordsForContinueTrip();
     updateCompactHeader();
     renderTimeline();
     renderAI();
@@ -1133,8 +1276,12 @@ if(routeFocusItem && live){
     if(seatEl) seatEl.classList.add("selected");
 
     setText("#seatTitle", "Koltuk " + seatNo);
-    setValue("#pickup", boardsMap[String(seatNo)] || getSelectedStopName() || "");
-    setValue("#dropoff", stopsMap[String(seatNo)] || "");
+
+    const seatKey = String(seatNo);
+    const pickupDefault = getBoardingStopDefault(seatNo);
+
+    setValue("#pickup", pickupDefault && pickupDefault !== "—" ? pickupDefault : "");
+    setValue("#dropoff", stopsMap[seatKey] || "");
 
     const pay = document.querySelector('input[name="pay"][value="nakit"]');
     if(pay) pay.checked = true;
@@ -1301,7 +1448,7 @@ if(routeFocusItem && live){
     populateStops().then(() => {
       const selected = getSelectedStopName() || "";
       const live = getDisplayLiveStop();
-      const fromDefault = live || selected || serverStops?.[0] || "";
+      const fromDefault = live || selected || (allStopsList()[0] || "") || "";
       if(selected) setValue("#bulkTo", selected);
       if(fromDefault) setValue("#bulkFrom", fromDefault);
       if($("#multiPick")) $("#multiPick").checked = !!multiMode;
@@ -1819,7 +1966,7 @@ function buildEtaModel(){
     setText("#stEtaTarget", nextTimed?.stop || "—");
 
     const kmInfo = nextTimed && Number.isFinite(nextTimed.km)
-      ? ` · ${nextTimed.km.toFixed(1)} km`
+      ? ` · ${nextTimed.km.toFixed(2)} km`
       : "";
 
     const speedInfo = nextTimed && Number.isFinite(nextTimed.speedKmh)
@@ -1948,10 +2095,11 @@ function buildEtaModel(){
     if(!coords || !cachedStops?.length) return;
 
     let best = null;
-    for(const stop of cachedStops){
+    for (const stop of cachedStops) {
+    const stopName = stopNameOf(stop) || (stop && stop.name) || "";
       if(!hasCoord(stop)) continue;
       const km = distKm(coords, { lat:Number(stop.lat), lng:Number(stop.lng) });
-      if(!best || km < best.km) best = { stop: stop.name, km };
+      if(!best || km < best.km) best = { stop: stopName, km };
     }
 
     if(best && best.km <= 3.5){
@@ -1973,7 +2121,6 @@ function initTabs(){
     const btn = document.querySelector(`.tab-btn[data-tab="${name}"]`);
     if(btn) btn.click();
   }
-
 
 
   (function initSpeed(){
@@ -2007,6 +2154,10 @@ function initTabs(){
     }
 
     syncTts();
+
+    window.addEventListener("ttsEnabledChanged", () => {
+      syncTts();
+    });
 
     ttsBtn.addEventListener("click", () => {
       const next = !readTtsEnabled();
@@ -2045,6 +2196,7 @@ function initTabs(){
     }
 
     function speakOnce(text){
+      ttsEnabled = readTtsEnabled();
       if(!ttsEnabled) return;
 
       const msg = String(text || "").trim();
@@ -2345,6 +2497,7 @@ function initTabs(){
         toast("Canlı durak henüz yok");
         return;
       }
+      setBoardingStopLiveMode();
       focusRouteStripStop(live, { select:true, voice:true });
     });
   }
@@ -2359,6 +2512,7 @@ function initTabs(){
         toast("Sıradaki durak bulunamadı");
         return;
       }
+      setBoardingStopManualMode(next);
       focusRouteStripStop(next, { select:true, voice:true });
     });
   }
@@ -2399,7 +2553,7 @@ function initTabs(){
 
       const next = computeNextStopName(speedState.liveStop || "", "nextWithSeats");
       if(next) setSelectedStop(next, { silent:true, voiceReply:false });
-      else if(serverStops?.length) setSelectedStop(serverStops[0], { silent:true, voiceReply:false });
+      else if(allStopsList().length) setSelectedStop(allStopsList()[0], { silent:true, voiceReply:false });
 
       renderTimeline();
       renderRouteStrip();
@@ -2411,10 +2565,59 @@ function initTabs(){
   })();
 
 
+/* =========================================================
+   LIVE RUNTIME STATE BRIDGE
+   Seats ekranındaki canlı veriyi backend'e yazar
+========================================================= */
+async function persistLiveRuntimeStateToServer(){
+  try{
+    const tripId = window.SEATS_BOOT?.tripId;
+    if(!tripId) return;
 
+    const liveStop =
+      (speedState && speedState.liveStop) ||
+      (typeof getDisplayLiveStop === "function" ? getDisplayLiveStop() : "") ||
+      "";
 
+    const speed = Math.round(Number((speedState && speedState.current) || 0)) || 0;
 
+    let gpsKm = "";
+    try{
+      if(liveStop && typeof stopDistanceKmByName === "function"){
+        const km = stopDistanceKmByName(liveStop);
+        if(Number.isFinite(km)){
+          gpsKm = String(km);
+        }
+      }
+    }catch(_){}
 
+    const etaMain = (document.getElementById("delayMain")?.textContent || "").trim();
+    const etaSub  = (document.getElementById("delaySub")?.textContent || "").trim();
 
+    const url =
+      `/api/live-runtime-state?write=1` +
+      `&trip_id=${encodeURIComponent(tripId)}` +
+      `&live_stop=${encodeURIComponent(liveStop)}` +
+      `&speed=${encodeURIComponent(speed)}` +
+      `&gps_km=${encodeURIComponent(gpsKm)}` +
+      `&eta_main=${encodeURIComponent(etaMain)}` +
+      `&eta_sub=${encodeURIComponent(etaSub)}`;
 
+    fetch(url, {
+      method: "GET",
+      credentials: "same-origin",
+      cache: "no-store"
+    }).catch(() => {});
+  }catch(_){}
+}
+
+if(!window.__liveRuntimeBridgeInterval){
+  window.__liveRuntimeBridgeInterval = setInterval(function(){
+    try{ persistLiveRuntimeStateToServer(); }catch(_){}
+  }, 1500);
+
+  window.addEventListener("beforeunload", function(){
+    try{ persistLiveRuntimeStateToServer(); }catch(_){}
+  });
+}
 
