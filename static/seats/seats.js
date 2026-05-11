@@ -215,6 +215,7 @@ const BAG_TRIP = TRIP_KEY;
   function persistVoiceState(){
     localStorage.setItem("liveStop:" + TRIP_KEY, speedState.liveStop || "");
     localStorage.setItem("passedStops:" + TRIP_KEY, JSON.stringify([...speedState.passedStops]));
+    persistLastCoordsForContinueTrip();
   }
 
   function loadVoiceState(){
@@ -1133,6 +1134,7 @@ if(routeFocusItem && live){
     speedState.liveStop = canonical;
     markPassedStopsUntil(canonical);
     persistVoiceState();
+    persistLastCoordsForContinueTrip();
     updateCompactHeader();
     renderTimeline();
     renderAI();

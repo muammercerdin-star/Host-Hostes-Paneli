@@ -2207,6 +2207,20 @@
     return cachedStops.find(s => normalize(s.name) === key) || null;
   }
 
+  function readCachedCoords(){
+    try{
+      const raw = localStorage.getItem("continueTripLastCoords:" + tripKey) || "";
+      if(!raw) return null;
+      const j = JSON.parse(raw);
+      const lat = Number(j.lat);
+      const lng = Number(j.lng);
+      if(!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      return { lat, lng, ts: Number(j.ts || 0) };
+    }catch(_){
+      return null;
+    }
+  }
+
   function seedFromCache(){
     const liveEl = document.getElementById("liveDistanceValue");
     if(!liveEl) return;
@@ -2255,18 +2269,15 @@
     }
   }
 
-  function updateDistances(coords){
-    const current = {
-      lat: Number(coords.latitude),
-      lng: Number(coords.longitude),
-    };
+  function updateDistancesFromPoint(point){
+    if(!point) return;
 
     distanceEls().forEach(el => {
       const stopName = el.getAttribute("data-stop-name") || "";
       const stop = findStopByName(stopName);
       if(!stop) return;
 
-      const km = haversineKm(current, {
+      const km = haversineKm(point, {
         lat: stop.lat,
         lng: stop.lng
       });
@@ -2279,6 +2290,13 @@
           localStorage.setItem("lastLiveGpsKm:" + tripKey, String(km));
         }catch(_){}
       }
+    });
+  }
+
+  function updateDistances(coords){
+    updateDistancesFromPoint({
+      lat: Number(coords.latitude),
+      lng: Number(coords.longitude)
     });
   }
 
@@ -2309,6 +2327,14 @@
       timestamp: pos.timestamp || Date.now()
     };
 
+    try{
+      localStorage.setItem("continueTripLastCoords:" + tripKey, JSON.stringify({
+        lat: Number(coords.latitude),
+        lng: Number(coords.longitude),
+        ts: Date.now()
+      }));
+    }catch(_){}
+
     if(kmh !== null){
       setSpeed(kmh);
     }
@@ -2323,6 +2349,12 @@
   async function boot(){
     seedFromCache();
     await loadStops();
+
+    // Sayfa açılır açılmaz seats ekranından gelen son koordinatla TÜM kartları doldur
+    const cachedPoint = readCachedCoords();
+    if(cachedPoint){
+      updateDistancesFromPoint(cachedPoint);
+    }
 
     if(!("geolocation" in navigator)){
       if(speedEl) speedEl.textContent = "GPS yok";
