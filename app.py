@@ -1448,29 +1448,28 @@ def continue_trip():
         pass
 
     # Canlı / seçili durak seçimi:
-    # Öncelik: query param stop -> en çok iniş olan durak -> ilk durak
+    # Öncelik:
+    # 1) URL parametresi ?stop=...
+    # 2) Route sırasına göre ilk işlem olan durak
+    # 3) İlk durak
     requested_stop = (request.args.get("stop") or "").strip()
     current_stop = ""
 
     if requested_stop and requested_stop in stops:
         current_stop = requested_stop
     else:
-        try:
-            row = db.execute(
-                """
-                SELECT to_stop, COUNT(*) AS c
-                FROM seats
-                WHERE trip_id=? AND COALESCE(to_stop,'') <> ''
-                GROUP BY to_stop
-                ORDER BY c DESC
-                LIMIT 1
-                """,
-                (tid,),
-            ).fetchone()
-            if row and (row["to_stop"] or "").strip() in stops:
-                current_stop = (row["to_stop"] or "").strip()
-        except Exception:
-            current_stop = ""
+        # Rotadaki sıraya göre, iniş/biniş/bagaj/servis işlemi olan ilk durağı seç.
+        operation_keys = set()
+        operation_keys.update(k for k, v in stop_off_counts.items() if v)
+        operation_keys.update(k for k, v in stop_board_counts.items() if v)
+        operation_keys.update(k for k, v in stop_walkon_counts.items() if v)
+        operation_keys.update(k for k, v in stop_consignment_counts.items() if v)
+        operation_keys.update(k for k, v in stop_service_counts.items() if v)
+
+        for stop_name in stops:
+            if norm_stop(stop_name) in operation_keys:
+                current_stop = stop_name
+                break
 
     if not current_stop:
         current_stop = first_stop
