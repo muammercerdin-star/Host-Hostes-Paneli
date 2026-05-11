@@ -263,10 +263,39 @@ const BAG_TRIP = TRIP_KEY;
     return a.slice(0, Math.max(0, Math.min(count, a.length)));
   }
 
-  function allStopsList(){
-    if(Array.isArray(cachedStops) && cachedStops.length) return cachedStops.map(x => x.name);
-    return Array.isArray(serverStops) ? serverStops.slice() : [];
+  
+function stopNameOf(item){
+  if(item == null) return "";
+  if(typeof item === "string") return item.trim();
+  if(typeof item === "object"){
+    return String(
+      item.name ||
+      item.stop ||
+      item.stop_name ||
+      item.label ||
+      ""
+    ).trim();
   }
+  return String(item).trim();
+}
+
+function allStopsList(){
+  if(Array.isArray(cachedStops) && cachedStops.length){
+    return cachedStops
+      .map(normalizeStopItem)
+      .filter(Boolean)
+      .map(x => x.name);
+  }
+
+  if(Array.isArray(serverStops)){
+    return serverStops
+      .map(normalizeStopItem)
+      .filter(Boolean)
+      .map(x => x.name);
+  }
+
+  return [];
+}
 
   function indexOfStopByName(name){
     const list = allStopsList();
@@ -275,16 +304,49 @@ const BAG_TRIP = TRIP_KEY;
   }
 
   function findStopByName(name){
-    const t = norm(name);
-    const list = Array.isArray(cachedStops)
-      ? cachedStops
-      : (Array.isArray(serverStops) ? serverStops.map(s => ({ name:s, lat:null, lng:null })) : []);
-    return list.find(x => norm(x?.name) === t) || null;
-  }
+  const t = norm(name);
+
+  const rawList = Array.isArray(cachedStops) && cachedStops.length
+    ? cachedStops
+    : (Array.isArray(serverStops) ? serverStops : []);
+
+  const list = rawList
+    .map(normalizeStopItem)
+    .filter(Boolean);
+
+  return list.find(x => norm(x.name) === t) || null;
+}
 
   function findCanonicalStopName(name){
     const s = findStopByName(name);
     return s?.name || "";
+  }
+
+  function normalizeStopItem(item){
+    if(!item) return null;
+
+    if(typeof item === "string"){
+      return { name:item, lat:null, lng:null };
+    }
+
+    if(typeof item === "object"){
+      const name =
+        item.name ||
+        item.stop ||
+        item.stop_name ||
+        item.label ||
+        "";
+
+      if(!name) return null;
+
+      return {
+        name: String(name),
+        lat: item.lat ?? null,
+        lng: item.lng ?? null
+      };
+    }
+
+    return null;
   }
 
   function hasCoord(stop){
@@ -310,7 +372,9 @@ function nearestStopByGps(maxKm = 15){
 
   let best = null;
 
-  for(const s of cachedStops){
+  for (const s of cachedStops) {
+        const stopName = stopNameOf(s);
+        if(!stopName) continue;
     if(!s || !hasCoord(s)) continue;
 
     const km = distKm(currentCoords, {
@@ -524,7 +588,7 @@ async function loadRouteScheduleFromApi(){
       }
     }catch(_){}
 
-    cachedStops = stops;
+    cachedStops = (Array.isArray(stops) ? stops : []).map(normalizeStopItem).filter(Boolean);
     return stops;
   }
 
@@ -544,7 +608,9 @@ async function loadRouteScheduleFromApi(){
       o0.textContent = "—";
       el.appendChild(o0);
 
-      for(const s of cachedStops){
+      for (const s of cachedStops) {
+        const stopName = stopNameOf(s);
+        if(!stopName) continue;
         const o = document.createElement("option");
         o.value = s.name;
         o.dataset.label = s.name;
@@ -1382,7 +1448,7 @@ if(routeFocusItem && live){
     populateStops().then(() => {
       const selected = getSelectedStopName() || "";
       const live = getDisplayLiveStop();
-      const fromDefault = live || selected || serverStops?.[0] || "";
+      const fromDefault = live || selected || (allStopsList()[0] || "") || "";
       if(selected) setValue("#bulkTo", selected);
       if(fromDefault) setValue("#bulkFrom", fromDefault);
       if($("#multiPick")) $("#multiPick").checked = !!multiMode;
@@ -2029,7 +2095,8 @@ function buildEtaModel(){
     if(!coords || !cachedStops?.length) return;
 
     let best = null;
-    for(const stop of cachedStops){
+    for (const stop of cachedStops) {
+    const stopName = stopNameOf(stop) || (stop && stop.name) || "";
       if(!hasCoord(stop)) continue;
       const km = distKm(coords, { lat:Number(stop.lat), lng:Number(stop.lng) });
       if(!best || km < best.km) best = { stop: stop.name, km };
