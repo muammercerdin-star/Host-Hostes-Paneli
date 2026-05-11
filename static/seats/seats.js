@@ -2411,10 +2411,59 @@ function initTabs(){
   })();
 
 
+/* =========================================================
+   LIVE RUNTIME STATE BRIDGE
+   Seats ekranındaki canlı veriyi backend'e yazar
+========================================================= */
+async function persistLiveRuntimeStateToServer(){
+  try{
+    const tripId = window.SEATS_BOOT?.tripId;
+    if(!tripId) return;
 
+    const liveStop =
+      (speedState && speedState.liveStop) ||
+      (typeof getDisplayLiveStop === "function" ? getDisplayLiveStop() : "") ||
+      "";
 
+    const speed = Math.round(Number((speedState && speedState.current) || 0)) || 0;
 
+    let gpsKm = "";
+    try{
+      if(liveStop && typeof stopDistanceKmByName === "function"){
+        const km = stopDistanceKmByName(liveStop);
+        if(Number.isFinite(km)){
+          gpsKm = String(km);
+        }
+      }
+    }catch(_){}
 
+    const etaMain = (document.getElementById("delayMain")?.textContent || "").trim();
+    const etaSub  = (document.getElementById("delaySub")?.textContent || "").trim();
 
+    const url =
+      `/api/live-runtime-state?write=1` +
+      `&trip_id=${encodeURIComponent(tripId)}` +
+      `&live_stop=${encodeURIComponent(liveStop)}` +
+      `&speed=${encodeURIComponent(speed)}` +
+      `&gps_km=${encodeURIComponent(gpsKm)}` +
+      `&eta_main=${encodeURIComponent(etaMain)}` +
+      `&eta_sub=${encodeURIComponent(etaSub)}`;
 
+    fetch(url, {
+      method: "GET",
+      credentials: "same-origin",
+      cache: "no-store"
+    }).catch(() => {});
+  }catch(_){}
+}
+
+if(!window.__liveRuntimeBridgeInterval){
+  window.__liveRuntimeBridgeInterval = setInterval(function(){
+    try{ persistLiveRuntimeStateToServer(); }catch(_){}
+  }, 1500);
+
+  window.addEventListener("beforeunload", function(){
+    try{ persistLiveRuntimeStateToServer(); }catch(_){}
+  });
+}
 
