@@ -1358,27 +1358,207 @@ def continue_trip():
     first_stop = stops[0] if stops else ""
     last_stop = stops[-1] if stops else ""
 
-    # Yolcuların en çok ineceği sıradaki durak gibi basit özet
-    next_stop = ""
+    def norm_stop(v):
+        return (v or "").strip().lower()
+
+    # Durak bazlı koltuk sayıları
+    stop_board_counts = {}
+    stop_off_counts = {}
+    stop_service_counts = {}
+
     try:
-        row = db.execute(
+        rows = db.execute(
             """
-            SELECT to_stop, COUNT(*) AS c
+            SELECT COALESCE(from_stop,'') AS from_stop,
+                   COALESCE(to_stop,'') AS to_stop,
+                   COALESCE(service,0) AS service
             FROM seats
-            WHERE trip_id=? AND COALESCE(to_stop,'') <> ''
-            GROUP BY to_stop
-            ORDER BY c DESC
-            LIMIT 1
+            WHERE trip_id=?
             """,
             (tid,),
-        ).fetchone()
-        if row:
-            next_stop = row["to_stop"]
-    except Exception:
-        next_stop = ""
+        ).fetchall()
 
-    if not next_stop:
-        next_stop = first_stop
+        for r in rows:
+            fs = (r["from_stop"] or "").strip()
+            ts = (r["to_stop"] or "").strip()
+
+            if fs:
+                stop_board_counts[norm_stop(fs)] = stop_board_counts.get(norm_stop(fs), 0) + 1
+
+            if ts:
+                stop_off_counts[norm_stop(ts)] = stop_off_counts.get(norm_stop(ts), 0) + 1
+
+            if ts and int(r["service"] or 0):
+                stop_service_counts[norm_stop(ts)] = stop_service_counts.get(norm_stop(ts), 0) + 1
+
+    except Exception:
+        pass
+
+    # Durak bazlı ayakta yolcu sayısı
+    stop_walkon_counts = {}
+    try:
+        rows = db.execute(
+            """
+            SELECT COALESCE(to_stop,'') AS to_stop,
+                   COALESCE(SUM(COALESCE(pax,0)),0) AS c
+            FROM walk_on_sales
+            WHERE trip_id=?
+            GROUP BY to_stop
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            ts = (r["to_stop"] or "").strip()
+            if ts:
+                stop_walkon_counts[norm_stop(ts)] = int(r["c"] or 0)
+    except Exception:
+        pass
+
+    # Durak bazlı emanet/bagaj sayısı - tablo/kolon farklarına dayanıklı
+    stop_consignment_counts = {}
+    try:
+        cols = [
+            x["name"]
+            for x in db.execute("PRAGMA table_info(consignments)").fetchall()
+        ]
+
+        stop_col = None
+        for candidate in ["to_stop", "delivery_stop", "to_stop_name", "stop_name", "target_stop"]:
+            if candidate in cols:
+                stop_col = candidate
+                break
+
+        if stop_col:
+            rows = db.execute(
+                f"""
+                SELECT COALESCE({stop_col}, '') AS stop_name,
+                       COUNT(*) AS c
+                FROM consignments
+                WHERE 1=1
+                GROUP BY {stop_col}
+                """
+            ).fetchall()
+
+            for r in rows:
+                sname = (r["stop_name"] or "").strip()
+                if sname:
+                    stop_consignment_counts[norm_stop(sname)] = int(r["c"] or 0)
+    except Exception:
+        pass
+
+    # Canlı / seçili durak seçimi:
+    # Öncelik: query param stop -> en çok iniş olan durak -> ilk durak
+    requested_stop = (request.args.get("stop") or "").strip()
+    current_stop = ""
+
+    if requested_stop and requested_stop in stops:
+        current_stop = requested_stop
+    else:
+        try:
+            row = db.execute(
+                """
+                SELECT to_stop, COUNT(*) AS c
+                FROM seats
+                WHERE trip_id=? AND COALESCE(to_stop,'') <> ''
+                GROUP BY to_stop
+                ORDER BY c DESC
+                LIMIT 1
+                """,
+                (tid,),
+            ).fetchone()
+            if row and (row["to_stop"] or "").strip() in stops:
+                current_stop = (row["to_stop"] or "").strip()
+        except Exception:
+            current_stop = ""
+
+    if not current_stop:
+        current_stop = first_stop
+
+    current_index = stops.index(current_stop) if current_stop in stops else 0
+
+    def make_stop_payload(stop_name, idx):
+        key = norm_stop(stop_name)
+
+        off_count = int(stop_off_counts.get(key, 0) or 0)
+        board_count = int(stop_board_counts.get(key, 0) or 0)
+        walkon_count = int(stop_walkon_counts.get(key, 0) or 0)
+        bagaj_count = int(stop_consignment_counts.get(key, 0) or 0)
+        service_count = int(stop_service_counts.get(key, 0) or 0)
+
+        if idx == current_index:
+            kind = "live"
+            status = "Canlı"
+            eta = "Şimdi"
+        elif idx == current_index + 1:
+            kind = "next"
+            status = "Sıradaki"
+            eta = "Sırada"
+        elif idx > current_index:
+            kind = "upcoming"
+            status = "Bekliyor"
+            eta = f"{idx - current_index} durak sonra"
+        else:
+            kind = "passed"
+            status = "Geçildi"
+            eta = "Geçildi"
+
+        # mesafe gerçek canlı konum yoksa sıra bazlı gösterim
+        if idx == current_index:
+            distance = "0 km"
+        elif idx > current_index:
+            distance = f"{idx - current_index} durak"
+        else:
+            distance = "Geçildi"
+
+        return {
+            "name": stop_name,
+            "kind": kind,
+            "status": status,
+            "eta": eta,
+            "distance": distance,
+            "off_count": off_count,
+            "board_count": board_count + walkon_count,
+            "bagaj_count": bagaj_count,
+            "service_count": service_count,
+            "bagaj_label": "var" if bagaj_count else "yok",
+        }
+
+    # Ekranda canlı durak + sonraki 3 durak göster
+    show_start = max(current_index, 0)
+    selected_stops = stops[show_start:show_start + 4] if stops else []
+    if current_stop and current_stop not in selected_stops:
+        selected_stops.insert(0, current_stop)
+
+    live_stops = [
+        make_stop_payload(stop_name, stops.index(stop_name) if stop_name in stops else i)
+        for i, stop_name in enumerate(selected_stops)
+    ]
+
+    live_current = make_stop_payload(current_stop, current_index) if current_stop else {
+        "name": "Durak seçilmedi",
+        "kind": "live",
+        "status": "Canlı",
+        "eta": "-",
+        "distance": "-",
+        "off_count": 0,
+        "board_count": 0,
+        "bagaj_count": 0,
+        "service_count": 0,
+        "bagaj_label": "yok",
+    }
+
+    live_summary = {
+        "passenger_count": passenger_count,
+        "total_seats": total_seats,
+        "empty_seats": empty_seats,
+        "occupancy": occupancy,
+        "off_count": live_current.get("off_count", 0),
+        "board_count": live_current.get("board_count", 0),
+        "bagaj_count": live_current.get("bagaj_count", 0),
+        "service_count": live_current.get("service_count", 0),
+        "total_revenue": total_revenue,
+    }
 
     stats = {
         "passenger_count": passenger_count,
@@ -1390,7 +1570,7 @@ def continue_trip():
         "total_revenue": total_revenue,
         "first_stop": first_stop,
         "last_stop": last_stop,
-        "next_stop": next_stop,
+        "next_stop": live_stops[1]["name"] if len(live_stops) > 1 else current_stop,
     }
 
     return render_template(
@@ -1398,6 +1578,9 @@ def continue_trip():
         trip=trip,
         stats=stats,
         stops=stops,
+        live_current=live_current,
+        live_stops=live_stops,
+        live_summary=live_summary,
     )
 
 

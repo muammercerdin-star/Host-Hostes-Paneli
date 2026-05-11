@@ -3,271 +3,530 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Devam Eden Sefer</title>
+  <title>Canlı Durak Akışı</title>
 
   <style>
-    *{
-      box-sizing:border-box;
-      -webkit-tap-highlight-color:transparent;
-    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
     :root{
+      --bg:#030712;
+      --panel:#07111f;
+      --line:rgba(255,255,255,.10);
+      --line2:rgba(255,255,255,.065);
+      --text:#f8fafc;
+      --muted:rgba(226,232,240,.70);
+      --muted2:rgba(226,232,240,.48);
       --blue:#2563eb;
-      --text:#0f172a;
-      --muted:#64748b;
-      --line:#e5edf6;
-      --danger:#ef4444;
-      --card-radius:26px;
+      --red:#ef4444;
+      --orange:#f59e0b;
+      --green:#22c55e;
+      --purple:#8b5cf6;
     }
+
+    html,body{min-height:100%}
 
     body{
       margin:0;
-      min-height:100vh;
-      background:
-        radial-gradient(circle at 18% 0%, rgba(37,99,235,.14), transparent 34%),
-        radial-gradient(circle at 100% 30%, rgba(14,165,233,.16), transparent 32%),
-        linear-gradient(180deg,#f8fbff,#eaf3ff);
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       color:var(--text);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 14% 0%, rgba(239,68,68,.16), transparent 30%),
+        radial-gradient(circle at 88% 12%, rgba(37,99,235,.15), transparent 28%),
+        radial-gradient(circle at 45% 78%, rgba(139,92,246,.10), transparent 34%),
+        linear-gradient(180deg,#020617 0%,#06101f 42%,#030712 100%);
+      -webkit-font-smoothing:antialiased;
+      overflow-x:hidden;
     }
 
-    a{
-      color:inherit;
-      text-decoration:none;
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,.016) 0,
+          rgba(255,255,255,.016) 1px,
+          transparent 1px,
+          transparent 4px
+        );
+      opacity:.14;
+      mix-blend-mode:screen;
+      z-index:0;
     }
 
-    button{
-      font-family:inherit;
-    }
-
-    .sr-only{
-      position:absolute !important;
-      width:1px !important;
-      height:1px !important;
-      padding:0 !important;
-      margin:-1px !important;
-      overflow:hidden !important;
-      clip:rect(0,0,0,0) !important;
-      white-space:nowrap !important;
-      border:0 !important;
-    }
+    a{color:inherit;text-decoration:none}
+    button{font-family:inherit}
 
     .shell{
-      width:calc(100vw - 14px);
-      max-width:720px;
-      margin:6px auto 12px;
-      padding:9px;
-      border-radius:28px;
-      background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(241,248,255,.96));
-      border:1px solid rgba(255,255,255,.86);
-      box-shadow:0 24px 70px rgba(15,23,42,.14);
-    }
-
-    /* ÜST HERO — hazır görsel */
-    .hero{
       position:relative;
-      height:162px;
-      min-height:162px;
-      border-radius:25px;
-      overflow:hidden;
-      margin-bottom:9px;
-      background:url("/static/img/home-bus-card-final.png") center / cover no-repeat;
-      box-shadow:0 20px 44px rgba(120,18,32,.20);
+      z-index:1;
+      width:min(94vw,720px);
+      margin:0 auto;
+      padding:16px 0 24px;
     }
 
-    .primary-actions{
-      display:grid;
-      gap:8px;
-      margin:9px 0;
-    }
-
-    .big-action{
+    .live-head{
       position:relative;
       overflow:hidden;
-      min-height:74px;
-      border-radius:23px;
-      padding:11px 14px;
-      display:grid;
-      grid-template-columns:46px 1fr 44px;
-      align-items:center;
-      gap:11px;
-      color:#fff;
-      background:linear-gradient(145deg,#38bdf8,#2563eb);
-      box-shadow:0 16px 34px rgba(37,99,235,.22);
-      transition:transform .12s ease, filter .12s ease;
-    }
-
-    .big-action:active,
-    .quick-item:active,
-    .danger-btn:active,
-    .bottom-home:active{
-      transform:scale(.985);
-      filter:brightness(.98);
-    }
-
-    /* Koltuklara Git — hazır görsel */
-    .seat-visual-card{
-      height:116px;
-      min-height:116px;
-      padding:0;
-      border-radius:24px;
-      background:url("/static/img/seat-card-final.png") center / cover no-repeat;
-      box-shadow:0 18px 42px rgba(0,88,220,.22);
-    }
-
-    /* Sürüş Modu — hazır görsel */
-    .big-action.drive{
-      min-height:84px;
-      border-radius:23px;
+      border-radius:30px;
+      padding:20px;
+      margin:0 0 12px;
       background:
-        linear-gradient(90deg, rgba(0,0,0,.10), rgba(0,0,0,.04)),
-        url("/static/img/drive-mode-card.png") center / cover no-repeat;
-      box-shadow:0 18px 42px rgba(14,165,233,.22);
+        radial-gradient(circle at 90% 12%, rgba(37,99,235,.14), transparent 30%),
+        linear-gradient(180deg, rgba(10,19,36,.94), rgba(6,12,24,.94));
+      border:1px solid var(--line);
+      box-shadow:0 20px 46px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.045);
     }
 
-    .big-action.cash{
-      min-height:76px;
-      background:linear-gradient(145deg,#334155,#0f172a);
-      box-shadow:0 16px 34px rgba(15,23,42,.20);
+    .live-head-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
     }
 
-    .big-ico{
+    .brand-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:30px;
+      padding:0 12px;
+      border-radius:999px;
+      color:#fecaca;
+      background:rgba(239,68,68,.10);
+      border:1px solid rgba(239,68,68,.18);
+      font-size:11px;
+      font-weight:1000;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      margin-bottom:12px;
+    }
+
+    .brand-chip::before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#ef4444;
+      box-shadow:0 0 14px rgba(239,68,68,.70);
+    }
+
+    .live-title{
+      margin:0;
+      font-size:clamp(32px, 7vw, 50px);
+      line-height:.95;
+      letter-spacing:-.055em;
+      font-weight:1000;
+      color:#fff;
+    }
+
+    .live-sub{
+      margin:10px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      font-weight:700;
+      line-height:1.35;
+    }
+
+    .live-head-actions{
+      display:flex;
+      gap:9px;
+      flex:0 0 auto;
+    }
+
+    .head-btn{
       width:46px;
       height:46px;
-      border-radius:17px;
       display:grid;
       place-items:center;
-      background:rgba(255,255,255,.18);
-      border:1px solid rgba(255,255,255,.23);
-      font-size:23px;
-    }
-
-    .big-title{
-      display:block;
+      border-radius:18px;
+      background:rgba(255,255,255,.045);
+      border:1px solid var(--line2);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
       font-size:20px;
-      font-weight:1000;
-      line-height:1;
     }
 
-    .big-desc{
-      display:block;
-      margin-top:4px;
-      font-size:12px;
-      color:rgba(255,255,255,.86);
-      font-weight:800;
-      line-height:1.12;
-    }
-
-    .arrow{
-      width:44px;
-      height:44px;
-      border-radius:999px;
+    .status-row{
       display:grid;
-      place-items:center;
-      background:rgba(255,255,255,.92);
-      color:var(--blue);
-      font-size:30px;
-      font-weight:1000;
-    }
-
-    .quick-list{
-      overflow:hidden;
-      border-radius:23px;
-      background:#fff;
-      border:1px solid var(--line);
-      box-shadow:0 14px 34px rgba(15,23,42,.08);
-      margin-bottom:8px;
-    }
-
-    .quick-item{
-      min-height:54px;
-      padding:8px 12px;
-      display:grid;
-      grid-template-columns:40px 1fr 28px;
-      align-items:center;
+      grid-template-columns:repeat(3,1fr);
       gap:10px;
-      border-bottom:1px solid var(--line);
-      transition:transform .12s ease, filter .12s ease;
+      margin:12px 0;
     }
 
-    .quick-item:last-child{
-      border-bottom:0;
+    .status-box{
+      min-height:72px;
+      border-radius:22px;
+      padding:12px;
+      background:linear-gradient(180deg, rgba(10,18,34,.88), rgba(5,10,22,.92));
+      border:1px solid var(--line2);
+      box-shadow:0 12px 28px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.035);
     }
 
-    .qico{
-      width:40px;
-      height:40px;
-      border-radius:15px;
-      display:grid;
-      place-items:center;
-      background:#eff6ff;
-      font-size:20px;
-    }
-
-    .qtitle{
+    .status-box span{
       display:block;
+      color:var(--muted2);
+      font-size:11px;
+      font-weight:850;
+      text-transform:uppercase;
+      letter-spacing:.07em;
+      margin-bottom:6px;
+    }
+
+    .status-box b{
+      display:block;
+      color:#fff;
       font-size:16px;
+      line-height:1.1;
+      font-weight:950;
+    }
+
+    .current-stop{
+      position:relative;
+      overflow:hidden;
+      border-radius:30px;
+      padding:20px;
+      margin:12px 0;
+      background:
+        radial-gradient(circle at 16% 0%, rgba(239,68,68,.23), transparent 32%),
+        linear-gradient(180deg, rgba(42,10,18,.96), rgba(10,14,26,.96));
+      border:1px solid rgba(239,68,68,.28);
+      box-shadow:0 22px 52px rgba(0,0,0,.30),0 0 30px rgba(239,68,68,.10),inset 0 1px 0 rgba(255,255,255,.045);
+    }
+
+    .current-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .current-label{
+      color:#fecaca;
+      font-size:12px;
       font-weight:1000;
-      color:var(--text);
-      line-height:1;
+      letter-spacing:.12em;
+      text-transform:uppercase;
     }
 
-    .qdesc{
-      display:block;
-      margin-top:3px;
-      color:var(--muted);
-      font-size:11.2px;
-      font-weight:800;
-      line-height:1.08;
-    }
-
-    .qarr{
-      color:var(--muted);
-      font-size:28px;
+    .current-pill{
+      display:inline-flex;
+      align-items:center;
+      min-height:32px;
+      padding:0 12px;
+      border-radius:999px;
+      color:#fff;
+      background:rgba(239,68,68,.18);
+      border:1px solid rgba(239,68,68,.22);
+      font-size:12px;
       font-weight:900;
+    }
+
+    .current-stop h2{
+      margin:0;
+      font-size:clamp(34px, 8vw, 56px);
+      line-height:.94;
+      letter-spacing:-.06em;
+      font-weight:1000;
+      color:#fff;
+    }
+
+    .current-stats{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .current-stat{
+      min-height:70px;
+      border-radius:20px;
+      padding:12px;
+      background:rgba(255,255,255,.055);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .current-stat small{
+      display:block;
+      color:rgba(255,255,255,.56);
+      font-size:11px;
+      font-weight:850;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      margin-bottom:6px;
+    }
+
+    .current-stat b{
+      display:block;
+      color:#fff;
+      font-size:18px;
+      font-weight:1000;
+      line-height:1.1;
+    }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin:16px 4px 10px;
+    }
+
+    .section-title h2{
+      margin:0;
+      color:#fff;
+      font-size:20px;
+      font-weight:1000;
+      letter-spacing:-.02em;
+    }
+
+    .section-title span{
+      color:var(--muted2);
+      font-size:12px;
+      font-weight:850;
+    }
+
+    .timeline{
+      position:relative;
+      display:grid;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .stop-item{
+      position:relative;
+      display:grid;
+      grid-template-columns:34px 1fr;
+      gap:10px;
+      align-items:stretch;
+    }
+
+    .stop-item::before{
+      content:"";
+      position:absolute;
+      left:16px;
+      top:32px;
+      bottom:-18px;
+      width:2px;
+      background:rgba(255,255,255,.08);
+    }
+
+    .stop-item:last-child::before{display:none}
+
+    .stop-dot{
+      width:34px;
+      display:flex;
+      justify-content:center;
+      padding-top:18px;
+      position:relative;
+      z-index:2;
+    }
+
+    .stop-dot::before{
+      content:"";
+      width:16px;
+      height:16px;
+      border-radius:50%;
+      background:#64748b;
+      box-shadow:0 0 16px rgba(100,116,139,.30);
+    }
+
+    .stop-item.live .stop-dot::before{
+      background:#ef4444;
+      box-shadow:0 0 0 6px rgba(239,68,68,.12),0 0 20px rgba(239,68,68,.70);
+    }
+
+    .stop-item.next .stop-dot::before{
+      background:#f59e0b;
+      box-shadow:0 0 0 6px rgba(245,158,11,.12),0 0 18px rgba(245,158,11,.55);
+    }
+
+    .stop-item.upcoming .stop-dot::before{
+      background:#2563eb;
+      box-shadow:0 0 0 6px rgba(37,99,235,.10),0 0 16px rgba(37,99,235,.45);
+    }
+
+    .stop-item.passed .stop-dot::before{
+      background:#64748b;
+      opacity:.55;
+    }
+
+    .stop-card{
+      border-radius:24px;
+      padding:16px;
+      background:linear-gradient(180deg, rgba(10,18,34,.90), rgba(5,10,22,.92));
+      border:1px solid var(--line2);
+      box-shadow:0 16px 34px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.035);
+    }
+
+    .stop-item.live .stop-card{
+      border-color:rgba(239,68,68,.26);
+      background:radial-gradient(circle at 0% 0%, rgba(239,68,68,.14), transparent 28%),linear-gradient(180deg, rgba(15,18,34,.94), rgba(5,10,22,.92));
+    }
+
+    .stop-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .stop-card h3{
+      margin:0;
+      color:#fff;
+      font-size:20px;
+      line-height:1.05;
+      font-weight:1000;
+      letter-spacing:-.025em;
+    }
+
+    .stop-status{
+      min-height:28px;
+      padding:0 10px;
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      color:#dbeafe;
+      background:rgba(37,99,235,.12);
+      border:1px solid rgba(37,99,235,.18);
+      font-size:11px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .stop-item.live .stop-status{
+      color:#fecaca;
+      background:rgba(239,68,68,.14);
+      border-color:rgba(239,68,68,.20);
+    }
+
+    .stop-item.next .stop-status{
+      color:#fed7aa;
+      background:rgba(245,158,11,.12);
+      border-color:rgba(245,158,11,.18);
+    }
+
+    .stop-meta{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:8px;
+      margin-top:12px;
+    }
+
+    .stop-meta span{
+      min-height:34px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:14px;
+      color:rgba(255,255,255,.74);
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.06);
+      font-size:12px;
+      font-weight:850;
+      text-align:center;
+    }
+
+    .operation-summary{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+      margin:12px 0;
+    }
+
+    .op-box{
+      min-height:70px;
+      border-radius:20px;
+      padding:12px 8px;
+      background:linear-gradient(180deg, rgba(10,18,34,.88), rgba(5,10,22,.92));
+      border:1px solid var(--line2);
+      text-align:center;
+    }
+
+    .op-box b{
+      display:block;
+      color:#fff;
+      font-size:21px;
       line-height:1;
-      justify-self:end;
+      font-weight:1000;
+      margin-bottom:6px;
+    }
+
+    .op-box span{
+      display:block;
+      color:var(--muted2);
+      font-size:11px;
+      font-weight:850;
+    }
+
+    .live-actions{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:9px;
+      margin:12px 0;
+    }
+
+    .live-actions a,
+    .live-actions button{
+      min-height:62px;
+      border:0;
+      border-radius:20px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:5px;
+      color:#fff;
+      background:linear-gradient(180deg, rgba(10,18,34,.88), rgba(5,10,22,.92));
+      border:1px solid var(--line2);
+      box-shadow:0 12px 26px rgba(0,0,0,.18);
+      font-weight:850;
+      font-size:13px;
+      cursor:pointer;
+    }
+
+    .live-actions i{
+      font-style:normal;
+      font-size:22px;
     }
 
     .danger-zone{
-      border-radius:20px;
-      padding:7px;
-      background:#fff;
-      border:1px solid #fee2e2;
-      box-shadow:0 14px 34px rgba(239,68,68,.08);
-      margin-bottom:7px;
+      border-radius:22px;
+      padding:8px;
+      background:rgba(239,68,68,.08);
+      border:1px solid rgba(239,68,68,.18);
+      margin:12px 0 8px;
     }
 
     .danger-btn{
       width:100%;
-      min-height:40px;
+      min-height:48px;
       border:0;
-      border-radius:16px;
+      border-radius:18px;
       color:#fff;
-      background:linear-gradient(145deg,#fb7185,#ef4444);
-      box-shadow:0 12px 26px rgba(239,68,68,.20);
-      font-size:13.5px;
-      font-weight:950;
+      background:radial-gradient(circle at 35% 15%, rgba(255,255,255,.18), transparent 32%),linear-gradient(135deg,#fb4458,#dc2626,#b91c1c);
+      box-shadow:0 14px 30px rgba(185,28,28,.26);
+      font-size:14px;
+      font-weight:1000;
       cursor:pointer;
-      transition:transform .12s ease, filter .12s ease;
     }
 
     .bottom-home{
-      min-height:40px;
-      border-radius:17px;
+      min-height:46px;
+      border-radius:18px;
       display:flex;
       align-items:center;
       justify-content:center;
-      background:#fff;
-      border:1px solid var(--line);
-      color:var(--blue);
+      color:#dbeafe;
+      background:rgba(255,255,255,.045);
+      border:1px solid var(--line2);
+      box-shadow:0 12px 26px rgba(0,0,0,.18);
       font-size:14px;
       font-weight:950;
-      box-shadow:0 12px 26px rgba(15,23,42,.06);
-      transition:transform .12s ease, filter .12s ease;
     }
 
-    /* SEFERİ BİTİR MODALI */
     .end-trip-overlay{
       position:fixed;
       inset:0;
@@ -276,74 +535,60 @@
       align-items:center;
       justify-content:center;
       padding:22px;
-      background:rgba(9,15,28,.68);
-      backdrop-filter:blur(12px);
+      background:radial-gradient(circle at 50% 25%, rgba(37,99,235,.18), transparent 34%),rgba(8,15,28,.72);
+      backdrop-filter:blur(16px) saturate(1.08);
+      -webkit-backdrop-filter:blur(16px) saturate(1.08);
     }
 
-    .end-trip-overlay.show{
-      display:flex;
-    }
+    .end-trip-overlay.show{display:flex}
 
     .end-trip-box{
-      width:min(92vw,430px);
+      width:min(92vw,410px);
       border-radius:34px;
       overflow:hidden;
-      background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(242,246,255,.97));
-      border:1px solid rgba(255,255,255,.75);
-      box-shadow:
-        0 30px 80px rgba(0,0,0,.38),
-        inset 0 1px 0 rgba(255,255,255,.9);
-      animation:endTripIn .18s ease-out both;
-    }
-
-    @keyframes endTripIn{
-      from{
-        transform:translateY(18px) scale(.96);
-        opacity:0;
-      }
-      to{
-        transform:translateY(0) scale(1);
-        opacity:1;
-      }
+      background:radial-gradient(circle at 18% 0%, rgba(255,255,255,.96), transparent 30%),linear-gradient(180deg,#ffffff 0%,#f7faff 58%,#eef4ff 100%);
+      border:1px solid rgba(255,255,255,.86);
+      box-shadow:0 34px 90px rgba(0,0,0,.40),0 0 0 1px rgba(255,255,255,.72) inset;
     }
 
     .end-trip-top{
-      padding:24px 24px 14px;
-      display:flex;
+      padding:24px 24px 12px;
+      display:grid;
+      grid-template-columns:62px 1fr;
       align-items:center;
-      gap:14px;
+      gap:16px;
     }
 
     .end-trip-mark{
-      width:60px;
-      height:60px;
+      width:62px;
+      height:62px;
       border-radius:22px;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:31px;
-      background:linear-gradient(135deg,#ffe8ed,#ffd4dd);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+      font-size:30px;
+      background:radial-gradient(circle at 35% 25%, rgba(255,255,255,.75), transparent 32%),linear-gradient(135deg,#ffe5ea,#ffd1dc);
     }
 
     .end-trip-title{
       margin:0;
-      color:#111827;
-      font-size:25px;
-      line-height:1.05;
-      font-weight:950;
-      letter-spacing:-.3px;
+      color:#0f172a;
+      font-size:28px;
+      line-height:1.03;
+      font-weight:1000;
+      letter-spacing:-.7px;
     }
 
     .end-trip-small{
-      margin:5px 0 0;
-      color:var(--muted);
+      margin:6px 0 0;
+      color:#64748b;
       font-size:14px;
-      font-weight:750;
+      line-height:1.2;
+      font-weight:850;
     }
 
     .end-trip-content{
-      padding:4px 24px 22px;
+      padding:4px 24px 20px;
     }
 
     .end-trip-text{
@@ -351,18 +596,19 @@
       color:#334155;
       font-size:17px;
       line-height:1.45;
-      font-weight:650;
+      font-weight:750;
     }
 
     .end-trip-note{
       margin-top:14px;
       padding:13px 14px;
-      border-radius:18px;
-      background:rgba(239,68,68,.08);
+      border-radius:20px;
+      background:linear-gradient(180deg,rgba(254,226,226,.92),rgba(255,241,242,.94));
+      border:1px solid rgba(252,165,165,.22);
       color:#991b1b;
       font-size:14px;
       line-height:1.35;
-      font-weight:800;
+      font-weight:900;
     }
 
     .end-trip-actions{
@@ -373,327 +619,230 @@
     }
 
     .end-trip-btn{
-      height:55px;
+      height:56px;
       border:0;
-      border-radius:19px;
+      border-radius:20px;
       font-size:16px;
-      font-weight:950;
+      font-weight:1000;
       cursor:pointer;
     }
 
     .end-trip-cancel{
-      background:#eef2f7;
       color:#334155;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+      background:linear-gradient(180deg,#ffffff,#eef3fb);
+      border:1px solid rgba(148,163,184,.20);
     }
 
     .end-trip-ok{
       color:#fff;
-      background:linear-gradient(135deg,#ef4444,#b91c1c);
-      box-shadow:0 14px 28px rgba(185,28,28,.25);
-    }
-
-    .end-trip-btn:active{
-      transform:scale(.98);
+      background:radial-gradient(circle at 35% 20%, rgba(255,255,255,.22), transparent 30%),linear-gradient(135deg,#fb4458 0%,#dc2626 52%,#b91c1c 100%);
     }
 
     @media(max-width:430px){
       .shell{
-        width:calc(100vw - 12px);
-        margin-top:5px;
-        padding:8px;
+        width:calc(100vw - 14px);
+        padding:14px 0 20px;
+      }
+
+      .live-head{
+        padding:18px;
         border-radius:26px;
       }
 
-      .hero{
-        height:158px;
-        min-height:158px;
-        border-radius:24px;
+      .live-title{
+        font-size:clamp(29px, 9vw, 44px);
       }
 
-      .seat-visual-card{
-        height:113px;
-        min-height:113px;
-        border-radius:23px;
+      .status-row{
+        gap:8px;
       }
 
-      .big-action.drive{
-        min-height:80px;
+      .status-box{
+        min-height:66px;
+        padding:10px;
+        border-radius:18px;
       }
 
-      .big-action.cash{
-        min-height:72px;
+      .current-stop{
+        padding:18px;
+        border-radius:26px;
       }
 
-      .quick-item{
-        min-height:52px;
+      .current-stats{
+        grid-template-columns:repeat(2,1fr);
+        gap:8px;
       }
 
-      .end-trip-box{
-        border-radius:28px;
+      .stop-card{
+        padding:14px;
+        border-radius:22px;
       }
 
-      .end-trip-top{
-        padding:22px 20px 12px;
+      .stop-meta{
+        grid-template-columns:1fr 1fr;
       }
 
-      .end-trip-content{
-        padding:4px 20px 20px;
+      .operation-summary{
+        gap:7px;
       }
 
-      .end-trip-actions{
-        padding:0 20px 22px;
+      .op-box{
+        min-height:64px;
+        padding:10px 6px;
       }
 
-      .end-trip-title{
-        font-size:23px;
+      .live-actions{
+        grid-template-columns:repeat(3,1fr);
+        gap:8px;
+      }
+
+      .live-actions a,
+      .live-actions button{
+        min-height:58px;
+        border-radius:18px;
+        font-size:12px;
       }
     }
   </style>
-
-<style id="end-trip-modal-premium-v2">
-/* =========================================================
-   SEFERİ BİTİR MODAL - PREMIUM FINAL V2
-========================================================= */
-
-.end-trip-overlay{
-  background:
-    radial-gradient(circle at 50% 25%, rgba(37,99,235,.18), transparent 34%),
-    rgba(8,15,28,.72) !important;
-  backdrop-filter:blur(16px) saturate(1.08) !important;
-  -webkit-backdrop-filter:blur(16px) saturate(1.08) !important;
-  padding:20px !important;
-}
-
-.end-trip-box{
-  width:min(92vw, 410px) !important;
-  border-radius:34px !important;
-  overflow:hidden !important;
-  background:
-    radial-gradient(circle at 18% 0%, rgba(255,255,255,.96), transparent 30%),
-    linear-gradient(180deg,#ffffff 0%,#f7faff 58%,#eef4ff 100%) !important;
-  border:1px solid rgba(255,255,255,.86) !important;
-  box-shadow:
-    0 34px 90px rgba(0,0,0,.40),
-    0 0 0 1px rgba(255,255,255,.72) inset !important;
-}
-
-.end-trip-top{
-  padding:24px 24px 12px !important;
-  display:grid !important;
-  grid-template-columns:62px 1fr !important;
-  align-items:center !important;
-  gap:16px !important;
-}
-
-.end-trip-mark{
-  width:62px !important;
-  height:62px !important;
-  border-radius:22px !important;
-  font-size:30px !important;
-  background:
-    radial-gradient(circle at 35% 25%, rgba(255,255,255,.75), transparent 32%),
-    linear-gradient(135deg,#ffe5ea,#ffd1dc) !important;
-  box-shadow:
-    0 14px 28px rgba(239,68,68,.16),
-    inset 0 1px 0 rgba(255,255,255,.92) !important;
-}
-
-.end-trip-title{
-  margin:0 !important;
-  color:#0f172a !important;
-  font-size:28px !important;
-  line-height:1.03 !important;
-  font-weight:1000 !important;
-  letter-spacing:-.7px !important;
-}
-
-.end-trip-small{
-  margin:6px 0 0 !important;
-  color:#64748b !important;
-  font-size:14px !important;
-  line-height:1.2 !important;
-  font-weight:850 !important;
-}
-
-.end-trip-content{
-  padding:4px 24px 20px !important;
-}
-
-.end-trip-text{
-  margin:0 !important;
-  color:#334155 !important;
-  font-size:17px !important;
-  line-height:1.45 !important;
-  font-weight:750 !important;
-}
-
-.end-trip-note{
-  margin-top:14px !important;
-  padding:13px 14px !important;
-  border-radius:20px !important;
-  background:
-    linear-gradient(180deg,rgba(254,226,226,.92),rgba(255,241,242,.94)) !important;
-  border:1px solid rgba(252,165,165,.22) !important;
-  color:#991b1b !important;
-  font-size:14px !important;
-  line-height:1.35 !important;
-  font-weight:900 !important;
-}
-
-.end-trip-actions{
-  display:grid !important;
-  grid-template-columns:1fr 1fr !important;
-  gap:12px !important;
-  padding:0 24px 24px !important;
-}
-
-.end-trip-btn{
-  height:56px !important;
-  border:0 !important;
-  border-radius:20px !important;
-  font-size:16px !important;
-  font-weight:1000 !important;
-  cursor:pointer !important;
-}
-
-.end-trip-cancel{
-  color:#334155 !important;
-  background:
-    linear-gradient(180deg,#ffffff,#eef3fb) !important;
-  border:1px solid rgba(148,163,184,.20) !important;
-  box-shadow:
-    0 12px 24px rgba(15,23,42,.08),
-    inset 0 1px 0 rgba(255,255,255,.92) !important;
-}
-
-.end-trip-ok{
-  color:#fff !important;
-  background:
-    radial-gradient(circle at 35% 20%, rgba(255,255,255,.22), transparent 30%),
-    linear-gradient(135deg,#fb4458 0%,#dc2626 52%,#b91c1c 100%) !important;
-  box-shadow:
-    0 16px 30px rgba(185,28,28,.28),
-    inset 0 1px 0 rgba(255,255,255,.18) !important;
-}
-
-.end-trip-btn:active{
-  transform:scale(.975) !important;
-}
-
-@media(max-width:420px){
-  .end-trip-overlay{
-    padding:18px !important;
-  }
-
-  .end-trip-box{
-    width:min(94vw, 390px) !important;
-    border-radius:30px !important;
-  }
-
-  .end-trip-top{
-    padding:22px 20px 10px !important;
-    grid-template-columns:58px 1fr !important;
-    gap:14px !important;
-  }
-
-  .end-trip-mark{
-    width:58px !important;
-    height:58px !important;
-    border-radius:20px !important;
-    font-size:28px !important;
-  }
-
-  .end-trip-title{
-    font-size:25px !important;
-  }
-
-  .end-trip-content{
-    padding:4px 20px 18px !important;
-  }
-
-  .end-trip-text{
-    font-size:16px !important;
-  }
-
-  .end-trip-actions{
-    padding:0 20px 22px !important;
-    gap:10px !important;
-  }
-
-  .end-trip-btn{
-    height:52px !important;
-    border-radius:18px !important;
-    font-size:15px !important;
-  }
-}
-</style>
-
 </head>
 
 <body>
   <main class="shell">
 
-    <section class="hero" aria-label="Devam eden sefer bilgisi">
-      <div class="sr-only">Devam Eden Sefer</div>
-      <h1 class="sr-only">{{ trip["route"] }}</h1>
-      <p class="sr-only">Aktif sefer hazır. İstediğin ekrana hızlıca geç.</p>
-      <div class="sr-only">
-        {{ trip["plate"] or "Plaka yok" }}
-        {% if trip["date"] and "-" in trip["date"] %}
-          {{ trip["date"].split("-")[2] }}.{{ trip["date"].split("-")[1] }}.{{ trip["date"].split("-")[0] }}
-        {% else %}
-          {{ trip["date"] }}
-        {% endif %}
-        {{ trip["departure_time"] }}
+    <header class="live-head">
+      <div class="live-head-top">
+        <div>
+          <div class="brand-chip">Muavin Asistanı</div>
+          <h1 class="live-title">Canlı Durak Akışı</h1>
+          <p class="live-sub">
+            {{ trip["route"] or "Denizli – İstanbul" }} • Araç {{ trip["plate"] or "45 KH 999" }}
+          </p>
+        </div>
+
+        <div class="live-head-actions">
+          <a class="head-btn" href="{{ url_for('seats_page') }}?drive=1" aria-label="Sesli komut">🎤</a>
+          <a class="head-btn" href="{{ url_for('seats_page') }}" aria-label="Koltuk ekranı">🗺️</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="status-row">
+      <div class="status-box">
+        <span>Saat</span>
+        <b>{{ trip["departure_time"] or "--:--" }}</b>
+      </div>
+      <div class="status-box">
+        <span>Yolcu</span>
+        <b>{{ live_summary.passenger_count }} / {{ live_summary.total_seats }}</b>
+      </div>
+      <div class="status-box">
+        <span>Durum</span>
+        <b>Planında</b>
       </div>
     </section>
 
-    <section class="primary-actions">
-      <a class="big-action seat-visual-card" href="{{ url_for('seats_page') }}" aria-label="Koltuklara Git">
-        <span class="sr-only">Koltuklara Git - Yolcu, koltuk ve iniş-biniş işlemleri</span>
-      </a>
+    <section class="current-stop">
+      <div class="current-top">
+        <span class="current-label">Şu anki durak</span>
+        <span class="current-pill">{{ live_current.status }}</span>
+      </div>
 
-      <a class="big-action drive" href="{{ url_for('seats_page') }}?drive=1" aria-label="Sürüş Modunu Aç">
-        <span class="sr-only">Sürüş Modunu Aç - Durak akışı, hız ve sesli takip ekranı</span>
-      </a>
+      <h2>{{ live_current.name }}</h2>
 
-      <a class="big-action cash" href="{{ url_for('hesap_page') }}">
-        <span class="big-ico">💵</span>
-        <span>
-          <span class="big-title">Hesap / Kasa</span>
-          <span class="big-desc">Giriş-çıkış, kalan ve sefer kasası</span>
-        </span>
-        <span class="arrow">›</span>
-      </a>
+      <div class="current-stats">
+        <div class="current-stat">
+          <small>Tahmini varış</small>
+          <b>{{ live_current.eta }}</b>
+        </div>
+        <div class="current-stat">
+          <small>Kalan mesafe</small>
+          <b>{{ live_current.distance }}</b>
+        </div>
+        <div class="current-stat">
+          <small>İnecek</small>
+          <b>{{ live_current.off_count }} yolcu</b>
+        </div>
+        <div class="current-stat">
+          <small>Bagaj</small>
+          <b>{{ live_current.bagaj_count }}</b>
+        </div>
+      </div>
     </section>
 
-    <section class="quick-list">
-      <a class="quick-item" href="{{ url_for('passenger_control') }}">
-        <span class="qico">👥</span>
-        <span>
-          <span class="qtitle">Yolcu Kontrolü</span>
-          <span class="qdesc">Binen-inen ve kontrol ekranı</span>
-        </span>
-        <span class="qarr">›</span>
+    <div class="section-title">
+      <h2>Durak Akışı</h2>
+      <span>Canlı operasyon</span>
+    </div>
+
+    <section class="timeline">
+      {% for stop in live_stops %}
+      <article class="stop-item {{ stop.kind }}">
+        <div class="stop-dot"></div>
+        <div class="stop-card">
+          <div class="stop-head">
+            <h3>{{ stop.name }}</h3>
+            <span class="stop-status">{{ stop.status }}</span>
+          </div>
+
+          <div class="stop-meta">
+            <span>{{ stop.eta }}</span>
+            <span>{{ stop.distance }}</span>
+            <span>{{ stop.off_count }} inecek</span>
+            <span>Bagaj {{ stop.bagaj_label }}</span>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </section>
+
+    <section class="operation-summary">
+      <div class="op-box">
+        <b>{{ live_summary.passenger_count }}</b>
+        <span>Yolcu</span>
+      </div>
+      <div class="op-box">
+        <b>{{ live_summary.off_count }}</b>
+        <span>İnecek</span>
+      </div>
+      <div class="op-box">
+        <b>{{ live_summary.bagaj_count }}</b>
+        <span>Bagaj</span>
+      </div>
+      <div class="op-box">
+        <b>{{ live_summary.empty_seats }}</b>
+        <span>Boş</span>
+      </div>
+    </section>
+
+    <section class="live-actions">
+      <a href="{{ url_for('seats_page') }}">
+        <i>💺</i>
+        <span>Koltuk</span>
       </a>
 
-      <a class="quick-item" href="{{ url_for('consignments_page') }}">
-        <span class="qico">📦</span>
-        <span>
-          <span class="qtitle">Emanetler</span>
-          <span class="qdesc">Emanet kayıt ve teslim işlemleri</span>
-        </span>
-        <span class="qarr">›</span>
+      <a href="{{ url_for('passenger_control') }}">
+        <i>👥</i>
+        <span>Yolcular</span>
       </a>
 
-      <a class="quick-item" href="/sefer-raporu-son">
-        <span class="qico">📁</span>
-        <span>
-          <span class="qtitle">Sefer Raporları</span>
-          <span class="qdesc">Biten sefer raporlarını aç</span>
-        </span>
-        <span class="qarr">›</span>
+      <a href="{{ url_for('consignments_page') }}">
+        <i>📦</i>
+        <span>Emanet</span>
+      </a>
+
+      <a href="{{ url_for('hesap_page') }}">
+        <i>💵</i>
+        <span>Hesap</span>
+      </a>
+
+      <button type="button">
+        <i>📣</i>
+        <span>Anons</span>
+      </button>
+
+      <a href="{{ url_for('seats_page') }}?drive=1">
+        <i>🎤</i>
+        <span>Sesli</span>
       </a>
     </section>
 
@@ -707,7 +856,6 @@
     </section>
 
     <a class="bottom-home" href="/">← Ana ekrana dön</a>
-
   </main>
 
   <div class="end-trip-overlay" id="endTripOverlay" aria-hidden="true">
