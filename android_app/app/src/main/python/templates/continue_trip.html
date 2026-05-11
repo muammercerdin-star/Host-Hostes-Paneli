@@ -241,7 +241,7 @@
 
     .stats-row{
       display:grid;
-      grid-template-columns:repeat(3,1fr);
+      grid-template-columns:repeat(4,1fr);
       gap:0;
       overflow:hidden;
       border-radius:30px;
@@ -905,6 +905,47 @@
     background:
       linear-gradient(90deg, rgba(5,10,22,.99) 0%, rgba(5,10,22,.88) 52%, rgba(5,10,22,.30) 100%),
       radial-gradient(circle at 82% 50%, rgba(37,99,235,.14), transparent 38%);
+  }
+}
+
+
+/* =========================================================
+   LIVE SPEED BOX RESPONSIVE FIX
+========================================================= */
+.stats-row{
+  grid-template-columns:repeat(4,1fr) !important;
+}
+
+.stat-box{
+  min-width:0;
+}
+
+.stat-box small{
+  white-space:nowrap;
+}
+
+.stat-box b{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+@media(max-width:430px){
+  .stats-row{
+    grid-template-columns:repeat(4,1fr) !important;
+  }
+
+  .stat-box{
+    padding-left:8px !important;
+    padding-right:8px !important;
+  }
+
+  .stat-box small{
+    font-size:9px !important;
+  }
+
+  .stat-box b{
+    font-size:14px !important;
   }
 }
 
@@ -1650,6 +1691,71 @@
 </style>
 
 
+
+<style id="live-status-four-col-polish">
+/* 4'lü Saat / Hız / Doluluk / Durum satırını dengeler */
+
+.stats-row{
+  grid-template-columns:repeat(4,1fr) !important;
+  border-radius:22px !important;
+}
+
+.stat-box{
+  min-height:58px !important;
+  padding:9px 8px !important;
+  min-width:0 !important;
+}
+
+.stat-box small{
+  font-size:9px !important;
+  letter-spacing:.07em !important;
+  margin-bottom:4px !important;
+  white-space:nowrap !important;
+}
+
+.stat-box b{
+  font-size:15px !important;
+  line-height:1.05 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+#liveSpeedText{
+  font-size:14px !important;
+  letter-spacing:-.02em !important;
+}
+
+.stat-box.status b,
+.stat-box b.ok{
+  font-size:14px !important;
+  color:var(--green) !important;
+}
+
+@media(max-width:430px){
+  .stat-box{
+    min-height:54px !important;
+    padding:8px 6px !important;
+  }
+
+  .stat-box small{
+    font-size:8.5px !important;
+  }
+
+  .stat-box b{
+    font-size:13.5px !important;
+  }
+
+  #liveSpeedText{
+    font-size:13px !important;
+  }
+
+  .stat-box.status b,
+  .stat-box b.ok{
+    font-size:13px !important;
+  }
+}
+</style>
 </head>
 
 <body>
@@ -1673,7 +1779,7 @@
       <img class="hero-bus-img" src="{{ url_for('static', filename='img/live-hero-bus.png', v='1') }}" alt="Canlı durak otobüs görseli">
       <span class="hero-bus-shade"></span>
 
-      <h1>Canlı Durak Akışı</h1>
+      <h1 class="hero-title">Canlı Durak Akışı</h1>
 
       <div class="hero-meta">
         <div class="hero-meta-line">
@@ -1690,7 +1796,12 @@
     <section class="stats-row">
       <div class="stat-box">
         <small>Saat</small>
-        <b>{{ trip["departure_time"] or "--:--" }}</b>
+        <b id="liveClockText">--:--</b>
+      </div>
+
+      <div class="stat-box">
+        <small>Hız</small>
+        <b id="liveSpeedText">— km/sa</b>
       </div>
 
       <div class="stat-box">
@@ -1714,7 +1825,7 @@
           <div class="card-head">
             <div>
               <span class="card-label">Şu anki durak</span>
-              <h2 class="card-title">{{ live_current.name or "Durak seçilmedi" }}</h2>
+              <h2 class="card-title" id="liveCurrentStopName">{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or "Durak seçilmedi" }}</h2>
             </div>
 
             <span class="status-pill live">{{ live_current.status or "Canlı" }}</span>
@@ -1723,12 +1834,12 @@
           <div class="metric-grid">
             <div class="metric">
               <small>Tahmini<br>varış</small>
-              <b>{{ live_current.eta or "-" }}</b>
+              <b id="liveEtaValue">{{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else live_current.eta) or "-" }}</b>
             </div>
 
             <div class="metric">
               <small>Kalan<br>mesafe</small>
-              <b>{{ live_current.distance or "-" }}</b>
+              <b id="liveDistanceValue">—</b>
             </div>
 
             <div class="metric">
@@ -1899,5 +2010,264 @@
       });
     })();
   </script>
+
+<script id="live-gps-speed-script">
+(function(){
+  const speedEl = document.getElementById("liveSpeedText");
+  if(!speedEl) return;
+
+  let lastPos = null;
+
+  function haversineMeters(a, b){
+    const R = 6371000;
+    const toRad = d => d * Math.PI / 180;
+
+    const lat1 = toRad(a.latitude);
+    const lat2 = toRad(b.latitude);
+    const dLat = toRad(b.latitude - a.latitude);
+    const dLon = toRad(b.longitude - a.longitude);
+
+    const x =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1) * Math.cos(lat2) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+
+    return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+  }
+
+  function setSpeed(kmh){
+    if(!Number.isFinite(kmh) || kmh < 1){
+      speedEl.textContent = "0 km/sa";
+      return;
+    }
+
+    speedEl.textContent = Math.round(kmh) + " km/sa";
+  }
+
+  function onPosition(pos){
+    const coords = pos.coords || {};
+    let kmh = null;
+
+    // Android / Chrome çoğu zaman speed değerini m/s olarak verir.
+    if(typeof coords.speed === "number" && Number.isFinite(coords.speed) && coords.speed >= 0){
+      kmh = coords.speed * 3.6;
+    }
+
+    // speed boş gelirse iki konum arasından hesapla.
+    if(kmh === null && lastPos){
+      const dt = (pos.timestamp - lastPos.timestamp) / 1000;
+      if(dt > 0){
+        const meters = haversineMeters(lastPos.coords, coords);
+        kmh = (meters / dt) * 3.6;
+      }
+    }
+
+    lastPos = {
+      coords: {
+        latitude: coords.latitude,
+        longitude: coords.longitude
+      },
+      timestamp: pos.timestamp || Date.now()
+    };
+
+    if(kmh !== null){
+      setSpeed(kmh);
+      try{ localStorage.setItem("lastLiveSpeedKmh", String(Math.round(kmh))); }catch(_){}
+    }
+  }
+
+  function onError(err){
+    try{
+      const cached = Number(localStorage.getItem("lastLiveSpeedKmh") || "");
+      if(Number.isFinite(cached)){
+        speedEl.textContent = cached + " km/sa";
+        return;
+      }
+    }catch(_){}
+
+    speedEl.textContent = "— km/sa";
+  }
+
+  if(!("geolocation" in navigator)){
+    speedEl.textContent = "GPS yok";
+    return;
+  }
+
+  try{
+    navigator.geolocation.watchPosition(
+      onPosition,
+      onError,
+      {
+        enableHighAccuracy:true,
+        maximumAge:1200,
+        timeout:10000
+      }
+    );
+  }catch(err){
+    speedEl.textContent = "— km/sa";
+  }
+})();
+</script>
+
+
+
+<script id="live-clock-script">
+(function(){
+  const el = document.getElementById("liveClockText");
+  if(!el) return;
+
+  function pad(n){
+    return String(n).padStart(2, "0");
+  }
+
+  function updateClock(){
+    const now = new Date();
+    el.textContent = pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+})();
+</script>
+
+
+
+
+<script id="continue-trip-stop-bridge">
+(function(){
+  try{
+    const url = new URL(window.location.href);
+
+    // URL'de stop varsa backend zaten onu kullanır.
+    if(url.searchParams.get("stop")) return;
+
+    const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
+
+    let stop = "";
+
+    try{
+      // seats.js mevcut gerçek canlı durak key'i
+      stop =
+        localStorage.getItem("liveStop:" + tripKey) ||
+        localStorage.getItem("continueTripStop:" + tripKey) ||
+        localStorage.getItem("continueTripStop:last") ||
+        "";
+    }catch(_){}
+
+    stop = String(stop || "").trim();
+
+    if(!stop || stop === "—" || stop === "-") return;
+
+    url.searchParams.set("stop", stop);
+    window.location.replace(url.toString());
+  }catch(err){
+    console.log("continue trip stop bridge error", err);
+  }
+})();
+</script>
+
+
+
+
+
+<script id="continue-trip-sync-from-seats">
+(function(){
+  const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
+
+  function sync(){
+    try{
+      const speed   = localStorage.getItem("continueTripSpeed:" + tripKey) || "0";
+      const liveStop = localStorage.getItem("continueTripLiveStop:" + tripKey) || "";
+      const gpsKm   = localStorage.getItem("continueTripGpsKm:" + tripKey) || "";
+
+      const speedEl = document.getElementById("liveSpeedValue");
+      const stopEl  = document.getElementById("liveCurrentStopName");
+      const distEl  = document.getElementById("liveDistanceValue");
+
+      if(speedEl){
+        speedEl.textContent = `${parseInt(speed || "0", 10) || 0} km/sa`;
+      }
+
+      if(stopEl && liveStop){
+        stopEl.textContent = liveStop;
+      }
+
+      if(distEl && gpsKm){
+        distEl.textContent = gpsKm;
+      }
+    }catch(_){}
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", sync);
+  }else{
+    sync();
+  }
+
+  setInterval(sync, 1000);
+})();
+</script>
+
+
+<script id="continue-trip-runtime-sync">
+(function(){
+  const tripId = {{ trip['id'] | tojson | safe }};
+
+  function formatGpsKm(value){
+    const raw = String(value ?? "").trim();
+    if(!raw) return "—";
+    const km = Number(raw.replace(",", "."));
+    if(!Number.isFinite(km)) return "—";
+    if(km < 0) return "—";
+    if(km < 1) return `${Math.round(km * 1000)} m`;
+    return `${km.toFixed(2)} km`;
+  }
+
+  function sync(){
+    fetch(`/api/live-runtime-state?trip_id=${encodeURIComponent(tripId)}&_=${Date.now()}`, {
+      method: "GET",
+      credentials: "same-origin",
+      cache: "no-store"
+    })
+    .then(r => r.json())
+    .then(j => {
+      const s = j && j.state ? j.state : null;
+      if(!s) return;
+
+      const speedEl = document.getElementById("liveSpeedValue");
+      const stopEl  = document.getElementById("liveCurrentStopName");
+      const distEl  = document.getElementById("liveDistanceValue");
+      const etaEl   = document.getElementById("liveEtaValue");
+
+      if(speedEl){
+        const n = parseInt(s.speed || 0, 10) || 0;
+        speedEl.textContent = `${n} km/sa`;
+      }
+
+      if(stopEl && s.live_stop){
+        stopEl.textContent = s.live_stop;
+      }
+
+      if(distEl){
+        distEl.textContent = formatGpsKm(s.gps_km);
+      }
+
+      if(etaEl && s.eta_main){
+        etaEl.textContent = s.eta_main;
+      }
+    })
+    .catch(() => {});
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", sync);
+  }else{
+    sync();
+  }
+
+  setInterval(sync, 1500);
+})();
+</script>
+
 </body>
 </html>
