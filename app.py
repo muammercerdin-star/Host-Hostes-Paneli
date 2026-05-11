@@ -4187,14 +4187,119 @@ def api_seats_gender():
 # Durak / koordinat API
 # =========================================================
 
+def _route_name_variants(name: str) -> list[str]:
+    raw = (name or "").strip()
+    if not raw:
+        return []
+
+    variants = []
+
+    def add(v):
+        v = (v or "").strip()
+        if v and v not in variants:
+            variants.append(v)
+
+    add(raw)
+    add(raw.replace("–", "-"))
+    add(raw.replace("-", "–"))
+    add(raw.replace("—", "-"))
+    add(raw.replace("—", "–"))
+
+    no_paren = re.sub(r"\s*\([^)]*\)\s*", "", raw).strip()
+    if no_paren:
+        add(no_paren)
+        add(no_paren.replace("–", "-"))
+        add(no_paren.replace("-", "–"))
+        add(no_paren.replace("—", "-"))
+        add(no_paren.replace("—", "–"))
+
+    return variants
+
+
+def _best_route_for_coords(db, requested_route: str) -> str:
+    variants = _route_name_variants(requested_route)
+    if not variants:
+        return requested_route
+
+    for cand in variants:
+        row = db.execute(
+            "SELECT route, COUNT(*) AS c FROM route_stop_coords WHERE route=? GROUP BY route LIMIT 1",
+            (cand,),
+        ).fetchone()
+        if row and int(row["c"] or 0) > 0:
+            return row["route"]
+
+    wanted_norms = set()
+    for v in variants:
+        wanted_norms.add(
+            re.sub(r"\s+", " ", v.replace("–", "-").replace("—", "-")).strip().lower()
+        )
+
+    rows = db.execute(
+        "SELECT route, COUNT(*) AS c FROM route_stop_coords GROUP BY route ORDER BY c DESC, route ASC"
+    ).fetchall()
+
+    for row in rows:
+        r = (row["route"] or "").strip()
+        rn = re.sub(r"\s*\([^)]*\)\s*", "", r)
+        rn = re.sub(r"\s+", " ", rn.replace("–", "-").replace("—", "-")).strip().lower()
+        if rn in wanted_norms:
+            return r
+
+    return requested_route
+
+
+def _coords_items_for_route(db, route_name: str):
+    best_route = _best_route_for_coords(db, route_name)
+
+    rows = db.execute(
+        "SELECT route, stop, lat, lng FROM route_stop_coords WHERE route=? ORDER BY stop",
+        (best_route,),
+    ).fetchall()
+
+    items = [
+        {
+            "route": r["route"],
+            "name": r["stop"],
+            "stop": r["stop"],
+            "lat": r["lat"],
+            "lng": r["lng"],
+        }
+        for r in rows
+    ]
+    return best_route, items
+
+
 @app.route("/api/stops")
 def api_stops():
     trip = get_active_trip_row()
     if not trip:
-        return jsonify({"ok": False, "msg": "Aktif sefer yok", "stops": []}), 400
+        return jsonify({"ok": False, "msg": "Aktif sefer yok", "stops": [], "items": []}), 400
 
-    route_name = trip["route"]
-    return jsonify({"ok": True, "route": route_name, "stops": get_stops(route_name)})
+    db = get_db()
+    route_name = (request.args.get("route") or trip["route"] or "").strip()
+
+    best_route, items = _coords_items_for_route(db, route_name)
+
+    if items:
+        return jsonify({
+            "ok": True,
+            "route": route_name,
+            "matched_route": best_route,
+            "stops": items,
+            "items": items,
+        })
+
+    stops = get_stops(route_name)
+    fallback_items = [{"name": s, "stop": s, "lat": None, "lng": None} for s in stops]
+
+    return jsonify({
+        "ok": True,
+        "route": route_name,
+        "matched_route": route_name,
+        "stops": fallback_items,
+        "items": fallback_items,
+    })
 
 
 

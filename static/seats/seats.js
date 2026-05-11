@@ -133,6 +133,22 @@ const BAG_TRIP = TRIP_KEY;
   let snoozeUntil = 0;
   let lastApproach = { stop:null, seats:[] };
   let currentCoords = null;
+
+  function persistLastCoordsForContinueTrip(){
+    try{
+      if(!currentCoords) return;
+
+      const lat = Number(currentCoords.lat);
+      const lng = Number(currentCoords.lng);
+      if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+      localStorage.setItem("continueTripLastCoords:" + TRIP_KEY, JSON.stringify({
+        lat,
+        lng,
+        ts: Date.now()
+      }));
+    }catch(_){}
+  }
   let lastApproachVoiceStop = "";
   let lastRouteStripCenteredStop = "";
 
