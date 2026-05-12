@@ -2454,6 +2454,7 @@ def api_live_stop_detail():
                    COALESCE(ticket_type,'') AS ticket_type,
                    COALESCE(payment,'') AS payment,
                    COALESCE(amount,0) AS amount,
+                   COALESCE(gender,'') AS gender,
                    COALESCE(service,0) AS service
             FROM seats
             WHERE trip_id=?
@@ -2519,6 +2520,7 @@ def api_live_stop_detail():
                 "ticket_type": r["ticket_type"] or "",
                 "payment": r["payment"] or "",
                 "amount": float(r["amount"] or 0),
+                "gender": r["gender"] or "",
                 "service": int(r["service"] or 0),
                 "bag_count": int(bag_count or 0),
                 "bag_right": int(bag_right or 0),

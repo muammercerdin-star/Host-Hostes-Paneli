@@ -3003,7 +3003,65 @@
   bottom:9px !important;
 }
 </style>
-</head>
+
+<style id="live-sheet-gender-color-style">
+.sheet-seat-row.gender-male{
+  border-color:rgba(59,130,246,.26) !important;
+  box-shadow:0 0 0 1px rgba(59,130,246,.10), 0 14px 34px rgba(0,0,0,.16);
+}
+
+.sheet-seat-row.gender-female{
+  border-color:rgba(236,72,153,.30) !important;
+  box-shadow:0 0 0 1px rgba(236,72,153,.11), 0 14px 34px rgba(0,0,0,.16);
+}
+
+.sheet-seat-row.gender-male .sheet-seat-no{
+  background:linear-gradient(135deg,#3b82f6,#1d4ed8) !important;
+  box-shadow:0 12px 28px rgba(37,99,235,.28) !important;
+}
+
+.sheet-seat-row.gender-female .sheet-seat-no{
+  background:linear-gradient(135deg,#ec4899,#be185d) !important;
+  box-shadow:0 12px 28px rgba(236,72,153,.28) !important;
+}
+
+.sheet-seat-row.gender-neutral .sheet-seat-no{
+  background:linear-gradient(135deg,#f97316,#ef4444) !important;
+}
+
+.sheet-gender-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-left:7px;
+  padding:4px 7px;
+  border-radius:999px;
+  font-size:10px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.02em;
+  vertical-align:middle;
+}
+
+.sheet-seat-row.gender-male .sheet-gender-chip{
+  color:#dbeafe;
+  background:rgba(59,130,246,.16);
+  border:1px solid rgba(147,197,253,.20);
+}
+
+.sheet-seat-row.gender-female .sheet-gender-chip{
+  color:#fce7f3;
+  background:rgba(236,72,153,.16);
+  border:1px solid rgba(244,114,182,.22);
+}
+
+.sheet-seat-row.gender-neutral .sheet-gender-chip{
+  color:#fed7aa;
+  background:rgba(249,115,22,.14);
+  border:1px solid rgba(251,146,60,.20);
+}
+</style>
+\n</head>
 
 <body>
   <main class="shell">
@@ -4405,6 +4463,41 @@
   }
 
 
+
+  function sheetGenderClass(p){
+    const g = String((p && p.gender) || "").trim().toLowerCase();
+
+    if(g === "bay" || g === "erkek" || g === "male"){
+      return "gender-male";
+    }
+
+    if(g === "bayan" || g === "kadın" || g === "kadin" || g === "female"){
+      return "gender-female";
+    }
+
+    return "gender-neutral";
+  }
+
+  function sheetGenderLabel(p){
+    const g = String((p && p.gender) || "").trim().toLowerCase();
+
+    if(g === "bay" || g === "erkek" || g === "male"){
+      return "Bay";
+    }
+
+    if(g === "bayan" || g === "kadın" || g === "kadin" || g === "female"){
+      return "Bayan";
+    }
+
+    return "";
+  }
+
+  function sheetGenderChip(p){
+    const label = sheetGenderLabel(p);
+    return label ? `<span class="sheet-gender-chip">${escapeHtml(label)}</span>` : "";
+  }
+
+
   function renderPassengers(data){
     lastDetailData = data;
     const passengers = Array.isArray(data.passengers) ? data.passengers : [];
@@ -4426,12 +4519,12 @@
           const route = `${p.from_stop || "Biniş yok"} → ${p.to_stop || data.stop || "İniş yok"}`;
 
           return `
-            <div class="sheet-seat-row">
+            <div class="sheet-seat-row ${sheetGenderClass(p)}">
               <div class="sheet-seat-no">${escapeHtml(p.seat_no || "-")}</div>
 
               <div class="sheet-seat-main">
                 <div class="sheet-seat-title">
-                  Koltuk ${escapeHtml(p.seat_no || "-")}${name ? " • " + escapeHtml(name) : ""}
+                  Koltuk ${escapeHtml(p.seat_no || "-")}${sheetGenderChip(p)}${name ? " • " + escapeHtml(name) : ""}
                 </div>
                 <div class="sheet-seat-route">${escapeHtml(route)}</div>
               </div>
