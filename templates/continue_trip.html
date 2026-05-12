@@ -2605,7 +2605,102 @@
 }
 </style>
 
-</head>
+
+<style id="live-metric-hint-polish">
+.metric-hint{
+  margin-top:6px !important;
+  display:block !important;
+  font-size:10.5px !important;
+  line-height:1.05 !important;
+  font-weight:900 !important;
+  letter-spacing:.035em !important;
+  color:rgba(255,255,255,.72) !important;
+  white-space:nowrap !important;
+}
+
+.metric-action.has-work .metric-hint{
+  color:#fed7aa !important;
+  text-shadow:0 0 14px rgba(251,146,60,.22);
+}
+
+.metric-action small{
+  letter-spacing:.04em !important;
+}
+
+.metric-action b{
+  letter-spacing:0 !important;
+}
+</style>
+\n
+<style id="live-metric-hint-compact-fix">
+.metric-hint{
+  margin-top:5px !important;
+  font-size:10px !important;
+  line-height:1 !important;
+  font-weight:950 !important;
+  letter-spacing:.02em !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  max-width:100% !important;
+  text-align:center !important;
+}
+
+.metric-action b{
+  font-size:20px !important;
+  line-height:1.05 !important;
+}
+
+.metric-action small{
+  font-size:11px !important;
+}
+</style>
+
+
+<style id="live-metric-compact-final-fix">
+/* Canlı durak küçük işlem kutuları final kompakt ayar */
+.card.live .metric-action{
+  padding:10px 6px !important;
+  min-width:0 !important;
+}
+
+.card.live .metric-action small{
+  font-size:10px !important;
+  line-height:1 !important;
+  letter-spacing:.02em !important;
+  margin-bottom:4px !important;
+}
+
+.card.live .metric-action b{
+  display:block !important;
+  font-size:16px !important;
+  line-height:1.05 !important;
+  letter-spacing:0 !important;
+  word-spacing:0 !important;
+  white-space:normal !important;
+  word-break:normal !important;
+  overflow-wrap:normal !important;
+  text-align:center !important;
+}
+
+.card.live .metric-action .metric-hint{
+  margin-top:4px !important;
+  font-size:9.5px !important;
+  line-height:1 !important;
+  letter-spacing:0 !important;
+  white-space:nowrap !important;
+  text-align:center !important;
+  color:rgba(255,255,255,.72) !important;
+}
+
+.card.live .metric-action::after{
+  width:6px !important;
+  height:6px !important;
+  right:8px !important;
+  bottom:8px !important;
+}
+</style>
+\n</head>
 
 <body>
   <main class="shell">
@@ -2694,13 +2789,13 @@
             <button class="metric metric-action" type="button" id="liveOffloadMetric" data-kind="offload" aria-label="Bu durakta inecek koltukları göster">
               <small>İnecek</small>
               <b id="liveOffloadCount">{{ live_current.off_count or 0 }} yolcu</b>
-              <span class="metric-hint">Koltukları gör</span>
+              <span class="metric-hint">Liste</span>
             </button>
 
             <button class="metric metric-action" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
               <small>Bagaj</small>
               <b id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</b>
-              <span class="metric-hint">Detayı gör</span>
+              <span class="metric-hint">Detay</span>
             </button>
           </div>
         </div>
@@ -3739,7 +3834,7 @@
       return;
     }
 
-    kickerEl.textContent = "Bagaj detayı";
+    kickerEl.textContent = "Detay";
     titleEl.textContent = `Koltuk ${seatNo}`;
     subEl.textContent = "Bagaj konumu yükleniyor...";
     bodyEl.innerHTML = '<div class="sheet-empty">Bagaj bilgisi alınıyor...</div>';
@@ -3800,7 +3895,7 @@
     }catch(err){
       console.error("seat bag detail error", err);
       subEl.textContent = "Bağlantı hatası.";
-      renderEmpty("Bagaj detayı alınamadı.");
+      renderEmpty("Detay alınamadı.");
     }
   }
 
@@ -3912,7 +4007,7 @@
 
     openSheet();
 
-    kickerEl.textContent = kind === "bagaj" ? "Bagaj detayı" : "İnecek yolcular";
+    kickerEl.textContent = kind === "bagaj" ? "Detay" : "İnecek yolcular";
     titleEl.textContent = `${stop} durağı`;
     subEl.textContent = "Yükleniyor...";
     bodyEl.innerHTML = '<div class="sheet-empty">Yükleniyor...</div>';
