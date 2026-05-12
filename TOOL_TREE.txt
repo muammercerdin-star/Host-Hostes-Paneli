@@ -1,0 +1,8 @@
+ARAÇ / ANALİZ SCRIPT DOSYALARI
+==============================
+Dosya sayısı: 2
+Kod satırı: 520
+
+└── tools
+    ├── audit_files.py
+    └── project_tree_audit.py

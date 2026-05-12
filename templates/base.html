@@ -7,7 +7,7 @@
   <title>{{ title or "Muavin Asistanı" }}</title>
 
   <!-- ✅ Yerel CSS -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/icons.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='3') }}">
 </head>
@@ -18,7 +18,7 @@
 
   <!-- ✅ Yerel JS (sırası önemli) -->
   <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='vendor/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 
   <!-- Sayfa bazlı ek script alanı -->

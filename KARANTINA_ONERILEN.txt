@@ -1,0 +1,5 @@
+seats_aktif_harita.py
+static/seats/seats-redesign.css
+static/vendor/fa/all.min.css
+static/vendor/jquery/jquery-3.7.1.min.js
+trafik_isigi/trafik.html

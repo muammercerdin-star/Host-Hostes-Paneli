@@ -1,0 +1,7 @@
+_unused_review/seats_aktif_harita.py
+_unused_review/static/seats/seats-redesign.css
+_unused_review/static/vendor/fa/all.min.css
+_unused_review/static/vendor/jquery/jquery-3.7.1.min.js
+_unused_review/trafik_isigi/trafik.html
+static/seats/_archive_theme_trials/seats-dashboard-final.css
+static/seats/_archive_theme_trials/seats-dashboard-tone.css

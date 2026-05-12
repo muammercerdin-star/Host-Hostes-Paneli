@@ -1,0 +1,17 @@
+seats_aktif_harita.py
+static/seats/bags.js
+static/seats/drive-controls.js
+static/seats/drive-eta-chip.js
+static/seats/route-marquee.js
+static/seats/seats-redesign.css
+static/seats/seats-time-prayer.js
+static/seats/seats.css
+static/seats/seats.js
+static/seats/standing.js
+static/seats/voice-commands.js
+static/seats/voice-tts.js
+static/vendor/bootstrap/bootstrap.bundle.min.js
+static/vendor/bootstrap/bootstrap.min.css
+static/vendor/fa/all.min.css
+static/vendor/jquery/jquery-3.7.1.min.js
+trafik_isigi/trafik.html

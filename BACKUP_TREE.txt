@@ -1,0 +1,22 @@
+YEDEK / ARŞİV DOSYALAR
+======================
+Dosya sayısı: 7
+Kod satırı: 2254
+
+├── _unused_review
+│   ├── seats_aktif_harita.py
+│   ├── static
+│   │   ├── seats
+│   │   │   └── seats-redesign.css
+│   │   └── vendor
+│   │       ├── fa
+│   │       │   └── all.min.css
+│   │       └── jquery
+│   │           └── jquery-3.7.1.min.js
+│   └── trafik_isigi
+│       └── trafik.html
+└── static
+    └── seats
+        └── _archive_theme_trials
+            ├── seats-dashboard-final.css
+            └── seats-dashboard-tone.css
