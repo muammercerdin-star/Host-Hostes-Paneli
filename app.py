@@ -1828,6 +1828,279 @@ def continue_trip():
     )
 
 
+@app.route("/api/live-seat-destination", methods=["POST"])
+def api_live_seat_destination():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    data = request.get_json(silent=True) or request.form or {}
+
+    seat_no = str(data.get("seat_no") or "").strip()
+    new_to_stop_raw = str(data.get("to_stop") or "").strip()
+
+    if not seat_no:
+        return jsonify({"ok": False, "error": "Koltuk numarası eksik."}), 400
+
+    if not new_to_stop_raw:
+        return jsonify({"ok": False, "error": "Yeni iniş durağı seçilmedi."}), 400
+
+    db = get_db()
+
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    stops = get_stops(trip["route"])
+
+    def stop_key(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    def find_route_stop(value):
+        raw = (value or "").strip()
+        if not raw:
+            return ""
+
+        if raw in stops:
+            return raw
+
+        raw_key = stop_key(raw)
+        if not raw_key:
+            return ""
+
+        for stop_name in stops:
+            if stop_key(stop_name) == raw_key:
+                return stop_name
+
+        for stop_name in stops:
+            sk = stop_key(stop_name)
+            if raw_key in sk or sk in raw_key:
+                return stop_name
+
+        return ""
+
+    new_to_stop = find_route_stop(new_to_stop_raw)
+    if not new_to_stop:
+        return jsonify({
+            "ok": False,
+            "error": "Seçilen durak bu rota içinde bulunamadı."
+        }), 400
+
+    row = db.execute(
+        """
+        SELECT seat_no,
+               COALESCE(from_stop,'') AS from_stop,
+               COALESCE(to_stop,'') AS to_stop
+        FROM seats
+        WHERE trip_id=? AND seat_no=?
+        """,
+        (tid, seat_no),
+    ).fetchone()
+
+    if not row:
+        return jsonify({
+            "ok": False,
+            "error": f"Koltuk {seat_no} bu seferde bulunamadı."
+        }), 404
+
+    old_to_stop = row["to_stop"] or ""
+
+    db.execute(
+        """
+        UPDATE seats
+        SET to_stop=?
+        WHERE trip_id=? AND seat_no=?
+        """,
+        (new_to_stop, tid, seat_no),
+    )
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "seat_no": seat_no,
+        "from_stop": row["from_stop"] or "",
+        "old_to_stop": old_to_stop,
+        "new_to_stop": new_to_stop,
+        "message": f"Koltuk {seat_no} iniş durağı {new_to_stop} olarak güncellendi."
+    })
+
+
+@app.route("/api/live-stop-detail")
+def api_live_stop_detail():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    stop = (request.args.get("stop") or "").strip()
+    if not stop:
+        return jsonify({"ok": False, "error": "Durak seçilmedi."}), 400
+
+    db = get_db()
+
+    def norm_stop(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    stop_key = norm_stop(stop)
+
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+
+    def _bag_count_from_meta(meta):
+        if isinstance(meta, (tuple, list)):
+            total = 0
+            for x in meta[:3]:
+                try:
+                    total += int(x or 0)
+                except Exception:
+                    pass
+            return total
+
+        if isinstance(meta, dict):
+            counts = meta.get("counts")
+            if isinstance(counts, dict):
+                total = 0
+                for k in ("R", "LF", "LB"):
+                    try:
+                        total += int(counts.get(k) or 0)
+                    except Exception:
+                        pass
+                return total
+
+        return 0
+
+    passengers = []
+    try:
+        rows = db.execute(
+            """
+            SELECT seat_no,
+                   COALESCE(from_stop,'') AS from_stop,
+                   COALESCE(to_stop,'') AS to_stop,
+                   COALESCE(passenger_name,'') AS passenger_name,
+                   COALESCE(passenger_phone,'') AS passenger_phone,
+                   COALESCE(ticket_type,'') AS ticket_type,
+                   COALESCE(payment,'') AS payment,
+                   COALESCE(amount,0) AS amount,
+                   COALESCE(service,0) AS service
+            FROM seats
+            WHERE trip_id=?
+            ORDER BY CAST(seat_no AS INTEGER), seat_no
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            to_stop = (r["to_stop"] or "").strip()
+            if norm_stop(to_stop) != stop_key:
+                continue
+
+            try:
+                meta = get_counts(trip_key, str(r["seat_no"]))
+            except Exception:
+                meta = ()
+
+            bag_count = _bag_count_from_meta(meta)
+
+            passengers.append({
+                "seat_no": str(r["seat_no"]),
+                "from_stop": r["from_stop"] or "",
+                "to_stop": to_stop,
+                "passenger_name": r["passenger_name"] or "",
+                "passenger_phone": r["passenger_phone"] or "",
+                "ticket_type": r["ticket_type"] or "",
+                "payment": r["payment"] or "",
+                "amount": float(r["amount"] or 0),
+                "service": int(r["service"] or 0),
+                "bag_count": int(bag_count or 0),
+            })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+    consignments = []
+    try:
+        cols = [
+            x["name"]
+            for x in db.execute("PRAGMA table_info(consignments)").fetchall()
+        ]
+
+        stop_col = None
+        for candidate in ["to_stop", "delivery_stop", "to_stop_name", "stop_name", "target_stop"]:
+            if candidate in cols:
+                stop_col = candidate
+                break
+
+        if stop_col:
+            select_cols = ["id", stop_col]
+            for c in ["code", "item_name", "item", "title", "note", "receiver_name", "to_name", "status"]:
+                if c in cols and c not in select_cols:
+                    select_cols.append(c)
+
+            q = f"SELECT {', '.join(select_cols)} FROM consignments WHERE trip_id=?"
+            rows = db.execute(q, (tid,)).fetchall()
+
+            for r in rows:
+                sname = (r[stop_col] or "").strip()
+                if norm_stop(sname) != stop_key:
+                    continue
+
+                item_label = ""
+                for c in ["item_name", "item", "title", "note"]:
+                    if c in cols:
+                        try:
+                            item_label = (r[c] or "").strip()
+                        except Exception:
+                            item_label = ""
+                        if item_label:
+                            break
+
+                receiver = ""
+                for c in ["receiver_name", "to_name"]:
+                    if c in cols:
+                        try:
+                            receiver = (r[c] or "").strip()
+                        except Exception:
+                            receiver = ""
+                        if receiver:
+                            break
+
+                code = ""
+                if "code" in cols:
+                    try:
+                        code = (r["code"] or "").strip()
+                    except Exception:
+                        code = ""
+
+                consignments.append({
+                    "code": code,
+                    "item_label": item_label,
+                    "receiver": receiver,
+                    "stop_name": sname,
+                })
+    except Exception:
+        consignments = []
+
+    seat_bag_total = sum(int(x.get("bag_count") or 0) for x in passengers)
+
+    return jsonify({
+        "ok": True,
+        "stop": stop,
+        "passengers": passengers,
+        "off_count": len(passengers),
+        "seat_bag_total": seat_bag_total,
+        "consignments": consignments,
+        "consignment_count": len(consignments),
+        "bag_total": seat_bag_total + len(consignments),
+    })
+
+
 @app.route("/seats")
 def seats_page():
     tid = get_active_trip()

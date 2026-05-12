@@ -1756,7 +1756,370 @@
   }
 }
 </style>
-</head>
+
+<style id="live-stop-sheet-style">
+.metric-action{
+  appearance:none;
+  border:1px solid rgba(255,255,255,.10);
+  font:inherit;
+  color:inherit;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+
+.metric-action::after{
+  content:"";
+  position:absolute;
+  inset:auto 14px 10px auto;
+  width:7px;
+  height:7px;
+  border-right:2px solid rgba(255,255,255,.55);
+  border-bottom:2px solid rgba(255,255,255,.55);
+  transform:rotate(-45deg);
+  opacity:.75;
+}
+
+.metric-action:hover,
+.metric-action:active{
+  transform:translateY(-1px);
+  border-color:rgba(255,190,90,.55);
+  box-shadow:0 0 0 1px rgba(255,190,90,.18), 0 14px 30px rgba(0,0,0,.18);
+}
+
+.metric-action.has-work{
+  border-color:rgba(255,190,90,.70);
+  box-shadow:0 0 0 1px rgba(255,190,90,.20), 0 0 22px rgba(255,144,45,.16);
+}
+
+.metric-action.is-empty{
+  opacity:.78;
+}
+
+.metric-hint{
+  display:block;
+  margin-top:5px;
+  font-size:10px;
+  line-height:1;
+  color:rgba(255,255,255,.58);
+  letter-spacing:.02em;
+}
+
+.live-sheet-overlay{
+  position:fixed;
+  inset:0;
+  z-index:9990;
+  background:rgba(3,7,18,.58);
+  backdrop-filter:blur(8px);
+  opacity:0;
+  pointer-events:none;
+  transition:.22s ease;
+}
+
+.live-sheet-overlay.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.live-stop-sheet{
+  position:fixed;
+  left:10px;
+  right:10px;
+  bottom:10px;
+  z-index:9991;
+  max-width:720px;
+  margin:0 auto;
+  border-radius:26px;
+  background:linear-gradient(180deg, rgba(18,28,48,.98), rgba(7,12,24,.98));
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 -24px 80px rgba(0,0,0,.48);
+  transform:translateY(115%);
+  transition:.26s cubic-bezier(.2,.8,.2,1);
+  overflow:hidden;
+}
+
+.live-stop-sheet.open{
+  transform:translateY(0);
+}
+
+.sheet-grip{
+  width:54px;
+  height:5px;
+  border-radius:99px;
+  background:rgba(255,255,255,.24);
+  margin:10px auto 6px;
+}
+
+.sheet-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:10px 18px 14px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.sheet-kicker{
+  font-size:11px;
+  color:#93c5fd;
+  font-weight:800;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+
+.sheet-title{
+  margin:4px 0 0;
+  font-size:21px;
+  line-height:1.1;
+  color:#fff;
+  font-weight:950;
+}
+
+.sheet-sub{
+  margin:6px 0 0;
+  color:rgba(255,255,255,.70);
+  font-size:13px;
+}
+
+.sheet-close{
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.07);
+  color:#fff;
+  font-size:22px;
+  line-height:1;
+}
+
+.sheet-body{
+  max-height:52vh;
+  overflow:auto;
+  padding:14px 14px 18px;
+}
+
+.sheet-empty{
+  padding:22px 14px;
+  text-align:center;
+  color:rgba(255,255,255,.72);
+}
+
+.sheet-list{
+  display:grid;
+  gap:10px;
+}
+
+.sheet-seat-row{
+  display:grid;
+  grid-template-columns:66px 1fr auto;
+  gap:12px;
+  align-items:center;
+  padding:13px;
+  border-radius:18px;
+  background:rgba(255,255,255,.065);
+  border:1px solid rgba(255,255,255,.09);
+}
+
+.sheet-seat-no{
+  width:54px;
+  height:54px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#f97316,#fb7185);
+  color:#fff;
+  font-size:22px;
+  font-weight:950;
+  box-shadow:0 12px 28px rgba(249,115,22,.20);
+}
+
+.sheet-seat-main{
+  min-width:0;
+}
+
+.sheet-seat-title{
+  color:#fff;
+  font-weight:900;
+  font-size:15px;
+}
+
+.sheet-seat-route{
+  color:rgba(255,255,255,.68);
+  font-size:12px;
+  margin-top:4px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.sheet-seat-extra{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:5px;
+  font-size:11px;
+  color:rgba(255,255,255,.72);
+}
+
+.sheet-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:6px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.10);
+  white-space:nowrap;
+}
+
+.sheet-badge.warn{
+  color:#fed7aa;
+  background:rgba(249,115,22,.14);
+  border-color:rgba(249,115,22,.28);
+}
+
+.sheet-consign-row{
+  padding:13px;
+  border-radius:18px;
+  background:rgba(59,130,246,.10);
+  border:1px solid rgba(147,197,253,.15);
+}
+
+.sheet-consign-title{
+  color:#fff;
+  font-weight:900;
+}
+
+.sheet-consign-sub{
+  margin-top:4px;
+  color:rgba(255,255,255,.68);
+  font-size:12px;
+}
+
+@media(max-width:520px){
+  .live-stop-sheet{
+    left:0;
+    right:0;
+    bottom:0;
+    border-radius:26px 26px 0 0;
+  }
+
+  .sheet-seat-row{
+    grid-template-columns:58px 1fr;
+  }
+
+  .sheet-seat-extra{
+    grid-column:1 / -1;
+    align-items:flex-start;
+    flex-direction:row;
+    flex-wrap:wrap;
+    padding-left:2px;
+  }
+}
+
+
+.sheet-action-btn{
+  appearance:none;
+  border:1px solid rgba(147,197,253,.22);
+  background:rgba(59,130,246,.12);
+  color:#dbeafe;
+  border-radius:999px;
+  padding:8px 10px;
+  font-weight:900;
+  font-size:11px;
+  white-space:nowrap;
+}
+
+.sheet-action-btn:active{
+  transform:scale(.98);
+}
+
+.sheet-change-form{
+  display:grid;
+  gap:14px;
+  padding:14px;
+}
+
+.sheet-change-card{
+  border-radius:20px;
+  padding:15px;
+  background:rgba(255,255,255,.065);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.sheet-change-title{
+  color:#fff;
+  font-size:18px;
+  font-weight:950;
+}
+
+.sheet-change-sub{
+  margin-top:5px;
+  color:rgba(255,255,255,.68);
+  font-size:13px;
+}
+
+.sheet-select{
+  width:100%;
+  min-height:54px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.14);
+  background:#101827;
+  color:#fff;
+  padding:0 14px;
+  font-size:16px;
+  font-weight:800;
+  outline:none;
+}
+
+.sheet-form-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.sheet-save-btn,
+.sheet-cancel-btn{
+  appearance:none;
+  border:0;
+  min-height:52px;
+  border-radius:18px;
+  font-size:15px;
+  font-weight:950;
+}
+
+.sheet-save-btn{
+  background:linear-gradient(135deg,#22c55e,#0ea5e9);
+  color:white;
+  box-shadow:0 14px 34px rgba(14,165,233,.20);
+}
+
+.sheet-cancel-btn{
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.12);
+}
+
+.sheet-note{
+  color:rgba(255,255,255,.62);
+  font-size:12px;
+  line-height:1.45;
+}
+</style>
+
+
+<style id="sheet-seat-number-spacing-fix">
+.sheet-seat-title,
+.sheet-change-title{
+  letter-spacing: 0 !important;
+  word-spacing: 0 !important;
+}
+
+.sheet-seat-no{
+  letter-spacing: 0 !important;
+}
+</style>
+\n</head>
 
 <body>
   <main class="shell">
@@ -1842,15 +2205,17 @@
               <b id="liveDistanceValue" class="stop-distance-value" data-stop-name="{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or '' }}">{{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else live_current.distance) or "-" }}</b>
             </div>
 
-            <div class="metric">
+            <button class="metric metric-action" type="button" id="liveOffloadMetric" data-kind="offload" aria-label="Bu durakta inecek koltukları göster">
               <small>İnecek</small>
-              <b>{{ live_current.off_count or 0 }} yolcu</b>
-            </div>
+              <b id="liveOffloadCount">{{ live_current.off_count or 0 }} yolcu</b>
+              <span class="metric-hint">Koltukları gör</span>
+            </button>
 
-            <div class="metric">
+            <button class="metric metric-action" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
               <small>Bagaj</small>
-              <b>{{ live_current.bagaj_count or 0 }}</b>
-            </div>
+              <b id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</b>
+              <span class="metric-hint">Detayı gör</span>
+            </button>
           </div>
         </div>
       </article>
@@ -1900,6 +2265,27 @@
         </div>
       </article>
       {% endfor %}
+    </section>
+
+
+    <div class="live-sheet-overlay" id="liveStopSheetOverlay"></div>
+
+    <section class="live-stop-sheet" id="liveStopSheet" aria-hidden="true">
+      <div class="sheet-grip"></div>
+
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-kicker" id="liveStopSheetKicker">Canlı durak</div>
+          <h2 class="sheet-title" id="liveStopSheetTitle">Durak detayı</h2>
+          <p class="sheet-sub" id="liveStopSheetSub">Yükleniyor...</p>
+        </div>
+
+        <button class="sheet-close" type="button" id="liveStopSheetClose" aria-label="Kapat">×</button>
+      </div>
+
+      <div class="sheet-body" id="liveStopSheetBody">
+        <div class="sheet-empty">Yükleniyor...</div>
+      </div>
     </section>
 
     <nav class="dock">
@@ -2376,6 +2762,383 @@
   }else{
     boot();
   }
+})();
+</script>
+
+
+<script id="live-stop-sheet-script">
+(function(){
+  const offBtn = document.getElementById("liveOffloadMetric");
+  const bagBtn = document.getElementById("liveBagajMetric");
+  const stopNameEl = document.getElementById("liveCurrentStopName");
+
+  const overlay = document.getElementById("liveStopSheetOverlay");
+  const sheet = document.getElementById("liveStopSheet");
+  const closeBtn = document.getElementById("liveStopSheetClose");
+  const titleEl = document.getElementById("liveStopSheetTitle");
+  const subEl = document.getElementById("liveStopSheetSub");
+  const bodyEl = document.getElementById("liveStopSheetBody");
+  const kickerEl = document.getElementById("liveStopSheetKicker");
+
+  const routeStops = {{ stops | tojson | safe }};
+  const csrfToken = {{ (csrf_token if csrf_token is defined else "") | tojson | safe }};
+
+  let lastDetailData = null;
+  let lastKind = "offload";
+
+  function text(v){
+    return String(v == null ? "" : v);
+  }
+
+  function escapeHtml(v){
+    return text(v)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function currentStopName(){
+    return (stopNameEl && stopNameEl.textContent ? stopNameEl.textContent : "").trim();
+  }
+
+  function openSheet(){
+    if(overlay) overlay.classList.add("open");
+    if(sheet){
+      sheet.classList.add("open");
+      sheet.setAttribute("aria-hidden", "false");
+    }
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeSheet(){
+    if(overlay) overlay.classList.remove("open");
+    if(sheet){
+      sheet.classList.remove("open");
+      sheet.setAttribute("aria-hidden", "true");
+    }
+    document.body.style.overflow = "";
+  }
+
+  function renderEmpty(message){
+    bodyEl.innerHTML = `<div class="sheet-empty">${escapeHtml(message)}</div>`;
+  }
+
+  function routeOptions(currentToStop){
+    const current = text(currentToStop || "").trim();
+
+    return (Array.isArray(routeStops) ? routeStops : []).map(stop => {
+      const selected = stop === current ? "selected" : "";
+      return `<option value="${escapeHtml(stop)}" ${selected}>${escapeHtml(stop)}</option>`;
+    }).join("");
+  }
+
+  function findPassenger(seatNo){
+    const passengers = lastDetailData && Array.isArray(lastDetailData.passengers)
+      ? lastDetailData.passengers
+      : [];
+
+    return passengers.find(p => text(p.seat_no) === text(seatNo));
+  }
+
+  function renderChangeDestinationForm(passenger){
+    if(!passenger){
+      renderEmpty("Koltuk bilgisi bulunamadı.");
+      return;
+    }
+
+    kickerEl.textContent = "İniş durağı değiştir";
+    titleEl.textContent = `Koltuk ${passenger.seat_no}`;
+    subEl.textContent = "Yeni ineceği durağı seç.";
+
+    bodyEl.innerHTML = `
+      <div class="sheet-change-form">
+        <div class="sheet-change-card">
+          <div class="sheet-change-title">Koltuk ${escapeHtml(passenger.seat_no)}</div>
+          <div class="sheet-change-sub">
+            Mevcut: ${escapeHtml(passenger.from_stop || "Biniş yok")} → ${escapeHtml(passenger.to_stop || "İniş yok")}
+          </div>
+        </div>
+
+        <label>
+          <div class="sheet-kicker" style="margin-bottom:8px;">Yeni iniş durağı</div>
+          <select class="sheet-select" id="sheetNewToStop">
+            ${routeOptions(passenger.to_stop)}
+          </select>
+        </label>
+
+        <div class="sheet-note">
+          Kaydedince koltuğun iniş durağı değişir. Koltuğa bağlı bagaj bilgisi de yeni durağın bagaj listesinde görünür.
+        </div>
+
+        <div class="sheet-form-actions">
+          <button class="sheet-cancel-btn" type="button" id="sheetCancelChange">Vazgeç</button>
+          <button class="sheet-save-btn" type="button" id="sheetSaveChange" data-seat-no="${escapeHtml(passenger.seat_no)}">Kaydet</button>
+        </div>
+      </div>
+    `;
+
+    const cancelBtn = document.getElementById("sheetCancelChange");
+    const saveBtn = document.getElementById("sheetSaveChange");
+
+    if(cancelBtn){
+      cancelBtn.addEventListener("click", function(){
+        if(lastKind === "bagaj") renderBags(lastDetailData || {});
+        else renderPassengers(lastDetailData || {});
+      });
+    }
+
+    if(saveBtn){
+      saveBtn.addEventListener("click", saveDestinationChange);
+    }
+  }
+
+  async function saveDestinationChange(){
+    const seatNo = this.getAttribute("data-seat-no") || "";
+    const select = document.getElementById("sheetNewToStop");
+    const toStop = select ? select.value : "";
+
+    if(!seatNo || !toStop){
+      renderEmpty("Koltuk veya durak bilgisi eksik.");
+      return;
+    }
+
+    this.disabled = true;
+    this.textContent = "Kaydediliyor...";
+
+    try{
+      const headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      };
+
+      if(csrfToken){
+        headers["X-CSRFToken"] = csrfToken;
+        headers["X-CSRF-Token"] = csrfToken;
+      }
+
+      const res = await fetch("/api/live-seat-destination", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          seat_no: seatNo,
+          to_stop: toStop
+        })
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        this.disabled = false;
+        this.textContent = "Kaydet";
+        alert(data.error || "İniş durağı değiştirilemedi.");
+        return;
+      }
+
+      titleEl.textContent = "Güncellendi";
+      subEl.textContent = data.message || "İniş durağı güncellendi.";
+      bodyEl.innerHTML = `
+        <div class="sheet-empty">
+          ${escapeHtml(data.message || "İniş durağı güncellendi.")}
+          <br><br>
+          Ekran yenileniyor...
+        </div>
+      `;
+
+      setTimeout(function(){
+        window.location.reload();
+      }, 650);
+
+    }catch(err){
+      console.error("destination change error", err);
+      this.disabled = false;
+      this.textContent = "Kaydet";
+      alert("Bağlantı hatası. İniş durağı değiştirilemedi.");
+    }
+  }
+
+  function renderPassengers(data){
+    lastDetailData = data;
+    const passengers = Array.isArray(data.passengers) ? data.passengers : [];
+
+    if(!passengers.length){
+      renderEmpty("Bu durakta inecek yolcu bulunmuyor.");
+      return;
+    }
+
+    bodyEl.innerHTML = `
+      <div class="sheet-list">
+        ${passengers.map(p => {
+          const bag = Number(p.bag_count || 0);
+          const name = text(p.passenger_name || "").trim();
+          const route = `${p.from_stop || "Biniş yok"} → ${p.to_stop || data.stop || "İniş yok"}`;
+
+          return `
+            <div class="sheet-seat-row">
+              <div class="sheet-seat-no">${escapeHtml(p.seat_no || "-")}</div>
+
+              <div class="sheet-seat-main">
+                <div class="sheet-seat-title">
+                  Koltuk ${escapeHtml(p.seat_no || "-")}${name ? " • " + escapeHtml(name) : ""}
+                </div>
+                <div class="sheet-seat-route">${escapeHtml(route)}</div>
+              </div>
+
+              <div class="sheet-seat-extra">
+                <span class="sheet-badge ${bag ? "warn" : ""}">🧳 ${bag ? bag + " bagaj" : "Bagaj yok"}</span>
+                ${Number(p.service || 0) ? '<span class="sheet-badge">🚌 Servis</span>' : ''}
+                <button class="sheet-action-btn" type="button" data-change-seat="${escapeHtml(p.seat_no || "")}">
+                  Durağı Değiştir
+                </button>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
+
+  function renderBags(data){
+    lastDetailData = data;
+    const passengers = Array.isArray(data.passengers) ? data.passengers : [];
+    const bagSeats = passengers.filter(p => Number(p.bag_count || 0) > 0);
+    const consignments = Array.isArray(data.consignments) ? data.consignments : [];
+
+    if(!bagSeats.length && !consignments.length){
+      renderEmpty("Bu durakta indirilecek bagaj veya emanet görünmüyor.");
+      return;
+    }
+
+    const seatHtml = bagSeats.map(p => `
+      <div class="sheet-seat-row">
+        <div class="sheet-seat-no">${escapeHtml(p.seat_no || "-")}</div>
+
+        <div class="sheet-seat-main">
+          <div class="sheet-seat-title">Koltuk ${escapeHtml(p.seat_no || "-")}</div>
+          <div class="sheet-seat-route">${escapeHtml((p.from_stop || "Biniş yok") + " → " + (p.to_stop || data.stop || "İniş yok"))}</div>
+        </div>
+
+        <div class="sheet-seat-extra">
+          <span class="sheet-badge warn">🧳 ${Number(p.bag_count || 0)} bagaj</span>
+          <button class="sheet-action-btn" type="button" data-change-seat="${escapeHtml(p.seat_no || "")}">
+            Durağı Değiştir
+          </button>
+        </div>
+      </div>
+    `).join("");
+
+    const consHtml = consignments.map(c => `
+      <div class="sheet-consign-row">
+        <div class="sheet-consign-title">📦 ${escapeHtml(c.code || "Emanet / Kargo")}</div>
+        <div class="sheet-consign-sub">
+          ${escapeHtml(c.item_label || "Ürün bilgisi yok")}
+          ${c.receiver ? " • Alıcı: " + escapeHtml(c.receiver) : ""}
+        </div>
+      </div>
+    `).join("");
+
+    bodyEl.innerHTML = `<div class="sheet-list">${seatHtml}${consHtml}</div>`;
+  }
+
+  async function loadDetail(kind){
+    lastKind = kind;
+    const stop = currentStopName();
+
+    if(!stop || stop === "Durak seçilmedi"){
+      openSheet();
+      titleEl.textContent = "Durak seçilmedi";
+      subEl.textContent = "Önce canlı durak belirlenmeli.";
+      renderEmpty("Canlı durak bilgisi bulunamadı.");
+      return;
+    }
+
+    openSheet();
+
+    kickerEl.textContent = kind === "bagaj" ? "Bagaj detayı" : "İnecek yolcular";
+    titleEl.textContent = `${stop} durağı`;
+    subEl.textContent = "Yükleniyor...";
+    bodyEl.innerHTML = '<div class="sheet-empty">Yükleniyor...</div>';
+
+    try{
+      const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stop)}&_=${Date.now()}`, {
+        headers: {"Accept":"application/json"}
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        subEl.textContent = "Bilgi alınamadı.";
+        renderEmpty(data.error || "Bir hata oluştu.");
+        return;
+      }
+
+      lastDetailData = data;
+
+      if(kind === "bagaj"){
+        subEl.textContent = `${Number(data.bag_total || 0)} bagaj / emanet`;
+        renderBags(data);
+      }else{
+        subEl.textContent = `${Number(data.off_count || 0)} yolcu inecek`;
+        renderPassengers(data);
+      }
+
+    }catch(err){
+      subEl.textContent = "Bağlantı hatası.";
+      renderEmpty("Durak detayı alınamadı.");
+      console.error("live stop detail error", err);
+    }
+  }
+
+  function refreshMetricState(){
+    const offCountEl = document.getElementById("liveOffloadCount");
+    const bagCountEl = document.getElementById("liveBagajCount");
+
+    const offN = parseInt((offCountEl && offCountEl.textContent || "0").replace(/\D+/g, "") || "0", 10);
+    const bagN = parseInt((bagCountEl && bagCountEl.textContent || "0").replace(/\D+/g, "") || "0", 10);
+
+    if(offBtn){
+      offBtn.classList.toggle("has-work", offN > 0);
+      offBtn.classList.toggle("is-empty", offN <= 0);
+    }
+
+    if(bagBtn){
+      bagBtn.classList.toggle("has-work", bagN > 0);
+      bagBtn.classList.toggle("is-empty", bagN <= 0);
+    }
+  }
+
+  if(offBtn){
+    offBtn.addEventListener("click", function(){
+      loadDetail("offload");
+    });
+  }
+
+  if(bagBtn){
+    bagBtn.addEventListener("click", function(){
+      loadDetail("bagaj");
+    });
+  }
+
+  if(bodyEl){
+    bodyEl.addEventListener("click", function(e){
+      const btn = e.target.closest("[data-change-seat]");
+      if(!btn) return;
+
+      const seatNo = btn.getAttribute("data-change-seat") || "";
+      const passenger = findPassenger(seatNo);
+      renderChangeDestinationForm(passenger);
+    });
+  }
+
+  if(closeBtn) closeBtn.addEventListener("click", closeSheet);
+  if(overlay) overlay.addEventListener("click", closeSheet);
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape") closeSheet();
+  });
+
+  refreshMetricState();
 })();
 </script>
 
