@@ -16,6 +16,33 @@ const serviceMap = BOOT.serviceMap || {};
 const serviceNotes = BOOT.serviceNotes || {};
 const serverStops = BOOT.serverStops || [];
 
+
+/* =========================================================
+   ONE TIME STOP FLOW HARD CLEAN
+   Eski sürümden kalan geçildi / işlem bitti izlerini temizler.
+========================================================= */
+(function hardCleanOldStopFlowOnce(){
+  try{
+    if(!TRIP_KEY) return;
+
+    const key = "hardCleanStopFlowOnce:" + TRIP_KEY;
+    const version = "20260512-v1";
+
+    if(localStorage.getItem(key) === version) return;
+
+    [
+      "stopFlowSummary:" + TRIP_KEY,
+      "passedStops:" + TRIP_KEY,
+      "liveStop:" + TRIP_KEY,
+      "continueTripStop:" + TRIP_KEY,
+      "continueTripStop:last"
+    ].forEach(k => localStorage.removeItem(k));
+
+    localStorage.setItem(key, version);
+  }catch(_){}
+})();
+
+
 const BAG_TRIP = TRIP_KEY;
   window.BAG_TRIP = BAG_TRIP;
 
@@ -90,7 +117,71 @@ const BAG_TRIP = TRIP_KEY;
     if(el) el.style.display = "none";
   }
 
-  const boardsMap = Object.assign(
+  
+/* =========================================================
+   TRIP MEMORY GUARD
+   Aynı rota/plaka ile yeni sefer açılınca eski canlı durak,
+   geçildi bilgisi ve durak akışı özeti taşınmasın.
+========================================================= */
+(function resetTripMemoryIfActiveTripChanged(){
+  try{
+    const currentTripId = String(
+      (window.SEATS_BOOT && window.SEATS_BOOT.tripId) ||
+      (typeof BOOT !== "undefined" && BOOT && BOOT.tripId) ||
+      ""
+    );
+
+    if(!currentTripId || !TRIP_KEY) return;
+
+    const activeTripMemoryKey = "activeTripId:" + TRIP_KEY;
+    const memorySchemaKey = "routeMemorySchema:" + TRIP_KEY;
+    const memorySchemaVersion = "v2-stop-flow-clean-20260512";
+
+    const oldTripId = localStorage.getItem(activeTripMemoryKey) || "";
+    const oldSchema = localStorage.getItem(memorySchemaKey) || "";
+
+    // Hem trip_id değişince hem de hafıza şeması değişince eski durak akışı silinsin.
+    const shouldClean =
+      !oldTripId ||
+      oldTripId !== currentTripId ||
+      oldSchema !== memorySchemaVersion;
+
+    if(!shouldClean){
+      return;
+    }
+
+    const prefixes = [
+      "liveStop:",
+      "passedStops:",
+      "boardsMap:",
+      "standingTotals:",
+      "standingItems:",
+      "continueTripStop:",
+      "stopFlowSummary:"
+    ];
+
+    prefixes.forEach(prefix => {
+      localStorage.removeItem(prefix + TRIP_KEY);
+    });
+
+    localStorage.removeItem("continueTripStop:last");
+
+    Object.keys(localStorage).forEach(k => {
+      if(
+        k.includes(TRIP_KEY) &&
+        prefixes.some(prefix => k.startsWith(prefix))
+      ){
+        localStorage.removeItem(k);
+      }
+    });
+
+    localStorage.setItem(activeTripMemoryKey, currentTripId);
+    localStorage.setItem(memorySchemaKey, memorySchemaVersion);
+  }catch(_){}
+})();
+
+
+const boardsMap = Object.assign(
     {},
     boardsMapServer || {},
     JSON.parse(localStorage.getItem("boardsMap:" + TRIP_KEY) || "{}")
@@ -288,7 +379,42 @@ function nearestStopByGps(maxKm = 15){
 }
 
 function getDisplayLiveStop(){
-  return speedState.liveStop || nearestStopByGps(15) || "";
+  const live = speedState.liveStop || "";
+  if(!live) return "";
+
+  // İşlem olmayan durak canlı gösterilmez.
+  try{
+    if(typeof hasLiveStopOperation === "function" && !hasLiveStopOperation(live)){
+      speedState.liveStop = "";
+      speedState.passedStops = new Set();
+
+      try{
+        localStorage.removeItem("liveStop:" + TRIP_KEY);
+        localStorage.removeItem("passedStops:" + TRIP_KEY);
+      }catch(_){}
+
+      return "";
+    }
+  }catch(_){}
+
+  // Canlı durak sadece gerçekten yakındaki doğrulanmış durak olsun.
+  try{
+    const km = stopDistanceKmByName(live);
+
+    if(Number.isFinite(km) && km > 5.5){
+      speedState.liveStop = "";
+      speedState.passedStops = new Set();
+
+      try{
+        localStorage.removeItem("liveStop:" + TRIP_KEY);
+        localStorage.removeItem("passedStops:" + TRIP_KEY);
+      }catch(_){}
+
+      return "";
+    }
+  }catch(_){}
+
+  return live;
 }
 
 function stopDistanceKmByName(name){
@@ -517,7 +643,24 @@ async function loadRouteScheduleFromApi(){
 
 
   const STOP_FLOW_SUMMARY_KEY = "stopFlowSummary:" + TRIP_KEY;
+  const STOP_FLOW_EVENT_KEY = "stopFlowLiveEvents:" + TRIP_KEY;
   let stopFlowSummary = {};
+
+  function readStopFlowLiveEvents(){
+    try{
+      const raw = localStorage.getItem(STOP_FLOW_EVENT_KEY) || "{}";
+      const obj = JSON.parse(raw);
+      return obj && typeof obj === "object" ? obj : {};
+    }catch(_){
+      return {};
+    }
+  }
+
+  function writeStopFlowLiveEvents(obj){
+    try{
+      localStorage.setItem(STOP_FLOW_EVENT_KEY, JSON.stringify(obj || {}));
+    }catch(_){}
+  }
 
   function loadStopFlowSummary(){
     try{
@@ -528,6 +671,43 @@ async function loadRouteScheduleFromApi(){
       stopFlowSummary = {};
     }
   }
+
+
+  function clearStaleStopFlowIfTripEmpty(){
+    try{
+      const assignedCount = Object.keys(assigned || {}).length;
+
+      // Yeni sefer açılmış ve koltuk yoksa eski durak akışı özetini taşıma.
+      if(assignedCount > 0) return;
+
+      const keys = [
+        "stopFlowSummary:" + TRIP_KEY,
+        "liveStop:" + TRIP_KEY,
+        "passedStops:" + TRIP_KEY,
+        "boardsMap:" + TRIP_KEY,
+        "standingTotals:" + TRIP_KEY,
+        "standingItems:" + TRIP_KEY,
+        "continueTripStop:" + TRIP_KEY,
+        "continueTripStop:last"
+      ];
+
+      keys.forEach(k => localStorage.removeItem(k));
+
+      stopFlowSummary = {};
+
+      if(speedState){
+        speedState.liveStop = "";
+        speedState.passedStops = new Set();
+      }
+
+      if(typeof renderTimeline === "function") renderTimeline();
+      if(typeof updateCompactHeader === "function") updateCompactHeader();
+      if(typeof renderAI === "function") renderAI();
+    }catch(_){}
+  }
+
+
+  setTimeout(clearStaleStopFlowIfTripEmpty, 0);
 
   function persistStopFlowSummary(){
     try{
@@ -586,6 +766,47 @@ async function loadRouteScheduleFromApi(){
     }
   }
 
+
+  function recordStopFlowEvent(stopName, delta = {}){
+    try{
+      const key = stopSummaryKey(stopName);
+      if(!key) return;
+
+      const liveEvents = readStopFlowLiveEvents();
+      const old = liveEvents[key] || {};
+
+      const rec = {
+        ...old,
+        board: Number(old.board || 0) + Number(delta.board || 0),
+        offload: Number(old.offload || 0) + Number(delta.offload || 0),
+        standing_board: Number(old.standing_board || 0) + Number(delta.standing_board || 0),
+        standing_offload: Number(old.standing_offload || 0) + Number(delta.standing_offload || 0),
+        parcel: Number(old.parcel || 0) + Number(delta.parcel || 0),
+        bag: Number(old.bag || 0) + Number(delta.bag || 0),
+        updated_at: Date.now()
+      };
+
+      liveEvents[key] = rec;
+      writeStopFlowLiveEvents(liveEvents);
+
+      // Eski summary içinde de bilgi dursun ama live event ayrı hafızada kalsın.
+      stopFlowSummary[key] = {
+        ...(stopFlowSummary[key] || {}),
+        live_board: rec.board,
+        live_offload: rec.offload,
+        live_parcel: rec.parcel,
+        live_bag: rec.bag,
+        updated_at: rec.updated_at
+      };
+      persistStopFlowSummary();
+
+      if(typeof renderRouteStrip === "function") renderRouteStrip();
+    }catch(err){
+      console.log("recordStopFlowEvent error", err);
+    }
+  }
+
+
   function snapshotStopFlowSummary(stopName, data = {}){
     const key = stopSummaryKey(stopName);
     if(!key) return;
@@ -617,20 +838,49 @@ async function loadRouteScheduleFromApi(){
   function stopFlowSummaryLine(stopName){
     const key = stopSummaryKey(stopName);
     const rec = stopFlowSummary[key] || {};
-
-    const off = Math.max(Number(rec.off || 0), offCountForStop(key));
-    const board = Math.max(Number(rec.board || 0), boardCountForStop(key));
-    const parcel = Math.max(Number(rec.parcel || 0), parcelCountForStop(key));
+    const liveRec = readStopFlowLiveEvents()[key] || {};
 
     const parts = [];
 
-    if(off > 0) parts.push(`${off} kişi indi`);
+    const board = Math.max(
+      Number(rec.board || rec.board_count || rec.live_board || 0),
+      Number(liveRec.board || 0)
+    );
+
+    const offload = Math.max(
+      Number(rec.offload || rec.offload_count || rec.live_offload || 0),
+      Number(liveRec.offload || 0)
+    );
+
+    const standingBoard = Math.max(
+      Number(rec.standing_board || rec.standingBoard || 0),
+      Number(liveRec.standing_board || 0)
+    );
+
+    const standingOffload = Math.max(
+      Number(rec.standing_offload || rec.standingOffload || 0),
+      Number(liveRec.standing_offload || 0)
+    );
+
+    const parcel = Math.max(
+      Number(rec.parcel || rec.parcel_count || rec.live_parcel || 0),
+      Number(liveRec.parcel || 0)
+    );
+
+    const bag = Math.max(
+      Number(rec.bag || rec.bag_count || rec.live_bag || 0),
+      Number(liveRec.bag || 0)
+    );
+
     if(board > 0) parts.push(`${board} kişi bindi`);
+    if(offload > 0) parts.push(`${offload} kişi indi`);
+    if(standingBoard > 0) parts.push(`${standingBoard} ayakta bindi`);
+    if(standingOffload > 0) parts.push(`${standingOffload} ayakta indi`);
+    if(bag > 0) parts.push(`${bag} bagaj`);
     if(parcel > 0) parts.push(`${parcel} emanet teslim`);
 
-    return parts.length ? parts.join(" · ") : "İşlem bitti";
+    return parts.length ? parts.join(" · ") : "İşlem yok";
   }
-
 
   function totalParcelCount(){
     return (parcelItems || []).reduce((a,b) => a + Number(b?.count || 0), 0);
@@ -891,10 +1141,14 @@ function renderRouteStrip(){
     else metaLine1 = "Bekliyor";
 
     let metaLine2 = "";
-    if(isDone){
-      metaLine2 = stopFlowSummaryLine(stop);
+    const flowLine = stopFlowSummaryLine(stop);
+
+    if(flowLine && flowLine !== "İşlem yok"){
+      metaLine2 = flowLine;
     }else if(seatCt || standingCt || parcelCt){
       metaLine2 = `${seatCt}K ${standingCt}A ${parcelCt}E`;
+    }else if(isDone){
+      metaLine2 = "İşlem bitti";
     }else{
       metaLine2 = "İşlem yok";
     }
@@ -1170,6 +1424,8 @@ if(routeFocusItem && live){
   async function saveSeat(){
     if(!currentSeat) return;
 
+    const wasAlreadyAssigned = !!assigned[String(currentSeat)];
+
     const from = $("#pickup")?.value || getSelectedStopName() || "";
     const stop = $("#dropoff")?.value || "";
     const ticket = document.querySelector('input[name="ticket"]:checked')?.value || "biletsiz";
@@ -1206,6 +1462,10 @@ if(routeFocusItem && live){
       serviceMap[String(currentSeat)] = !!service;
       serviceNotes[String(currentSeat)] = service_note;
       boardsMap[String(currentSeat)] = from;
+
+      if(!wasAlreadyAssigned && from){
+        recordStopFlowEvent(from, { board: 1 });
+      }
 
       persistBoards();
       setSeatVisual(currentSeat);
@@ -1246,6 +1506,8 @@ if(routeFocusItem && live){
   async function offloadSeat(){
     if(!currentSeat) return;
 
+    const offStop = stopsMap[String(currentSeat)] || getSelectedStopName() || "";
+
     try{
       const j = await safeJsonFetch("/api/seat?seat_no=" + currentSeat, {
         method:"DELETE",
@@ -1253,6 +1515,10 @@ if(routeFocusItem && live){
       });
 
       if(!j.ok) throw new Error(j.msg || "Silme başarısız");
+
+      if(offStop){
+        recordStopFlowEvent(offStop, { offload: 1 });
+      }
 
       await clearBagsForSeat(currentSeat);
       clearSeatUI(currentSeat);
@@ -1496,6 +1762,14 @@ function renderApproachPanel(stop, seats){
   async function bulkOffload(seatNums){
     if(!Array.isArray(seatNums) || !seatNums.length) return;
 
+    const offloadByStop = {};
+    for(const n of seatNums){
+      const st = stopsMap[String(n)] || getSelectedStopName() || "";
+      if(st){
+        offloadByStop[st] = (offloadByStop[st] || 0) + 1;
+      }
+    }
+
     try{
       let ok = false;
 
@@ -1517,6 +1791,10 @@ function renderApproachPanel(stop, seats){
           if(!j.ok) throw new Error(j.msg || ("Koltuk " + n + " boşaltılamadı"));
         }
       }
+
+      Object.entries(offloadByStop).forEach(([stopName, count]) => {
+        recordStopFlowEvent(stopName, { offload: count });
+      });
 
       for(const n of seatNums){
         await clearBagsForSeat(n);
@@ -1948,19 +2226,142 @@ function buildEtaModel(){
     setText("#aiParcel", selectedParcel > 0 ? `${selectedParcel} teslim var` : (stop ? "Teslim yok" : "Durak seçilmedi"));
   }
 
-  function autoDetectLiveStop(coords){
+  const LIVE_DETECT_KM = 5;        // Muavin hazırlık/canlı durak eşiği
+  const LIVE_FORCE_KM = 5;         // Bu mesafede beklemeden canlı yap
+  const LIVE_STABLE_HITS = 2;      // GPS sapmasına karşı aynı durak kaç kez görülsün
+  const LIVE_LOOKAHEAD_STOPS = 4;  // Mevcut canlı duraktan sonra kaç durağa bakılsın
+
+  let liveDetectCandidate = {
+    name: "",
+    hits: 0,
+    lastAt: 0
+  };
+
+      function liveCandidateStops(){
+    const list = allStopsList();
+    if(!Array.isArray(list) || !list.length) return [];
+
+    // Canlı durak GPS + rota sırasına göre belirlenecek.
+    // Seçili durak veya eski canlı durak aday listesini kısıtlamaz.
+    return list;
+  }
+
+    
+  function liveStopOperationCount(stopName){
+    const canonical = findCanonicalStopName(stopName) || String(stopName || "").trim();
+    if(!canonical) return 0;
+
+    let total = 0;
+
+    try{
+      const arr = seatsForStop(canonical);
+      if(Array.isArray(arr)) total += arr.length;
+    }catch(_){}
+
+    try{
+      if(typeof boardCountForStop === "function"){
+        total += Number(boardCountForStop(canonical) || 0);
+      }
+    }catch(_){}
+
+    try{
+      const standingMap = computeStandingCountsByStop();
+      total += Number(standingMap[canonical] || 0);
+    }catch(_){}
+
+    try{
+      const parcelMap = computeParcelCountsByStop();
+      total += Number(parcelMap[canonical] || 0);
+    }catch(_){}
+
+    return total;
+  }
+
+  function hasLiveStopOperation(stopName){
+    return liveStopOperationCount(stopName) > 0;
+  }
+
+
+    function autoDetectLiveStop(coords){
     if(!coords || !cachedStops?.length) return;
 
-    let best = null;
-    for(const stop of cachedStops){
-      if(!hasCoord(stop)) continue;
-      const km = distKm(coords, { lat:Number(stop.lat), lng:Number(stop.lng) });
-      if(!best || km < best.km) best = { stop: stop.name, km };
+    const list = allStopsList();
+    if(!Array.isArray(list) || !list.length) return;
+
+    const candidates = [];
+
+    // 5 km içindeki ve işlem olan rota duraklarını topla.
+    for(const stopName of list){
+      const canonical = findCanonicalStopName(stopName) || stopName;
+      const stopObj = findStopByName(canonical);
+
+      if(!stopObj || !hasCoord(stopObj)) continue;
+
+      // İşlem yoksa canlı durak yapma.
+      if(!hasLiveStopOperation(canonical)) continue;
+
+      const km = distKm(coords, {
+        lat:Number(stopObj.lat),
+        lng:Number(stopObj.lng)
+      });
+
+      if(Number.isFinite(km) && km <= LIVE_DETECT_KM){
+        candidates.push({
+          stop: canonical,
+          km,
+          idx: indexOfStopByName(canonical)
+        });
+      }
     }
 
-    if(best && best.km <= 3.5){
-      setLiveStop(best.stop);
+    if(!candidates.length){
+      // Mevcut canlı durakta artık işlem yoksa veya işlemli aday yoksa canlıyı boşalt.
+      if(speedState.liveStop && !hasLiveStopOperation(speedState.liveStop)){
+        speedState.liveStop = "";
+        speedState.passedStops = new Set();
+
+        try{
+          localStorage.removeItem("liveStop:" + TRIP_KEY);
+          localStorage.removeItem("passedStops:" + TRIP_KEY);
+        }catch(_){}
+
+        renderRouteStrip();
+        updateCompactHeader();
+      }
+      return;
     }
+
+    // Birden fazla işlemli durak 5 km içindeyse rota sırasında önce gelen canlı olur.
+    candidates.sort((a, b) => {
+      const ai = Number.isFinite(a.idx) && a.idx >= 0 ? a.idx : 999999;
+      const bi = Number.isFinite(b.idx) && b.idx >= 0 ? b.idx : 999999;
+
+      if(ai !== bi) return ai - bi;
+      return a.km - b.km;
+    });
+
+    const best = candidates[0];
+    if(!best) return;
+
+    const currentLive = speedState.liveStop || "";
+    const now = Date.now();
+
+    if(currentLive && norm(currentLive) === norm(best.stop)){
+      liveDetectCandidate = {
+        name: best.stop,
+        hits: LIVE_STABLE_HITS,
+        lastAt: now
+      };
+      return;
+    }
+
+    setLiveStop(best.stop);
+
+    liveDetectCandidate = {
+      name: best.stop,
+      hits: LIVE_STABLE_HITS,
+      lastAt: now
+    };
   }
 
 function initTabs(){
@@ -2424,10 +2825,21 @@ async function persistLiveRuntimeStateToServer(){
     const tripId = window.SEATS_BOOT?.tripId;
     if(!tripId) return;
 
-    const liveStop =
+    // Backend'e sadece gerçekten set edilmiş canlı durağı yaz.
+    // getDisplayLiveStop() içindeki 15 km fallback burada kullanılmaz.
+    let liveStop =
       (speedState && speedState.liveStop) ||
-      (typeof getDisplayLiveStop === "function" ? getDisplayLiveStop() : "") ||
       "";
+
+    // Uzakta kalmış eski canlı durak backend'e yazılmasın.
+    try{
+      if(liveStop && typeof stopDistanceKmByName === "function"){
+        const liveKmCheck = stopDistanceKmByName(liveStop);
+        if(Number.isFinite(liveKmCheck) && liveKmCheck > 5.5){
+          liveStop = "";
+        }
+      }
+    }catch(_){}
 
     const speed = Math.round(Number((speedState && speedState.current) || 0)) || 0;
 

@@ -2454,6 +2454,7 @@ def api_live_stop_detail():
                    COALESCE(ticket_type,'') AS ticket_type,
                    COALESCE(payment,'') AS payment,
                    COALESCE(amount,0) AS amount,
+                   COALESCE(gender,'') AS gender,
                    COALESCE(service,0) AS service
             FROM seats
             WHERE trip_id=?
@@ -2519,6 +2520,7 @@ def api_live_stop_detail():
                 "ticket_type": r["ticket_type"] or "",
                 "payment": r["payment"] or "",
                 "amount": float(r["amount"] or 0),
+                "gender": r["gender"] or "",
                 "service": int(r["service"] or 0),
                 "bag_count": int(bag_count or 0),
                 "bag_right": int(bag_right or 0),
@@ -6737,9 +6739,35 @@ def end_trip():
     db = get_db()
 
     if tid:
+        trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+
         finalize_remaining_trip_events(db, tid)
         report_files = save_finished_trip_report(tid)
         session["last_finished_trip_report"] = report_files
+
+        # Canlı runtime bilgisini temizle
+        try:
+            ensure_live_runtime_state_table()
+            db.execute("DELETE FROM live_runtime_state WHERE trip_id=?", (tid,))
+        except Exception:
+            pass
+
+        # Continue ekranının son seçili durağını temizle
+        try:
+            session.pop("continue_current_stop", None)
+        except Exception:
+            pass
+
+        # Bu sefere ait koltuk bagaj klasörünü temizle
+        try:
+            if trip:
+                import shutil
+                trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+                d = bag_root() / safe(trip_key)
+                if d.exists() and d.is_dir():
+                    shutil.rmtree(d, ignore_errors=True)
+        except Exception:
+            pass
 
         db.execute("DELETE FROM seats WHERE trip_id=?", (tid,))
         db.execute("DELETE FROM walk_on_sales WHERE trip_id=?", (tid,))
@@ -6747,6 +6775,11 @@ def end_trip():
         db.execute("UPDATE app_state SET active_trip_id=NULL WHERE id=1")
         db.commit()
     else:
+        try:
+            session.pop("continue_current_stop", None)
+        except Exception:
+            pass
+
         db.execute("UPDATE app_state SET active_trip_id=NULL WHERE id=1")
         db.commit()
 

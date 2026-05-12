@@ -3003,6 +3003,195 @@
   bottom:9px !important;
 }
 </style>
+
+<style id="live-sheet-gender-color-style">
+.sheet-seat-row.gender-male{
+  border-color:rgba(59,130,246,.26) !important;
+  box-shadow:0 0 0 1px rgba(59,130,246,.10), 0 14px 34px rgba(0,0,0,.16);
+}
+
+.sheet-seat-row.gender-female{
+  border-color:rgba(236,72,153,.30) !important;
+  box-shadow:0 0 0 1px rgba(236,72,153,.11), 0 14px 34px rgba(0,0,0,.16);
+}
+
+.sheet-seat-row.gender-male .sheet-seat-no{
+  background:linear-gradient(135deg,#3b82f6,#1d4ed8) !important;
+  box-shadow:0 12px 28px rgba(37,99,235,.28) !important;
+}
+
+.sheet-seat-row.gender-female .sheet-seat-no{
+  background:linear-gradient(135deg,#ec4899,#be185d) !important;
+  box-shadow:0 12px 28px rgba(236,72,153,.28) !important;
+}
+
+.sheet-seat-row.gender-neutral .sheet-seat-no{
+  background:linear-gradient(135deg,#f97316,#ef4444) !important;
+}
+
+.sheet-gender-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-left:7px;
+  padding:4px 7px;
+  border-radius:999px;
+  font-size:10px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.02em;
+  vertical-align:middle;
+}
+
+.sheet-seat-row.gender-male .sheet-gender-chip{
+  color:#dbeafe;
+  background:rgba(59,130,246,.16);
+  border:1px solid rgba(147,197,253,.20);
+}
+
+.sheet-seat-row.gender-female .sheet-gender-chip{
+  color:#fce7f3;
+  background:rgba(236,72,153,.16);
+  border:1px solid rgba(244,114,182,.22);
+}
+
+.sheet-seat-row.gender-neutral .sheet-gender-chip{
+  color:#fed7aa;
+  background:rgba(249,115,22,.14);
+  border:1px solid rgba(251,146,60,.20);
+}
+</style>
+
+<style id="live-stop-summary-style">
+.live-summary-trigger{
+  cursor:pointer;
+  position:relative;
+}
+
+.live-summary-trigger:active{
+  transform:scale(.995);
+}
+
+.sheet-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  padding:14px;
+}
+
+.sheet-summary-cell{
+  border-radius:18px;
+  padding:13px 9px;
+  text-align:center;
+  background:rgba(255,255,255,.065);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.sheet-summary-cell strong{
+  display:block;
+  color:#fff;
+  font-size:24px;
+  font-weight:1000;
+  line-height:1;
+}
+
+.sheet-summary-cell span{
+  display:block;
+  margin-top:7px;
+  color:rgba(255,255,255,.68);
+  font-size:11px;
+  font-weight:900;
+}
+
+.sheet-summary-card{
+  margin:0 14px 12px;
+  border-radius:22px;
+  padding:15px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.sheet-summary-title{
+  color:#bfdbfe;
+  font-size:12px;
+  font-weight:1000;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+
+.sheet-summary-text{
+  color:rgba(255,255,255,.78);
+  font-size:14px;
+  line-height:1.45;
+  font-weight:800;
+}
+
+.sheet-summary-pill-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.sheet-summary-pill{
+  padding:7px 10px;
+  border-radius:999px;
+  background:rgba(59,130,246,.12);
+  border:1px solid rgba(147,197,253,.18);
+  color:#dbeafe;
+  font-size:12px;
+  font-weight:950;
+}
+
+.sheet-summary-pill.female{
+  background:rgba(236,72,153,.13);
+  border-color:rgba(244,114,182,.20);
+  color:#fce7f3;
+}
+
+.sheet-summary-pill.bag{
+  background:rgba(249,115,22,.13);
+  border-color:rgba(251,146,60,.22);
+  color:#fed7aa;
+}
+
+.sheet-summary-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:9px;
+  padding:2px 14px 16px;
+}
+
+.sheet-summary-action{
+  appearance:none;
+  border:1px solid rgba(147,197,253,.18);
+  background:rgba(59,130,246,.12);
+  color:#dbeafe;
+  border-radius:17px;
+  min-height:48px;
+  font-size:12px;
+  font-weight:1000;
+}
+
+.sheet-summary-action.speak{
+  background:linear-gradient(135deg,rgba(34,197,94,.22),rgba(14,165,233,.16));
+  border-color:rgba(34,197,94,.24);
+  color:#dcfce7;
+}
+
+.sheet-summary-action.bag{
+  background:rgba(249,115,22,.13);
+  border-color:rgba(251,146,60,.22);
+  color:#fed7aa;
+}
+
+@media(max-width:430px){
+  .sheet-summary-actions{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -3068,7 +3257,7 @@
       <article class="journey-card">
         <div class="node live"></div>
 
-        <div class="card live">
+        <div class="card live live-summary-trigger" id="liveCurrentCard" role="button" tabindex="0" aria-label="Canlı durak özetini aç">
           <div class="card-head">
             <div>
               <span class="card-label">Şu anki durak</span>
@@ -3273,8 +3462,49 @@
         }
       });
 
+
+      function clearTripLocalMemory(){
+        try{
+          const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
+
+          const exactKeys = [
+            "liveStop:" + tripKey,
+            "passedStops:" + tripKey,
+            "boardsMap:" + tripKey,
+            "standingTotals:" + tripKey,
+            "standingItems:" + tripKey,
+            "continueTripStop:" + tripKey,
+            "continueTripStop:last",
+            "stopFlowSummary:" + tripKey,
+            "stopFlowLiveEvents:" + tripKey
+          ];
+
+          exactKeys.forEach(k => localStorage.removeItem(k));
+
+          Object.keys(localStorage).forEach(k => {
+            if(
+              k.includes(tripKey) &&
+              (
+                k.startsWith("liveStop:") ||
+                k.startsWith("passedStops:") ||
+                k.startsWith("boardsMap:") ||
+                k.startsWith("standingTotals:") ||
+                k.startsWith("standingItems:") ||
+                k.startsWith("continueTripStop:") ||
+                k.startsWith("stopFlowSummary:") ||
+                k.startsWith("stopFlowLiveEvents:")
+              )
+            ){
+              localStorage.removeItem(k);
+            }
+          });
+        }catch(_){}
+      }
+
+
       ok.addEventListener("click", function(){
         confirmed = true;
+        clearTripLocalMemory();
         closeModal();
         form.submit();
       });
@@ -3323,7 +3553,9 @@
       stop =
         localStorage.getItem("liveStop:" + tripKey) ||
         localStorage.getItem("continueTripStop:" + tripKey) ||
-        localStorage.getItem("continueTripStop:last") ||
+        localStorage.getItem("continueTripStop:last",
+            "stopFlowSummary:" + tripKey,
+            "stopFlowLiveEvents:" + tripKey) ||
         "";
     }catch(_){}
 
@@ -4405,6 +4637,41 @@
   }
 
 
+
+  function sheetGenderClass(p){
+    const g = String((p && p.gender) || "").trim().toLowerCase();
+
+    if(g === "bay" || g === "erkek" || g === "male"){
+      return "gender-male";
+    }
+
+    if(g === "bayan" || g === "kadın" || g === "kadin" || g === "female"){
+      return "gender-female";
+    }
+
+    return "gender-neutral";
+  }
+
+  function sheetGenderLabel(p){
+    const g = String((p && p.gender) || "").trim().toLowerCase();
+
+    if(g === "bay" || g === "erkek" || g === "male"){
+      return "Bay";
+    }
+
+    if(g === "bayan" || g === "kadın" || g === "kadin" || g === "female"){
+      return "Bayan";
+    }
+
+    return "";
+  }
+
+  function sheetGenderChip(p){
+    const label = sheetGenderLabel(p);
+    return label ? `<span class="sheet-gender-chip">${escapeHtml(label)}</span>` : "";
+  }
+
+
   function renderPassengers(data){
     lastDetailData = data;
     const passengers = Array.isArray(data.passengers) ? data.passengers : [];
@@ -4426,12 +4693,12 @@
           const route = `${p.from_stop || "Biniş yok"} → ${p.to_stop || data.stop || "İniş yok"}`;
 
           return `
-            <div class="sheet-seat-row">
+            <div class="sheet-seat-row ${sheetGenderClass(p)}">
               <div class="sheet-seat-no">${escapeHtml(p.seat_no || "-")}</div>
 
               <div class="sheet-seat-main">
                 <div class="sheet-seat-title">
-                  Koltuk ${escapeHtml(p.seat_no || "-")}${name ? " • " + escapeHtml(name) : ""}
+                  Koltuk ${escapeHtml(p.seat_no || "-")}${sheetGenderChip(p)}${name ? " • " + escapeHtml(name) : ""}
                 </div>
                 <div class="sheet-seat-route">${escapeHtml(route)}</div>
               </div>
@@ -4602,6 +4869,261 @@
     `;
   }
 
+
+
+  function stopSummaryBagLocationText(p){
+    const parts = [];
+
+    const r = Number(p.bag_right || 0);
+    const lf = Number(p.bag_left_front || 0);
+    const lb = Number(p.bag_left_back || 0);
+
+    if(r > 0) parts.push(`Sağ göz ${r}`);
+    if(lf > 0) parts.push(`Sol ön ${lf}`);
+    if(lb > 0) parts.push(`Sol arka ${lb}`);
+
+    return parts.length ? parts.join(" • ") : "Konum bilgisi yok";
+  }
+
+  function stopSummaryBagSpeechText(p){
+    const parts = [];
+
+    const r = Number(p.bag_right || 0);
+    const lf = Number(p.bag_left_front || 0);
+    const lb = Number(p.bag_left_back || 0);
+
+    if(r > 0) parts.push(`sağ gözde ${r}`);
+    if(lf > 0) parts.push(`sol önde ${lf}`);
+    if(lb > 0) parts.push(`sol arkada ${lb}`);
+
+    return parts.length ? parts.join(", ") : "konum bilgisi yok";
+  }
+
+
+  function passengerGenderCounts(passengers){
+    let male = 0;
+    let female = 0;
+    let unknown = 0;
+
+    passengers.forEach(p => {
+      const g = String((p && p.gender) || "").trim().toLowerCase();
+
+      if(g === "bay" || g === "erkek" || g === "male") male++;
+      else if(g === "bayan" || g === "kadın" || g === "kadin" || g === "female") female++;
+      else unknown++;
+    });
+
+    return {male, female, unknown};
+  }
+
+  function buildStopSummarySentence(data){
+    const passengers = Array.isArray(data.passengers) ? data.passengers : [];
+    const consignments = Array.isArray(data.consignments) ? data.consignments : [];
+    const g = passengerGenderCounts(passengers);
+
+    const seats = passengers.map(p => p.seat_no).filter(Boolean).join(", ");
+    const bagTotal = Number(data.bag_total || 0);
+    const consCount = consignments.length;
+
+    const parts = [];
+
+    parts.push(`${data.stop || currentStopName() || "Bu"} durağında ${passengers.length} yolcu inecek.`);
+
+    if(passengers.length){
+      const genderParts = [];
+      if(g.male) genderParts.push(`${g.male} bay`);
+      if(g.female) genderParts.push(`${g.female} bayan`);
+      if(g.unknown) genderParts.push(`${g.unknown} belirsiz`);
+      if(genderParts.length) parts.push(genderParts.join(", ") + ".");
+      if(seats) parts.push(`Koltuklar: ${seats}.`);
+    }
+
+    if(bagTotal > 0){
+      const bagDetails = passengers
+        .filter(p => Number(p.bag_count || 0) > 0)
+        .map(p => `Koltuk ${p.seat_no}: ${Number(p.bag_count || 0)} bagaj, ${stopSummaryBagSpeechText(p)}`);
+
+      parts.push(`${bagTotal} bagaj var.`);
+      if(bagDetails.length){
+        parts.push(`Bagaj uyarısı: ${bagDetails.join(". ")}.`);
+      }
+    }
+
+    if(consCount > 0){
+      parts.push(`${consCount} emanet teslim var.`);
+    }
+
+    return parts.join(" ");
+  }
+
+  function speakStopSummary(data){
+    const msg = buildStopSummarySentence(data);
+
+    try{
+      if(window.speechSynthesis){
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(msg);
+        u.lang = "tr-TR";
+        u.rate = 0.95;
+        u.pitch = 1;
+        window.speechSynthesis.speak(u);
+      }
+    }catch(err){
+      console.error("summary speak error", err);
+    }
+  }
+
+  function renderStopSummary(data){
+    lastDetailData = data;
+    lastKind = "summary";
+
+    const passengers = Array.isArray(data.passengers) ? data.passengers : [];
+    const consignments = Array.isArray(data.consignments) ? data.consignments : [];
+    const g = passengerGenderCounts(passengers);
+
+    const seats = passengers.map(p => p.seat_no).filter(Boolean);
+    const bagTotal = Number(data.bag_total || 0);
+    const consCount = consignments.length;
+
+    kickerEl.textContent = "Durak özeti";
+    titleEl.textContent = `${data.stop || currentStopName() || "Durak"} durağı`;
+    subEl.textContent = `${passengers.length} yolcu • ${bagTotal} bagaj • ${consCount} emanet`;
+
+    const bagRows = passengers
+      .filter(p => Number(p.bag_count || 0) > 0)
+      .map(p => `Koltuk ${p.seat_no}: ${Number(p.bag_count || 0)} bagaj · ${stopSummaryBagLocationText(p)}`)
+      .join(" • ");
+
+    const consRows = consignments
+      .map(c => `${c.code || "Emanet"}${c.item_label ? " · " + c.item_label : ""}`)
+      .join(" • ");
+
+    bodyEl.innerHTML = `
+      <div class="sheet-summary-grid">
+        <div class="sheet-summary-cell">
+          <strong>${passengers.length}</strong>
+          <span>İnecek</span>
+        </div>
+        <div class="sheet-summary-cell">
+          <strong>${bagTotal}</strong>
+          <span>Bagaj</span>
+        </div>
+        <div class="sheet-summary-cell">
+          <strong>${consCount}</strong>
+          <span>Emanet</span>
+        </div>
+      </div>
+
+      <div class="sheet-summary-card">
+        <div class="sheet-summary-title">Yolcu dağılımı</div>
+        <div class="sheet-summary-pill-row">
+          <span class="sheet-summary-pill">Bay: ${g.male}</span>
+          <span class="sheet-summary-pill female">Bayan: ${g.female}</span>
+          ${g.unknown ? `<span class="sheet-summary-pill">Belirsiz: ${g.unknown}</span>` : ""}
+        </div>
+      </div>
+
+      <div class="sheet-summary-card">
+        <div class="sheet-summary-title">Koltuklar</div>
+        <div class="sheet-summary-text">
+          ${seats.length ? escapeHtml(seats.join(", ")) : "Bu durakta inecek yolcu görünmüyor."}
+        </div>
+      </div>
+
+      <div class="sheet-summary-card">
+        <div class="sheet-summary-title">Bagaj uyarısı</div>
+        <div class="sheet-summary-text">
+          ${bagRows ? escapeHtml(bagRows) : "Yolcu bagajı görünmüyor."}
+        </div>
+      </div>
+
+      <div class="sheet-summary-card">
+        <div class="sheet-summary-title">Emanet / Kargo</div>
+        <div class="sheet-summary-text">
+          ${consRows ? escapeHtml(consRows) : "Teslim edilecek emanet görünmüyor."}
+        </div>
+      </div>
+
+      <div class="sheet-summary-actions">
+        <button class="sheet-summary-action speak" type="button" id="sheetSummarySpeak">Sesli Oku</button>
+        <button class="sheet-summary-action" type="button" id="sheetSummaryPassengers">Yolcu Listesi</button>
+        <button class="sheet-summary-action bag" type="button" id="sheetSummaryBags">Bagaj Detayı</button>
+      </div>
+    `;
+
+    const speakBtn = document.getElementById("sheetSummarySpeak");
+    const passengerBtn = document.getElementById("sheetSummaryPassengers");
+    const bagBtn2 = document.getElementById("sheetSummaryBags");
+
+    if(speakBtn){
+      speakBtn.addEventListener("click", function(){
+        speakStopSummary(data);
+      });
+    }
+
+    if(passengerBtn){
+      passengerBtn.addEventListener("click", function(){
+        lastKind = "offload";
+        kickerEl.textContent = "İnecek yolcular";
+        titleEl.textContent = `${data.stop || currentStopName() || "Durak"} durağı`;
+        subEl.textContent = `${Number(data.off_count || 0)} yolcu inecek`;
+        renderPassengers(data);
+      });
+    }
+
+    if(bagBtn2){
+      bagBtn2.addEventListener("click", function(){
+        lastKind = "bagaj";
+        kickerEl.textContent = "Detay";
+        titleEl.textContent = `${data.stop || currentStopName() || "Durak"} durağı`;
+        subEl.textContent = `${Number(data.bag_total || 0)} bagaj / emanet`;
+        renderBags(data);
+      });
+    }
+  }
+
+  async function loadStopSummary(){
+    const stop = currentStopName();
+
+    if(!stop || stop === "Durak seçilmedi"){
+      openSheet();
+      kickerEl.textContent = "Durak özeti";
+      titleEl.textContent = "Durak seçilmedi";
+      subEl.textContent = "Önce canlı durak belirlenmeli.";
+      renderEmpty("Canlı durak bilgisi bulunamadı.");
+      return;
+    }
+
+    openSheet();
+
+    kickerEl.textContent = "Durak özeti";
+    titleEl.textContent = `${stop} durağı`;
+    subEl.textContent = "Yükleniyor...";
+    bodyEl.innerHTML = '<div class="sheet-empty">Durak özeti hazırlanıyor...</div>';
+
+    try{
+      const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stop)}&_=${Date.now()}`, {
+        headers: {"Accept":"application/json"}
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        subEl.textContent = "Bilgi alınamadı.";
+        renderEmpty(data.error || "Bir hata oluştu.");
+        return;
+      }
+
+      renderStopSummary(data);
+
+    }catch(err){
+      console.error("stop summary error", err);
+      subEl.textContent = "Bağlantı hatası.";
+      renderEmpty("Durak özeti alınamadı.");
+    }
+  }
+
+
   async function loadDetail(kind){
     lastKind = kind;
     const stop = currentStopName();
@@ -4668,6 +5190,23 @@
       bagBtn.classList.toggle("is-empty", bagN <= 0);
     }
   }
+
+
+  const liveCard = document.getElementById("liveCurrentCard");
+  if(liveCard){
+    liveCard.addEventListener("click", function(e){
+      if(e.target.closest("button, a, .metric-action, .status-pill")) return;
+      loadStopSummary();
+    });
+
+    liveCard.addEventListener("keydown", function(e){
+      if(e.key === "Enter" || e.key === " "){
+        e.preventDefault();
+        loadStopSummary();
+      }
+    });
+  }
+
 
   if(offBtn){
     offBtn.addEventListener("click", function(){
