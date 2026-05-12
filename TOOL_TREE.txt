@@ -1,8 +1,9 @@
 ARAÇ / ANALİZ SCRIPT DOSYALARI
 ==============================
-Dosya sayısı: 2
-Kod satırı: 520
+Dosya sayısı: 3
+Kod satırı: 655
 
 └── tools
     ├── audit_files.py
+    ├── make_soy_agaci_satirli.py
     └── project_tree_audit.py

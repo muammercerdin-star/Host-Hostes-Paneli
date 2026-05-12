@@ -1756,6 +1756,1253 @@
   }
 }
 </style>
+
+<style id="live-stop-sheet-style">
+.metric-action{
+  appearance:none;
+  border:1px solid rgba(255,255,255,.10);
+  font:inherit;
+  color:inherit;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+
+.metric-action::after{
+  content:"";
+  position:absolute;
+  inset:auto 14px 10px auto;
+  width:7px;
+  height:7px;
+  border-right:2px solid rgba(255,255,255,.55);
+  border-bottom:2px solid rgba(255,255,255,.55);
+  transform:rotate(-45deg);
+  opacity:.75;
+}
+
+.metric-action:hover,
+.metric-action:active{
+  transform:translateY(-1px);
+  border-color:rgba(255,190,90,.55);
+  box-shadow:0 0 0 1px rgba(255,190,90,.18), 0 14px 30px rgba(0,0,0,.18);
+}
+
+.metric-action.has-work{
+  border-color:rgba(255,190,90,.70);
+  box-shadow:0 0 0 1px rgba(255,190,90,.20), 0 0 22px rgba(255,144,45,.16);
+}
+
+.metric-action.is-empty{
+  opacity:.78;
+}
+
+.metric-hint{
+  display:block;
+  margin-top:5px;
+  font-size:10px;
+  line-height:1;
+  color:rgba(255,255,255,.58);
+  letter-spacing:.02em;
+}
+
+.live-sheet-overlay{
+  position:fixed;
+  inset:0;
+  z-index:9990;
+  background:rgba(3,7,18,.58);
+  backdrop-filter:blur(8px);
+  opacity:0;
+  pointer-events:none;
+  transition:.22s ease;
+}
+
+.live-sheet-overlay.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.live-stop-sheet{
+  position:fixed;
+  left:10px;
+  right:10px;
+  bottom:10px;
+  z-index:9991;
+  max-width:720px;
+  margin:0 auto;
+  border-radius:26px;
+  background:linear-gradient(180deg, rgba(18,28,48,.98), rgba(7,12,24,.98));
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 -24px 80px rgba(0,0,0,.48);
+  transform:translateY(115%);
+  transition:.26s cubic-bezier(.2,.8,.2,1);
+  overflow:hidden;
+}
+
+.live-stop-sheet.open{
+  transform:translateY(0);
+}
+
+.sheet-grip{
+  width:54px;
+  height:5px;
+  border-radius:99px;
+  background:rgba(255,255,255,.24);
+  margin:10px auto 6px;
+}
+
+.sheet-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:10px 18px 14px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.sheet-kicker{
+  font-size:11px;
+  color:#93c5fd;
+  font-weight:800;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+
+.sheet-title{
+  margin:4px 0 0;
+  font-size:21px;
+  line-height:1.1;
+  color:#fff;
+  font-weight:950;
+}
+
+.sheet-sub{
+  margin:6px 0 0;
+  color:rgba(255,255,255,.70);
+  font-size:13px;
+}
+
+.sheet-close{
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.07);
+  color:#fff;
+  font-size:22px;
+  line-height:1;
+}
+
+.sheet-body{
+  max-height:52vh;
+  overflow:auto;
+  padding:14px 14px 18px;
+}
+
+.sheet-empty{
+  padding:22px 14px;
+  text-align:center;
+  color:rgba(255,255,255,.72);
+}
+
+.sheet-list{
+  display:grid;
+  gap:10px;
+}
+
+.sheet-seat-row{
+  display:grid;
+  grid-template-columns:66px 1fr auto;
+  gap:12px;
+  align-items:center;
+  padding:13px;
+  border-radius:18px;
+  background:rgba(255,255,255,.065);
+  border:1px solid rgba(255,255,255,.09);
+}
+
+.sheet-seat-no{
+  width:54px;
+  height:54px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#f97316,#fb7185);
+  color:#fff;
+  font-size:22px;
+  font-weight:950;
+  box-shadow:0 12px 28px rgba(249,115,22,.20);
+}
+
+.sheet-seat-main{
+  min-width:0;
+}
+
+.sheet-seat-title{
+  color:#fff;
+  font-weight:900;
+  font-size:15px;
+}
+
+.sheet-seat-route{
+  color:rgba(255,255,255,.68);
+  font-size:12px;
+  margin-top:4px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.sheet-seat-extra{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:5px;
+  font-size:11px;
+  color:rgba(255,255,255,.72);
+}
+
+.sheet-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:6px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.10);
+  white-space:nowrap;
+}
+
+.sheet-badge.warn{
+  color:#fed7aa;
+  background:rgba(249,115,22,.14);
+  border-color:rgba(249,115,22,.28);
+}
+
+.sheet-consign-row{
+  padding:13px;
+  border-radius:18px;
+  background:rgba(59,130,246,.10);
+  border:1px solid rgba(147,197,253,.15);
+}
+
+.sheet-consign-title{
+  color:#fff;
+  font-weight:900;
+}
+
+.sheet-consign-sub{
+  margin-top:4px;
+  color:rgba(255,255,255,.68);
+  font-size:12px;
+}
+
+@media(max-width:520px){
+  .live-stop-sheet{
+    left:0;
+    right:0;
+    bottom:0;
+    border-radius:26px 26px 0 0;
+  }
+
+  .sheet-seat-row{
+    grid-template-columns:58px 1fr;
+  }
+
+  .sheet-seat-extra{
+    grid-column:1 / -1;
+    align-items:flex-start;
+    flex-direction:row;
+    flex-wrap:wrap;
+    padding-left:2px;
+  }
+}
+
+
+.sheet-action-btn{
+  appearance:none;
+  border:1px solid rgba(147,197,253,.22);
+  background:rgba(59,130,246,.12);
+  color:#dbeafe;
+  border-radius:999px;
+  padding:8px 10px;
+  font-weight:900;
+  font-size:11px;
+  white-space:nowrap;
+}
+
+.sheet-action-btn:active{
+  transform:scale(.98);
+}
+
+.sheet-change-form{
+  display:grid;
+  gap:14px;
+  padding:14px;
+}
+
+.sheet-change-card{
+  border-radius:20px;
+  padding:15px;
+  background:rgba(255,255,255,.065);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.sheet-change-title{
+  color:#fff;
+  font-size:18px;
+  font-weight:950;
+}
+
+.sheet-change-sub{
+  margin-top:5px;
+  color:rgba(255,255,255,.68);
+  font-size:13px;
+}
+
+.sheet-select{
+  width:100%;
+  min-height:54px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.14);
+  background:#101827;
+  color:#fff;
+  padding:0 14px;
+  font-size:16px;
+  font-weight:800;
+  outline:none;
+}
+
+.sheet-form-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.sheet-save-btn,
+.sheet-cancel-btn{
+  appearance:none;
+  border:0;
+  min-height:52px;
+  border-radius:18px;
+  font-size:15px;
+  font-weight:950;
+}
+
+.sheet-save-btn{
+  background:linear-gradient(135deg,#22c55e,#0ea5e9);
+  color:white;
+  box-shadow:0 14px 34px rgba(14,165,233,.20);
+}
+
+.sheet-cancel-btn{
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.12);
+}
+
+.sheet-note{
+  color:rgba(255,255,255,.62);
+  font-size:12px;
+  line-height:1.45;
+}
+
+
+.sheet-offload-btn{
+  appearance:none;
+  border:1px solid rgba(248,113,113,.45);
+  background:linear-gradient(135deg, #ef4444, #b91c1c);
+  color:#fff;
+  border-radius:999px;
+  padding:8px 13px;
+  font-weight:950;
+  font-size:11px;
+  white-space:nowrap;
+  box-shadow:0 12px 26px rgba(239,68,68,.26);
+}
+
+.sheet-offload-btn.danger{
+  color:#fff;
+  border-color:rgba(248,113,113,.50);
+  background:linear-gradient(135deg, #ef4444, #991b1b);
+}
+
+.sheet-offload-btn:active{
+  transform:scale(.98);
+}
+</style>
+
+
+<style id="sheet-seat-number-spacing-fix">
+.sheet-seat-title,
+.sheet-change-title{
+  letter-spacing: 0 !important;
+  word-spacing: 0 !important;
+}
+
+.sheet-seat-no{
+  letter-spacing: 0 !important;
+}
+</style>
+<style id="sheet-offload-button-text-fix">
+.sheet-offload-btn{
+  text-transform: uppercase !important;
+  letter-spacing: .06em !important;
+  font-weight: 1000 !important;
+}
+</style>
+<style id="sheet-offload-confirm-theme">
+.sheet-confirm-wrap{
+  display:grid;
+  gap:14px;
+  padding:14px;
+}
+
+.sheet-confirm-card{
+  border-radius:22px;
+  padding:18px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(239,68,68,.18), transparent 36%),
+    rgba(255,255,255,.065);
+  border:1px solid rgba(248,113,113,.20);
+  box-shadow:0 18px 42px rgba(0,0,0,.22);
+}
+
+.sheet-confirm-title{
+  color:#fff;
+  font-size:22px;
+  font-weight:1000;
+  letter-spacing:-.3px;
+  line-height:1.1;
+}
+
+.sheet-confirm-sub{
+  margin-top:9px;
+  color:rgba(255,255,255,.70);
+  font-size:14px;
+  line-height:1.45;
+}
+
+.sheet-confirm-warning{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  padding:13px 14px;
+  border-radius:18px;
+  color:#fecaca;
+  background:rgba(239,68,68,.12);
+  border:1px solid rgba(248,113,113,.18);
+  font-size:13px;
+  line-height:1.4;
+  font-weight:800;
+}
+
+.sheet-confirm-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.sheet-confirm-cancel,
+.sheet-confirm-ok{
+  appearance:none;
+  border:0;
+  min-height:54px;
+  border-radius:18px;
+  font-size:15px;
+  font-weight:1000;
+  letter-spacing:.03em;
+}
+
+.sheet-confirm-cancel{
+  color:#fff;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.12);
+}
+
+.sheet-confirm-ok{
+  color:#fff;
+  background:linear-gradient(135deg,#ef4444,#991b1b);
+  box-shadow:0 16px 34px rgba(239,68,68,.28);
+  border:1px solid rgba(248,113,113,.42);
+}
+
+.sheet-confirm-cancel:active,
+.sheet-confirm-ok:active{
+  transform:scale(.98);
+}
+</style>
+
+
+<style id="sheet-bulk-offload-style">
+.sheet-bulk-bar{
+  display:flex;
+  justify-content:flex-end;
+  margin-bottom:10px;
+}
+
+.sheet-bulk-btn{
+  appearance:none;
+  border:1px solid rgba(248,113,113,.48);
+  background:linear-gradient(135deg,#ef4444,#991b1b);
+  color:#fff;
+  border-radius:999px;
+  min-height:42px;
+  padding:0 16px;
+  font-size:12px;
+  font-weight:1000;
+  letter-spacing:.05em;
+  box-shadow:0 12px 28px rgba(239,68,68,.22);
+}
+
+.sheet-bulk-btn:active{
+  transform:scale(.98);
+}
+</style>
+
+
+<style id="sheet-bag-detail-style">
+.sheet-bag-detail-btn{
+  appearance:none;
+  border:1px solid rgba(249,115,22,.30);
+  background:rgba(249,115,22,.14);
+  color:#fed7aa;
+  border-radius:999px;
+  padding:6px 9px;
+  font-size:11px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.sheet-bag-detail-btn:active{
+  transform:scale(.98);
+}
+
+.sheet-bag-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  padding:14px;
+}
+
+.sheet-bag-cell{
+  border-radius:18px;
+  padding:14px 10px;
+  text-align:center;
+  background:rgba(255,255,255,.065);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.sheet-bag-cell.active{
+  border-color:rgba(249,115,22,.42);
+  background:rgba(249,115,22,.14);
+  box-shadow:0 12px 28px rgba(249,115,22,.10);
+}
+
+.sheet-bag-label{
+  color:rgba(255,255,255,.66);
+  font-size:11px;
+  font-weight:850;
+}
+
+.sheet-bag-count{
+  margin-top:7px;
+  color:#fff;
+  font-size:24px;
+  font-weight:1000;
+}
+
+.sheet-bag-info{
+  margin:0 14px 14px;
+  border-radius:20px;
+  padding:14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  color:rgba(255,255,255,.72);
+  font-size:13px;
+  line-height:1.45;
+}
+
+.sheet-bag-back{
+  margin:0 14px 16px;
+  width:calc(100% - 28px);
+  min-height:50px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  font-weight:950;
+}
+</style>
+
+
+<style id="sheet-bag-text-polish">
+.sheet-change-title,
+.sheet-title,
+.sheet-seat-title,
+.sheet-seat-no,
+.sheet-bag-count{
+  letter-spacing: 0 !important;
+  word-spacing: 0 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.sheet-bag-info b{
+  color:#fff;
+}
+</style>
+<style id="sheet-bag-photo-gallery-style">
+.sheet-bag-gallery{
+  margin:0 14px 14px;
+  border-radius:22px;
+  padding:14px;
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.sheet-bag-gallery-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.sheet-bag-gallery-title{
+  color:#fff;
+  font-size:15px;
+  font-weight:1000;
+}
+
+.sheet-bag-gallery-count{
+  color:rgba(255,255,255,.72);
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.sheet-bag-photo-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+
+.sheet-bag-photo{
+  position:relative;
+  display:block;
+  overflow:hidden;
+  min-height:120px;
+  border-radius:18px;
+  border:1px solid rgba(96,165,250,.28);
+  background:rgba(15,23,42,.78);
+  box-shadow:0 14px 34px rgba(0,0,0,.20);
+  text-decoration:none;
+}
+
+.sheet-bag-photo img{
+  width:100%;
+  height:120px;
+  display:block;
+  object-fit:cover;
+}
+
+.sheet-bag-photo-badge{
+  position:absolute;
+  left:9px;
+  top:9px;
+  padding:5px 9px;
+  border-radius:999px;
+  color:#fff;
+  background:rgba(2,6,23,.68);
+  border:1px solid rgba(255,255,255,.14);
+  font-size:12px;
+  font-weight:900;
+  backdrop-filter:blur(8px);
+}
+
+.sheet-bag-photo-side{
+  position:absolute;
+  left:9px;
+  bottom:9px;
+  padding:5px 9px;
+  border-radius:999px;
+  color:#fed7aa;
+  background:rgba(2,6,23,.70);
+  border:1px solid rgba(249,115,22,.22);
+  font-size:11px;
+  font-weight:900;
+  backdrop-filter:blur(8px);
+}
+
+.sheet-bag-photo-open{
+  position:absolute;
+  right:9px;
+  bottom:9px;
+  padding:5px 9px;
+  border-radius:999px;
+  color:#dbeafe;
+  background:rgba(15,23,42,.72);
+  border:1px solid rgba(147,197,253,.20);
+  font-size:11px;
+  font-weight:900;
+  backdrop-filter:blur(8px);
+}
+
+.sheet-bag-no-photo{
+  margin:0 14px 14px;
+  border-radius:18px;
+  padding:14px;
+  color:rgba(255,255,255,.68);
+  background:rgba(255,255,255,.055);
+  border:1px dashed rgba(255,255,255,.14);
+  font-size:13px;
+}
+
+@media(max-width:430px){
+  .sheet-bag-photo img{
+    height:112px;
+  }
+
+  .sheet-bag-photo{
+    min-height:112px;
+  }
+}
+</style>
+
+
+<style id="bag-photo-viewer-style">
+.bag-photo-viewer{
+  position:fixed;
+  inset:0;
+  z-index:10050;
+  display:none;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(37,99,235,.16), transparent 34%),
+    rgba(2,6,23,.92);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+
+.bag-photo-viewer.open{
+  display:flex;
+  flex-direction:column;
+}
+
+.bag-viewer-top{
+  min-height:76px;
+  padding:16px 16px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  color:#fff;
+}
+
+.bag-viewer-title{
+  min-width:0;
+}
+
+.bag-viewer-kicker{
+  color:#93c5fd;
+  font-size:11px;
+  font-weight:1000;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+
+.bag-viewer-name{
+  margin-top:4px;
+  font-size:20px;
+  font-weight:1000;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.bag-viewer-close{
+  width:48px;
+  height:48px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  font-size:28px;
+  line-height:1;
+}
+
+.bag-viewer-stage{
+  flex:1;
+  min-height:0;
+  display:grid;
+  place-items:center;
+  padding:8px 14px 18px;
+}
+
+.bag-viewer-img-wrap{
+  width:100%;
+  height:100%;
+  max-height:68vh;
+  display:grid;
+  place-items:center;
+  border-radius:24px;
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.10);
+  overflow:hidden;
+  box-shadow:0 24px 70px rgba(0,0,0,.42);
+}
+
+.bag-viewer-img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.bag-viewer-bottom{
+  padding:0 16px 18px;
+  display:grid;
+  gap:12px;
+}
+
+.bag-viewer-caption{
+  min-height:44px;
+  border-radius:18px;
+  padding:12px 14px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.10);
+  color:rgba(255,255,255,.78);
+  font-size:14px;
+  font-weight:800;
+  text-align:center;
+}
+
+.bag-viewer-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.bag-viewer-btn{
+  min-height:52px;
+  border-radius:18px;
+  border:1px solid rgba(147,197,253,.18);
+  background:rgba(59,130,246,.14);
+  color:#dbeafe;
+  font-weight:1000;
+  font-size:15px;
+}
+
+.bag-viewer-btn:disabled{
+  opacity:.42;
+}
+
+.bag-viewer-btn:active{
+  transform:scale(.98);
+}
+</style>
+
+
+<style id="live-metric-hint-polish">
+.metric-hint{
+  margin-top:6px !important;
+  display:block !important;
+  font-size:10.5px !important;
+  line-height:1.05 !important;
+  font-weight:900 !important;
+  letter-spacing:.035em !important;
+  color:rgba(255,255,255,.72) !important;
+  white-space:nowrap !important;
+}
+
+.metric-action.has-work .metric-hint{
+  color:#fed7aa !important;
+  text-shadow:0 0 14px rgba(251,146,60,.22);
+}
+
+.metric-action small{
+  letter-spacing:.04em !important;
+}
+
+.metric-action b{
+  letter-spacing:0 !important;
+}
+</style>
+<style id="live-metric-hint-compact-fix">
+.metric-hint{
+  margin-top:5px !important;
+  font-size:10px !important;
+  line-height:1 !important;
+  font-weight:950 !important;
+  letter-spacing:.02em !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  max-width:100% !important;
+  text-align:center !important;
+}
+
+.metric-action b{
+  font-size:20px !important;
+  line-height:1.05 !important;
+}
+
+.metric-action small{
+  font-size:11px !important;
+}
+</style>
+
+
+<style id="live-metric-compact-final-fix">
+/* Canlı durak küçük işlem kutuları final kompakt ayar */
+.card.live .metric-action{
+  padding:10px 6px !important;
+  min-width:0 !important;
+}
+
+.card.live .metric-action small{
+  font-size:10px !important;
+  line-height:1 !important;
+  letter-spacing:.02em !important;
+  margin-bottom:4px !important;
+}
+
+.card.live .metric-action b{
+  display:block !important;
+  font-size:16px !important;
+  line-height:1.05 !important;
+  letter-spacing:0 !important;
+  word-spacing:0 !important;
+  white-space:normal !important;
+  word-break:normal !important;
+  overflow-wrap:normal !important;
+  text-align:center !important;
+}
+
+.card.live .metric-action .metric-hint{
+  margin-top:4px !important;
+  font-size:9.5px !important;
+  line-height:1 !important;
+  letter-spacing:0 !important;
+  white-space:nowrap !important;
+  text-align:center !important;
+  color:rgba(255,255,255,.72) !important;
+}
+
+.card.live .metric-action::after{
+  width:6px !important;
+  height:6px !important;
+  right:8px !important;
+  bottom:8px !important;
+}
+</style>
+<style id="sheet-bag-centered-modal-style">
+.sheet-bag-stop-summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  padding:14px;
+}
+
+.sheet-bag-stop-cell{
+  border-radius:18px;
+  padding:13px 8px;
+  text-align:center;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.sheet-bag-stop-cell.active{
+  border-color:rgba(249,115,22,.42);
+  background:rgba(249,115,22,.13);
+  box-shadow:0 12px 28px rgba(249,115,22,.10);
+}
+
+.sheet-bag-stop-cell small{
+  display:block;
+  color:rgba(255,255,255,.66);
+  font-size:10.5px;
+  font-weight:900;
+}
+
+.sheet-bag-stop-cell b{
+  display:block;
+  margin-top:6px;
+  color:#fff;
+  font-size:23px;
+  font-weight:1000;
+}
+
+.sheet-bag-item{
+  border-radius:22px;
+  padding:14px;
+  background:rgba(255,255,255,.065);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.sheet-bag-item-head{
+  display:grid;
+  grid-template-columns:56px 1fr;
+  gap:12px;
+  align-items:center;
+}
+
+.sheet-bag-icon{
+  width:56px;
+  height:56px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  font-size:26px;
+  background:linear-gradient(135deg,rgba(249,115,22,.95),rgba(239,68,68,.88));
+  box-shadow:0 12px 28px rgba(249,115,22,.20);
+}
+
+.sheet-bag-item-title{
+  color:#fff;
+  font-size:18px;
+  font-weight:1000;
+}
+
+.sheet-bag-item-sub{
+  margin-top:5px;
+  color:#fed7aa;
+  font-size:13px;
+  font-weight:900;
+}
+
+.sheet-bag-mini{
+  margin-top:12px;
+  padding:10px 11px;
+  border-radius:16px;
+  background:rgba(15,23,42,.42);
+  border:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.72);
+  font-size:12.5px;
+  font-weight:800;
+}
+
+.sheet-bag-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+.sheet-bag-detail-open{
+  appearance:none;
+  border:1px solid rgba(249,115,22,.30);
+  background:rgba(249,115,22,.14);
+  color:#fed7aa;
+  border-radius:999px;
+  padding:8px 10px;
+  font-size:11px;
+  font-weight:950;
+  white-space:nowrap;
+}
+</style>
+
+
+<style id="sheet-bag-cargo-section-style">
+.sheet-section-title{
+  margin:14px 14px 9px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  color:#bfdbfe;
+  font-size:12px;
+  font-weight:1000;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.sheet-section-count{
+  color:rgba(255,255,255,.72);
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:999px;
+  padding:5px 9px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:0;
+  text-transform:none;
+}
+
+.sheet-cargo-item{
+  border-radius:22px;
+  padding:15px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(59,130,246,.18), transparent 35%),
+    rgba(59,130,246,.075);
+  border:1px solid rgba(147,197,253,.16);
+  box-shadow:0 14px 34px rgba(0,0,0,.18);
+}
+
+.sheet-cargo-head{
+  display:grid;
+  grid-template-columns:56px 1fr;
+  gap:12px;
+  align-items:center;
+}
+
+.sheet-cargo-icon{
+  width:56px;
+  height:56px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  font-size:26px;
+  background:linear-gradient(135deg,rgba(59,130,246,.95),rgba(124,58,237,.88));
+  box-shadow:0 12px 28px rgba(59,130,246,.20);
+}
+
+.sheet-cargo-title{
+  color:#fff;
+  font-size:18px;
+  font-weight:1000;
+  line-height:1.12;
+}
+
+.sheet-cargo-sub{
+  margin-top:5px;
+  color:#bfdbfe;
+  font-size:13px;
+  font-weight:900;
+}
+
+.sheet-cargo-meta{
+  margin-top:12px;
+  padding:10px 11px;
+  border-radius:16px;
+  background:rgba(15,23,42,.42);
+  border:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.74);
+  font-size:12.5px;
+  line-height:1.35;
+  font-weight:800;
+}
+
+.sheet-cargo-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+.sheet-cargo-btn{
+  appearance:none;
+  border:1px solid rgba(147,197,253,.24);
+  background:rgba(59,130,246,.13);
+  color:#dbeafe;
+  border-radius:999px;
+  padding:8px 11px;
+  font-size:11px;
+  font-weight:950;
+  white-space:nowrap;
+}
+</style>
+<style id="sheet-cargo-detail-style">
+.sheet-cargo-detail-card{
+  margin:14px;
+  border-radius:22px;
+  padding:16px;
+  background:rgba(255,255,255,.065);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.sheet-cargo-detail-title{
+  color:#fff;
+  font-size:22px;
+  font-weight:1000;
+  line-height:1.1;
+}
+
+.sheet-cargo-detail-sub{
+  margin-top:7px;
+  color:#bfdbfe;
+  font-size:13px;
+  font-weight:900;
+}
+
+.sheet-cargo-detail-grid{
+  display:grid;
+  gap:9px;
+  margin-top:14px;
+}
+
+.sheet-cargo-line{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 11px;
+  border-radius:15px;
+  background:rgba(15,23,42,.38);
+  border:1px solid rgba(255,255,255,.07);
+  color:rgba(255,255,255,.72);
+  font-size:13px;
+  font-weight:800;
+}
+
+.sheet-cargo-line b{
+  color:#fff;
+  text-align:right;
+}
+
+.sheet-cargo-photo-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:14px;
+}
+
+.sheet-cargo-photo{
+  display:block;
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid rgba(147,197,253,.20);
+  background:rgba(15,23,42,.50);
+  min-height:110px;
+}
+
+.sheet-cargo-photo img{
+  width:100%;
+  height:110px;
+  object-fit:cover;
+  display:block;
+}
+
+.sheet-cargo-back{
+  margin:0 14px 16px;
+  width:calc(100% - 28px);
+  min-height:50px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  font-weight:950;
+}
+</style>
+<style id="cargo-photo-badge-position-fix">
+.sheet-cargo-photo{
+  position:relative !important;
+}
+
+.sheet-cargo-photo .sheet-bag-photo-badge{
+  left:9px !important;
+  top:9px !important;
+}
+
+.sheet-cargo-photo .sheet-bag-photo-side{
+  left:9px !important;
+  bottom:9px !important;
+}
+
+.sheet-cargo-photo .sheet-bag-photo-open{
+  right:9px !important;
+  bottom:9px !important;
+}
+</style>
 </head>
 
 <body>
@@ -1842,15 +3089,17 @@
               <b id="liveDistanceValue" class="stop-distance-value" data-stop-name="{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or '' }}">{{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else live_current.distance) or "-" }}</b>
             </div>
 
-            <div class="metric">
+            <button class="metric metric-action" type="button" id="liveOffloadMetric" data-kind="offload" aria-label="Bu durakta inecek koltukları göster">
               <small>İnecek</small>
-              <b>{{ live_current.off_count or 0 }} yolcu</b>
-            </div>
+              <b id="liveOffloadCount">{{ live_current.off_count or 0 }} yolcu</b>
+              <span class="metric-hint">Liste</span>
+            </button>
 
-            <div class="metric">
+            <button class="metric metric-action" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
               <small>Bagaj</small>
-              <b>{{ live_current.bagaj_count or 0 }}</b>
-            </div>
+              <b id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</b>
+              <span class="metric-hint">Detay</span>
+            </button>
           </div>
         </div>
       </article>
@@ -1900,6 +3149,27 @@
         </div>
       </article>
       {% endfor %}
+    </section>
+
+
+    <div class="live-sheet-overlay" id="liveStopSheetOverlay"></div>
+
+    <section class="live-stop-sheet" id="liveStopSheet" aria-hidden="true">
+      <div class="sheet-grip"></div>
+
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-kicker" id="liveStopSheetKicker">Canlı durak</div>
+          <h2 class="sheet-title" id="liveStopSheetTitle">Durak detayı</h2>
+          <p class="sheet-sub" id="liveStopSheetSub">Yükleniyor...</p>
+        </div>
+
+        <button class="sheet-close" type="button" id="liveStopSheetClose" aria-label="Kapat">×</button>
+      </div>
+
+      <div class="sheet-body" id="liveStopSheetBody">
+        <div class="sheet-empty">Yükleniyor...</div>
+      </div>
     </section>
 
     <nav class="dock">
@@ -2376,6 +3646,1229 @@
   }else{
     boot();
   }
+})();
+</script>
+
+
+<script id="live-stop-sheet-script">
+(function(){
+  const offBtn = document.getElementById("liveOffloadMetric");
+  const bagBtn = document.getElementById("liveBagajMetric");
+  const stopNameEl = document.getElementById("liveCurrentStopName");
+
+  const overlay = document.getElementById("liveStopSheetOverlay");
+  const sheet = document.getElementById("liveStopSheet");
+  const closeBtn = document.getElementById("liveStopSheetClose");
+  const titleEl = document.getElementById("liveStopSheetTitle");
+  const subEl = document.getElementById("liveStopSheetSub");
+  const bodyEl = document.getElementById("liveStopSheetBody");
+  const kickerEl = document.getElementById("liveStopSheetKicker");
+
+  const routeStops = {{ stops | tojson | safe }};
+  const csrfToken = {{ (csrf_token if csrf_token is defined else "") | tojson | safe }};
+
+  let lastDetailData = null;
+  let lastKind = "offload";
+
+  function text(v){
+    return String(v == null ? "" : v);
+  }
+
+  function escapeHtml(v){
+    return text(v)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function currentStopName(){
+    return (stopNameEl && stopNameEl.textContent ? stopNameEl.textContent : "").trim();
+  }
+
+  function openSheet(){
+    if(overlay) overlay.classList.add("open");
+    if(sheet){
+      sheet.classList.add("open");
+      sheet.setAttribute("aria-hidden", "false");
+    }
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeSheet(){
+    if(overlay) overlay.classList.remove("open");
+    if(sheet){
+      sheet.classList.remove("open");
+      sheet.setAttribute("aria-hidden", "true");
+    }
+    document.body.style.overflow = "";
+  }
+
+  function renderEmpty(message){
+    bodyEl.innerHTML = `<div class="sheet-empty">${escapeHtml(message)}</div>`;
+  }
+
+  function routeOptions(currentToStop){
+    const current = text(currentToStop || "").trim();
+
+    return (Array.isArray(routeStops) ? routeStops : []).map(stop => {
+      const selected = stop === current ? "selected" : "";
+      return `<option value="${escapeHtml(stop)}" ${selected}>${escapeHtml(stop)}</option>`;
+    }).join("");
+  }
+
+  function findPassenger(seatNo){
+    const passengers = lastDetailData && Array.isArray(lastDetailData.passengers)
+      ? lastDetailData.passengers
+      : [];
+
+    return passengers.find(p => text(p.seat_no) === text(seatNo));
+  }
+
+  function renderChangeDestinationForm(passenger){
+    if(!passenger){
+      renderEmpty("Koltuk bilgisi bulunamadı.");
+      return;
+    }
+
+    kickerEl.textContent = "İniş durağı değiştir";
+    titleEl.textContent = `Koltuk ${passenger.seat_no}`;
+    subEl.textContent = "Yeni ineceği durağı seç.";
+
+    bodyEl.innerHTML = `
+      <div class="sheet-change-form">
+        <div class="sheet-change-card">
+          <div class="sheet-change-title">Koltuk ${escapeHtml(passenger.seat_no)}</div>
+          <div class="sheet-change-sub">
+            Mevcut: ${escapeHtml(passenger.from_stop || "Biniş yok")} → ${escapeHtml(passenger.to_stop || "İniş yok")}
+          </div>
+        </div>
+
+        <label>
+          <div class="sheet-kicker" style="margin-bottom:8px;">Yeni iniş durağı</div>
+          <select class="sheet-select" id="sheetNewToStop">
+            ${routeOptions(passenger.to_stop)}
+          </select>
+        </label>
+
+        <div class="sheet-note">
+          Kaydedince koltuğun iniş durağı değişir. Koltuğa bağlı bagaj bilgisi de yeni durağın bagaj listesinde görünür.
+        </div>
+
+        <div class="sheet-form-actions">
+          <button class="sheet-cancel-btn" type="button" id="sheetCancelChange">Vazgeç</button>
+          <button class="sheet-save-btn" type="button" id="sheetSaveChange" data-seat-no="${escapeHtml(passenger.seat_no)}">Kaydet</button>
+        </div>
+      </div>
+    `;
+
+    const cancelBtn = document.getElementById("sheetCancelChange");
+    const saveBtn = document.getElementById("sheetSaveChange");
+
+    if(cancelBtn){
+      cancelBtn.addEventListener("click", function(){
+        if(lastKind === "bagaj") renderBags(lastDetailData || {});
+        else renderPassengers(lastDetailData || {});
+      });
+    }
+
+    if(saveBtn){
+      saveBtn.addEventListener("click", saveDestinationChange);
+    }
+  }
+
+  async function saveDestinationChange(){
+    const seatNo = this.getAttribute("data-seat-no") || "";
+    const select = document.getElementById("sheetNewToStop");
+    const toStop = select ? select.value : "";
+
+    if(!seatNo || !toStop){
+      renderEmpty("Koltuk veya durak bilgisi eksik.");
+      return;
+    }
+
+    this.disabled = true;
+    this.textContent = "Kaydediliyor...";
+
+    try{
+      const headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      };
+
+      if(csrfToken){
+        headers["X-CSRFToken"] = csrfToken;
+        headers["X-CSRF-Token"] = csrfToken;
+      }
+
+      const res = await fetch("/api/live-seat-destination", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          seat_no: seatNo,
+          to_stop: toStop
+        })
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        this.disabled = false;
+        this.textContent = "Kaydet";
+        alert(data.error || "İniş durağı değiştirilemedi.");
+        return;
+      }
+
+      titleEl.textContent = "Güncellendi";
+      subEl.textContent = data.message || "İniş durağı güncellendi.";
+      bodyEl.innerHTML = `
+        <div class="sheet-empty">
+          ${escapeHtml(data.message || "İniş durağı güncellendi.")}
+          <br><br>
+          Ekran yenileniyor...
+        </div>
+      `;
+
+      setTimeout(function(){
+        window.location.reload();
+      }, 650);
+
+    }catch(err){
+      console.error("destination change error", err);
+      this.disabled = false;
+      this.textContent = "Kaydet";
+      alert("Bağlantı hatası. İniş durağı değiştirilemedi.");
+    }
+  }
+
+
+
+  function askLiveOffloadConfirm(passenger){
+    return new Promise(resolve => {
+      const bag = Number(passenger.bag_count || 0);
+      const seatNo = passenger.seat_no || "-";
+      const routeText = `${passenger.from_stop || "Biniş yok"} → ${passenger.to_stop || currentStopName() || "İniş yok"}`;
+
+      kickerEl.textContent = "İndirme onayı";
+      titleEl.textContent = `Koltuk ${seatNo}`;
+      subEl.textContent = "Yolcu indirilsin mi?";
+
+      bodyEl.innerHTML = `
+        <div class="sheet-confirm-wrap">
+          <div class="sheet-confirm-card">
+            <div class="sheet-confirm-title">Koltuk ${escapeHtml(seatNo)} indirilsin mi?</div>
+            <div class="sheet-confirm-sub">
+              ${escapeHtml(routeText)}
+              <br>
+              ${bag > 0 ? `🧳 ${bag} bagaj teslim edildi sayılıp temizlenecek.` : "🧳 Bagaj yok."}
+            </div>
+          </div>
+
+          <div class="sheet-confirm-warning">
+            <span>⚠️</span>
+            <span>Bu işlem koltuğu boşaltır. Yolcu artık canlı durak listesinde görünmez.</span>
+          </div>
+
+          <div class="sheet-confirm-actions">
+            <button class="sheet-confirm-cancel" type="button" id="sheetConfirmCancel">Vazgeç</button>
+            <button class="sheet-confirm-ok" type="button" id="sheetConfirmOk">İNDİR</button>
+          </div>
+        </div>
+      `;
+
+      const cancelBtn = document.getElementById("sheetConfirmCancel");
+      const okBtn = document.getElementById("sheetConfirmOk");
+
+      if(cancelBtn){
+        cancelBtn.addEventListener("click", function(){
+          if(lastKind === "bagaj") renderBags(lastDetailData || {});
+          else renderPassengers(lastDetailData || {});
+          resolve(false);
+        }, {once:true});
+      }
+
+      if(okBtn){
+        okBtn.addEventListener("click", function(){
+          resolve(true);
+        }, {once:true});
+      }
+    });
+  }
+
+
+  async function offloadSeatFromSheet(seatNo){
+    const passenger = findPassenger(seatNo);
+
+    if(!passenger){
+      alert("Koltuk bilgisi bulunamadı.");
+      return;
+    }
+
+    const okConfirm = await askLiveOffloadConfirm(passenger);
+    if(!okConfirm) return;
+
+    try{
+      const headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      };
+
+      if(csrfToken){
+        headers["X-CSRFToken"] = csrfToken;
+        headers["X-CSRF-Token"] = csrfToken;
+      }
+
+      kickerEl.textContent = "Yolcu indiriliyor";
+      titleEl.textContent = `Koltuk ${seatNo}`;
+      subEl.textContent = "İşlem yapılıyor...";
+      bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+
+      const res = await fetch("/api/live-seat-offload", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          seat_no: seatNo,
+          stop: currentStopName()
+        })
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        titleEl.textContent = "İşlem yapılamadı";
+        subEl.textContent = "Koltuk indirilemedi.";
+        renderEmpty(data.error || "Bir hata oluştu.");
+        return;
+      }
+
+      titleEl.textContent = "İNDİRrildi";
+      subEl.textContent = data.message || `Koltuk ${seatNo} indirildi.`;
+
+      bodyEl.innerHTML = `
+        <div class="sheet-empty">
+          ${escapeHtml(data.message || `Koltuk ${seatNo} indirildi.`)}
+          ${Number(data.bag_deleted || 0) > 0 ? `<br><br>🧳 ${Number(data.bag_deleted || 0)} bagaj kaydı temizlendi.` : ""}
+          <br><br>
+          Ekran yenileniyor...
+        </div>
+      `;
+
+      setTimeout(function(){
+        window.location.reload();
+      }, 650);
+
+    }catch(err){
+      console.error("live seat offload error", err);
+      titleEl.textContent = "Bağlantı hatası";
+      subEl.textContent = "İNDİRrme işlemi tamamlanamadı.";
+      renderEmpty("Bağlantı hatası. Koltuk indirilemedi.");
+    }
+  }
+
+
+
+  function askBulkOffloadConfirm(data){
+    return new Promise(resolve => {
+      const passengers = Array.isArray(data.passengers) ? data.passengers : [];
+      const stop = data.stop || currentStopName() || "seçili durak";
+      const seats = passengers.map(p => p.seat_no).join(", ");
+      const bagTotal = passengers.reduce((sum, p) => sum + Number(p.bag_count || 0), 0);
+
+      kickerEl.textContent = "Toplu indirme onayı";
+      titleEl.textContent = `${stop} durağı`;
+      subEl.textContent = `${passengers.length} yolcu indirilsin mi?`;
+
+      bodyEl.innerHTML = `
+        <div class="sheet-confirm-wrap">
+          <div class="sheet-confirm-card">
+            <div class="sheet-confirm-title">${escapeHtml(stop)} durağındaki yolcular indirilsin mi?</div>
+            <div class="sheet-confirm-sub">
+              Koltuklar: ${escapeHtml(seats || "-")}
+              <br>
+              ${bagTotal > 0 ? `🧳 Toplam ${bagTotal} bagaj teslim edildi sayılıp temizlenecek.` : "🧳 Bagaj görünmüyor."}
+            </div>
+          </div>
+
+          <div class="sheet-confirm-warning">
+            <span>⚠️</span>
+            <span>Bu işlem listedeki tüm yolcuları indirir ve koltukları boşaltır.</span>
+          </div>
+
+          <div class="sheet-confirm-actions">
+            <button class="sheet-confirm-cancel" type="button" id="sheetBulkCancel">Vazgeç</button>
+            <button class="sheet-confirm-ok" type="button" id="sheetBulkOk">TOPLU İNDİR</button>
+          </div>
+        </div>
+      `;
+
+      const cancelBtn = document.getElementById("sheetBulkCancel");
+      const okBtn = document.getElementById("sheetBulkOk");
+
+      if(cancelBtn){
+        cancelBtn.addEventListener("click", function(){
+          renderPassengers(lastDetailData || {});
+          resolve(false);
+        }, {once:true});
+      }
+
+      if(okBtn){
+        okBtn.addEventListener("click", function(){
+          resolve(true);
+        }, {once:true});
+      }
+    });
+  }
+
+  async function bulkOffloadCurrentStop(){
+    const data = lastDetailData || {};
+    const passengers = Array.isArray(data.passengers) ? data.passengers : [];
+
+    if(!passengers.length){
+      renderEmpty("Bu durakta indirilecek yolcu bulunmuyor.");
+      return;
+    }
+
+    const okConfirm = await askBulkOffloadConfirm(data);
+    if(!okConfirm) return;
+
+    try{
+      const headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      };
+
+      if(csrfToken){
+        headers["X-CSRFToken"] = csrfToken;
+        headers["X-CSRF-Token"] = csrfToken;
+      }
+
+      kickerEl.textContent = "Toplu indirme";
+      titleEl.textContent = data.stop || currentStopName() || "Durak";
+      subEl.textContent = "İşlem yapılıyor...";
+      bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+
+      const res = await fetch("/api/live-stop-offload", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          stop: data.stop || currentStopName()
+        })
+      });
+
+      const j = await res.json();
+
+      if(!j.ok){
+        titleEl.textContent = "İşlem yapılamadı";
+        subEl.textContent = "Toplu indirme başarısız.";
+        renderEmpty(j.error || "Bir hata oluştu.");
+        return;
+      }
+
+      titleEl.textContent = "İndirildi";
+      subEl.textContent = j.message || "Yolcular indirildi.";
+
+      bodyEl.innerHTML = `
+        <div class="sheet-empty">
+          ${escapeHtml(j.message || "Yolcular indirildi.")}
+          <br><br>
+          Koltuklar: ${escapeHtml((j.deleted || []).join(", "))}
+          ${Number(j.bag_deleted || 0) > 0 ? `<br><br>🧳 ${Number(j.bag_deleted || 0)} bagaj kaydı temizlendi.` : ""}
+          <br><br>
+          Ekran yenileniyor...
+        </div>
+      `;
+
+      setTimeout(function(){
+        window.location.reload();
+      }, 750);
+
+    }catch(err){
+      console.error("bulk stop offload error", err);
+      titleEl.textContent = "Bağlantı hatası";
+      subEl.textContent = "Toplu indirme tamamlanamadı.";
+      renderEmpty("Bağlantı hatası. Yolcular indirilemedi.");
+    }
+  }
+
+
+
+
+  function renderBagPhotoGallery(photos){
+    photos = Array.isArray(photos) ? photos : [];
+
+    if(!photos.length){
+      return `
+        <div class="sheet-bag-no-photo">
+          Bu koltuk için görünür bagaj fotoğrafı bulunamadı.
+        </div>
+      `;
+    }
+
+    return `
+      <div class="sheet-bag-gallery">
+        <div class="sheet-bag-gallery-head">
+          <div class="sheet-bag-gallery-title">Bagaj Fotoğrafları</div>
+          <div class="sheet-bag-gallery-count">${photos.length} fotoğraf</div>
+        </div>
+
+        <div class="sheet-bag-photo-grid">
+          ${photos.map((photo, idx) => `
+            <a class="sheet-bag-photo"
+               href="${escapeHtml(photo.url || photo.thumb_url || "#")}"
+               target="_blank"
+               rel="noopener"
+               title="Fotoğrafı aç">
+              <img src="${escapeHtml(photo.thumb_url || photo.url || "")}" alt="Bagaj fotoğrafı ${idx + 1}" loading="lazy">
+              <span class="sheet-bag-photo-badge">${idx + 1} / ${photos.length}</span>
+              <span class="sheet-bag-photo-side">${escapeHtml(photo.side_label || "Bagaj")}</span>
+              <span class="sheet-bag-photo-open">Aç</span>
+            </a>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+
+
+  async function renderConsignmentDetail(cid){
+    if(!cid){
+      renderEmpty("Emanet bilgisi bulunamadı.");
+      return;
+    }
+
+    kickerEl.textContent = "Emanet detayı";
+    titleEl.textContent = "Yükleniyor...";
+    subEl.textContent = "Emanet bilgisi alınıyor...";
+    bodyEl.innerHTML = '<div class="sheet-empty">Yükleniyor...</div>';
+
+    try{
+      const res = await fetch(`/api/live-consignment-detail/${encodeURIComponent(cid)}?_=${Date.now()}`, {
+        headers: {"Accept":"application/json"}
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        titleEl.textContent = "Bulunamadı";
+        subEl.textContent = "Emanet bilgisi alınamadı.";
+        renderEmpty(data.error || "Bir hata oluştu.");
+        return;
+      }
+
+      const item = data.item || {};
+      const photos = Array.isArray(item.photos) ? item.photos : [];
+
+      kickerEl.textContent = "Emanet detayı";
+      titleEl.textContent = item.code || `Emanet ${item.id || ""}`;
+      subEl.textContent = item.item_name || "Emanet / Kargo";
+
+      bodyEl.innerHTML = `
+        <div class="sheet-cargo-detail-card">
+          <div class="sheet-cargo-detail-title">${escapeHtml(item.item_name || "Emanet / Kargo")}</div>
+          <div class="sheet-cargo-detail-sub">Kod: ${escapeHtml(item.code || "-")}</div>
+
+          <div class="sheet-cargo-detail-grid">
+            <div class="sheet-cargo-line"><span>Teslim durağı</span><b>${escapeHtml(item.to_stop || "-")}</b></div>
+            <div class="sheet-cargo-line"><span>Alıcı</span><b>${escapeHtml(item.to_name || "-")}</b></div>
+            <div class="sheet-cargo-line"><span>Alıcı telefon</span><b>${escapeHtml(item.to_phone || "-")}</b></div>
+            <div class="sheet-cargo-line"><span>Gönderen</span><b>${escapeHtml(item.from_name || "-")}</b></div>
+            <div class="sheet-cargo-line"><span>Ücret</span><b>${Number(item.amount || 0).toFixed(2)} ₺</b></div>
+            <div class="sheet-cargo-line"><span>Ödeme</span><b>${escapeHtml(item.payment || "-")}</b></div>
+            <div class="sheet-cargo-line"><span>Durum</span><b>${escapeHtml(item.status || "-")}</b></div>
+            ${item.notes ? `<div class="sheet-cargo-line"><span>Not</span><b>${escapeHtml(item.notes)}</b></div>` : ""}
+          </div>
+        </div>
+
+        ${photos.length ? `
+          <div class="sheet-section-title">
+            <span>Fotoğraflar</span>
+            <span class="sheet-section-count">${photos.length} foto</span>
+          </div>
+          <div class="sheet-cargo-photo-grid">
+            ${photos.map((ph, idx) => `
+              <a class="sheet-cargo-photo" href="${escapeHtml(ph.url || "#")}" data-cargo-photo="1">
+                <img src="${escapeHtml(ph.url || "")}" alt="Emanet fotoğrafı ${idx + 1}">
+                <span class="sheet-bag-photo-badge">${idx + 1} / ${photos.length}</span>
+                <span class="sheet-bag-photo-side">Emanet</span>
+                <span class="sheet-bag-photo-open">Aç</span>
+              </a>
+            `).join("")}
+          </div>
+        ` : ""}
+
+        <button class="sheet-cargo-back" type="button" id="sheetCargoBackBtn">Listeye Dön</button>
+      `;
+
+      const backBtn = document.getElementById("sheetCargoBackBtn");
+      if(backBtn){
+        backBtn.addEventListener("click", function(){
+          renderBags(lastDetailData || {});
+        }, {once:true});
+      }
+
+    }catch(err){
+      console.error("consignment detail error", err);
+      titleEl.textContent = "Bağlantı hatası";
+      subEl.textContent = "Emanet detayı alınamadı.";
+      renderEmpty("Bağlantı hatası. Emanet detayı alınamadı.");
+    }
+  }
+
+  function askConsignmentDeliverConfirm(cid){
+    const consignments = lastDetailData && Array.isArray(lastDetailData.consignments)
+      ? lastDetailData.consignments
+      : [];
+
+    const item = consignments.find(x => String(x.id || "") === String(cid || "")) || {};
+
+    return new Promise(resolve => {
+      kickerEl.textContent = "Teslim onayı";
+      titleEl.textContent = item.code || "Emanet";
+      subEl.textContent = "Emanet teslim edilsin mi?";
+
+      bodyEl.innerHTML = `
+        <div class="sheet-confirm-wrap">
+          <div class="sheet-confirm-card">
+            <div class="sheet-confirm-title">${escapeHtml(item.item_label || "Emanet / Kargo")} teslim edilsin mi?</div>
+            <div class="sheet-confirm-sub">
+              Kod: ${escapeHtml(item.code || "-")}
+              <br>
+              Teslim durağı: ${escapeHtml(item.stop_name || currentStopName() || "-")}
+              ${item.receiver ? `<br>Alıcı: ${escapeHtml(item.receiver)}` : ""}
+            </div>
+          </div>
+
+          <div class="sheet-confirm-warning">
+            <span>⚠️</span>
+            <span>Bu işlem emaneti teslim edildi olarak işaretler.</span>
+          </div>
+
+          <div class="sheet-confirm-actions">
+            <button class="sheet-confirm-cancel" type="button" id="sheetCargoCancel">Vazgeç</button>
+            <button class="sheet-confirm-ok" type="button" id="sheetCargoOk">TESLİM ET</button>
+          </div>
+        </div>
+      `;
+
+      const cancelBtn = document.getElementById("sheetCargoCancel");
+      const okBtn = document.getElementById("sheetCargoOk");
+
+      if(cancelBtn){
+        cancelBtn.addEventListener("click", function(){
+          renderBags(lastDetailData || {});
+          resolve(false);
+        }, {once:true});
+      }
+
+      if(okBtn){
+        okBtn.addEventListener("click", function(){
+          resolve(true);
+        }, {once:true});
+      }
+    });
+  }
+
+  async function deliverConsignmentFromSheet(cid){
+    if(!cid){
+      renderEmpty("Emanet bilgisi bulunamadı.");
+      return;
+    }
+
+    const okConfirm = await askConsignmentDeliverConfirm(cid);
+    if(!okConfirm) return;
+
+    try{
+      const headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      };
+
+      if(csrfToken){
+        headers["X-CSRFToken"] = csrfToken;
+        headers["X-CSRF-Token"] = csrfToken;
+      }
+
+      kickerEl.textContent = "Emanet teslimi";
+      titleEl.textContent = "Teslim ediliyor...";
+      subEl.textContent = "İşlem yapılıyor...";
+      bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+
+      const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({})
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        titleEl.textContent = "Teslim edilemedi";
+        subEl.textContent = "İşlem başarısız.";
+        renderEmpty(data.error || "Bir hata oluştu.");
+        return;
+      }
+
+      titleEl.textContent = "Teslim edildi";
+      subEl.textContent = data.message || "Emanet teslim edildi.";
+      bodyEl.innerHTML = `
+        <div class="sheet-empty">
+          ${escapeHtml(data.message || "Emanet teslim edildi.")}
+          <br><br>
+          Ekran yenileniyor...
+        </div>
+      `;
+
+      setTimeout(function(){
+        window.location.reload();
+      }, 700);
+
+    }catch(err){
+      console.error("consignment deliver error", err);
+      titleEl.textContent = "Bağlantı hatası";
+      subEl.textContent = "Emanet teslim edilemedi.";
+      renderEmpty("Bağlantı hatası. Emanet teslim edilemedi.");
+    }
+  }
+
+
+  async function renderSeatBagDetail(seatNo){
+    if(!seatNo){
+      renderEmpty("Koltuk bilgisi bulunamadı.");
+      return;
+    }
+
+    kickerEl.textContent = "Detay";
+    titleEl.textContent = `Koltuk ${seatNo}`;
+    subEl.textContent = "Bagaj konumu yükleniyor...";
+    bodyEl.innerHTML = '<div class="sheet-empty">Bagaj bilgisi alınıyor...</div>';
+
+    try{
+      const res = await fetch(`/api/live-seat-bag-detail?seat_no=${encodeURIComponent(seatNo)}&_=${Date.now()}`, {
+        headers: {"Accept":"application/json"}
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        subEl.textContent = "Bagaj bilgisi alınamadı.";
+        renderEmpty(data.error || "Bir hata oluştu.");
+        return;
+      }
+
+      const locations = Array.isArray(data.locations) ? data.locations : [];
+      subEl.textContent = `${Number(data.total || 0)} bagaj`;
+
+      bodyEl.innerHTML = `
+        <div class="sheet-change-card" style="margin:14px 14px 0;">
+          <div class="sheet-change-title">Koltuk ${escapeHtml(data.seat_no || seatNo)}</div>
+          <div class="sheet-change-sub">
+            ${escapeHtml((data.from_stop || "Biniş yok") + " → " + (data.to_stop || "İniş yok"))}
+            ${data.passenger_name ? "<br>Yolcu: " + escapeHtml(data.passenger_name) : ""}
+          </div>
+        </div>
+
+        <div class="sheet-bag-grid">
+          ${locations.map(loc => `
+            <div class="sheet-bag-cell ${Number(loc.count || 0) > 0 ? "active" : ""}">
+              <div class="sheet-bag-label">${escapeHtml(loc.label)}</div>
+              <div class="sheet-bag-count">${Number(loc.count || 0)}</div>
+            </div>
+          `).join("")}
+        </div>
+
+        <div class="sheet-bag-info">
+          Toplam: <b>${Number(data.total || 0)}</b> bagaj.
+          <br>
+          Fotoğraf kaydı: <b>${Array.isArray(data.photos) && data.photos.length ? "Var" : "Yok"}</b>
+        </div>
+
+        ${renderBagPhotoGallery(data.photos)}
+
+        <button class="sheet-bag-back" type="button" id="sheetBagBackBtn">Listeye Dön</button>
+      `;
+
+      const backBtn = document.getElementById("sheetBagBackBtn");
+      if(backBtn){
+        backBtn.addEventListener("click", function(){
+          if(lastKind === "bagaj") renderBags(lastDetailData || {});
+          else renderPassengers(lastDetailData || {});
+        }, {once:true});
+      }
+
+    }catch(err){
+      console.error("seat bag detail error", err);
+      subEl.textContent = "Bağlantı hatası.";
+      renderEmpty("Detay alınamadı.");
+    }
+  }
+
+
+  function renderPassengers(data){
+    lastDetailData = data;
+    const passengers = Array.isArray(data.passengers) ? data.passengers : [];
+
+    if(!passengers.length){
+      renderEmpty("Bu durakta inecek yolcu bulunmuyor.");
+      return;
+    }
+
+    bodyEl.innerHTML = `
+      <div class="sheet-bulk-bar">
+        <button class="sheet-bulk-btn" type="button" id="sheetBulkOffloadBtn">TOPLU İNDİR</button>
+      </div>
+
+      <div class="sheet-list">
+        ${passengers.map(p => {
+          const bag = Number(p.bag_count || 0);
+          const name = text(p.passenger_name || "").trim();
+          const route = `${p.from_stop || "Biniş yok"} → ${p.to_stop || data.stop || "İniş yok"}`;
+
+          return `
+            <div class="sheet-seat-row">
+              <div class="sheet-seat-no">${escapeHtml(p.seat_no || "-")}</div>
+
+              <div class="sheet-seat-main">
+                <div class="sheet-seat-title">
+                  Koltuk ${escapeHtml(p.seat_no || "-")}${name ? " • " + escapeHtml(name) : ""}
+                </div>
+                <div class="sheet-seat-route">${escapeHtml(route)}</div>
+              </div>
+
+              <div class="sheet-seat-extra">
+                ${bag ? `<button class="sheet-bag-detail-btn" type="button" data-bag-seat="${escapeHtml(p.seat_no || "")}">🧳 ${bag} bagaj</button>` : `<span class="sheet-badge">🧳 Bagaj yok</span>`}
+                ${Number(p.service || 0) ? '<span class="sheet-badge">🚌 Servis</span>' : ''}
+                <button class="sheet-action-btn" type="button" data-change-seat="${escapeHtml(p.seat_no || "")}">
+                  Durağı Değiştir
+                </button>
+                <button class="sheet-offload-btn ${bag ? "danger" : ""}" type="button" data-offload-seat="${escapeHtml(p.seat_no || "")}">
+                  İNDİR
+                </button>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
+
+  function renderBags(data){
+    lastDetailData = data;
+
+    const passengers = Array.isArray(data.passengers) ? data.passengers : [];
+    const bagSeats = passengers.filter(p => Number(p.bag_count || 0) > 0);
+    const consignments = Array.isArray(data.consignments) ? data.consignments : [];
+
+    if(!bagSeats.length && !consignments.length){
+      renderEmpty("Bu durakta indirilecek bagaj veya emanet görünmüyor.");
+      return;
+    }
+
+    const rightTotal = bagSeats.reduce((sum, p) => sum + Number(p.bag_right || 0), 0);
+    const leftFrontTotal = bagSeats.reduce((sum, p) => sum + Number(p.bag_left_front || 0), 0);
+    const leftBackTotal = bagSeats.reduce((sum, p) => sum + Number(p.bag_left_back || 0), 0);
+    const bagTotal = rightTotal + leftFrontTotal + leftBackTotal;
+
+    subEl.textContent = `${bagTotal} bagaj • ${consignments.length} emanet`;
+
+    function locLine(p){
+      const parts = [];
+      const r = Number(p.bag_right || 0);
+      const lf = Number(p.bag_left_front || 0);
+      const lb = Number(p.bag_left_back || 0);
+
+      if(r > 0) parts.push(`Sağ göz ${r}`);
+      if(lf > 0) parts.push(`Sol ön ${lf}`);
+      if(lb > 0) parts.push(`Sol arka ${lb}`);
+
+      return parts.length ? parts.join(" • ") : "Konum bilgisi yok";
+    }
+
+    const seatHtml = bagSeats.map(p => {
+      const bag = Number(p.bag_count || 0);
+      const photos = Number(p.bag_photo_count || 0);
+      const route = `${p.from_stop || "Biniş yok"} → ${p.to_stop || data.stop || "İniş yok"}`;
+
+      return `
+        <div class="sheet-bag-item">
+          <div class="sheet-bag-item-head">
+            <div class="sheet-bag-icon">🧳</div>
+
+            <div>
+              <div class="sheet-bag-item-title">${bag} bagaj</div>
+              <div class="sheet-bag-item-sub">${escapeHtml(locLine(p))}</div>
+            </div>
+          </div>
+
+          <div class="sheet-bag-mini">
+            Koltuk ${escapeHtml(p.seat_no || "-")} • ${escapeHtml(route)}
+            <br>
+            Fotoğraf: ${photos > 0 ? photos + " adet" : "Yok"}
+          </div>
+
+          <div class="sheet-bag-actions">
+            <button class="sheet-bag-detail-open" type="button" data-bag-seat="${escapeHtml(p.seat_no || "")}">
+              Bagajı Aç
+            </button>
+
+            <button class="sheet-action-btn" type="button" data-change-seat="${escapeHtml(p.seat_no || "")}">
+              Durağı Değiştir
+            </button>
+
+            <button class="sheet-offload-btn danger" type="button" data-offload-seat="${escapeHtml(p.seat_no || "")}">
+              İNDİR
+            </button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    const consHtml = consignments.map((c, idx) => {
+      const code = c.code || `Emanet ${idx + 1}`;
+      const item = c.item_label || "Emanet / Kargo";
+      const receiver = c.receiver || "";
+      const stop = c.stop_name || data.stop || currentStopName() || "";
+
+      return `
+        <div class="sheet-cargo-item">
+          <div class="sheet-cargo-head">
+            <div class="sheet-cargo-icon">📦</div>
+
+            <div>
+              <div class="sheet-cargo-title">${escapeHtml(item)}</div>
+              <div class="sheet-cargo-sub">Kod: ${escapeHtml(code)}</div>
+            </div>
+          </div>
+
+          <div class="sheet-cargo-meta">
+            Teslim durağı: ${escapeHtml(stop || "-")}
+            ${receiver ? `<br>Alıcı: ${escapeHtml(receiver)}` : ""}
+          </div>
+
+          <div class="sheet-cargo-actions">
+            <button class="sheet-cargo-btn" type="button" data-cargo-detail="${escapeHtml(c.id || "")}">
+              Detay
+            </button>
+            <button class="sheet-cargo-btn" type="button" data-cargo-deliver="${escapeHtml(c.id || "")}">
+              Teslim Et
+            </button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    bodyEl.innerHTML = `
+      ${bagSeats.length ? `
+        <div class="sheet-bag-stop-summary">
+          <div class="sheet-bag-stop-cell ${rightTotal > 0 ? "active" : ""}">
+            <small>Sağ göz</small>
+            <b>${rightTotal}</b>
+          </div>
+
+          <div class="sheet-bag-stop-cell ${leftFrontTotal > 0 ? "active" : ""}">
+            <small>Sol ön</small>
+            <b>${leftFrontTotal}</b>
+          </div>
+
+          <div class="sheet-bag-stop-cell ${leftBackTotal > 0 ? "active" : ""}">
+            <small>Sol arka</small>
+            <b>${leftBackTotal}</b>
+          </div>
+        </div>
+      ` : ""}
+
+      ${bagSeats.length ? `
+        <div class="sheet-section-title">
+          <span>Yolcu Bagajları</span>
+          <span class="sheet-section-count">${bagTotal} bagaj</span>
+        </div>
+
+        <div class="sheet-list">
+          ${seatHtml}
+        </div>
+      ` : ""}
+
+      ${consignments.length ? `
+        <div class="sheet-section-title">
+          <span>Emanet / Kargo</span>
+          <span class="sheet-section-count">${consignments.length} emanet</span>
+        </div>
+
+        <div class="sheet-list">
+          ${consHtml}
+        </div>
+      ` : ""}
+    `;
+  }
+
+  async function loadDetail(kind){
+    lastKind = kind;
+    const stop = currentStopName();
+
+    if(!stop || stop === "Durak seçilmedi"){
+      openSheet();
+      titleEl.textContent = "Durak seçilmedi";
+      subEl.textContent = "Önce canlı durak belirlenmeli.";
+      renderEmpty("Canlı durak bilgisi bulunamadı.");
+      return;
+    }
+
+    openSheet();
+
+    kickerEl.textContent = kind === "bagaj" ? "Detay" : "İnecek yolcular";
+    titleEl.textContent = `${stop} durağı`;
+    subEl.textContent = "Yükleniyor...";
+    bodyEl.innerHTML = '<div class="sheet-empty">Yükleniyor...</div>';
+
+    try{
+      const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stop)}&_=${Date.now()}`, {
+        headers: {"Accept":"application/json"}
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        subEl.textContent = "Bilgi alınamadı.";
+        renderEmpty(data.error || "Bir hata oluştu.");
+        return;
+      }
+
+      lastDetailData = data;
+
+      if(kind === "bagaj"){
+        subEl.textContent = `${Number(data.bag_total || 0)} bagaj / emanet`;
+        renderBags(data);
+      }else{
+        subEl.textContent = `${Number(data.off_count || 0)} yolcu inecek`;
+        renderPassengers(data);
+      }
+
+    }catch(err){
+      subEl.textContent = "Bağlantı hatası.";
+      renderEmpty("Durak detayı alınamadı.");
+      console.error("live stop detail error", err);
+    }
+  }
+
+  function refreshMetricState(){
+    const offCountEl = document.getElementById("liveOffloadCount");
+    const bagCountEl = document.getElementById("liveBagajCount");
+
+    const offN = parseInt((offCountEl && offCountEl.textContent || "0").replace(/\D+/g, "") || "0", 10);
+    const bagN = parseInt((bagCountEl && bagCountEl.textContent || "0").replace(/\D+/g, "") || "0", 10);
+
+    if(offBtn){
+      offBtn.classList.toggle("has-work", offN > 0);
+      offBtn.classList.toggle("is-empty", offN <= 0);
+    }
+
+    if(bagBtn){
+      bagBtn.classList.toggle("has-work", bagN > 0);
+      bagBtn.classList.toggle("is-empty", bagN <= 0);
+    }
+  }
+
+  if(offBtn){
+    offBtn.addEventListener("click", function(){
+      loadDetail("offload");
+    });
+  }
+
+  if(bagBtn){
+    bagBtn.addEventListener("click", function(){
+      loadDetail("bagaj");
+    });
+  }
+
+  if(bodyEl){
+    bodyEl.addEventListener("click", function(e){
+      const cargoDetailBtn = e.target.closest("[data-cargo-detail]");
+      if(cargoDetailBtn){
+        const cid = cargoDetailBtn.getAttribute("data-cargo-detail") || "";
+        renderConsignmentDetail(cid);
+        return;
+      }
+
+      const cargoDeliverBtn = e.target.closest("[data-cargo-deliver]");
+      if(cargoDeliverBtn){
+        const cid = cargoDeliverBtn.getAttribute("data-cargo-deliver") || "";
+        deliverConsignmentFromSheet(cid);
+        return;
+      }
+
+      const bagDetailBtn = e.target.closest("[data-bag-seat]");
+      if(bagDetailBtn){
+        const seatNo = bagDetailBtn.getAttribute("data-bag-seat") || "";
+        renderSeatBagDetail(seatNo);
+        return;
+      }
+
+      const bulkBtn = e.target.closest("#sheetBulkOffloadBtn");
+      if(bulkBtn){
+        bulkOffloadCurrentStop();
+        return;
+      }
+
+      const offloadBtn = e.target.closest("[data-offload-seat]");
+      if(offloadBtn){
+        const seatNo = offloadBtn.getAttribute("data-offload-seat") || "";
+        offloadSeatFromSheet(seatNo);
+        return;
+      }
+
+      const btn = e.target.closest("[data-change-seat]");
+      if(!btn) return;
+
+      const seatNo = btn.getAttribute("data-change-seat") || "";
+      const passenger = findPassenger(seatNo);
+      renderChangeDestinationForm(passenger);
+    });
+  }
+
+  if(closeBtn) closeBtn.addEventListener("click", closeSheet);
+  if(overlay) overlay.addEventListener("click", closeSheet);
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape") closeSheet();
+  });
+
+  refreshMetricState();
+})();
+</script>
+
+
+<div class="bag-photo-viewer" id="bagPhotoViewer" aria-hidden="true">
+  <div class="bag-viewer-top">
+    <div class="bag-viewer-title">
+      <div class="bag-viewer-kicker">Bagaj fotoğrafı</div>
+      <div class="bag-viewer-name" id="bagViewerTitle">Fotoğraf</div>
+    </div>
+
+    <button class="bag-viewer-close" type="button" id="bagViewerClose" aria-label="Kapat">×</button>
+  </div>
+
+  <div class="bag-viewer-stage">
+    <div class="bag-viewer-img-wrap">
+      <img class="bag-viewer-img" id="bagViewerImg" src="" alt="Bagaj fotoğrafı">
+    </div>
+  </div>
+
+  <div class="bag-viewer-bottom">
+    <div class="bag-viewer-caption" id="bagViewerCaption">—</div>
+
+    <div class="bag-viewer-actions">
+      <button class="bag-viewer-btn" type="button" id="bagViewerPrev">← Önceki</button>
+      <button class="bag-viewer-btn" type="button" id="bagViewerNext">Sonraki →</button>
+    </div>
+  </div>
+</div>
+
+<script id="bag-photo-viewer-script">
+(function(){
+  const viewer = document.getElementById("bagPhotoViewer");
+  const img = document.getElementById("bagViewerImg");
+  const title = document.getElementById("bagViewerTitle");
+  const caption = document.getElementById("bagViewerCaption");
+  const closeBtn = document.getElementById("bagViewerClose");
+  const prevBtn = document.getElementById("bagViewerPrev");
+  const nextBtn = document.getElementById("bagViewerNext");
+
+  if(!viewer || !img || !title || !caption) return;
+
+  let photos = [];
+  let index = 0;
+
+  function getPhotoItems(){
+    return Array.from(document.querySelectorAll(".sheet-bag-photo, .sheet-cargo-photo")).map((el, i) => {
+      const badge = el.querySelector(".sheet-bag-photo-badge");
+      const side = el.querySelector(".sheet-bag-photo-side");
+      const image = el.querySelector("img");
+
+      return {
+        url: el.getAttribute("href") || (image ? image.getAttribute("src") : ""),
+        thumb: image ? image.getAttribute("src") : "",
+        badge: badge ? badge.textContent.trim() : `${i + 1}`,
+        side: side ? side.textContent.trim() : "",
+      };
+    }).filter(x => x.url);
+  }
+
+  function showPhoto(i){
+    if(!photos.length) return;
+
+    index = Math.max(0, Math.min(i, photos.length - 1));
+    const p = photos[index];
+
+    img.src = p.url;
+    title.textContent = `Fotoğraf ${index + 1} / ${photos.length}`;
+    caption.textContent = p.side ? `${p.side} • ${index + 1} / ${photos.length}` : `${index + 1} / ${photos.length}`;
+
+    if(prevBtn) prevBtn.disabled = index <= 0;
+    if(nextBtn) nextBtn.disabled = index >= photos.length - 1;
+  }
+
+  function openViewer(startIndex){
+    photos = getPhotoItems();
+
+    if(!photos.length) return;
+
+    viewer.classList.add("open");
+    viewer.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+
+    showPhoto(startIndex || 0);
+  }
+
+  function closeViewer(){
+    viewer.classList.remove("open");
+    viewer.setAttribute("aria-hidden", "true");
+    img.src = "";
+
+    // Canlı durak sheet açıksa body kilidi kalsın; yoksa serbest bırak.
+    const liveSheet = document.getElementById("liveStopSheet");
+    if(!liveSheet || !liveSheet.classList.contains("open")){
+      document.body.style.overflow = "";
+    }
+  }
+
+  document.addEventListener("click", function(e){
+    const photo = e.target.closest(".sheet-bag-photo, .sheet-cargo-photo");
+    if(!photo) return;
+
+    e.preventDefault();
+
+    const currentList = Array.from(document.querySelectorAll(".sheet-bag-photo, .sheet-cargo-photo"));
+    const startIndex = currentList.indexOf(photo);
+
+    openViewer(startIndex >= 0 ? startIndex : 0);
+  });
+
+  if(closeBtn) closeBtn.addEventListener("click", closeViewer);
+
+  if(prevBtn){
+    prevBtn.addEventListener("click", function(){
+      showPhoto(index - 1);
+    });
+  }
+
+  if(nextBtn){
+    nextBtn.addEventListener("click", function(){
+      showPhoto(index + 1);
+    });
+  }
+
+  viewer.addEventListener("click", function(e){
+    if(e.target === viewer) closeViewer();
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(!viewer.classList.contains("open")) return;
+
+    if(e.key === "Escape") closeViewer();
+    if(e.key === "ArrowLeft") showPhoto(index - 1);
+    if(e.key === "ArrowRight") showPhoto(index + 1);
+  });
 })();
 </script>
 

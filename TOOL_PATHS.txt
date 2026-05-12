@@ -1,2 +1,3 @@
 tools/audit_files.py
+tools/make_soy_agaci_satirli.py
 tools/project_tree_audit.py

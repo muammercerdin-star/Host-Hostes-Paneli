@@ -6,7 +6,7 @@
 - Sahipsiz / kontrol edilecek: 0 dosya, 0 satır
 - Yedek / arşiv: 7 dosya, 2254 satır
 - APK / Android kopya: 127 dosya, 87854 satır
-- Araç / analiz scriptleri: 2 dosya, 520 satır
+- Araç / analiz scriptleri: 3 dosya, 655 satır
 
 ## 1. ÇALIŞAN / AKTİF DOSYALAR
 
@@ -276,6 +276,7 @@
 ```text
 └── tools
     ├── audit_files.py
+    ├── make_soy_agaci_satirli.py
     └── project_tree_audit.py
 ```
 

@@ -848,6 +848,85 @@ body{
 
 </main>
 
+
+<style id="consignment-photo-modal-fix">
+/* Emanet fotoğraf modalı görünürlük/z-index düzeltmesi */
+#mback.mback{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:999999 !important;
+  display:none;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:18px !important;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(59,130,246,.18), transparent 34%),
+    rgba(2,6,23,.72) !important;
+  backdrop-filter:blur(14px) saturate(1.08) !important;
+  -webkit-backdrop-filter:blur(14px) saturate(1.08) !important;
+}
+
+#mback.mback.is-open{
+  display:flex !important;
+}
+
+#mback .modal{
+  position:relative !important;
+  z-index:1000000 !important;
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  transform:none !important;
+  pointer-events:auto !important;
+
+  width:min(92vw,460px) !important;
+  max-height:86vh !important;
+  overflow:auto !important;
+
+  border-radius:28px !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(59,130,246,.14), transparent 34%),
+    linear-gradient(180deg, rgba(18,28,48,.98), rgba(7,12,24,.98)) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  box-shadow:0 30px 90px rgba(0,0,0,.52) !important;
+}
+
+#mback .mhead{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:linear-gradient(180deg, rgba(18,28,48,.98), rgba(18,28,48,.88));
+  backdrop-filter:blur(10px);
+}
+
+#mback .photo-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+#mback .thumb{
+  border-radius:18px;
+  overflow:hidden;
+  border:1px solid rgba(147,197,253,.22);
+  background:rgba(255,255,255,.06);
+}
+
+#mback .thumb img{
+  width:100%;
+  height:130px;
+  object-fit:cover;
+  display:block;
+}
+
+#mback .file-input{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
+</style>
+
+
 <!-- Fotoğraf Modalı -->
 <div id="mback" class="mback" onclick="if(event.target.id==='mback') hideModal()">
   <div class="modal" onclick="event.stopPropagation()">
@@ -916,11 +995,34 @@ async function delCons(id){
 
 /* -------- Photos Modal -------- */
 function showModal(){
-  document.getElementById('mback').style.display='flex';
+  const back = document.getElementById('mback');
+  if(!back) return;
+
+  back.style.display = 'flex';
+  back.classList.add('is-open');
+  back.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+
+  const modal = back.querySelector('.modal');
+  if(modal){
+    modal.style.display = 'block';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+    modal.style.transform = 'none';
+  }
 }
 
 function hideModal(){
-  document.getElementById('mback').style.display='none';
+  const back = document.getElementById('mback');
+  if(!back) return;
+
+  back.classList.remove('is-open');
+  back.style.display = 'none';
+  back.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+
+  const input = document.getElementById('fileInput');
+  if(input) input.value = '';
 }
 
 async function openPhotos(cid, code){
