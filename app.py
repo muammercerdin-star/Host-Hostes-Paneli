@@ -1598,6 +1598,10 @@ def continue_trip():
                        COUNT(*) AS c
                 FROM consignments
                 WHERE trip_id=?
+                  AND (
+                    status IS NULL
+                    OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+                  )
                 GROUP BY {stop_col}
                 """,
                 (tid,),
@@ -2243,6 +2247,152 @@ def api_live_seat_destination():
     })
 
 
+@app.route("/api/live-consignment-detail/<int:cid>")
+def api_live_consignment_detail(cid):
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    db = get_db()
+
+    row = db.execute(
+        "SELECT * FROM consignments WHERE id=? AND trip_id=?",
+        (cid, tid),
+    ).fetchone()
+
+    if not row:
+        return jsonify({"ok": False, "error": "Emanet bulunamadı."}), 404
+
+    photos = []
+    try:
+        photo_rows = db.execute(
+            """
+            SELECT id, role, file_path, mime, size_bytes, created_at
+            FROM consignment_photos
+            WHERE consignment_id=?
+            ORDER BY id DESC
+            """,
+            (cid,),
+        ).fetchall()
+
+        for pr in photo_rows:
+            fp = (pr["file_path"] or "").strip()
+
+            raw_fp = (fp or "").replace("\\", "/").strip()
+            filename = raw_fp.split("/")[-1] if raw_fp else ""
+
+            if filename:
+                url = url_for("serve_uploaded", filename=filename)
+            else:
+                url = ""
+
+            photos.append({
+                "id": pr["id"],
+                "role": pr["role"] or "",
+                "file_path": fp,
+                "url": url,
+                "mime": pr["mime"] or "",
+                "size_bytes": int(pr["size_bytes"] or 0),
+                "created_at": pr["created_at"] or "",
+            })
+    except Exception:
+        photos = []
+
+    return jsonify({
+        "ok": True,
+        "item": {
+            "id": row["id"],
+            "code": row["code"] or "",
+            "item_name": row["item_name"] or "",
+            "item_type": row["item_type"] or "",
+            "from_name": row["from_name"] or "",
+            "from_phone": row["from_phone"] or "",
+            "to_name": row["to_name"] or "",
+            "to_phone": row["to_phone"] or "",
+            "from_stop": row["from_stop"] or "",
+            "to_stop": row["to_stop"] or "",
+            "amount": float(row["amount"] or 0),
+            "payment": row["payment"] or "",
+            "status": row["status"] or "",
+            "notes": row["notes"] or "",
+            "created_at": row["created_at"] or "",
+            "updated_at": row["updated_at"] or "",
+            "delivered_at": row["delivered_at"] or "",
+            "photos": photos,
+            "photo_count": len(photos),
+        }
+    })
+
+
+@app.route("/api/live-consignment-deliver/<int:cid>", methods=["POST"])
+def api_live_consignment_deliver(cid):
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    db = get_db()
+
+    row = db.execute(
+        "SELECT * FROM consignments WHERE id=? AND trip_id=?",
+        (cid, tid),
+    ).fetchone()
+
+    if not row:
+        return jsonify({"ok": False, "error": "Emanet bulunamadı."}), 404
+
+    current_status = (row["status"] or "").strip().lower()
+    if current_status in {"teslim", "teslim_edildi", "delivered"}:
+        return jsonify({
+            "ok": True,
+            "already": True,
+            "message": "Bu emanet zaten teslim edilmiş.",
+            "id": cid,
+            "code": row["code"] or "",
+        })
+
+    db.execute(
+        """
+        UPDATE consignments
+        SET status='teslim_edildi',
+            delivered_at=datetime('now','localtime'),
+            updated_at=datetime('now','localtime')
+        WHERE id=? AND trip_id=?
+        """,
+        (cid, tid),
+    )
+
+    try:
+        if (row["to_stop"] or "").strip():
+            log_trip_stop_event(
+                db,
+                tid,
+                row["to_stop"],
+                "parcel_deliver",
+                {
+                    "action": "live_consignment_deliver",
+                    "consignment_id": cid,
+                    "code": row["code"] or "",
+                    "item_name": row["item_name"] or "",
+                    "to_name": row["to_name"] or "",
+                    "to_phone": row["to_phone"] or "",
+                    "count": 1,
+                },
+            )
+    except Exception:
+        pass
+
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "id": cid,
+        "code": row["code"] or "",
+        "item_name": row["item_name"] or "",
+        "to_stop": row["to_stop"] or "",
+        "message": f"{row['code'] or cid} kodlu emanet teslim edildi.",
+    })
+
+
 @app.route("/api/live-stop-detail")
 def api_live_stop_detail():
     tid = get_active_trip()
@@ -2394,11 +2544,20 @@ def api_live_stop_detail():
 
         if stop_col:
             select_cols = ["id", stop_col]
-            for c in ["code", "item_name", "item", "title", "note", "receiver_name", "to_name", "status"]:
+            for c in [
+                "code", "item_name", "item_type", "item", "title",
+                "from_name", "from_phone", "to_name", "to_phone",
+                "note", "notes", "receiver_name", "amount", "payment",
+                "status", "created_at", "updated_at", "delivered_at"
+            ]:
                 if c in cols and c not in select_cols:
                     select_cols.append(c)
 
-            q = f"SELECT {', '.join(select_cols)} FROM consignments WHERE trip_id=?"
+            status_filter = ""
+            if "status" in cols:
+                status_filter = " AND (status IS NULL OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered'))"
+
+            q = f"SELECT {', '.join(select_cols)} FROM consignments WHERE trip_id=?{status_filter}"
             rows = db.execute(q, (tid,)).fetchall()
 
             for r in rows:
@@ -2433,11 +2592,33 @@ def api_live_stop_detail():
                     except Exception:
                         code = ""
 
+                try:
+                    cid = r["id"]
+                except Exception:
+                    cid = ""
+
+                def _rv(col, default=""):
+                    try:
+                        return r[col] if col in cols or col == "id" else default
+                    except Exception:
+                        return default
+
                 consignments.append({
+                    "id": cid,
                     "code": code,
                     "item_label": item_label,
+                    "item_type": _rv("item_type", "") or "",
                     "receiver": receiver,
+                    "to_name": _rv("to_name", "") or "",
+                    "to_phone": _rv("to_phone", "") or "",
+                    "from_name": _rv("from_name", "") or "",
+                    "from_phone": _rv("from_phone", "") or "",
                     "stop_name": sname,
+                    "amount": float(_rv("amount", 0) or 0),
+                    "payment": _rv("payment", "") or "",
+                    "status": _rv("status", "") or "",
+                    "notes": _rv("notes", "") or _rv("note", "") or "",
+                    "delivered_at": _rv("delivered_at", "") or "",
                 })
     except Exception:
         consignments = []
