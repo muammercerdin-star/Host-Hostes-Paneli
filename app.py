@@ -2322,7 +2322,43 @@ def api_live_stop_detail():
             except Exception:
                 meta = ()
 
-            bag_count = _bag_count_from_meta(meta)
+            bag_right = bag_left_front = bag_left_back = 0
+
+            if isinstance(meta, (tuple, list)):
+                try:
+                    bag_right = int(meta[0] or 0) if len(meta) > 0 else 0
+                    bag_left_front = int(meta[1] or 0) if len(meta) > 1 else 0
+                    bag_left_back = int(meta[2] or 0) if len(meta) > 2 else 0
+                except Exception:
+                    bag_right = bag_left_front = bag_left_back = 0
+            elif isinstance(meta, dict):
+                counts = meta.get("counts")
+                if isinstance(counts, dict):
+                    try:
+                        bag_right = int(counts.get("R") or 0)
+                        bag_left_front = int(counts.get("LF") or 0)
+                        bag_left_back = int(counts.get("LB") or 0)
+                    except Exception:
+                        bag_right = bag_left_front = bag_left_back = 0
+
+            bag_count = int(bag_right or 0) + int(bag_left_front or 0) + int(bag_left_back or 0)
+            if bag_count <= 0:
+                bag_count = _bag_count_from_meta(meta)
+
+            bag_photo_count = 0
+            try:
+                d = bag_root() / safe(trip_key) / safe(str(r["seat_no"]))
+                if d.exists() and d.is_dir():
+                    for fp in d.iterdir():
+                        low = fp.name.lower()
+                        if not fp.is_file():
+                            continue
+                        if ".thumb." in low:
+                            continue
+                        if low.endswith((".jpg", ".jpeg", ".png", ".webp")):
+                            bag_photo_count += 1
+            except Exception:
+                bag_photo_count = 0
 
             passengers.append({
                 "seat_no": str(r["seat_no"]),
@@ -2335,6 +2371,10 @@ def api_live_stop_detail():
                 "amount": float(r["amount"] or 0),
                 "service": int(r["service"] or 0),
                 "bag_count": int(bag_count or 0),
+                "bag_right": int(bag_right or 0),
+                "bag_left_front": int(bag_left_front or 0),
+                "bag_left_back": int(bag_left_back or 0),
+                "bag_photo_count": int(bag_photo_count or 0),
             })
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500

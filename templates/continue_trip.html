@@ -2143,7 +2143,6 @@
   letter-spacing: 0 !important;
 }
 </style>
-\n
 <style id="sheet-offload-button-text-fix">
 .sheet-offload-btn{
   text-transform: uppercase !important;
@@ -2151,7 +2150,6 @@
   font-weight: 1000 !important;
 }
 </style>
-\n
 <style id="sheet-offload-confirm-theme">
 .sheet-confirm-wrap{
   display:grid;
@@ -2352,7 +2350,6 @@
   color:#fff;
 }
 </style>
-\n
 <style id="sheet-bag-photo-gallery-style">
 .sheet-bag-gallery{
   margin:0 14px 14px;
@@ -2631,7 +2628,6 @@
   letter-spacing:0 !important;
 }
 </style>
-\n
 <style id="live-metric-hint-compact-fix">
 .metric-hint{
   margin-top:5px !important;
@@ -2700,7 +2696,113 @@
   bottom:8px !important;
 }
 </style>
-\n</head>
+<style id="sheet-bag-centered-modal-style">
+.sheet-bag-stop-summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  padding:14px;
+}
+
+.sheet-bag-stop-cell{
+  border-radius:18px;
+  padding:13px 8px;
+  text-align:center;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.sheet-bag-stop-cell.active{
+  border-color:rgba(249,115,22,.42);
+  background:rgba(249,115,22,.13);
+  box-shadow:0 12px 28px rgba(249,115,22,.10);
+}
+
+.sheet-bag-stop-cell small{
+  display:block;
+  color:rgba(255,255,255,.66);
+  font-size:10.5px;
+  font-weight:900;
+}
+
+.sheet-bag-stop-cell b{
+  display:block;
+  margin-top:6px;
+  color:#fff;
+  font-size:23px;
+  font-weight:1000;
+}
+
+.sheet-bag-item{
+  border-radius:22px;
+  padding:14px;
+  background:rgba(255,255,255,.065);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.sheet-bag-item-head{
+  display:grid;
+  grid-template-columns:56px 1fr;
+  gap:12px;
+  align-items:center;
+}
+
+.sheet-bag-icon{
+  width:56px;
+  height:56px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  font-size:26px;
+  background:linear-gradient(135deg,rgba(249,115,22,.95),rgba(239,68,68,.88));
+  box-shadow:0 12px 28px rgba(249,115,22,.20);
+}
+
+.sheet-bag-item-title{
+  color:#fff;
+  font-size:18px;
+  font-weight:1000;
+}
+
+.sheet-bag-item-sub{
+  margin-top:5px;
+  color:#fed7aa;
+  font-size:13px;
+  font-weight:900;
+}
+
+.sheet-bag-mini{
+  margin-top:12px;
+  padding:10px 11px;
+  border-radius:16px;
+  background:rgba(15,23,42,.42);
+  border:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.72);
+  font-size:12.5px;
+  font-weight:800;
+}
+
+.sheet-bag-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+.sheet-bag-detail-open{
+  appearance:none;
+  border:1px solid rgba(249,115,22,.30);
+  background:rgba(249,115,22,.14);
+  color:#fed7aa;
+  border-radius:999px;
+  padding:8px 10px;
+  font-size:11px;
+  font-weight:950;
+  white-space:nowrap;
+}
+</style>
+
+</head>
 
 <body>
   <main class="shell">
@@ -3950,6 +4052,7 @@
 
   function renderBags(data){
     lastDetailData = data;
+
     const passengers = Array.isArray(data.passengers) ? data.passengers : [];
     const bagSeats = passengers.filter(p => Number(p.bag_count || 0) > 0);
     const consignments = Array.isArray(data.consignments) ? data.consignments : [];
@@ -3959,26 +4062,61 @@
       return;
     }
 
-    const seatHtml = bagSeats.map(p => `
-      <div class="sheet-seat-row">
-        <div class="sheet-seat-no">${escapeHtml(p.seat_no || "-")}</div>
+    const rightTotal = bagSeats.reduce((sum, p) => sum + Number(p.bag_right || 0), 0);
+    const leftFrontTotal = bagSeats.reduce((sum, p) => sum + Number(p.bag_left_front || 0), 0);
+    const leftBackTotal = bagSeats.reduce((sum, p) => sum + Number(p.bag_left_back || 0), 0);
 
-        <div class="sheet-seat-main">
-          <div class="sheet-seat-title">Koltuk ${escapeHtml(p.seat_no || "-")}</div>
-          <div class="sheet-seat-route">${escapeHtml((p.from_stop || "Biniş yok") + " → " + (p.to_stop || data.stop || "İniş yok"))}</div>
-        </div>
+    function locLine(p){
+      const parts = [];
+      const r = Number(p.bag_right || 0);
+      const lf = Number(p.bag_left_front || 0);
+      const lb = Number(p.bag_left_back || 0);
 
-        <div class="sheet-seat-extra">
-          <button class="sheet-bag-detail-btn" type="button" data-bag-seat="${escapeHtml(p.seat_no || "")}">🧳 ${Number(p.bag_count || 0)} bagaj</button>
-          <button class="sheet-action-btn" type="button" data-change-seat="${escapeHtml(p.seat_no || "")}">
-            Durağı Değiştir
-          </button>
-          <button class="sheet-offload-btn danger" type="button" data-offload-seat="${escapeHtml(p.seat_no || "")}">
-                  İNDİR
-                </button>
+      if(r > 0) parts.push(`Sağ göz ${r}`);
+      if(lf > 0) parts.push(`Sol ön ${lf}`);
+      if(lb > 0) parts.push(`Sol arka ${lb}`);
+
+      return parts.length ? parts.join(" • ") : "Konum bilgisi yok";
+    }
+
+    const seatHtml = bagSeats.map(p => {
+      const bag = Number(p.bag_count || 0);
+      const photos = Number(p.bag_photo_count || 0);
+      const route = `${p.from_stop || "Biniş yok"} → ${p.to_stop || data.stop || "İniş yok"}`;
+
+      return `
+        <div class="sheet-bag-item">
+          <div class="sheet-bag-item-head">
+            <div class="sheet-bag-icon">🧳</div>
+
+            <div>
+              <div class="sheet-bag-item-title">${bag} bagaj</div>
+              <div class="sheet-bag-item-sub">${escapeHtml(locLine(p))}</div>
+            </div>
+          </div>
+
+          <div class="sheet-bag-mini">
+            Koltuk ${escapeHtml(p.seat_no || "-")} • ${escapeHtml(route)}
+            <br>
+            Fotoğraf: ${photos > 0 ? photos + " adet" : "Yok"}
+          </div>
+
+          <div class="sheet-bag-actions">
+            <button class="sheet-bag-detail-open" type="button" data-bag-seat="${escapeHtml(p.seat_no || "")}">
+              Bagajı Aç
+            </button>
+
+            <button class="sheet-action-btn" type="button" data-change-seat="${escapeHtml(p.seat_no || "")}">
+              Durağı Değiştir
+            </button>
+
+            <button class="sheet-offload-btn danger" type="button" data-offload-seat="${escapeHtml(p.seat_no || "")}">
+              İNDİR
+            </button>
+          </div>
         </div>
-      </div>
-    `).join("");
+      `;
+    }).join("");
 
     const consHtml = consignments.map(c => `
       <div class="sheet-consign-row">
@@ -3990,7 +4128,28 @@
       </div>
     `).join("");
 
-    bodyEl.innerHTML = `<div class="sheet-list">${seatHtml}${consHtml}</div>`;
+    bodyEl.innerHTML = `
+      <div class="sheet-bag-stop-summary">
+        <div class="sheet-bag-stop-cell ${rightTotal > 0 ? "active" : ""}">
+          <small>Sağ göz</small>
+          <b>${rightTotal}</b>
+        </div>
+
+        <div class="sheet-bag-stop-cell ${leftFrontTotal > 0 ? "active" : ""}">
+          <small>Sol ön</small>
+          <b>${leftFrontTotal}</b>
+        </div>
+
+        <div class="sheet-bag-stop-cell ${leftBackTotal > 0 ? "active" : ""}">
+          <small>Sol arka</small>
+          <b>${leftBackTotal}</b>
+        </div>
+      </div>
+
+      <div class="sheet-list">
+        ${seatHtml}${consHtml}
+      </div>
+    `;
   }
 
   async function loadDetail(kind){
