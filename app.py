@@ -1828,6 +1828,321 @@ def continue_trip():
     )
 
 
+@app.route("/api/live-seat-bag-detail")
+def api_live_seat_bag_detail():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    seat_no = str(request.args.get("seat_no") or request.args.get("seat") or "").strip()
+    if not seat_no:
+        return jsonify({"ok": False, "error": "Koltuk numarası eksik."}), 400
+
+    db = get_db()
+
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    row = db.execute(
+        """
+        SELECT seat_no,
+               COALESCE(from_stop,'') AS from_stop,
+               COALESCE(to_stop,'') AS to_stop,
+               COALESCE(passenger_name,'') AS passenger_name
+        FROM seats
+        WHERE trip_id=? AND seat_no=?
+        """,
+        (tid, seat_no),
+    ).fetchone()
+
+    if not row:
+        return jsonify({
+            "ok": False,
+            "error": f"Koltuk {seat_no} bulunamadı veya boş."
+        }), 404
+
+    trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+
+    right = left_front = left_back = 0
+
+    try:
+        right, left_front, left_back = get_counts(trip_key, seat_no)
+    except Exception:
+        right, left_front, left_back = 0, 0, 0
+
+    right = int(right or 0)
+    left_front = int(left_front or 0)
+    left_back = int(left_back or 0)
+    total = right + left_front + left_back
+
+    files = []
+    photos = []
+    try:
+        from modules.bags import ensure_thumb, thumb_path, _is_image, _side_from_filename, _side_label
+
+        d = bag_root() / safe(trip_key) / safe(seat_no)
+
+        if d.exists() and d.is_dir():
+            for fp in sorted(d.iterdir(), key=lambda x: x.name):
+                if fp.is_file():
+                    files.append(fp.name)
+
+            for fp in sorted(d.iterdir(), key=lambda x: x.name):
+                if not (fp.is_file() and _is_image(fp)):
+                    continue
+
+                # Mevcut bagaj modülünün thumbnail mantığını kullan.
+                try:
+                    ensure_thumb(fp)
+                except Exception:
+                    pass
+
+                tn = thumb_path(fp)
+                thumb_name = tn.name if tn.exists() else fp.name
+
+                side = _side_from_filename(fp.name)
+
+                photos.append({
+                    "index": len(photos) + 1,
+                    "name": fp.name,
+                    "side": side,
+                    "side_label": _side_label(side),
+                    "url": url_for("bags.raw", trip=trip_key, seat=seat_no, filename=fp.name),
+                    "thumb_url": url_for("bags.thumb", trip=trip_key, seat=seat_no, filename=thumb_name),
+                })
+
+    except Exception:
+        files = []
+        photos = []
+
+    return jsonify({
+        "ok": True,
+        "seat_no": seat_no,
+        "from_stop": row["from_stop"] or "",
+        "to_stop": row["to_stop"] or "",
+        "passenger_name": row["passenger_name"] or "",
+        "trip_key": trip_key,
+        "right": right,
+        "left_front": left_front,
+        "left_back": left_back,
+        "total": total,
+        "files": files,
+        "photos": photos,
+        "photo_count": len(photos),
+        "locations": [
+            {"key": "R", "label": "Sağ göz", "count": right},
+            {"key": "LF", "label": "Sol ön", "count": left_front},
+            {"key": "LB", "label": "Sol arka", "count": left_back},
+        ],
+    })
+
+
+@app.route("/api/live-stop-offload", methods=["POST"])
+def api_live_stop_offload():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    data = request.get_json(silent=True) or request.form or {}
+    stop_raw = str(data.get("stop") or "").strip()
+
+    if not stop_raw:
+        return jsonify({"ok": False, "error": "Durak seçilmedi."}), 400
+
+    db = get_db()
+
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    def norm_stop(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    stop_key = norm_stop(stop_raw)
+
+    rows = db.execute(
+        """
+        SELECT *
+        FROM seats
+        WHERE trip_id=? AND COALESCE(to_stop,'') <> ''
+        ORDER BY CAST(seat_no AS INTEGER), seat_no
+        """,
+        (tid,),
+    ).fetchall()
+
+    selected = []
+    for r in rows:
+        if norm_stop(r["to_stop"] or "") == stop_key:
+            selected.append(r)
+
+    if not selected:
+        return jsonify({
+            "ok": False,
+            "error": "Bu durakta indirilecek yolcu bulunamadı."
+        }), 404
+
+    trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+
+    deleted = []
+    bag_deleted = 0
+
+    for r in selected:
+        seat_no = int(r["seat_no"])
+
+        if (r["to_stop"] or "").strip():
+            log_trip_stop_event(
+                db,
+                tid,
+                r["to_stop"],
+                "offload",
+                _seat_event_meta(r, {"action": "live_stop_bulk_offload"}),
+            )
+
+        db.execute(
+            "DELETE FROM seats WHERE trip_id=? AND seat_no=?",
+            (tid, seat_no),
+        )
+
+        deleted.append(seat_no)
+
+        # Koltuğa bağlı bagaj dosyalarını temizle
+        try:
+            d = bag_root() / safe(trip_key) / safe(str(seat_no))
+            if d.exists() and d.is_dir():
+                for fp in d.iterdir():
+                    try:
+                        if fp.is_file():
+                            fp.unlink(missing_ok=True)
+                            bag_deleted += 1
+                    except Exception:
+                        pass
+
+                try:
+                    d.rmdir()
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "stop": stop_raw,
+        "deleted": deleted,
+        "count": len(deleted),
+        "bag_deleted": bag_deleted,
+        "message": f"{stop_raw} durağında {len(deleted)} yolcu indirildi."
+    })
+
+
+@app.route("/api/live-seat-offload", methods=["POST"])
+def api_live_seat_offload():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    data = request.get_json(silent=True) or request.form or {}
+
+    seat_no_raw = str(data.get("seat_no") or "").strip()
+    stop_raw = str(data.get("stop") or "").strip()
+
+    seat_no = parse_int(seat_no_raw, None)
+    if seat_no is None:
+        return jsonify({"ok": False, "error": "Koltuk numarası geçersiz."}), 400
+
+    if not validate_seat_no(seat_no):
+        return jsonify({"ok": False, "error": "Geçersiz koltuk numarası."}), 400
+
+    db = get_db()
+
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    row = db.execute(
+        """
+        SELECT *
+        FROM seats
+        WHERE trip_id=? AND seat_no=?
+        """,
+        (tid, seat_no),
+    ).fetchone()
+
+    if not row:
+        return jsonify({
+            "ok": False,
+            "error": f"Koltuk {seat_no} zaten boş veya bu seferde bulunamadı."
+        }), 404
+
+    def norm_stop(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    old_to_stop = (row["to_stop"] or "").strip()
+
+    # Modal hangi duraktan açıldıysa güvenlik için kontrol ediyoruz.
+    # Boş gönderilirse engellemiyoruz.
+    if stop_raw and old_to_stop and norm_stop(stop_raw) != norm_stop(old_to_stop):
+        return jsonify({
+            "ok": False,
+            "error": f"Koltuk {seat_no} şu an {old_to_stop} durağına kayıtlı görünüyor."
+        }), 409
+
+    if old_to_stop:
+        log_trip_stop_event(
+            db,
+            tid,
+            old_to_stop,
+            "offload",
+            _seat_event_meta(row, {"action": "live_sheet_offload"}),
+        )
+
+    db.execute(
+        "DELETE FROM seats WHERE trip_id=? AND seat_no=?",
+        (tid, seat_no),
+    )
+
+    # Koltuğa bağlı bagaj meta dosyalarını temizle
+    bag_deleted = 0
+    try:
+        trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+        d = bag_root() / safe(trip_key) / safe(str(seat_no))
+
+        if d.exists() and d.is_dir():
+            for fp in d.iterdir():
+                try:
+                    if fp.is_file():
+                        fp.unlink(missing_ok=True)
+                        bag_deleted += 1
+                except Exception:
+                    pass
+
+            try:
+                d.rmdir()
+            except Exception:
+                pass
+    except Exception:
+        bag_deleted = 0
+
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "seat_no": seat_no,
+        "from_stop": row["from_stop"] or "",
+        "to_stop": old_to_stop,
+        "bag_deleted": bag_deleted,
+        "message": f"Koltuk {seat_no} indirildi."
+    })
+
+
 @app.route("/api/live-seat-destination", methods=["POST"])
 def api_live_seat_destination():
     tid = get_active_trip()
