@@ -3121,6 +3121,27 @@ def live_map_page():
     except Exception:
         route_segments = []
 
+    # APK tarafında db.sqlite3 farklı olabileceği için static JSON fallback kullan.
+    # Böylece gerçek yol geometrisi kodla beraber APK'ya taşınır.
+    if not route_segments:
+        try:
+            import json as _json
+            from pathlib import Path as _Path
+
+            seg_path = _Path(app.static_folder or "static") / "data" / "route_segments.json"
+
+            if seg_path.exists():
+                all_segments = _json.loads(seg_path.read_text(encoding="utf-8"))
+
+                route_segments = [
+                    x for x in all_segments
+                    if (x.get("route") or "") == route_name
+                ]
+
+                route_segments.sort(key=lambda x: int(x.get("sort_order") or 0))
+        except Exception:
+            route_segments = []
+
     map_boot = {
         "trip": {
             "id": trip["id"],
