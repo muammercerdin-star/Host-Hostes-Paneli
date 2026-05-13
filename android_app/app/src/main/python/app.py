@@ -2393,6 +2393,217 @@ def api_live_consignment_deliver(cid):
     })
 
 
+@app.route("/api/live-stop-complete", methods=["POST"])
+def api_live_stop_complete():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    data = request.get_json(silent=True) or request.form or {}
+    stop_raw = str(data.get("stop") or "").strip()
+
+    if not stop_raw:
+        return jsonify({"ok": False, "error": "Durak seçilmedi."}), 400
+
+    db = get_db()
+
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    stops = get_stops(trip["route"])
+
+    def stop_key(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    def find_route_stop(value):
+        raw = (value or "").strip()
+        if not raw:
+            return ""
+
+        if raw in stops:
+            return raw
+
+        raw_key = stop_key(raw)
+        if not raw_key:
+            return ""
+
+        for stop_name in stops:
+            if stop_key(stop_name) == raw_key:
+                return stop_name
+
+        for stop_name in stops:
+            sk = stop_key(stop_name)
+            if raw_key in sk or sk in raw_key:
+                return stop_name
+
+        return raw
+
+    stop_name = find_route_stop(stop_raw)
+    target_key = stop_key(stop_name)
+
+    pending_seats = []
+    bag_total = 0
+
+    try:
+        trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+
+        rows = db.execute(
+            """
+            SELECT seat_no,
+                   COALESCE(from_stop,'') AS from_stop,
+                   COALESCE(to_stop,'') AS to_stop,
+                   COALESCE(passenger_name,'') AS passenger_name,
+                   COALESCE(gender,'') AS gender
+            FROM seats
+            WHERE trip_id=?
+              AND COALESCE(to_stop,'') <> ''
+            ORDER BY CAST(seat_no AS INTEGER), seat_no
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            to_stop = (r["to_stop"] or "").strip()
+
+            if stop_key(to_stop) != target_key:
+                continue
+
+            pending_seats.append({
+                "seat_no": str(r["seat_no"]),
+                "from_stop": r["from_stop"] or "",
+                "to_stop": to_stop,
+                "passenger_name": r["passenger_name"] or "",
+                "gender": r["gender"] or "",
+            })
+
+            try:
+                meta = get_counts(trip_key, str(r["seat_no"]))
+            except Exception:
+                meta = ()
+
+            if isinstance(meta, (tuple, list)):
+                for x in meta[:3]:
+                    try:
+                        bag_total += int(x or 0)
+                    except Exception:
+                        pass
+            elif isinstance(meta, dict):
+                counts = meta.get("counts")
+                if isinstance(counts, dict):
+                    for k in ("R", "LF", "LB"):
+                        try:
+                            bag_total += int(counts.get(k) or 0)
+                        except Exception:
+                            pass
+
+    except Exception:
+        pending_seats = []
+
+    standing_count = 0
+    try:
+        row = db.execute(
+            """
+            SELECT COALESCE(SUM(COALESCE(pax,0)),0) AS c
+            FROM walk_on_sales
+            WHERE trip_id=?
+              AND lower(COALESCE(to_stop,''))=lower(?)
+            """,
+            (tid, stop_name),
+        ).fetchone()
+
+        standing_count = int(row["c"] or 0) if row else 0
+    except Exception:
+        standing_count = 0
+
+    pending_consignments = []
+    try:
+        rows = db.execute(
+            """
+            SELECT id,
+                   COALESCE(code,'') AS code,
+                   COALESCE(item_name,'') AS item_name,
+                   COALESCE(to_name,'') AS to_name,
+                   COALESCE(to_stop,'') AS to_stop,
+                   COALESCE(status,'') AS status
+            FROM consignments
+            WHERE trip_id=?
+              AND lower(COALESCE(to_stop,''))=lower(?)
+              AND (
+                status IS NULL
+                OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+              )
+            ORDER BY id DESC
+            """,
+            (tid, stop_name),
+        ).fetchall()
+
+        for r in rows:
+            pending_consignments.append({
+                "id": r["id"],
+                "code": r["code"] or "",
+                "item_name": r["item_name"] or "",
+                "to_name": r["to_name"] or "",
+                "to_stop": r["to_stop"] or "",
+                "status": r["status"] or "",
+            })
+
+    except Exception:
+        pending_consignments = []
+
+    pending = {
+        "seat_count": len(pending_seats),
+        "seats": pending_seats,
+        "standing_count": standing_count,
+        "bag_count": int(bag_total or 0),
+        "consignment_count": len(pending_consignments),
+        "consignments": pending_consignments,
+    }
+
+    total_pending = (
+        pending["seat_count"]
+        + pending["standing_count"]
+        + pending["bag_count"]
+        + pending["consignment_count"]
+    )
+
+    if total_pending > 0:
+        return jsonify({
+            "ok": True,
+            "completed": False,
+            "stop": stop_name,
+            "pending": pending,
+            "message": "Bu durakta eksik işlem var."
+        })
+
+    try:
+        log_trip_stop_event(
+            db,
+            tid,
+            stop_name,
+            "pass_stop",
+            {
+                "action": "live_stop_complete",
+                "stop": stop_name,
+                "count": 1,
+            },
+        )
+        db.commit()
+    except Exception:
+        pass
+
+    return jsonify({
+        "ok": True,
+        "completed": True,
+        "stop": stop_name,
+        "pending": pending,
+        "message": f"{stop_name} durağı tamamlandı."
+    })
+
+
 @app.route("/api/live-stop-detail")
 def api_live_stop_detail():
     tid = get_active_trip()
@@ -2637,6 +2848,297 @@ def api_live_stop_detail():
         "consignment_count": len(consignments),
         "bag_total": seat_bag_total + len(consignments),
     })
+
+
+@app.route("/canli-harita")
+def live_map_page():
+    tid = get_active_trip()
+    if not tid:
+        return redirect(url_for("trip_start"))
+
+    db = get_db()
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+
+    if not trip:
+        set_active_trip(None)
+        return redirect(url_for("trip_start"))
+
+    route_name = trip["route"] or ""
+    stops = get_stops(route_name)
+    live_runtime = fetch_live_runtime_state(tid)
+
+    def norm_stop(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    # Durak koordinatları: önce rota+durak eşleşmesi, yoksa sadece durak adına göre fallback
+    coord_map = {}
+
+    try:
+        rows = db.execute(
+            """
+            SELECT route, stop, lat, lng
+            FROM route_stop_coords
+            WHERE route=?
+            """,
+            (route_name,),
+        ).fetchall()
+
+        for r in rows:
+            coord_map[norm_stop(r["stop"])] = {
+                "lat": float(r["lat"]),
+                "lng": float(r["lng"]),
+            }
+    except Exception:
+        pass
+
+    # Rota tam eşleşmezse stop adına göre koordinat ara
+    if not coord_map:
+        try:
+            rows = db.execute(
+                """
+                SELECT route, stop, lat, lng
+                FROM route_stop_coords
+                """
+            ).fetchall()
+
+            wanted = {norm_stop(x) for x in stops}
+
+            for r in rows:
+                k = norm_stop(r["stop"])
+                if k in wanted and k not in coord_map:
+                    coord_map[k] = {
+                        "lat": float(r["lat"]),
+                        "lng": float(r["lng"]),
+                    }
+        except Exception:
+            pass
+
+    # Yolcu iniş/biniş sayıları
+    off_counts = {}
+    board_counts = {}
+
+    try:
+        rows = db.execute(
+            """
+            SELECT COALESCE(from_stop,'') AS from_stop,
+                   COALESCE(to_stop,'') AS to_stop,
+                   seat_no
+            FROM seats
+            WHERE trip_id=?
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            fs = (r["from_stop"] or "").strip()
+            ts = (r["to_stop"] or "").strip()
+
+            if fs:
+                k = norm_stop(fs)
+                board_counts[k] = board_counts.get(k, 0) + 1
+
+            if ts:
+                k = norm_stop(ts)
+                off_counts[k] = off_counts.get(k, 0) + 1
+    except Exception:
+        pass
+
+    # Bagaj sayıları
+    bag_counts = {}
+
+    def _bag_count_from_meta(meta):
+        if isinstance(meta, (tuple, list)):
+            total = 0
+            for x in meta[:3]:
+                try:
+                    total += int(x or 0)
+                except Exception:
+                    pass
+            return total
+
+        if isinstance(meta, dict):
+            counts = meta.get("counts")
+            if isinstance(counts, dict):
+                total = 0
+                for k in ("R", "LF", "LB"):
+                    try:
+                        total += int(counts.get(k) or 0)
+                    except Exception:
+                        pass
+                return total
+
+        return 0
+
+    try:
+        trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+
+        rows = db.execute(
+            """
+            SELECT seat_no, COALESCE(to_stop,'') AS to_stop
+            FROM seats
+            WHERE trip_id=?
+              AND COALESCE(to_stop,'') <> ''
+            ORDER BY seat_no
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            to_stop = (r["to_stop"] or "").strip()
+            if not to_stop:
+                continue
+
+            try:
+                meta = get_counts(trip_key, str(r["seat_no"]))
+            except Exception:
+                meta = ()
+
+            cnt = _bag_count_from_meta(meta)
+
+            if cnt > 0:
+                k = norm_stop(to_stop)
+                bag_counts[k] = bag_counts.get(k, 0) + int(cnt)
+    except Exception:
+        pass
+
+    # Emanet / kargo sayıları: teslim edilmemiş olanlar
+    parcel_counts = {}
+
+    try:
+        rows = db.execute(
+            """
+            SELECT COALESCE(to_stop,'') AS to_stop,
+                   COUNT(*) AS c
+            FROM consignments
+            WHERE trip_id=?
+              AND (
+                status IS NULL
+                OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+              )
+            GROUP BY to_stop
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            ts = (r["to_stop"] or "").strip()
+            if ts:
+                k = norm_stop(ts)
+                parcel_counts[k] = int(r["c"] or 0)
+    except Exception:
+        pass
+
+    live_stop = (live_runtime.get("live_stop") or "").strip()
+    live_key = norm_stop(live_stop)
+
+    stop_items = []
+
+    for idx, stop_name in enumerate(stops):
+        key = norm_stop(stop_name)
+        coord = coord_map.get(key)
+
+        off_c = int(off_counts.get(key, 0) or 0)
+        board_c = int(board_counts.get(key, 0) or 0)
+        bag_c = int(bag_counts.get(key, 0) or 0)
+        parcel_c = int(parcel_counts.get(key, 0) or 0)
+        total_ops = off_c + board_c + bag_c + parcel_c
+
+        kind = "waiting"
+        if live_key and key == live_key:
+            kind = "live"
+        elif total_ops > 0:
+            kind = "operation"
+
+        stop_items.append({
+            "name": stop_name,
+            "index": idx,
+            "lat": coord["lat"] if coord else None,
+            "lng": coord["lng"] if coord else None,
+            "has_coord": bool(coord),
+            "kind": kind,
+            "off_count": off_c,
+            "board_count": board_c,
+            "bag_count": bag_c,
+            "parcel_count": parcel_c,
+            "total_ops": total_ops,
+        })
+
+    # Sıradaki işlemli durak
+    next_operation = None
+    live_idx = -1
+
+    for item in stop_items:
+        if item["kind"] == "live":
+            live_idx = item["index"]
+            break
+
+    for item in stop_items:
+        if item["total_ops"] <= 0:
+            continue
+
+        if live_idx >= 0 and item["index"] <= live_idx:
+            continue
+
+        next_operation = item
+        break
+
+    # Gerçek yol geometrisi segmentleri
+    route_segments = []
+    try:
+        import json as _json
+
+        seg_rows = db.execute(
+            """
+            SELECT route, from_stop, to_stop, sort_order,
+                   distance_m, duration_s, geometry_json, provider, updated_at
+            FROM route_segments
+            WHERE route=?
+            ORDER BY sort_order ASC
+            """,
+            (route_name,),
+        ).fetchall()
+
+        for r in seg_rows:
+            try:
+                geom = _json.loads(r["geometry_json"] or "[]")
+            except Exception:
+                geom = []
+
+            route_segments.append({
+                "route": r["route"],
+                "from_stop": r["from_stop"],
+                "to_stop": r["to_stop"],
+                "sort_order": int(r["sort_order"] or 0),
+                "distance_m": float(r["distance_m"] or 0),
+                "duration_s": float(r["duration_s"] or 0),
+                "geometry": geom,
+                "provider": r["provider"] or "",
+                "updated_at": r["updated_at"] or "",
+            })
+    except Exception:
+        route_segments = []
+
+    map_boot = {
+        "trip": {
+            "id": trip["id"],
+            "route": trip["route"] or "",
+            "plate": trip["plate"] or "",
+        },
+        "live_runtime": live_runtime,
+        "live_stop": live_stop,
+        "next_operation": next_operation,
+        "route_segments": route_segments,
+        "stops": stop_items,
+    }
+
+    return render_template(
+        "live_map.html",
+        trip=trip,
+        map_boot=map_boot,
+    )
 
 
 @app.route("/seats")

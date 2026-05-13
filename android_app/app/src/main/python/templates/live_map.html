@@ -1,0 +1,2784 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Canlı Harita</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <style>
+    :root{
+      --bg:#050b16;
+      --panel:rgba(15,23,42,.86);
+      --line:rgba(255,255,255,.10);
+      --text:#f8fafc;
+      --muted:rgba(255,255,255,.68);
+      --blue:#3b82f6;
+      --red:#ef4444;
+      --yellow:#f59e0b;
+      --green:#22c55e;
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      min-height:100%;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(59,130,246,.14), transparent 34%),
+        linear-gradient(180deg,#071426,#030712);
+      color:var(--text);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+
+    .shell{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      padding:14px;
+      gap:12px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 4px 0;
+    }
+
+    .back{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.08);
+      border:1px solid var(--line);
+      color:#fff;
+      text-decoration:none;
+      font-weight:900;
+    }
+
+    .title h1{
+      margin:0;
+      font-size:25px;
+      line-height:1.1;
+      letter-spacing:-.04em;
+    }
+
+    .title p{
+      margin:5px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:750;
+    }
+
+    .summary{
+      display:grid;
+      gap:10px;
+      grid-template-columns:1fr 1fr 1fr;
+    }
+
+    .summary-card{
+      border-radius:22px;
+      padding:13px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      box-shadow:0 16px 34px rgba(0,0,0,.22);
+    }
+
+    .summary-card small{
+      display:block;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+
+    .summary-card b{
+      display:block;
+      margin-top:7px;
+      font-size:18px;
+      line-height:1.15;
+    }
+
+    .map-wrap{
+      position:relative;
+      flex:1;
+      min-height:560px;
+      overflow:hidden;
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,.13);
+      box-shadow:0 24px 60px rgba(0,0,0,.38);
+      background:#020617;
+    }
+
+    #map{
+      position:absolute;
+      inset:0;
+      z-index:1;
+    }
+
+    .map-actions{
+      position:absolute;
+      left:12px;
+      right:12px;
+      bottom:12px;
+      z-index:10;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      pointer-events:none;
+    }
+
+    .map-actions button{
+      pointer-events:auto;
+      min-height:48px;
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:18px;
+      color:white;
+      background:rgba(15,23,42,.82);
+      backdrop-filter:blur(10px);
+      font-weight:1000;
+      font-size:13px;
+    }
+
+    .pin{
+      width:34px;
+      height:34px;
+      display:grid;
+      place-items:center;
+      border-radius:50% 50% 50% 8px;
+      transform:rotate(-45deg);
+      border:2px solid rgba(255,255,255,.85);
+      box-shadow:0 10px 22px rgba(0,0,0,.35);
+    }
+
+    .pin span{
+      transform:rotate(45deg);
+      font-size:15px;
+      font-weight:1000;
+      color:#fff;
+    }
+
+    .pin.live{background:linear-gradient(135deg,#ef4444,#991b1b)}
+    .pin.next{background:linear-gradient(135deg,#f59e0b,#b45309)}
+    .pin.operation{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+    .pin.waiting{background:linear-gradient(135deg,#64748b,#334155)}
+
+    .bus-marker{
+      width:38px;
+      height:38px;
+      border-radius:18px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,#22c55e,#0ea5e9);
+      color:white;
+      border:2px solid rgba(255,255,255,.88);
+      box-shadow:0 14px 28px rgba(14,165,233,.35);
+      font-size:20px;
+    }
+
+    .leaflet-popup-content-wrapper{
+      border-radius:18px;
+      background:#0f172a;
+      color:white;
+      border:1px solid rgba(255,255,255,.10);
+    }
+
+    .leaflet-popup-tip{background:#0f172a}
+
+    .popup-title{
+      font-size:17px;
+      font-weight:1000;
+      margin-bottom:8px;
+    }
+
+    .popup-line{
+      font-size:13px;
+      color:rgba(255,255,255,.74);
+      font-weight:750;
+      margin:3px 0;
+    }
+
+    .popup-actions{
+      margin-top:10px;
+      display:grid;
+      gap:7px;
+    }
+
+    .popup-actions a{
+      text-align:center;
+      text-decoration:none;
+      color:white;
+      background:rgba(59,130,246,.20);
+      border:1px solid rgba(147,197,253,.20);
+      border-radius:12px;
+      padding:8px;
+      font-weight:900;
+      font-size:12px;
+    }
+
+    .legend{
+      display:flex;
+      gap:7px;
+      overflow:auto;
+      padding:2px 2px 4px;
+    }
+
+    .legend span{
+      white-space:nowrap;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      border:1px solid var(--line);
+      color:rgba(255,255,255,.78);
+      font-size:12px;
+      font-weight:800;
+    }
+  </style>
+
+<style id="live-map-stage-2-style">
+.pin.live{
+  animation:livePinPulse 1.15s ease-in-out infinite;
+  box-shadow:
+    0 0 0 7px rgba(239,68,68,.16),
+    0 0 26px rgba(239,68,68,.55),
+    0 12px 24px rgba(0,0,0,.35) !important;
+}
+
+.pin.next{
+  box-shadow:
+    0 0 0 6px rgba(245,158,11,.14),
+    0 0 24px rgba(245,158,11,.48),
+    0 12px 24px rgba(0,0,0,.35) !important;
+}
+
+.pin.operation{
+  box-shadow:
+    0 0 0 5px rgba(59,130,246,.12),
+    0 0 18px rgba(59,130,246,.32),
+    0 12px 24px rgba(0,0,0,.30) !important;
+}
+
+@keyframes livePinPulse{
+  0%,100%{
+    box-shadow:
+      0 0 0 6px rgba(239,68,68,.14),
+      0 0 20px rgba(239,68,68,.40),
+      0 12px 24px rgba(0,0,0,.35);
+  }
+  50%{
+    box-shadow:
+      0 0 0 13px rgba(239,68,68,.06),
+      0 0 36px rgba(239,68,68,.70),
+      0 14px 28px rgba(0,0,0,.40);
+  }
+}
+
+.map-actions.three{
+  grid-template-columns:1fr 1fr 1fr;
+}
+
+.map-actions button.active{
+  background:linear-gradient(135deg,rgba(245,158,11,.30),rgba(59,130,246,.18));
+  border-color:rgba(245,158,11,.36);
+  color:#fff7ed;
+}
+
+.leaflet-interactive.route-line{
+  filter:drop-shadow(0 0 8px rgba(59,130,246,.34));
+}
+
+@media(max-width:430px){
+  .map-actions{
+    grid-template-columns:1fr 1fr 1fr !important;
+    gap:7px;
+  }
+
+  .map-actions button{
+    font-size:11px;
+    min-height:44px;
+    padding:0 4px;
+  }
+}
+</style>
+
+
+<style id="live-map-route-toggle-style">
+.map-actions.four{
+  grid-template-columns:1fr 1fr 1fr 1fr !important;
+}
+
+.map-actions button.route-off{
+  opacity:.62;
+}
+
+.leaflet-interactive.route-line{
+  filter:drop-shadow(0 0 5px rgba(59,130,246,.22));
+}
+
+@media(max-width:430px){
+  .map-actions.four{
+    grid-template-columns:1fr 1fr !important;
+  }
+}
+</style>
+
+
+<style id="travego-bus-marker-style">
+.bus-marker{
+  position:relative !important;
+  width:76px !important;
+  height:42px !important;
+  border-radius:18px 22px 16px 16px !important;
+  display:block !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0) 35%),
+    linear-gradient(135deg,#10213d 0%,#0ea5e9 48%,#22c55e 100%) !important;
+  border:2px solid rgba(255,255,255,.92) !important;
+  box-shadow:
+    0 0 0 8px rgba(34,197,94,.13),
+    0 0 30px rgba(14,165,233,.48),
+    0 16px 34px rgba(0,0,0,.46) !important;
+  animation:busPulse 1.45s ease-in-out infinite !important;
+  overflow:visible !important;
+}
+
+.bus-marker::before{
+  content:"";
+  position:absolute;
+  left:8px;
+  top:8px;
+  width:45px;
+  height:13px;
+  border-radius:9px 12px 8px 8px;
+  background:
+    linear-gradient(90deg, rgba(219,234,254,.95), rgba(125,211,252,.72));
+  box-shadow:
+    50px 8px 0 -5px rgba(255,255,255,.85),
+    inset 0 1px 0 rgba(255,255,255,.70);
+}
+
+.bus-marker::after{
+  content:"";
+  position:absolute;
+  left:13px;
+  bottom:-7px;
+  width:13px;
+  height:13px;
+  border-radius:50%;
+  background:#020617;
+  border:3px solid rgba(226,232,240,.92);
+  box-shadow:
+    38px 0 0 -3px #020617,
+    38px 0 0 0 rgba(226,232,240,.92),
+    0 0 12px rgba(255,255,255,.18);
+}
+
+.bus-marker .bus-front{
+  position:absolute;
+  right:4px;
+  top:7px;
+  width:14px;
+  height:25px;
+  border-radius:5px 14px 12px 4px;
+  background:linear-gradient(180deg,rgba(14,165,233,.75),rgba(15,23,42,.30));
+  border-left:1px solid rgba(255,255,255,.36);
+}
+
+.bus-marker .bus-light{
+  position:absolute;
+  right:3px;
+  bottom:8px;
+  width:8px;
+  height:4px;
+  border-radius:999px;
+  background:#fef3c7;
+  box-shadow:0 0 10px rgba(254,243,199,.8);
+}
+
+.bus-marker .bus-stripe{
+  position:absolute;
+  left:9px;
+  right:12px;
+  bottom:12px;
+  height:4px;
+  border-radius:999px;
+  background:rgba(255,255,255,.82);
+}
+
+.bus-marker .bus-label{
+  position:absolute;
+  left:50%;
+  top:-25px;
+  transform:translateX(-50%);
+  padding:4px 8px;
+  border-radius:999px;
+  background:rgba(15,23,42,.88);
+  border:1px solid rgba(255,255,255,.18);
+  color:#bbf7d0;
+  font-size:9px;
+  font-weight:1000;
+  letter-spacing:.08em;
+  white-space:nowrap;
+}
+
+@keyframes busPulse{
+  0%,100%{
+    box-shadow:
+      0 0 0 7px rgba(34,197,94,.13),
+      0 0 24px rgba(14,165,233,.38),
+      0 14px 30px rgba(0,0,0,.42);
+  }
+  50%{
+    box-shadow:
+      0 0 0 14px rgba(34,197,94,.06),
+      0 0 38px rgba(14,165,233,.62),
+      0 16px 34px rgba(0,0,0,.48);
+  }
+}
+</style>
+
+
+<style id="real-bus-marker-style">
+.bus-marker-real{
+  position:relative;
+  width:104px;
+  height:58px;
+  filter:
+    drop-shadow(0 0 10px rgba(34,197,94,.45))
+    drop-shadow(0 14px 22px rgba(0,0,0,.45));
+  animation:realBusPulse 1.6s ease-in-out infinite;
+}
+
+.bus-marker-real::before{
+  content:"CANLI";
+  position:absolute;
+  left:50%;
+  top:-24px;
+  transform:translateX(-50%);
+  padding:4px 9px;
+  border-radius:999px;
+  background:rgba(15,23,42,.92);
+  border:1px solid rgba(255,255,255,.22);
+  color:#bbf7d0;
+  font-size:9px;
+  font-weight:1000;
+  letter-spacing:.10em;
+  white-space:nowrap;
+}
+
+.bus-marker-real svg{
+  width:104px;
+  height:58px;
+  display:block;
+}
+
+@keyframes realBusPulse{
+  0%,100%{
+    filter:
+      drop-shadow(0 0 8px rgba(34,197,94,.38))
+      drop-shadow(0 12px 20px rgba(0,0,0,.42));
+    transform:scale(1);
+  }
+  50%{
+    filter:
+      drop-shadow(0 0 18px rgba(14,165,233,.62))
+      drop-shadow(0 16px 28px rgba(0,0,0,.50));
+    transform:scale(1.035);
+  }
+}
+</style>
+<style id="cinematic-bus-marker-style">
+.bus-marker-real{
+  position:relative;
+  width:112px;
+  height:62px;
+  filter:
+    drop-shadow(0 0 12px rgba(56,189,248,.55))
+    drop-shadow(0 14px 24px rgba(0,0,0,.55));
+  animation:cinematicBusPulse 1.7s ease-in-out infinite;
+}
+
+.bus-marker-real::before{
+  content:"CANLI";
+  position:absolute;
+  left:50%;
+  top:-26px;
+  transform:translateX(-50%);
+  padding:4px 10px;
+  border-radius:999px;
+  background:rgba(2,6,23,.92);
+  border:1px solid rgba(125,211,252,.32);
+  color:#bae6fd;
+  font-size:9px;
+  font-weight:1000;
+  letter-spacing:.12em;
+  white-space:nowrap;
+  box-shadow:0 0 18px rgba(56,189,248,.22);
+}
+
+.bus-marker-real svg{
+  width:112px;
+  height:62px;
+  display:block;
+  overflow:visible;
+}
+
+@keyframes cinematicBusPulse{
+  0%,100%{
+    filter:
+      drop-shadow(0 0 10px rgba(56,189,248,.42))
+      drop-shadow(0 14px 24px rgba(0,0,0,.55));
+    transform:scale(1);
+  }
+  50%{
+    filter:
+      drop-shadow(0 0 22px rgba(14,165,233,.72))
+      drop-shadow(0 18px 30px rgba(0,0,0,.62));
+    transform:scale(1.025);
+  }
+}
+</style>
+
+<style id="live-map-popup-stage3-style">
+.map-popup-card{
+  min-width:230px;
+}
+
+.map-popup-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.map-popup-title{
+  color:#fff;
+  font-size:18px;
+  font-weight:1000;
+  line-height:1.1;
+}
+
+.map-popup-state{
+  padding:5px 8px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:1000;
+  white-space:nowrap;
+  border:1px solid rgba(255,255,255,.14);
+}
+
+.map-popup-state.live{
+  background:rgba(239,68,68,.18);
+  color:#fecaca;
+  border-color:rgba(248,113,113,.28);
+}
+
+.map-popup-state.next{
+  background:rgba(245,158,11,.18);
+  color:#fde68a;
+  border-color:rgba(251,191,36,.26);
+}
+
+.map-popup-state.operation{
+  background:rgba(59,130,246,.18);
+  color:#bfdbfe;
+  border-color:rgba(147,197,253,.24);
+}
+
+.map-popup-state.waiting{
+  background:rgba(148,163,184,.12);
+  color:#cbd5e1;
+}
+
+.map-popup-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin:10px 0;
+}
+
+.map-popup-metric{
+  border-radius:14px;
+  padding:9px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.map-popup-metric small{
+  display:block;
+  color:rgba(255,255,255,.60);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+
+.map-popup-metric b{
+  display:block;
+  margin-top:4px;
+  color:#fff;
+  font-size:18px;
+  font-weight:1000;
+}
+
+.map-popup-note{
+  margin-top:8px;
+  padding:9px 10px;
+  border-radius:14px;
+  background:rgba(15,23,42,.62);
+  border:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.72);
+  font-size:12px;
+  font-weight:800;
+  line-height:1.35;
+}
+
+.map-popup-actions{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.map-popup-actions a{
+  text-align:center;
+  text-decoration:none;
+  color:white;
+  border-radius:13px;
+  padding:9px 7px;
+  font-weight:1000;
+  font-size:12px;
+  border:1px solid rgba(255,255,255,.12);
+}
+
+.map-popup-actions a.primary{
+  background:linear-gradient(135deg,#2563eb,#0ea5e9);
+}
+
+.map-popup-actions a.dark{
+  background:rgba(255,255,255,.08);
+}
+
+.map-popup-actions a.bag{
+  background:rgba(249,115,22,.18);
+  color:#fed7aa;
+  border-color:rgba(249,115,22,.28);
+}
+</style>
+<style id="live-map-speed-badge-style">
+.map-speed-badge{
+  position:absolute;
+  right:12px;
+  top:12px;
+  z-index:15;
+  min-width:112px;
+  padding:11px 13px;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(59,130,246,.24), transparent 38%),
+    rgba(15,23,42,.86);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 16px 34px rgba(0,0,0,.32);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  color:#fff;
+}
+
+.map-speed-badge small{
+  display:block;
+  color:rgba(255,255,255,.62);
+  font-size:10px;
+  font-weight:1000;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.map-speed-badge b{
+  display:block;
+  margin-top:4px;
+  font-size:22px;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:-.03em;
+}
+
+.map-speed-badge .unit{
+  font-size:12px;
+  color:rgba(255,255,255,.72);
+  font-weight:900;
+  margin-left:3px;
+}
+
+.map-speed-badge.speed-ok{
+  border-color:rgba(34,197,94,.25);
+}
+
+.map-speed-badge.speed-moving{
+  border-color:rgba(59,130,246,.30);
+  box-shadow:
+    0 0 0 1px rgba(59,130,246,.10),
+    0 16px 34px rgba(0,0,0,.32),
+    0 0 26px rgba(59,130,246,.18);
+}
+
+.map-speed-badge.speed-fast{
+  border-color:rgba(249,115,22,.36);
+  box-shadow:
+    0 0 0 1px rgba(249,115,22,.12),
+    0 16px 34px rgba(0,0,0,.32),
+    0 0 26px rgba(249,115,22,.20);
+}
+
+@media(max-width:430px){
+  .map-speed-badge{
+    right:10px;
+    top:10px;
+    min-width:96px;
+    padding:10px 11px;
+  }
+
+  .map-speed-badge b{
+    font-size:19px;
+  }
+}
+</style>
+
+
+<style id="live-map-route-progress-style">
+.leaflet-interactive.route-line-passed{
+  filter:drop-shadow(0 0 8px rgba(239,68,68,.38));
+}
+
+.leaflet-interactive.route-line-ahead{
+  filter:drop-shadow(0 0 8px rgba(34,197,94,.32));
+}
+</style>
+<style id="live-map-next-ops-panel-style">
+.next-ops-panel{
+  position:absolute;
+  left:12px;
+  right:12px;
+  bottom:114px;
+  z-index:14;
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(59,130,246,.18), transparent 35%),
+    rgba(15,23,42,.88);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 18px 42px rgba(0,0,0,.36);
+  backdrop-filter:blur(13px);
+  -webkit-backdrop-filter:blur(13px);
+  overflow:hidden;
+}
+
+.next-ops-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 13px 9px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.next-ops-title{
+  color:#fff;
+  font-size:13px;
+  font-weight:1000;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.next-ops-count{
+  color:rgba(255,255,255,.72);
+  font-size:11px;
+  font-weight:900;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.next-ops-list{
+  max-height:160px;
+  overflow:auto;
+  display:grid;
+  gap:8px;
+  padding:10px;
+}
+
+.next-op-item{
+  width:100%;
+  text-align:left;
+  appearance:none;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:17px;
+  padding:10px 11px;
+  background:rgba(255,255,255,.07);
+  color:#fff;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:center;
+}
+
+.next-op-item.live{
+  border-color:rgba(239,68,68,.30);
+  background:rgba(239,68,68,.14);
+}
+
+.next-op-item.next{
+  border-color:rgba(245,158,11,.30);
+  background:rgba(245,158,11,.14);
+}
+
+.next-op-main{
+  min-width:0;
+}
+
+.next-op-name{
+  font-size:15px;
+  font-weight:1000;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.next-op-meta{
+  margin-top:4px;
+  color:rgba(255,255,255,.72);
+  font-size:12px;
+  font-weight:800;
+  line-height:1.25;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.next-op-km{
+  min-width:62px;
+  text-align:center;
+  padding:7px 8px;
+  border-radius:14px;
+  background:rgba(15,23,42,.58);
+  border:1px solid rgba(255,255,255,.10);
+  color:#bfdbfe;
+  font-size:12px;
+  font-weight:1000;
+}
+
+.next-ops-empty{
+  padding:16px 12px;
+  color:rgba(255,255,255,.68);
+  font-size:13px;
+  font-weight:850;
+  text-align:center;
+}
+
+.next-ops-toggle{
+  appearance:none;
+  border:0;
+  background:transparent;
+  color:#bfdbfe;
+  font-size:12px;
+  font-weight:1000;
+}
+
+.next-ops-panel.collapsed .next-ops-list{
+  display:none;
+}
+
+@media(max-width:430px){
+  .next-ops-panel{
+    bottom:108px;
+    left:10px;
+    right:10px;
+    border-radius:20px;
+  }
+
+  .next-ops-list{
+    max-height:134px;
+  }
+
+  .next-op-item{
+    padding:9px 10px;
+  }
+
+  .next-op-name{
+    font-size:14px;
+  }
+
+  .next-op-meta{
+    font-size:11px;
+  }
+}
+</style>
+
+
+<style id="live-map-fullscreen-style">
+.map-fullscreen-btn{
+  position:absolute;
+  right:12px;
+  top:86px;
+  z-index:16;
+  min-width:108px;
+  min-height:42px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(15,23,42,.86);
+  color:#fff;
+  font-size:12px;
+  font-weight:1000;
+  box-shadow:0 14px 30px rgba(0,0,0,.30);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+
+body.map-fullscreen-mode{
+  overflow:hidden;
+}
+
+body.map-fullscreen-mode .shell{
+  padding:0 !important;
+  gap:0 !important;
+  min-height:100vh !important;
+}
+
+body.map-fullscreen-mode .topbar,
+body.map-fullscreen-mode .summary,
+body.map-fullscreen-mode .legend{
+  display:none !important;
+}
+
+body.map-fullscreen-mode .map-wrap{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:9999 !important;
+  width:100vw !important;
+  height:100vh !important;
+  min-height:100vh !important;
+  border-radius:0 !important;
+  border:0 !important;
+}
+
+body.map-fullscreen-mode #map{
+  position:absolute !important;
+  inset:0 !important;
+}
+
+body.map-fullscreen-mode .map-fullscreen-btn{
+  top:calc(env(safe-area-inset-top, 0px) + 12px) !important;
+  right:12px !important;
+  background:linear-gradient(135deg,rgba(239,68,68,.92),rgba(153,27,27,.92)) !important;
+}
+
+body.map-fullscreen-mode .map-speed-badge{
+  top:calc(env(safe-area-inset-top, 0px) + 64px) !important;
+  right:12px !important;
+}
+
+body.map-fullscreen-mode .next-ops-panel{
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 116px) !important;
+  left:12px !important;
+  right:12px !important;
+}
+
+body.map-fullscreen-mode .map-actions{
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+  left:12px !important;
+  right:12px !important;
+}
+
+body.map-fullscreen-mode .leaflet-control-zoom{
+  margin-top:calc(env(safe-area-inset-top, 0px) + 12px) !important;
+}
+
+@media(max-width:430px){
+  .map-fullscreen-btn{
+    top:76px;
+    right:10px;
+    min-width:92px;
+    min-height:38px;
+    font-size:11px;
+  }
+
+  body.map-fullscreen-mode .next-ops-panel{
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 108px) !important;
+  }
+}
+</style>
+
+
+<style id="live-map-compact-popup-style">
+/* Canlı harita popup kompakt görünüm */
+.leaflet-popup-content{
+  margin:10px 10px 12px !important;
+  width:270px !important;
+}
+
+.leaflet-popup-content-wrapper{
+  border-radius:22px !important;
+}
+
+.map-popup-card{
+  min-width:0 !important;
+  width:250px !important;
+}
+
+.map-popup-head{
+  margin-bottom:8px !important;
+  gap:8px !important;
+}
+
+.map-popup-title{
+  font-size:20px !important;
+  line-height:1.08 !important;
+  letter-spacing:-.03em !important;
+}
+
+.map-popup-state{
+  padding:4px 7px !important;
+  font-size:9px !important;
+}
+
+.map-popup-grid{
+  grid-template-columns:repeat(4,1fr) !important;
+  gap:6px !important;
+  margin:8px 0 !important;
+}
+
+.map-popup-metric{
+  border-radius:12px !important;
+  padding:7px 5px !important;
+  text-align:center !important;
+}
+
+.map-popup-metric small{
+  font-size:9px !important;
+  letter-spacing:.04em !important;
+}
+
+.map-popup-metric b{
+  margin-top:3px !important;
+  font-size:17px !important;
+}
+
+.map-popup-note{
+  margin-top:7px !important;
+  padding:8px 9px !important;
+  border-radius:13px !important;
+  font-size:12px !important;
+  line-height:1.25 !important;
+}
+
+.map-popup-actions{
+  margin-top:8px !important;
+  grid-template-columns:repeat(4,1fr) !important;
+  gap:6px !important;
+}
+
+.map-popup-actions a{
+  padding:8px 4px !important;
+  border-radius:12px !important;
+  font-size:11px !important;
+  line-height:1.1 !important;
+}
+
+/* Buton yazılarını kısaltılmış gibi daha rahat göster */
+.map-popup-actions a.primary::after{
+  content:"";
+}
+
+body.map-fullscreen-mode .leaflet-popup-content{
+  width:258px !important;
+}
+
+body.map-fullscreen-mode .map-popup-card{
+  width:238px !important;
+}
+
+@media(max-width:430px){
+  .leaflet-popup-content{
+    width:260px !important;
+  }
+
+  .map-popup-card{
+    width:240px !important;
+  }
+
+  .map-popup-title{
+    font-size:18px !important;
+  }
+
+  .map-popup-grid{
+    gap:5px !important;
+  }
+
+  .map-popup-actions{
+    gap:5px !important;
+  }
+
+  .map-popup-actions a{
+    font-size:10.5px !important;
+    padding:8px 3px !important;
+  }
+}
+</style>
+<style id="live-map-route-status-style">
+.map-route-status{
+  position:absolute;
+  left:12px;
+  top:92px;
+  z-index:15;
+  min-width:150px;
+  padding:11px 13px;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(34,197,94,.18), transparent 38%),
+    rgba(15,23,42,.86);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 16px 34px rgba(0,0,0,.32);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  color:#fff;
+}
+
+.map-route-status small{
+  display:block;
+  color:rgba(255,255,255,.62);
+  font-size:10px;
+  font-weight:1000;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.map-route-status b{
+  display:block;
+  margin-top:5px;
+  font-size:15px;
+  line-height:1.15;
+  font-weight:1000;
+}
+
+.map-route-status.ok{
+  border-color:rgba(34,197,94,.32);
+  box-shadow:
+    0 0 0 1px rgba(34,197,94,.10),
+    0 16px 34px rgba(0,0,0,.32),
+    0 0 24px rgba(34,197,94,.15);
+}
+
+.map-route-status.warn{
+  border-color:rgba(245,158,11,.38);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(245,158,11,.20), transparent 38%),
+    rgba(15,23,42,.88);
+  box-shadow:
+    0 0 0 1px rgba(245,158,11,.12),
+    0 16px 34px rgba(0,0,0,.32),
+    0 0 24px rgba(245,158,11,.18);
+}
+
+.map-route-status.bad{
+  border-color:rgba(239,68,68,.45);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(239,68,68,.22), transparent 38%),
+    rgba(15,23,42,.90);
+  box-shadow:
+    0 0 0 1px rgba(239,68,68,.16),
+    0 16px 34px rgba(0,0,0,.34),
+    0 0 26px rgba(239,68,68,.24);
+}
+
+.map-route-status.bad b{
+  color:#fecaca;
+}
+
+.map-route-status.warn b{
+  color:#fde68a;
+}
+
+.map-route-status.ok b{
+  color:#dcfce7;
+}
+
+body.map-fullscreen-mode .map-route-status{
+  top:calc(env(safe-area-inset-top, 0px) + 116px) !important;
+  left:12px !important;
+}
+
+@media(max-width:430px){
+  .map-route-status{
+    left:10px;
+    top:86px;
+    min-width:136px;
+    padding:10px 11px;
+  }
+
+  .map-route-status b{
+    font-size:13.5px;
+  }
+}
+</style>
+
+
+<style id="route-status-right-top-fix">
+/* Rota Durumu kartını sağ üst kontrol grubuna taşır */
+.map-route-status{
+  left:auto !important;
+  right:12px !important;
+  top:146px !important;
+  min-width:150px !important;
+  max-width:180px !important;
+}
+
+.map-speed-badge{
+  top:230px !important;
+  right:12px !important;
+}
+
+/* Tam ekran modda sağ üstte Çık → Rota Durumu → Hız şeklinde diz */
+body.map-fullscreen-mode .map-route-status{
+  left:auto !important;
+  right:12px !important;
+  top:calc(env(safe-area-inset-top, 0px) + 64px) !important;
+}
+
+body.map-fullscreen-mode .map-speed-badge{
+  right:12px !important;
+  top:calc(env(safe-area-inset-top, 0px) + 148px) !important;
+}
+
+@media(max-width:430px){
+  .map-route-status{
+    right:10px !important;
+    top:134px !important;
+    min-width:132px !important;
+    max-width:150px !important;
+    padding:9px 10px !important;
+  }
+
+  .map-route-status b{
+    font-size:12.5px !important;
+  }
+
+  .map-speed-badge{
+    top:214px !important;
+    right:10px !important;
+  }
+
+  body.map-fullscreen-mode .map-route-status{
+    right:10px !important;
+    top:calc(env(safe-area-inset-top, 0px) + 62px) !important;
+  }
+
+  body.map-fullscreen-mode .map-speed-badge{
+    right:10px !important;
+    top:calc(env(safe-area-inset-top, 0px) + 138px) !important;
+  }
+}
+</style>
+
+
+<style id="live-map-approach-alert-style">
+.approach-alert{
+  position:absolute;
+  left:12px;
+  right:12px;
+  top:12px;
+  z-index:40;
+  display:none;
+  border-radius:24px;
+  padding:14px;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(245,158,11,.24), transparent 36%),
+    rgba(15,23,42,.92);
+  border:1px solid rgba(245,158,11,.30);
+  box-shadow:
+    0 22px 60px rgba(0,0,0,.44),
+    0 0 34px rgba(245,158,11,.18);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  color:#fff;
+}
+
+.approach-alert.show{
+  display:block;
+  animation:approachAlertIn .18s ease-out both;
+}
+
+.approach-alert.urgent{
+  border-color:rgba(239,68,68,.42);
+  background:
+    radial-gradient(circle at 14% 0%, rgba(239,68,68,.28), transparent 36%),
+    rgba(15,23,42,.94);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.48),
+    0 0 38px rgba(239,68,68,.24);
+}
+
+@keyframes approachAlertIn{
+  from{ transform:translateY(-12px); opacity:0; }
+  to{ transform:translateY(0); opacity:1; }
+}
+
+.approach-alert-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.approach-alert-kicker{
+  color:#fde68a;
+  font-size:11px;
+  font-weight:1000;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+
+.approach-alert.urgent .approach-alert-kicker{
+  color:#fecaca;
+}
+
+.approach-alert-title{
+  margin-top:4px;
+  font-size:23px;
+  line-height:1.05;
+  font-weight:1000;
+  letter-spacing:-.04em;
+}
+
+.approach-alert-close{
+  width:42px;
+  height:42px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  font-size:22px;
+  font-weight:900;
+}
+
+.approach-alert-info{
+  margin-top:11px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:11px 12px;
+  border-radius:18px;
+  background:rgba(255,255,255,.065);
+  border:1px solid rgba(255,255,255,.09);
+}
+
+.approach-alert-text{
+  min-width:0;
+  color:rgba(255,255,255,.78);
+  font-size:13px;
+  line-height:1.35;
+  font-weight:800;
+}
+
+.approach-alert-km{
+  min-width:76px;
+  padding:9px 10px;
+  border-radius:16px;
+  text-align:center;
+  background:rgba(15,23,42,.62);
+  border:1px solid rgba(255,255,255,.10);
+  color:#fff;
+  font-size:15px;
+  font-weight:1000;
+}
+
+.approach-alert-actions{
+  margin-top:11px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+}
+
+.approach-alert-actions button,
+.approach-alert-actions a{
+  min-height:44px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  text-decoration:none;
+  display:grid;
+  place-items:center;
+  font-size:12px;
+  font-weight:1000;
+}
+
+.approach-alert-actions .speak{
+  color:#dcfce7;
+  background:rgba(34,197,94,.15);
+  border-color:rgba(34,197,94,.26);
+}
+
+.approach-alert-actions .open{
+  color:#dbeafe;
+  background:rgba(59,130,246,.16);
+  border-color:rgba(147,197,253,.22);
+}
+
+.approach-alert-actions .snooze{
+  color:#fed7aa;
+  background:rgba(249,115,22,.13);
+  border-color:rgba(251,146,60,.22);
+}
+
+body.map-fullscreen-mode .approach-alert{
+  top:calc(env(safe-area-inset-top, 0px) + 12px);
+  left:12px;
+  right:136px;
+}
+
+@media(max-width:430px){
+  .approach-alert{
+    left:10px;
+    right:10px;
+    top:10px;
+    border-radius:22px;
+    padding:12px;
+  }
+
+  .approach-alert-title{
+    font-size:20px;
+  }
+
+  .approach-alert-actions{
+    grid-template-columns:1fr;
+  }
+
+  body.map-fullscreen-mode .approach-alert{
+    right:112px;
+  }
+}
+</style>
+<style id="approach-alert-banner-compact-style">
+.approach-alert{
+  left:12px !important;
+  right:12px !important;
+  top:12px !important;
+  border-radius:18px !important;
+  padding:10px 11px !important;
+  background:rgba(15,23,42,.90) !important;
+  border:1px solid rgba(245,158,11,.30) !important;
+  box-shadow:0 14px 34px rgba(0,0,0,.36), 0 0 20px rgba(245,158,11,.14) !important;
+}
+
+.approach-alert.urgent{
+  border-color:rgba(239,68,68,.42) !important;
+  box-shadow:0 14px 34px rgba(0,0,0,.38), 0 0 24px rgba(239,68,68,.18) !important;
+}
+
+.approach-alert-head{
+  align-items:center !important;
+}
+
+.approach-alert-kicker{
+  font-size:9px !important;
+  letter-spacing:.11em !important;
+}
+
+.approach-alert-title{
+  margin-top:2px !important;
+  font-size:17px !important;
+  line-height:1.05 !important;
+}
+
+.approach-alert-close{
+  width:34px !important;
+  height:34px !important;
+  border-radius:13px !important;
+  font-size:19px !important;
+}
+
+.approach-alert-info{
+  margin-top:8px !important;
+  grid-template-columns:1fr auto !important;
+  padding:8px 10px !important;
+  border-radius:14px !important;
+}
+
+.approach-alert-text{
+  font-size:12px !important;
+  line-height:1.25 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+.approach-alert-km{
+  min-width:64px !important;
+  padding:7px 8px !important;
+  border-radius:13px !important;
+  font-size:13px !important;
+}
+
+.approach-alert-actions{
+  margin-top:8px !important;
+  grid-template-columns:repeat(3,1fr) !important;
+  gap:6px !important;
+}
+
+.approach-alert-actions button,
+.approach-alert-actions a{
+  min-height:36px !important;
+  border-radius:13px !important;
+  font-size:11px !important;
+}
+
+body.map-fullscreen-mode .approach-alert{
+  top:calc(env(safe-area-inset-top, 0px) + 12px) !important;
+  left:12px !important;
+  right:136px !important;
+}
+
+@media(max-width:430px){
+  .approach-alert{
+    left:10px !important;
+    right:10px !important;
+    top:10px !important;
+    padding:9px 10px !important;
+  }
+
+  .approach-alert-title{
+    font-size:16px !important;
+  }
+
+  .approach-alert-actions{
+    grid-template-columns:repeat(3,1fr) !important;
+  }
+
+  body.map-fullscreen-mode .approach-alert{
+    right:112px !important;
+  }
+}
+</style>
+
+
+<style id="live-map-popup-focus-style">
+/* Durak popup açılınca haritayı sadeleştirir */
+body.map-popup-focus .next-ops-panel,
+body.map-popup-focus .map-route-status,
+body.map-popup-focus .approach-alert{
+  display:none !important;
+}
+
+body.map-popup-focus .map-speed-badge{
+  transform:scale(.88);
+  transform-origin:top right;
+  opacity:.92;
+}
+
+body.map-popup-focus .map-actions{
+  opacity:.88;
+}
+
+body.map-popup-focus .leaflet-popup{
+  z-index:20000 !important;
+}
+</style>
+
+
+<style id="map-right-control-stack-final">
+/* Harita sağ üst kontrol grubu: Çık / Rota Durumu / Hız */
+.map-fullscreen-btn,
+.map-route-status,
+.map-speed-badge{
+  right:12px !important;
+  left:auto !important;
+  width:148px !important;
+  min-width:148px !important;
+  max-width:148px !important;
+  box-sizing:border-box !important;
+}
+
+/* Normal mod */
+.map-fullscreen-btn{
+  top:12px !important;
+  min-height:44px !important;
+  border-radius:17px !important;
+}
+
+.map-route-status{
+  top:66px !important;
+  padding:10px 12px !important;
+  border-radius:17px !important;
+}
+
+.map-speed-badge{
+  top:140px !important;
+  padding:10px 12px !important;
+  border-radius:17px !important;
+}
+
+/* Yazı ölçüleri */
+.map-route-status small,
+.map-speed-badge small{
+  font-size:9.5px !important;
+  letter-spacing:.10em !important;
+}
+
+.map-route-status b{
+  font-size:13px !important;
+  line-height:1.15 !important;
+}
+
+.map-speed-badge b{
+  font-size:20px !important;
+  line-height:1 !important;
+}
+
+.map-speed-badge .unit{
+  font-size:11px !important;
+}
+
+/* Tam ekran modda aynı düzen */
+body.map-fullscreen-mode .map-fullscreen-btn{
+  top:calc(env(safe-area-inset-top, 0px) + 12px) !important;
+  right:12px !important;
+}
+
+body.map-fullscreen-mode .map-route-status{
+  top:calc(env(safe-area-inset-top, 0px) + 66px) !important;
+  right:12px !important;
+}
+
+body.map-fullscreen-mode .map-speed-badge{
+  top:calc(env(safe-area-inset-top, 0px) + 140px) !important;
+  right:12px !important;
+}
+
+/* Mobilde biraz daha kompakt */
+@media(max-width:430px){
+  .map-fullscreen-btn,
+  .map-route-status,
+  .map-speed-badge{
+    right:10px !important;
+    width:132px !important;
+    min-width:132px !important;
+    max-width:132px !important;
+  }
+
+  .map-fullscreen-btn{
+    top:10px !important;
+    min-height:40px !important;
+    font-size:11.5px !important;
+  }
+
+  .map-route-status{
+    top:58px !important;
+    padding:9px 10px !important;
+  }
+
+  .map-speed-badge{
+    top:126px !important;
+    padding:9px 10px !important;
+  }
+
+  .map-route-status b{
+    font-size:12px !important;
+  }
+
+  .map-speed-badge b{
+    font-size:18px !important;
+  }
+
+  body.map-fullscreen-mode .map-fullscreen-btn{
+    top:calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    right:10px !important;
+  }
+
+  body.map-fullscreen-mode .map-route-status{
+    top:calc(env(safe-area-inset-top, 0px) + 58px) !important;
+    right:10px !important;
+  }
+
+  body.map-fullscreen-mode .map-speed-badge{
+    top:calc(env(safe-area-inset-top, 0px) + 126px) !important;
+    right:10px !important;
+  }
+}
+</style>
+\n</head>
+<body>
+  <main class="shell">
+    <div class="topbar">
+      <a class="back" href="{{ url_for('continue_trip') }}">← Canlı Akış</a>
+      <div class="title">
+        <h1>Canlı Harita</h1>
+        <p>{{ trip["route"] }} · {{ trip["plate"] }}</p>
+      </div>
+    </div>
+
+    <section class="summary">
+      <div class="summary-card">
+        <small>Canlı durak</small>
+        <b id="sumLive">—</b>
+      </div>
+
+      <div class="summary-card">
+        <small>Sıradaki işlem</small>
+        <b id="sumNext">—</b>
+      </div>
+    </section>
+
+    <div class="legend">
+      <span>🔴 Canlı</span>
+      <span>🟡 Sıradaki işlem</span>
+      <span>🔵 İşlemli durak</span>
+      <span>⚫ Bekleyen</span>
+      <span>🚌 Otobüs</span>
+    </div>
+
+    <section class="map-wrap">
+      <div id="map"></div>
+
+      <div class="approach-alert" id="approachAlert" aria-hidden="true">
+        <div class="approach-alert-head">
+          <div>
+            <div class="approach-alert-kicker" id="approachAlertKicker">Durak yaklaşıyor</div>
+            <div class="approach-alert-title" id="approachAlertTitle">Durak</div>
+          </div>
+          <button class="approach-alert-close" type="button" id="approachAlertClose" aria-label="Kapat">×</button>
+        </div>
+
+        <div class="approach-alert-info">
+          <div class="approach-alert-text" id="approachAlertText">İşlem özeti hazırlanıyor.</div>
+          <div class="approach-alert-km" id="approachAlertKm">—</div>
+        </div>
+
+        <div class="approach-alert-actions">
+          <button class="speak" type="button" id="approachAlertSpeak">Sesli</button>
+          <a class="open" id="approachAlertOpen" href="#">Aç</a>
+          <button class="snooze" type="button" id="approachAlertSnooze">Sustur</button>
+        </div>
+      </div>
+
+
+      <div class="map-route-status ok" id="mapRouteStatus">
+        <small>Rota Durumu</small>
+        <b id="mapRouteStatusText">Rota bekleniyor</b>
+      </div>
+
+
+      <button class="map-fullscreen-btn" type="button" id="btnMapFullscreen">⛶ Tam Ekran</button>
+
+
+      <div class="map-speed-badge speed-ok" id="mapSpeedBadge">
+        <small>Hız</small>
+        <b><span id="mapSpeedValue">0</span><span class="unit">km/sa</span></b>
+      </div>
+
+
+      
+      <div class="next-ops-panel" id="nextOpsPanel">
+        <div class="next-ops-head">
+          <div class="next-ops-title">Sıradaki İşlemler</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="next-ops-count" id="nextOpsCount">0 durak</span>
+            <button class="next-ops-toggle" type="button" id="nextOpsToggle">Gizle</button>
+          </div>
+        </div>
+        <div class="next-ops-list" id="nextOpsList">
+          <div class="next-ops-empty">İşlemli durak bulunmuyor.</div>
+        </div>
+      </div>
+
+      <div class="map-actions four">
+        <button type="button" id="btnLocate">🚌 Konumum</button>
+        <button type="button" id="btnFit">🗺️ Tüm Duraklar</button>
+        <button type="button" id="btnRoute">〽️ Rota</button>
+        <button type="button" id="btnOps">🎯 İşlemli</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    const BOOT = {{ map_boot | tojson | safe }};
+
+    const stops = Array.isArray(BOOT.stops) ? BOOT.stops : [];
+    const routeSegments = Array.isArray(BOOT.route_segments) ? BOOT.route_segments : [];
+    const liveStop = BOOT.live_stop || "";
+    const nextOperation = BOOT.next_operation || null;
+
+    const sumLive = document.getElementById("sumLive");
+    const sumNext = document.getElementById("sumNext");
+
+
+    updateMapSpeed((BOOT.live_runtime && BOOT.live_runtime.speed) || 0);
+
+    if(sumLive) sumLive.textContent = liveStop || "—";
+    if(sumNext) sumNext.textContent = nextOperation ? nextOperation.name : "—";
+
+    const map = L.map("map", {
+      zoomControl:true,
+      attributionControl:true
+    });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom:19,
+      attribution:"© OpenStreetMap"
+    }).addTo(map);
+
+    const markers = [];
+    const markerItems = [];
+    let routeLine = null;
+    let routeLinePassed = null;
+    let routeLineAhead = null;
+    let routeLineVisible = true;
+    let busMarker = null;
+    let currentLatLng = null;
+
+    function iconFor(kind, label){
+      const html = `<div class="pin ${kind}"><span>${label || "•"}</span></div>`;
+      return L.divIcon({
+        className:"",
+        html,
+        iconSize:[34,34],
+        iconAnchor:[17,34],
+        popupAnchor:[0,-32]
+      });
+    }
+
+    function busIcon(){
+      return L.divIcon({
+        className:"",
+        html:`
+          <div class="bus-marker-real">
+            <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg" aria-label="Canlı otobüs">
+              <defs>
+                <linearGradient id="nightBody" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#020617"/>
+                  <stop offset="45%" stop-color="#0f172a"/>
+                  <stop offset="100%" stop-color="#111827"/>
+                </linearGradient>
+
+                <linearGradient id="glassNight" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#020617"/>
+                  <stop offset="35%" stop-color="#082f49"/>
+                  <stop offset="100%" stop-color="#0ea5e9"/>
+                </linearGradient>
+
+                <linearGradient id="blueLight" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#7dd3fc"/>
+                  <stop offset="100%" stop-color="#38bdf8"/>
+                </linearGradient>
+
+                <filter id="glowBlue" x="-60%" y="-60%" width="220%" height="220%">
+                  <feGaussianBlur stdDeviation="4" result="blur"/>
+                  <feColorMatrix in="blur" type="matrix"
+                    values="0 0 0 0 0.1
+                            0 0 0 0 0.75
+                            0 0 0 0 1
+                            0 0 0 .7 0"/>
+                  <feMerge>
+                    <feMergeNode/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+
+                <filter id="redGlow" x="-60%" y="-60%" width="220%" height="220%">
+                  <feGaussianBlur stdDeviation="5" result="blur"/>
+                  <feColorMatrix in="blur" type="matrix"
+                    values="1 0 0 0 0.9
+                            0 0 0 0 0.05
+                            0 0 0 0 0.08
+                            0 0 0 .55 0"/>
+                  <feMerge>
+                    <feMergeNode/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <!-- ışık izi / hız efekti -->
+              <path d="M118 88 C182 76 237 64 295 50" stroke="#ef4444" stroke-width="6" stroke-linecap="round" opacity=".60" filter="url(#redGlow)"/>
+              <path d="M105 78 C170 65 232 51 292 34" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" opacity=".46" filter="url(#glowBlue)"/>
+
+              <!-- gölge -->
+              <ellipse cx="132" cy="125" rx="110" ry="14" fill="rgba(0,0,0,.55)"/>
+
+              <!-- ana otobüs gövdesi -->
+              <path
+                d="M26 86
+                   C25 58 39 34 67 27
+                   C99 18 178 18 222 30
+                   C248 37 268 58 274 84
+                   L279 105
+                   C281 114 275 122 264 122
+                   L42 122
+                   C32 122 25 115 25 105
+                   Z"
+                fill="url(#nightBody)"
+                stroke="rgba(148,163,184,.85)"
+                stroke-width="3"
+              />
+
+              <!-- ön burun -->
+              <path
+                d="M235 45
+                   C256 52 270 70 274 93
+                   L251 94
+                   C238 82 231 62 235 45Z"
+                fill="#030712"
+                stroke="rgba(125,211,252,.35)"
+                stroke-width="2"
+              />
+
+              <!-- camlar -->
+              <path
+                d="M62 38
+                   C99 29 175 30 221 42
+                   C231 45 237 53 240 66
+                   L65 66
+                   C53 66 48 58 51 50
+                   C53 43 56 40 62 38Z"
+                fill="url(#glassNight)"
+                opacity=".95"
+                stroke="rgba(125,211,252,.32)"
+                stroke-width="2"
+              />
+
+              <!-- cam bölmeleri -->
+              <line x1="99" y1="33" x2="95" y2="66" stroke="rgba(255,255,255,.16)" stroke-width="2"/>
+              <line x1="139" y1="32" x2="138" y2="66" stroke="rgba(255,255,255,.15)" stroke-width="2"/>
+              <line x1="183" y1="35" x2="187" y2="66" stroke="rgba(255,255,255,.14)" stroke-width="2"/>
+
+              <!-- yan parlak çizgi -->
+              <path d="M54 79 C102 91 182 91 258 78" fill="none" stroke="rgba(226,232,240,.88)" stroke-width="4" stroke-linecap="round"/>
+              <path d="M58 87 C108 99 183 98 263 86" fill="none" stroke="rgba(14,165,233,.60)" stroke-width="5" stroke-linecap="round"/>
+
+              <!-- alt gövde -->
+              <path d="M35 91 L270 91 L275 106 C276 113 270 118 260 118 L43 118 C34 118 30 112 31 105 Z"
+                    fill="rgba(15,23,42,.92)"/>
+
+              <!-- farlar -->
+              <path d="M237 81 L268 75 C271 76 272 79 269 82 L238 91 Z"
+                    fill="url(#blueLight)"
+                    filter="url(#glowBlue)"
+                    opacity=".98"/>
+              <path d="M42 83 L68 78" stroke="#7dd3fc" stroke-width="5" stroke-linecap="round" filter="url(#glowBlue)"/>
+
+              <!-- küçük park ışıkları -->
+              <circle cx="77" cy="101" r="3" fill="#f97316"/>
+              <circle cx="132" cy="106" r="3" fill="#f97316"/>
+              <circle cx="207" cy="103" r="3" fill="#f97316"/>
+
+              <!-- kapı -->
+              <path d="M83 68 L83 118" stroke="rgba(148,163,184,.35)" stroke-width="2"/>
+              <rect x="67" y="70" width="30" height="43" rx="8"
+                    fill="rgba(255,255,255,.06)"
+                    stroke="rgba(148,163,184,.32)"
+                    stroke-width="2"/>
+
+              <!-- tekerler -->
+              <circle cx="75" cy="119" r="19" fill="#020617" stroke="#e5e7eb" stroke-width="5"/>
+              <circle cx="75" cy="119" r="8" fill="#64748b"/>
+              <circle cx="221" cy="119" r="19" fill="#020617" stroke="#e5e7eb" stroke-width="5"/>
+              <circle cx="221" cy="119" r="8" fill="#64748b"/>
+
+              <!-- üst ışıklar -->
+              <rect x="107" y="22" width="18" height="5" rx="3" fill="#bfdbfe" filter="url(#glowBlue)"/>
+              <rect x="154" y="22" width="18" height="5" rx="3" fill="#bfdbfe" filter="url(#glowBlue)"/>
+            </svg>
+          </div>
+        `,
+        iconSize:[112,62],
+        iconAnchor:[56,56],
+        popupAnchor:[0,-56]
+      });
+    }
+
+    function stopKind(stop){
+      if(liveStop && stop.name === liveStop) return "live";
+      if(nextOperation && stop.name === nextOperation.name) return "next";
+      if(Number(stop.total_ops || 0) > 0) return "operation";
+      return "waiting";
+    }
+
+    function stopLabel(stop){
+      const ops = Number(stop.total_ops || 0);
+      if(ops > 0) return String(ops);
+      return "";
+    }
+
+    function popupHtml(stop){
+      const kind = stopKind(stop);
+
+      let stateText = "Bekleyen";
+      if(kind === "live") stateText = "Canlı Durak";
+      else if(kind === "next") stateText = "Sıradaki İşlem";
+      else if(kind === "operation") stateText = "İşlemli Durak";
+
+      const off = Number(stop.off_count || 0);
+      const board = Number(stop.board_count || 0);
+      const bag = Number(stop.bag_count || 0);
+      const parcel = Number(stop.parcel_count || 0);
+      const total = off + board + bag + parcel;
+
+      let note = "Bu durakta aktif işlem görünmüyor.";
+
+      if(total > 0){
+        const parts = [];
+        if(off) parts.push(`${off} yolcu inecek`);
+        if(board) parts.push(`${board} yolcu binecek`);
+        if(bag) parts.push(`${bag} bagaj`);
+        if(parcel) parts.push(`${parcel} emanet`);
+        note = parts.join(" · ");
+      }
+
+      return `
+        <div class="map-popup-card">
+          <div class="map-popup-head">
+            <div class="map-popup-title">${stop.name}</div>
+            <div class="map-popup-state ${kind}">${stateText}</div>
+          </div>
+
+          <div class="map-popup-grid">
+            <div class="map-popup-metric">
+              <small>İnecek</small>
+              <b>${off}</b>
+            </div>
+
+            <div class="map-popup-metric">
+              <small>Binecek</small>
+              <b>${board}</b>
+            </div>
+
+            <div class="map-popup-metric">
+              <small>Bagaj</small>
+              <b>${bag}</b>
+            </div>
+
+            <div class="map-popup-metric">
+              <small>Emanet</small>
+              <b>${parcel}</b>
+            </div>
+          </div>
+
+          <div class="map-popup-note">
+            ${note}
+          </div>
+
+          <div class="map-popup-actions">
+            <a class="primary" href="{{ url_for('continue_trip') }}?stop=${encodeURIComponent(stop.name)}">Akış</a>
+            <a class="dark" href="{{ url_for('seats_page') }}?stop=${encodeURIComponent(stop.name)}">Koltuk</a>
+            <a class="bag" href="{{ url_for('continue_trip') }}?stop=${encodeURIComponent(stop.name)}">Bagaj</a>
+            <a class="dark" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stop.lat + "," + stop.lng)}" target="_blank" rel="noopener">Yol</a>
+          </div>
+        </div>
+      `;
+    }
+
+    stops.forEach(stop => {
+      if(!stop.has_coord || stop.lat == null || stop.lng == null) return;
+
+      const kind = stopKind(stop);
+      const m = L.marker([stop.lat, stop.lng], {
+        icon: iconFor(kind, stopLabel(stop))
+      });
+
+      m.bindPopup(popupHtml(stop));
+      m.addTo(map);
+      markers.push(m);
+      markerItems.push({
+        marker:m,
+        stop,
+        kind
+      });
+    });
+
+    function buildRoutePoints(){
+      const points = [];
+
+      if(routeSegments.length){
+        routeSegments
+          .slice()
+          .sort((a,b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
+          .forEach(seg => {
+            const geom = Array.isArray(seg.geometry) ? seg.geometry : [];
+
+            geom.forEach(pt => {
+              if(!Array.isArray(pt) || pt.length < 2) return;
+
+              const lat = Number(pt[0]);
+              const lng = Number(pt[1]);
+
+              if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+              const last = points[points.length - 1];
+              if(last && Math.abs(last[0] - lat) < 1e-9 && Math.abs(last[1] - lng) < 1e-9){
+                return;
+              }
+
+              points.push([lat, lng]);
+            });
+          });
+      }
+
+      if(points.length >= 2){
+        return points;
+      }
+
+      return stops
+        .filter(s => s.has_coord && s.lat != null && s.lng != null)
+        .map(s => [s.lat, s.lng]);
+    }
+
+    const routePoints = buildRoutePoints();
+
+    if(routePoints.length >= 2){
+      routeLine = L.polyline(routePoints, {
+        color:"#2563eb",
+        weight:4,
+        opacity:.55,
+        
+        className:"route-line"
+      }).addTo(map);
+    }
+
+    const group = L.featureGroup(markers);
+
+    if(markers.length){
+      map.fitBounds(group.getBounds().pad(0.18));
+    }else{
+      map.setView([38.35, 28.5], 9);
+    }
+
+
+    function setRouteLineVisible(visible){
+      routeLineVisible = !!visible;
+
+      const btn = document.getElementById("btnRoute");
+      if(btn){
+        btn.classList.toggle("route-off", !routeLineVisible);
+        btn.textContent = routeLineVisible ? "〽️ Rota" : "〽️ Rota Kapalı";
+      }
+
+      if(!routeLine) return;
+
+      if(routeLineVisible){
+        if(!map.hasLayer(routeLine)) routeLine.addTo(map);
+      }else{
+        if(map.hasLayer(routeLine)) map.removeLayer(routeLine);
+      }
+    }
+
+    function setOpsButton(active){
+      const btn = document.getElementById("btnOps");
+      if(btn) btn.classList.toggle("active", !!active);
+    }
+
+    function applyMarkerFilter(mode){
+      const onlyOps = mode === "ops";
+
+      markerItems.forEach(item => {
+        const shouldShow = !onlyOps || ["live","next","operation"].includes(item.kind);
+
+        if(shouldShow){
+          if(!map.hasLayer(item.marker)) item.marker.addTo(map);
+        }else{
+          if(map.hasLayer(item.marker)) map.removeLayer(item.marker);
+        }
+      });
+
+      setOpsButton(onlyOps);
+
+      const visibleMarkers = markerItems
+        .filter(item => map.hasLayer(item.marker))
+        .map(item => item.marker);
+
+      if(visibleMarkers.length){
+        const fg = L.featureGroup(visibleMarkers);
+        map.fitBounds(fg.getBounds().pad(0.22));
+      }
+    }
+
+    function focusImportantStop(){
+      const liveItem = markerItems.find(x => x.kind === "live");
+      const nextItem = markerItems.find(x => x.kind === "next");
+      const target = liveItem || nextItem;
+
+      if(target){
+        // İlk girişte sadece durağa odaklan; popup otomatik açılmasın.
+        map.setView(target.marker.getLatLng(), 13);
+      }
+    }
+
+    setTimeout(focusImportantStop, 450);
+
+
+    function updateMapSpeed(kmh){
+      const valueEl = document.getElementById("mapSpeedValue");
+      const badge = document.getElementById("mapSpeedBadge");
+
+      const n = Math.max(0, Math.round(Number(kmh || 0)));
+
+      if(valueEl) valueEl.textContent = String(n);
+
+      if(badge){
+        badge.classList.remove("speed-ok","speed-moving","speed-fast");
+
+        if(n <= 3){
+          badge.classList.add("speed-ok");
+        }else if(n <= 90){
+          badge.classList.add("speed-moving");
+        }else{
+          badge.classList.add("speed-fast");
+        }
+      }
+    }
+
+
+    function projectPointOnSegment(p, a, b){
+      const px = p[1], py = p[0];
+      const ax = a[1], ay = a[0];
+      const bx = b[1], by = b[0];
+
+      const dx = bx - ax;
+      const dy = by - ay;
+      const len2 = dx * dx + dy * dy;
+
+      if(len2 === 0){
+        return {
+          point:[a[0], a[1]],
+          t:0,
+          dist2:(px - ax) * (px - ax) + (py - ay) * (py - ay)
+        };
+      }
+
+      let t = ((px - ax) * dx + (py - ay) * dy) / len2;
+      t = Math.max(0, Math.min(1, t));
+
+      const x = ax + t * dx;
+      const y = ay + t * dy;
+
+      return {
+        point:[y, x],
+        t,
+        dist2:(px - x) * (px - x) + (py - y) * (py - y)
+      };
+    }
+
+    function closestRouteProjection(latlng){
+      if(!Array.isArray(routePoints) || routePoints.length < 2) return null;
+
+      let best = null;
+
+      for(let i = 0; i < routePoints.length - 1; i++){
+        const pr = projectPointOnSegment(latlng, routePoints[i], routePoints[i + 1]);
+
+        if(!best || pr.dist2 < best.dist2){
+          best = {
+            index:i,
+            point:pr.point,
+            t:pr.t,
+            dist2:pr.dist2
+          };
+        }
+      }
+
+      return best;
+    }
+
+
+    function formatRouteDistance(meters){
+      const m = Number(meters || 0);
+
+      if(!Number.isFinite(m)) return "—";
+      if(m < 1000) return `${Math.round(m)} m`;
+
+      return `${(m / 1000).toFixed(1)} km`;
+    }
+
+    function updateRouteDeviationStatus(latlng){
+      const box = document.getElementById("mapRouteStatus");
+      const text = document.getElementById("mapRouteStatusText");
+
+      if(!box || !text) return;
+
+      if(!latlng || !Array.isArray(routePoints) || routePoints.length < 2){
+        box.classList.remove("ok","warn","bad");
+        box.classList.add("warn");
+        text.textContent = "Rota bekleniyor";
+        return;
+      }
+
+      const pr = closestRouteProjection(latlng);
+
+      if(!pr || !Array.isArray(pr.point)){
+        box.classList.remove("ok","warn","bad");
+        box.classList.add("warn");
+        text.textContent = "Rota bulunamadı";
+        return;
+      }
+
+      let meters = 0;
+
+      try{
+        meters = map.distance(
+          L.latLng(latlng[0], latlng[1]),
+          L.latLng(pr.point[0], pr.point[1])
+        );
+      }catch(_){
+        meters = 0;
+      }
+
+      box.classList.remove("ok","warn","bad");
+
+      if(meters <= 500){
+        box.classList.add("ok");
+        text.textContent = "Rota üzerinde";
+      }else if(meters <= 1000){
+        box.classList.add("warn");
+        text.textContent = `Rotadan ${formatRouteDistance(meters)}`;
+      }else{
+        box.classList.add("bad");
+        text.textContent = `Rota dışı ${formatRouteDistance(meters)}`;
+      }
+    }
+
+
+    function updateRouteProgressLine(latlng){
+      if(!routeLineAhead || !routeLinePassed) return;
+      if(!Array.isArray(routePoints) || routePoints.length < 2) return;
+
+      if(!latlng){
+        routeLinePassed.setLatLngs([]);
+        routeLineAhead.setLatLngs(routePoints);
+        return;
+      }
+
+      const pr = closestRouteProjection(latlng);
+
+      if(!pr){
+        routeLinePassed.setLatLngs([]);
+        routeLineAhead.setLatLngs(routePoints);
+        return;
+      }
+
+      const passed = routePoints.slice(0, pr.index + 1);
+      passed.push(pr.point);
+
+      const ahead = [pr.point].concat(routePoints.slice(pr.index + 1));
+
+      routeLinePassed.setLatLngs(passed);
+      routeLineAhead.setLatLngs(ahead);
+    }
+
+
+    function operationText(stop){
+      const parts = [];
+      const off = Number(stop.off_count || 0);
+      const board = Number(stop.board_count || 0);
+      const bag = Number(stop.bag_count || 0);
+      const parcel = Number(stop.parcel_count || 0);
+
+      if(off) parts.push(`${off} inecek`);
+      if(board) parts.push(`${board} binecek`);
+      if(bag) parts.push(`${bag} bagaj`);
+      if(parcel) parts.push(`${parcel} emanet`);
+
+      return parts.length ? parts.join(" · ") : "İşlem yok";
+    }
+
+    function distanceToStopText(stop){
+      if(!currentLatLng || !stop || stop.lat == null || stop.lng == null) return "—";
+
+      try{
+        const km = map.distance(
+          L.latLng(currentLatLng[0], currentLatLng[1]),
+          L.latLng(stop.lat, stop.lng)
+        ) / 1000;
+
+        if(!Number.isFinite(km)) return "—";
+        if(km < 1) return `${Math.round(km * 1000)} m`;
+        return `${km.toFixed(1)} km`;
+      }catch(_){
+        return "—";
+      }
+    }
+
+    function nextOperationStops(){
+      const liveIndex = stops.findIndex(s => liveStop && s.name === liveStop);
+
+      return stops
+        .filter(s => Number(s.total_ops || 0) > 0)
+        .filter(s => liveIndex < 0 || Number(s.index || 0) >= liveIndex)
+        .sort((a,b) => Number(a.index || 0) - Number(b.index || 0))
+        .slice(0, 6);
+    }
+
+    function renderNextOpsPanel(){
+      const listEl = document.getElementById("nextOpsList");
+      const countEl = document.getElementById("nextOpsCount");
+
+      if(!listEl) return;
+
+      const items = nextOperationStops();
+
+      if(countEl){
+        countEl.textContent = `${items.length} durak`;
+      }
+
+      if(!items.length){
+        listEl.innerHTML = '<div class="next-ops-empty">İşlemli durak bulunmuyor.</div>';
+        return;
+      }
+
+      listEl.innerHTML = items.map((stop, idx) => {
+        const kind = stopKind(stop);
+        const cls = kind === "live" ? "live" : (idx === 0 ? "next" : "");
+        return `
+          <button class="next-op-item ${cls}" type="button" data-next-op-stop="${escapeHtmlForAttr(stop.name)}">
+            <div class="next-op-main">
+              <div class="next-op-name">${stop.name}</div>
+              <div class="next-op-meta">${operationText(stop)}</div>
+            </div>
+            <div class="next-op-km" data-op-km="${escapeHtmlForAttr(stop.name)}">${distanceToStopText(stop)}</div>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function refreshNextOpsDistances(){
+      document.querySelectorAll("[data-op-km]").forEach(el => {
+        const name = el.getAttribute("data-op-km") || "";
+        const stop = stops.find(s => s.name === name);
+        if(stop) el.textContent = distanceToStopText(stop);
+      });
+    }
+
+    function escapeHtmlForAttr(v){
+      return String(v == null ? "" : v)
+        .replaceAll("&","&amp;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;");
+    }
+
+
+
+    const APPROACH_WARN_KM = 3;
+    const APPROACH_URGENT_KM = 1;
+    const APPROACH_SNOOZE_MS = 3 * 60 * 1000;
+
+    let approachState = {
+      stopName:"",
+      level:"",
+      snoozeUntil:0
+    };
+
+    function approachDistanceKm(stop){
+      if(!currentLatLng || !stop || stop.lat == null || stop.lng == null) return NaN;
+
+      try{
+        return map.distance(
+          L.latLng(currentLatLng[0], currentLatLng[1]),
+          L.latLng(stop.lat, stop.lng)
+        ) / 1000;
+      }catch(_){
+        return NaN;
+      }
+    }
+
+    function buildApproachMessage(stop, km){
+      const parts = [];
+
+      const off = Number(stop.off_count || 0);
+      const board = Number(stop.board_count || 0);
+      const bag = Number(stop.bag_count || 0);
+      const parcel = Number(stop.parcel_count || 0);
+
+      if(off) parts.push(`${off} yolcu inecek`);
+      if(board) parts.push(`${board} yolcu binecek`);
+      if(bag) parts.push(`${bag} bagaj`);
+      if(parcel) parts.push(`${parcel} emanet`);
+
+      const opText = parts.length ? parts.join(" · ") : "İşlem görünmüyor";
+      const kmText = km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+
+      return {
+        opText,
+        kmText,
+        speech:`${stop.name} yaklaşıyor. Kalan mesafe ${kmText}. ${opText}.`
+      };
+    }
+
+    function speakApproach(stop, km){
+      const msg = buildApproachMessage(stop, km).speech;
+
+      try{
+        if(window.speechSynthesis){
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(msg);
+          u.lang = "tr-TR";
+          u.rate = 0.95;
+          window.speechSynthesis.speak(u);
+        }
+      }catch(err){
+        console.log("approach speak error", err);
+      }
+    }
+
+    function hideApproachAlert(){
+      const box = document.getElementById("approachAlert");
+      if(!box) return;
+
+      box.classList.remove("show","urgent");
+      box.setAttribute("aria-hidden", "true");
+    }
+
+    function showApproachAlert(stop, km, level){
+      const box = document.getElementById("approachAlert");
+      const kicker = document.getElementById("approachAlertKicker");
+      const title = document.getElementById("approachAlertTitle");
+      const text = document.getElementById("approachAlertText");
+      const kmEl = document.getElementById("approachAlertKm");
+      const open = document.getElementById("approachAlertOpen");
+
+      if(!box || !title || !text || !kmEl) return;
+
+      const msg = buildApproachMessage(stop, km);
+
+      box.classList.add("show");
+      box.classList.toggle("urgent", level === "urgent");
+      box.setAttribute("aria-hidden", "false");
+
+      if(kicker){
+        kicker.textContent = level === "urgent" ? "Çok az kaldı" : "Durak yaklaşıyor";
+      }
+
+      title.textContent = stop.name;
+      text.textContent = msg.opText;
+      kmEl.textContent = msg.kmText;
+
+      if(open){
+        open.href = `{{ url_for('continue_trip') }}?stop=${encodeURIComponent(stop.name)}`;
+      }
+    }
+
+    function checkApproachAlert(){
+      const now = Date.now();
+
+      if(now < approachState.snoozeUntil) return;
+
+      const ops = nextOperationStops();
+      if(!ops.length){
+        hideApproachAlert();
+        return;
+      }
+
+      const target = ops[0];
+      const km = approachDistanceKm(target);
+
+      if(!Number.isFinite(km) || km > APPROACH_WARN_KM){
+        hideApproachAlert();
+        return;
+      }
+
+      const level = km <= APPROACH_URGENT_KM ? "urgent" : "warn";
+      const same = approachState.stopName === target.name && approachState.level === level;
+
+      approachState.stopName = target.name;
+      approachState.level = level;
+
+      showApproachAlert(target, km, level);
+
+      // İlk yakalamada otomatik sesli oku; aynı uyarıda tekrar tekrar konuşmasın.
+      if(!same){
+        speakApproach(target, km);
+      }
+    }
+
+
+    function updateBusPosition(lat, lng){
+      currentLatLng = [lat, lng];
+
+      if(!busMarker){
+        busMarker = L.marker(currentLatLng, { icon:busIcon() })
+          .bindPopup("Otobüs konumu")
+          .addTo(map);
+      }else{
+        busMarker.setLatLng(currentLatLng);
+      }
+
+      updateRouteProgressLine(currentLatLng);
+      updateRouteDeviationStatus(currentLatLng);
+      refreshNextOpsDistances();
+      checkApproachAlert();
+    }
+
+    if("geolocation" in navigator){
+      navigator.geolocation.watchPosition(pos => {
+        updateBusPosition(pos.coords.latitude, pos.coords.longitude);
+
+        const rawSpeed = pos.coords.speed;
+        const kmh = (typeof rawSpeed === "number" && !isNaN(rawSpeed)) ? rawSpeed * 3.6 : 0;
+        updateMapSpeed(kmh);
+      }, err => {
+        console.log("Konum alınamadı", err);
+      }, {
+        enableHighAccuracy:true,
+        maximumAge:3000,
+        timeout:10000
+      });
+    }
+
+
+    document.getElementById("nextOpsList")?.addEventListener("click", e => {
+      const btn = e.target.closest("[data-next-op-stop]");
+      if(!btn) return;
+
+      const name = btn.getAttribute("data-next-op-stop") || "";
+      const item = markerItems.find(x => x.stop && x.stop.name === name);
+
+      if(item){
+        map.setView(item.marker.getLatLng(), 14);
+        item.marker.openPopup();
+      }
+    });
+
+    document.getElementById("nextOpsToggle")?.addEventListener("click", () => {
+      const panel = document.getElementById("nextOpsPanel");
+      const btn = document.getElementById("nextOpsToggle");
+      if(!panel || !btn) return;
+
+      const collapsed = panel.classList.toggle("collapsed");
+      btn.textContent = collapsed ? "Göster" : "Gizle";
+    });
+
+    renderNextOpsPanel();
+
+
+    function setMapFullscreen(on){
+      const btn = document.getElementById("btnMapFullscreen");
+      document.body.classList.toggle("map-fullscreen-mode", !!on);
+
+      if(btn){
+        btn.textContent = on ? "✕ Çık" : "⛶ Tam Ekran";
+      }
+
+      setTimeout(() => {
+        try{
+          map.invalidateSize(true);
+        }catch(_){}
+      }, 260);
+    }
+
+    function isMapFullscreen(){
+      return document.body.classList.contains("map-fullscreen-mode");
+    }
+
+    document.getElementById("btnMapFullscreen")?.addEventListener("click", async () => {
+      const next = !isMapFullscreen();
+
+      setMapFullscreen(next);
+
+      try{
+        if(next && document.documentElement.requestFullscreen){
+          await document.documentElement.requestFullscreen();
+        }else if(!next && document.fullscreenElement && document.exitFullscreen){
+          await document.exitFullscreen();
+        }
+      }catch(_){}
+    });
+
+    document.addEventListener("fullscreenchange", () => {
+      if(!document.fullscreenElement && isMapFullscreen()){
+        setMapFullscreen(false);
+      }
+    });
+
+
+    document.getElementById("approachAlertClose")?.addEventListener("click", () => {
+      hideApproachAlert();
+    });
+
+    document.getElementById("approachAlertSnooze")?.addEventListener("click", () => {
+      approachState.snoozeUntil = Date.now() + APPROACH_SNOOZE_MS;
+      hideApproachAlert();
+    });
+
+    document.getElementById("approachAlertSpeak")?.addEventListener("click", () => {
+      const ops = nextOperationStops();
+      if(!ops.length) return;
+
+      const target = ops[0];
+      const km = approachDistanceKm(target);
+
+      if(Number.isFinite(km)){
+        speakApproach(target, km);
+      }
+    });
+
+
+    function setPopupFocusMode(on){
+      document.body.classList.toggle("map-popup-focus", !!on);
+
+      // Popup açıldığında yaklaşma uyarısı varsa kapat.
+      if(on){
+        try{
+          if(typeof hideApproachAlert === "function"){
+            hideApproachAlert();
+          }
+        }catch(_){}
+      }
+
+      setTimeout(() => {
+        try{
+          map.invalidateSize(true);
+        }catch(_){}
+      }, 120);
+    }
+
+    map.on("popupopen", () => {
+      setPopupFocusMode(true);
+    });
+
+    map.on("popupclose", () => {
+      setPopupFocusMode(false);
+    });
+
+
+    document.getElementById("btnLocate")?.addEventListener("click", () => {
+      if(currentLatLng){
+        map.setView(currentLatLng, 15);
+      }
+    });
+
+    document.getElementById("btnFit")?.addEventListener("click", () => {
+      applyMarkerFilter("all");
+      if(markers.length){
+        map.fitBounds(group.getBounds().pad(0.18));
+      }
+    });
+
+    document.getElementById("btnRoute")?.addEventListener("click", () => {
+      setRouteLineVisible(!routeLineVisible);
+    });
+
+    document.getElementById("btnOps")?.addEventListener("click", () => {
+      const btn = document.getElementById("btnOps");
+      const active = btn && btn.classList.contains("active");
+      applyMarkerFilter(active ? "all" : "ops");
+    });
+  </script>
+</body>
+</html>
