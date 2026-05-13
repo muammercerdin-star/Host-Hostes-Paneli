@@ -1494,3 +1494,607 @@
   setTimeout(cleanCompass, 1800);
   setInterval(cleanCompass, 4000);
 })();
+
+/* MUAVIN_NEXT_OPS_FINAL_V1_JS */
+(function () {
+  if (window.MUAVIN_NEXT_OPS_FINAL_V1) return;
+  window.MUAVIN_NEXT_OPS_FINAL_V1 = true;
+
+  const DONE_KEY = "muavinNextOpsDoneStopsV1";
+
+  function esc(v) {
+    return String(v == null ? "" : v)
+      .replaceAll("&", "&amp;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
+  }
+
+  function getDoneList() {
+    try {
+      const arr = JSON.parse(sessionStorage.getItem(DONE_KEY) || "[]");
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function setDone(name) {
+    const arr = getDoneList();
+    if (!arr.includes(name)) arr.push(name);
+    try {
+      sessionStorage.setItem(DONE_KEY, JSON.stringify(arr));
+    } catch (e) {}
+  }
+
+  function isDone(name) {
+    return getDoneList().includes(name);
+  }
+
+  function safeStops() {
+    try {
+      if (typeof nextOperationStops === "function") return nextOperationStops();
+    } catch (e) {}
+    return [];
+  }
+
+  function safeOperationText(stop) {
+    try {
+      if (typeof operationText === "function") return operationText(stop);
+    } catch (e) {}
+    return "İşlem yok";
+  }
+
+  function safeDistance(stop) {
+    try {
+      if (typeof distanceToStopText === "function") return distanceToStopText(stop);
+    } catch (e) {}
+    return "—";
+  }
+
+  function findMarkerItem(name) {
+    try {
+      if (Array.isArray(markerItems)) {
+        return markerItems.find(x => x.stop && x.stop.name === name);
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function openStop(name) {
+    const item = findMarkerItem(name);
+    try {
+      if (item && item.marker && typeof map !== "undefined") {
+        map.setView(item.marker.getLatLng(), 14);
+        item.marker.openPopup();
+      }
+    } catch (e) {}
+  }
+
+  function speakStop(stop) {
+    if (!stop) return;
+
+    const name = stop.name || "Durak";
+    const km = safeDistance(stop);
+    const op = safeOperationText(stop);
+
+    const msg = `${name} yaklaşıyor. Kalan mesafe ${km}. ${op}.`;
+
+    try {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(msg);
+        u.lang = "tr-TR";
+        u.rate = 0.95;
+        window.speechSynthesis.speak(u);
+      }
+    } catch (e) {}
+  }
+
+  function metricChip(label, value, cls) {
+    return `<span class="next-op-chip ${cls || ""}">${label}: ${value}</span>`;
+  }
+
+  function renderHero(stop) {
+    const off = Number(stop.off_count || 0);
+    const board = Number(stop.board_count || 0);
+    const bag = Number(stop.bag_count || 0);
+    const parcel = Number(stop.parcel_count || 0);
+    const done = isDone(stop.name);
+
+    const chips = [
+      metricChip("İnecek", off, off ? "warn" : "good"),
+      metricChip("Binecek", board, board ? "warn" : "good"),
+      metricChip("Bagaj", bag, bag ? "warn" : "good"),
+      metricChip("Emanet", parcel, parcel ? "warn" : "good"),
+    ].join("");
+
+    return `
+      <div class="next-op-hero">
+        <div class="next-op-hero-top">
+          <div>
+            <div class="next-op-hero-kicker">Sıradaki Durak</div>
+            <div class="next-op-hero-title">${esc(stop.name)}</div>
+          </div>
+          <div class="next-op-hero-distance" data-op-km="${esc(stop.name)}">${esc(safeDistance(stop))}</div>
+        </div>
+
+        <div class="next-op-hero-meta">
+          ${chips}
+        </div>
+
+        <div class="next-op-task-grid">
+          <button class="next-op-task-btn speak" type="button" data-next-task="speak" data-stop="${esc(stop.name)}">🔊 Anons</button>
+          <button class="next-op-task-btn people" type="button" data-next-task="people" data-stop="${esc(stop.name)}">👥 Yolcu</button>
+          <button class="next-op-task-btn bag" type="button" data-next-task="bag" data-stop="${esc(stop.name)}">🎒 Bagaj</button>
+          <button class="next-op-task-btn done ${done ? "is-done" : ""}" type="button" data-next-task="done" data-stop="${esc(stop.name)}">${done ? "✅ Tamam" : "✅ Tamamla"}</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderMini(stop) {
+    return `
+      <button class="next-op-mini" type="button" data-next-op-stop="${esc(stop.name)}">
+        <div>
+          <div class="next-op-mini-name">${esc(stop.name)}</div>
+          <div class="next-op-mini-meta">${esc(safeOperationText(stop))}</div>
+        </div>
+        <div class="next-op-mini-km" data-op-km="${esc(stop.name)}">${esc(safeDistance(stop))}</div>
+      </button>
+    `;
+  }
+
+  function renderEnhancedNextOps() {
+    const listEl = document.getElementById("nextOpsList");
+    const countEl = document.getElementById("nextOpsCount");
+
+    if (!listEl) return;
+
+    const items = safeStops();
+
+    if (countEl) countEl.textContent = `${items.length} durak`;
+
+    if (!items.length) {
+      listEl.innerHTML = `
+        <div class="next-ops-final-wrap">
+          <div class="next-ops-final-empty">İşlemli durak bulunmuyor.</div>
+        </div>
+      `;
+      return;
+    }
+
+    const first = items[0];
+    const rest = items.slice(1, 5);
+
+    listEl.innerHTML = `
+      <div class="next-ops-final-wrap">
+        ${renderHero(first)}
+
+        ${rest.length ? `
+          <div class="next-op-section-title">Sonraki İşlemler</div>
+          <div class="next-op-mini-list">
+            ${rest.map(renderMini).join("")}
+          </div>
+        ` : ""}
+      </div>
+    `;
+  }
+
+  function refreshDistances() {
+    document.querySelectorAll("[data-op-km]").forEach(el => {
+      const name = el.getAttribute("data-op-km") || "";
+      let stop = null;
+
+      try {
+        if (typeof stops !== "undefined" && Array.isArray(stops)) {
+          stop = stops.find(s => s.name === name);
+        }
+      } catch (e) {}
+
+      if (stop) el.textContent = safeDistance(stop);
+    });
+  }
+
+  function bindActions() {
+    const listEl = document.getElementById("nextOpsList");
+    if (!listEl || listEl.dataset.nextOpsFinalBound === "1") return;
+
+    listEl.dataset.nextOpsFinalBound = "1";
+
+    listEl.addEventListener("click", function (e) {
+      const task = e.target.closest("[data-next-task]");
+      if (task) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const name = task.getAttribute("data-stop") || "";
+        let stop = null;
+
+        try {
+          if (typeof stops !== "undefined" && Array.isArray(stops)) {
+            stop = stops.find(s => s.name === name);
+          }
+        } catch (err) {}
+
+        const action = task.getAttribute("data-next-task");
+
+        if (action === "speak") speakStop(stop);
+        if (action === "people") openStop(name);
+        if (action === "bag") openStop(name);
+        if (action === "done") {
+          setDone(name);
+          renderEnhancedNextOps();
+        }
+
+        return;
+      }
+
+      const mini = e.target.closest("[data-next-op-stop]");
+      if (mini) {
+        e.preventDefault();
+        e.stopPropagation();
+        openStop(mini.getAttribute("data-next-op-stop") || "");
+      }
+    }, true);
+  }
+
+  function boot() {
+    try {
+      window.renderNextOpsPanel = renderEnhancedNextOps;
+    } catch (e) {}
+
+    bindActions();
+    renderEnhancedNextOps();
+    refreshDistances();
+
+    setInterval(refreshDistances, 2500);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+
+  setTimeout(boot, 800);
+  setTimeout(boot, 1800);
+})();
+
+/* MUAVIN_NEXT_OPS_BUBBLE_DRAG_V4_JS */
+(function () {
+  if (window.MUAVIN_NEXT_OPS_BUBBLE_DRAG_V4) return;
+  window.MUAVIN_NEXT_OPS_BUBBLE_DRAG_V4 = true;
+
+  const STORAGE_KEY = "muavinNextOpsBubblePositionV4";
+  let drag = null;
+  let suppressClickUntil = 0;
+
+  function getMap() {
+    if (window.MUAVIN_LIVE_MAP && window.MUAVIN_LIVE_MAP._container) return window.MUAVIN_LIVE_MAP;
+    if (window.map && window.map._container) return window.map;
+    return null;
+  }
+
+  function getContainer() {
+    const map = getMap();
+    return map && map._container ? map._container : document.querySelector(".leaflet-container");
+  }
+
+  function getPanel() {
+    return document.getElementById("nextOpsPanel");
+  }
+
+  function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+  }
+
+  function getPoint(e) {
+    if (e.touches && e.touches.length) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+
+    if (e.changedTouches && e.changedTouches.length) {
+      return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+    }
+
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  function disableMapMove() {
+    const map = getMap();
+    if (!map) return;
+
+    try { map.dragging.disable(); } catch (e) {}
+    try { map.touchZoom.disable(); } catch (e) {}
+    try { map.doubleClickZoom.disable(); } catch (e) {}
+  }
+
+  function enableMapMove() {
+    const map = getMap();
+    if (!map) return;
+
+    try { map.dragging.enable(); } catch (e) {}
+    try { map.touchZoom.enable(); } catch (e) {}
+    try { map.doubleClickZoom.enable(); } catch (e) {}
+  }
+
+  function applyPosition(panel, x, y, save) {
+    const container = getContainer();
+    if (!container || !panel) return;
+
+    const cRect = container.getBoundingClientRect();
+    const pRect = panel.getBoundingClientRect();
+
+    const margin = 8;
+    const maxX = Math.max(margin, cRect.width - pRect.width - margin);
+    const maxY = Math.max(margin, cRect.height - pRect.height - margin);
+
+    x = clamp(x, margin, maxX);
+    y = clamp(y, margin, maxY);
+
+    panel.classList.add("is-nextops-positioned");
+    panel.style.setProperty("--nextops-left", x + "px");
+    panel.style.setProperty("--nextops-top", y + "px");
+
+    if (save) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          xPct: x / Math.max(cRect.width, 1),
+          yPct: y / Math.max(cRect.height, 1)
+        }));
+      } catch (e) {}
+    }
+  }
+
+  function restorePosition() {
+    const panel = getPanel();
+    const container = getContainer();
+
+    if (!panel || !container) return;
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      if (!saved || typeof saved.xPct !== "number" || typeof saved.yPct !== "number") return;
+
+      const cRect = container.getBoundingClientRect();
+
+      applyPosition(
+        panel,
+        saved.xPct * cRect.width,
+        saved.yPct * cRect.height,
+        false
+      );
+    } catch (e) {}
+  }
+
+  function bindDrag() {
+    const panel = getPanel();
+    const container = getContainer();
+
+    if (!panel || !container) {
+      setTimeout(bindDrag, 500);
+      return;
+    }
+
+    restorePosition();
+
+    if (panel.dataset.nextOpsDragV4 === "1") return;
+    panel.dataset.nextOpsDragV4 = "1";
+
+    function start(e) {
+      if (!panel.classList.contains("collapsed")) return;
+
+      const p = getPoint(e);
+      const cRect = container.getBoundingClientRect();
+      const pRect = panel.getBoundingClientRect();
+
+      drag = {
+        startX: p.x,
+        startY: p.y,
+        baseX: pRect.left - cRect.left,
+        baseY: pRect.top - cRect.top,
+        moved: false
+      };
+
+      panel.classList.add("is-nextops-dragging");
+      disableMapMove();
+    }
+
+    function move(e) {
+      if (!drag) return;
+      if (!panel.classList.contains("collapsed")) return;
+
+      const p = getPoint(e);
+      const dx = p.x - drag.startX;
+      const dy = p.y - drag.startY;
+
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        drag.moved = true;
+      }
+
+      if (!drag.moved) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+
+      applyPosition(panel, drag.baseX + dx, drag.baseY + dy, true);
+    }
+
+    function end(e) {
+      if (!drag) return;
+
+      if (drag.moved) {
+        suppressClickUntil = Date.now() + 500;
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      }
+
+      panel.classList.remove("is-nextops-dragging");
+      drag = null;
+      enableMapMove();
+    }
+
+    panel.addEventListener("touchstart", start, { passive:false, capture:true });
+    panel.addEventListener("touchmove", move, { passive:false, capture:true });
+    panel.addEventListener("touchend", end, { passive:false, capture:true });
+    panel.addEventListener("touchcancel", end, { passive:false, capture:true });
+
+    panel.addEventListener("mousedown", start, true);
+    window.addEventListener("mousemove", move, true);
+    window.addEventListener("mouseup", end, true);
+
+    panel.addEventListener("click", function (e) {
+      if (Date.now() < suppressClickUntil) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      }
+    }, true);
+
+    window.addEventListener("resize", restorePosition);
+
+    const toggle = document.getElementById("nextOpsToggle");
+    if (toggle && toggle.dataset.dragAwareV4 !== "1") {
+      toggle.dataset.dragAwareV4 = "1";
+
+      toggle.addEventListener("click", function () {
+        setTimeout(function () {
+          if (panel.classList.contains("collapsed")) {
+            restorePosition();
+          }
+        }, 80);
+      }, true);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindDrag);
+  } else {
+    bindDrag();
+  }
+
+  setTimeout(bindDrag, 800);
+  setTimeout(bindDrag, 1800);
+  setTimeout(bindDrag, 3200);
+})();
+
+/* MUAVIN_CLEAN_START_MODE_V10_JS */
+(function () {
+  if (window.MUAVIN_CLEAN_START_MODE_V10) return;
+  window.MUAVIN_CLEAN_START_MODE_V10 = true;
+
+  let btn = null;
+  let clean = true;
+
+  function getMap() {
+    if (window.MUAVIN_LIVE_MAP && window.MUAVIN_LIVE_MAP._container) return window.MUAVIN_LIVE_MAP;
+    if (window.map && window.map._container) return window.map;
+    return null;
+  }
+
+  function getContainer() {
+    const map = getMap();
+    return map && map._container ? map._container : document.querySelector(".leaflet-container");
+  }
+
+  function setButtonText() {
+    if (!btn) return;
+
+    btn.innerHTML = clean
+      ? '<span class="clean-icon">☰</span><span>Kontroller</span>'
+      : '<span class="clean-icon">⌄</span><span>Sade</span>';
+  }
+
+  function closeHeavyPanels() {
+    const nextOps = document.getElementById("nextOpsPanel");
+    const nextOpsToggle = document.getElementById("nextOpsToggle");
+
+    if (nextOps) nextOps.classList.add("collapsed");
+    if (nextOpsToggle) nextOpsToggle.textContent = "Göster";
+
+    document.querySelectorAll(".muavin-route-summary-card-final").forEach(function (el) {
+      el.classList.remove("is-open");
+    });
+
+    document.querySelectorAll(".muavin-summary-bubble-final").forEach(function (el) {
+      el.classList.remove("is-open");
+    });
+
+    document.querySelectorAll(".muavin-tools-sheet-final").forEach(function (el) {
+      el.classList.remove("is-open");
+    });
+  }
+
+  function applyCleanMode(on) {
+    clean = !!on;
+
+    if (clean) {
+      closeHeavyPanels();
+      document.body.classList.add("muavin-map-clean-start");
+    } else {
+      document.body.classList.remove("muavin-map-clean-start");
+      closeHeavyPanels();
+    }
+
+    setButtonText();
+
+    setTimeout(function () {
+      try {
+        const map = getMap();
+        if (map && map.invalidateSize) map.invalidateSize(true);
+      } catch (e) {}
+    }, 120);
+  }
+
+  function ensureButton() {
+    const container = getContainer();
+
+    if (!container) {
+      setTimeout(ensureButton, 500);
+      return;
+    }
+
+    if (btn && btn.isConnected) return;
+
+    btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "muavin-clean-toggle-v10";
+    btn.title = "Kontrolleri aç/kapat";
+    btn.setAttribute("aria-label", "Kontrolleri aç/kapat");
+
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      applyCleanMode(!clean);
+    });
+
+    try {
+      if (window.L && L.DomEvent) {
+        L.DomEvent.disableClickPropagation(btn);
+        L.DomEvent.disableScrollPropagation(btn);
+      }
+    } catch (e) {}
+
+    container.appendChild(btn);
+    setButtonText();
+  }
+
+  function boot() {
+    ensureButton();
+
+    // Her sayfa açılışında temiz başlasın.
+    applyCleanMode(true);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+
+  setTimeout(boot, 700);
+  setTimeout(boot, 1600);
+})();

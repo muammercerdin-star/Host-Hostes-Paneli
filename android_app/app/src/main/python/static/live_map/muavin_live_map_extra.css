@@ -785,3 +785,1131 @@
   display: none !important;
 }
 /* END_MUAVIN_REMOVE_COMPASS_V7 */
+
+/* MUAVIN_NEXT_OPS_FINAL_V1 */
+.next-ops-panel{
+  border-radius:24px !important;
+}
+
+.next-ops-panel.collapsed .next-ops-final-wrap{
+  display:none !important;
+}
+
+.next-ops-final-wrap{
+  display:grid;
+  gap:10px;
+  padding:10px;
+}
+
+.next-op-hero{
+  border-radius:22px;
+  padding:13px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(245,158,11,.20), transparent 38%),
+    rgba(255,255,255,.075);
+  border:1px solid rgba(245,158,11,.22);
+  box-shadow:0 14px 28px rgba(0,0,0,.18);
+}
+
+.next-op-hero-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.next-op-hero-kicker{
+  color:#fde68a;
+  font-size:10px;
+  font-weight:1000;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+
+.next-op-hero-title{
+  margin-top:3px;
+  color:#fff;
+  font-size:21px;
+  line-height:1.08;
+  font-weight:1000;
+  letter-spacing:-.04em;
+}
+
+.next-op-hero-distance{
+  min-width:76px;
+  text-align:center;
+  padding:9px 10px;
+  border-radius:17px;
+  background:rgba(15,23,42,.62);
+  border:1px solid rgba(255,255,255,.10);
+  color:#bfdbfe;
+  font-size:15px;
+  font-weight:1000;
+}
+
+.next-op-hero-meta{
+  margin-top:10px;
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
+.next-op-chip{
+  padding:7px 9px;
+  border-radius:999px;
+  background:rgba(15,23,42,.48);
+  border:1px solid rgba(255,255,255,.10);
+  color:rgba(255,255,255,.86);
+  font-size:11px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.next-op-chip.warn{
+  background:rgba(245,158,11,.14);
+  color:#fde68a;
+  border-color:rgba(245,158,11,.22);
+}
+
+.next-op-chip.good{
+  background:rgba(34,197,94,.13);
+  color:#bbf7d0;
+  border-color:rgba(34,197,94,.20);
+}
+
+.next-op-task-grid{
+  margin-top:11px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+}
+
+.next-op-task-btn{
+  min-height:42px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:15px;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  font-size:11px;
+  font-weight:1000;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.next-op-task-btn:active{
+  transform:scale(.97);
+}
+
+.next-op-task-btn.speak{
+  background:rgba(34,197,94,.14);
+  color:#dcfce7;
+  border-color:rgba(34,197,94,.24);
+}
+
+.next-op-task-btn.people{
+  background:rgba(59,130,246,.15);
+  color:#dbeafe;
+  border-color:rgba(147,197,253,.22);
+}
+
+.next-op-task-btn.bag{
+  background:rgba(249,115,22,.14);
+  color:#fed7aa;
+  border-color:rgba(249,115,22,.22);
+}
+
+.next-op-task-btn.done{
+  background:rgba(148,163,184,.12);
+  color:#e2e8f0;
+}
+
+.next-op-task-btn.done.is-done{
+  background:rgba(34,197,94,.20);
+  color:#bbf7d0;
+  border-color:rgba(34,197,94,.30);
+}
+
+.next-op-section-title{
+  margin:1px 2px 0;
+  color:rgba(255,255,255,.58);
+  font-size:10px;
+  font-weight:1000;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+
+.next-op-mini-list{
+  display:grid;
+  gap:7px;
+}
+
+.next-op-mini{
+  width:100%;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:17px;
+  padding:10px 11px;
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:center;
+  text-align:left;
+}
+
+.next-op-mini-name{
+  font-size:14px;
+  font-weight:1000;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.next-op-mini-meta{
+  margin-top:3px;
+  color:rgba(255,255,255,.67);
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.next-op-mini-km{
+  min-width:62px;
+  text-align:center;
+  padding:7px 8px;
+  border-radius:14px;
+  background:rgba(15,23,42,.58);
+  border:1px solid rgba(255,255,255,.10);
+  color:#bfdbfe;
+  font-size:12px;
+  font-weight:1000;
+}
+
+.next-ops-final-empty{
+  padding:16px 12px;
+  color:rgba(255,255,255,.68);
+  font-size:13px;
+  font-weight:850;
+  text-align:center;
+}
+
+@media(max-width:430px){
+  .next-ops-final-wrap{
+    padding:9px;
+    gap:9px;
+  }
+
+  .next-op-hero{
+    padding:12px;
+    border-radius:20px;
+  }
+
+  .next-op-hero-title{
+    font-size:19px;
+  }
+
+  .next-op-task-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .next-op-task-btn{
+    min-height:40px;
+  }
+}
+/* END_MUAVIN_NEXT_OPS_FINAL_V1 */
+
+/* MUAVIN_NEXT_OPS_PANEL_POLISH_V2 */
+.next-ops-panel{
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 104px) !important;
+  max-height:min(48vh, 420px) !important;
+  display:flex !important;
+  flex-direction:column !important;
+}
+
+.next-ops-head{
+  flex:0 0 auto !important;
+}
+
+.next-ops-list{
+  max-height:min(38vh, 340px) !important;
+  overflow-y:auto !important;
+  padding:8px !important;
+}
+
+.next-ops-panel.collapsed{
+  max-height:64px !important;
+}
+
+.next-ops-panel.collapsed .next-ops-list{
+  display:none !important;
+}
+
+.next-ops-final-wrap{
+  padding:8px !important;
+  gap:8px !important;
+}
+
+.next-op-hero{
+  padding:10px !important;
+  border-radius:18px !important;
+}
+
+.next-op-hero-kicker{
+  font-size:9px !important;
+  letter-spacing:.12em !important;
+}
+
+.next-op-hero-title{
+  font-size:18px !important;
+  line-height:1.05 !important;
+}
+
+.next-op-hero-distance{
+  min-width:66px !important;
+  padding:7px 8px !important;
+  border-radius:14px !important;
+  font-size:13px !important;
+}
+
+.next-op-hero-meta{
+  margin-top:8px !important;
+  display:grid !important;
+  grid-template-columns:repeat(4,1fr) !important;
+  gap:6px !important;
+}
+
+.next-op-chip{
+  padding:6px 6px !important;
+  font-size:10px !important;
+  text-align:center !important;
+  white-space:nowrap !important;
+}
+
+.next-op-task-grid{
+  margin-top:9px !important;
+  display:grid !important;
+  grid-template-columns:repeat(4,1fr) !important;
+  gap:6px !important;
+}
+
+.next-op-task-btn{
+  min-height:36px !important;
+  border-radius:13px !important;
+  font-size:10px !important;
+  padding:0 3px !important;
+}
+
+.next-op-section-title{
+  font-size:9px !important;
+  margin-top:0 !important;
+}
+
+.next-op-mini{
+  padding:8px 10px !important;
+  border-radius:15px !important;
+}
+
+.next-op-mini-name{
+  font-size:13px !important;
+}
+
+.next-op-mini-meta{
+  font-size:10.5px !important;
+}
+
+.next-op-mini-km{
+  min-width:58px !important;
+  padding:6px 7px !important;
+  font-size:11px !important;
+}
+
+@media(max-width:430px){
+  .next-ops-panel{
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 102px) !important;
+    max-height:min(50vh, 430px) !important;
+  }
+
+  .next-ops-list{
+    max-height:min(40vh, 350px) !important;
+  }
+
+  .next-op-hero-title{
+    font-size:17px !important;
+  }
+
+  .next-op-hero-meta{
+    grid-template-columns:repeat(2,1fr) !important;
+  }
+
+  .next-op-task-grid{
+    grid-template-columns:repeat(4,1fr) !important;
+  }
+
+  .next-op-task-btn{
+    font-size:9.5px !important;
+    min-height:35px !important;
+  }
+}
+/* END_MUAVIN_NEXT_OPS_PANEL_POLISH_V2 */
+
+/* MUAVIN_NEXT_OPS_FLOAT_BUBBLE_V3 */
+
+/* Kapalı halde uzun bar yerine yüzen balon */
+.next-ops-panel.collapsed{
+  left:22px !important;
+  right:auto !important;
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 106px) !important;
+  width:auto !important;
+  min-width:178px !important;
+  max-width:230px !important;
+  height:60px !important;
+  max-height:60px !important;
+  border-radius:999px !important;
+  overflow:visible !important;
+  display:flex !important;
+  align-items:center !important;
+  background:rgba(15,23,42,.94) !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+  box-shadow:
+    0 18px 44px rgba(15,23,42,.38),
+    0 0 0 1px rgba(255,255,255,.10) inset !important;
+  backdrop-filter:blur(16px) !important;
+  -webkit-backdrop-filter:blur(16px) !important;
+  animation:muavinNextOpsFloat 2.8s ease-in-out infinite;
+}
+
+.next-ops-panel.collapsed .next-ops-head{
+  width:100% !important;
+  height:60px !important;
+  padding:7px 9px 7px 8px !important;
+  border-bottom:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:9px !important;
+}
+
+/* Başlığı kısa balon başlığına çevir */
+.next-ops-panel.collapsed .next-ops-title{
+  font-size:0 !important;
+  width:auto !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:7px !important;
+  white-space:nowrap !important;
+}
+
+.next-ops-panel.collapsed .next-ops-title::before{
+  content:"🎯";
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#1a73e8,#2563eb);
+  box-shadow:
+    0 10px 24px rgba(26,115,232,.30),
+    0 0 0 1px rgba(255,255,255,.14) inset;
+  font-size:20px;
+}
+
+.next-ops-panel.collapsed .next-ops-title::after{
+  content:"İşlemler";
+  font-size:14px;
+  font-weight:1000;
+  letter-spacing:.2px;
+  color:#fff;
+}
+
+/* count + göster kısmı kompakt */
+.next-ops-panel.collapsed .next-ops-head > div{
+  display:flex !important;
+  align-items:center !important;
+  gap:6px !important;
+  margin-left:auto !important;
+}
+
+.next-ops-panel.collapsed .next-ops-count{
+  height:28px !important;
+  padding:0 8px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  border-radius:999px !important;
+  font-size:10px !important;
+  font-weight:950 !important;
+  background:rgba(255,255,255,.10) !important;
+  color:rgba(255,255,255,.82) !important;
+}
+
+.next-ops-panel.collapsed .next-ops-toggle{
+  width:34px !important;
+  height:34px !important;
+  border-radius:999px !important;
+  background:rgba(255,255,255,.92) !important;
+  color:#111827 !important;
+  font-size:0 !important;
+  display:grid !important;
+  place-items:center !important;
+}
+
+.next-ops-panel.collapsed .next-ops-toggle::before{
+  content:"+";
+  font-size:22px;
+  line-height:1;
+  font-weight:1000;
+}
+
+/* Kapalıyken liste tamamen gizli */
+.next-ops-panel.collapsed .next-ops-list,
+.next-ops-panel.collapsed .next-ops-final-wrap{
+  display:none !important;
+}
+
+/* Açık hal eski panel gibi geniş kalsın */
+.next-ops-panel:not(.collapsed){
+  left:12px !important;
+  right:12px !important;
+  width:auto !important;
+  animation:none !important;
+}
+
+/* Alt dock ile çakışmasın */
+.muavin-bottom-dock-final-v5{
+  z-index:99999 !important;
+}
+
+@keyframes muavinNextOpsFloat{
+  0%,100%{
+    transform:translateY(0);
+  }
+  50%{
+    transform:translateY(-4px);
+  }
+}
+
+@media(max-width:430px){
+  .next-ops-panel.collapsed{
+    left:18px !important;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 104px) !important;
+    min-width:170px !important;
+    max-width:220px !important;
+    height:58px !important;
+    max-height:58px !important;
+  }
+
+  .next-ops-panel.collapsed .next-ops-head{
+    height:58px !important;
+    padding:7px 8px !important;
+  }
+
+  .next-ops-panel.collapsed .next-ops-title::before{
+    width:42px;
+    height:42px;
+    flex-basis:42px;
+    font-size:19px;
+  }
+
+  .next-ops-panel.collapsed .next-ops-title::after{
+    font-size:13px;
+  }
+
+  .next-ops-panel.collapsed .next-ops-count{
+    font-size:9.5px !important;
+    padding:0 7px !important;
+  }
+
+  .next-ops-panel.collapsed .next-ops-toggle{
+    width:32px !important;
+    height:32px !important;
+  }
+}
+/* END_MUAVIN_NEXT_OPS_FLOAT_BUBBLE_V3 */
+
+/* MUAVIN_NEXT_OPS_BUBBLE_DRAG_V4 */
+.next-ops-panel.collapsed{
+  touch-action:none !important;
+  user-select:none !important;
+  -webkit-user-select:none !important;
+  cursor:grab !important;
+  z-index:1650 !important;
+}
+
+.next-ops-panel.collapsed.is-nextops-dragging{
+  cursor:grabbing !important;
+  animation:none !important;
+  transform:scale(1.035) !important;
+  box-shadow:
+    0 24px 58px rgba(15,23,42,.46),
+    0 0 0 2px rgba(26,115,232,.32) inset !important;
+}
+
+.next-ops-panel.collapsed.is-nextops-positioned{
+  left:var(--nextops-left) !important;
+  top:var(--nextops-top) !important;
+  right:auto !important;
+  bottom:auto !important;
+}
+/* END_MUAVIN_NEXT_OPS_BUBBLE_DRAG_V4 */
+
+/* MUAVIN_SMALL_ELEGANT_BUTTONS_V9 */
+
+/* Sağdaki Araçlar butonu daha küçük */
+.muavin-tools-fab-final{
+  width:54px !important;
+  height:54px !important;
+  border-radius:18px !important;
+  right:14px !important;
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 282px) !important;
+  gap:2px !important;
+}
+
+.muavin-tools-fab-final .fab-icon{
+  font-size:16px !important;
+}
+
+.muavin-tools-fab-final .fab-text{
+  font-size:9px !important;
+}
+
+/* Konum butonu daha kibar */
+.muavin-locate-control{
+  width:52px !important;
+  height:52px !important;
+  border-radius:18px !important;
+  right:14px !important;
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 218px) !important;
+}
+
+.muavin-locate-inner{
+  width:28px !important;
+  height:28px !important;
+}
+
+.muavin-locate-inner::before{
+  width:12px !important;
+  height:12px !important;
+  border-width:3px !important;
+}
+
+/* Araçlar menüsü pozisyonu */
+.muavin-tools-sheet-final{
+  right:14px !important;
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 342px) !important;
+}
+
+/* Rota balonu daha küçük */
+.muavin-summary-bubble-final{
+  min-width:124px !important;
+  height:46px !important;
+  padding:5px 10px 5px 6px !important;
+  gap:7px !important;
+  border-radius:999px !important;
+}
+
+.muavin-summary-bubble-final .bubble-icon{
+  width:32px !important;
+  height:32px !important;
+  flex-basis:32px !important;
+  font-size:15px !important;
+}
+
+.muavin-summary-bubble-final .bubble-main{
+  font-size:12px !important;
+}
+
+.muavin-summary-bubble-final .bubble-sub{
+  font-size:9px !important;
+  margin-top:2px !important;
+}
+
+/* İşlemler kapalı balonu daha küçük ve zarif */
+.next-ops-panel.collapsed{
+  min-width:150px !important;
+  max-width:178px !important;
+  height:48px !important;
+  max-height:48px !important;
+  border-radius:999px !important;
+}
+
+.next-ops-panel.collapsed .next-ops-head{
+  height:48px !important;
+  padding:5px 7px 5px 6px !important;
+  gap:7px !important;
+}
+
+.next-ops-panel.collapsed .next-ops-title::before{
+  width:34px !important;
+  height:34px !important;
+  flex-basis:34px !important;
+  font-size:16px !important;
+}
+
+.next-ops-panel.collapsed .next-ops-title::after{
+  content:"İşlem" !important;
+  font-size:12px !important;
+  letter-spacing:.1px !important;
+}
+
+.next-ops-panel.collapsed .next-ops-count{
+  height:24px !important;
+  padding:0 7px !important;
+  font-size:8.8px !important;
+}
+
+.next-ops-panel.collapsed .next-ops-toggle{
+  width:30px !important;
+  height:30px !important;
+}
+
+.next-ops-panel.collapsed .next-ops-toggle::before{
+  font-size:20px !important;
+}
+
+/* Alt dock butonları küçük, premium görünüm */
+.muavin-bottom-dock-final-v5{
+  left:42px !important;
+  right:42px !important;
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
+}
+
+.muavin-bottom-dock-final-v5 .dock-row{
+  grid-template-columns:1fr 1fr 58px !important;
+  gap:8px !important;
+}
+
+.muavin-bottom-dock-final-v5 button{
+  height:48px !important;
+  border-radius:17px !important;
+  font-size:13px !important;
+  gap:6px !important;
+  box-shadow:
+    0 10px 22px rgba(15,23,42,.20),
+    0 0 0 1px rgba(255,255,255,.09) inset !important;
+}
+
+.muavin-bottom-dock-final-v5 .dock-icon{
+  font-size:15px !important;
+}
+
+.muavin-bottom-dock-final-v5 .dock-light,
+.muavin-bottom-dock-final-v5 .dock-close{
+  font-size:19px !important;
+}
+
+/* Mobilde yine küçük kalsın */
+@media(max-width:430px){
+  .muavin-bottom-dock-final-v5{
+    left:40px !important;
+    right:40px !important;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
+  }
+
+  .muavin-bottom-dock-final-v5 .dock-row{
+    grid-template-columns:1fr 1fr 56px !important;
+    gap:8px !important;
+  }
+
+  .muavin-bottom-dock-final-v5 button{
+    height:47px !important;
+    border-radius:16px !important;
+    font-size:12.5px !important;
+  }
+
+  .next-ops-panel.collapsed{
+    min-width:146px !important;
+    max-width:172px !important;
+    height:47px !important;
+    max-height:47px !important;
+  }
+
+  .next-ops-panel.collapsed .next-ops-head{
+    height:47px !important;
+  }
+
+  .muavin-summary-bubble-final{
+    min-width:120px !important;
+    height:45px !important;
+  }
+
+  .muavin-tools-fab-final{
+    width:52px !important;
+    height:52px !important;
+    border-radius:17px !important;
+  }
+
+  .muavin-locate-control{
+    width:50px !important;
+    height:50px !important;
+    border-radius:17px !important;
+  }
+}
+/* END_MUAVIN_SMALL_ELEGANT_BUTTONS_V9 */
+
+/* MUAVIN_CLEAN_START_MODE_V10 */
+
+/* Temiz modda bütün yardımcı paneller gizlenir */
+body.muavin-map-clean-start .map-fullscreen-btn,
+body.muavin-map-clean-start .map-route-status,
+body.muavin-map-clean-start .map-speed-badge,
+body.muavin-map-clean-start .approach-alert,
+body.muavin-map-clean-start .next-ops-panel,
+body.muavin-map-clean-start .map-actions,
+body.muavin-map-clean-start .muavin-summary-bubble-final,
+body.muavin-map-clean-start .muavin-route-summary-card-final,
+body.muavin-map-clean-start .muavin-tools-fab-final,
+body.muavin-map-clean-start .muavin-tools-sheet-final,
+body.muavin-map-clean-start .muavin-locate-control,
+body.muavin-map-clean-start .muavin-bottom-dock-final-v5{
+  display:none !important;
+}
+
+/* Temiz mod aç/kapat butonu */
+.muavin-clean-toggle-v10{
+  position:absolute;
+  right:14px;
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 18px);
+  z-index:100000;
+  height:46px;
+  min-width:112px;
+  border:0;
+  border-radius:999px;
+  padding:0 15px;
+  background:rgba(15,23,42,.94);
+  color:#fff;
+  box-shadow:
+    0 14px 34px rgba(15,23,42,.32),
+    0 0 0 1px rgba(255,255,255,.12) inset;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-size:13px;
+  font-weight:950;
+  letter-spacing:.2px;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+
+.muavin-clean-toggle-v10:active{
+  transform:scale(.96);
+}
+
+.muavin-clean-toggle-v10 .clean-icon{
+  font-size:16px;
+  line-height:1;
+}
+
+body:not(.muavin-map-clean-start) .muavin-clean-toggle-v10{
+  background:linear-gradient(135deg,#1f2937,#0f172a);
+}
+
+/* Kontroller açıkken buton sağ altta dock üstünde kalsın */
+body:not(.muavin-map-clean-start) .muavin-clean-toggle-v10{
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 76px);
+  min-width:86px;
+}
+
+/* Mobil kibar ölçü */
+@media(max-width:430px){
+  .muavin-clean-toggle-v10{
+    right:12px;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 16px);
+    height:44px;
+    min-width:104px;
+    font-size:12.5px;
+  }
+
+  body:not(.muavin-map-clean-start) .muavin-clean-toggle-v10{
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 72px);
+    min-width:82px;
+  }
+}
+/* END_MUAVIN_CLEAN_START_MODE_V10 */
+
+/* MUAVIN_CLEAN_MODE_FULLSCREEN_VISIBLE_V11 */
+
+/* Temiz modda Tam Ekran butonu görünür kalsın */
+body.muavin-map-clean-start .map-fullscreen-btn{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  position:absolute !important;
+  top:12px !important;
+  right:12px !important;
+  z-index:100001 !important;
+  width:auto !important;
+  min-width:118px !important;
+  max-width:none !important;
+  min-height:42px !important;
+  padding:0 14px !important;
+  border-radius:17px !important;
+  background:rgba(15,23,42,.88) !important;
+  color:#fff !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+  box-shadow:0 14px 30px rgba(0,0,0,.28) !important;
+  backdrop-filter:blur(12px) !important;
+  -webkit-backdrop-filter:blur(12px) !important;
+  font-size:12px !important;
+  font-weight:1000 !important;
+}
+
+/* Tam ekran içindeyken temiz modda da Çık butonu görünsün */
+body.map-fullscreen-mode.muavin-map-clean-start .map-fullscreen-btn{
+  display:flex !important;
+  top:calc(env(safe-area-inset-top, 0px) + 12px) !important;
+  right:12px !important;
+  background:linear-gradient(135deg,rgba(239,68,68,.94),rgba(153,27,27,.94)) !important;
+}
+
+/* Temiz moddaki Kontroller butonu altta kalmaya devam etsin */
+body.muavin-map-clean-start .muavin-clean-toggle-v10{
+  display:flex !important;
+}
+
+@media(max-width:430px){
+  body.muavin-map-clean-start .map-fullscreen-btn{
+    top:10px !important;
+    right:10px !important;
+    min-width:104px !important;
+    min-height:39px !important;
+    padding:0 12px !important;
+    font-size:11px !important;
+    border-radius:15px !important;
+  }
+
+  body.map-fullscreen-mode.muavin-map-clean-start .map-fullscreen-btn{
+    top:calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    right:10px !important;
+  }
+}
+/* END_MUAVIN_CLEAN_MODE_FULLSCREEN_VISIBLE_V11 */
+
+/* MUAVIN_CLEAN_MODE_DOCK_VISIBLE_V12 */
+
+/* Sade modda alt dock görünsün: Duraklar / Rota / ••• */
+body.muavin-map-clean-start .muavin-bottom-dock-final-v5{
+  display:block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+  z-index:99999 !important;
+}
+
+/* Sade moddaki Kontroller butonu dock ile çakışmasın */
+body.muavin-map-clean-start .muavin-clean-toggle-v10{
+  display:flex !important;
+  right:12px !important;
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 72px) !important;
+  min-width:96px !important;
+  height:44px !important;
+}
+
+/* Sade modda eski map-actions yine gizli kalsın */
+body.muavin-map-clean-start .map-actions{
+  display:none !important;
+}
+
+/* Sade modda sadece şu yapı kalsın:
+   Harita + Tam Ekran + Alt Dock + Kontroller */
+body.muavin-map-clean-start .muavin-bottom-dock-final-v5 .dock-row{
+  display:grid !important;
+}
+
+@media(max-width:430px){
+  body.muavin-map-clean-start .muavin-clean-toggle-v10{
+    right:12px !important;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 70px) !important;
+    min-width:88px !important;
+    height:42px !important;
+    font-size:12px !important;
+  }
+
+  body.muavin-map-clean-start .muavin-bottom-dock-final-v5{
+    left:40px !important;
+    right:40px !important;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
+  }
+}
+/* END_MUAVIN_CLEAN_MODE_DOCK_VISIBLE_V12 */
+
+/* MUAVIN_CLEAN_MODE_HIDE_KM_LABELS_V13 */
+
+/* Sade modda KM etiketleri görünmesin */
+body.muavin-map-clean-start .muavin-km-label-final-icon,
+body.muavin-map-clean-start .muavin-km-label-icon,
+body.muavin-map-clean-start .muavin-km-label-final,
+body.muavin-map-clean-start .muavin-km-label{
+  display:none !important;
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+/* Leaflet marker olarak gelen KM balonlarını da yakala */
+body.muavin-map-clean-start .leaflet-marker-icon.muavin-km-label-final-icon,
+body.muavin-map-clean-start .leaflet-marker-icon.muavin-km-label-icon{
+  display:none !important;
+}
+
+/* Sade modda sadece gerçek durak pinleri, rota ve canlı konum kalsın */
+body.muavin-map-clean-start .leaflet-marker-icon:has(.muavin-km-label-final),
+body.muavin-map-clean-start .leaflet-marker-icon:has(.muavin-km-label){
+  display:none !important;
+}
+
+/* Kontroller açılınca KM aktifse tekrar görünebilir */
+body:not(.muavin-map-clean-start) .muavin-km-label-final-icon,
+body:not(.muavin-map-clean-start) .muavin-km-label-icon{
+  visibility:visible;
+}
+/* END_MUAVIN_CLEAN_MODE_HIDE_KM_LABELS_V13 */
+
+/* MUAVIN_CLEAN_MODE_LOCATION_VISIBLE_V14 */
+
+/* Sade modda mavi canlı konum noktası kesin görünür kalsın */
+body.muavin-map-clean-start .leaflet-marker-icon.muavin-gm-marker-icon,
+body.muavin-map-clean-start .muavin-gm-live-marker,
+body.muavin-map-clean-start .muavin-gm-dot,
+body.muavin-map-clean-start .muavin-gm-aura{
+  display:block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+
+/* Sade modda konuma dön butonu da görünsün */
+body.muavin-map-clean-start .muavin-locate-control{
+  display:flex !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+  right:14px !important;
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 126px) !important;
+  width:50px !important;
+  height:50px !important;
+  border-radius:17px !important;
+  z-index:100000 !important;
+}
+
+/* Konum butonu içi sade ve küçük */
+body.muavin-map-clean-start .muavin-locate-inner{
+  width:28px !important;
+  height:28px !important;
+}
+
+body.muavin-map-clean-start .muavin-locate-inner::before{
+  width:12px !important;
+  height:12px !important;
+  border-width:3px !important;
+}
+
+/* Kontroller butonu konum butonuyla çakışmasın */
+body.muavin-map-clean-start .muavin-clean-toggle-v10{
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 72px) !important;
+}
+
+/* Alt dock yine en altta kalsın */
+body.muavin-map-clean-start .muavin-bottom-dock-final-v5{
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
+}
+
+@media(max-width:430px){
+  body.muavin-map-clean-start .muavin-locate-control{
+    right:12px !important;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 122px) !important;
+    width:48px !important;
+    height:48px !important;
+    border-radius:16px !important;
+  }
+}
+/* END_MUAVIN_CLEAN_MODE_LOCATION_VISIBLE_V14 */
+
+/* MUAVIN_CLEAN_MODE_SPEED_VISIBLE_V15 */
+
+/* Sade modda hız kartı görünür olsun ve Çık / Tam Ekran butonunun soluna hizalansın */
+body.muavin-map-clean-start .map-speed-badge{
+  display:block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:none !important;
+  position:absolute !important;
+  top:12px !important;
+  right:138px !important;
+  z-index:100000 !important;
+
+  width:92px !important;
+  min-width:92px !important;
+  max-width:92px !important;
+  padding:8px 10px !important;
+  border-radius:16px !important;
+
+  background:rgba(15,23,42,.88) !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+  box-shadow:0 14px 30px rgba(0,0,0,.28) !important;
+  backdrop-filter:blur(12px) !important;
+  -webkit-backdrop-filter:blur(12px) !important;
+}
+
+/* Yazıları sade modda kompaktlaştır */
+body.muavin-map-clean-start .map-speed-badge small{
+  font-size:8.5px !important;
+  letter-spacing:.10em !important;
+}
+
+body.muavin-map-clean-start .map-speed-badge b{
+  margin-top:3px !important;
+  font-size:17px !important;
+  line-height:1 !important;
+}
+
+body.muavin-map-clean-start .map-speed-badge .unit{
+  font-size:9.5px !important;
+  margin-left:2px !important;
+}
+
+/* Tam ekran içindeyken de Çık butonunun solunda kalsın */
+body.map-fullscreen-mode.muavin-map-clean-start .map-speed-badge{
+  display:block !important;
+  top:calc(env(safe-area-inset-top, 0px) + 12px) !important;
+  right:138px !important;
+  z-index:100000 !important;
+}
+
+/* Mobil hizalama */
+@media(max-width:430px){
+  body.muavin-map-clean-start .map-speed-badge{
+    top:10px !important;
+    right:122px !important;
+    width:82px !important;
+    min-width:82px !important;
+    max-width:82px !important;
+    padding:7px 8px !important;
+    border-radius:14px !important;
+  }
+
+  body.muavin-map-clean-start .map-speed-badge small{
+    font-size:8px !important;
+  }
+
+  body.muavin-map-clean-start .map-speed-badge b{
+    font-size:15px !important;
+  }
+
+  body.muavin-map-clean-start .map-speed-badge .unit{
+    font-size:8.5px !important;
+  }
+
+  body.map-fullscreen-mode.muavin-map-clean-start .map-speed-badge{
+    top:calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    right:122px !important;
+  }
+}
+/* END_MUAVIN_CLEAN_MODE_SPEED_VISIBLE_V15 */
