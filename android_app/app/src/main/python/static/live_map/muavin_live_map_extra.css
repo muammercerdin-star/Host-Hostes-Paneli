@@ -1327,162 +1327,44 @@
 }
 /* END_MUAVIN_MINIMAL_SIMPLIFY_V1 */
 
-
-/* MUAVIN_BOTTOM_ACTIONS_MINIMAL_V1 */
+/* MUAVIN_BOTTOM_DOCK_FINAL_V5 */
 .muavin-original-bottom-action-hidden {
   display: none !important;
 }
 
-.muavin-bottom-panel-simplified {
-  position: relative !important;
-  overflow: visible !important;
-}
-
-.muavin-bottom-minibar {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr 82px;
-  gap: 10px;
-  position: relative;
-  z-index: 30;
-}
-
-.muavin-mini-action {
-  height: 58px;
-  border: 0;
-  border-radius: 20px;
-  background: rgba(15, 23, 42, .88);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 950;
-  letter-spacing: .2px;
-  box-shadow:
-    0 10px 26px rgba(15,23,42,.22),
-    0 0 0 1px rgba(255,255,255,.10) inset;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.muavin-mini-action:active {
-  transform: scale(.97);
-}
-
-.muavin-mini-action.is-primary {
-  background: linear-gradient(135deg, rgba(30,41,59,.96), rgba(15,23,42,.96));
-}
-
-.muavin-mini-action.is-more {
-  background: rgba(255,255,255,.92);
-  color: #111827;
-}
-
-.muavin-mini-action .mini-icon {
-  font-size: 17px;
-  line-height: 1;
-}
-
-.muavin-more-menu {
-  position: absolute;
-  right: 0;
-  bottom: 68px;
-  width: 168px;
-  padding: 10px;
-  border-radius: 22px;
-  background: rgba(15,23,42,.95);
-  color: #fff;
-  box-shadow:
-    0 18px 42px rgba(15,23,42,.36),
-    0 0 0 1px rgba(255,255,255,.10) inset;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  display: none;
-  z-index: 60;
-}
-
-.muavin-more-menu.is-open {
-  display: grid;
-  gap: 8px;
-}
-
-.muavin-more-menu button {
-  width: 100%;
-  min-height: 44px;
-  border: 0;
-  border-radius: 16px;
-  background: rgba(255,255,255,.09);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 900;
-  text-align: left;
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.muavin-more-menu button:active {
-  transform: scale(.98);
-}
-
-.muavin-more-menu small {
-  font-size: 10px;
-  opacity: .70;
-  font-weight: 850;
-}
-
-@media (max-width: 430px) {
-  .muavin-bottom-minibar {
-    grid-template-columns: 1fr 1fr 76px;
-    gap: 9px;
-  }
-
-  .muavin-mini-action {
-    height: 56px;
-    border-radius: 18px;
-    font-size: 14px;
-  }
-
-  .muavin-more-menu {
-    width: 158px;
-  }
-}
-/* END_MUAVIN_BOTTOM_ACTIONS_MINIMAL_V1 */
-
-
-/* MUAVIN_BOTTOM_DOCK_FIX_V2 */
-.muavin-bottom-minibar {
-  display: none !important;
-}
-
-/* Eski 4 buton gizli kalacak */
-.muavin-original-bottom-action-hidden {
-  display: none !important;
-}
-
-/* Yeni alt dock kesinlikle harita altında sabit durur */
+.muavin-bottom-minibar,
+.muavin-more-menu,
 .muavin-bottom-dock-v2 {
+  display: none !important;
+}
+
+.muavin-bottom-dock-final-v5 {
   position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
-  z-index: 1700;
+  left: 22px;
+  right: 22px;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  z-index: 99999;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.muavin-bottom-dock-final-v5,
+.muavin-bottom-dock-final-v5 * {
   pointer-events: auto;
 }
 
-.muavin-bottom-dock-v2 .dock-row {
+.muavin-bottom-dock-final-v5 .dock-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 78px;
+  grid-template-columns: 1fr 1fr 74px;
   gap: 10px;
+  position: relative;
+  z-index: 3;
 }
 
-.muavin-bottom-dock-v2 button {
-  height: 58px;
+.muavin-bottom-dock-final-v5 button {
+  height: 56px;
   border: 0;
-  border-radius: 21px;
+  border-radius: 20px;
   font-size: 15px;
   font-weight: 950;
   letter-spacing: .2px;
@@ -1490,174 +1372,55 @@
   align-items: center;
   justify-content: center;
   gap: 9px;
+  cursor: pointer;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   box-shadow:
     0 12px 28px rgba(15,23,42,.24),
     0 0 0 1px rgba(255,255,255,.10) inset;
 }
 
-.muavin-bottom-dock-v2 button:active {
+.muavin-bottom-dock-final-v5 button:active {
   transform: scale(.97);
 }
 
-.muavin-dock-main {
-  background: rgba(15, 23, 42, .92);
+.muavin-bottom-dock-final-v5 .dock-dark {
+  background: rgba(15, 23, 42, .93);
   color: #fff;
 }
 
-.muavin-dock-more {
+.muavin-bottom-dock-final-v5 .dock-light {
   background: rgba(255,255,255,.94);
   color: #111827;
-  font-size: 22px !important;
 }
 
-.muavin-bottom-dock-v2 .dock-icon {
+.muavin-bottom-dock-final-v5 .dock-close {
+  background: rgba(255,255,255,.94);
+  color: #111827;
+  font-size: 24px;
+}
+
+.muavin-bottom-dock-final-v5 .dock-icon {
   font-size: 18px;
   line-height: 1;
 }
 
-.muavin-bottom-dock-v2 .dock-menu {
-  position: absolute;
-  right: 0;
-  bottom: 70px;
-  width: 166px;
-  padding: 10px;
-  border-radius: 22px;
-  background: rgba(15,23,42,.95);
-  color: #fff;
-  box-shadow:
-    0 18px 42px rgba(15,23,42,.36),
-    0 0 0 1px rgba(255,255,255,.10) inset;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  display: none;
-}
-
-.muavin-bottom-dock-v2 .dock-menu.is-open {
-  display: grid;
-  gap: 8px;
-}
-
-.muavin-bottom-dock-v2 .dock-menu button {
-  width: 100%;
-  height: 44px;
-  min-height: 44px;
-  border-radius: 16px;
-  background: rgba(255,255,255,.09);
-  color: #fff;
-  font-size: 14px;
-  justify-content: space-between;
-  padding: 0 14px;
-  box-shadow: none;
-}
-
-.muavin-bottom-dock-v2 .dock-menu small {
-  font-size: 10px;
-  opacity: .70;
-  font-weight: 850;
-}
-
-/* Sıradaki işlemler başlığı ile çakışmasın diye biraz yukarı alabiliriz */
-.siradaki-islemler,
-.next-actions,
-.next-actions-panel {
-  margin-bottom: 72px !important;
-}
-
 @media (max-width: 430px) {
-  .muavin-bottom-dock-v2 {
+  .muavin-bottom-dock-final-v5 {
     left: 22px;
     right: 22px;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
   }
 
-  .muavin-bottom-dock-v2 .dock-row {
-    grid-template-columns: 1fr 1fr 74px;
+  .muavin-bottom-dock-final-v5 .dock-row {
+    grid-template-columns: 1fr 1fr 72px;
     gap: 9px;
   }
 
-  .muavin-bottom-dock-v2 button {
+  .muavin-bottom-dock-final-v5 button {
     height: 56px;
     border-radius: 19px;
     font-size: 14px;
   }
 }
-/* END_MUAVIN_BOTTOM_DOCK_FIX_V2 */
-
-
-/* MUAVIN_BOTTOM_DOCK_SMART_MORE_V3 */
-.muavin-bottom-dock-v2 .dock-menu {
-  display: none !important;
-}
-
-.muavin-bottom-dock-v2.is-more-mode .dock-row {
-  grid-template-columns: 1fr 1fr 74px !important;
-}
-
-.muavin-bottom-dock-v2.is-more-mode .muavin-smart-close {
-  background: rgba(255,255,255,.94) !important;
-  color: #111827 !important;
-  font-size: 24px !important;
-}
-
-.muavin-bottom-dock-v2 .muavin-smart-action {
-  height: 58px;
-  border: 0;
-  border-radius: 21px;
-  font-size: 15px;
-  font-weight: 950;
-  letter-spacing: .2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  -webkit-tap-highlight-color: transparent;
-  box-shadow:
-    0 12px 28px rgba(15,23,42,.24),
-    0 0 0 1px rgba(255,255,255,.10) inset;
-}
-
-.muavin-bottom-dock-v2 .muavin-smart-dark {
-  background: rgba(15, 23, 42, .92);
-  color: #fff;
-}
-
-.muavin-bottom-dock-v2 .muavin-smart-light {
-  background: rgba(255,255,255,.94);
-  color: #111827;
-}
-
-@media (max-width: 430px) {
-  .muavin-bottom-dock-v2 .muavin-smart-action {
-    height: 56px;
-    border-radius: 19px;
-    font-size: 14px;
-  }
-}
-/* END_MUAVIN_BOTTOM_DOCK_SMART_MORE_V3 */
-
-
-/* MUAVIN_BOTTOM_DOCK_CLICK_FIX_V4 */
-.muavin-bottom-dock-v2 {
-  z-index: 99999 !important;
-  pointer-events: auto !important;
-  touch-action: manipulation !important;
-}
-
-.muavin-bottom-dock-v2,
-.muavin-bottom-dock-v2 * {
-  pointer-events: auto !important;
-}
-
-.muavin-bottom-dock-v2 button {
-  touch-action: manipulation !important;
-  cursor: pointer !important;
-  position: relative !important;
-  z-index: 2 !important;
-}
-
-.muavin-bottom-dock-v2 .dock-row {
-  position: relative !important;
-  z-index: 2 !important;
-}
-/* END_MUAVIN_BOTTOM_DOCK_CLICK_FIX_V4 */
+/* END_MUAVIN_BOTTOM_DOCK_FINAL_V5 */

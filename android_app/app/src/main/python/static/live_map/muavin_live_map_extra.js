@@ -2147,196 +2147,13 @@
   setTimeout(boot, 2800);
 })();
 
-
-
-/* MUAVIN_BOTTOM_ACTIONS_MINIMAL_V1_JS */
+/* MUAVIN_BOTTOM_DOCK_FINAL_V5_JS */
 (function () {
-  if (window.MUAVIN_BOTTOM_ACTIONS_MINIMAL_V1) return;
-  window.MUAVIN_BOTTOM_ACTIONS_MINIMAL_V1 = true;
+  if (window.MUAVIN_BOTTOM_DOCK_FINAL_V5) return;
+  window.MUAVIN_BOTTOM_DOCK_FINAL_V5 = true;
 
-  function norm(s) {
-    return String(s || "")
-      .toLocaleLowerCase("tr-TR")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function visibleEnough(el) {
-    try {
-      const r = el.getBoundingClientRect();
-      return r.width > 20 && r.height > 20;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function findSmallestElementWithText(root, label) {
-    const target = norm(label);
-    const all = Array.from(root.querySelectorAll("*"));
-
-    const matches = all.filter(function (el) {
-      const t = norm(el.innerText || el.textContent || "");
-      if (!t.includes(target)) return false;
-      if (!visibleEnough(el)) return false;
-
-      const r = el.getBoundingClientRect();
-      return r.top > window.innerHeight * 0.45;
-    });
-
-    matches.sort(function (a, b) {
-      const ar = a.getBoundingClientRect();
-      const br = b.getBoundingClientRect();
-      return (ar.width * ar.height) - (br.width * br.height);
-    });
-
-    return matches[0] || null;
-  }
-
-  function clickTarget(el) {
-    if (!el) return;
-
-    const clickable = el.closest("button,a,[role='button'],[onclick]") || el;
-
-    try {
-      clickable.click();
-      return;
-    } catch (e) {}
-
-    try {
-      clickable.dispatchEvent(new MouseEvent("click", {
-        bubbles: true,
-        cancelable: true
-      }));
-    } catch (e) {}
-  }
-
-  function commonParent(items) {
-    const valid = items.filter(Boolean);
-    if (!valid.length) return null;
-
-    let p = valid[0].parentElement;
-
-    while (p && p !== document.body) {
-      if (valid.every(function (x) { return p.contains(x); })) {
-        return p;
-      }
-      p = p.parentElement;
-    }
-
-    return valid[0].parentElement;
-  }
-
-  function setupBottomMinimal() {
-    if (document.querySelector(".muavin-bottom-minibar")) return;
-
-    const konumum = findSmallestElementWithText(document, "Konumum");
-    const duraklar = findSmallestElementWithText(document, "Tüm Duraklar");
-    const rota = findSmallestElementWithText(document, "Rota");
-    const islemli = findSmallestElementWithText(document, "İşlemli");
-
-    if (!duraklar || !rota) {
-      setTimeout(setupBottomMinimal, 700);
-      return;
-    }
-
-    const panel = commonParent([konumum, duraklar, rota, islemli]) || duraklar.parentElement;
-    if (!panel) return;
-
-    panel.classList.add("muavin-bottom-panel-simplified");
-
-    [konumum, duraklar, rota, islemli].forEach(function (el) {
-      if (el) el.classList.add("muavin-original-bottom-action-hidden");
-    });
-
-    const bar = document.createElement("div");
-    bar.className = "muavin-bottom-minibar";
-    bar.innerHTML = `
-      <button type="button" class="muavin-mini-action is-primary" data-mini-action="duraklar">
-        <span class="mini-icon">🗺️</span>
-        <span>Duraklar</span>
-      </button>
-
-      <button type="button" class="muavin-mini-action is-primary" data-mini-action="rota">
-        <span class="mini-icon">〽️</span>
-        <span>Rota</span>
-      </button>
-
-      <button type="button" class="muavin-mini-action is-more" data-mini-action="more">
-        <span>•••</span>
-      </button>
-
-      <div class="muavin-more-menu">
-        <button type="button" data-more-action="konumum">
-          <span>Konumum</span>
-          <small>Canlı</small>
-        </button>
-        <button type="button" data-more-action="islemli">
-          <span>İşlemli</span>
-          <small>Durak</small>
-        </button>
-      </div>
-    `;
-
-    panel.appendChild(bar);
-
-    const menu = bar.querySelector(".muavin-more-menu");
-
-    bar.addEventListener("click", function (e) {
-      const mini = e.target.closest("[data-mini-action]");
-      const more = e.target.closest("[data-more-action]");
-
-      if (mini) {
-        const act = mini.getAttribute("data-mini-action");
-
-        if (act === "duraklar") {
-          clickTarget(duraklar);
-          menu.classList.remove("is-open");
-        }
-
-        if (act === "rota") {
-          clickTarget(rota);
-          menu.classList.remove("is-open");
-        }
-
-        if (act === "more") {
-          menu.classList.toggle("is-open");
-        }
-      }
-
-      if (more) {
-        const act = more.getAttribute("data-more-action");
-
-        if (act === "konumum") clickTarget(konumum);
-        if (act === "islemli") clickTarget(islemli);
-
-        menu.classList.remove("is-open");
-      }
-    });
-
-    document.addEventListener("click", function (e) {
-      if (!bar.contains(e.target)) {
-        menu.classList.remove("is-open");
-      }
-    }, true);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", setupBottomMinimal);
-  } else {
-    setupBottomMinimal();
-  }
-
-  setTimeout(setupBottomMinimal, 800);
-  setTimeout(setupBottomMinimal, 1800);
-  setTimeout(setupBottomMinimal, 3200);
-})();
-
-
-
-/* MUAVIN_BOTTOM_DOCK_FIX_V2_JS */
-(function () {
-  if (window.MUAVIN_BOTTOM_DOCK_FIX_V2) return;
-  window.MUAVIN_BOTTOM_DOCK_FIX_V2 = true;
+  let originals = {};
+  let lastTap = 0;
 
   function norm(s) {
     return String(s || "")
@@ -2351,47 +2168,195 @@
     return document.querySelector(".leaflet-container");
   }
 
-  function findOriginal(label) {
-    const target = norm(label);
+  function visibleEnough(el) {
+    try {
+      const r = el.getBoundingClientRect();
+      return r.width > 18 && r.height > 18;
+    } catch (e) {
+      return false;
+    }
+  }
 
-    const hidden = Array.from(document.querySelectorAll(".muavin-original-bottom-action-hidden"));
-    let found = hidden.find(function (el) {
-      return norm(el.innerText || el.textContent || "").includes(target);
-    });
+  function isExcluded(el) {
+    return !!(
+      el.closest(".muavin-bottom-dock-final-v5") ||
+      el.closest(".muavin-bottom-dock-v2") ||
+      el.closest(".muavin-bottom-minibar") ||
+      el.closest(".muavin-tools-fab") ||
+      el.closest(".muavin-tools-sheet") ||
+      el.closest(".muavin-summary-bubble") ||
+      el.closest(".muavin-route-summary-card") ||
+      el.closest(".leaflet-control") ||
+      el.closest(".leaflet-marker-icon")
+    );
+  }
 
-    if (found) return found;
+  function smallestByText(labels) {
+    labels = Array.isArray(labels) ? labels : [labels];
+    const targets = labels.map(norm);
 
     const all = Array.from(document.querySelectorAll("button,a,[role='button'],[onclick],div,span"));
-    found = all.find(function (el) {
-      if (el.closest(".muavin-bottom-dock-v2")) return false;
-      if (el.closest(".muavin-bottom-minibar")) return false;
-      return norm(el.innerText || el.textContent || "").includes(target);
+
+    const matches = all.filter(function (el) {
+      if (isExcluded(el)) return false;
+
+      const txt = norm(el.innerText || el.textContent || "");
+      if (!targets.some(t => txt.includes(t))) return false;
+      if (!visibleEnough(el)) return false;
+
+      try {
+        const r = el.getBoundingClientRect();
+        return r.top > window.innerHeight * 0.45;
+      } catch (e) {
+        return false;
+      }
     });
 
-    return found || null;
+    matches.sort(function (a, b) {
+      const ar = a.getBoundingClientRect();
+      const br = b.getBoundingClientRect();
+      return (ar.width * ar.height) - (br.width * br.height);
+    });
+
+    return matches[0] || null;
   }
 
-  function clickTarget(el) {
-    if (!el) return;
-    const clickable = el.closest("button,a,[role='button'],[onclick]") || el;
+  function clickReal(el) {
+    if (!el) return false;
+
+    const oldClass = el.className || "";
+    const oldStyle = el.getAttribute("style") || "";
 
     try {
-      clickable.click();
+      el.classList.remove("muavin-original-bottom-action-hidden");
+      el.setAttribute(
+        "style",
+        oldStyle + ";position:fixed!important;left:-9999px!important;top:-9999px!important;opacity:0!important;display:block!important;pointer-events:auto!important;"
+      );
+    } catch (e) {}
+
+    const clickable =
+      (el.closest && el.closest("button,a,[role='button'],[onclick]")) ||
+      (el.querySelector && el.querySelector("button,a,[role='button'],[onclick]")) ||
+      el;
+
+    setTimeout(function () {
+      try {
+        clickable.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true }));
+        clickable.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true }));
+        clickable.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+      } catch (e) {
+        try { clickable.click(); } catch (err) {}
+      }
+
+      setTimeout(function () {
+        try {
+          el.className = oldClass;
+          if (oldStyle) el.setAttribute("style", oldStyle);
+          else el.removeAttribute("style");
+          el.classList.add("muavin-original-bottom-action-hidden");
+        } catch (e) {}
+      }, 80);
+    }, 20);
+
+    return true;
+  }
+
+  function captureOriginals() {
+    if (!originals.duraklar) originals.duraklar = smallestByText(["Tüm Duraklar", "Duraklar"]);
+    if (!originals.rota) originals.rota = smallestByText("Rota");
+    if (!originals.konumum) originals.konumum = smallestByText("Konumum");
+    if (!originals.islemli) originals.islemli = smallestByText("İşlemli");
+
+    Object.keys(originals).forEach(function (k) {
+      const el = originals[k];
+      if (el) el.classList.add("muavin-original-bottom-action-hidden");
+    });
+  }
+
+  function mainHtml() {
+    return `
+      <button type="button" class="dock-dark" data-final-dock="duraklar">
+        <span class="dock-icon">🗺️</span>
+        <span>Duraklar</span>
+      </button>
+
+      <button type="button" class="dock-dark" data-final-dock="rota">
+        <span class="dock-icon">〽️</span>
+        <span>Rota</span>
+      </button>
+
+      <button type="button" class="dock-light" data-final-dock="more">
+        <span>•••</span>
+      </button>
+    `;
+  }
+
+  function moreHtml() {
+    return `
+      <button type="button" class="dock-dark" data-final-dock="konumum">
+        <span class="dock-icon">📍</span>
+        <span>Konumum</span>
+      </button>
+
+      <button type="button" class="dock-dark" data-final-dock="islemli">
+        <span class="dock-icon">🎯</span>
+        <span>İşlemli</span>
+      </button>
+
+      <button type="button" class="dock-close" data-final-dock="close">
+        <span>×</span>
+      </button>
+    `;
+  }
+
+  function render(mode) {
+    const dock = document.querySelector(".muavin-bottom-dock-final-v5");
+    if (!dock) return;
+
+    const row = dock.querySelector(".dock-row");
+    if (!row) return;
+
+    row.innerHTML = mode === "more" ? moreHtml() : mainHtml();
+    dock.dataset.mode = mode === "more" ? "more" : "main";
+  }
+
+  function runAction(action) {
+    captureOriginals();
+
+    if (action === "more") {
+      render("more");
       return;
-    } catch (e) {}
+    }
 
-    try {
-      clickable.dispatchEvent(new MouseEvent("click", {
-        bubbles: true,
-        cancelable: true
-      }));
-    } catch (e) {}
-  }
+    if (action === "close") {
+      render("main");
+      return;
+    }
 
-  function hideWrongTopMiniBars() {
-    document.querySelectorAll(".muavin-bottom-minibar").forEach(function (el) {
-      el.style.display = "none";
-    });
+    if (action === "duraklar") {
+      clickReal(originals.duraklar);
+      render("main");
+      return;
+    }
+
+    if (action === "rota") {
+      clickReal(originals.rota);
+      render("main");
+      return;
+    }
+
+    if (action === "konumum") {
+      clickReal(originals.konumum);
+      render("main");
+      return;
+    }
+
+    if (action === "islemli") {
+      clickReal(originals.islemli);
+      render("main");
+      return;
+    }
   }
 
   function setupDock() {
@@ -2402,83 +2367,58 @@
       return;
     }
 
-    hideWrongTopMiniBars();
+    captureOriginals();
 
-    if (container.querySelector(".muavin-bottom-dock-v2")) return;
-
-    const dock = document.createElement("div");
-    dock.className = "muavin-bottom-dock-v2";
-    dock.innerHTML = `
-      <div class="dock-row">
-        <button type="button" class="muavin-dock-main" data-dock-action="duraklar">
-          <span class="dock-icon">🗺️</span>
-          <span>Duraklar</span>
-        </button>
-
-        <button type="button" class="muavin-dock-main" data-dock-action="rota">
-          <span class="dock-icon">〽️</span>
-          <span>Rota</span>
-        </button>
-
-        <button type="button" class="muavin-dock-more" data-dock-action="more">
-          <span>•••</span>
-        </button>
-      </div>
-
-      <div class="dock-menu">
-        <button type="button" data-dock-more="konumum">
-          <span>Konumum</span>
-          <small>Canlı</small>
-        </button>
-
-        <button type="button" data-dock-more="islemli">
-          <span>İşlemli</span>
-          <small>Durak</small>
-        </button>
-      </div>
-    `;
-
-    const menu = dock.querySelector(".dock-menu");
-
-    dock.addEventListener("click", function (e) {
-      const actionBtn = e.target.closest("[data-dock-action]");
-      const moreBtn = e.target.closest("[data-dock-more]");
-
-      if (actionBtn) {
-        const action = actionBtn.getAttribute("data-dock-action");
-
-        if (action === "duraklar") {
-          clickTarget(findOriginal("Tüm Duraklar") || findOriginal("Duraklar"));
-          menu.classList.remove("is-open");
-        }
-
-        if (action === "rota") {
-          clickTarget(findOriginal("Rota"));
-          menu.classList.remove("is-open");
-        }
-
-        if (action === "more") {
-          menu.classList.toggle("is-open");
-        }
-      }
-
-      if (moreBtn) {
-        const action = moreBtn.getAttribute("data-dock-more");
-
-        if (action === "konumum") clickTarget(findOriginal("Konumum"));
-        if (action === "islemli") clickTarget(findOriginal("İşlemli"));
-
-        menu.classList.remove("is-open");
-      }
+    document.querySelectorAll(".muavin-bottom-dock-v2, .muavin-bottom-minibar").forEach(function (el) {
+      el.style.display = "none";
     });
 
-    document.addEventListener("click", function (e) {
-      if (!dock.contains(e.target)) {
-        menu.classList.remove("is-open");
-      }
-    }, true);
+    let dock = container.querySelector(".muavin-bottom-dock-final-v5");
 
-    container.appendChild(dock);
+    if (!dock) {
+      dock = document.createElement("div");
+      dock.className = "muavin-bottom-dock-final-v5";
+      dock.innerHTML = `<div class="dock-row"></div>`;
+      container.appendChild(dock);
+    }
+
+    if (dock.dataset.ready !== "1") {
+      dock.dataset.ready = "1";
+
+      try {
+        if (window.L && L.DomEvent) {
+          L.DomEvent.disableClickPropagation(dock);
+          L.DomEvent.disableScrollPropagation(dock);
+        }
+      } catch (e) {}
+
+      function handle(e) {
+        const btn = e.target.closest("[data-final-dock]");
+        if (!btn || !dock.contains(btn)) return;
+
+        const now = Date.now();
+
+        if (now - lastTap < 260) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+          return;
+        }
+
+        lastTap = now;
+
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+
+        runAction(btn.getAttribute("data-final-dock"));
+      }
+
+      dock.addEventListener("touchend", handle, { capture: true, passive: false });
+      dock.addEventListener("click", handle, true);
+    }
+
+    render("main");
   }
 
   if (document.readyState === "loading") {
@@ -2487,462 +2427,7 @@
     setupDock();
   }
 
-  setTimeout(setupDock, 700);
-  setTimeout(setupDock, 1600);
-  setTimeout(setupDock, 3000);
+  setTimeout(setupDock, 800);
+  setTimeout(setupDock, 1800);
+  setTimeout(setupDock, 3200);
 })();
-
-
-
-/* MUAVIN_BOTTOM_DOCK_SMART_MORE_V3_JS */
-(function () {
-  if (window.MUAVIN_BOTTOM_DOCK_SMART_MORE_V3) return;
-  window.MUAVIN_BOTTOM_DOCK_SMART_MORE_V3 = true;
-
-  function norm(s) {
-    return String(s || "")
-      .toLocaleLowerCase("tr-TR")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function findOriginal(label) {
-    const target = norm(label);
-
-    const all = Array.from(document.querySelectorAll("button,a,[role='button'],[onclick],div,span"));
-
-    let found = all.find(function (el) {
-      if (el.closest(".muavin-bottom-dock-v2")) return false;
-      if (el.closest(".muavin-bottom-minibar")) return false;
-
-      const t = norm(el.innerText || el.textContent || "");
-      return t.includes(target);
-    });
-
-    return found || null;
-  }
-
-  function clickTarget(el) {
-    if (!el) return;
-
-    const clickable = el.closest("button,a,[role='button'],[onclick]") || el;
-
-    try {
-      clickable.click();
-      return;
-    } catch (e) {}
-
-    try {
-      clickable.dispatchEvent(new MouseEvent("click", {
-        bubbles: true,
-        cancelable: true
-      }));
-    } catch (e) {}
-  }
-
-  function mainHtml() {
-    return `
-      <button type="button" class="muavin-smart-action muavin-smart-dark" data-smart-action="duraklar">
-        <span>🗺️</span>
-        <span>Duraklar</span>
-      </button>
-
-      <button type="button" class="muavin-smart-action muavin-smart-dark" data-smart-action="rota">
-        <span>〽️</span>
-        <span>Rota</span>
-      </button>
-
-      <button type="button" class="muavin-smart-action muavin-smart-light" data-smart-action="more">
-        <span>•••</span>
-      </button>
-    `;
-  }
-
-  function moreHtml() {
-    return `
-      <button type="button" class="muavin-smart-action muavin-smart-dark" data-smart-action="konumum">
-        <span>📍</span>
-        <span>Konumum</span>
-      </button>
-
-      <button type="button" class="muavin-smart-action muavin-smart-dark" data-smart-action="islemli">
-        <span>🎯</span>
-        <span>İşlemli</span>
-      </button>
-
-      <button type="button" class="muavin-smart-action muavin-smart-close" data-smart-action="close">
-        <span>×</span>
-      </button>
-    `;
-  }
-
-  function renderMain(dock, row) {
-    dock.classList.remove("is-more-mode");
-    row.innerHTML = mainHtml();
-  }
-
-  function renderMore(dock, row) {
-    dock.classList.add("is-more-mode");
-    row.innerHTML = moreHtml();
-  }
-
-  function setupSmartDock() {
-    const dock = document.querySelector(".muavin-bottom-dock-v2");
-    if (!dock) {
-      setTimeout(setupSmartDock, 500);
-      return;
-    }
-
-    const row = dock.querySelector(".dock-row");
-    if (!row) {
-      setTimeout(setupSmartDock, 500);
-      return;
-    }
-
-    const oldMenu = dock.querySelector(".dock-menu");
-    if (oldMenu) oldMenu.style.display = "none";
-
-    if (dock.dataset.smartMoreReady !== "1") {
-      dock.dataset.smartMoreReady = "1";
-
-      renderMain(dock, row);
-
-      dock.addEventListener("click", function (e) {
-        const btn = e.target.closest("[data-smart-action]");
-        if (!btn || !dock.contains(btn)) return;
-
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-
-        const action = btn.getAttribute("data-smart-action");
-
-        if (action === "duraklar") {
-          clickTarget(findOriginal("Tüm Duraklar") || findOriginal("Duraklar"));
-          renderMain(dock, row);
-        }
-
-        if (action === "rota") {
-          clickTarget(findOriginal("Rota"));
-          renderMain(dock, row);
-        }
-
-        if (action === "more") {
-          renderMore(dock, row);
-        }
-
-        if (action === "konumum") {
-          clickTarget(findOriginal("Konumum"));
-          renderMain(dock, row);
-        }
-
-        if (action === "islemli") {
-          clickTarget(findOriginal("İşlemli"));
-          renderMain(dock, row);
-        }
-
-        if (action === "close") {
-          renderMain(dock, row);
-        }
-      }, true);
-    }
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", setupSmartDock);
-  } else {
-    setupSmartDock();
-  }
-
-  setTimeout(setupSmartDock, 800);
-  setTimeout(setupSmartDock, 1800);
-  setTimeout(setupSmartDock, 3200);
-})();
-
-
-
-/* MUAVIN_BOTTOM_DOCK_CLICK_FIX_V4_JS */
-(function () {
-  if (window.MUAVIN_BOTTOM_DOCK_CLICK_FIX_V4) return;
-  window.MUAVIN_BOTTOM_DOCK_CLICK_FIX_V4 = true;
-
-  let lastHandledAt = 0;
-
-  function norm(s) {
-    return String(s || "")
-      .toLocaleLowerCase("tr-TR")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function getDock() {
-    return document.querySelector(".muavin-bottom-dock-v2");
-  }
-
-  function safeText(el) {
-    if (!el) return "";
-    return norm((el.textContent || "") + " " + (el.innerText || ""));
-  }
-
-  function excluded(el) {
-    return !!(
-      el.closest(".muavin-bottom-dock-v2") ||
-      el.closest(".muavin-bottom-minibar") ||
-      el.closest(".muavin-summary-bubble") ||
-      el.closest(".muavin-route-summary-card") ||
-      el.closest(".muavin-tools-fab") ||
-      el.closest(".muavin-tools-sheet") ||
-      el.closest(".leaflet-marker-icon")
-    );
-  }
-
-  function findOriginal(labels) {
-    labels = Array.isArray(labels) ? labels : [labels];
-
-    const targets = labels.map(norm);
-
-    // Önce bizim gizlediğimiz eski butonlarda ara
-    const hidden = Array.from(document.querySelectorAll(".muavin-original-bottom-action-hidden"));
-    for (const el of hidden) {
-      const t = safeText(el);
-      if (targets.some(x => t.includes(x))) return el;
-    }
-
-    // Sonra genel DOM içinde ara
-    const all = Array.from(document.querySelectorAll("button,a,[role='button'],[onclick],div,span"));
-    const candidates = all.filter(function (el) {
-      if (excluded(el)) return false;
-      const t = safeText(el);
-      return targets.some(x => t.includes(x));
-    });
-
-    candidates.sort(function (a, b) {
-      const ar = a.getBoundingClientRect();
-      const br = b.getBoundingClientRect();
-      return (ar.width * ar.height) - (br.width * br.height);
-    });
-
-    return candidates[0] || null;
-  }
-
-  function dispatchClick(el) {
-    if (!el) return false;
-
-    const possible = [];
-
-    if (el.matches && el.matches("button,a,[role='button'],[onclick]")) possible.push(el);
-
-    el.querySelectorAll &&
-      el.querySelectorAll("button,a,[role='button'],[onclick]").forEach(x => possible.push(x));
-
-    const closest = el.closest && el.closest("button,a,[role='button'],[onclick]");
-    if (closest) possible.push(closest);
-
-    possible.push(el);
-
-    const unique = [...new Set(possible)].filter(Boolean);
-
-    for (const target of unique) {
-      try {
-        target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true }));
-        target.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true }));
-        target.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-        return true;
-      } catch (e) {}
-
-      try {
-        target.click();
-        return true;
-      } catch (e) {}
-    }
-
-    return false;
-  }
-
-  function activateOriginal(el) {
-    if (!el) return;
-
-    const oldClass = el.className;
-    const oldStyle = el.getAttribute("style") || "";
-
-    // Gizli butonu çok kısa süre offscreen görünür yapıp tıklıyoruz
-    try {
-      el.classList.remove("muavin-original-bottom-action-hidden");
-      el.setAttribute(
-        "style",
-        oldStyle + ";position:fixed!important;left:-9999px!important;top:-9999px!important;opacity:0!important;pointer-events:auto!important;display:block!important;"
-      );
-    } catch (e) {}
-
-    setTimeout(function () {
-      dispatchClick(el);
-
-      setTimeout(function () {
-        try {
-          el.className = oldClass;
-          if (oldStyle) el.setAttribute("style", oldStyle);
-          else el.removeAttribute("style");
-        } catch (e) {}
-      }, 80);
-    }, 20);
-  }
-
-  function mainHtml() {
-    return `
-      <button type="button" class="muavin-smart-action muavin-smart-dark" data-smart-action="duraklar">
-        <span>🗺️</span>
-        <span>Duraklar</span>
-      </button>
-
-      <button type="button" class="muavin-smart-action muavin-smart-dark" data-smart-action="rota">
-        <span>〽️</span>
-        <span>Rota</span>
-      </button>
-
-      <button type="button" class="muavin-smart-action muavin-smart-light" data-smart-action="more">
-        <span>•••</span>
-      </button>
-    `;
-  }
-
-  function moreHtml() {
-    return `
-      <button type="button" class="muavin-smart-action muavin-smart-dark" data-smart-action="konumum">
-        <span>📍</span>
-        <span>Konumum</span>
-      </button>
-
-      <button type="button" class="muavin-smart-action muavin-smart-dark" data-smart-action="islemli">
-        <span>🎯</span>
-        <span>İşlemli</span>
-      </button>
-
-      <button type="button" class="muavin-smart-action muavin-smart-close" data-smart-action="close">
-        <span>×</span>
-      </button>
-    `;
-  }
-
-  function renderMain() {
-    const dock = getDock();
-    const row = dock && dock.querySelector(".dock-row");
-    if (!dock || !row) return;
-
-    dock.classList.remove("is-more-mode");
-    row.innerHTML = mainHtml();
-  }
-
-  function renderMore() {
-    const dock = getDock();
-    const row = dock && dock.querySelector(".dock-row");
-    if (!dock || !row) return;
-
-    dock.classList.add("is-more-mode");
-    row.innerHTML = moreHtml();
-  }
-
-  function runAction(action) {
-    if (action === "more") {
-      renderMore();
-      return;
-    }
-
-    if (action === "close") {
-      renderMain();
-      return;
-    }
-
-    if (action === "duraklar") {
-      activateOriginal(findOriginal(["Tüm Duraklar", "Duraklar"]));
-      renderMain();
-      return;
-    }
-
-    if (action === "rota") {
-      activateOriginal(findOriginal("Rota"));
-      renderMain();
-      return;
-    }
-
-    if (action === "konumum") {
-      activateOriginal(findOriginal("Konumum"));
-      renderMain();
-      return;
-    }
-
-    if (action === "islemli") {
-      activateOriginal(findOriginal("İşlemli"));
-      renderMain();
-      return;
-    }
-  }
-
-  function handleDockEvent(e) {
-    const dock = getDock();
-    if (!dock || !dock.contains(e.target)) return;
-
-    const btn = e.target.closest("[data-smart-action],[data-dock-action],[data-dock-more]");
-    if (!btn || !dock.contains(btn)) return;
-
-    const now = Date.now();
-
-    // touchend + click çift çalışmasın
-    if (now - lastHandledAt < 280) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-      return;
-    }
-
-    lastHandledAt = now;
-
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-
-    const action =
-      btn.getAttribute("data-smart-action") ||
-      btn.getAttribute("data-dock-action") ||
-      btn.getAttribute("data-dock-more");
-
-    runAction(action);
-  }
-
-  function setup() {
-    const dock = getDock();
-
-    if (!dock) {
-      setTimeout(setup, 500);
-      return;
-    }
-
-    if (dock.dataset.clickFixV4 === "1") return;
-    dock.dataset.clickFixV4 = "1";
-
-    // Leaflet harita dokunmayı yutmasın
-    try {
-      if (window.L && L.DomEvent) {
-        L.DomEvent.disableClickPropagation(dock);
-        L.DomEvent.disableScrollPropagation(dock);
-      }
-    } catch (e) {}
-
-    dock.addEventListener("touchend", handleDockEvent, { capture: true, passive: false });
-    dock.addEventListener("pointerup", handleDockEvent, true);
-    dock.addEventListener("click", handleDockEvent, true);
-
-    // Başlangıçta ana mod düzgün olsun
-    renderMain();
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", setup);
-  } else {
-    setup();
-  }
-
-  setTimeout(setup, 800);
-  setTimeout(setup, 1800);
-  setTimeout(setup, 3200);
-})();
-
