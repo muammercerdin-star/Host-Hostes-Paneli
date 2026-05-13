@@ -2,13 +2,10 @@ import argparse
 import json
 import sys
 import time
-import urllib.parse
 import urllib.request
 from datetime import datetime
 from pathlib import Path
 
-# Proje kökünü Python import yoluna ekle.
-# Böylece tools/ içinden çalışırken app.py bulunur.
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -41,6 +38,21 @@ def ensure_table(db):
             PRIMARY KEY(route, from_stop, to_stop)
         )
     """)
+
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS route_segment_vias(
+            route TEXT NOT NULL,
+            from_stop TEXT NOT NULL,
+            to_stop TEXT NOT NULL,
+            via_name TEXT NOT NULL,
+            lat REAL NOT NULL,
+            lng REAL NOT NULL,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY(route, from_stop, to_stop, via_name)
+        )
+    """)
+
     db.commit()
 
 
@@ -59,7 +71,6 @@ def get_active_route(db):
 def load_coords(db, route, stops):
     coords = {}
 
-    # Önce rota adı birebir eşleşsin
     rows = db.execute("""
         SELECT route, stop, lat, lng
         FROM route_stop_coords
@@ -72,7 +83,6 @@ def load_coords(db, route, stops):
             "lng": float(r["lng"]),
         }
 
-    # Eksik durak varsa durak adına göre fallback
     wanted = {norm_stop(x) for x in stops}
     missing = wanted - set(coords.keys())
 
@@ -93,12 +103,46 @@ def load_coords(db, route, stops):
     return coords
 
 
-def osrm_route(a, b):
-    # OSRM koordinat sırası: lng,lat
-    coord = f"{a['lng']},{a['lat']};{b['lng']},{b['lat']}"
+def load_vias(db, route, from_stop, to_stop):
+    ensure_table(db)
+
+    rows = db.execute("""
+        SELECT via_name, lat, lng, sort_order
+        FROM route_segment_vias
+        WHERE route=? AND from_stop=? AND to_stop=?
+        ORDER BY sort_order ASC, via_name ASC
+    """, (route, from_stop, to_stop)).fetchall()
+
+    vias = []
+
+    for r in rows:
+        vias.append({
+            "name": r["via_name"],
+            "lat": float(r["lat"]),
+            "lng": float(r["lng"]),
+            "sort_order": int(r["sort_order"] or 0),
+        })
+
+    return vias
+
+
+def osrm_route(points):
+    """
+    points listesi:
+    [
+      {"lat":..., "lng":...},  # başlangıç
+      {"lat":..., "lng":...},  # via varsa
+      {"lat":..., "lng":...},  # bitiş
+    ]
+    """
+
+    if len(points) < 2:
+        raise RuntimeError("OSRM için en az 2 nokta gerekir.")
+
+    coord = ";".join(f"{p['lng']},{p['lat']}" for p in points)
     url = f"{OSRM_BASE}/{coord}?overview=full&geometries=geojson&steps=false"
 
-    with urllib.request.urlopen(url, timeout=30) as resp:
+    with urllib.request.urlopen(url, timeout=40) as resp:
         data = json.loads(resp.read().decode("utf-8"))
 
     if data.get("code") != "Ok" or not data.get("routes"):
@@ -107,7 +151,6 @@ def osrm_route(a, b):
     route = data["routes"][0]
     geometry = route.get("geometry", {}).get("coordinates", [])
 
-    # Leaflet için lat,lng sırasına çeviriyoruz
     lat_lng = [[lat, lng] for lng, lat in geometry]
 
     return {
@@ -159,8 +202,19 @@ def build_segments(route, force=False, sleep_s=0.35):
                 continue
 
             try:
-                print(f"OSRM: {from_stop} -> {to_stop}")
-                res = osrm_route(a, b)
+                vias = load_vias(db, route, from_stop, to_stop)
+
+                points = [a]
+                points.extend({"lat": v["lat"], "lng": v["lng"]} for v in vias)
+                points.append(b)
+
+                via_text = ""
+                if vias:
+                    via_text = " | VIA: " + " -> ".join(v["name"] for v in vias)
+
+                print(f"OSRM: {from_stop} -> {to_stop}{via_text}")
+
+                res = osrm_route(points)
 
                 db.execute("""
                     INSERT INTO route_segments(

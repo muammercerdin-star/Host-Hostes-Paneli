@@ -3192,7 +3192,104 @@
 }
 </style>
 
-</head>
+
+<style id="live-stop-complete-style">
+.sheet-summary-actions{
+  grid-template-columns:1fr 1fr !important;
+}
+
+.sheet-summary-action.done{
+  background:linear-gradient(135deg,rgba(34,197,94,.25),rgba(14,165,233,.15)) !important;
+  border-color:rgba(34,197,94,.28) !important;
+  color:#dcfce7 !important;
+}
+
+.sheet-incomplete-card{
+  margin:14px;
+  border-radius:22px;
+  padding:16px;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(239,68,68,.18), transparent 36%),
+    rgba(255,255,255,.065);
+  border:1px solid rgba(248,113,113,.22);
+}
+
+.sheet-incomplete-title{
+  color:#fff;
+  font-size:21px;
+  font-weight:1000;
+  line-height:1.1;
+}
+
+.sheet-incomplete-sub{
+  margin-top:8px;
+  color:rgba(255,255,255,.72);
+  font-size:13px;
+  font-weight:800;
+  line-height:1.45;
+}
+
+.sheet-pending-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin:0 14px 14px;
+}
+
+.sheet-pending-cell{
+  border-radius:18px;
+  padding:13px 10px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  text-align:center;
+}
+
+.sheet-pending-cell b{
+  display:block;
+  color:#fff;
+  font-size:24px;
+  font-weight:1000;
+}
+
+.sheet-pending-cell span{
+  display:block;
+  margin-top:6px;
+  color:rgba(255,255,255,.68);
+  font-size:11px;
+  font-weight:900;
+}
+
+.sheet-complete-success{
+  margin:14px;
+  border-radius:22px;
+  padding:20px;
+  text-align:center;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(34,197,94,.20), transparent 38%),
+    rgba(34,197,94,.08);
+  border:1px solid rgba(34,197,94,.22);
+  color:#dcfce7;
+  font-size:18px;
+  font-weight:1000;
+}
+
+.sheet-complete-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:0 14px 16px;
+}
+
+.sheet-complete-actions button{
+  min-height:50px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.09);
+  color:#fff;
+  font-weight:1000;
+}
+</style>
+\n</head>
 
 <body>
   <main class="shell">
@@ -3372,7 +3469,7 @@
         <span>Yolcular</span>
       </a>
 
-      <a class="dock-item" href="{{ url_for('seats_page') }}?drive=1">
+      <a class="dock-item" href="{{ url_for("live_map_page") }}">
         <i>🗺️</i>
         <span>Harita</span>
       </a>
@@ -4973,6 +5070,139 @@
     }
   }
 
+
+  async function completeStopFromSummary(data){
+    const stop = (data && data.stop) || currentStopName();
+
+    if(!stop){
+      renderEmpty("Durak bilgisi bulunamadı.");
+      return;
+    }
+
+    kickerEl.textContent = "Durak kontrolü";
+    titleEl.textContent = `${stop} durağı`;
+    subEl.textContent = "Eksik işlem kontrol ediliyor...";
+    bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+
+    try{
+      const headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      };
+
+      if(csrfToken){
+        headers["X-CSRFToken"] = csrfToken;
+        headers["X-CSRF-Token"] = csrfToken;
+      }
+
+      const res = await fetch("/api/live-stop-complete", {
+        method:"POST",
+        headers,
+        body:JSON.stringify({ stop })
+      });
+
+      const j = await res.json();
+
+      if(!j.ok){
+        subEl.textContent = "Kontrol yapılamadı.";
+        renderEmpty(j.error || "Bir hata oluştu.");
+        return;
+      }
+
+      if(j.completed){
+        kickerEl.textContent = "Durak tamamlandı";
+        titleEl.textContent = `${j.stop || stop}`;
+        subEl.textContent = "Bu durakta bekleyen işlem kalmadı.";
+
+        bodyEl.innerHTML = `
+          <div class="sheet-complete-success">
+            ✅ ${escapeHtml(j.message || "Durak tamamlandı.")}
+          </div>
+
+          <div class="sheet-complete-actions">
+            <button type="button" id="completeBackSummary">Özete Dön</button>
+            <button type="button" id="completeCloseSheet">Kapat</button>
+          </div>
+        `;
+
+        document.getElementById("completeBackSummary")?.addEventListener("click", () => {
+          renderStopSummary(data);
+        });
+
+        document.getElementById("completeCloseSheet")?.addEventListener("click", () => {
+          closeSheet();
+          setTimeout(() => window.location.reload(), 250);
+        });
+
+        return;
+      }
+
+      const p = j.pending || {};
+
+      kickerEl.textContent = "Eksik işlem var";
+      titleEl.textContent = `${j.stop || stop}`;
+      subEl.textContent = "Durak tamamlanamaz.";
+
+      bodyEl.innerHTML = `
+        <div class="sheet-incomplete-card">
+          <div class="sheet-incomplete-title">${escapeHtml(j.stop || stop)} tamamlanamaz.</div>
+          <div class="sheet-incomplete-sub">
+            Önce kalan yolcuları indir. Bagaj veya emanet varsa onları da tamamla.
+          </div>
+        </div>
+
+        <div class="sheet-pending-grid">
+          <div class="sheet-pending-cell">
+            <b>${Number(p.seat_count || 0)}</b>
+            <span>İnecek yolcu</span>
+          </div>
+
+          <div class="sheet-pending-cell">
+            <b>${Number(p.bag_count || 0)}</b>
+            <span>Bagaj</span>
+          </div>
+
+          <div class="sheet-pending-cell">
+            <b>${Number(p.consignment_count || 0)}</b>
+            <span>Emanet</span>
+          </div>
+
+          <div class="sheet-pending-cell">
+            <b>${Number(p.standing_count || 0)}</b>
+            <span>Ayakta</span>
+          </div>
+        </div>
+
+        <div class="sheet-summary-actions">
+          <button class="sheet-summary-action" type="button" id="pendingPassengersBtn">Yolcu Listesi</button>
+          <button class="sheet-summary-action bag" type="button" id="pendingBagsBtn">Bagaj Detayı</button>
+        </div>
+      `;
+
+      document.getElementById("pendingPassengersBtn")?.addEventListener("click", () => {
+        lastKind = "offload";
+        kickerEl.textContent = "İnecek yolcular";
+        titleEl.textContent = `${data.stop || currentStopName() || "Durak"} durağı`;
+        subEl.textContent = `${Number(data.off_count || 0)} yolcu inecek`;
+        renderPassengers(data);
+      });
+
+      document.getElementById("pendingBagsBtn")?.addEventListener("click", () => {
+        lastKind = "bagaj";
+        kickerEl.textContent = "Detay";
+        titleEl.textContent = `${data.stop || currentStopName() || "Durak"} durağı`;
+        subEl.textContent = `${Number(data.bag_total || 0)} bagaj / emanet`;
+        renderBags(data);
+      });
+
+    }catch(err){
+      console.error("complete stop error", err);
+      subEl.textContent = "Bağlantı hatası.";
+      renderEmpty("Durak kontrolü yapılamadı.");
+    }
+  }
+
+
   function renderStopSummary(data){
     lastDetailData = data;
     lastKind = "summary";
@@ -5046,18 +5276,26 @@
 
       <div class="sheet-summary-actions">
         <button class="sheet-summary-action speak" type="button" id="sheetSummarySpeak">Sesli Oku</button>
+        <button class="sheet-summary-action done" type="button" id="sheetSummaryComplete">Tamamla</button>
         <button class="sheet-summary-action" type="button" id="sheetSummaryPassengers">Yolcu Listesi</button>
         <button class="sheet-summary-action bag" type="button" id="sheetSummaryBags">Bagaj Detayı</button>
       </div>
     `;
 
     const speakBtn = document.getElementById("sheetSummarySpeak");
+    const completeBtn = document.getElementById("sheetSummaryComplete");
     const passengerBtn = document.getElementById("sheetSummaryPassengers");
     const bagBtn2 = document.getElementById("sheetSummaryBags");
 
     if(speakBtn){
       speakBtn.addEventListener("click", function(){
         speakStopSummary(data);
+      });
+    }
+
+    if(completeBtn){
+      completeBtn.addEventListener("click", function(){
+        completeStopFromSummary(data);
       });
     }
 
