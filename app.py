@@ -4386,10 +4386,42 @@ def ai_answer_query(intent: str, trip_row):
     tid = trip_row["id"]
     db = get_db()
 
+    try:
+        live_runtime = fetch_live_runtime_state(tid) or {}
+    except Exception:
+        live_runtime = {}
+
+    def stop_key(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    def find_stop_index(stops, name):
+        if not stops or not name:
+            return -1
+
+        raw_key = stop_key(name)
+
+        for i, stop in enumerate(stops):
+            if stop == name:
+                return i
+
+        for i, stop in enumerate(stops):
+            if stop_key(stop) == raw_key:
+                return i
+
+        for i, stop in enumerate(stops):
+            sk = stop_key(stop)
+            if raw_key and (raw_key in sk or sk in raw_key):
+                return i
+
+        return -1
+
     if intent == "query_total_passengers":
         seat_row = db.execute("SELECT COUNT(*) AS c FROM seats WHERE trip_id=?", (tid,)).fetchone()
         standing_row = db.execute(
-            "SELECT COALESCE(SUM(pax),0) AS c FROM walk_on_sales WHERE trip_id=?",
+            "SELECT COALESCE(SUM(pax),0) AS c, COALESCE(SUM(total_amount),0) AS t FROM walk_on_sales WHERE trip_id=?",
             (tid,),
         ).fetchone()
         seated = int(seat_row["c"] or 0)
@@ -4405,34 +4437,50 @@ def ai_answer_query(intent: str, trip_row):
         return f"Ayakta {int(row['c'] or 0)} kişi var. Tahsilat {float(row['t'] or 0):.2f} TL."
 
     if intent == "query_live_stop":
+        live_stop = (live_runtime.get("live_stop") or "").strip()
+        if live_stop:
+            return f"Son canlı durak: {live_stop}."
+
         last = ai_last_stop_info(tid)
         if not last:
-            return "Canlı durak için henüz stop log kaydı yok."
+            return "Canlı durak için henüz kayıt yok."
         return f"Son bilinen durak: {last['stop_name']} ({last['event']})."
 
     if intent == "query_next_stop":
-        last = ai_last_stop_info(tid)
         stops = get_stops(trip_row["route"])
-
         if not stops:
             return "Bu hat için durak listesi bulunamadı."
 
-        if not last:
+        live_stop = (live_runtime.get("live_stop") or "").strip()
+        base_stop = live_stop
+
+        if not base_stop:
+            last = ai_last_stop_info(tid)
+            base_stop = (last or {}).get("stop_name") or ""
+
+        if not base_stop:
             return f"Sıradaki durak: {stops[0]}"
 
-        if last["stop_name"] not in stops:
-            return f"Sıradaki durak hesaplanamadı. Son kayıt: {last['stop_name']}"
+        idx = find_stop_index(stops, base_stop)
+        if idx < 0:
+            return f"Sıradaki durak hesaplanamadı. Son kayıt: {base_stop}"
 
-        idx = stops.index(last["stop_name"])
         next_idx = idx + 1
-
         if next_idx >= len(stops):
             return "Güzergâhın son durağındasın."
 
         return f"Sıradaki durak: {stops[next_idx]}"
 
     if intent == "query_delay":
-        return "Rötar hesabı için saatli durak / ETA verisi backend tarafına henüz bağlanmadı."
+        eta_main = (live_runtime.get("eta_main") or "").strip()
+        eta_sub = (live_runtime.get("eta_sub") or "").strip()
+
+        if eta_main or eta_sub:
+            if eta_main and eta_sub:
+                return f"Rötar durumu: {eta_main}. {eta_sub}"
+            return f"Rötar durumu: {eta_main or eta_sub}"
+
+        return "Rötar bilgisi henüz hazır değil."
 
     return "Sorgu cevabı üretilemedi."
 
@@ -5058,6 +5106,41 @@ def log_trip_stop_event(db, tid, stop_name, event, meta=None, distance_km=None, 
     )
 
 
+
+def _trip_key_from_row(trip_row) -> str:
+    if not trip_row:
+        return ""
+    try:
+        return ((trip_row["route"] or "") + "|" + (trip_row["plate"] or "")).replace(" ", "_")
+    except Exception:
+        return ""
+
+
+def clear_bags_for_seat(trip_key: str, seat_no) -> int:
+    if not trip_key or seat_no is None:
+        return 0
+
+    deleted = 0
+
+    try:
+        d = bag_root() / safe(trip_key) / safe(str(seat_no))
+        if not (d.exists() and d.is_dir()):
+            return 0
+
+        for fp in d.rglob("*"):
+            try:
+                if fp.is_file():
+                    deleted += 1
+            except Exception:
+                pass
+
+        shutil.rmtree(d, ignore_errors=True)
+    except Exception:
+        return deleted
+
+    return deleted
+
+
 @app.route("/api/seat", methods=["POST", "DELETE"])
 def api_seat():
     tid = get_active_trip()
@@ -5087,9 +5170,17 @@ def api_seat():
                 _seat_event_meta(old_row, {"action": "offload_single"}),
             )
 
+        bag_deleted = 0
+        try:
+            trip_row = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+            trip_key = _trip_key_from_row(trip_row)
+            bag_deleted = clear_bags_for_seat(trip_key, seat_no)
+        except Exception:
+            bag_deleted = 0
+
         db.execute("DELETE FROM seats WHERE trip_id=? AND seat_no=?", (tid, seat_no))
         db.commit()
-        return jsonify({"ok": True})
+        return jsonify({"ok": True, "bag_deleted": bag_deleted})
 
     data = request.get_json(force=True) or {}
     seat_no = parse_int(data.get("seat_no"), None)
@@ -5173,34 +5264,6 @@ def api_seat():
     db.commit()
     return jsonify({"ok": True})
 
-    db.execute(
-        """
-        INSERT INTO seats(
-            trip_id, seat_no, from_stop, to_stop, ticket_type, payment, amount,
-            gender, pair_ok, service, service_note, passenger_name, passenger_phone
-        )
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
-        ON CONFLICT(trip_id, seat_no) DO UPDATE SET
-            from_stop=excluded.from_stop,
-            to_stop=excluded.to_stop,
-            ticket_type=excluded.ticket_type,
-            payment=excluded.payment,
-            amount=excluded.amount,
-            gender=excluded.gender,
-            pair_ok=excluded.pair_ok,
-            service=excluded.service,
-            service_note=excluded.service_note,
-            passenger_name=excluded.passenger_name,
-            passenger_phone=excluded.passenger_phone
-        """,
-        (
-            tid, seat_no, from_stop, to_stop, ticket_type, payment, amount,
-            gender, 1 if pair_ok else 0, service, service_note,
-            passenger_name, passenger_phone,
-        ),
-    )
-    db.commit()
-    return jsonify({"ok": True})
 
 @app.route("/api/seats/bulk", methods=["POST", "DELETE"])
 def api_seats_bulk():
@@ -5238,14 +5301,21 @@ def api_seats_bulk():
                     "offload",
                     _seat_event_meta(r, {"action": "offload_bulk_delete"}),
                 )
+        bag_deleted = 0
+        try:
+            trip_row = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+            trip_key = _trip_key_from_row(trip_row)
+            for s in seat_list:
+                bag_deleted += clear_bags_for_seat(trip_key, s)
+        except Exception:
+            bag_deleted = 0
 
         db.executemany(
             "DELETE FROM seats WHERE trip_id=? AND seat_no=?",
             [(tid, s) for s in seat_list],
         )
         db.commit()
-        return jsonify({"ok": True, "deleted": seat_list})
-
+        return jsonify({"ok": True, "deleted": seat_list, "bag_deleted": bag_deleted})
     data = request.get_json(force=True) or {}
     seats = data.get("seats")
 
@@ -5395,10 +5465,19 @@ def api_seats_offload():
                 _seat_event_meta(r, {"action": "offload_bulk"}),
             )
 
+    bag_deleted = 0
+    try:
+        trip_row = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+        trip_key = _trip_key_from_row(trip_row)
+        for s in seat_list:
+            bag_deleted += clear_bags_for_seat(trip_key, s)
+    except Exception:
+        bag_deleted = 0
+
     db.executemany("DELETE FROM seats WHERE trip_id=? AND seat_no=?", [(tid, s) for s in seat_list])
     db.commit()
 
-    return jsonify({"ok": True, "deleted": seat_list})
+    return jsonify({"ok": True, "deleted": seat_list, "bag_deleted": bag_deleted})
 
 @app.post("/api/seats/service")
 def api_seats_service():
