@@ -6271,61 +6271,16 @@ def api_trip_report():
 
 
 
-@app.route("/olaylar")
-def events_page():
-    return render_template("events.html")
+# =========================================================
+# Raporlar / Olaylar
+# =========================================================
+from modules.reports_panel import register_reports_routes
 
-
-@app.route("/api/events")
-def api_events():
-    route = (request.args.get("route") or "").strip()
-    d1 = request.args.get("date_from")
-    d2 = request.args.get("date_to")
-
-    sql = """
-    SELECT l.id, l.trip_id, t.date, t.route, l.stop_name, l.event, l.distance_km,
-           l.seats_for_stop, l.meta_json, l.ts
-    FROM stop_logs l
-    JOIN trips t ON t.id = l.trip_id
-    WHERE 1=1
-    """
-    args = []
-
-    if route:
-        sql += " AND t.route=?"
-        args.append(route)
-    if d1:
-        sql += " AND t.date >= ?"
-        args.append(d1)
-    if d2:
-        sql += " AND t.date <= ?"
-        args.append(d2)
-
-    sql += " ORDER BY l.ts DESC, l.id DESC LIMIT 500"
-    rows = get_db().execute(sql, args).fetchall()
-
-    items = []
-    for r in rows:
-        try:
-            meta = json.loads(r["meta_json"]) if r["meta_json"] else None
-        except Exception:
-            meta = None
-
-        items.append({
-            "id": r["id"],
-            "trip_id": r["trip_id"],
-            "date": r["date"],
-            "route": r["route"],
-            "stop_name": r["stop_name"],
-            "event": r["event"],
-            "distance_km": r["distance_km"],
-            "seats_for_stop": r["seats_for_stop"],
-            "meta": meta,
-            "ts": r["ts"],
-        })
-
-    return jsonify({"ok": True, "items": items})
-
+register_reports_routes(app, {
+    "get_db": get_db,
+    "all_route_names": all_route_names,
+    "SEAT_NUMBERS": SEAT_NUMBERS,
+})
 
 
 # =========================================================
@@ -6490,96 +6445,6 @@ def report_file_download(base, kind):
 
     return send_from_directory(str(reports_dir_path()), path.name, as_attachment=True)
 
-
-
-# =========================================================
-# Raporlar
-# =========================================================
-
-@app.route("/raporlar")
-def reports_page():
-    return render_template("reports.html", all_routes=all_route_names())
-
-
-@app.route("/api/report/seat-stats")
-def api_report_seat_stats():
-    route = (request.args.get("route") or "").strip()
-    d1 = request.args.get("date_from")
-    d2 = request.args.get("date_to")
-
-    where = ["1=1"]
-    args = []
-
-    if route:
-        where.append("t.route=?")
-        args.append(route)
-    if d1:
-        where.append("t.date >= ?")
-        args.append(d1)
-    if d2:
-        where.append("t.date <= ?")
-        args.append(d2)
-
-    sql_where = " AND ".join(where)
-    db = get_db()
-
-    per = db.execute(
-        f"""
-        SELECT s.seat_no, COUNT(*) AS times, COALESCE(SUM(s.amount),0) AS revenue
-        FROM seats s
-        JOIN trips t ON t.id=s.trip_id
-        WHERE {sql_where}
-        GROUP BY s.seat_no
-        ORDER BY s.seat_no
-        """,
-        args,
-    ).fetchall()
-
-    per_seat = [{
-        "seat_no": int(r["seat_no"]),
-        "times": int(r["times"]),
-        "revenue": float(r["revenue"]),
-    } for r in per]
-
-    sold_seats = {x["seat_no"] for x in per_seat}
-    never_sold = [n for n in SEAT_NUMBERS if n not in sold_seats]
-
-    seat_tot = db.execute(
-        f"""
-        SELECT COALESCE(SUM(s.amount),0) AS revenue, COUNT(*) AS cnt
-        FROM seats s
-        JOIN trips t ON t.id=s.trip_id
-        WHERE {sql_where}
-        """,
-        args,
-    ).fetchone()
-
-    walk_tot = db.execute(
-        f"""
-        SELECT COALESCE(SUM(w.total_amount),0) AS revenue, COALESCE(SUM(w.pax),0) AS pax
-        FROM walk_on_sales w
-        JOIN trips t ON t.id=w.trip_id
-        WHERE {sql_where}
-        """,
-        args,
-    ).fetchone()
-
-    top_seat = max(per_seat, key=lambda x: (x["times"], x["revenue"])) if per_seat else None
-
-    return jsonify({
-        "ok": True,
-        "filters": {"route": route or None, "date_from": d1, "date_to": d2},
-        "totals": {
-            "seated_count": int(seat_tot["cnt"] or 0),
-            "seated_revenue": float(seat_tot["revenue"] or 0),
-            "walk_pax": int(walk_tot["pax"] or 0),
-            "walk_revenue": float(walk_tot["revenue"] or 0),
-            "overall_revenue": float(seat_tot["revenue"] or 0) + float(walk_tot["revenue"] or 0),
-        },
-        "per_seat": per_seat,
-        "top_seat": top_seat,
-        "never_sold": never_sold,
-    })
 
 
 # =========================================================
