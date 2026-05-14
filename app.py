@@ -4001,12 +4001,21 @@ def ai_execute_intent(intent: str, entities: dict, command: str = ""):
         seat_no = (entities.get("seats") or [None])[0]
         if seat_no is None:
             raise ValueError("Koltuk gerekli")
+
+        bag_deleted = 0
+        try:
+            trip_key = _trip_key_from_row(trip)
+            bag_deleted = clear_bags_for_seat(trip_key, seat_no)
+        except Exception:
+            bag_deleted = 0
+
         db.execute("DELETE FROM seats WHERE trip_id=? AND seat_no=?", (tid, seat_no))
         db.commit()
         return {
             "ok": True,
             "intent": intent,
             "deleted": [seat_no],
+            "bag_deleted": bag_deleted,
             "answer_text": f"{seat_no} numaralı koltuk boşaltıldı.",
         }
 
@@ -4017,12 +4026,22 @@ def ai_execute_intent(intent: str, entities: dict, command: str = ""):
         invalid = [s for s in seats if not validate_seat_no(s)]
         if invalid:
             raise ValueError(f"Geçersiz koltuklar: {invalid}")
+
+        bag_deleted = 0
+        try:
+            trip_key = _trip_key_from_row(trip)
+            for s in seats:
+                bag_deleted += clear_bags_for_seat(trip_key, s)
+        except Exception:
+            bag_deleted = 0
+
         db.executemany("DELETE FROM seats WHERE trip_id=? AND seat_no=?", [(tid, s) for s in seats])
         db.commit()
         return {
             "ok": True,
             "intent": intent,
             "deleted": seats,
+            "bag_deleted": bag_deleted,
             "answer_text": f"Koltuklar boşaltıldı: {', '.join(map(str, seats))}",
         }
 
@@ -4201,6 +4220,14 @@ def ai_execute_intent(intent: str, entities: dict, command: str = ""):
         ).fetchall()
         seat_list = [r["seat_no"] for r in seat_rows]
 
+        bag_deleted = 0
+        try:
+            trip_key = _trip_key_from_row(trip)
+            for s in seat_list:
+                bag_deleted += clear_bags_for_seat(trip_key, s)
+        except Exception:
+            bag_deleted = 0
+
         if seat_list:
             db.executemany("DELETE FROM seats WHERE trip_id=? AND seat_no=?", [(tid, s) for s in seat_list])
 
@@ -4212,6 +4239,7 @@ def ai_execute_intent(intent: str, entities: dict, command: str = ""):
             "intent": intent,
             "deleted_seats": seat_list,
             "deleted_standing_ids": deleted_walkon,
+            "bag_deleted": bag_deleted,
             "answer_text": f"{stop_name} için iniş uygulandı. Koltuk: {len(seat_list)}, ayakta kayıt: {len(deleted_walkon)}",
         }
 
