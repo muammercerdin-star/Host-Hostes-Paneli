@@ -9,7 +9,24 @@ def register_reports_routes(app, deps):
     SEAT_NUMBERS = deps["SEAT_NUMBERS"]
 
     def events_page():
-        return render_template("events.html")
+        get_active_trip = deps.get("get_active_trip")
+        tid = get_active_trip() if callable(get_active_trip) else None
+
+        sums = {"devir": 0, "giris": 0, "cikis": 0, "kalan": 0}
+        trip = {}
+
+        if tid:
+            db = get_db()
+            trip_row = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+            trip = dict(trip_row) if trip_row else {}
+
+            try:
+                if hasattr(app, "cash_sums"):
+                    sums = dict(app.cash_sums(tid))
+            except Exception:
+                pass
+
+        return render_template("events.html", sums=sums, trip=trip)
 
     def api_events():
         route = (request.args.get("route") or "").strip()
