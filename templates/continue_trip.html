@@ -3633,40 +3633,7 @@
 
 
 
-<script id="continue-trip-stop-bridge">
-(function(){
-  try{
-    const url = new URL(window.location.href);
 
-    // URL'de stop varsa backend zaten onu kullanır.
-    if(url.searchParams.get("stop")) return;
-
-    const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
-
-    let stop = "";
-
-    try{
-      // seats.js mevcut gerçek canlı durak key'i
-      stop =
-        localStorage.getItem("liveStop:" + tripKey) ||
-        localStorage.getItem("continueTripStop:" + tripKey) ||
-        localStorage.getItem("continueTripStop:last",
-            "stopFlowSummary:" + tripKey,
-            "stopFlowLiveEvents:" + tripKey) ||
-        "";
-    }catch(_){}
-
-    stop = String(stop || "").trim();
-
-    if(!stop || stop === "—" || stop === "-") return;
-
-    url.searchParams.set("stop", stop);
-    window.location.replace(url.toString());
-  }catch(err){
-    console.log("continue trip stop bridge error", err);
-  }
-})();
-</script>
 
 
 
@@ -3677,15 +3644,59 @@
 <script id="continue-trip-runtime-sync">
 (function(){
   const tripId = {{ trip['id'] | tojson | safe }};
+  const runtimeGpsKm = {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }};
+  const runtimeSpeed = {{ (live_runtime.speed if live_runtime else 0) | tojson | safe }};
+  const runtimeStop = {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }};
+  const runtimeEta = {{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else "") | tojson | safe }};
+
+  function parseKmAny(value){
+    const raw = String(value ?? "").trim();
+    if(!raw) return NaN;
+
+    const cleaned = raw
+      .replace(/km/gi, "")
+      .replace(/m/gi, "")
+      .trim()
+      .replace(",", ".");
+
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : NaN;
+  }
 
   function formatGpsKm(value){
     const raw = String(value ?? "").trim();
     if(!raw) return "—";
-    const km = Number(raw.replace(",", "."));
-    if(!Number.isFinite(km)) return "—";
+
+    const km = parseKmAny(raw);
+    if(!Number.isFinite(km)) return raw;
+
     if(km < 0) return "—";
     if(km < 1) return `${Math.round(km * 1000)} m`;
     return `${km.toFixed(2)} km`;
+  }
+
+  function setInitial(){
+    const speedEl = document.getElementById("liveSpeedText");
+    const stopEl  = document.getElementById("liveCurrentStopName");
+    const distEl  = document.getElementById("liveDistanceValue");
+    const etaEl   = document.getElementById("liveEtaValue");
+
+    if(speedEl){
+      const n = parseInt(runtimeSpeed || 0, 10) || 0;
+      speedEl.textContent = `${n} km/sa`;
+    }
+
+    if(stopEl && runtimeStop){
+      stopEl.textContent = runtimeStop;
+    }
+
+    if(distEl && runtimeGpsKm){
+      distEl.textContent = formatGpsKm(runtimeGpsKm);
+    }
+
+    if(etaEl && runtimeEta){
+      etaEl.textContent = runtimeEta;
+    }
   }
 
   function sync(){
@@ -3713,8 +3724,9 @@
         stopEl.textContent = s.live_stop;
       }
 
-      // live km burada güncellenmesin.
-      // Bu alanı continue-trip-gps-distance-and-speed scripti hesaplıyor.
+      if(distEl){
+        distEl.textContent = formatGpsKm(s.gps_km);
+      }
 
       if(etaEl && s.eta_main){
         etaEl.textContent = s.eta_main;
@@ -3724,8 +3736,12 @@
   }
 
   if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", sync);
+    document.addEventListener("DOMContentLoaded", function(){
+      setInitial();
+      sync();
+    });
   }else{
+    setInitial();
     sync();
   }
 
@@ -3734,249 +3750,7 @@
 </script>
 
 
-<script id="continue-trip-gps-distance-and-speed">
-(function(){
-  const routeName = {{ trip["route"] | tojson | safe }};
-  const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
-  const runtimeGpsKm = {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }};
 
-  const speedEl = document.getElementById("liveSpeedText");
-  const distanceEls = () => Array.from(document.querySelectorAll(".stop-distance-value[data-stop-name]"));
-
-  let lastPos = null;
-  let cachedStops = [];
-
-  function haversineKm(a, b){
-    const R = 6371;
-    const toRad = d => d * Math.PI / 180;
-
-    const lat1 = toRad(a.lat);
-    const lat2 = toRad(b.lat);
-    const dLat = toRad(b.lat - a.lat);
-    const dLng = toRad(b.lng - a.lng);
-
-    const h =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
-
-    return 2 * R * Math.asin(Math.sqrt(h));
-  }
-
-  function parseKmAny(value){
-    const raw = String(value ?? "").trim();
-    if(!raw) return NaN;
-
-    const cleaned = raw
-      .replace(/km/gi, "")
-      .replace(/m/gi, "")
-      .trim()
-      .replace(",", ".");
-
-    const n = Number(cleaned);
-    return Number.isFinite(n) ? n : NaN;
-  }
-
-  function formatKm(km){
-    if(!Number.isFinite(km)) return "—";
-    if(km < 0) return "—";
-    if(km < 1) return `${Math.round(km * 1000)} m`;
-    return `${km.toFixed(2)} km`;
-  }
-
-  function setSpeed(kmh){
-    if(!speedEl) return;
-    if(!Number.isFinite(kmh) || kmh < 1){
-      speedEl.textContent = "0 km/sa";
-      return;
-    }
-    speedEl.textContent = `${Math.round(kmh)} km/sa`;
-  }
-
-  function normalize(s){
-    return String(s || "")
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .trim()
-      .toLowerCase();
-  }
-
-  function findStopByName(name){
-    const key = normalize(name);
-    return cachedStops.find(s => normalize(s.name) === key) || null;
-  }
-
-  function readCachedCoords(){
-    try{
-      const raw = localStorage.getItem("continueTripLastCoords:" + tripKey) || "";
-      if(!raw) return null;
-      const j = JSON.parse(raw);
-      const lat = Number(j.lat);
-      const lng = Number(j.lng);
-      if(!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-      return { lat, lng, ts: Number(j.ts || 0) };
-    }catch(_){
-      return null;
-    }
-  }
-
-  function seedFromCache(){
-    const liveEl = document.getElementById("liveDistanceValue");
-    if(!liveEl) return;
-
-    let seeded = "";
-    try{
-      seeded =
-        localStorage.getItem("continueTripGpsKm:" + tripKey) ||
-        localStorage.getItem("lastLiveGpsKm:" + tripKey) ||
-        "";
-    }catch(_){}
-
-    if(!seeded && runtimeGpsKm){
-      seeded = runtimeGpsKm;
-    }
-
-    const parsed = parseKmAny(seeded);
-    if(Number.isFinite(parsed)){
-      liveEl.textContent = formatKm(parsed);
-    }
-  }
-
-  async function loadStops(){
-    try{
-      const res = await fetch(`/api/stops?route=${encodeURIComponent(routeName)}&_=${Date.now()}`, {
-        credentials: "same-origin",
-        cache: "no-store"
-      });
-      const j = await res.json();
-
-      let items = [];
-      if(Array.isArray(j)) items = j;
-      else if(Array.isArray(j.items)) items = j.items;
-      else if(Array.isArray(j.stops)) items = j.stops;
-
-      cachedStops = items
-        .map(x => ({
-          name: x.name || x.stop_name || "",
-          lat: Number(x.lat),
-          lng: Number(x.lng),
-        }))
-        .filter(x => x.name && Number.isFinite(x.lat) && Number.isFinite(x.lng));
-    }catch(err){
-      console.log("Durak koordinatları alınamadı:", err);
-      cachedStops = [];
-    }
-  }
-
-  function updateDistancesFromPoint(point){
-    if(!point) return;
-
-    distanceEls().forEach(el => {
-      const stopName = el.getAttribute("data-stop-name") || "";
-      const stop = findStopByName(stopName);
-      if(!stop) return;
-
-      const km = haversineKm(point, {
-        lat: stop.lat,
-        lng: stop.lng
-      });
-
-      el.textContent = formatKm(km);
-
-      if(el.id === "liveDistanceValue"){
-        try{
-          localStorage.setItem("continueTripGpsKm:" + tripKey, String(km));
-          localStorage.setItem("lastLiveGpsKm:" + tripKey, String(km));
-        }catch(_){}
-      }
-    });
-  }
-
-  function updateDistances(coords){
-    updateDistancesFromPoint({
-      lat: Number(coords.latitude),
-      lng: Number(coords.longitude)
-    });
-  }
-
-  function onPosition(pos){
-    const coords = pos.coords || {};
-    let kmh = null;
-
-    if(typeof coords.speed === "number" && Number.isFinite(coords.speed) && coords.speed >= 0){
-      kmh = coords.speed * 3.6;
-    }
-
-    if(kmh === null && lastPos){
-      const dt = (pos.timestamp - lastPos.timestamp) / 1000;
-      if(dt > 0){
-        const km = haversineKm(
-          { lat:lastPos.coords.latitude, lng:lastPos.coords.longitude },
-          { lat:coords.latitude, lng:coords.longitude }
-        );
-        kmh = (km / dt) * 3600;
-      }
-    }
-
-    lastPos = {
-      coords: {
-        latitude: coords.latitude,
-        longitude: coords.longitude
-      },
-      timestamp: pos.timestamp || Date.now()
-    };
-
-    try{
-      localStorage.setItem("continueTripLastCoords:" + tripKey, JSON.stringify({
-        lat: Number(coords.latitude),
-        lng: Number(coords.longitude),
-        ts: Date.now()
-      }));
-    }catch(_){}
-
-    if(kmh !== null){
-      setSpeed(kmh);
-    }
-
-    updateDistances(coords);
-  }
-
-  function onError(){
-    if(speedEl) speedEl.textContent = "— km/sa";
-  }
-
-  async function boot(){
-    seedFromCache();
-    await loadStops();
-
-    // Sayfa açılır açılmaz seats ekranından gelen son koordinatla TÜM kartları doldur
-    const cachedPoint = readCachedCoords();
-    if(cachedPoint){
-      updateDistancesFromPoint(cachedPoint);
-    }
-
-    if(!("geolocation" in navigator)){
-      if(speedEl) speedEl.textContent = "GPS yok";
-      return;
-    }
-
-    navigator.geolocation.watchPosition(
-      onPosition,
-      onError,
-      {
-        enableHighAccuracy: true,
-        maximumAge: 1200,
-        timeout: 10000
-      }
-    );
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", boot);
-  }else{
-    boot();
-  }
-})();
-</script>
 
 
 <script id="live-stop-sheet-script">

@@ -5584,9 +5584,17 @@ def _best_route_for_coords(db, requested_route: str) -> str:
 
 
 def _coords_items_for_route(db, route_name: str):
+    """
+    Durak sırası routes/get_stops kaynağından gelir.
+    Koordinatlar route_stop_coords tablosundan aynı sıraya giydirilir.
+    Dönüş:
+      best_route: koordinat için eşleşen route adı
+      ordered_names: string durak listesi
+      items: koordinatlı obje listesi
+    """
     best_route = _best_route_for_coords(db, route_name)
 
-    ordered_stops = get_stops(route_name) or get_stops(best_route) or []
+    ordered_names = get_stops(route_name) or get_stops(best_route) or []
 
     rows = db.execute(
         "SELECT route, stop, lat, lng FROM route_stop_coords WHERE route=?",
@@ -5595,7 +5603,7 @@ def _coords_items_for_route(db, route_name: str):
 
     def norm_stop(v):
         v = (v or "").strip().lower()
-        v = re.sub(r"\s+", " ", v)
+        v = re.sub(r"\\s+", " ", v)
         return v
 
     coord_map = {}
@@ -5611,7 +5619,7 @@ def _coords_items_for_route(db, route_name: str):
             }
 
     items = []
-    for stop_name in ordered_stops:
+    for stop_name in ordered_names:
         key = norm_stop(stop_name)
         hit = coord_map.get(key)
 
@@ -5623,39 +5631,35 @@ def _coords_items_for_route(db, route_name: str):
             "lng": (hit["lng"] if hit else None),
         })
 
-    return best_route, items
+    return best_route, ordered_names, items
+
 
 @app.route("/api/stops")
 def api_stops():
     trip = get_active_trip_row()
     if not trip:
-        return jsonify({"ok": False, "msg": "Aktif sefer yok", "stops": [], "items": []}), 400
+        return jsonify({
+            "ok": False,
+            "msg": "Aktif sefer yok",
+            "stops": [],
+            "items": [],
+        }), 400
 
     db = get_db()
     route_name = (request.args.get("route") or trip["route"] or "").strip()
 
-    best_route, items = _coords_items_for_route(db, route_name)
+    best_route, ordered_names, items = _coords_items_for_route(db, route_name)
 
-    if items:
-        return jsonify({
-            "ok": True,
-            "route": route_name,
-            "matched_route": best_route,
-            "stops": [x.get("name") or x.get("stop") or "" for x in items],
-            "items": items,
-        })
-
-    stops = get_stops(route_name)
-    fallback_items = [{"name": s, "stop": s, "lat": None, "lng": None} for s in stops]
-
+    # Sözleşme:
+    # stops = sadece string isim listesi
+    # items = koordinatlı obje listesi
     return jsonify({
         "ok": True,
         "route": route_name,
-        "matched_route": route_name,
-        "stops": fallback_items,
-        "items": fallback_items,
+        "matched_route": best_route,
+        "stops": ordered_names,
+        "items": items,
     })
-
 
 
 
