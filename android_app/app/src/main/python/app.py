@@ -3655,179 +3655,16 @@ def fare_admin():
 # =========================================================
 # Hesap / kasa
 # =========================================================
+from modules.cash_panel import register_cash_routes
 
-def cash_sums(trip_id: int):
-    db = get_db()
-    r_in = db.execute(
-        "SELECT COALESCE(SUM(amount),0) FROM cash_moves WHERE trip_id=? AND direction='+'",
-        (trip_id,),
-    ).fetchone()
-    r_out = db.execute(
-        "SELECT COALESCE(SUM(amount),0) FROM cash_moves WHERE trip_id=? AND direction='-'",
-        (trip_id,),
-    ).fetchone()
-    r_dev = db.execute(
-        "SELECT COALESCE(SUM(amount),0) FROM cash_moves WHERE trip_id=? AND direction='+' AND lower(category)='devir'",
-        (trip_id,),
-    ).fetchone()
-
-    total_in = int(r_in[0] or 0)
-    total_out = int(r_out[0] or 0)
-    devir = int(r_dev[0] or 0)
-
-    return {
-        "devir": devir,
-        "giris": total_in - devir,
-        "cikis": total_out,
-        "kalan": total_in - total_out,
-    }
-
-
-@app.route("/hesap")
-def hesap_page():
-    tid = get_active_trip()
-    if not tid:
-        return render_template(
-            "no_active_trip.html",
-            title="Hesap",
-            message="Hesap ekranını açmak için önce aktif bir sefer başlatmalısın.",
-            action_text="Yeni Sefer Başlat",
-            action_url=url_for("trip_start"),
-            home_url=url_for("index"),
-        )
-
-    db = get_db()
-    trip_row = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
-    trip = dict(trip_row) if trip_row else {}
-    sums = dict(cash_sums(tid))
-    moves = [
-        dict(r) for r in db.execute(
-            """
-            SELECT id, created_at, direction, category, amount, COALESCE(note,'') AS note
-            FROM cash_moves
-            WHERE trip_id=?
-            ORDER BY id DESC
-            LIMIT 100
-            """,
-            (tid,),
-        ).fetchall()
-    ]
-    cats_in, cats_out = get_cash_categories()
-
-    return render_template(
-        "hesap.html",
-        trip=trip,
-        sums=sums,
-        moves=moves,
-        categories_in=cats_in,
-        categories_out=cats_out,
-        csrf_token=get_csrf(),
-    )
-
-
-@app.post("/hesap/devir")
-def hesap_devir():
-    tid = get_active_trip()
-    if not tid:
-        return redirect(url_for("trip_start"))
-
-    amount = parse_int(request.form.get("amount"), 0)
-    note = (request.form.get("note") or "").strip()
-
-    if amount and amount > 0:
-        db = get_db()
-        db.execute(
-            "INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
-            (tid, "+", "Devir", amount, note),
-        )
-        db.commit()
-
-    return redirect(url_for("hesap_page"))
-
-
-@app.post("/hesap/giris")
-def hesap_giris():
-    tid = get_active_trip()
-    if not tid:
-        return redirect(url_for("trip_start"))
-
-    amount = parse_int(request.form.get("amount"), 0)
-    category = (request.form.get("category") or "Diğer").strip()
-    note = (request.form.get("note") or "").strip()
-
-    if amount and amount > 0:
-        db = get_db()
-        db.execute(
-            "INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
-            (tid, "+", category, amount, note),
-        )
-        db.commit()
-
-    return redirect(url_for("hesap_page"))
-
-
-@app.post("/hesap/cikis")
-def hesap_cikis():
-    tid = get_active_trip()
-    if not tid:
-        return redirect(url_for("trip_start"))
-
-    amount = parse_int(request.form.get("amount"), 0)
-    category = (request.form.get("category") or "Diğer").strip()
-    note = (request.form.get("note") or "").strip()
-
-    if amount and amount > 0:
-        db = get_db()
-        db.execute(
-            "INSERT INTO cash_moves(trip_id, direction, category, amount, note) VALUES(?,?,?,?,?)",
-            (tid, "-", category, amount, note),
-        )
-        db.commit()
-
-    return redirect(url_for("hesap_page"))
-
-
-@app.post("/hesap/kategoriler")
-def hesap_kategoriler_kaydet():
-    save_cash_categories(request.form.get("cats_in") or "", request.form.get("cats_out") or "")
-    return redirect(url_for("hesap_page"))
-
-
-@app.route("/hesap/moves.csv")
-def hesap_moves_csv():
-    tid = get_active_trip()
-    if not tid:
-        return redirect(url_for("trip_start"))
-
-    rows = [
-        dict(r) for r in get_db().execute(
-            """
-            SELECT created_at, direction, category, note, amount
-            FROM cash_moves
-            WHERE trip_id=?
-            ORDER BY id DESC
-            """,
-            (tid,),
-        ).fetchall()
-    ]
-
-    buf = StringIO()
-    writer = csv.writer(buf)
-    writer.writerow(["Zaman", "Yön", "Kategori", "Açıklama", "Tutar (TL)"])
-    for r in rows:
-        writer.writerow([
-            r.get("created_at", ""),
-            "+" if r.get("direction") == "+" else "-",
-            r.get("category", ""),
-            r.get("note", ""),
-            r.get("amount", 0),
-        ])
-
-    out = buf.getvalue().encode("utf-8-sig")
-    resp = make_response(out)
-    resp.headers["Content-Type"] = "text/csv; charset=utf-8"
-    resp.headers["Content-Disposition"] = 'attachment; filename="son_hareketler.csv"'
-    return resp
+register_cash_routes(app, {
+    "get_active_trip": get_active_trip,
+    "get_db": get_db,
+    "get_cash_categories": get_cash_categories,
+    "save_cash_categories": save_cash_categories,
+    "parse_int": parse_int,
+    "get_csrf": get_csrf,
+})
 
 
 # =========================================================
@@ -4386,10 +4223,42 @@ def ai_answer_query(intent: str, trip_row):
     tid = trip_row["id"]
     db = get_db()
 
+    try:
+        live_runtime = fetch_live_runtime_state(tid) or {}
+    except Exception:
+        live_runtime = {}
+
+    def stop_key(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    def find_stop_index(stops, name):
+        if not stops or not name:
+            return -1
+
+        raw_key = stop_key(name)
+
+        for i, stop in enumerate(stops):
+            if stop == name:
+                return i
+
+        for i, stop in enumerate(stops):
+            if stop_key(stop) == raw_key:
+                return i
+
+        for i, stop in enumerate(stops):
+            sk = stop_key(stop)
+            if raw_key and (raw_key in sk or sk in raw_key):
+                return i
+
+        return -1
+
     if intent == "query_total_passengers":
         seat_row = db.execute("SELECT COUNT(*) AS c FROM seats WHERE trip_id=?", (tid,)).fetchone()
         standing_row = db.execute(
-            "SELECT COALESCE(SUM(pax),0) AS c FROM walk_on_sales WHERE trip_id=?",
+            "SELECT COALESCE(SUM(pax),0) AS c, COALESCE(SUM(total_amount),0) AS t FROM walk_on_sales WHERE trip_id=?",
             (tid,),
         ).fetchone()
         seated = int(seat_row["c"] or 0)
@@ -4405,34 +4274,50 @@ def ai_answer_query(intent: str, trip_row):
         return f"Ayakta {int(row['c'] or 0)} kişi var. Tahsilat {float(row['t'] or 0):.2f} TL."
 
     if intent == "query_live_stop":
+        live_stop = (live_runtime.get("live_stop") or "").strip()
+        if live_stop:
+            return f"Son canlı durak: {live_stop}."
+
         last = ai_last_stop_info(tid)
         if not last:
-            return "Canlı durak için henüz stop log kaydı yok."
+            return "Canlı durak için henüz kayıt yok."
         return f"Son bilinen durak: {last['stop_name']} ({last['event']})."
 
     if intent == "query_next_stop":
-        last = ai_last_stop_info(tid)
         stops = get_stops(trip_row["route"])
-
         if not stops:
             return "Bu hat için durak listesi bulunamadı."
 
-        if not last:
+        live_stop = (live_runtime.get("live_stop") or "").strip()
+        base_stop = live_stop
+
+        if not base_stop:
+            last = ai_last_stop_info(tid)
+            base_stop = (last or {}).get("stop_name") or ""
+
+        if not base_stop:
             return f"Sıradaki durak: {stops[0]}"
 
-        if last["stop_name"] not in stops:
-            return f"Sıradaki durak hesaplanamadı. Son kayıt: {last['stop_name']}"
+        idx = find_stop_index(stops, base_stop)
+        if idx < 0:
+            return f"Sıradaki durak hesaplanamadı. Son kayıt: {base_stop}"
 
-        idx = stops.index(last["stop_name"])
         next_idx = idx + 1
-
         if next_idx >= len(stops):
             return "Güzergâhın son durağındasın."
 
         return f"Sıradaki durak: {stops[next_idx]}"
 
     if intent == "query_delay":
-        return "Rötar hesabı için saatli durak / ETA verisi backend tarafına henüz bağlanmadı."
+        eta_main = (live_runtime.get("eta_main") or "").strip()
+        eta_sub = (live_runtime.get("eta_sub") or "").strip()
+
+        if eta_main or eta_sub:
+            if eta_main and eta_sub:
+                return f"Rötar durumu: {eta_main}. {eta_sub}"
+            return f"Rötar durumu: {eta_main or eta_sub}"
+
+        return "Rötar bilgisi henüz hazır değil."
 
     return "Sorgu cevabı üretilemedi."
 
@@ -5058,6 +4943,41 @@ def log_trip_stop_event(db, tid, stop_name, event, meta=None, distance_km=None, 
     )
 
 
+
+def _trip_key_from_row(trip_row) -> str:
+    if not trip_row:
+        return ""
+    try:
+        return ((trip_row["route"] or "") + "|" + (trip_row["plate"] or "")).replace(" ", "_")
+    except Exception:
+        return ""
+
+
+def clear_bags_for_seat(trip_key: str, seat_no) -> int:
+    if not trip_key or seat_no is None:
+        return 0
+
+    deleted = 0
+
+    try:
+        d = bag_root() / safe(trip_key) / safe(str(seat_no))
+        if not (d.exists() and d.is_dir()):
+            return 0
+
+        for fp in d.rglob("*"):
+            try:
+                if fp.is_file():
+                    deleted += 1
+            except Exception:
+                pass
+
+        shutil.rmtree(d, ignore_errors=True)
+    except Exception:
+        return deleted
+
+    return deleted
+
+
 @app.route("/api/seat", methods=["POST", "DELETE"])
 def api_seat():
     tid = get_active_trip()
@@ -5087,9 +5007,17 @@ def api_seat():
                 _seat_event_meta(old_row, {"action": "offload_single"}),
             )
 
+        bag_deleted = 0
+        try:
+            trip_row = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+            trip_key = _trip_key_from_row(trip_row)
+            bag_deleted = clear_bags_for_seat(trip_key, seat_no)
+        except Exception:
+            bag_deleted = 0
+
         db.execute("DELETE FROM seats WHERE trip_id=? AND seat_no=?", (tid, seat_no))
         db.commit()
-        return jsonify({"ok": True})
+        return jsonify({"ok": True, "bag_deleted": bag_deleted})
 
     data = request.get_json(force=True) or {}
     seat_no = parse_int(data.get("seat_no"), None)
@@ -5173,34 +5101,6 @@ def api_seat():
     db.commit()
     return jsonify({"ok": True})
 
-    db.execute(
-        """
-        INSERT INTO seats(
-            trip_id, seat_no, from_stop, to_stop, ticket_type, payment, amount,
-            gender, pair_ok, service, service_note, passenger_name, passenger_phone
-        )
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
-        ON CONFLICT(trip_id, seat_no) DO UPDATE SET
-            from_stop=excluded.from_stop,
-            to_stop=excluded.to_stop,
-            ticket_type=excluded.ticket_type,
-            payment=excluded.payment,
-            amount=excluded.amount,
-            gender=excluded.gender,
-            pair_ok=excluded.pair_ok,
-            service=excluded.service,
-            service_note=excluded.service_note,
-            passenger_name=excluded.passenger_name,
-            passenger_phone=excluded.passenger_phone
-        """,
-        (
-            tid, seat_no, from_stop, to_stop, ticket_type, payment, amount,
-            gender, 1 if pair_ok else 0, service, service_note,
-            passenger_name, passenger_phone,
-        ),
-    )
-    db.commit()
-    return jsonify({"ok": True})
 
 @app.route("/api/seats/bulk", methods=["POST", "DELETE"])
 def api_seats_bulk():
@@ -5238,14 +5138,21 @@ def api_seats_bulk():
                     "offload",
                     _seat_event_meta(r, {"action": "offload_bulk_delete"}),
                 )
+        bag_deleted = 0
+        try:
+            trip_row = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+            trip_key = _trip_key_from_row(trip_row)
+            for s in seat_list:
+                bag_deleted += clear_bags_for_seat(trip_key, s)
+        except Exception:
+            bag_deleted = 0
 
         db.executemany(
             "DELETE FROM seats WHERE trip_id=? AND seat_no=?",
             [(tid, s) for s in seat_list],
         )
         db.commit()
-        return jsonify({"ok": True, "deleted": seat_list})
-
+        return jsonify({"ok": True, "deleted": seat_list, "bag_deleted": bag_deleted})
     data = request.get_json(force=True) or {}
     seats = data.get("seats")
 
@@ -5395,10 +5302,19 @@ def api_seats_offload():
                 _seat_event_meta(r, {"action": "offload_bulk"}),
             )
 
+    bag_deleted = 0
+    try:
+        trip_row = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+        trip_key = _trip_key_from_row(trip_row)
+        for s in seat_list:
+            bag_deleted += clear_bags_for_seat(trip_key, s)
+    except Exception:
+        bag_deleted = 0
+
     db.executemany("DELETE FROM seats WHERE trip_id=? AND seat_no=?", [(tid, s) for s in seat_list])
     db.commit()
 
-    return jsonify({"ok": True, "deleted": seat_list})
+    return jsonify({"ok": True, "deleted": seat_list, "bag_deleted": bag_deleted})
 
 @app.post("/api/seats/service")
 def api_seats_service():
@@ -5584,9 +5500,17 @@ def _best_route_for_coords(db, requested_route: str) -> str:
 
 
 def _coords_items_for_route(db, route_name: str):
+    """
+    Durak sırası routes/get_stops kaynağından gelir.
+    Koordinatlar route_stop_coords tablosundan aynı sıraya giydirilir.
+    Dönüş:
+      best_route: koordinat için eşleşen route adı
+      ordered_names: string durak listesi
+      items: koordinatlı obje listesi
+    """
     best_route = _best_route_for_coords(db, route_name)
 
-    ordered_stops = get_stops(route_name) or get_stops(best_route) or []
+    ordered_names = get_stops(route_name) or get_stops(best_route) or []
 
     rows = db.execute(
         "SELECT route, stop, lat, lng FROM route_stop_coords WHERE route=?",
@@ -5595,7 +5519,7 @@ def _coords_items_for_route(db, route_name: str):
 
     def norm_stop(v):
         v = (v or "").strip().lower()
-        v = re.sub(r"\s+", " ", v)
+        v = re.sub(r"\\s+", " ", v)
         return v
 
     coord_map = {}
@@ -5611,7 +5535,7 @@ def _coords_items_for_route(db, route_name: str):
             }
 
     items = []
-    for stop_name in ordered_stops:
+    for stop_name in ordered_names:
         key = norm_stop(stop_name)
         hit = coord_map.get(key)
 
@@ -5623,39 +5547,35 @@ def _coords_items_for_route(db, route_name: str):
             "lng": (hit["lng"] if hit else None),
         })
 
-    return best_route, items
+    return best_route, ordered_names, items
+
 
 @app.route("/api/stops")
 def api_stops():
     trip = get_active_trip_row()
     if not trip:
-        return jsonify({"ok": False, "msg": "Aktif sefer yok", "stops": [], "items": []}), 400
+        return jsonify({
+            "ok": False,
+            "msg": "Aktif sefer yok",
+            "stops": [],
+            "items": [],
+        }), 400
 
     db = get_db()
     route_name = (request.args.get("route") or trip["route"] or "").strip()
 
-    best_route, items = _coords_items_for_route(db, route_name)
+    best_route, ordered_names, items = _coords_items_for_route(db, route_name)
 
-    if items:
-        return jsonify({
-            "ok": True,
-            "route": route_name,
-            "matched_route": best_route,
-            "stops": [x.get("name") or x.get("stop") or "" for x in items],
-            "items": items,
-        })
-
-    stops = get_stops(route_name)
-    fallback_items = [{"name": s, "stop": s, "lat": None, "lng": None} for s in stops]
-
+    # Sözleşme:
+    # stops = sadece string isim listesi
+    # items = koordinatlı obje listesi
     return jsonify({
         "ok": True,
         "route": route_name,
-        "matched_route": route_name,
-        "stops": fallback_items,
-        "items": fallback_items,
+        "matched_route": best_route,
+        "stops": ordered_names,
+        "items": items,
     })
-
 
 
 
@@ -6665,202 +6585,20 @@ def api_report_seat_stats():
 # =========================================================
 # Emanetler
 # =========================================================
+from modules.consignments_panel import register_consignments_routes
 
-@app.route("/emanetler")
-def consignments_page():
-    tid = get_active_trip()
-    if not tid:
-        return redirect(url_for("trip_start"))
-
-    db = get_db()
-    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
-    rows = db.execute(
-        "SELECT * FROM consignments WHERE trip_id=? ORDER BY created_at DESC",
-        (tid,),
-    ).fetchall()
-
-    return render_template(
-        "consignments.html",
-        trip=trip,
-        stops=get_stops(trip["route"]),
-        items=[dict(r) for r in rows],
-    )
-
-
-@app.route("/api/consignments", methods=["GET", "POST"])
-def api_consignments():
-    tid = get_active_trip()
-    if not tid:
-        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
-    db = get_db()
-
-    if request.method == "GET":
-        rows = db.execute(
-            "SELECT * FROM consignments WHERE trip_id=? ORDER BY created_at DESC",
-            (tid,),
-        ).fetchall()
-        return jsonify({"ok": True, "items": [dict(r) for r in rows]})
-
-    data = request.get_json(force=True) or {}
-    code = (data.get("code") or "").strip() or secrets.token_hex(3).upper()
-    item_name = (data.get("item_name") or "").strip()
-    item_type = (data.get("item_type") or "").strip()
-    from_name = (data.get("from_name") or "").strip()
-    from_phone = (data.get("from_phone") or "").strip()
-    to_name = (data.get("to_name") or "").strip()
-    to_phone = (data.get("to_phone") or "").strip()
-    from_stop = (data.get("from_stop") or "").strip()
-    to_stop = (data.get("to_stop") or "").strip()
-    payment = norm_payment(data.get("payment"))
-    amount = parse_float(data.get("amount"), 0.0) or 0.0
-
-    if not item_name:
-        return jsonify({"ok": False, "msg": "Eşya adı gerekli"}), 400
-    if from_stop and not validate_stop_for_active_trip(from_stop):
-        return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {from_stop}"}), 400
-    if to_stop and not validate_stop_for_active_trip(to_stop):
-        return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
-
-    db.execute(
-        """
-        INSERT INTO consignments(
-            trip_id, code, item_name, item_type, from_name, from_phone,
-            to_name, to_phone, from_stop, to_stop, amount, payment, status
-        )
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?, 'bekliyor')
-        """,
-        (
-            tid, code, item_name, item_type, from_name, from_phone,
-            to_name, to_phone, from_stop, to_stop, amount, payment,
-        ),
-    )
-    db.commit()
-    new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
-    return jsonify({"ok": True, "id": new_id, "code": code})
-
-
-@app.get("/api/parcels")
-def api_parcels():
-    tid = get_active_trip()
-    if not tid:
-        return jsonify({"ok": False, "msg": "Aktif sefer yok", "items": []}), 400
-
-    status = (request.args.get("status") or "bekliyor").strip().lower()
-    rows = get_db().execute(
-        """
-        SELECT COALESCE(to_stop,'') AS to_stop, COUNT(*) AS cnt
-        FROM consignments
-        WHERE trip_id=? AND status=?
-        GROUP BY to_stop
-        """,
-        (tid, status),
-    ).fetchall()
-
-    items = [{"to": r["to_stop"], "count": int(r["cnt"])} for r in rows if r["to_stop"]]
-    return jsonify({"ok": True, "items": items})
-
-
-@app.route("/api/consignments/<int:cid>/photos", methods=["GET", "POST"])
-def api_consignment_photos(cid):
-    tid = get_active_trip()
-    if not tid:
-        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
-    db = get_db()
-
-    if request.method == "GET":
-        rows = db.execute(
-            """
-            SELECT id, role, file_path, mime, size_bytes, created_at
-            FROM consignment_photos
-            WHERE consignment_id=?
-            ORDER BY id DESC
-            """,
-            (cid,),
-        ).fetchall()
-
-        items = [{
-            "id": r["id"],
-            "role": r["role"],
-            "file": r["file_path"],
-            "mime": r["mime"],
-            "size": r["size_bytes"],
-            "created_at": r["created_at"],
-            "url": url_for("serve_uploaded", filename=r["file_path"]),
-        } for r in rows]
-
-        return jsonify({"ok": True, "items": items})
-
-    role = (request.form.get("role") or "").strip().lower()
-    file = request.files.get("file")
-
-    if not file or not file.filename:
-        return jsonify({"ok": False, "msg": "Dosya gerekli"}), 400
-    if not allowed_file(file.filename):
-        return jsonify({"ok": False, "msg": "İzin verilmeyen dosya türü"}), 400
-    if file.mimetype not in ALLOWED_IMAGE_MIMES:
-        return jsonify({"ok": False, "msg": "Desteklenmeyen MIME"}), 400
-
-    row = db.execute("SELECT id FROM consignments WHERE id=? AND trip_id=?", (cid, tid)).fetchone()
-    if not row:
-        return jsonify({"ok": False, "msg": "Emanet bulunamadı"}), 404
-
-    ext = file.filename.rsplit(".", 1)[1].lower()
-    rid = secrets.token_hex(3)
-    fname = secure_filename(f"c{cid}_{int(datetime.now().timestamp())}_{rid}.{ext}")
-
-    ensure_upload_dir()
-    save_path = Path(UPLOAD_DIR) / fname
-    file.save(save_path)
-    size_bytes = save_path.stat().st_size
-
-    db.execute(
-        """
-        INSERT INTO consignment_photos(consignment_id, role, file_path, mime, size_bytes)
-        VALUES(?,?,?,?,?)
-        """,
-        (cid, role, fname, file.mimetype, size_bytes),
-    )
-    db.commit()
-
-    return jsonify({
-        "ok": True,
-        "url": url_for("serve_uploaded", filename=fname),
-        "file": fname,
-        "size": size_bytes,
-    })
-
-
-@app.route("/api/consignments/<int:cid>", methods=["DELETE"])
-def api_consignment_delete(cid):
-    tid = get_active_trip()
-    if not tid:
-        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
-
-    db = get_db()
-    photos = db.execute("SELECT file_path FROM consignment_photos WHERE consignment_id=?", (cid,)).fetchall()
-
-    for r in photos:
-        try:
-            (Path(UPLOAD_DIR) / r["file_path"]).unlink(missing_ok=True)
-        except Exception:
-            pass
-
-    db.execute("DELETE FROM consignment_photos WHERE consignment_id=?", (cid,))
-    db.execute("DELETE FROM consignments WHERE id=? AND trip_id=?", (cid, tid))
-    db.commit()
-    return jsonify({"ok": True})
-
-
-# =========================================================
-# Upload serve
-# =========================================================
-
-@app.route("/u/<path:filename>")
-def serve_uploaded(filename):
-    safe_name = secure_filename(filename)
-    return send_from_directory(UPLOAD_DIR, safe_name, as_attachment=False)
+register_consignments_routes(app, {
+    "get_active_trip": get_active_trip,
+    "get_db": get_db,
+    "get_stops": get_stops,
+    "validate_stop_for_active_trip": validate_stop_for_active_trip,
+    "norm_payment": norm_payment,
+    "parse_float": parse_float,
+    "allowed_file": allowed_file,
+    "ensure_upload_dir": ensure_upload_dir,
+    "UPLOAD_DIR": UPLOAD_DIR,
+    "ALLOWED_IMAGE_MIMES": ALLOWED_IMAGE_MIMES,
+})
 
 
 # =========================================================
@@ -7486,803 +7224,37 @@ def settings_profile_page():
 # =========================================================
 # Yedekleme Sistemi
 # =========================================================
-def backup_dir_path():
-    p = Path(app.root_path) / "storage" / "backups"
-    p.mkdir(parents=True, exist_ok=True)
-    return p
+from modules.backup_panel import register_backup_routes
 
-
-def safe_backup_filename(name):
-    name = (name or "").strip()
-    if not name:
-        return ""
-    name = Path(name).name
-    if not name.startswith("yedek_"):
-        return ""
-    if not name.endswith(".zip"):
-        return ""
-    return name
-
-
-def file_size_text(size):
-    try:
-        size = float(size)
-    except Exception:
-        return "0 B"
-
-    units = ["B", "KB", "MB", "GB"]
-    i = 0
-    while size >= 1024 and i < len(units) - 1:
-        size /= 1024
-        i += 1
-
-    if i == 0:
-        return f"{int(size)} {units[i]}"
-    return f"{size:.1f} {units[i]}"
-
-
-def list_backup_files():
-    folder = backup_dir_path()
-    items = []
-
-    for f in sorted(folder.glob("yedek_*.zip"), key=lambda x: x.stat().st_mtime, reverse=True):
-        st = f.stat()
-        items.append({
-            "name": f.name,
-            "size": file_size_text(st.st_size),
-            "mtime": datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
-        })
-
-    return items
-
-
-def add_file_to_zip(zf, file_path, arcname):
-    file_path = Path(file_path)
-    if file_path.exists() and file_path.is_file():
-        zf.write(str(file_path), arcname)
-
-
-def add_folder_to_zip(zf, folder_path, arc_prefix):
-    folder_path = Path(folder_path)
-    if not folder_path.exists() or not folder_path.is_dir():
-        return
-
-    for item in folder_path.rglob("*"):
-        if item.is_file():
-            rel = item.relative_to(folder_path)
-            zf.write(str(item), str(Path(arc_prefix) / rel))
-
-
-def create_backup_zip():
-    folder = backup_dir_path()
-    now = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"yedek_{now}.zip"
-    target = folder / filename
-
-    root = Path(app.root_path)
-
-    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as zf:
-        # Ana veritabanı
-        add_file_to_zip(zf, root / "db.sqlite3", "db.sqlite3")
-
-        # Sefer raporları
-        add_folder_to_zip(zf, root / "storage" / "reports", "storage/reports")
-
-        # Yüklenen profil fotoğrafları
-        add_folder_to_zip(zf, root / "static" / "profile", "static/profile")
-
-        # Uygulama içi yüklenen dosyalar/fotoğraflar
-        add_folder_to_zip(zf, root / "uploads", "uploads")
-
-        # Bilgi dosyası
-        info = []
-        info.append("Sarıkız Host/Hostes Paneli Yedek Dosyası")
-        info.append(f"Oluşturma: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        info.append("")
-        info.append("İçerik:")
-        info.append("- db.sqlite3")
-        info.append("- storage/reports")
-        info.append("- static/profile")
-        info.append("- uploads")
-        zf.writestr("YEDEK_BILGI.txt", "\n".join(info))
-
-    return filename
-
-
-@app.route("/ayarlar/yedekleme")
-def settings_backup_page():
-    created = (request.args.get("created") or "").strip()
-    deleted = (request.args.get("deleted") or "").strip()
-    restored = (request.args.get("restored") or "").strip()
-    emergency = (request.args.get("emergency") or "").strip()
-    restore_error = (request.args.get("restore_error") or "").strip()
-    items = list_backup_files()
-
-    return render_template(
-        "settings_backup.html",
-        items=items,
-        created=created,
-        deleted=deleted,
-        restored=restored,
-        emergency=emergency,
-        restore_error=restore_error,
-    )
-
-
-@app.post("/ayarlar/yedekleme/olustur")
-def settings_backup_create():
-    filename = create_backup_zip()
-    return redirect(url_for("settings_backup_page", created=filename))
-
-
-@app.route("/ayarlar/yedekleme/indir/<filename>")
-def settings_backup_download(filename):
-    filename = safe_backup_filename(filename)
-    if not filename:
-        abort(404)
-
-    path = backup_dir_path() / filename
-    if not path.exists():
-        abort(404)
-
-    return send_file(str(path), as_attachment=True, download_name=filename)
-
-
-@app.post("/ayarlar/yedekleme/sil/<filename>")
-def settings_backup_delete(filename):
-    filename = safe_backup_filename(filename)
-    if not filename:
-        abort(404)
-
-    path = backup_dir_path() / filename
-    if path.exists():
-        path.unlink()
-
-    return redirect(url_for("settings_backup_page", deleted=filename))
-
+register_backup_routes(app)
 
 
 # =========================================================
-# Yedekten Geri Yükleme Sistemi
+# Abonelik / Paket Sistemi
 # =========================================================
-def restore_upload_dir_path():
-    p = Path(app.root_path) / "storage" / "restore_uploads"
-    p.mkdir(parents=True, exist_ok=True)
-    return p
-
-
-def is_allowed_restore_member(name):
-    name = (name or "").replace("\\", "/").strip()
-
-    if not name or name.startswith("/") or name.startswith("../") or "/../" in name:
-        return False
-
-    allowed_exact = {"db.sqlite3", "YEDEK_BILGI.txt"}
-    allowed_prefixes = (
-        "storage/reports/",
-        "static/profile/",
-        "uploads/",
-    )
-
-    if name in allowed_exact:
-        return True
-
-    return any(name.startswith(prefix) for prefix in allowed_prefixes)
-
-
-def extract_restore_zip_safely(zip_path):
-    zip_path = Path(zip_path)
-    root = Path(app.root_path)
-    temp_dir = root / "storage" / "restore_temp"
-
-    if temp_dir.exists():
-        shutil.rmtree(temp_dir)
-    temp_dir.mkdir(parents=True, exist_ok=True)
-
-    with zipfile.ZipFile(zip_path, "r") as zf:
-        names = zf.namelist()
-
-        if "db.sqlite3" not in names:
-            raise ValueError("Bu yedek dosyasında db.sqlite3 bulunamadı.")
-
-        for name in names:
-            if name.endswith("/"):
-                continue
-
-            if not is_allowed_restore_member(name):
-                continue
-
-            target = temp_dir / name
-            target.parent.mkdir(parents=True, exist_ok=True)
-
-            with zf.open(name) as src, open(target, "wb") as dst:
-                shutil.copyfileobj(src, dst)
-
-    return temp_dir
-
-
-def close_db_for_restore():
-    # Açık SQLite bağlantısı varsa kapatmaya çalış
-    try:
-        db = getattr(g, "db", None)
-        if db:
-            db.close()
-            g.db = None
-    except Exception:
-        pass
-
-    try:
-        db = getattr(g, "_database", None)
-        if db:
-            db.close()
-            g._database = None
-    except Exception:
-        pass
-
-
-def restore_backup_from_zip(zip_path):
-    root = Path(app.root_path)
-
-    # Önce mevcut sistemi acil yedekle
-    emergency_backup = create_backup_zip()
-
-    temp_dir = extract_restore_zip_safely(zip_path)
-
-    close_db_for_restore()
-
-    # Veritabanı geri yükle
-    src_db = temp_dir / "db.sqlite3"
-    if src_db.exists():
-        shutil.copy2(src_db, root / "db.sqlite3")
-
-    # Raporlar geri yükle
-    src_reports = temp_dir / "storage" / "reports"
-    dst_reports = root / "storage" / "reports"
-    if src_reports.exists():
-        if dst_reports.exists():
-            shutil.rmtree(dst_reports)
-        dst_reports.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(src_reports, dst_reports)
-
-    # Profil fotoğrafları geri yükle
-    src_profile = temp_dir / "static" / "profile"
-    dst_profile = root / "static" / "profile"
-    if src_profile.exists():
-        if dst_profile.exists():
-            shutil.rmtree(dst_profile)
-        dst_profile.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(src_profile, dst_profile)
-
-    # Uploads geri yükle
-    src_uploads = temp_dir / "uploads"
-    dst_uploads = root / "uploads"
-    if src_uploads.exists():
-        if dst_uploads.exists():
-            shutil.rmtree(dst_uploads)
-        dst_uploads.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(src_uploads, dst_uploads)
-
-    try:
-        shutil.rmtree(temp_dir)
-    except Exception:
-        pass
-
-    return emergency_backup
-
-
-@app.post("/ayarlar/yedekleme/geri-yukle")
-def settings_backup_restore():
-    f = request.files.get("backup_file")
-
-    if not f or not f.filename:
-        return redirect(url_for("settings_backup_page", restore_error="Yedek dosyası seçilmedi."))
-
-    filename = secure_filename(f.filename or "")
-
-    if not filename.lower().endswith(".zip"):
-        return redirect(url_for("settings_backup_page", restore_error="Sadece .zip yedek dosyası yüklenebilir."))
-
-    upload_dir = restore_upload_dir_path()
-    upload_path = upload_dir / f"restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
-    f.save(str(upload_path))
-
-    try:
-        emergency = restore_backup_from_zip(upload_path)
-    except zipfile.BadZipFile:
-        try:
-            upload_path.unlink()
-        except Exception:
-            pass
-        return redirect(url_for("settings_backup_page", restore_error="Zip dosyası bozuk veya geçersiz."))
-    except Exception as e:
-        try:
-            upload_path.unlink()
-        except Exception:
-            pass
-        return redirect(url_for("settings_backup_page", restore_error=str(e)))
-
-    try:
-        upload_path.unlink()
-    except Exception:
-        pass
-
-    return redirect(url_for(
-        "settings_backup_page",
-        restored=filename,
-        emergency=emergency
-    ))
-
-
-
-# =========================================================
-# Abonelik / 30 Gün Deneme Sistemi
-# =========================================================
-TRIAL_DAYS = 30
-
-
-def parse_dt_safe(value):
-    try:
-        return datetime.fromisoformat(str(value))
-    except Exception:
-        return None
-
-
-
-
-def format_dt_tr(value):
-    dt = parse_dt_safe(value)
-    if not dt:
-        return value or "-"
-    return dt.strftime("%d.%m.%Y %H:%M")
-
-
-def subscription_defaults():
-    now = datetime.now()
-    ends = now + timedelta(days=TRIAL_DAYS)
-
-    return {
-        "subscription_status": "trial",
-        "trial_started_at": now.isoformat(timespec="seconds"),
-        "trial_ends_at": ends.isoformat(timespec="seconds"),
-        "subscription_plan": "Deneme",
-        "payment_method_added": "0",
-        "subscription_started_at": "",
-        "subscription_ends_at": "",
-        "last_payment_at": "",
-    }
-
-
-def ensure_subscription_state():
-    status = settings_get("subscription_status", "")
-
-    if status:
-        return
-
-    data = subscription_defaults()
-    for k, v in data.items():
-        settings_set(k, v)
-
-
-def get_subscription_info():
-    ensure_subscription_state()
-
-    status = settings_get("subscription_status", "trial") or "trial"
-    trial_started_at = settings_get("trial_started_at", "") or ""
-    trial_ends_at = settings_get("trial_ends_at", "") or ""
-    plan = settings_get("subscription_plan", "Deneme") or "Deneme"
-    payment_method_added = settings_get("payment_method_added", "0") or "0"
-    subscription_started_at = settings_get("subscription_started_at", "") or ""
-    last_payment_at = settings_get("last_payment_at", "") or ""
-
-    now = datetime.now()
-    end_dt = parse_dt_safe(trial_ends_at)
-
-    days_left = 0
-    expired = False
-
-    if status == "trial" and end_dt:
-        diff = end_dt - now
-        days_left = max(0, diff.days + (1 if diff.seconds > 0 else 0))
-        expired = now > end_dt
-
-    if status == "active":
-        expired = False
-        days_left = None
-
-    if status in {"past_due", "canceled", "expired"}:
-        expired = True
-
-    return {
-        "status": status,
-        "plan": plan,
-        "trial_started_at": trial_started_at,
-        "trial_ends_at": trial_ends_at,
-        "trial_started_text": format_dt_tr(trial_started_at),
-        "trial_ends_text": format_dt_tr(trial_ends_at),
-        "payment_method_added": payment_method_added == "1",
-        "subscription_started_at": subscription_started_at,
-        "subscription_started_text": format_dt_tr(subscription_started_at),
-        "last_payment_at": last_payment_at,
-        "last_payment_text": format_dt_tr(last_payment_at),
-        "days_left": days_left,
-        "expired": expired,
-    }
-
-
-def subscription_allows_access():
-    info = get_subscription_info()
-
-    if info["status"] == "active":
-        return True
-
-    if info["status"] == "trial" and not info["expired"]:
-        return True
-
-    return False
-
-
-def start_trial_if_missing():
-    ensure_subscription_state()
-
-
-def activate_subscription_manually(plan="Standart"):
-    settings_set("subscription_status", "active")
-    settings_set("subscription_plan", plan or "Standart")
-    settings_set("payment_method_added", "1")
-    settings_set("subscription_started_at", datetime.now().isoformat(timespec="seconds"))
-    settings_set("last_payment_at", datetime.now().isoformat(timespec="seconds"))
-
-
-def force_expire_trial_for_test():
-    settings_set("subscription_status", "expired")
-    settings_set("trial_ends_at", (datetime.now() - timedelta(minutes=1)).isoformat(timespec="seconds"))
-
-
-@app.context_processor
-def inject_subscription_info():
-    try:
-        return {"subscription_info": get_subscription_info()}
-    except Exception:
-        return {"subscription_info": None}
-
-
-def subscription_dev_mode():
-    """
-    Test abonelik butonları sadece açıkça izin verilirse görünür.
-    Müşteri sürümünde asla görünmez.
-    
-    Test için:
-    SHOW_TEST_CONTROLS=1 python app.py
-    """
-    try:
-        return os.getenv("SHOW_TEST_CONTROLS", "").strip().lower() in {"1", "true", "yes", "on"}
-    except Exception:
-        return False
-
-
-
-
-
-# =========================================================
-# Paketlere Göre Özellik Kilidi
-# =========================================================
-PLAN_LEVELS = {
-    "": 0,
-    "Deneme": 2,      # Deneme süresinde Pro özellikleri açık
-    "Standart": 1,
-    "Pro": 2,
-    "Sınırsız": 3,
-}
-
-FEATURE_RULES = [
-    # path_prefix, gerekli_paket, özellik_adı
-    ("/sefer-raporu-son", "Pro", "Gelişmiş sefer raporları"),
-    ("/api/report-archive", "Pro", "Rapor arşivi API"),
-    ("/ayarlar/yedekleme/geri-yukle", "Pro", "Yedekten geri yükleme"),
-]
-
-
-def get_effective_plan():
-    """
-    Kullanıcının paketini hesaplar.
-    Deneme süresi devam ediyorsa Pro hakları verilir.
-    """
-    info = get_subscription_info()
-
-    if info.get("status") == "trial" and not info.get("expired"):
-        return "Deneme"
-
-    if info.get("status") == "active":
-        return info.get("plan") or "Standart"
-
-    return ""
-
-
-def plan_level(plan):
-    return PLAN_LEVELS.get(plan or "", 0)
-
-
-def plan_allows(required_plan):
-    current = get_effective_plan()
-    return plan_level(current) >= plan_level(required_plan)
-
-
-def find_feature_rule_for_path(path):
-    path = path or ""
-    for prefix, required_plan, feature_name in FEATURE_RULES:
-        if path.startswith(prefix):
-            return {
-                "prefix": prefix,
-                "required_plan": required_plan,
-                "feature_name": feature_name,
-            }
-    return None
-
-
-@app.route("/paket-gerekli")
-def package_required_page():
-    feature = (request.args.get("feature") or "Bu özellik").strip()
-    required = (request.args.get("required") or "Pro").strip()
-    current = get_effective_plan() or "Yok"
-
-    return render_template(
-        "package_required.html",
-        feature=feature,
-        required=required,
-        current=current,
-    )
-
-@app.route("/ayarlar/abonelik", methods=["GET", "POST"])
-def settings_subscription_page():
-    msg = ""
-    error = ""
-
-    if request.method == "POST":
-        action = (request.form.get("action") or "").strip()
-
-        if action in {"activate_manual", "expire_test", "restart_trial"} and not subscription_dev_mode():
-            error = "Bu test işlemi müşteri sürümünde kapalıdır."
-
-        elif action == "activate_manual":
-            activate_subscription_manually(request.form.get("plan") or "Standart")
-            msg = "Abonelik manuel olarak aktif edildi. Ödeme sistemi bağlanınca bu işlem otomatik olacak."
-
-        elif action == "expire_test":
-            force_expire_trial_for_test()
-            msg = "Test için deneme süresi bitmiş hale getirildi."
-
-        elif action == "restart_trial":
-            data = subscription_defaults()
-            for k, v in data.items():
-                settings_set(k, v)
-            msg = "Deneme süresi yeniden başlatıldı."
-
-        else:
-            error = "Geçersiz işlem."
-
-    upgrade_required = (request.args.get("required") or "").strip()
-    upgrade_feature = (request.args.get("feature") or "").strip()
-
-    return render_template(
-        "settings_subscription.html",
-        info=get_subscription_info(),
-        msg=msg,
-        error=error,
-        dev_mode=subscription_dev_mode(),
-        upgrade_required=upgrade_required,
-        upgrade_feature=upgrade_feature,
-    )
-
-
-@app.route("/abonelik-gerekli")
-def subscription_required_page():
-    return render_template("subscription_required.html", info=get_subscription_info())
-
-@app.route("/ayarlar")
-def settings_page():
-    return render_template("settings.html")
-
-
-
-# =========================================================
-# Paket Talep Kayıtları
-# =========================================================
-def ensure_package_requests_table():
-    db = get_db()
-    db.execute("""
-        CREATE TABLE IF NOT EXISTS package_requests(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            requested_plan TEXT NOT NULL,
-            current_plan TEXT,
-            subscription_status TEXT,
-            note TEXT,
-            user_agent TEXT,
-            created_at TEXT NOT NULL,
-            is_done INTEGER NOT NULL DEFAULT 0
-        )
-    """)
-    db.commit()
-
-
-@app.post("/api/package-request")
-def api_package_request():
-    if not subscription_dev_mode():
-        return jsonify({
-            "ok": False,
-            "error": "Paket talebi müşteri sürümünde kapalıdır. Satın alma Google Play üzerinden yapılacaktır."
-        }), 403
-
-    ensure_package_requests_table()
-
-    requested_plan = (
-        request.form.get("plan")
-        or (request.json.get("plan") if request.is_json and request.json else "")
-        or ""
-    ).strip()
-
-    if requested_plan not in {"Standart", "Pro", "Sınırsız"}:
-        return jsonify({"ok": False, "error": "Geçersiz paket seçimi."}), 400
-
-    info = get_subscription_info()
-    current_plan = get_effective_plan() or info.get("plan") or ""
-    status = info.get("status") or ""
-
-    note = f"{requested_plan} paketi için talep oluşturuldu."
-
-    db = get_db()
-    db.execute(
-        """
-        INSERT INTO package_requests(
-            requested_plan,
-            current_plan,
-            subscription_status,
-            note,
-            user_agent,
-            created_at,
-            is_done
-        )
-        VALUES(?,?,?,?,?,?,0)
-        """,
-        (
-            requested_plan,
-            current_plan,
-            status,
-            note,
-            request.headers.get("User-Agent", ""),
-            datetime.now().isoformat(timespec="seconds"),
-        ),
-    )
-    db.commit()
-
-    return jsonify({
-        "ok": True,
-        "message": f"{requested_plan} paket talebiniz kaydedildi."
-    })
-
-
-@app.route("/ayarlar/paket-talepleri")
-def settings_package_requests_page():
-    if not subscription_dev_mode():
-        abort(404)
-
-    ensure_package_requests_table()
-
-    rows = get_db().execute(
-        """
-        SELECT *
-        FROM package_requests
-        ORDER BY id DESC
-        LIMIT 100
-        """
-    ).fetchall()
-
-    return render_template("settings_package_requests.html", rows=rows)
-
-
-@app.post("/ayarlar/paket-talepleri/<int:req_id>/tamamla")
-def settings_package_request_done(req_id):
-    if not subscription_dev_mode():
-        abort(404)
-
-    ensure_package_requests_table()
-
-    get_db().execute(
-        "UPDATE package_requests SET is_done=1 WHERE id=?",
-        (req_id,),
-    )
-    get_db().commit()
-
-    return redirect(url_for("settings_package_requests_page"))
-
-
-
-
-# =========================================================
-# Google Play Satın Alma Başarılı Köprüsü
-# =========================================================
-GOOGLE_PLAY_PRODUCT_TO_PLAN = {
-    "standart_monthly": "Standart",
-    "pro_monthly": "Pro",
-    "unlimited_monthly": "Sınırsız",
-}
-
-
-def google_play_plan_from_product(product_id: str) -> str:
-    product_id = (product_id or "").strip()
-    return GOOGLE_PLAY_PRODUCT_TO_PLAN.get(product_id, "")
-
-
-@app.post("/api/google-play/purchase-success")
-def api_google_play_purchase_success():
-    """
-    Android WebView içinde Google Play Billing ödeme başarılı olunca çağrılır.
-
-    ÖNEMLİ:
-    Gerçek yayın sürümünde satın alma token'ı Google Play tarafında doğrulanmadan
-    paket açılmamalı. Şimdilik Android köprü altyapısı için yerel aktivasyon yapıyoruz.
-    """
-    product_id = (
-        request.form.get("product_id")
-        or (request.json.get("product_id") if request.is_json and request.json else "")
-        or ""
-    ).strip()
-
-    purchase_token = (
-        request.form.get("purchase_token")
-        or (request.json.get("purchase_token") if request.is_json and request.json else "")
-        or ""
-    ).strip()
-
-    plan = google_play_plan_from_product(product_id)
-
-    if not plan:
-        return jsonify({
-            "ok": False,
-            "error": "Geçersiz Google Play ürün kodu.",
-            "product_id": product_id,
-        }), 400
-
-    # Şimdilik yerel aktivasyon.
-    # Gerçek Play Store sürümünde burada token doğrulama / backend doğrulama yapılacak.
-    activate_subscription_manually(plan)
-
-    try:
-        settings_set("google_play_product_id", product_id)
-        settings_set("google_play_purchase_token", purchase_token)
-        settings_set("google_play_last_purchase_at", datetime.now().isoformat(timespec="seconds"))
-    except Exception:
-        pass
-
-    return jsonify({
-        "ok": True,
-        "plan": plan,
-        "product_id": product_id,
-        "message": f"{plan} paketi Google Play satın alma sonrası aktif edildi.",
-    })
-
-
-@app.post("/api/google-play/purchase-cancelled")
-def api_google_play_purchase_cancelled():
-    product_id = (
-        request.form.get("product_id")
-        or (request.json.get("product_id") if request.is_json and request.json else "")
-        or ""
-    ).strip()
-
-    try:
-        settings_set("google_play_last_cancelled_product_id", product_id)
-        settings_set("google_play_last_cancelled_at", datetime.now().isoformat(timespec="seconds"))
-    except Exception:
-        pass
-
-    return jsonify({
-        "ok": True,
-        "message": "Satın alma iptal bilgisi kaydedildi.",
-    })
-
-
-
-
+from modules.subscription_panel import register_subscription_routes
+
+_subscription_exports = register_subscription_routes(app, {
+    "settings_get": settings_get,
+    "settings_set": settings_set,
+    "get_db": get_db,
+})
+
+parse_dt_safe = _subscription_exports["parse_dt_safe"]
+format_dt_tr = _subscription_exports["format_dt_tr"]
+subscription_defaults = _subscription_exports["subscription_defaults"]
+ensure_subscription_state = _subscription_exports["ensure_subscription_state"]
+get_subscription_info = _subscription_exports["get_subscription_info"]
+subscription_allows_access = _subscription_exports["subscription_allows_access"]
+start_trial_if_missing = _subscription_exports["start_trial_if_missing"]
+activate_subscription_manually = _subscription_exports["activate_subscription_manually"]
+force_expire_trial_for_test = _subscription_exports["force_expire_trial_for_test"]
+subscription_dev_mode = _subscription_exports["subscription_dev_mode"]
+get_effective_plan = _subscription_exports["get_effective_plan"]
+plan_level = _subscription_exports["plan_level"]
+plan_allows = _subscription_exports["plan_allows"]
+find_feature_rule_for_path = _subscription_exports["find_feature_rule_for_path"]
+google_play_plan_from_product = _subscription_exports["google_play_plan_from_product"]
 
 
 # === LOCAL COORDS MANAGER START ===
