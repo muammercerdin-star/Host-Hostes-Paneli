@@ -29,11 +29,26 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Proje dosyalarını kontrol et
         run: |
           pwd
           ls -la
           find . -maxdepth 3 -type f \( -name "gradlew" -o -name "build.gradle" -o -name "settings.gradle" -o -name "*.gradle" \) -print
+
+      - name: Chaquopy Python link hazırla
+        run: |
+          which python
+          which python3
+          python --version
+          python3 --version
+          ln -sf "$(which python3)" ./python3.11
+          chmod +x ./python3.11
+          ./python3.11 --version
 
       - name: Python kontrol
         run: |
