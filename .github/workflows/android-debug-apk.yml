@@ -1,10 +1,10 @@
 name: güncelleme
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build:
@@ -29,8 +29,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Gradle izin ver
-        run: chmod +x ./gradlew
+      - name: Proje dosyalarını kontrol et
+        run: |
+          pwd
+          ls -la
+          find . -maxdepth 3 -type f \( -name "gradlew" -o -name "build.gradle" -o -name "settings.gradle" -o -name "*.gradle" \) -print
 
       - name: Python kontrol
         run: |
@@ -39,7 +42,13 @@ jobs:
           find app/src/main/python/modules -name "*.py" -print -exec python3 -m py_compile {} \;
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug
+        run: |
+          if [ -f ./gradlew ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug
+          else
+            gradle assembleDebug
+          fi
 
       - name: APK yükle
         uses: actions/upload-artifact@v4
