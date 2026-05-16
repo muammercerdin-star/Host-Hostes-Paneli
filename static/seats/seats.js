@@ -955,10 +955,10 @@ function setVoiceBadge(text){
 
     const label = $("#label-" + seatNo);
     if(label){
-      const from = boardsMap[key] || "";
-      const to = stopsMap[key] || "";
-      label.textContent = isAssigned ? (from ? `${from} → ${to}` : to) : "";
-    }
+        const from = boardsMap[key] || "";
+        const to = stopsMap[key] || "";
+        label.textContent = isAssigned ? (from ? `${from} → ${to}` : to) : "";
+      }
 
     const svc = el.querySelector(".svc-badge");
     if(svc){

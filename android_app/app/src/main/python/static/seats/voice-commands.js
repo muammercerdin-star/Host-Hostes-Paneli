@@ -646,7 +646,10 @@ async function handleLocalVoiceCommand(text){
   if(cmd.type === "ask_total"){
     const seated = Object.values(assigned || {}).filter(Boolean).length;
     const total = seated + (standingCount || 0);
-    const msg = `Toplam ${total} yolcu var. ${seated} oturan, ${standingCount || 0} ayakta.`;
+    const standing = Number(standingCount || 0);
+      const msg = standing > 0
+        ? `Toplam ${total} yolcu var. Bunun ${standing} kişisi ayakta.`
+        : `Toplam ${total} yolcu var.`;
     toast(msg, 3600);
     speak(msg);
     return true;
@@ -780,7 +783,10 @@ async function handleBasicVoiceCommand(text){
       if(cmd.type === "ask_total"){
         const seated = Object.values(assigned || {}).filter(Boolean).length;
         const total = seated + (standingCount || 0);
-        const msg = `Toplam ${total} yolcu var. ${seated} oturan, ${standingCount || 0} ayakta.`;
+        const standing = Number(standingCount || 0);
+      const msg = standing > 0
+        ? `Toplam ${total} yolcu var. Bunun ${standing} kişisi ayakta.`
+        : `Toplam ${total} yolcu var.`;
         toast(msg, 3600);
         speak(msg);
         return;
@@ -807,9 +813,11 @@ function getVoiceCommandButtons(){
   const out = [];
   const mainBtn = $("#btnDeckAI");
   const driveBtn = document.getElementById("btnDeckAIDrive");
+  const bottomBtn = document.getElementById("seatSimpleVoiceBtn");
 
   if(mainBtn) out.push(mainBtn);
   if(driveBtn) out.push(driveBtn);
+  if(bottomBtn) out.push(bottomBtn);
 
   return out;
 }
@@ -817,6 +825,16 @@ function getVoiceCommandButtons(){
 function setVoiceCommandButtonsListening(buttons, on){
   (buttons || []).forEach(btn => {
     btn.classList.toggle("listening", !!on);
+
+    if(btn.id === "seatSimpleVoiceBtn"){
+      btn.innerHTML = on
+        ? '<span class="ico">🔴</span><span class="voice-bottom-text">Dinliyor</span>'
+        : '<span class="ico">🎙️</span><span class="voice-bottom-text">Sesli<br>Komut</span>';
+      btn.setAttribute("title", on ? "Dinliyor" : "Sesli Komut");
+      btn.setAttribute("aria-label", on ? "Dinliyor" : "Sesli Komut");
+      return;
+    }
+
     btn.innerHTML = on
       ? '🔴 <span>Dinliyor</span>'
       : '🎤 <span>Sesli Komut</span>';

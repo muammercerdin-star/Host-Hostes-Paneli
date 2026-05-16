@@ -1,0 +1,1215 @@
+============================================================
+MUAVİN ASİSTANI - SEATS DETAYLI SİSTEM RAPORU
+Tarih: Sat May 16 15:59:24 +03 2026
+Klasör: /data/data/com.termux/files/home/Host-Hostes-Paneli
+============================================================
+
+===== 1) DOSYA VARLIK KONTROLÜ =====
+templates/seats.html                                             3329 satır
+templates/seats_parts/topbar.html                                  39 satır
+templates/seats_parts/deck.html                                    29 satır
+templates/seats_parts/route_flow.html                              31 satır
+templates/seats_parts/modals.html                                 195 satır
+templates/seats_parts/finish_trip_modal.html                      254 satır
+templates/seats_parts/offload_confirm.html                        258 satır
+static/seats/seats.js                                            2885 satır
+static/seats/voice-commands.js                                    907 satır
+static/seats/voice-tts.js                                         159 satır
+static/seats/drive-controls.js                                    286 satır
+static/seats/drive-eta-chip.js                                     64 satır
+static/seats/bags.js                                              187 satır
+static/seats/standing.js                                          245 satır
+static/seats/seats.css                                           4961 satır
+static/seats/seats-final.css                                     2563 satır
+
+===== 2) seats.html INCLUDE HARİTASI =====
+9:  {% include "seats_parts/topbar.html" %}
+10:  {# {% include "seats_parts/stats.html" %} #}
+86:        {% include "seats_parts/route_flow.html" %}
+87:        {% include "seats_parts/deck.html" %}
+324:{% include "seats_parts/modals.html" %}
+622:{% include "seats_parts/finish_trip_modal.html" %}
+835:{% include "seats_parts/offload_confirm.html" %}
+
+===== 3) seats.html SCRIPT / CSS BAĞLANTILARI =====
+4:<link rel="stylesheet" href="/static/style.css">
+5:<link rel="stylesheet" href="/static/seats/seats.css?v=41">
+6:<link rel="stylesheet" href="/static/seats/seats-final.css?v=drive-voice-real-width-test-1">
+351:<script src="/static/seats/bags.js?v=1"></script>
+352:<script src="/static/seats/voice-commands.js?v=natural-total-voice-1"></script>
+353:<script src="/static/seats/standing.js?v=1"></script>
+354:<script src="/static/seats/seats.js?v=drive-premium-rollback-1"></script>
+355:<script src="/static/seats/route-marquee.js?v=route-clean-ticker-single-1"></script>
+356:<script src="/static/seats/seats-time-prayer.js?v=time-prayer-apk-1"></script>
+357:<script src="/static/seats/voice-tts.js?v=voice-owner-fix-1"></script>
+358:<script src="/static/seats/drive-eta-chip.js?v=1"></script>
+359:<script src="/static/seats/drive-controls.js?v=drive-toggle-fix-1"></script>
+
+===== 4) seats.html AKTİF STYLE/SCRIPT ID BLOKLARI =====
+373:<style id="drive-mode-actions-independent-style">
+458:<script id="drive-mode-actions-independent-js">
+625:<style id="drive-dock-stability-final">
+853:<script id="drive-mode-force-toggle-js">
+927:<script id="drive-voice-mirror-script">
+995:<style id="seat-simple-open-mode-style">
+1133:<script id="seat-simple-open-mode-script">
+1221:<style id="seat-simple-summary-polish-style">
+1365:<script id="seat-simple-summary-polish-script">
+1484:<style id="seat-simple-bottom-bar-style">
+1592:<script id="seat-simple-bottom-bar-script">
+1701:<style id="seat-hide-bottom-menu-on-modal-style">
+1713:<script id="seat-hide-bottom-menu-on-modal-script">
+1795:<style id="stop-flow-focus-patch-style">
+1975:<script id="stop-flow-focus-patch-script">
+2323:<style id="stop-selected-toast-style">
+2394:<script id="stop-selected-toast-script">
+2469:<style id="modal-bottom-nav-autohide-v3-style">
+2478:<script id="modal-bottom-nav-autohide-v3-script">
+2651:<style id="right-seat-column-spacing-fix-style">
+2706:<style id="bottom-row-51-54-equal-spacing-style">
+2728:<style id="fab-left-gap-move-style">
+2778:<script id="fab-left-gap-move-script">
+2860:<style id="fab-distinct-panel-style">
+2978:<style id="only-54-reapply-right-shift-style">
+3005:<style id="bottom-voice-command-final-style">
+3029:<style id="bottom-voice-listening-state-fix-style">
+3041:<style id="top-sound-toggle-style">
+3104:<script id="top-sound-toggle-script">
+3270:<script id="continue-trip-selected-stop-store">
+
+===== 5) seats.html AKTİF PATCH MARKERLARI =====
+
+===== 6) PATCH BLOK DETAY RAPORU =====
+Toplam seats.html satırı: 3329
+
+STYLE / SCRIPT ID BLOKLARI
+  373-  456 | STYLE  | drive-mode-actions-independent-style | satır: 84
+  458-  619 | SCRIPT | drive-mode-actions-independent-js | satır: 162
+  625-  830 | STYLE  | drive-dock-stability-final | satır: 206
+  853-  920 | SCRIPT | drive-mode-force-toggle-js | satır: 68
+  927-  991 | SCRIPT | drive-voice-mirror-script | satır: 65
+  995- 1131 | STYLE  | seat-simple-open-mode-style | satır: 137
+ 1133- 1217 | SCRIPT | seat-simple-open-mode-script | satır: 85
+ 1221- 1363 | STYLE  | seat-simple-summary-polish-style | satır: 143
+ 1365- 1480 | SCRIPT | seat-simple-summary-polish-script | satır: 116
+ 1484- 1590 | STYLE  | seat-simple-bottom-bar-style | satır: 107
+ 1592- 1697 | SCRIPT | seat-simple-bottom-bar-script | satır: 106
+ 1701- 1711 | STYLE  | seat-hide-bottom-menu-on-modal-style | satır: 11
+ 1713- 1790 | SCRIPT | seat-hide-bottom-menu-on-modal-script | satır: 78
+ 1795- 1973 | STYLE  | stop-flow-focus-patch-style | satır: 179
+ 1975- 2318 | SCRIPT | stop-flow-focus-patch-script | satır: 344
+ 2323- 2392 | STYLE  | stop-selected-toast-style | satır: 70
+ 2394- 2458 | SCRIPT | stop-selected-toast-script | satır: 65
+ 2469- 2476 | STYLE  | modal-bottom-nav-autohide-v3-style | satır: 8
+ 2478- 2628 | SCRIPT | modal-bottom-nav-autohide-v3-script | satır: 151
+ 2651- 2701 | STYLE  | right-seat-column-spacing-fix-style | satır: 51
+ 2706- 2723 | STYLE  | bottom-row-51-54-equal-spacing-style | satır: 18
+ 2728- 2776 | STYLE  | fab-left-gap-move-style | satır: 49
+ 2778- 2855 | SCRIPT | fab-left-gap-move-script | satır: 78
+ 2860- 2958 | STYLE  | fab-distinct-panel-style | satır: 99
+ 2978- 2999 | STYLE  | only-54-reapply-right-shift-style | satır: 22
+ 3005- 3024 | STYLE  | bottom-voice-command-final-style | satır: 20
+ 3029- 3036 | STYLE  | bottom-voice-listening-state-fix-style | satır: 8
+ 3041- 3102 | STYLE  | top-sound-toggle-style | satır: 62
+ 3104- 3264 | SCRIPT | top-sound-toggle-script | satır: 161
+ 3270- 3324 | SCRIPT | continue-trip-selected-stop-store | satır: 55
+
+COMMENT MARKER BLOKLARI
+ 1794- 2319 | STOP_FLOW_FOCUS_PATCH | satır: 526
+ 2322- 2459 | STOP_SELECTED_TOAST_PATCH | satır: 138
+ 2468- 2629 | MODAL_BOTTOM_NAV_AUTOHIDE_V3 | satır: 162
+ 2650- 2702 | RIGHT_SEAT_COLUMN_SPACING_FIX | satır: 53
+ 2705- 2724 | BOTTOM_ROW_51_54_EQUAL_SPACING | satır: 20
+ 2727- 2856 | FAB_LEFT_GAP_MOVE | satır: 130
+ 2859- 2959 | FAB_DISTINCT_PANEL | satır: 101
+ 2977- 3000 | ONLY_54_REAPPLY_RIGHT_SHIFT | satır: 24
+ 3004- 3025 | BOTTOM_VOICE_COMMAND_FINAL | satır: 22
+ 3028- 3037 | BOTTOM_VOICE_LISTENING_STATE_FIX | satır: 10
+ 3040- 3265 | TOP_SOUND_TOGGLE | satır: 226
+
+===== 7) HTML/CSS/JS AÇILIŞ-KAPANIŞ SAYIMI =====
+style açılış: 17
+style kapanış: 17
+script açılış: 23
+script kapanış: 23
+START sayısı: 11
+END sayısı: 11
+END olmayan START: []
+START olmayan END: []
+
+===== 8) KOLTUK PLANINI YÖNETEN KAYNAKLAR =====
+--- deck.html ---
+     1	<div class="board-stage">
+     2	          <div class="deck-wrap">
+     3	            <div class="deck" id="deck">
+     4	              <div class="corr">KORİDOR</div>
+     5	
+     6	              {% for n, pos in seat_positions.items() %}
+     7	                {% if n == 29 %}
+     8	                  <div class="door">KAPI</div>
+     9	                {% endif %}
+    10	
+    11	                <div class="cell" style="grid-row:{{ pos[0] }}; grid-column:{{ pos[1] }};">
+    12	                  <div class="seat" id="seat-{{ n }}" data-seat="{{ n }}" role="button" aria-label="Koltuk {{ n }}">
+    13	                    {{ n }}
+    14	                    <span class="svc-badge" title="Servis">🚌</span>
+    15	                    <span class="bag-badge" title="Bagaj"><span class="bag-dir"></span><span class="bag-count">0</span></span>
+    16	                    <span class="stop-badge" title="Bu durakta inecek">🔔</span>
+    17	                  </div>
+    18	                  <div class="label" id="label-{{ n }}"></div>
+    19	                </div>
+    20	              {% endfor %}
+    21	            </div>
+    22	
+    23	            <div class="fab-column" aria-label="Hızlı işlemler">
+    24	              <button class="fab primary" id="fabBulk" type="button" title="Toplu Giriş">＋</button>
+    25	              <button class="fab green" id="fabCash" type="button" title="Hızlı Tahsilat">₺</button>
+    26	              <button class="fab orange" id="btnOffloadNow" type="button" title="İndir">⇩</button>
+    27	            </div>
+    28	          </div>
+    29	        </div>
+
+--- app.py SEAT_POSITIONS ---
+   232	SEAT_NUMBERS = [
+   233	    1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20, 21, 23, 24,
+   234	    25, 27, 28, 29, 31, 33, 34, 35, 37, 38, 39, 41, 42, 43, 45, 46,
+   235	    49, 50, 51, 52, 53, 54,
+   236	]
+   237	
+   238	SEAT_POSITIONS = {
+   239	    1: [1, 1], 3: [1, 3], 4: [1, 4],
+   240	    5: [2, 1], 7: [2, 3], 8: [2, 4],
+   241	    9: [3, 1], 11: [3, 3], 12: [3, 4],
+   242	    13: [4, 1], 15: [4, 3], 16: [4, 4],
+   243	    17: [5, 1], 19: [5, 3], 20: [5, 4],
+   244	    21: [6, 1], 23: [6, 3], 24: [6, 4],
+   245	    25: [7, 1], 27: [8, 3], 28: [8, 4],
+   246	    29: [8, 1],
+   247	    31: [9, 1], 33: [9, 3], 34: [9, 4],
+   248	    35: [10, 1], 37: [10, 3], 38: [10, 4],
+   249	    39: [11, 1], 41: [11, 3], 42: [11, 4],
+   250	    43: [12, 1], 45: [12, 3], 46: [12, 4],
+   251	    49: [13, 3], 50: [13, 4],
+   252	    51: [14, 1], 52: [14, 2], 53: [14, 3], 54: [14, 4],
+   253	}
+
+--- seats.js setSeatVisual ---
+931-    const stop = getSelectedStopName();
+932-    $$(".seat").forEach(el => el.classList.remove("has-stop"));
+933-    if(!stop) return;
+934-
+935-    seatsForStop(stop).forEach(n => {
+936-      const el = $("#seat-" + n);
+937-      if(el) el.classList.add("has-stop");
+938-    });
+939-  }
+940-
+941:  function setSeatVisual(seatNo){
+942-    const key = String(seatNo);
+943-    const el = $("#seat-" + seatNo);
+944-    if(!el) return;
+945-
+946-    el.classList.remove("male","female","isAssigned","has-service");
+947-
+948-    const isAssigned = !!assigned[key];
+949-    const gender = genders[key] || "";
+950-
+951-    if(isAssigned) el.classList.add("isAssigned");
+952-    if(gender === "bay") el.classList.add("male");
+953-    if(gender === "bayan") el.classList.add("female");
+954-    if(serviceMap[key]) el.classList.add("has-service");
+955-
+956-    const label = $("#label-" + seatNo);
+957-    if(label){
+958-        const from = boardsMap[key] || "";
+959-        const to = stopsMap[key] || "";
+960-        label.textContent = isAssigned ? (from ? `${from} → ${to}` : to) : "";
+961-      }
+962-
+963-    const svc = el.querySelector(".svc-badge");
+964-    if(svc){
+965-      const note = (serviceNotes[key] || "").trim();
+966-      svc.title = note ? `Servis: ${note}` : "Servis";
+967-    }
+968-  }
+969-
+970-  function updateStats(){
+971-    const totalSeats = Object.keys(seatPositions || {}).length;
+972-    const filled = Object.values(assigned || {}).filter(Boolean).length;
+973-    const empty = totalSeats - filled;
+974-    const occ = totalSeats ? Math.round((filled / totalSeats) * 100) : 0;
+975-
+976-    setText("#pillTotal", String(filled + standingCount));
+
+--- seats.css deck / cell / seat / label / fab ---
+557:  .deck-wrap{
+564:  .deck{
+612:  .cell{
+621:  .seat{
+674:  .label{
+730:  .fab-column{
+740:  .fab{
+1373:    .deck-wrap{
+1377:    .fab-column{
+1384:    .fab{
+1514:    .deck{
+1523:    .fab-column{
+1528:    .fab{
+2394:body.drive-mode .deck{
+2400:body.drive-mode .label{
+2413:body.drive-mode .cell{
+2435:body.drive-mode .fab-column{
+2441:body.drive-mode .fab{
+2505:  body.drive-mode .label{
+2595:.deck{
+2620:body.drive-mode .deck{
+2667:body.drive-mode .deck-wrap{
+2674:body.drive-mode .deck{
+2682:body.drive-mode .label{
+2695:body.drive-mode .cell{
+2712:  body.drive-mode .deck{
+2721:  body.drive-mode .label{
+2757:body.drive-mode .deck-wrap{
+2762:body.drive-mode .fab-column{
+2789:body.drive-mode .fab{
+2813:body.drive-mode .deck{
+2819:  body.drive-mode .fab-column{
+2826:  body.drive-mode .fab{
+2839:  body.drive-mode .deck{
+2856:body.drive-mode .deck-wrap{
+2861:body.drive-mode .deck{
+2866:body.drive-mode .fab-column{
+2874:body.drive-mode .fab{
+2889:  body.drive-mode .deck{
+2893:  body.drive-mode .fab-column{
+2899:  body.drive-mode .fab{
+4923:.deck .cell[style*="grid-row:14;"]{
+4927:.deck .cell[style*="grid-row:14;"] .label:empty{
+4939:.deck{
+4945:.deck .cell[style*="grid-row:14;"],
+4946:.deck .cell[style*="grid-row: 14;"]{
+4951:.deck .cell[style*="grid-row:14;"] .label:empty,
+4952:.deck .cell[style*="grid-row: 14;"] .label:empty{
+
+--- seats-final.css override ---
+608:.deck-wrap{
+615:.deck{
+620:.seat{
+627:.label{
+632:.fab-column{
+638:.fab{
+1734:body.drive-mode .deck{
+1756:  body.drive-mode .deck{
+
+===== 9) HIZLI İŞLEM / FAB KAYNAK RAPORU =====
+templates/seats.html:211:                <button class="btn danger" type="button" id="btnOffloadNowPane">İnecekleri İndir</button>
+templates/seats.html:281:              <button class="btn primary" type="button" id="fabBulkPane">Toplu Giriş</button>
+templates/seats.html:282:              <button class="btn green" type="button" id="fabCashPane">Hızlı Tahsilat</button>
+templates/seats.html:2727:<!-- FAB_LEFT_GAP_MOVE_START -->
+templates/seats.html:2735:  .fab-column.fab-left-gap-moved{
+templates/seats.html:2748:  .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:2756:  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:2764:    .fab-column.fab-left-gap-moved{
+templates/seats.html:2768:    .fab-column.fab-left-gap-moved .fab,
+templates/seats.html:2769:    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:2788:    var col = q(".fab-column");
+templates/seats.html:2856:<!-- FAB_LEFT_GAP_MOVE_END -->
+templates/seats.html:2859:<!-- FAB_DISTINCT_PANEL_START -->
+templates/seats.html:2866:  .fab-column.fab-left-gap-moved{
+templates/seats.html:2884:  .fab-column.fab-left-gap-moved::before{
+templates/seats.html:2899:  .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:2915:  .fab-column.fab-left-gap-moved .fab::after{
+templates/seats.html:2924:  .fab-column.fab-left-gap-moved .fab.primary{
+templates/seats.html:2930:  .fab-column.fab-left-gap-moved .fab.green{
+templates/seats.html:2936:  .fab-column.fab-left-gap-moved .fab.orange{
+templates/seats.html:2942:  .fab-column.fab-left-gap-moved .fab:active{
+templates/seats.html:2947:    .fab-column.fab-left-gap-moved{
+templates/seats.html:2952:    .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:2959:<!-- FAB_DISTINCT_PANEL_END -->
+templates/seats_parts/deck.html:23:            <div class="fab-column" aria-label="Hızlı işlemler">
+templates/seats_parts/deck.html:24:              <button class="fab primary" id="fabBulk" type="button" title="Toplu Giriş">＋</button>
+templates/seats_parts/deck.html:25:              <button class="fab green" id="fabCash" type="button" title="Hızlı Tahsilat">₺</button>
+templates/seats_parts/deck.html:26:              <button class="fab orange" id="btnOffloadNow" type="button" title="İndir">⇩</button>
+static/seats/seats.js:2646:  onClick("#fabBulk", openBulk);
+static/seats/seats.js:2647:  onClick("#fabBulkPane", openBulk);
+static/seats/seats.js:2653:  onClick("#fabCash", openCash);
+static/seats/seats.js:2654:  onClick("#fabCashPane", openCash);
+static/seats/seats.js:2691:  onClick("#btnOffloadNow", offloadSelectedStop);
+static/seats/seats.js:2692:  onClick("#btnOffloadNowPane", offloadSelectedStop);
+static/seats/seats.css:730:  .fab-column{
+static/seats/seats.css:1377:    .fab-column{
+static/seats/seats.css:1523:    .fab-column{
+static/seats/seats.css:2435:body.drive-mode .fab-column{
+static/seats/seats.css:2762:body.drive-mode .fab-column{
+static/seats/seats.css:2819:  body.drive-mode .fab-column{
+static/seats/seats.css:2866:body.drive-mode .fab-column{
+static/seats/seats.css:2893:  body.drive-mode .fab-column{
+static/seats/seats-final.css:632:.fab-column{
+
+===== 10) SESLİ KOMUT / ASİSTAN SES RAPORU =====
+templates/seats.html:47:              <button class="voice-command-btn" id="btnDeckAI" type="button" title="Sesli Komut">
+templates/seats.html:61:  <button class="drive-voice-btn" id="btnDeckAIDrive" type="button" title="Sesli Komut">
+templates/seats.html:944:    const fakeBtn = document.getElementById("btnDeckAIDrive");
+templates/seats.html:945:    const realBtn = document.getElementById("btnDeckAI");
+templates/seats.html:1622:      if(window.SeatsVoice && typeof window.SeatsVoice.startDeckAIVoice === "function"){
+templates/seats.html:1623:        window.SeatsVoice.startDeckAIVoice();
+templates/seats.html:1628:    const btn = q("#btnDeckAI") || q("#btnDeckAIDrive");
+templates/seats.html:1659:      <button type="button" class="seat-simple-bottom-item warn" id="seatSimpleVoiceBtn" title="Sesli Komut" aria-label="Sesli Komut">
+templates/seats.html:1661:        <span class="voice-bottom-text">Sesli<br>Komut</span>
+templates/seats.html:1683:    const voice = q("#seatSimpleVoiceBtn");
+templates/seats.html:3004:<!-- BOTTOM_VOICE_COMMAND_FINAL_START -->
+templates/seats.html:3006:  #seatSimpleVoiceBtn{
+templates/seats.html:3013:  #seatSimpleVoiceBtn .ico{
+templates/seats.html:3017:  #seatSimpleVoiceBtn .voice-bottom-text{
+templates/seats.html:3025:<!-- BOTTOM_VOICE_COMMAND_FINAL_END -->
+templates/seats.html:3028:<!-- BOTTOM_VOICE_LISTENING_STATE_FIX_START -->
+templates/seats.html:3030:  #seatSimpleVoiceBtn.listening{
+templates/seats.html:3037:<!-- BOTTOM_VOICE_LISTENING_STATE_FIX_END -->
+static/seats/voice-commands.js:812:function getVoiceCommandButtons(){
+static/seats/voice-commands.js:814:  const mainBtn = $("#btnDeckAI");
+static/seats/voice-commands.js:815:  const driveBtn = document.getElementById("btnDeckAIDrive");
+static/seats/voice-commands.js:816:  const bottomBtn = document.getElementById("seatSimpleVoiceBtn");
+static/seats/voice-commands.js:825:function setVoiceCommandButtonsListening(buttons, on){
+static/seats/voice-commands.js:829:    if(btn.id === "seatSimpleVoiceBtn"){
+static/seats/voice-commands.js:831:        ? '<span class="ico">🔴</span><span class="voice-bottom-text">Dinliyor</span>'
+static/seats/voice-commands.js:832:        : '<span class="ico">🎙️</span><span class="voice-bottom-text">Sesli<br>Komut</span>';
+static/seats/voice-commands.js:844:function startDeckAIVoice(){
+static/seats/voice-commands.js:845:  const buttons = getVoiceCommandButtons();
+static/seats/voice-commands.js:860:  setVoiceCommandButtonsListening(buttons, true);
+static/seats/voice-commands.js:884:    setVoiceCommandButtonsListening(buttons, false);
+static/seats/voice-commands.js:892:    setVoiceCommandButtonsListening(buttons, false);
+static/seats/voice-commands.js:906:  startDeckAIVoice
+static/seats/seats.js:2772:  onClick("#btnDeckAI", startDeckAIVoice);
+
+===== 11) SES AÇ/KAPAT / TTS RAPORU =====
+templates/seats.html:149:              <button class="tts-btn" id="ttsToggle" title="Sesli uyarı">🔊</button>
+templates/seats.html:205:                <label><input type="checkbox" id="soundToggle" checked> Sesli yanıt</label>
+templates/seats.html:3040:<!-- TOP_SOUND_TOGGLE_START -->
+templates/seats.html:3056:  #seatSimpleSoundToggle{
+templates/seats.html:3077:  #seatSimpleSoundToggle.is-off{
+templates/seats.html:3085:  #seatSimpleSoundToggle:active{
+templates/seats.html:3094:    #seatSimpleSoundToggle{
+templates/seats.html:3109:  var KEY = "ttsEnabled";
+templates/seats.html:3136:      if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+templates/seats.html:3137:        window.SeatsVoice.setEnabled(on);
+templates/seats.html:3145:    var sound = q("#soundToggle");
+templates/seats.html:3151:    var tts = q("#ttsToggle");
+templates/seats.html:3161:        }else if(window.SeatsStopVoice){
+templates/seats.html:3162:          window.SeatsStopVoice();
+templates/seats.html:3170:      window.dispatchEvent(new CustomEvent("ttsEnabledChanged", {detail:{enabled:on}}));
+templates/seats.html:3177:    var btn = q("#seatSimpleSoundToggle");
+templates/seats.html:3206:    var btn = q("#seatSimpleSoundToggle");
+templates/seats.html:3211:      btn.id = "seatSimpleSoundToggle";
+templates/seats.html:3220:        if(next && window.SeatsSpeak){
+templates/seats.html:3221:          try{ window.SeatsSpeak("Sesli asistan açık.", {force:true}); }catch(_){}
+templates/seats.html:3246:  window.addEventListener("ttsEnabledChanged", syncButton);
+templates/seats.html:3249:    if(e.target && e.target.id === "soundToggle"){
+templates/seats.html:3265:<!-- TOP_SOUND_TOGGLE_END -->
+static/seats/seats.js:1304:      if(window.SeatsSpeak){
+static/seats/seats.js:1305:        window.SeatsSpeak(msg);
+static/seats/seats.js:1753:      if(window.SeatsSpeak){
+static/seats/seats.js:1754:        window.SeatsSpeak(msg);
+static/seats/seats.js:2388:    const ttsBtn = $("#ttsToggle");
+static/seats/seats.js:2391:    const TTS_KEY = "ttsEnabled";
+static/seats/seats.js:2401:    let ttsEnabled = readTtsEnabled();
+static/seats/seats.js:2404:      ttsEnabled = readTtsEnabled();
+static/seats/seats.js:2406:      ttsEnabled ? ttsBtn.classList.remove("muted") : ttsBtn.classList.add("muted");
+static/seats/seats.js:2407:      ttsBtn.title = ttsEnabled ? "Sesli uyarı açık" : "Sesli uyarı kapalı";
+static/seats/seats.js:2419:      if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+static/seats/seats.js:2420:        window.SeatsVoice.setEnabled(next);
+static/seats/seats.js:2425:      ttsEnabled = next;
+static/seats/seats.js:2429:        if(window.SeatsSpeak){
+static/seats/seats.js:2430:          window.SeatsSpeak("Sesli uyarı açık.", { force:true });
+static/seats/seats.js:2435:        if(window.SeatsStopVoice){
+static/seats/seats.js:2436:          window.SeatsStopVoice();
+static/seats/seats.js:2453:      if(!ttsEnabled) return;
+static/seats/seats.js:2458:      if(window.SeatsSpeak){
+static/seats/seats.js:2459:        window.SeatsSpeak(msg);
+static/seats/voice-tts.js:11:  const KEY = "ttsEnabled";
+static/seats/voice-tts.js:29:      window.dispatchEvent(new CustomEvent("ttsEnabledChanged", {
+static/seats/voice-tts.js:97:    const ttsBtn = document.getElementById("ttsToggle");
+static/seats/voice-tts.js:111:  window.SeatsSpeak = speak;
+static/seats/voice-tts.js:112:  window.SeatsStopVoice = stop;
+static/seats/drive-controls.js:56:      if(window.SeatsSpeak){
+static/seats/drive-controls.js:57:        window.SeatsSpeak(msg, { force:true });
+static/seats/drive-controls.js:183:    const saved = localStorage.getItem("ttsEnabled");
+static/seats/drive-controls.js:186:    const cb = document.getElementById("soundToggle");
+static/seats/drive-controls.js:218:        if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+static/seats/drive-controls.js:219:          window.SeatsVoice.setEnabled(enabled);
+static/seats/drive-controls.js:221:          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+static/seats/drive-controls.js:225:          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+static/seats/drive-controls.js:229:      const cb = document.getElementById("soundToggle");
+static/seats/drive-controls.js:245:    const cb = document.getElementById("soundToggle");
+static/seats/voice-commands.js:233:  const soundToggle = $("#soundToggle");
+static/seats/voice-commands.js:235:  if(soundToggle && !soundToggle.checked) return;
+static/seats/voice-commands.js:238:    if(typeof window.SeatsSpeak === "function"){
+static/seats/voice-commands.js:239:      window.SeatsSpeak(msg);
+
+===== 12) BOZUK KALINTI KONTROLLERİ =====
+--- ses ayırma kalıntısı ---
+OK: ses ayırma kalıntısı görünmüyor.
+
+--- drive-controls bozuk kalıntısı ---
+OK: drive-controls bozuk kalıntısı görünmüyor.
+
+===== 13) DOĞAL YOLCU CEVABI KONTROLÜ =====
+651:        ? `Toplam ${total} yolcu var. Bunun ${standing} kişisi ayakta.`
+652:        : `Toplam ${total} yolcu var.`;
+788:        ? `Toplam ${total} yolcu var. Bunun ${standing} kişisi ayakta.`
+789:        : `Toplam ${total} yolcu var.`;
+
+===== 14) SON YEDEKLER =====
+-rw-------. 1 u0_a201 u0_a201 89727 May 16 15:57 templates/seats.html.bak_before_rollback_good_fab_20260516_155731
+-rw-------. 1 u0_a201 u0_a201 87792 May 16 15:56 templates/seats.html.bak_before_restore_good_fab_20260516_155627
+-rw-------. 1 u0_a201 u0_a201 85464 May 16 15:53 templates/seats.html.bak_before_rollback_fab_mini_20260516_155332
+-rw-------. 1 u0_a201 u0_a201 87792 May 16 15:52 templates/seats.html.bak_before_fab_mini_restore_20260516_155226
+-rw-------. 1 u0_a201 u0_a201 89719 May 16 15:48 templates/seats.html.bak_before_remove_fab_compact_fit_20260516_154836
+-rw-------. 1 u0_a201 u0_a201 23585 May 16 15:41 static/seats/voice-commands.js.bak_before_rollback_exact_113619_20260516_154139
+-rw-------. 1 u0_a201 u0_a201  7542 May 16 15:41 static/seats/drive-controls.js.bak_before_rollback_exact_113619_20260516_154139
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 15:41 static/seats/voice-tts.js.bak_before_rollback_exact_113619_20260516_154139
+-rw-------. 1 u0_a201 u0_a201 84139 May 16 15:41 static/seats/seats.js.bak_before_rollback_exact_113619_20260516_154139
+-rw-------. 1 u0_a201 u0_a201 89719 May 16 15:41 templates/seats.html.bak_before_rollback_exact_113619_20260516_154139
+-rw-------. 1 u0_a201 u0_a201 23585 May 16 15:39 static/seats/voice-commands.js.bak_before_exact_113619_restore_20260516_153946
+-rw-------. 1 u0_a201 u0_a201  7542 May 16 15:39 static/seats/drive-controls.js.bak_before_exact_113619_restore_20260516_153946
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 15:39 static/seats/voice-tts.js.bak_before_exact_113619_restore_20260516_153946
+-rw-------. 1 u0_a201 u0_a201 84139 May 16 15:39 static/seats/seats.js.bak_before_exact_113619_restore_20260516_153946
+-rw-------. 1 u0_a201 u0_a201 89719 May 16 15:39 templates/seats.html.bak_before_exact_113619_restore_20260516_153946
+-rw-------. 1 u0_a201 u0_a201 23585 May 16 15:35 static/seats/voice-commands.js.bak_before_restore_12_checkpoint_20260516_153518
+-rw-------. 1 u0_a201 u0_a201  7542 May 16 15:35 static/seats/drive-controls.js.bak_before_restore_12_checkpoint_20260516_153518
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 15:35 static/seats/voice-tts.js.bak_before_restore_12_checkpoint_20260516_153518
+-rw-------. 1 u0_a201 u0_a201 84139 May 16 15:35 static/seats/seats.js.bak_before_restore_12_checkpoint_20260516_153518
+-rw-------. 1 u0_a201 u0_a201 89731 May 16 15:35 templates/seats.html.bak_before_restore_12_checkpoint_20260516_153518
+-rw-------. 1 u0_a201 u0_a201 89719 May 16 15:31 templates/seats.html.bak_before_restore_visual_blocks_20260516_153134
+-rw-------. 1 u0_a201 u0_a201  7542 May 16 15:24 static/seats/drive-controls.js.bak_before_restore_natural_total_checkpoint_20260516_152438
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 15:24 static/seats/voice-tts.js.bak_before_restore_natural_total_checkpoint_20260516_152438
+-rw-------. 1 u0_a201 u0_a201 84179 May 16 15:24 static/seats/seats.js.bak_before_restore_natural_total_checkpoint_20260516_152438
+-rw-------. 1 u0_a201 u0_a201 23585 May 16 15:24 static/seats/voice-commands.js.bak_before_restore_natural_total_checkpoint_20260516_152438
+-rw-------. 1 u0_a201 u0_a201 89651 May 16 15:24 templates/seats.html.bak_before_restore_natural_total_checkpoint_20260516_152438
+-rw-------. 1 u0_a201 u0_a201  7542 May 16 15:16 static/seats/drive-controls.js.bak_before_clean_speed_split_leftover_20260516_151647
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 15:16 static/seats/voice-tts.js.bak_before_clean_speed_split_leftover_20260516_151647
+-rw-------. 1 u0_a201 u0_a201 84151 May 16 15:16 static/seats/seats.js.bak_before_clean_speed_split_leftover_20260516_151647
+-rw-------. 1 u0_a201 u0_a201 89643 May 16 15:16 templates/seats.html.bak_before_clean_speed_split_leftover_20260516_151647
+-rw-------. 1 u0_a201 u0_a201  7959 May 16 15:15 static/seats/drive-controls.js.bak_before_corrective_restore_20260516_151536
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 15:15 static/seats/voice-tts.js.bak_before_corrective_restore_20260516_151536
+-rw-------. 1 u0_a201 u0_a201 84139 May 16 15:15 static/seats/seats.js.bak_before_corrective_restore_20260516_151536
+-rw-------. 1 u0_a201 u0_a201 89652 May 16 15:15 templates/seats.html.bak_before_corrective_restore_20260516_151536
+-rw-------. 1 u0_a201 u0_a201  7543 May 16 15:13 static/seats/drive-controls.js.bak_before_restore_from_20260516_145319_20260516_151331
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 15:13 static/seats/voice-tts.js.bak_before_restore_from_20260516_145319_20260516_151331
+-rw-------. 1 u0_a201 u0_a201 84139 May 16 15:13 static/seats/seats.js.bak_before_restore_from_20260516_145319_20260516_151331
+-rw-------. 1 u0_a201 u0_a201 89651 May 16 15:13 templates/seats.html.bak_before_restore_from_20260516_145319_20260516_151331
+-rw-------. 1 u0_a201 u0_a201  7542 May 16 15:06 static/seats/drive-controls.js.bak_before_fix_bad_voice_rollback_20260516_150609
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 15:06 static/seats/voice-tts.js.bak_before_fix_bad_voice_rollback_20260516_150609
+-rw-------. 1 u0_a201 u0_a201 84151 May 16 15:06 static/seats/seats.js.bak_before_fix_bad_voice_rollback_20260516_150609
+-rw-------. 1 u0_a201 u0_a201 89643 May 16 15:06 templates/seats.html.bak_before_fix_bad_voice_rollback_20260516_150609
+-rw-------. 1 u0_a201 u0_a201  7959 May 16 15:05 static/seats/drive-controls.js.bak_before_restore_previous_20260516_150549
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 15:05 static/seats/voice-tts.js.bak_before_restore_previous_20260516_150549
+-rw-------. 1 u0_a201 u0_a201 84111 May 16 15:05 static/seats/seats.js.bak_before_restore_previous_20260516_150549
+-rw-------. 1 u0_a201 u0_a201 89652 May 16 15:05 templates/seats.html.bak_before_restore_previous_20260516_150549
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 15:03 static/seats/voice-tts.js.bak_before_voice_mass_rollback_20260516_150355
+-rw-------. 1 u0_a201 u0_a201 84151 May 16 15:03 static/seats/seats.js.bak_before_voice_mass_rollback_20260516_150355
+-rw-------. 1 u0_a201 u0_a201  7542 May 16 15:03 static/seats/drive-controls.js.bak_before_voice_mass_rollback_20260516_150355
+-rw-------. 1 u0_a201 u0_a201 89643 May 16 15:03 templates/seats.html.bak_before_voice_mass_rollback_20260516_150355
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 15:01 static/seats/voice-tts.js.bak_force_tts_toggle_speed_sync_20260516_150133
+-rw-------. 1 u0_a201 u0_a201 89645 May 16 15:00 templates/seats.html.bak_tts_toggle_speed_sync_20260516_150032
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 15:00 static/seats/voice-tts.js.bak_tts_toggle_speed_sync_20260516_150032
+-rw-------. 1 u0_a201 u0_a201 89645 May 16 14:59 templates/seats.html.bak_speed_voice_click_final_20260516_145945
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 14:59 static/seats/voice-tts.js.bak_speed_voice_click_final_20260516_145945
+-rw-------. 1 u0_a201 u0_a201 84111 May 16 14:59 static/seats/seats.js.bak_speed_voice_click_final_20260516_145945
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 14:57 static/seats/voice-tts.js.bak_voice_split_final2_20260516_145734
+-rw-------. 1 u0_a201 u0_a201 84111 May 16 14:57 static/seats/seats.js.bak_voice_split_final2_20260516_145734
+-rw-------. 1 u0_a201 u0_a201 89643 May 16 14:57 templates/seats.html.bak_voice_split_final2_20260516_145734
+-rw-------. 1 u0_a201 u0_a201  7959 May 16 14:56 static/seats/drive-controls.js.bak_hard_line_repair_20260516_145608
+-rw-------. 1 u0_a201 u0_a201  7959 May 16 14:54 static/seats/drive-controls.js.bak_hard_repair_voice_block_20260516_145427
+-rw-------. 1 u0_a201 u0_a201 89652 May 16 14:53 templates/seats.html.bak_drive_force_repair_version_20260516_145319
+-rw-------. 1 u0_a201 u0_a201  7959 May 16 14:53 static/seats/drive-controls.js.bak_force_repair_20260516_145319
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 13:36 static/seats/voice-tts.js.bak_final_voice_split_20260516_133629
+-rw-------. 1 u0_a201 u0_a201 84139 May 16 13:36 static/seats/seats.js.bak_final_voice_split_20260516_133629
+-rw-------. 1 u0_a201 u0_a201 89730 May 16 13:36 templates/seats.html.bak_final_voice_split_20260516_133629
+-rw-------. 1 u0_a201 u0_a201 89719 May 16 13:34 templates/seats.html.bak_drive_controls_repair_version_20260516_133452
+-rw-------. 1 u0_a201 u0_a201  7959 May 16 13:34 static/seats/drive-controls.js.bak_repair_voice_block_20260516_133452
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 11:43 static/seats/voice-tts.js.bak_clean_speed_voice_split_20260516_114304
+-rw-------. 1 u0_a201 u0_a201 84139 May 16 11:43 static/seats/seats.js.bak_clean_speed_voice_split_20260516_114304
+-rw-------. 1 u0_a201 u0_a201 89719 May 16 11:43 templates/seats.html.bak_clean_speed_voice_split_20260516_114304
+-rw-------. 1 u0_a201 u0_a201  3944 May 16 11:36 static/seats/voice-tts.js.bak_split_assistant_speed_voice_20260516_113619
+-rw-------. 1 u0_a201 u0_a201 84139 May 16 11:36 static/seats/seats.js.bak_split_assistant_speed_voice_20260516_113619
+-rw-------. 1 u0_a201 u0_a201 89719 May 16 11:36 templates/seats.html.bak_split_assistant_speed_voice_20260516_113619
+-rw-------. 1 u0_a201 u0_a201 23387 May 16 11:29 static/seats/voice-commands.js.bak_natural_total_voice_20260516_112923
+-rw-------. 1 u0_a201 u0_a201 84281 May 16 11:23 templates/seats.html.bak_top_sound_toggle_20260516_112357
+-rw-------. 1 u0_a201 u0_a201 22870 May 16 11:16 static/seats/voice-commands.js.bak_bottom_voice_clickfix_20260516_111618
+-rw-------. 1 u0_a201 u0_a201 83704 May 16 11:16 templates/seats.html.bak_bottom_voice_clickfix_20260516_111618
+-rw-------. 1 u0_a201 u0_a201 87562 May 16 11:12 templates/seats.html.bak_voice_bottom_final_20260516_111251
+-rw-------. 1 u0_a201 u0_a201 83038 May 16 11:07 templates/seats.html.bak_rollback_voice_to_bottom_20260516_110701
+-rw-------. 1 u0_a201 u0_a201 87561 May 16 11:05 templates/seats.html.bak_voice_to_bottom_20260516_110540
+-rw-------. 1 u0_a201 u0_a201 86462 May 16 10:59 templates/seats.html.bak_only54_shift_fix_20260516_105927
+-rw-------. 1 u0_a201 u0_a201 86641 May 16 10:56 templates/seats.html.bak_rollback_only54_20260516_105639
+-rw-------. 1 u0_a201 u0_a201  1438 May 16 10:56 templates/seats_parts/deck.html.bak_rollback_only54_20260516_105639
+-rw-------. 1 u0_a201 u0_a201 86459 May 16 10:55 templates/seats.html.bak_only54_20260516_105535
+-rw-------. 1 u0_a201 u0_a201  1420 May 16 10:55 templates/seats_parts/deck.html.bak_only54_20260516_105535
+-rw-------. 1 u0_a201 u0_a201 86781 May 16 07:54 templates/seats.html.bak_rollback_bottom_row_align_20260516_075433
+-rw-------. 1 u0_a201 u0_a201 86455 May 16 07:53 templates/seats.html.bak_bottom_row_align_20260516_075348
+-rw-------. 1 u0_a201 u0_a201 90741 May 16 07:10 templates/seats.html.bak_rollback_wide_angle_scroll_20260516_071027
+-rw-------. 1 u0_a201 u0_a201 90553 May 16 07:05 templates/seats.html.bak_wide_angle_final_nudge_20260516_070540
+-rw-------. 1 u0_a201 u0_a201 86452 May 16 07:02 templates/seats.html.bak_deck_wide_angle_fit_20260516_070229
+-rw-------. 1 u0_a201 u0_a201 87851 May 16 07:00 templates/seats.html.bak_rollback_disable_deck_horizontal_scroll_20260516_070001
+-rw-------. 1 u0_a201 u0_a201 86449 May 16 06:59 templates/seats.html.bak_disable_deck_horizontal_scroll_20260516_065903
+-rw-------. 1 u0_a201 u0_a201 87508 May 16 06:49 templates/seats.html.bak_rollback_bottom_deck_space_trim_20260516_064933
+-rw-------. 1 u0_a201 u0_a201 86446 May 16 06:48 templates/seats.html.bak_bottom_deck_space_trim_20260516_064820
+-rw-------. 1 u0_a201 u0_a201 84516 May 16 06:46 templates/seats.html.bak_fab_compact_fit_20260516_064606
+-rw-------. 1 u0_a201 u0_a201 81697 May 16 06:44 templates/seats.html.bak_fab_distinct_panel_20260516_064444
+-rw-------. 1 u0_a201 u0_a201 78285 May 16 06:42 templates/seats.html.bak_fab_left_gap_move_20260516_064207
+-rw-------. 1 u0_a201 u0_a201 77643 May 16 06:37 templates/seats.html.bak_bottom_row_equal_20260516_063703
+-rw-------. 1 u0_a201 u0_a201 76393 May 16 06:31 templates/seats.html.bak_right_column_spacing_20260516_063100
+-rw-------. 1 u0_a201 u0_a201 84267 May 16 06:25 static/seats/seats.js.bak_rollback_general_label_fix_20260516_062504
+-rw-------. 1 u0_a201 u0_a201 77726 May 16 06:25 templates/seats.html.bak_rollback_general_label_fix_20260516_062504
+-rw-------. 1 u0_a201 u0_a201 84131 May 16 06:23 static/seats/seats.js.bak_label_title_regex_20260516_062350
+-rw-------. 1 u0_a201 u0_a201 84131 May 16 06:22 static/seats/seats.js.bak_general_seat_label_fix_20260516_062235
+-rw-------. 1 u0_a201 u0_a201 76390 May 16 06:22 templates/seats.html.bak_general_seat_label_fix_20260516_062235
+-rw-------. 1 u0_a201 u0_a201 71864 May 16 06:15 templates/seats.html.bak_simple_top_voice_safe_20260516_061522
+-rw-------. 1 u0_a201 u0_a201 78000 May 16 06:03 templates/seats.html.bak_rollback_safe_top_voice_overlay_20260516_060324
+-rw-------. 1 u0_a201 u0_a201 73741 May 16 06:02 templates/seats.html.bak_safe_top_voice_overlay_20260516_060214
+-rw-------. 1 u0_a201 u0_a201 71858 May 16 06:00 templates/seats.html.bak_repair_top_split_shift_20260516_060003
+-rw-------. 1 u0_a201 u0_a201 76856 May 16 05:58 templates/seats.html.bak_rollback_top_voice_split_20260516_055839
+-rw-------. 1 u0_a201 u0_a201 71855 May 16 05:57 templates/seats.html.bak_top_voice_split_20260516_055736
+-rw-------. 1 u0_a201 u0_a201 76631 May 15 21:01 templates/seats.html.bak_rollback_seat_label_overlap_fix_20260515_210127
+-rw-------. 1 u0_a201 u0_a201 71852 May 15 21:00 templates/seats.html.bak_seat_label_overlap_fix_20260515_210033
+-rw-------. 1 u0_a201 u0_a201 71507 May 15 17:39 templates/seats.html.bak_modal_bottom_nav_hide_v3_20260515_173940
+-rw-------. 1 u0_a201 u0_a201 67333 May 15 17:36 templates/seats.html.bak_bulk_nav_hide_v2_20260515_173615
+-rw-------. 1 u0_a201 u0_a201 72014 May 15 15:25 templates/seats.html.bak_rollback_bulk_modal_hide_bottom_nav_20260515_152530
+-rw-------. 1 u0_a201 u0_a201 67330 May 15 15:24 templates/seats.html.bak_bulk_modal_hide_bottom_nav_20260515_152410
+-rw-------. 1 u0_a201 u0_a201 63912 May 15 15:17 templates/seats.html.bak_stop_toast_20260515_151720
+-rw-------. 1 u0_a201 u0_a201 49021 May 15 15:14 templates/seats.html.bak_stop_flow_focus_20260515_151416
+-rw-------. 1 u0_a201 u0_a201 46805 May 15 14:47 templates/seats.html.bak_hide_bottom_menu_on_seat_modal
+
+===== 15) GIT DURUMU =====
+ M android_app/app/src/main/python/static/seats/drive-controls.js
+ M android_app/app/src/main/python/static/seats/seats.css
+ M android_app/app/src/main/python/static/seats/seats.js
+ M android_app/app/src/main/python/static/seats/voice-commands.js
+ M android_app/app/src/main/python/templates/seats.html
+ M db.sqlite3
+ M static/seats/drive-controls.js
+ M static/seats/seats.css
+ M static/seats/seats.js
+ M static/seats/voice-commands.js
+ M templates/seats.html
+?? KOLTUK_PANEL_YAMA_RAPORU_20260516_153819.txt
+?? SEATS_DETAYLI_SISTEM_RAPORU_20260516_155924.txt
+?? SON_YARIM_SAAT_YAMA_RAPORU_20260516_150801.txt
+
+ .../src/main/python/static/seats/drive-controls.js |   59 +-
+ .../app/src/main/python/static/seats/seats.css     |   43 +
+ .../app/src/main/python/static/seats/seats.js      |    8 +-
+ .../src/main/python/static/seats/voice-commands.js |   22 +-
+ .../app/src/main/python/templates/seats.html       | 2279 +++++++++++++++++++-
+ db.sqlite3                                         |  Bin 1298432 -> 1310720 bytes
+ static/seats/drive-controls.js                     |   59 +-
+ static/seats/seats.css                             |   43 +
+ static/seats/seats.js                              |    8 +-
+ static/seats/voice-commands.js                     |   22 +-
+ templates/seats.html                               | 2279 +++++++++++++++++++-
+ 11 files changed, 4732 insertions(+), 90 deletions(-)
+
+===== 16) GIT DIFF ÖNEMLİ DOSYALAR =====
+diff --git a/static/seats/drive-controls.js b/static/seats/drive-controls.js
+index 545d5bf..6080a1d 100644
+--- a/static/seats/drive-controls.js
++++ b/static/seats/drive-controls.js
+@@ -45,8 +45,6 @@
+   const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+ 
+   const DRIVE_MODE_KEY = "driveMode:" + tripKey;
+-  const VOICE_SOUND_KEY = "voiceSoundEnabled:" + tripKey;
+-
+   function safeToast(msg, ms=1600){
+     try{
+       if(typeof toast === "function") toast(msg, ms);
+@@ -213,50 +211,35 @@
+       ? "Sesli robot açık. Kapatmak için dokun."
+       : "Sesli robot kapalı. Açmak için dokun.";
+   }
++    function setVoiceEnabled(on, opts={}){
++      const enabled = !!on;
+ 
+-  function setVoiceEnabled(on, opts={}){
+-    const enabled = !!on;
+-
+-    try{
+-      if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+-        window.SeatsVoice.setEnabled(enabled);
+-      }else{
+-        localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
++      try{
++        if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
++          window.SeatsVoice.setEnabled(enabled);
++        }else{
++          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
++        }
++      }catch(_){
++        try{
++          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
++        }catch(e){}
+       }
+-    }catch(_){
+-      localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+-    }
+ 
+-    const cb = document.getElementById("soundToggle");
+-    if(cb) cb.checked = enabled;
++      const cb = document.getElementById("soundToggle");
++      if(cb) cb.checked = enabled;
+ 
+-    updateNightVoiceToggle();
++      updateNightVoiceToggle();
+ 
+-    if(!opts.silent){
+-      safeToast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1600);
+-    }
+-
+-    if(enabled && opts.announce){
+-      setTimeout(() => safeSpeak("Sesli robot açık."), 80);
+-    }
+-  }){
+-    const enabled = !!on;
+-
+-    localStorage.setItem(VOICE_SOUND_KEY, enabled ? "1" : "0");
+-
+-    const cb = document.getElementById("soundToggle");
+-    if(cb) cb.checked = enabled;
+-
+-    updateNightVoiceToggle();
++      if(!opts.silent){
++        safeToast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1600);
++      }
+ 
+-    if(!opts.silent){
+-      safeToast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1600);
++      if(enabled && opts.announce){
++        setTimeout(() => safeSpeak("Sesli robot açık."), 80);
++      }
+     }
+ 
+-    if(enabled && opts.announce){
+-      setTimeout(() => safeSpeak("Sesli robot açık."), 80);
+-    }
+-  }
+ 
+   function bindNightVoiceToggle(){
+     const cb = document.getElementById("soundToggle");
+diff --git a/static/seats/seats.js b/static/seats/seats.js
+index cb182f5..7ed57be 100644
+--- a/static/seats/seats.js
++++ b/static/seats/seats.js
+@@ -955,10 +955,10 @@ function setVoiceBadge(text){
+ 
+     const label = $("#label-" + seatNo);
+     if(label){
+-      const from = boardsMap[key] || "";
+-      const to = stopsMap[key] || "";
+-      label.textContent = isAssigned ? (from ? `${from} → ${to}` : to) : "";
+-    }
++        const from = boardsMap[key] || "";
++        const to = stopsMap[key] || "";
++        label.textContent = isAssigned ? (from ? `${from} → ${to}` : to) : "";
++      }
+ 
+     const svc = el.querySelector(".svc-badge");
+     if(svc){
+diff --git a/static/seats/voice-commands.js b/static/seats/voice-commands.js
+index 92a9e42..9d7d909 100644
+--- a/static/seats/voice-commands.js
++++ b/static/seats/voice-commands.js
+@@ -646,7 +646,10 @@ async function handleLocalVoiceCommand(text){
+   if(cmd.type === "ask_total"){
+     const seated = Object.values(assigned || {}).filter(Boolean).length;
+     const total = seated + (standingCount || 0);
+-    const msg = `Toplam ${total} yolcu var. ${seated} oturan, ${standingCount || 0} ayakta.`;
++    const standing = Number(standingCount || 0);
++      const msg = standing > 0
++        ? `Toplam ${total} yolcu var. Bunun ${standing} kişisi ayakta.`
++        : `Toplam ${total} yolcu var.`;
+     toast(msg, 3600);
+     speak(msg);
+     return true;
+@@ -780,7 +783,10 @@ async function handleBasicVoiceCommand(text){
+       if(cmd.type === "ask_total"){
+         const seated = Object.values(assigned || {}).filter(Boolean).length;
+         const total = seated + (standingCount || 0);
+-        const msg = `Toplam ${total} yolcu var. ${seated} oturan, ${standingCount || 0} ayakta.`;
++        const standing = Number(standingCount || 0);
++      const msg = standing > 0
++        ? `Toplam ${total} yolcu var. Bunun ${standing} kişisi ayakta.`
++        : `Toplam ${total} yolcu var.`;
+         toast(msg, 3600);
+         speak(msg);
+         return;
+@@ -807,9 +813,11 @@ function getVoiceCommandButtons(){
+   const out = [];
+   const mainBtn = $("#btnDeckAI");
+   const driveBtn = document.getElementById("btnDeckAIDrive");
++  const bottomBtn = document.getElementById("seatSimpleVoiceBtn");
+ 
+   if(mainBtn) out.push(mainBtn);
+   if(driveBtn) out.push(driveBtn);
++  if(bottomBtn) out.push(bottomBtn);
+ 
+   return out;
+ }
+@@ -817,6 +825,16 @@ function getVoiceCommandButtons(){
+ function setVoiceCommandButtonsListening(buttons, on){
+   (buttons || []).forEach(btn => {
+     btn.classList.toggle("listening", !!on);
++
++    if(btn.id === "seatSimpleVoiceBtn"){
++      btn.innerHTML = on
++        ? '<span class="ico">🔴</span><span class="voice-bottom-text">Dinliyor</span>'
++        : '<span class="ico">🎙️</span><span class="voice-bottom-text">Sesli<br>Komut</span>';
++      btn.setAttribute("title", on ? "Dinliyor" : "Sesli Komut");
++      btn.setAttribute("aria-label", on ? "Dinliyor" : "Sesli Komut");
++      return;
++    }
++
+     btn.innerHTML = on
+       ? '🔴 <span>Dinliyor</span>'
+       : '🎤 <span>Sesli Komut</span>';
+diff --git a/templates/seats.html b/templates/seats.html
+index b8dc25e..e37ecbf 100644
+--- a/templates/seats.html
++++ b/templates/seats.html
+@@ -349,7 +349,7 @@
+ </script>
+ 
+ <script src="/static/seats/bags.js?v=1"></script>
+-<script src="/static/seats/voice-commands.js?v=voice-central-bridge-1"></script>
++<script src="/static/seats/voice-commands.js?v=natural-total-voice-1"></script>
+ <script src="/static/seats/standing.js?v=1"></script>
+ <script src="/static/seats/seats.js?v=drive-premium-rollback-1"></script>
+ <script src="/static/seats/route-marquee.js?v=route-clean-ticker-single-1"></script>
+@@ -991,6 +991,2279 @@
+ </script>
+ <!-- DRIVE VOICE MIRROR SCRIPT END -->
+ 
++
++<style id="seat-simple-open-mode-style">
++/* =========================================================
++   SADE KOLTUK MODU
++   İlk açılışta koltuk planını öne alır, gelişmiş panelleri gizler.
++========================================================= */
++
++.seat-simple-toggle{
++  position:sticky;
++  top:8px;
++  z-index:9999;
++  width:100%;
++  min-height:44px;
++  margin:0 0 10px;
++  border:1px solid rgba(96,165,250,.28);
++  border-radius:18px;
++  color:#eaf3ff;
++  background:linear-gradient(135deg,rgba(37,99,235,.96),rgba(29,78,216,.92));
++  box-shadow:0 12px 28px rgba(37,99,235,.24), inset 0 1px 0 rgba(255,255,255,.16);
++  font-size:14px;
++  font-weight:950;
++  letter-spacing:.02em;
++  display:flex;
++  align-items:center;
++  justify-content:center;
++  gap:8px;
++}
++
++html.seat-simple-mode .seats-shell{
++  max-width:760px !important;
++  margin:0 auto !important;
++}
++
++/* seats-shell içindeki topbarı gizle; layout kalsın */
++html.seat-simple-mode .seats-shell > :not(.layout){
++  display:none !important;
++}
++
++html.seat-simple-mode .layout{
++  display:block !important;
++  grid-template-columns:1fr !important;
++}
++
++html.seat-simple-mode .panel-card{
++  display:none !important;
++}
++
++html.seat-simple-mode .board-card{
++  width:100% !important;
++  max-width:100% !important;
++  margin:0 auto !important;
++}
++
++html.seat-simple-mode .board-inner{
++  padding-top:10px !important;
++}
++
++/* üst sürüş/eta dock sade modda gizli */
++html.seat-simple-mode #driveInlineDock,
++html.seat-simple-mode #driveModeActionsDock{
++  display:none !important;
++}
++
++/* sağdaki ses/legend/kalabalık kontroller gizli */
++html.seat-simple-mode .board-head-right,
++html.seat-simple-mode .voice-row,
++html.seat-simple-mode .drive-voice-row,
++html.seat-simple-mode .legend{
++  display:none !important;
++}
++
++/* başlığı kompakt bırak */
++html.seat-simple-mode .board-head{
++  margin:0 0 10px !important;
++  display:block !important;
++}
++
++html.seat-simple-mode .board-title{
++  width:100% !important;
++}
++
++html.seat-simple-mode .board-kicker,
++html.seat-simple-mode .board-title small{
++  display:none !important;
++}
++
++html.seat-simple-mode .board-title h2{
++  margin:0 0 8px !important;
++  font-size:clamp(30px, 8vw, 44px) !important;
++  line-height:1 !important;
++  letter-spacing:-.045em !important;
++}
++
++html.seat-simple-mode .selected-stop-chip{
++  min-height:42px !important;
++  display:flex !important;
++  align-items:center !important;
++  justify-content:flex-start !important;
++  border-radius:18px !important;
++  padding:0 14px !important;
++  font-size:14px !important;
++}
++
++/* rota/durak akışı ilk açılışta gizli */
++html.seat-simple-mode .route-strip-shell,
++html.seat-simple-mode .route-flow-shell,
++html.seat-simple-mode .route-flow,
++html.seat-simple-mode #routeStrip,
++html.seat-simple-mode .route-mini,
++html.seat-simple-mode .route-pill{
++  display:none !important;
++}
++
++/* koltuk deck yukarı gelsin */
++html.seat-simple-mode .deck-card,
++html.seat-simple-mode .seat-deck,
++html.seat-simple-mode .deck-shell{
++  margin-top:8px !important;
++}
++
++/* mobil sıkılık */
++@media(max-width:430px){
++  .seat-simple-toggle{
++    min-height:42px;
++    border-radius:16px;
++    font-size:13px;
++    margin-bottom:8px;
++  }
++
++  html.seat-simple-mode .board-inner{
++    padding:8px !important;
++  }
++
++  html.seat-simple-mode .board-title h2{
++    font-size:34px !important;
++  }
++}
++</style>
++
++<script id="seat-simple-open-mode-script">
++(function(){
++  if(window.__seatSimpleOpenModeReady) return;
++  window.__seatSimpleOpenModeReady = true;
++
++  function getTripKey(){
++    try{
++      return (window.SEATS_BOOT && window.SEATS_BOOT.tripKey) || window.BAG_TRIP || "default";
++    }catch(_){
++      return "default";
++    }
++  }
++
++  function key(){
++    return "seatUiMode:" + getTripKey();
++  }
++
++  function readMode(){
++    try{
++      return localStorage.getItem(key()) || "simple";
++    }catch(_){
++      return "simple";
++    }
++  }
++
++  function writeMode(mode){
++    try{
++      localStorage.setItem(key(), mode);
++    }catch(_){}
++  }
++
++  function applyMode(mode){
++    const simple = mode !== "advanced";
++    document.documentElement.classList.toggle("seat-simple-mode", simple);
++    document.body.classList.toggle("seat-simple-mode", simple);
++
++    const btn = document.getElementById("seatSimpleModeToggle");
++    if(btn){
++      btn.innerHTML = simple
++        ? "⚙️ Gelişmiş ekranı aç"
++        : "💺 Sade koltuk moduna dön";
++      btn.setAttribute("aria-pressed", simple ? "true" : "false");
++    }
++
++    try{
++      if(typeof renderRouteStrip === "function") renderRouteStrip();
++      if(typeof updateCompactHeader === "function") updateCompactHeader();
++    }catch(_){}
++  }
++
++  function ensureButton(){
++    if(document.getElementById("seatSimpleModeToggle")) return;
++
++    const host = document.querySelector(".board-inner") || document.querySelector(".seats-shell");
++    if(!host) return;
++
++    const btn = document.createElement("button");
++    btn.id = "seatSimpleModeToggle";
++    btn.type = "button";
++    btn.className = "seat-simple-toggle";
++    btn.addEventListener("click", function(){
++      const current = readMode();
++      const next = current === "advanced" ? "simple" : "advanced";
++      writeMode(next);
++      applyMode(next);
++    });
++
++    host.insertBefore(btn, host.firstChild);
++  }
++
++  function boot(){
++    ensureButton();
++    applyMode(readMode());
++
++    setTimeout(function(){ applyMode(readMode()); }, 250);
++    setTimeout(function(){ applyMode(readMode()); }, 900);
++  }
++
++  if(document.readyState === "loading"){
++    document.addEventListener("DOMContentLoaded", boot);
++  }else{
++    boot();
++  }
++})();
++</script>
++
++
++
++<style id="seat-simple-summary-polish-style">
++/* =========================================================
++   SADE MOD MINI DURUM OZETI
++   Koltuk ekranı ilk açılışta daha net ve premium görünür.
++========================================================= */
++
++.seat-simple-summary{
++  display:none;
++  width:100%;
++  margin:0 0 12px;
++  padding:13px 14px;
++  border-radius:22px;
++  background:
++    radial-gradient(circle at 12% 0%, rgba(59,130,246,.20), transparent 34%),
++    linear-gradient(180deg, rgba(14,27,48,.96), rgba(6,13,25,.98));
++  border:1px solid rgba(148,163,184,.16);
++  box-shadow:
++    0 16px 34px rgba(0,0,0,.28),
++    inset 0 1px 0 rgba(255,255,255,.06);
++}
++
++html.seat-simple-mode .seat-simple-summary{
++  display:block;
++}
++
++.seat-simple-summary-top{
++  display:flex;
++  align-items:center;
++  justify-content:space-between;
++  gap:10px;
++  margin-bottom:10px;
++}
++
++.seat-simple-route{
++  min-width:0;
++  color:#fff;
++  font-size:17px;
++  line-height:1.08;
++  font-weight:1000;
++  letter-spacing:-.035em;
++  overflow:hidden;
++  text-overflow:ellipsis;
++  white-space:nowrap;
++}
++
++.seat-simple-status{
++  flex:0 0 auto;
++  min-height:28px;
++  padding:0 10px;
++  border-radius:999px;
++  display:flex;
++  align-items:center;
++  justify-content:center;
++  gap:6px;
++  color:#bbf7d0;
++  background:rgba(34,197,94,.12);
++  border:1px solid rgba(34,197,94,.22);
++  font-size:11px;
++  font-weight:950;
++  white-space:nowrap;
++}
++
++.seat-simple-summary-grid{
++  display:grid;
++  grid-template-columns:1.25fr .75fr .75fr;
++  gap:8px;
++}
++
++.seat-simple-mini{
++  min-height:52px;
++  padding:9px 10px;
++  border-radius:17px;
++  background:rgba(255,255,255,.045);
++  border:1px solid rgba(255,255,255,.07);
++  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
++  overflow:hidden;
++}
++
++.seat-simple-mini small{
++  display:block;
++  margin-bottom:5px;
++  color:rgba(226,232,240,.56);
++  font-size:10px;
++  font-weight:950;
++  text-transform:uppercase;
++  letter-spacing:.08em;
++  white-space:nowrap;
++}
++
++.seat-simple-mini b{
++  display:block;
++  color:#fff;
++  font-size:15px;
++  line-height:1.08;
++  font-weight:1000;
++  overflow:hidden;
++  text-overflow:ellipsis;
++  white-space:nowrap;
++}
++
++.seat-simple-mini .ok{
++  color:#4ade80;
++}
++
++.seat-simple-mini .speed{
++  color:#93c5fd;
++}
++
++html.seat-simple-mode .seat-simple-toggle{
++  margin-bottom:10px !important;
++}
++
++@media(max-width:430px){
++  .seat-simple-summary{
++    padding:12px;
++    border-radius:20px;
++    margin-bottom:10px;
++  }
++
++  .seat-simple-route{
++    font-size:16px;
++  }
++
++  .seat-simple-summary-grid{
++    grid-template-columns:1.15fr .85fr .85fr;
++    gap:7px;
++  }
++
++  .seat-simple-mini{
++    min-height:49px;
++    padding:8px 9px;
++    border-radius:15px;
++  }
++
++  .seat-simple-mini small{
++    font-size:9px;
++  }
++
++  .seat-simple-mini b{
++    font-size:13.5px;
++  }
++}
++</style>
++
++<script id="seat-simple-summary-polish-script">
++(function(){
++  if(window.__seatSimpleSummaryPolishReady) return;
++  window.__seatSimpleSummaryPolishReady = true;
++
++  function q(sel){
++    return document.querySelector(sel);
++  }
++
++  function boot(){
++    const board = q(".board-inner");
++    if(!board) return;
++
++    let box = q("#seatSimpleSummary");
++    if(!box){
++      box = document.createElement("div");
++      box.id = "seatSimpleSummary";
++      box.className = "seat-simple-summary";
++      box.innerHTML = `
++        <div class="seat-simple-summary-top">
++          <div class="seat-simple-route" id="seatSimpleRoute">—</div>
++          <div class="seat-simple-status"><span>●</span><span>Sade Mod</span></div>
++        </div>
++
++        <div class="seat-simple-summary-grid">
++          <div class="seat-simple-mini">
++            <small>Durak</small>
++            <b id="seatSimpleStop">—</b>
++          </div>
++          <div class="seat-simple-mini">
++            <small>Doluluk</small>
++            <b class="ok" id="seatSimpleOcc">0/0</b>
++          </div>
++          <div class="seat-simple-mini">
++            <small>Hız</small>
++            <b class="speed" id="seatSimpleSpeed">0 km/h</b>
++          </div>
++        </div>
++      `;
++
++      const toggle = q("#seatSimpleModeToggle");
++      if(toggle && toggle.parentNode === board){
++        toggle.insertAdjacentElement("afterend", box);
++      }else{
++        board.insertBefore(box, board.firstChild);
++      }
++    }
++
++    update();
++    setInterval(update, 1000);
++  }
+
+===== 17) PYTHON KONTROL =====
+app.py syntax OK

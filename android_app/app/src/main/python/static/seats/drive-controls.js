@@ -45,8 +45,6 @@
   const tripKey = window.BAG_TRIP || boot.tripKey || "default";
 
   const DRIVE_MODE_KEY = "driveMode:" + tripKey;
-  const VOICE_SOUND_KEY = "voiceSoundEnabled:" + tripKey;
-
   function safeToast(msg, ms=1600){
     try{
       if(typeof toast === "function") toast(msg, ms);
@@ -213,50 +211,35 @@
       ? "Sesli robot açık. Kapatmak için dokun."
       : "Sesli robot kapalı. Açmak için dokun.";
   }
+    function setVoiceEnabled(on, opts={}){
+      const enabled = !!on;
 
-  function setVoiceEnabled(on, opts={}){
-    const enabled = !!on;
-
-    try{
-      if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
-        window.SeatsVoice.setEnabled(enabled);
-      }else{
-        localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+      try{
+        if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+          window.SeatsVoice.setEnabled(enabled);
+        }else{
+          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+        }
+      }catch(_){
+        try{
+          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+        }catch(e){}
       }
-    }catch(_){
-      localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+
+      const cb = document.getElementById("soundToggle");
+      if(cb) cb.checked = enabled;
+
+      updateNightVoiceToggle();
+
+      if(!opts.silent){
+        safeToast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1600);
+      }
+
+      if(enabled && opts.announce){
+        setTimeout(() => safeSpeak("Sesli robot açık."), 80);
+      }
     }
 
-    const cb = document.getElementById("soundToggle");
-    if(cb) cb.checked = enabled;
-
-    updateNightVoiceToggle();
-
-    if(!opts.silent){
-      safeToast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1600);
-    }
-
-    if(enabled && opts.announce){
-      setTimeout(() => safeSpeak("Sesli robot açık."), 80);
-    }
-  }){
-    const enabled = !!on;
-
-    localStorage.setItem(VOICE_SOUND_KEY, enabled ? "1" : "0");
-
-    const cb = document.getElementById("soundToggle");
-    if(cb) cb.checked = enabled;
-
-    updateNightVoiceToggle();
-
-    if(!opts.silent){
-      safeToast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1600);
-    }
-
-    if(enabled && opts.announce){
-      setTimeout(() => safeSpeak("Sesli robot açık."), 80);
-    }
-  }
 
   function bindNightVoiceToggle(){
     const cb = document.getElementById("soundToggle");

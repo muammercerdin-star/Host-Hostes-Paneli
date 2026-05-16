@@ -1,0 +1,859 @@
+============================================================
+FAB / HIZLI İŞLEM PANELİ DETAYLI ARAŞTIRMA RAPORU
+Tarih: Sat May 16 16:45:49 +03 2026
+============================================================
+
+===== 1) templates/seats.html içindeki aktif FAB markerları =====
+3054:<!-- FAB_LEFT_GAP_MOVE_START -->
+3183:<!-- FAB_LEFT_GAP_MOVE_END -->
+3185:<!-- FAB_DISTINCT_PANEL_START -->
+3285:<!-- FAB_DISTINCT_PANEL_END -->
+3287:<!-- FAB_COMPACT_FIT_START -->
+3362:<!-- FAB_COMPACT_FIT_END -->
+
+===== 2) Aktif FAB bloklarının tam içeriği =====
+
+---------------- FAB_LEFT_GAP_MOVE ----------------
+<!-- FAB_LEFT_GAP_MOVE_START -->
+<style id="fab-left-gap-move-style">
+  /*
+    Hızlı işlem butonlarını sağ alttan alıp
+    43 ile 51 arasındaki boş sol alana yerleştirir.
+    HTML/ID değişmez; JS bağlantıları aynen çalışır.
+  */
+
+  .fab-column.fab-left-gap-moved{
+    position:absolute !important;
+    right:auto !important;
+    bottom:auto !important;
+    z-index:45 !important;
+
+    display:flex !important;
+    flex-direction:column !important;
+    gap:7px !important;
+
+    pointer-events:auto !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab{
+    width:46px !important;
+    height:46px !important;
+    border-radius:16px !important;
+    font-size:19px !important;
+    box-shadow:0 14px 28px rgba(0,0,0,.34) !important;
+  }
+
+  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+    width:46px !important;
+    height:46px !important;
+    border-radius:16px !important;
+    font-size:19px !important;
+  }
+
+  @media(max-width:380px){
+    .fab-column.fab-left-gap-moved{
+      gap:6px !important;
+    }
+
+    .fab-column.fab-left-gap-moved .fab,
+    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+      width:44px !important;
+      height:44px !important;
+      border-radius:15px !important;
+      font-size:18px !important;
+    }
+  }
+</style>
+
+<script id="fab-left-gap-move-script">
+(function(){
+  if(window.__fabLeftGapMoveLoaded) return;
+  window.__fabLeftGapMoveLoaded = true;
+
+  function q(sel){
+    return document.querySelector(sel);
+  }
+
+  function placeFabColumn(){
+    var col = q(".fab-column");
+    var wrap = q(".deck-wrap");
+    var seat43 = q("#seat-43");
+    var seat51 = q("#seat-51");
+
+    if(!col || !wrap || !seat43 || !seat51) return;
+
+    col.classList.add("fab-left-gap-moved");
+
+    // Ölçülerin oturması için önce sınıfı verip sonra ölçü alıyoruz.
+    var wrapRect = wrap.getBoundingClientRect();
+    var r43 = seat43.getBoundingClientRect();
+    var r51 = seat51.getBoundingClientRect();
+    var cRect = col.getBoundingClientRect();
+
+    var colW = cRect.width || 46;
+    var colH = cRect.height || 152;
+
+    var centerX43 = r43.left + (r43.width / 2);
+    var centerX51 = r51.left + (r51.width / 2);
+    var centerX = (centerX43 + centerX51) / 2;
+
+    var gapTop = r43.bottom + 12;
+    var gapBottom = r51.top - 12;
+    var centerY = (gapTop + gapBottom) / 2;
+
+    var left = centerX - wrapRect.left - (colW / 2);
+    var top = centerY - wrapRect.top - (colH / 2);
+
+    // Güvenli sınırlar
+    if(top < 0) top = 0;
+    if(left < 0) left = 0;
+
+    col.style.left = Math.round(left) + "px";
+    col.style.top = Math.round(top) + "px";
+  }
+
+  var timer = null;
+
+  function schedule(){
+    clearTimeout(timer);
+    timer = setTimeout(placeFabColumn, 80);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", schedule);
+  }else{
+    schedule();
+  }
+
+  window.addEventListener("load", schedule);
+  window.addEventListener("resize", schedule);
+  window.addEventListener("orientationchange", schedule);
+  window.addEventListener("scroll", schedule, true);
+
+  var obs = new MutationObserver(schedule);
+  obs.observe(document.documentElement, {
+    childList:true,
+    subtree:true,
+    attributes:true,
+    attributeFilter:["class","style"]
+  });
+
+  setTimeout(placeFabColumn, 150);
+  setTimeout(placeFabColumn, 600);
+  setTimeout(placeFabColumn, 1400);
+})();
+</script>
+<!-- FAB_LEFT_GAP_MOVE_END -->
+
+---------------- FAB_DISTINCT_PANEL ----------------
+<!-- FAB_DISTINCT_PANEL_START -->
+<style id="fab-distinct-panel-style">
+  /*
+    Sol boş alana taşınan hızlı işlem butonlarını
+    koltuklardan görsel olarak ayırır.
+  */
+
+  .fab-column.fab-left-gap-moved{
+    padding:18px 8px 8px !important;
+    border-radius:24px !important;
+
+    background:
+      radial-gradient(circle at 50% 0%, rgba(56,189,248,.22), transparent 42%),
+      linear-gradient(180deg, rgba(15,23,42,.92), rgba(2,6,23,.86)) !important;
+
+    border:1px solid rgba(125,211,252,.36) !important;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.05) inset,
+      0 18px 42px rgba(0,0,0,.42),
+      0 0 28px rgba(37,99,235,.20) !important;
+
+    backdrop-filter:blur(14px) !important;
+    -webkit-backdrop-filter:blur(14px) !important;
+  }
+
+  .fab-column.fab-left-gap-moved::before{
+    content:"HIZLI";
+    position:absolute;
+    top:5px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:8px;
+    line-height:1;
+    font-weight:1000;
+    letter-spacing:.16em;
+    color:rgba(191,219,254,.92);
+    text-shadow:0 0 12px rgba(96,165,250,.55);
+    pointer-events:none;
+  }
+
+  .fab-column.fab-left-gap-moved .fab{
+    position:relative !important;
+    width:48px !important;
+    height:48px !important;
+    border-radius:18px !important;
+
+    border:1px solid rgba(255,255,255,.30) !important;
+    outline:1px solid rgba(125,211,252,.18) !important;
+    outline-offset:2px !important;
+
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.22),
+      inset 0 -10px 18px rgba(0,0,0,.20),
+      0 12px 24px rgba(0,0,0,.38) !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab::after{
+    content:"";
+    position:absolute;
+    inset:-5px;
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,.08);
+    pointer-events:none;
+  }
+
+  .fab-column.fab-left-gap-moved .fab.primary{
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,.24), transparent 34%),
+      linear-gradient(180deg, #60a5fa, #1d4ed8) !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab.green{
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,.22), transparent 34%),
+      linear-gradient(180deg, #34d399, #047857) !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab.orange{
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,.24), transparent 34%),
+      linear-gradient(180deg, #fbbf24, #b45309) !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab:active{
+    transform:scale(.94) !important;
+  }
+
+  @media(max-width:380px){
+    .fab-column.fab-left-gap-moved{
+      padding:17px 7px 7px !important;
+      border-radius:22px !important;
+    }
+
+    .fab-column.fab-left-gap-moved .fab{
+      width:46px !important;
+      height:46px !important;
+      border-radius:17px !important;
+    }
+  }
+</style>
+<!-- FAB_DISTINCT_PANEL_END -->
+
+---------------- FAB_COMPACT_FIT ----------------
+<!-- FAB_COMPACT_FIT_START -->
+<style id="fab-compact-fit-style">
+  /*
+    Hızlı işlem paneli 43 ile 51 arasına tam otursun diye
+    butonları ve panel yüksekliğini kompaktlaştırır.
+  */
+
+  .fab-column.fab-left-gap-moved{
+    padding:15px 6px 6px !important;
+    gap:5px !important;
+    border-radius:21px !important;
+  }
+
+  .fab-column.fab-left-gap-moved::before{
+    top:4px !important;
+    font-size:7px !important;
+    letter-spacing:.14em !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab,
+  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+    width:41px !important;
+    height:41px !important;
+    min-width:41px !important;
+    min-height:41px !important;
+    border-radius:15px !important;
+    font-size:17px !important;
+    outline-offset:1px !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab::after{
+    inset:-3px !important;
+    border-radius:18px !important;
+  }
+
+  @media(max-width:380px){
+    .fab-column.fab-left-gap-moved{
+      padding:14px 5px 5px !important;
+      gap:4px !important;
+      border-radius:19px !important;
+    }
+
+    .fab-column.fab-left-gap-moved .fab,
+    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+      width:39px !important;
+      height:39px !important;
+      min-width:39px !important;
+      min-height:39px !important;
+      border-radius:14px !important;
+      font-size:16px !important;
+    }
+  }
+</style>
+
+<script id="fab-compact-fit-script">
+(function(){
+  function refreshFabPosition(){
+    try{
+      window.dispatchEvent(new Event("resize"));
+    }catch(_){}
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", function(){
+      setTimeout(refreshFabPosition, 120);
+      setTimeout(refreshFabPosition, 600);
+    });
+  }else{
+    setTimeout(refreshFabPosition, 120);
+    setTimeout(refreshFabPosition, 600);
+  }
+
+  setTimeout(refreshFabPosition, 1200);
+})();
+</script>
+<!-- FAB_COMPACT_FIT_END -->
+
+---------------- FAB_VERTICAL_PANEL_OVERRIDE ----------------
+
+===== 3) Hızlı işlem HTML kaynağı deck.html =====
+     1	<div class="board-stage">
+     2	          <div class="deck-wrap">
+     3	            <div class="deck" id="deck">
+     4	              <div class="corr">KORİDOR</div>
+     5	
+     6	              {% for n, pos in seat_positions.items() %}
+     7	                {% if n == 29 %}
+     8	                  <div class="door">KAPI</div>
+     9	                {% endif %}
+    10	
+    11	                <div class="cell" style="grid-row:{{ pos[0] }}; grid-column:{{ pos[1] }};">
+    12	                  <div class="seat" id="seat-{{ n }}" data-seat="{{ n }}" role="button" aria-label="Koltuk {{ n }}">
+    13	                    {{ n }}
+    14	                    <span class="svc-badge" title="Servis">🚌</span>
+    15	                    <span class="bag-badge" title="Bagaj"><span class="bag-dir"></span><span class="bag-count">0</span></span>
+    16	                    <span class="stop-badge" title="Bu durakta inecek">🔔</span>
+    17	                  </div>
+    18	                  <div class="label" id="label-{{ n }}"></div>
+    19	                </div>
+    20	              {% endfor %}
+    21	            </div>
+    22	
+    23	            <div class="fab-column" aria-label="Hızlı işlemler">
+    24	              <button class="fab primary" id="fabBulk" type="button" title="Toplu Giriş">＋</button>
+    25	              <button class="fab green" id="fabCash" type="button" title="Hızlı Tahsilat">₺</button>
+    26	              <button class="fab orange" id="btnOffloadNow" type="button" title="İndir">⇩</button>
+    27	            </div>
+    28	          </div>
+    29	        </div>
+
+===== 4) FAB butonlarının JS bağlantıları =====
+1570:  function openBulk(){
+1836:  async function offloadSelectedStop(){
+2646:  onClick("#fabBulk", openBulk);
+2647:  onClick("#fabBulkPane", openBulk);
+2653:  onClick("#fabCash", openCash);
+2654:  onClick("#fabCashPane", openCash);
+2691:  onClick("#btnOffloadNow", offloadSelectedStop);
+2692:  onClick("#btnOffloadNowPane", offloadSelectedStop);
+
+===== 5) Tüm CSS dosyalarında fab-column / fab kuralları =====
+static/seats/seats.css:730:  .fab-column{
+static/seats/seats.css:740:  .fab{
+static/seats/seats.css:1377:    .fab-column{
+static/seats/seats.css:1384:    .fab{
+static/seats/seats.css:1523:    .fab-column{
+static/seats/seats.css:1528:    .fab{
+static/seats/seats.css:2435:body.drive-mode .fab-column{
+static/seats/seats.css:2441:body.drive-mode .fab{
+static/seats/seats.css:2762:body.drive-mode .fab-column{
+static/seats/seats.css:2789:body.drive-mode .fab{
+static/seats/seats.css:2819:  body.drive-mode .fab-column{
+static/seats/seats.css:2826:  body.drive-mode .fab{
+static/seats/seats.css:2866:body.drive-mode .fab-column{
+static/seats/seats.css:2874:body.drive-mode .fab{
+static/seats/seats.css:2893:  body.drive-mode .fab-column{
+static/seats/seats.css:2899:  body.drive-mode .fab{
+static/seats/seats-final.css:632:.fab-column{
+static/seats/seats-final.css:638:.fab{
+templates/seats.html:3062:  .fab-column.fab-left-gap-moved{
+templates/seats.html:3075:  .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:3083:  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:3091:    .fab-column.fab-left-gap-moved{
+templates/seats.html:3095:    .fab-column.fab-left-gap-moved .fab,
+templates/seats.html:3096:    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:3115:    var col = q(".fab-column");
+templates/seats.html:3192:  .fab-column.fab-left-gap-moved{
+templates/seats.html:3210:  .fab-column.fab-left-gap-moved::before{
+templates/seats.html:3225:  .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:3241:  .fab-column.fab-left-gap-moved .fab::after{
+templates/seats.html:3250:  .fab-column.fab-left-gap-moved .fab.primary{
+templates/seats.html:3256:  .fab-column.fab-left-gap-moved .fab.green{
+templates/seats.html:3262:  .fab-column.fab-left-gap-moved .fab.orange{
+templates/seats.html:3268:  .fab-column.fab-left-gap-moved .fab:active{
+templates/seats.html:3273:    .fab-column.fab-left-gap-moved{
+templates/seats.html:3278:    .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:3294:  .fab-column.fab-left-gap-moved{
+templates/seats.html:3300:  .fab-column.fab-left-gap-moved::before{
+templates/seats.html:3306:  .fab-column.fab-left-gap-moved .fab,
+templates/seats.html:3307:  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:3317:  .fab-column.fab-left-gap-moved .fab::after{
+templates/seats.html:3323:    .fab-column.fab-left-gap-moved{
+templates/seats.html:3329:    .fab-column.fab-left-gap-moved .fab,
+templates/seats.html:3330:    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+
+===== 6) static/seats/seats.css içindeki FAB çevreleri =====
+--- 700-770 ---
+   700	    top:-7px;
+   701	    min-width:22px;
+   702	    min-height:22px;
+   703	    padding:3px 7px;
+   704	    background:var(--accent);
+   705	  }
+   706	
+   707	  .bag-badge{
+   708	    right:-9px;
+   709	    top:-8px;
+   710	    min-height:23px;
+   711	    min-width:23px;
+   712	    padding:3px 7px;
+   713	    gap:4px;
+   714	    background:var(--primary);
+   715	  }
+   716	
+   717	  .stop-badge{
+   718	    left:-7px;
+   719	    bottom:-7px;
+   720	    min-height:22px;
+   721	    padding:3px 7px;
+   722	    background:var(--warn);
+   723	    color:#1f1f1f;
+   724	  }
+   725	
+   726	  .seat.has-service .svc-badge{ display:flex; }
+   727	  .seat.has-bag .bag-badge{ display:inline-flex; }
+   728	  .seat.has-stop .stop-badge{ display:flex; }
+   729	
+   730	  .fab-column{
+   731	    position:absolute;
+   732	    right:14px;
+   733	    bottom:14px;
+   734	    z-index:40;
+   735	    display:flex;
+   736	    flex-direction:column;
+   737	    gap:10px;
+   738	  }
+   739	
+   740	  .fab{
+   741	    width:58px;
+   742	    height:58px;
+   743	    border:none;
+   744	    border-radius:50%;
+   745	    color:#fff;
+   746	    font-size:22px;
+   747	    font-weight:900;
+   748	    cursor:pointer;
+   749	    box-shadow:0 16px 32px rgba(0,0,0,.32);
+   750	  }
+   751	
+   752	  .fab.primary{ background:linear-gradient(180deg, #3b82f6, #1d4ed8); }
+   753	  .fab.green{ background:linear-gradient(180deg, #22c55e, #16843f); }
+   754	  .fab.purple{ background:linear-gradient(180deg, #8b5cf6, #6d28d9); }
+   755	  .fab.orange{ background:linear-gradient(180deg, #f59e0b, #d97706); }
+   756	
+   757	  .fab.listening{
+   758	    animation:micPulse 1s ease-in-out infinite;
+   759	    background:linear-gradient(180deg, #ef4444, #b91c1c);
+   760	  }
+   761	
+   762	  @keyframes micPulse{
+   763	    0%,100%{
+   764	      box-shadow:0 0 0 0 rgba(239,68,68,0), 0 14px 30px rgba(0,0,0,.3);
+   765	    }
+   766	    50%{
+   767	      box-shadow:0 0 0 11px rgba(239,68,68,.20), 0 14px 30px rgba(0,0,0,.3);
+   768	    }
+   769	  }
+   770	
+
+--- 1350-1400 ---
+  1350	      border-radius:16px;
+  1351	      font-size:18px;
+  1352	    }
+  1353	
+  1354	    .status-row{
+  1355	      grid-template-columns:repeat(3, minmax(0,1fr));
+  1356	    }
+  1357	
+  1358	    .layout{
+  1359	      grid-template-columns:1fr;
+  1360	    }
+  1361	
+  1362	    .field-row,
+  1363	    .metrics-grid,
+  1364	    .action-grid{
+  1365	      grid-template-columns:1fr;
+  1366	    }
+  1367	
+  1368	    .board-stage{
+  1369	      padding-right:88px;
+  1370	      padding-bottom:12px;
+  1371	    }
+  1372	
+  1373	    .deck-wrap{
+  1374	      padding-right:78px;
+  1375	    }
+  1376	
+  1377	    .fab-column{
+  1378	      position:fixed;
+  1379	      right:var(--mobile-fab-offset);
+  1380	      bottom:16px;
+  1381	      z-index:1300;
+  1382	    }
+  1383	
+  1384	    .fab{
+  1385	      width:54px;
+  1386	      height:54px;
+  1387	      font-size:20px;
+  1388	    }
+  1389	
+  1390	    .panel-card{
+  1391	      margin-top:2px;
+  1392	      border-radius:28px;
+  1393	    }
+  1394	
+  1395	    .panel-handle{
+  1396	      display:block;
+  1397	    }
+  1398	  }
+  1399	
+  1400	  @media (max-width:760px){
+  1401	    :root{
+  1402	      --seat-w:58px;
+  1403	      --seat-h:58px;
+  1404	      --seat-gap-y:16px;
+  1405	      --seat-gap-x:16px;
+
+--- 1500-1540 ---
+  1500	      border-radius:20px;
+  1501	    }
+  1502	
+  1503	    .route-stop{
+  1504	      min-width:100px;
+  1505	      min-height:52px;
+  1506	      padding:9px 10px;
+  1507	    }
+  1508	
+  1509	    .board-stage{
+  1510	      padding:12px 76px 10px 6px;
+  1511	      border-radius:22px;
+  1512	    }
+  1513	
+  1514	    .deck{
+  1515	      padding:12px 6px 8px;
+  1516	    }
+  1517	
+  1518	    .corr{
+  1519	      width:54px;
+  1520	      border-radius:18px;
+  1521	    }
+  1522	
+  1523	    .fab-column{
+  1524	      right:10px;
+  1525	      bottom:12px;
+  1526	    }
+  1527	
+  1528	    .fab{
+  1529	      width:52px;
+  1530	      height:52px;
+  1531	      font-size:19px;
+  1532	    }
+  1533	
+  1534	    .panel-tabs{
+  1535	      grid-template-columns:repeat(5, minmax(0,1fr));
+  1536	      gap:6px;
+  1537	    }
+  1538	
+  1539	    .tab-btn{
+  1540	      min-height:40px;
+  1541	      font-size:12px;
+  1542	      padding:8px 6px;
+  1543	      border-radius:14px;
+  1544	    }
+  1545	
+
+--- 2420-2460 ---
+  2420	  top:-10px;
+  2421	  min-height:24px;
+  2422	  min-width:28px;
+  2423	  font-size:12px;
+  2424	}
+  2425	
+  2426	body.drive-mode .stop-badge{
+  2427	  left:-8px;
+  2428	  bottom:-8px;
+  2429	  min-height:24px;
+  2430	  min-width:24px;
+  2431	  font-size:12px;
+  2432	}
+  2433	
+  2434	/* Sağdaki hızlı butonlar koltukların üstüne fazla binmesin */
+  2435	body.drive-mode .fab-column{
+  2436	  right:8px !important;
+  2437	  bottom:10px !important;
+  2438	  gap:8px !important;
+  2439	}
+  2440	
+  2441	body.drive-mode .fab{
+  2442	  width:48px !important;
+  2443	  height:48px !important;
+  2444	  font-size:18px !important;
+  2445	}
+  2446	
+  2447	/* Küçük telefon ayarı */
+  2448	@media (max-width:760px){
+  2449	
+  2450	  body.drive-mode #driveModeToggle{
+  2451	    top:calc(8px + env(safe-area-inset-top));
+  2452	    right:8px;
+  2453	    min-width:128px;
+  2454	    min-height:42px;
+  2455	    font-size:14px;
+  2456	  }
+  2457	
+  2458	  body.drive-mode .board-head{
+  2459	    grid-template-columns:1fr !important;
+  2460	  }
+  2461	
+  2462	  body.drive-mode .selected-stop-chip{
+  2463	    max-width:calc(100vw - 150px);
+  2464	    min-height:38px;
+  2465	    font-size:14px;
+
+--- 2740-2835 ---
+  2740	/* Normal modda da aynı düzgünlük istenirse */
+  2741	.corr{
+  2742	  grid-row:1 / 14;
+  2743	}
+  2744	
+  2745	
+  2746	/* =========================================================
+  2747	   SÜRÜŞ MODU ALT HIZLI İŞLEM BARI
+  2748	   Sağ alttaki + ₺ ⇩ butonlarını alta yatay dizer
+  2749	========================================================= */
+  2750	
+  2751	/* Alt bar için koltuk planının altında yer aç */
+  2752	body.drive-mode .board-stage{
+  2753	  padding-bottom:92px !important;
+  2754	}
+  2755	
+  2756	/* Deck içinde butonlara alt boşluk bırak */
+  2757	body.drive-mode .deck-wrap{
+  2758	  padding-bottom:78px !important;
+  2759	}
+  2760	
+  2761	/* Sağdaki dikey FAB kolonunu sürüş modunda yatay alt bara çevir */
+  2762	body.drive-mode .fab-column{
+  2763	  position:absolute !important;
+  2764	  left:50% !important;
+  2765	  right:auto !important;
+  2766	  bottom:14px !important;
+  2767	  transform:translateX(-50%) !important;
+  2768	
+  2769	  display:flex !important;
+  2770	  flex-direction:row !important;
+  2771	  align-items:center !important;
+  2772	  justify-content:center !important;
+  2773	  gap:14px !important;
+  2774	
+  2775	  width:auto !important;
+  2776	  padding:10px 14px !important;
+  2777	  border-radius:26px !important;
+  2778	
+  2779	  background:linear-gradient(180deg, rgba(15,23,42,.88), rgba(2,6,23,.88));
+  2780	  border:1px solid rgba(255,255,255,.12);
+  2781	  box-shadow:
+  2782	    0 16px 34px rgba(0,0,0,.38),
+  2783	    0 0 0 1px rgba(255,255,255,.04) inset;
+  2784	  backdrop-filter:blur(10px);
+  2785	  z-index:80 !important;
+  2786	}
+  2787	
+  2788	/* Alt bar butonları */
+  2789	body.drive-mode .fab{
+  2790	  width:56px !important;
+  2791	  height:56px !important;
+  2792	  min-width:56px !important;
+  2793	  min-height:56px !important;
+  2794	  border-radius:20px !important;
+  2795	  font-size:23px !important;
+  2796	  box-shadow:0 12px 24px rgba(0,0,0,.34);
+  2797	}
+  2798	
+  2799	/* Butonların rengi daha net kalsın */
+  2800	body.drive-mode .fab.primary{
+  2801	  background:linear-gradient(180deg, #3b82f6, #1d4ed8) !important;
+  2802	}
+  2803	
+  2804	body.drive-mode .fab.green{
+  2805	  background:linear-gradient(180deg, #22c55e, #15803d) !important;
+  2806	}
+  2807	
+  2808	body.drive-mode .fab.orange{
+  2809	  background:linear-gradient(180deg, #f59e0b, #d97706) !important;
+  2810	}
+  2811	
+  2812	/* 51-52-53-54 satırı ile çakışmasın */
+  2813	body.drive-mode .deck{
+  2814	  padding-bottom:88px !important;
+  2815	}
+  2816	
+  2817	/* Dar telefonlarda biraz küçült */
+  2818	@media (max-width:420px){
+  2819	  body.drive-mode .fab-column{
+  2820	    bottom:12px !important;
+  2821	    gap:10px !important;
+  2822	    padding:9px 12px !important;
+  2823	    border-radius:24px !important;
+  2824	  }
+  2825	
+  2826	  body.drive-mode .fab{
+  2827	    width:52px !important;
+  2828	    height:52px !important;
+  2829	    min-width:52px !important;
+  2830	    min-height:52px !important;
+  2831	    font-size:21px !important;
+  2832	    border-radius:18px !important;
+  2833	  }
+  2834	
+  2835	  body.drive-mode .board-stage{
+
+--- 2850-2910 ---
+  2850	/* Önceki fazla alt boşlukları ezer */
+  2851	body.drive-mode .board-stage{
+  2852	  padding-bottom:14px !important;
+  2853	}
+  2854	
+  2855	/* Deck-wrap ekstra boşluk vermesin */
+  2856	body.drive-mode .deck-wrap{
+  2857	  padding-bottom:0 !important;
+  2858	}
+  2859	
+  2860	/* Sadece buton bar kadar kontrollü boşluk bırak */
+  2861	body.drive-mode .deck{
+  2862	  padding-bottom:76px !important;
+  2863	}
+  2864	
+  2865	/* Alt hızlı işlem barını 51-54 satırına daha yakın taşı */
+  2866	body.drive-mode .fab-column{
+  2867	  bottom:8px !important;
+  2868	  padding:8px 12px !important;
+  2869	  gap:12px !important;
+  2870	  border-radius:24px !important;
+  2871	}
+  2872	
+  2873	/* Butonlar biraz daha kompakt */
+  2874	body.drive-mode .fab{
+  2875	  width:52px !important;
+  2876	  height:52px !important;
+  2877	  min-width:52px !important;
+  2878	  min-height:52px !important;
+  2879	  border-radius:18px !important;
+  2880	  font-size:21px !important;
+  2881	}
+  2882	
+  2883	/* Çok dar ekranda daha da sıkı */
+  2884	@media (max-width:420px){
+  2885	  body.drive-mode .board-stage{
+  2886	    padding-bottom:10px !important;
+  2887	  }
+  2888	
+  2889	  body.drive-mode .deck{
+  2890	    padding-bottom:68px !important;
+  2891	  }
+  2892	
+  2893	  body.drive-mode .fab-column{
+  2894	    bottom:6px !important;
+  2895	    padding:7px 10px !important;
+  2896	    gap:9px !important;
+  2897	  }
+  2898	
+  2899	  body.drive-mode .fab{
+  2900	    width:48px !important;
+  2901	    height:48px !important;
+  2902	    min-width:48px !important;
+  2903	    min-height:48px !important;
+  2904	    font-size:20px !important;
+  2905	  }
+  2906	}
+  2907	
+  2908	
+  2909	/* =========================================================
+  2910	   DURAK AKIŞI CANLI / SIRADAKİ TIKLANABİLİR PILL
+
+===== 7) static/seats/seats-final.css içindeki FAB çevresi =====
+   620	.seat{
+   621	  border-radius:20px !important;
+   622	  box-shadow:
+   623	    inset 0 -10px 18px rgba(0,0,0,.16),
+   624	    0 13px 24px rgba(0,0,0,.30) !important;
+   625	}
+   626	
+   627	.label{
+   628	  color:#dbeafe !important;
+   629	  font-size:10.5px !important;
+   630	}
+   631	
+   632	.fab-column{
+   633	  right:9px !important;
+   634	  bottom:10px !important;
+   635	  gap:8px !important;
+   636	}
+   637	
+   638	.fab{
+   639	  width:48px !important;
+   640	  height:48px !important;
+   641	  border-radius:17px !important;
+   642	  font-size:19px !important;
+   643	}
+   644	
+   645	/* =========================================================
+   646	   SAĞ PANEL
+   647	========================================================= */
+   648	
+   649	.panel-card{
+   650	  padding:10px !important;
+
+===== 8) Başarılı olduğu düşünülen yedeklerle mevcut FAB blok farkı =====
+Kaynak yedek: templates/seats.html.bak_rollback_bottom_deck_space_trim_20260516_064933
+
+---------------- DIFF FAB_LEFT_GAP_MOVE ----------------
+
+---------------- DIFF FAB_DISTINCT_PANEL ----------------
+
+---------------- DIFF FAB_COMPACT_FIT ----------------
+
+===== 9) Aktif CSS/JS blok sayım kontrolü =====
+style açılış: 0
+style kapanış: 18
+script açılış: 0
+script kapanış: 24
+FAB_LEFT_GAP_MOVE START: 1 END: 1
+FAB_DISTINCT_PANEL START: 1 END: 1
+FAB_COMPACT_FIT START: 1 END: 1
+FAB_VERTICAL_PANEL_OVERRIDE START: 0 END: 0
+
+===== 10) Python kontrol =====
+app.py syntax OK

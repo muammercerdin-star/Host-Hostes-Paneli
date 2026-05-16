@@ -4916,3 +4916,46 @@ body.drive-mode .route-stop.done.has-flow-summary .meta.done-summary{
     font-size:11px;
   }
 }
+
+
+/* LAST_ROW_INNER_GAP_FIX_START */
+/* Sadece en alt satır (51-52-53-54) altındaki iç boşluğu kapat */
+.deck .cell[style*="grid-row:14;"]{
+  gap:0 !important;
+}
+
+.deck .cell[style*="grid-row:14;"] .label:empty{
+  min-height:0 !important;
+  height:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+}
+/* LAST_ROW_INNER_GAP_FIX_END */
+
+
+/* LAST_ROW_TIGHTER_FIX_START */
+/* 51-52-53-54 satırının altındaki iç boşluğu daha da daraltır */
+.deck{
+  grid-template-rows:
+    repeat(13, calc(var(--seat-h) + 24px))
+    calc(var(--seat-h) + 2px) !important;
+}
+
+.deck .cell[style*="grid-row:14;"],
+.deck .cell[style*="grid-row: 14;"]{
+  gap:0 !important;
+  align-self:start !important;
+}
+
+.deck .cell[style*="grid-row:14;"] .label:empty,
+.deck .cell[style*="grid-row: 14;"] .label:empty{
+  min-height:0 !important;
+  height:0 !important;
+  max-height:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+}
+/* LAST_ROW_TIGHTER_FIX_END */
+

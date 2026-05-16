@@ -1,0 +1,951 @@
+============================================================
+SON YARIM SAAT / SES YAMALARI RAPORU
+Tarih: Sat May 16 15:08:01 +03 2026
+Proje: /data/data/com.termux/files/home/Host-Hostes-Paneli
+============================================================
+
+===== 1) SON OLUŞAN YEDEKLER =====
+2026-05-16 15:06  templates/seats.html.bak_before_fix_bad_voice_rollback_20260516_150609
+2026-05-16 15:06  static/seats/voice-tts.js.bak_before_fix_bad_voice_rollback_20260516_150609
+2026-05-16 15:06  static/seats/seats.js.bak_before_fix_bad_voice_rollback_20260516_150609
+2026-05-16 15:06  static/seats/drive-controls.js.bak_before_fix_bad_voice_rollback_20260516_150609
+2026-05-16 15:05  templates/seats.html.bak_before_restore_previous_20260516_150549
+2026-05-16 15:05  static/seats/voice-tts.js.bak_before_restore_previous_20260516_150549
+2026-05-16 15:05  static/seats/seats.js.bak_before_restore_previous_20260516_150549
+2026-05-16 15:05  static/seats/drive-controls.js.bak_before_restore_previous_20260516_150549
+2026-05-16 15:03  templates/seats.html.bak_before_voice_mass_rollback_20260516_150355
+2026-05-16 15:03  static/seats/voice-tts.js.bak_before_voice_mass_rollback_20260516_150355
+2026-05-16 15:03  static/seats/seats.js.bak_before_voice_mass_rollback_20260516_150355
+2026-05-16 15:03  static/seats/drive-controls.js.bak_before_voice_mass_rollback_20260516_150355
+2026-05-16 15:01  static/seats/voice-tts.js.bak_force_tts_toggle_speed_sync_20260516_150133
+2026-05-16 15:01  android_app/app/src/main/python/static/seats/voice-tts.js.bak_force_tts_toggle_speed_sync_20260516_150133
+2026-05-16 15:00  templates/seats.html.bak_tts_toggle_speed_sync_20260516_150032
+2026-05-16 15:00  static/seats/voice-tts.js.bak_tts_toggle_speed_sync_20260516_150032
+2026-05-16 15:00  android_app/app/src/main/python/templates/seats.html.bak_tts_toggle_speed_sync_20260516_150032
+2026-05-16 15:00  android_app/app/src/main/python/static/seats/voice-tts.js.bak_tts_toggle_speed_sync_20260516_150032
+2026-05-16 14:59  templates/seats.html.bak_speed_voice_click_final_20260516_145945
+2026-05-16 14:59  static/seats/voice-tts.js.bak_speed_voice_click_final_20260516_145945
+2026-05-16 14:59  static/seats/seats.js.bak_speed_voice_click_final_20260516_145945
+2026-05-16 14:59  android_app/app/src/main/python/templates/seats.html.bak_speed_voice_click_final_20260516_145945
+2026-05-16 14:59  android_app/app/src/main/python/static/seats/voice-tts.js.bak_speed_voice_click_final_20260516_145945
+2026-05-16 14:59  android_app/app/src/main/python/static/seats/seats.js.bak_speed_voice_click_final_20260516_145945
+2026-05-16 14:57  templates/seats.html.bak_voice_split_final2_20260516_145734
+2026-05-16 14:57  static/seats/voice-tts.js.bak_voice_split_final2_20260516_145734
+2026-05-16 14:57  static/seats/seats.js.bak_voice_split_final2_20260516_145734
+2026-05-16 14:57  android_app/app/src/main/python/templates/seats.html.bak_voice_split_final2_20260516_145734
+2026-05-16 14:57  android_app/app/src/main/python/static/seats/voice-tts.js.bak_voice_split_final2_20260516_145734
+2026-05-16 14:57  android_app/app/src/main/python/static/seats/seats.js.bak_voice_split_final2_20260516_145734
+2026-05-16 14:56  static/seats/drive-controls.js.bak_hard_line_repair_20260516_145608
+2026-05-16 14:56  android_app/app/src/main/python/static/seats/drive-controls.js.bak_hard_line_repair_20260516_145608
+2026-05-16 14:54  static/seats/drive-controls.js.bak_hard_repair_voice_block_20260516_145427
+2026-05-16 14:54  android_app/app/src/main/python/static/seats/drive-controls.js.bak_hard_repair_voice_block_20260516_145427
+2026-05-16 14:53  templates/seats.html.bak_drive_force_repair_version_20260516_145319
+2026-05-16 14:53  static/seats/drive-controls.js.bak_force_repair_20260516_145319
+2026-05-16 14:53  android_app/app/src/main/python/templates/seats.html.bak_drive_force_repair_version_20260516_145319
+2026-05-16 14:53  android_app/app/src/main/python/static/seats/drive-controls.js.bak_force_repair_20260516_145319
+2026-05-16 13:36  templates/seats.html.bak_final_voice_split_20260516_133629
+2026-05-16 13:36  static/seats/voice-tts.js.bak_final_voice_split_20260516_133629
+2026-05-16 13:36  static/seats/seats.js.bak_final_voice_split_20260516_133629
+2026-05-16 13:36  android_app/app/src/main/python/templates/seats.html.bak_final_voice_split_20260516_133629
+2026-05-16 13:36  android_app/app/src/main/python/static/seats/voice-tts.js.bak_final_voice_split_20260516_133629
+2026-05-16 13:36  android_app/app/src/main/python/static/seats/seats.js.bak_final_voice_split_20260516_133629
+2026-05-16 13:34  templates/seats.html.bak_drive_controls_repair_version_20260516_133452
+2026-05-16 13:34  static/seats/drive-controls.js.bak_repair_voice_block_20260516_133452
+2026-05-16 13:34  android_app/app/src/main/python/templates/seats.html.bak_drive_controls_repair_version_20260516_133452
+2026-05-16 13:34  android_app/app/src/main/python/static/seats/drive-controls.js.bak_repair_voice_block_20260516_133452
+2026-05-16 11:43  templates/seats.html.bak_clean_speed_voice_split_20260516_114304
+2026-05-16 11:43  static/seats/voice-tts.js.bak_clean_speed_voice_split_20260516_114304
+2026-05-16 11:43  static/seats/seats.js.bak_clean_speed_voice_split_20260516_114304
+2026-05-16 11:43  android_app/app/src/main/python/templates/seats.html.bak_clean_speed_voice_split_20260516_114304
+2026-05-16 11:43  android_app/app/src/main/python/static/seats/voice-tts.js.bak_clean_speed_voice_split_20260516_114304
+2026-05-16 11:43  android_app/app/src/main/python/static/seats/seats.js.bak_clean_speed_voice_split_20260516_114304
+2026-05-16 11:36  templates/seats.html.bak_split_assistant_speed_voice_20260516_113619
+2026-05-16 11:36  static/seats/voice-tts.js.bak_split_assistant_speed_voice_20260516_113619
+2026-05-16 11:36  static/seats/seats.js.bak_split_assistant_speed_voice_20260516_113619
+2026-05-16 11:36  android_app/app/src/main/python/templates/seats.html.bak_split_assistant_speed_voice_20260516_113619
+2026-05-16 11:36  android_app/app/src/main/python/static/seats/voice-tts.js.bak_split_assistant_speed_voice_20260516_113619
+2026-05-16 11:36  android_app/app/src/main/python/static/seats/seats.js.bak_split_assistant_speed_voice_20260516_113619
+2026-05-16 11:29  static/seats/voice-commands.js.bak_natural_total_voice_20260516_112923
+2026-05-16 11:29  android_app/app/src/main/python/static/seats/voice-commands.js.bak_natural_total_voice_20260516_112923
+2026-05-16 11:23  templates/seats.html.bak_top_sound_toggle_20260516_112357
+2026-05-16 11:23  android_app/app/src/main/python/templates/seats.html.bak_top_sound_toggle_20260516_112357
+2026-05-16 11:16  templates/seats.html.bak_bottom_voice_clickfix_20260516_111618
+2026-05-16 11:16  static/seats/voice-commands.js.bak_bottom_voice_clickfix_20260516_111618
+2026-05-16 11:16  android_app/app/src/main/python/templates/seats.html.bak_bottom_voice_clickfix_20260516_111618
+2026-05-16 11:16  android_app/app/src/main/python/static/seats/voice-commands.js.bak_bottom_voice_clickfix_20260516_111618
+2026-05-16 11:12  templates/seats.html.bak_voice_bottom_final_20260516_111251
+2026-05-16 11:12  android_app/app/src/main/python/templates/seats.html.bak_voice_bottom_final_20260516_111252
+2026-05-16 11:07  templates/seats.html.bak_rollback_voice_to_bottom_20260516_110701
+2026-05-16 11:07  android_app/app/src/main/python/templates/seats.html.bak_rollback_voice_to_bottom_20260516_110701
+2026-05-16 11:05  templates/seats.html.bak_voice_to_bottom_20260516_110540
+2026-05-16 11:05  android_app/app/src/main/python/templates/seats.html.bak_voice_to_bottom_20260516_110540
+2026-05-16 10:59  templates/seats.html.bak_only54_shift_fix_20260516_105927
+2026-05-16 10:56  templates/seats_parts/deck.html.bak_rollback_only54_20260516_105639
+2026-05-16 10:56  templates/seats.html.bak_rollback_only54_20260516_105639
+2026-05-16 10:56  android_app/app/src/main/python/templates/seats_parts/deck.html.bak_rollback_only54_20260516_105639
+2026-05-16 10:56  android_app/app/src/main/python/templates/seats.html.bak_rollback_only54_20260516_105639
+2026-05-16 10:55  templates/seats_parts/deck.html.bak_only54_20260516_105535
+2026-05-16 10:55  templates/seats.html.bak_only54_20260516_105535
+2026-05-16 10:55  android_app/app/src/main/python/templates/seats_parts/deck.html.bak_only54_20260516_105535
+2026-05-16 10:55  android_app/app/src/main/python/templates/seats.html.bak_only54_20260516_105535
+2026-05-16 07:54  templates/seats.html.bak_rollback_bottom_row_align_20260516_075433
+2026-05-16 07:54  android_app/app/src/main/python/templates/seats.html.bak_rollback_bottom_row_align_20260516_075433
+2026-05-16 07:53  templates/seats.html.bak_bottom_row_align_20260516_075348
+2026-05-16 07:53  android_app/app/src/main/python/templates/seats.html.bak_bottom_row_align_20260516_075348
+2026-05-16 07:10  templates/seats.html.bak_rollback_wide_angle_scroll_20260516_071027
+2026-05-16 07:05  templates/seats.html.bak_wide_angle_final_nudge_20260516_070540
+2026-05-16 07:02  templates/seats.html.bak_deck_wide_angle_fit_20260516_070229
+2026-05-16 07:00  templates/seats.html.bak_rollback_disable_deck_horizontal_scroll_20260516_070001
+2026-05-16 06:59  templates/seats.html.bak_disable_deck_horizontal_scroll_20260516_065903
+2026-05-16 06:57  static/seats/seats.css.bak_last_row_tighter_20260516_065700
+2026-05-16 06:57  android_app/app/src/main/python/static/seats/seats.css.bak_last_row_tighter_20260516_065700
+2026-05-16 06:55  static/seats/seats.css.bak_last_row_inner_gap_fix_20260516_065535
+2026-05-16 06:55  android_app/app/src/main/python/static/seats/seats.css.bak_last_row_inner_gap_fix_20260516_065535
+2026-05-16 06:49  templates/seats.html.bak_rollback_bottom_deck_space_trim_20260516_064933
+2026-05-16 06:48  templates/seats.html.bak_bottom_deck_space_trim_20260516_064820
+2026-05-16 06:46  templates/seats.html.bak_fab_compact_fit_20260516_064606
+2026-05-16 06:44  templates/seats.html.bak_fab_distinct_panel_20260516_064444
+2026-05-16 06:42  templates/seats.html.bak_fab_left_gap_move_20260516_064207
+2026-05-16 06:37  templates/seats.html.bak_bottom_row_equal_20260516_063703
+2026-05-16 06:31  templates/seats.html.bak_right_column_spacing_20260516_063100
+2026-05-16 06:25  templates/seats.html.bak_rollback_general_label_fix_20260516_062504
+2026-05-16 06:25  static/seats/seats.js.bak_rollback_general_label_fix_20260516_062504
+2026-05-16 06:23  static/seats/seats.js.bak_label_title_regex_20260516_062350
+2026-05-16 06:22  templates/seats.html.bak_general_seat_label_fix_20260516_062235
+2026-05-16 06:22  static/seats/seats.js.bak_general_seat_label_fix_20260516_062235
+2026-05-16 06:15  templates/seats.html.bak_simple_top_voice_safe_20260516_061522
+2026-05-16 06:03  templates/seats.html.bak_rollback_safe_top_voice_overlay_20260516_060324
+2026-05-16 06:02  templates/seats.html.bak_safe_top_voice_overlay_20260516_060214
+2026-05-16 06:00  templates/seats.html.bak_repair_top_split_shift_20260516_060003
+2026-05-16 05:58  templates/seats.html.bak_rollback_top_voice_split_20260516_055839
+2026-05-16 05:57  templates/seats.html.bak_top_voice_split_20260516_055736
+2026-05-15 21:01  templates/seats.html.bak_rollback_seat_label_overlap_fix_20260515_210127
+2026-05-15 21:00  templates/seats.html.bak_seat_label_overlap_fix_20260515_210033
+2026-05-15 17:39  templates/seats.html.bak_modal_bottom_nav_hide_v3_20260515_173940
+2026-05-15 17:36  templates/seats.html.bak_bulk_nav_hide_v2_20260515_173615
+2026-05-15 15:25  templates/seats.html.bak_rollback_bulk_modal_hide_bottom_nav_20260515_152530
+2026-05-15 15:24  templates/seats.html.bak_bulk_modal_hide_bottom_nav_20260515_152410
+
+===== 2) AKTİF SCRIPT VERSİYONLARI =====
+352:<script src="/static/seats/voice-commands.js?v=natural-total-voice-1"></script>
+354:<script src="/static/seats/seats.js?v=voice-rollback-clean-1"></script>
+357:<script src="/static/seats/voice-tts.js?v=voice-rollback-clean-1"></script>
+359:<script src="/static/seats/drive-controls.js?v=voice-rollback-clean-1"></script>
+
+===== 3) AKTİF PATCH MARKERLARI - templates/seats.html =====
+2650:<!-- RIGHT_SEAT_COLUMN_SPACING_FIX_START -->
+2702:<!-- RIGHT_SEAT_COLUMN_SPACING_FIX_END -->
+2705:<!-- BOTTOM_ROW_51_54_EQUAL_SPACING_START -->
+2724:<!-- BOTTOM_ROW_51_54_EQUAL_SPACING_END -->
+2727:<!-- FAB_LEFT_GAP_MOVE_START -->
+2856:<!-- FAB_LEFT_GAP_MOVE_END -->
+2859:<!-- FAB_DISTINCT_PANEL_START -->
+2959:<!-- FAB_DISTINCT_PANEL_END -->
+2962:<!-- FAB_COMPACT_FIT_START -->
+3037:<!-- FAB_COMPACT_FIT_END -->
+3052:<!-- ONLY_54_REAPPLY_RIGHT_SHIFT_START -->
+3056:    BOTTOM_ROW_51_54_EQUAL_SPACING yaması 14. satırın transformunu sıfırladığı için
+3075:<!-- ONLY_54_REAPPLY_RIGHT_SHIFT_END -->
+3079:<!-- BOTTOM_VOICE_COMMAND_FINAL_START -->
+3100:<!-- BOTTOM_VOICE_COMMAND_FINAL_END -->
+3103:<!-- BOTTOM_VOICE_LISTENING_STATE_FIX_START -->
+3112:<!-- BOTTOM_VOICE_LISTENING_STATE_FIX_END -->
+3115:<!-- TOP_SOUND_TOGGLE_START -->
+3336:<!-- TOP_SOUND_TOGGLE_END -->
+
+===== 4) SES AYRIMI KALINTI KONTROLÜ =====
+Ses ayrıştırma kalıntısı görünmüyor.
+
+===== 5) drive-controls.js BOZUK KALINTI KONTROLÜ =====
+drive-controls bozuk kalıntısı görünmüyor.
+
+===== 6) SESLE İLGİLİ AKTİF KOD PARÇALARI =====
+templates/seats.html:149:              <button class="tts-btn" id="ttsToggle" title="Sesli uyarı">🔊</button>
+templates/seats.html:205:                <label><input type="checkbox" id="soundToggle" checked> Sesli yanıt</label>
+templates/seats.html:3131:  #seatSimpleSoundToggle{
+templates/seats.html:3152:  #seatSimpleSoundToggle.is-off{
+templates/seats.html:3160:  #seatSimpleSoundToggle:active{
+templates/seats.html:3169:    #seatSimpleSoundToggle{
+templates/seats.html:3184:  var KEY = "ttsEnabled";
+templates/seats.html:3211:      if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+templates/seats.html:3212:        window.SeatsVoice.setEnabled(on);
+templates/seats.html:3220:    var sound = q("#soundToggle");
+templates/seats.html:3226:    // #ttsToggle artık hız limiti sesine aittir; asistan ses butonu buraya dokunmaz.
+templates/seats.html:3241:      window.dispatchEvent(new CustomEvent("ttsEnabledChanged", {detail:{enabled:on}}));
+templates/seats.html:3248:    var btn = q("#seatSimpleSoundToggle");
+templates/seats.html:3277:    var btn = q("#seatSimpleSoundToggle");
+templates/seats.html:3282:      btn.id = "seatSimpleSoundToggle";
+templates/seats.html:3291:        if(next && window.SeatsSpeak){
+templates/seats.html:3292:          try{ window.SeatsSpeak("Sesli asistan açık.", {force:true}); }catch(_){}
+templates/seats.html:3317:  window.addEventListener("ttsEnabledChanged", syncButton);
+templates/seats.html:3320:    if(e.target && e.target.id === "soundToggle"){
+static/seats/seats.js:1304:      if(window.SeatsSpeak){
+static/seats/seats.js:1305:        window.SeatsSpeak(msg);
+static/seats/seats.js:1753:      if(window.SeatsSpeak){
+static/seats/seats.js:1754:        window.SeatsSpeak(msg);
+static/seats/seats.js:2388:    const ttsBtn = $("#ttsToggle");
+static/seats/seats.js:2391:    const TTS_KEY = "ttsEnabled";
+static/seats/seats.js:2401:    let ttsEnabled = readTtsEnabled();
+static/seats/seats.js:2404:      ttsEnabled = readTtsEnabled();
+static/seats/seats.js:2406:      ttsEnabled ? ttsBtn.classList.remove("muted") : ttsBtn.classList.add("muted");
+static/seats/seats.js:2407:      ttsBtn.title = ttsEnabled ? "Sesli uyarı açık" : "Sesli uyarı kapalı";
+static/seats/seats.js:2419:      if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+static/seats/seats.js:2420:        window.SeatsVoice.setEnabled(next);
+static/seats/seats.js:2425:      ttsEnabled = next;
+static/seats/seats.js:2429:        if(window.SeatsSpeak){
+static/seats/seats.js:2430:          window.SeatsSpeak("Sesli uyarı açık.", { force:true });
+static/seats/seats.js:2453:      if(!ttsEnabled) return;
+static/seats/seats.js:2458:      if(window.SeatsSpeak){
+static/seats/seats.js:2459:        window.SeatsSpeak(msg);
+static/seats/voice-tts.js:11:  const KEY = "ttsEnabled";
+static/seats/voice-tts.js:29:      window.dispatchEvent(new CustomEvent("ttsEnabledChanged", {
+static/seats/voice-tts.js:97:    const ttsBtn = document.getElementById("ttsToggle");
+static/seats/voice-tts.js:111:  window.SeatsSpeak = speak;
+static/seats/drive-controls.js:56:      if(window.SeatsSpeak){
+static/seats/drive-controls.js:57:        window.SeatsSpeak(msg, { force:true });
+static/seats/drive-controls.js:183:    const saved = localStorage.getItem("ttsEnabled");
+static/seats/drive-controls.js:186:    const cb = document.getElementById("soundToggle");
+static/seats/drive-controls.js:218:        if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+static/seats/drive-controls.js:219:          window.SeatsVoice.setEnabled(enabled);
+static/seats/drive-controls.js:221:          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+static/seats/drive-controls.js:225:          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+static/seats/drive-controls.js:229:      const cb = document.getElementById("soundToggle");
+static/seats/drive-controls.js:246:    const cb = document.getElementById("soundToggle");
+static/seats/voice-commands.js:233:  const soundToggle = $("#soundToggle");
+static/seats/voice-commands.js:235:  if(soundToggle && !soundToggle.checked) return;
+static/seats/voice-commands.js:238:    if(typeof window.SeatsSpeak === "function"){
+static/seats/voice-commands.js:239:      window.SeatsSpeak(msg);
+
+===== 7) drive-controls.js 170-275 ARASI =====
+   170	        <span>km/h</span>
+   171	      </div>
+   172	      <div class="drive-speed-sub">${limitText}${stopText}</div>
+   173	    `;
+   174	  }
+   175	
+   176	  function getVoiceEnabled(){
+   177	    try{
+   178	      if(window.SeatsVoice && typeof window.SeatsVoice.isEnabled === "function"){
+   179	        return window.SeatsVoice.isEnabled();
+   180	      }
+   181	    }catch(_){}
+   182	
+   183	    const saved = localStorage.getItem("ttsEnabled");
+   184	    if(saved !== null) return saved === "1";
+   185	
+   186	    const cb = document.getElementById("soundToggle");
+   187	    if(cb) return cb.checked !== false;
+   188	
+   189	    return true;
+   190	  }
+   191	
+   192	  function updateNightVoiceToggle(){
+   193	    try{
+   194	      if(window.SeatsVoice && typeof window.SeatsVoice.syncButtons === "function"){
+   195	        window.SeatsVoice.syncButtons();
+   196	        return;
+   197	      }
+   198	    }catch(_){}
+   199	
+   200	    const btn = document.getElementById("nightVoiceToggle");
+   201	    if(!btn) return;
+   202	
+   203	    const on = getVoiceEnabled();
+   204	
+   205	    btn.classList.toggle("is-off", !on);
+   206	    btn.innerHTML = on
+   207	      ? `<span class="nv-ico">🔊</span><span>Ses Açık</span>`
+   208	      : `<span class="nv-ico">🔇</span><span>Sessiz</span>`;
+   209	
+   210	    btn.title = on
+   211	      ? "Sesli robot açık. Kapatmak için dokun."
+   212	      : "Sesli robot kapalı. Açmak için dokun.";
+   213	  }
+   214	    function setVoiceEnabled(on, opts={}){
+   215	      const enabled = !!on;
+   216	
+   217	      try{
+   218	        if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+   219	          window.SeatsVoice.setEnabled(enabled);
+   220	        }else{
+   221	          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+   222	        }
+   223	      }catch(_){
+   224	        try{
+   225	          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+   226	        }catch(e){}
+   227	      }
+   228	
+   229	      const cb = document.getElementById("soundToggle");
+   230	      if(cb) cb.checked = enabled;
+   231	
+   232	      updateNightVoiceToggle();
+   233	
+   234	      if(!opts.silent){
+   235	        safeToast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1600);
+   236	      }
+   237	
+   238	      if(enabled && opts.announce){
+   239	        setTimeout(() => safeSpeak("Sesli robot açık."), 80);
+   240	      }
+   241	    }
+   242	
+   243	
+   244	
+   245	  function bindNightVoiceToggle(){
+   246	    const cb = document.getElementById("soundToggle");
+   247	
+   248	    if(cb){
+   249	      cb.checked = getVoiceEnabled();
+   250	
+   251	      if(cb.dataset.voiceBound !== "1"){
+   252	        cb.dataset.voiceBound = "1";
+   253	        cb.addEventListener("change", () => {
+   254	          setVoiceEnabled(cb.checked, { silent:true });
+   255	        });
+   256	      }
+   257	    }
+   258	
+   259	    /*
+   260	      #nightVoiceToggle butonunun tek sahibi voice-tts.js.
+   261	      Burada click event bağlamıyoruz; çift yönetim bozulma yapıyordu.
+   262	    */
+   263	    updateNightVoiceToggle();
+   264	  }
+   265	
+   266	  function bootDriveControls(){
+   267	    bindDriveMode();
+   268	    bindNightVoiceToggle();
+   269	    updateDriveSpeedChip();
+   270	  }
+   271	
+   272	  bootDriveControls();
+   273	
+   274	  window.addEventListener("load", bootDriveControls);
+   275	  window.addEventListener("resize", bootDriveControls);
+
+===== 8) seats.js HIZ SESİ BLOĞU =====
+  2384	  (function initSpeed(){
+  2385	    const spVal = $("#spVal");
+  2386	    const spLimit = $("#spLimit");
+  2387	    const speedBox = $("#speedBox");
+  2388	    const ttsBtn = $("#ttsToggle");
+  2389	    if(!spVal || !spLimit || !speedBox || !ttsBtn) return;
+  2390	
+  2391	    const TTS_KEY = "ttsEnabled";
+  2392	
+  2393	    function readTtsEnabled(){
+  2394	      try{
+  2395	        return (localStorage.getItem(TTS_KEY) ?? "1") === "1";
+  2396	      }catch(_){
+  2397	        return true;
+  2398	      }
+  2399	    }
+  2400	
+  2401	    let ttsEnabled = readTtsEnabled();
+  2402	
+  2403	    function syncTts(){
+  2404	      ttsEnabled = readTtsEnabled();
+  2405	
+  2406	      ttsEnabled ? ttsBtn.classList.remove("muted") : ttsBtn.classList.add("muted");
+  2407	      ttsBtn.title = ttsEnabled ? "Sesli uyarı açık" : "Sesli uyarı kapalı";
+  2408	
+  2409	      if(window.SeatsVoice && typeof window.SeatsVoice.syncButtons === "function"){
+  2410	        window.SeatsVoice.syncButtons();
+  2411	      }
+  2412	    }
+  2413	
+  2414	    syncTts();
+  2415	
+  2416	    ttsBtn.addEventListener("click", () => {
+  2417	      const next = !readTtsEnabled();
+  2418	
+  2419	      if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+  2420	        window.SeatsVoice.setEnabled(next);
+  2421	      }else{
+  2422	        localStorage.setItem(TTS_KEY, next ? "1" : "0");
+  2423	      }
+  2424	
+  2425	      ttsEnabled = next;
+  2426	      syncTts();
+  2427	
+  2428	      if(next){
+  2429	        if(window.SeatsSpeak){
+  2430	          window.SeatsSpeak("Sesli uyarı açık.", { force:true });
+  2431	        }else{
+  2432	          speakOnce("Sesli uyarı açık.");
+  2433	        }
+  2434	      }else{
+  2435	        if(window.SeatsStopVoice){
+  2436	          window.SeatsStopVoice();
+  2437	        }
+  2438	      }
+  2439	    });
+  2440	
+  2441	    let trVoice = null;
+  2442	    function loadVoices(){
+  2443	      const voices = speechSynthesis.getVoices();
+  2444	      trVoice = voices.find(v => (v.lang || "").toLowerCase().startsWith("tr")) || null;
+  2445	    }
+  2446	
+  2447	    if("speechSynthesis" in window){
+  2448	      loadVoices();
+  2449	      speechSynthesis.onvoiceschanged = loadVoices;
+  2450	    }
+  2451	
+  2452	    function speakOnce(text){
+  2453	      if(!ttsEnabled) return;
+  2454	
+  2455	      const msg = String(text || "").trim();
+  2456	      if(!msg) return;
+  2457	
+  2458	      if(window.SeatsSpeak){
+  2459	        window.SeatsSpeak(msg);
+  2460	        return;
+  2461	      }
+  2462	
+  2463	      if(!("speechSynthesis" in window)) return;
+  2464	
+  2465	      try{
+
+===== 9) voice-tts.js MERKEZİ SES BLOĞU =====
+     1	/* =========================================================
+     2	   SEATS UNIFIED VOICE MODULE
+     3	   Tüm ses çıkışlarını tek merkezden yönetir.
+     4	   Tarayıcıda speechSynthesis, APK’da AndroidTTS kullanır.
+     5	========================================================= */
+     6	
+     7	(function(){
+     8	  if(window.__SeatsVoiceUnifiedReady) return;
+     9	  window.__SeatsVoiceUnifiedReady = true;
+    10	
+    11	  const KEY = "ttsEnabled";
+    12	
+    13	  function isEnabled(){
+    14	    try{
+    15	      return (localStorage.getItem(KEY) ?? "1") === "1";
+    16	    }catch(e){
+    17	      return true;
+    18	    }
+    19	  }
+    20	
+    21	  function setEnabled(value){
+    22	    try{
+    23	      localStorage.setItem(KEY, value ? "1" : "0");
+    24	    }catch(e){}
+    25	
+    26	    syncButtons();
+    27	
+    28	    try{
+    29	      window.dispatchEvent(new CustomEvent("ttsEnabledChanged", {
+    30	        detail:{ enabled: !!value }
+    31	      }));
+    32	    }catch(e){}
+    33	  }
+    34	
+    35	  function stop(){
+    36	    if(window.AndroidTTS && typeof window.AndroidTTS.stop === "function"){
+    37	      try{ window.AndroidTTS.stop(); }catch(e){}
+    38	    }
+    39	
+    40	    try{
+    41	      if("speechSynthesis" in window) speechSynthesis.cancel();
+    42	    }catch(e){}
+    43	  }
+    44	
+    45	  function speak(text, opts = {}){
+    46	    const msg = String(text || "").trim();
+    47	    if(!msg) return;
+    48	
+    49	    if(!opts.force && !isEnabled()) return;
+    50	
+    51	    if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
+    52	      try{
+    53	        window.AndroidTTS.speak(msg);
+    54	        return;
+    55	      }catch(e){
+    56	        console.warn("AndroidTTS hata:", e);
+    57	      }
+    58	    }
+    59	
+    60	    try{
+    61	      if(!("speechSynthesis" in window)) return;
+    62	
+    63	      speechSynthesis.cancel();
+    64	
+    65	      const u = new SpeechSynthesisUtterance(msg);
+    66	      u.lang = "tr-TR";
+    67	      u.rate = 0.95;
+    68	      u.pitch = 1;
+    69	
+    70	      const voices = speechSynthesis.getVoices ? speechSynthesis.getVoices() : [];
+    71	      const trVoice = voices.find(v =>
+    72	        String(v.lang || "").toLowerCase().startsWith("tr") ||
+    73	        String(v.name || "").toLowerCase().includes("turk")
+    74	      );
+    75	
+    76	      if(trVoice) u.voice = trVoice;
+    77	
+    78	      speechSynthesis.speak(u);
+    79	    }catch(e){
+    80	      console.warn("speechSynthesis hata:", e);
+    81	    }
+    82	  }
+    83	
+    84	  function syncButtons(){
+    85	    const on = isEnabled();
+    86	
+    87	    const nightBtn = document.getElementById("nightVoiceToggle");
+    88	    if(nightBtn){
+    89	      nightBtn.classList.toggle("is-off", !on);
+    90	      nightBtn.dataset.voiceOn = on ? "1" : "0";
+    91	      nightBtn.title = on ? "Durak akışı sesi açık" : "Durak akışı sesi kapalı";
+    92	      nightBtn.innerHTML = on
+    93	        ? '<span class="nv-ico">🔊</span><span>Ses Açık</span>'
+    94	        : '<span class="nv-ico">🔇</span><span>Sessiz</span>';
+    95	    }
+    96	
+    97	    const ttsBtn = document.getElementById("ttsToggle");
+    98	    if(ttsBtn){
+    99	      ttsBtn.classList.toggle("muted", !on);
+   100	      ttsBtn.title = on ? "Sesli uyarı açık" : "Sesli uyarı kapalı";
+   101	    }
+   102	  }
+   103	
+   104	  function cleanText(x){
+   105	    return String(x || "")
+   106	      .replace(/\s+/g, " ")
+   107	      .trim();
+   108	  }
+   109	
+   110	  // Dışarıya tek merkez olarak aç
+   111	  window.SeatsSpeak = speak;
+   112	  window.SeatsStopVoice = stop;
+   113	
+   114	  // voice-commands.js daha önce window.SeatsVoice içine komut fonksiyonları koymuş olabilir.
+   115	  // Onları ezmeden, TTS yönetimini aynı objeye ekliyoruz.
+   116	  window.SeatsVoice = Object.assign(window.SeatsVoice || {}, {
+   117	    speak,
+   118	    stop,
+   119	    isEnabled,
+   120	    setEnabled,
+   121	    syncButtons
+   122	  });
+   123	
+   124	
+   125	  // Yeşil Ses Açık / Sessiz butonu
+   126	  document.addEventListener("click", function(e){
+   127	    const btn = e.target.closest && e.target.closest("#nightVoiceToggle");
+   128	    if(!btn) return;
+   129	
+   130	    e.preventDefault();
+   131	    e.stopPropagation();
+   132	
+   133	    const next = !isEnabled();
+   134	    setEnabled(next);
+   135	
+
+===== 10) GIT DIFF VARSA =====
+diff --git a/static/seats/drive-controls.js b/static/seats/drive-controls.js
+index 545d5bf..7cde116 100644
+--- a/static/seats/drive-controls.js
++++ b/static/seats/drive-controls.js
+@@ -45,8 +45,6 @@
+   const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+ 
+   const DRIVE_MODE_KEY = "driveMode:" + tripKey;
+-  const VOICE_SOUND_KEY = "voiceSoundEnabled:" + tripKey;
+-
+   function safeToast(msg, ms=1600){
+     try{
+       if(typeof toast === "function") toast(msg, ms);
+@@ -213,50 +211,36 @@
+       ? "Sesli robot açık. Kapatmak için dokun."
+       : "Sesli robot kapalı. Açmak için dokun.";
+   }
++    function setVoiceEnabled(on, opts={}){
++      const enabled = !!on;
+ 
+-  function setVoiceEnabled(on, opts={}){
+-    const enabled = !!on;
+-
+-    try{
+-      if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+-        window.SeatsVoice.setEnabled(enabled);
+-      }else{
+-        localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
++      try{
++        if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
++          window.SeatsVoice.setEnabled(enabled);
++        }else{
++          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
++        }
++      }catch(_){
++        try{
++          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
++        }catch(e){}
+       }
+-    }catch(_){
+-      localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+-    }
+ 
+-    const cb = document.getElementById("soundToggle");
+-    if(cb) cb.checked = enabled;
++      const cb = document.getElementById("soundToggle");
++      if(cb) cb.checked = enabled;
+ 
+-    updateNightVoiceToggle();
++      updateNightVoiceToggle();
+ 
+-    if(!opts.silent){
+-      safeToast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1600);
+-    }
++      if(!opts.silent){
++        safeToast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1600);
++      }
+ 
+-    if(enabled && opts.announce){
+-      setTimeout(() => safeSpeak("Sesli robot açık."), 80);
++      if(enabled && opts.announce){
++        setTimeout(() => safeSpeak("Sesli robot açık."), 80);
++      }
+     }
+-  }){
+-    const enabled = !!on;
+-
+-    localStorage.setItem(VOICE_SOUND_KEY, enabled ? "1" : "0");
+ 
+-    const cb = document.getElementById("soundToggle");
+-    if(cb) cb.checked = enabled;
+-
+-    updateNightVoiceToggle();
+ 
+-    if(!opts.silent){
+-      safeToast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1600);
+-    }
+-
+-    if(enabled && opts.announce){
+-      setTimeout(() => safeSpeak("Sesli robot açık."), 80);
+-    }
+-  }
+ 
+   function bindNightVoiceToggle(){
+     const cb = document.getElementById("soundToggle");
+diff --git a/static/seats/seats.js b/static/seats/seats.js
+index cb182f5..7ed57be 100644
+--- a/static/seats/seats.js
++++ b/static/seats/seats.js
+@@ -955,10 +955,10 @@ function setVoiceBadge(text){
+ 
+     const label = $("#label-" + seatNo);
+     if(label){
+-      const from = boardsMap[key] || "";
+-      const to = stopsMap[key] || "";
+-      label.textContent = isAssigned ? (from ? `${from} → ${to}` : to) : "";
+-    }
++        const from = boardsMap[key] || "";
++        const to = stopsMap[key] || "";
++        label.textContent = isAssigned ? (from ? `${from} → ${to}` : to) : "";
++      }
+ 
+     const svc = el.querySelector(".svc-badge");
+     if(svc){
+diff --git a/templates/seats.html b/templates/seats.html
+index b8dc25e..5e03bab 100644
+--- a/templates/seats.html
++++ b/templates/seats.html
+@@ -349,14 +349,14 @@
+ </script>
+ 
+ <script src="/static/seats/bags.js?v=1"></script>
+-<script src="/static/seats/voice-commands.js?v=voice-central-bridge-1"></script>
++<script src="/static/seats/voice-commands.js?v=natural-total-voice-1"></script>
+ <script src="/static/seats/standing.js?v=1"></script>
+-<script src="/static/seats/seats.js?v=drive-premium-rollback-1"></script>
++<script src="/static/seats/seats.js?v=voice-rollback-clean-1"></script>
+ <script src="/static/seats/route-marquee.js?v=route-clean-ticker-single-1"></script>
+ <script src="/static/seats/seats-time-prayer.js?v=time-prayer-apk-1"></script>
+-<script src="/static/seats/voice-tts.js?v=voice-owner-fix-1"></script>
++<script src="/static/seats/voice-tts.js?v=voice-rollback-clean-1"></script>
+ <script src="/static/seats/drive-eta-chip.js?v=1"></script>
+-<script src="/static/seats/drive-controls.js?v=drive-toggle-fix-1"></script>
++<script src="/static/seats/drive-controls.js?v=voice-rollback-clean-1"></script>
+ 
+ 
+ 
+@@ -991,6 +991,2350 @@
+ </script>
+ <!-- DRIVE VOICE MIRROR SCRIPT END -->
+ 
++
++<style id="seat-simple-open-mode-style">
++/* =========================================================
++   SADE KOLTUK MODU
++   İlk açılışta koltuk planını öne alır, gelişmiş panelleri gizler.
++========================================================= */
++
++.seat-simple-toggle{
++  position:sticky;
++  top:8px;
++  z-index:9999;
++  width:100%;
++  min-height:44px;
++  margin:0 0 10px;
++  border:1px solid rgba(96,165,250,.28);
++  border-radius:18px;
++  color:#eaf3ff;
++  background:linear-gradient(135deg,rgba(37,99,235,.96),rgba(29,78,216,.92));
++  box-shadow:0 12px 28px rgba(37,99,235,.24), inset 0 1px 0 rgba(255,255,255,.16);
++  font-size:14px;
++  font-weight:950;
++  letter-spacing:.02em;
++  display:flex;
++  align-items:center;
++  justify-content:center;
++  gap:8px;
++}
++
++html.seat-simple-mode .seats-shell{
++  max-width:760px !important;
++  margin:0 auto !important;
++}
++
++/* seats-shell içindeki topbarı gizle; layout kalsın */
++html.seat-simple-mode .seats-shell > :not(.layout){
++  display:none !important;
++}
++
++html.seat-simple-mode .layout{
++  display:block !important;
++  grid-template-columns:1fr !important;
++}
++
++html.seat-simple-mode .panel-card{
++  display:none !important;
++}
++
++html.seat-simple-mode .board-card{
++  width:100% !important;
++  max-width:100% !important;
++  margin:0 auto !important;
++}
++
++html.seat-simple-mode .board-inner{
++  padding-top:10px !important;
++}
++
++/* üst sürüş/eta dock sade modda gizli */
++html.seat-simple-mode #driveInlineDock,
++html.seat-simple-mode #driveModeActionsDock{
++  display:none !important;
++}
++
++/* sağdaki ses/legend/kalabalık kontroller gizli */
++html.seat-simple-mode .board-head-right,
++html.seat-simple-mode .voice-row,
++html.seat-simple-mode .drive-voice-row,
++html.seat-simple-mode .legend{
++  display:none !important;
++}
++
++/* başlığı kompakt bırak */
++html.seat-simple-mode .board-head{
++  margin:0 0 10px !important;
++  display:block !important;
++}
++
++html.seat-simple-mode .board-title{
++  width:100% !important;
++}
++
++html.seat-simple-mode .board-kicker,
++html.seat-simple-mode .board-title small{
++  display:none !important;
++}
++
++html.seat-simple-mode .board-title h2{
++  margin:0 0 8px !important;
++  font-size:clamp(30px, 8vw, 44px) !important;
++  line-height:1 !important;
++  letter-spacing:-.045em !important;
++}
++
++html.seat-simple-mode .selected-stop-chip{
++  min-height:42px !important;
++  display:flex !important;
++  align-items:center !important;
++  justify-content:flex-start !important;
++  border-radius:18px !important;
++  padding:0 14px !important;
++  font-size:14px !important;
++}
++
++/* rota/durak akışı ilk açılışta gizli */
++html.seat-simple-mode .route-strip-shell,
++html.seat-simple-mode .route-flow-shell,
++html.seat-simple-mode .route-flow,
++html.seat-simple-mode #routeStrip,
++html.seat-simple-mode .route-mini,
++html.seat-simple-mode .route-pill{
++  display:none !important;
++}
++
++/* koltuk deck yukarı gelsin */
++html.seat-simple-mode .deck-card,
++html.seat-simple-mode .seat-deck,
++html.seat-simple-mode .deck-shell{
++  margin-top:8px !important;
++}
++
++/* mobil sıkılık */
++@media(max-width:430px){
++  .seat-simple-toggle{
++    min-height:42px;
++    border-radius:16px;
++    font-size:13px;
++    margin-bottom:8px;
++  }
++
++  html.seat-simple-mode .board-inner{
++    padding:8px !important;
++  }
++
++  html.seat-simple-mode .board-title h2{
++    font-size:34px !important;
++  }
++}
++</style>
++
++<script id="seat-simple-open-mode-script">
++(function(){
++  if(window.__seatSimpleOpenModeReady) return;
++  window.__seatSimpleOpenModeReady = true;
++
++  function getTripKey(){
++    try{
++      return (window.SEATS_BOOT && window.SEATS_BOOT.tripKey) || window.BAG_TRIP || "default";
++    }catch(_){
++      return "default";
++    }
++  }
++
++  function key(){
++    return "seatUiMode:" + getTripKey();
++  }
++
++  function readMode(){
++    try{
++      return localStorage.getItem(key()) || "simple";
++    }catch(_){
++      return "simple";
++    }
++  }
++
++  function writeMode(mode){
++    try{
++      localStorage.setItem(key(), mode);
++    }catch(_){}
++  }
++
++  function applyMode(mode){
++    const simple = mode !== "advanced";
++    document.documentElement.classList.toggle("seat-simple-mode", simple);
++    document.body.classList.toggle("seat-simple-mode", simple);
++
++    const btn = document.getElementById("seatSimpleModeToggle");
++    if(btn){
++      btn.innerHTML = simple
++        ? "⚙️ Gelişmiş ekranı aç"
++        : "💺 Sade koltuk moduna dön";
++      btn.setAttribute("aria-pressed", simple ? "true" : "false");
++    }
++
++    try{
++      if(typeof renderRouteStrip === "function") renderRouteStrip();
++      if(typeof updateCompactHeader === "function") updateCompactHeader();
++    }catch(_){}
++  }
++
++  function ensureButton(){
++    if(document.getElementById("seatSimpleModeToggle")) return;
++
++    const host = document.querySelector(".board-inner") || document.querySelector(".seats-shell");
++    if(!host) return;
++
++    const btn = document.createElement("button");
++    btn.id = "seatSimpleModeToggle";
++    btn.type = "button";
++    btn.className = "seat-simple-toggle";
++    btn.addEventListener("click", function(){
++      const current = readMode();
++      const next = current === "advanced" ? "simple" : "advanced";
++      writeMode(next);
++      applyMode(next);
++    });
++
++    host.insertBefore(btn, host.firstChild);
++  }
++
++  function boot(){
++    ensureButton();
++    applyMode(readMode());
++
++    setTimeout(function(){ applyMode(readMode()); }, 250);
++    setTimeout(function(){ applyMode(readMode()); }, 900);
++  }
++
++  if(document.readyState === "loading"){
++    document.addEventListener("DOMContentLoaded", boot);
++  }else{
++    boot();
++  }
++})();
++</script>
++
++
++
++<style id="seat-simple-summary-polish-style">
++/* =========================================================
++   SADE MOD MINI DURUM OZETI
++   Koltuk ekranı ilk açılışta daha net ve premium görünür.
++========================================================= */
++
++.seat-simple-summary{
++  display:none;
++  width:100%;
++  margin:0 0 12px;
++  padding:13px 14px;
++  border-radius:22px;
++  background:
++    radial-gradient(circle at 12% 0%, rgba(59,130,246,.20), transparent 34%),
++    linear-gradient(180deg, rgba(14,27,48,.96), rgba(6,13,25,.98));
++  border:1px solid rgba(148,163,184,.16);
++  box-shadow:
++    0 16px 34px rgba(0,0,0,.28),
++    inset 0 1px 0 rgba(255,255,255,.06);
++}
++
++html.seat-simple-mode .seat-simple-summary{
++  display:block;
++}
++
++.seat-simple-summary-top{
++  display:flex;
++  align-items:center;
++  justify-content:space-between;
++  gap:10px;
++  margin-bottom:10px;
++}
++
++.seat-simple-route{
++  min-width:0;
++  color:#fff;
++  font-size:17px;
++  line-height:1.08;
++  font-weight:1000;
++  letter-spacing:-.035em;
++  overflow:hidden;
++  text-overflow:ellipsis;
+
+===== 11) PYTHON KONTROL =====
+app.py syntax OK
