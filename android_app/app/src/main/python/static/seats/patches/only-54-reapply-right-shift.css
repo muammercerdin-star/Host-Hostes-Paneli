@@ -1,0 +1,20 @@
+/*
+    50 zaten sağ kolon kaydırmasından etkileniyor.
+    BOTTOM_ROW_51_54_EQUAL_SPACING yaması 14. satırın transformunu sıfırladığı için
+    sadece 54'e sağ kolon kaymasını geri veriyoruz.
+    51-52-53'e dokunmaz.
+  */
+
+  .deck .cell[style*="grid-row:14"][style*="grid-column:4"],
+  .deck .cell[style*="grid-row:14"][style*="grid-column: 4"],
+  .deck .cell[style*="grid-row: 14"][style*="grid-column:4"],
+  .deck .cell[style*="grid-row: 14"][style*="grid-column: 4"]{
+    transform:translateX(var(--right-seat-column-shift, 16px)) !important;
+  }
+
+  body.drive-mode .deck .cell[style*="grid-row:14"][style*="grid-column:4"],
+  body.drive-mode .deck .cell[style*="grid-row:14"][style*="grid-column: 4"],
+  body.drive-mode .deck .cell[style*="grid-row: 14"][style*="grid-column:4"],
+  body.drive-mode .deck .cell[style*="grid-row: 14"][style*="grid-column: 4"]{
+    transform:translateX(var(--right-seat-column-shift, 18px)) !important;
+  }

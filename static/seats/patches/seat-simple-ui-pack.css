@@ -1,0 +1,397 @@
+/* ===== seat-simple-open-mode-style ===== */
+/* =========================================================
+   SADE KOLTUK MODU
+   İlk açılışta koltuk planını öne alır, gelişmiş panelleri gizler.
+========================================================= */
+
+.seat-simple-toggle{
+  position:sticky;
+  top:8px;
+  z-index:9999;
+  width:100%;
+  min-height:44px;
+  margin:0 0 10px;
+  border:1px solid rgba(96,165,250,.28);
+  border-radius:18px;
+  color:#eaf3ff;
+  background:linear-gradient(135deg,rgba(37,99,235,.96),rgba(29,78,216,.92));
+  box-shadow:0 12px 28px rgba(37,99,235,.24), inset 0 1px 0 rgba(255,255,255,.16);
+  font-size:14px;
+  font-weight:950;
+  letter-spacing:.02em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+
+html.seat-simple-mode .seats-shell{
+  max-width:760px !important;
+  margin:0 auto !important;
+}
+
+/* seats-shell içindeki topbarı gizle; layout kalsın */
+html.seat-simple-mode .seats-shell > :not(.layout){
+  display:none !important;
+}
+
+html.seat-simple-mode .layout{
+  display:block !important;
+  grid-template-columns:1fr !important;
+}
+
+html.seat-simple-mode .panel-card{
+  display:none !important;
+}
+
+html.seat-simple-mode .board-card{
+  width:100% !important;
+  max-width:100% !important;
+  margin:0 auto !important;
+}
+
+html.seat-simple-mode .board-inner{
+  padding-top:10px !important;
+}
+
+/* üst sürüş/eta dock sade modda gizli */
+html.seat-simple-mode #driveInlineDock,
+html.seat-simple-mode #driveModeActionsDock{
+  display:none !important;
+}
+
+/* sağdaki ses/legend/kalabalık kontroller gizli */
+html.seat-simple-mode .board-head-right,
+html.seat-simple-mode .voice-row,
+html.seat-simple-mode .drive-voice-row,
+html.seat-simple-mode .legend{
+  display:none !important;
+}
+
+/* başlığı kompakt bırak */
+html.seat-simple-mode .board-head{
+  margin:0 0 10px !important;
+  display:block !important;
+}
+
+html.seat-simple-mode .board-title{
+  width:100% !important;
+}
+
+html.seat-simple-mode .board-kicker,
+html.seat-simple-mode .board-title small{
+  display:none !important;
+}
+
+html.seat-simple-mode .board-title h2{
+  margin:0 0 8px !important;
+  font-size:clamp(30px, 8vw, 44px) !important;
+  line-height:1 !important;
+  letter-spacing:-.045em !important;
+}
+
+html.seat-simple-mode .selected-stop-chip{
+  min-height:42px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  border-radius:18px !important;
+  padding:0 14px !important;
+  font-size:14px !important;
+}
+
+/* rota/durak akışı ilk açılışta gizli */
+html.seat-simple-mode .route-strip-shell,
+html.seat-simple-mode .route-flow-shell,
+html.seat-simple-mode .route-flow,
+html.seat-simple-mode #routeStrip,
+html.seat-simple-mode .route-mini,
+html.seat-simple-mode .route-pill{
+  display:none !important;
+}
+
+/* koltuk deck yukarı gelsin */
+html.seat-simple-mode .deck-card,
+html.seat-simple-mode .seat-deck,
+html.seat-simple-mode .deck-shell{
+  margin-top:8px !important;
+}
+
+/* mobil sıkılık */
+@media(max-width:430px){
+  .seat-simple-toggle{
+    min-height:42px;
+    border-radius:16px;
+    font-size:13px;
+    margin-bottom:8px;
+  }
+
+  html.seat-simple-mode .board-inner{
+    padding:8px !important;
+  }
+
+  html.seat-simple-mode .board-title h2{
+    font-size:34px !important;
+  }
+}
+
+/* ===== seat-simple-summary-polish-style ===== */
+/* =========================================================
+   SADE MOD MINI DURUM OZETI
+   Koltuk ekranı ilk açılışta daha net ve premium görünür.
+========================================================= */
+
+.seat-simple-summary{
+  display:none;
+  width:100%;
+  margin:0 0 12px;
+  padding:13px 14px;
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(59,130,246,.20), transparent 34%),
+    linear-gradient(180deg, rgba(14,27,48,.96), rgba(6,13,25,.98));
+  border:1px solid rgba(148,163,184,.16);
+  box-shadow:
+    0 16px 34px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+html.seat-simple-mode .seat-simple-summary{
+  display:block;
+}
+
+.seat-simple-summary-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.seat-simple-route{
+  min-width:0;
+  color:#fff;
+  font-size:17px;
+  line-height:1.08;
+  font-weight:1000;
+  letter-spacing:-.035em;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.seat-simple-status{
+  flex:0 0 auto;
+  min-height:28px;
+  padding:0 10px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  color:#bbf7d0;
+  background:rgba(34,197,94,.12);
+  border:1px solid rgba(34,197,94,.22);
+  font-size:11px;
+  font-weight:950;
+  white-space:nowrap;
+}
+
+.seat-simple-summary-grid{
+  display:grid;
+  grid-template-columns:1.25fr .75fr .75fr;
+  gap:8px;
+}
+
+.seat-simple-mini{
+  min-height:52px;
+  padding:9px 10px;
+  border-radius:17px;
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  overflow:hidden;
+}
+
+.seat-simple-mini small{
+  display:block;
+  margin-bottom:5px;
+  color:rgba(226,232,240,.56);
+  font-size:10px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  white-space:nowrap;
+}
+
+.seat-simple-mini b{
+  display:block;
+  color:#fff;
+  font-size:15px;
+  line-height:1.08;
+  font-weight:1000;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.seat-simple-mini .ok{
+  color:#4ade80;
+}
+
+.seat-simple-mini .speed{
+  color:#93c5fd;
+}
+
+html.seat-simple-mode .seat-simple-toggle{
+  margin-bottom:10px !important;
+}
+
+@media(max-width:430px){
+  .seat-simple-summary{
+    padding:12px;
+    border-radius:20px;
+    margin-bottom:10px;
+  }
+
+  .seat-simple-route{
+    font-size:16px;
+  }
+
+  .seat-simple-summary-grid{
+    grid-template-columns:1.15fr .85fr .85fr;
+    gap:7px;
+  }
+
+  .seat-simple-mini{
+    min-height:49px;
+    padding:8px 9px;
+    border-radius:15px;
+  }
+
+  .seat-simple-mini small{
+    font-size:9px;
+  }
+
+  .seat-simple-mini b{
+    font-size:13.5px;
+  }
+}
+
+/* ===== seat-simple-bottom-bar-style ===== */
+/* =========================================================
+   SADE MOD ALT HIZLI BAR
+   Koltuk ekranında ana işlemlere tek dokunuş erişim sağlar.
+========================================================= */
+
+.seat-simple-bottom-bar{
+  display:none;
+  position:fixed;
+  left:10px;
+  right:10px;
+  bottom:10px;
+  z-index:99999;
+  padding:8px;
+  border-radius:26px;
+  background:
+    linear-gradient(180deg, rgba(8,18,34,.96), rgba(3,9,20,.98));
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow:
+    0 18px 46px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.07);
+  backdrop-filter:blur(18px) saturate(1.1);
+  -webkit-backdrop-filter:blur(18px) saturate(1.1);
+  grid-template-columns:repeat(5,1fr);
+  gap:7px;
+}
+
+html.seat-simple-mode .seat-simple-bottom-bar{
+  display:grid;
+}
+
+html.seat-simple-mode body{
+  padding-bottom:92px !important;
+}
+
+.seat-simple-bottom-item{
+  min-height:62px;
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,.08);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(59,130,246,.16), transparent 38%),
+    linear-gradient(180deg, rgba(20,35,58,.92), rgba(8,17,31,.96));
+  color:#eaf3ff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  text-decoration:none;
+  font-size:11.5px;
+  font-weight:900;
+  line-height:1;
+  cursor:pointer;
+  padding:0;
+  font-family:inherit;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.seat-simple-bottom-item .ico{
+  font-size:23px;
+  line-height:1;
+}
+
+.seat-simple-bottom-item.primary{
+  background:
+    radial-gradient(circle at 35% 15%, rgba(255,255,255,.20), transparent 34%),
+    linear-gradient(135deg, rgba(37,99,235,.98), rgba(29,78,216,.96));
+  border-color:rgba(147,197,253,.25);
+}
+
+.seat-simple-bottom-item.warn{
+  background:
+    radial-gradient(circle at 35% 15%, rgba(255,255,255,.16), transparent 34%),
+    linear-gradient(135deg, rgba(124,58,237,.92), rgba(67,56,202,.96));
+}
+
+.seat-simple-bottom-item.danger{
+  background:
+    radial-gradient(circle at 35% 15%, rgba(255,255,255,.18), transparent 34%),
+    linear-gradient(135deg, rgba(239,68,68,.95), rgba(127,29,29,.96));
+}
+
+.seat-simple-bottom-item:active{
+  transform:scale(.96);
+}
+
+@media(max-width:430px){
+  .seat-simple-bottom-bar{
+    left:8px;
+    right:8px;
+    bottom:8px;
+    border-radius:24px;
+    gap:6px;
+    padding:7px;
+  }
+
+  .seat-simple-bottom-item{
+    min-height:58px;
+    border-radius:18px;
+    font-size:10.8px;
+  }
+
+  .seat-simple-bottom-item .ico{
+    font-size:22px;
+  }
+}
+
+/* ===== seat-hide-bottom-menu-on-modal-style ===== */
+/* =========================================================
+   KOLTUK MODAL AÇILINCA ALT MENÜYÜ GİZLE
+   Modala dokunmaz; sadece sade mod alt barını saklar.
+========================================================= */
+
+html.seat-modal-open .seat-simple-bottom-bar,
+body.seat-modal-open .seat-simple-bottom-bar{
+  display:none !important;
+}

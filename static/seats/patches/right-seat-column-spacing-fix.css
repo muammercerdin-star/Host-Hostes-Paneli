@@ -1,0 +1,49 @@
+/*
+    Sağ koltuk kolonunu ferahlatma:
+    4,8,12,16,20,24,28,34,38,42,46,50,54 gibi
+    grid-column:4 olan koltukları biraz sağa alır.
+
+    Amaç:
+    23-24 / 27-28 gibi yan yana koltuklarda alt yazıların
+    birbirine girmesini azaltmak.
+  */
+
+  .deck{
+    --right-seat-column-shift:16px;
+  }
+
+  .deck .cell[style*="grid-column:4"],
+  .deck .cell[style*="grid-column: 4"]{
+    transform:translateX(var(--right-seat-column-shift)) !important;
+  }
+
+  /*
+    Kapı sağ çift koltukların arasında durduğu için
+    çok az sağa alınır; görüntü dengeli kalır.
+  */
+  .deck .door{
+    transform:translateX(calc(var(--right-seat-column-shift) * .35)) !important;
+  }
+
+  /*
+    Çok dar ekranda fazla kaçmasın.
+  */
+  @media(max-width:380px){
+    .deck{
+      --right-seat-column-shift:13px;
+    }
+  }
+
+  /*
+    Sürüş modunda koltuklar biraz daha sıkıştığı için
+    sağ kolonu bir tık daha açıyoruz.
+  */
+  body.drive-mode .deck{
+    --right-seat-column-shift:18px;
+  }
+
+  @media(max-width:380px){
+    body.drive-mode .deck{
+      --right-seat-column-shift:15px;
+    }
+  }

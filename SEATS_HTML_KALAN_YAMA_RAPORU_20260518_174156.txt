@@ -1,0 +1,395 @@
+===== DOSYA ÖZETİ =====
+Dosya: templates/seats.html
+Satır: 2904
+Karakter: 79398
+
+===== DIŞARI BAĞLI PATCH CSS/JS LİNKLERİ =====
+    7: <link rel="stylesheet" href="/static/seats/patches/stop-selected-toast.css?v=1">
+    8: <link rel="stylesheet" href="/static/seats/patches/bottom-voice-command.css?v=1">
+    9: <link rel="stylesheet" href="/static/seats/patches/modal-bottom-nav-autohide.css?v=1">
+   10: <link rel="stylesheet" href="/static/seats/patches/manual-ticket-system.css?v=1">
+   11: <link rel="stylesheet" href="/static/seats/patches/top-sound-toggle.css?v=1">
+  365: <script src="/static/seats/patches/stop-selected-toast.js?v=1">
+  366: <script src="/static/seats/patches/modal-bottom-nav-autohide.js?v=1">
+  367: <script src="/static/seats/patches/manual-ticket-system.js?v=1">
+  368: <script src="/static/seats/patches/top-sound-toggle.js?v=1">
+
+===== START / END MARKER BLOKLARI =====
+ 1764- 2289: STOP_FLOW_FOCUS_PATCH
+ 2295- 2347: RIGHT_SEAT_COLUMN_SPACING_FIX
+ 2349- 2368: BOTTOM_ROW_51_54_EQUAL_SPACING
+ 2370- 2393: ONLY_54_REAPPLY_RIGHT_SHIFT
+ 2401- 2530: FAB_LEFT_GAP_MOVE
+ 2532- 2632: FAB_DISTINCT_PANEL
+ 2634- 2709: FAB_COMPACT_FIT
+ 2711- 2900: FAB_DRIVE_MODE_OVERRIDE_FIX
+
+===== INLINE STYLE BLOKLARI =====
+  1)   370-  453 |   84 satır | drive-mode-actions-independent-style | /* ========================================================= SÜRÜŞ MODU ÜST HIZLI MENÜ - BAĞIMSIZ FINAL driveInlineDock 
+  2)   620-  825 |  206 satır | drive-dock-stability-final | /* ========================================================= SÜRÜŞ / HIZ / RÖTAR SATIRI SABİTLEME Üste binme ve sağa-sol
+  3)   968- 1104 |  137 satır | seat-simple-open-mode-style | /* ========================================================= SADE KOLTUK MODU İlk açılışta koltuk planını öne alır, geli
+  4)  1192- 1334 |  143 satır | seat-simple-summary-polish-style | /* ========================================================= SADE MOD MINI DURUM OZETI Koltuk ekranı ilk açılışta daha n
+  5)  1453- 1559 |  107 satır | seat-simple-bottom-bar-style | /* ========================================================= SADE MOD ALT HIZLI BAR Koltuk ekranında ana işlemlere tek d
+  6)  1673- 1683 |   11 satır | seat-hide-bottom-menu-on-modal-style | /* ========================================================= KOLTUK MODAL AÇILINCA ALT MENÜYÜ GİZLE Modala dokunmaz; sad
+  7)  1765- 1943 |  179 satır | stop-flow-focus-patch-style | html.stop-flow-focus-lock, body.stop-flow-focus-lock{ overflow:hidden !important; height:100% !important; } #stopFlowFoc
+  8)  2296- 2346 |   51 satır | right-seat-column-spacing-fix-style | /* Sağ koltuk kolonunu ferahlatma: 4,8,12,16,20,24,28,34,38,42,46,50,54 gibi grid-column:4 olan koltukları biraz sağa al
+  9)  2350- 2367 |   18 satır | bottom-row-51-54-equal-spacing-style | /* En alt sıra 51-52-53-54 eşit aralık düzeltmesi. Sağ kolon kaydırma 54'ü de etkilediği için bu satırda kaydırmayı sıfı
+ 10)  2371- 2392 |   22 satır | only-54-reapply-right-shift-style | /* 50 zaten sağ kolon kaydırmasından etkileniyor. BOTTOM_ROW_51_54_EQUAL_SPACING yaması 14. satırın transformunu sıfırla
+ 11)  2402- 2450 |   49 satır | fab-left-gap-move-style | /* Hızlı işlem butonlarını sağ alttan alıp 43 ile 51 arasındaki boş sol alana yerleştirir. HTML/ID değişmez; JS bağlantı
+ 12)  2533- 2631 |   99 satır | fab-distinct-panel-style | /* Sol boş alana taşınan hızlı işlem butonlarını koltuklardan görsel olarak ayırır. */ .fab-column.fab-left-gap-moved{ p
+ 13)  2635- 2686 |   52 satır | fab-compact-fit-style | /* Hızlı işlem paneli 43 ile 51 arasına tam otursun diye butonları ve panel yüksekliğini kompaktlaştırır. */ .fab-column
+ 14)  2712- 2829 |  118 satır | fab-drive-mode-override-fix-style | /* Sorun: static/seats/seats.css içindeki body.drive-mode .fab-column kuralı hızlı işlem panelini yatay alt bar gibi zor
+
+===== INLINE SCRIPT BLOKLARI =====
+  1)   331-  354 |   24 satır | id-yok | window.SEATS_BOOT = { csrf: {{ csrf_token | tojson | safe }}, routeName: {{ trip['route'] | tojson | safe }}, tripId: {{
+  2)   455-  616 |  162 satır | drive-mode-actions-independent-js | (function(){ function isDriveMode(){ const btn = document.getElementById("driveModeToggle"); const txt = (btn ? btn.text
+  3)   830-  897 |   68 satır | drive-mode-force-toggle-js | (function(){ if(window.__driveModeForceToggleReady) return; window.__driveModeForceToggleReady = true; function driveKey
+  4)   901-  965 |   65 satır | drive-voice-mirror-script | (function(){ function syncDriveVoiceStats(){ const oldFilled = document.getElementById("voiceSeatFilled"); const oldEmpt
+  5)  1106- 1190 |   85 satır | seat-simple-open-mode-script | (function(){ if(window.__seatSimpleOpenModeReady) return; window.__seatSimpleOpenModeReady = true; function getTripKey()
+  6)  1336- 1451 |  116 satır | seat-simple-summary-polish-script | (function(){ if(window.__seatSimpleSummaryPolishReady) return; window.__seatSimpleSummaryPolishReady = true; function q(
+  7)  1561- 1671 |  111 satır | seat-simple-bottom-bar-script | (function(){ if(window.__seatSimpleBottomBarReady) return; window.__seatSimpleBottomBarReady = true; function q(sel){ re
+  8)  1685- 1762 |   78 satır | seat-hide-bottom-menu-on-modal-script | (function(){ if(window.__seatHideBottomMenuOnModalReady) return; window.__seatHideBottomMenuOnModalReady = true; functio
+  9)  1945- 2288 |  344 satır | stop-flow-focus-patch-script | (function(){ if(window.__stopFlowFocusPatchLoaded) return; window.__stopFlowFocusPatchLoaded = true; var overlayId = "st
+ 10)  2452- 2529 |   78 satır | fab-left-gap-move-script | (function(){ if(window.__fabLeftGapMoveLoaded) return; window.__fabLeftGapMoveLoaded = true; function q(sel){ return doc
+ 11)  2688- 2708 |   21 satır | fab-compact-fit-script | (function(){ function refreshFabPosition(){ try{ window.dispatchEvent(new Event("resize")); }catch(_){} } if(document.re
+ 12)  2831- 2899 |   69 satır | fab-drive-mode-override-fix-script | (function(){ if(window.__fabDriveModeOverrideFixReady) return; window.__fabDriveModeOverrideFixReady = true; function q(
+
+===== ŞÜPHELİ PATCH/YAMA ANAHTARLARI =====
+    6: <link rel="stylesheet" href="/static/seats/seats-final.css?v=drive-voice-real-width-test-1">
+    7: <link rel="stylesheet" href="/static/seats/patches/stop-selected-toast.css?v=1">
+    8: <link rel="stylesheet" href="/static/seats/patches/bottom-voice-command.css?v=1">
+    9: <link rel="stylesheet" href="/static/seats/patches/modal-bottom-nav-autohide.css?v=1">
+   10: <link rel="stylesheet" href="/static/seats/patches/manual-ticket-system.css?v=1">
+   11: <link rel="stylesheet" href="/static/seats/patches/top-sound-toggle.css?v=1">
+   21: <div id="driveInlineDock">
+   22: <button id="driveModeToggle" type="button" aria-label="Sürüş modu">🚘 Sürüş</button>
+   24: <div id="driveSpeedChip" class="drive-speed-chip neutral">
+   25: <div class="drive-speed-top">
+   26: <span class="drive-speed-ico">🚦</span>
+   30: <div class="drive-speed-sub">Limit: —</div>
+   33: <div id="driveEtaChip" class="drive-eta-chip neutral">
+   34: <div class="drive-eta-top">
+   36: <b id="driveEtaMain">Rötar</b>
+   38: <div class="drive-eta-sub" id="driveEtaSub">ETA bekleniyor</div>
+   51: <div class="voice-row">
+   52: <button class="voice-command-btn" id="btnDeckAI" type="button" title="Sesli Komut">
+   56: <div class="voice-seat-mini" id="voiceSeatMiniStats" title="Koltuk özeti">
+   57: <span>Dolu <b id="voiceSeatFilled">0</b></span>
+   58: <span>Boş <b id="voiceSeatEmpty">0</b></span>
+   61: <div class="voice-state" id="voiceStateBadge">Hazır</div>
+   64: <!-- DRIVE VOICE ROW START -->
+   65: <div class="drive-voice-row" id="driveVoiceRow">
+   66: <button class="drive-voice-btn" id="btnDeckAIDrive" type="button" title="Sesli Komut">
+   70: <div class="drive-voice-seat" id="driveVoiceSeatCard" title="Koltuk özeti">
+   71: <span class="drive-voice-seat-ico">💺</span>
+   72: <span class="drive-voice-seat-values">
+   73: <b id="driveVoiceFilled">0</b>
+   75: <b id="driveVoiceEmpty">0</b>
+   79: <!-- DRIVE VOICE ROW END -->
+  210: <label><input type="checkbox" id="soundToggle" checked> Sesli yanıt</label>
+  286: <button class="btn primary" type="button" id="fabBulkPane">Toplu Giriş</button>
+  287: <button class="btn green" type="button" id="fabCashPane">Hızlı Tahsilat</button>
+  288: <button class="btn ghost" type="button" id="openStandingModalBtn">Ayakta Listesi</button>
+  329: {% include "seats_parts/modals.html" %}
+  357: <script src="/static/seats/voice-commands.js?v=voice-listen-guard-1"></script>
+  359: <script src="/static/seats/seats.js?v=clear-ticket-on-offload-1"></script>
+  362: <script src="/static/seats/voice-tts.js?v=voice-owner-fix-1"></script>
+  363: <script src="/static/seats/drive-eta-chip.js?v=1"></script>
+  364: <script src="/static/seats/drive-controls.js?v=drive-toggle-fix-1"></script>
+  365: <script src="/static/seats/patches/stop-selected-toast.js?v=1"></script>
+  366: <script src="/static/seats/patches/modal-bottom-nav-autohide.js?v=1"></script>
+  367: <script src="/static/seats/patches/manual-ticket-system.js?v=1"></script>
+  368: <script src="/static/seats/patches/top-sound-toggle.js?v=1"></script>
+  370: <style id="drive-mode-actions-independent-style">
+  372: SÜRÜŞ MODU ÜST HIZLI MENÜ - BAĞIMSIZ FINAL
+  373: driveInlineDock içine girmez, kendi kendine görünür.
+  380: #driveModeActionsDock{
+  401: #driveModeActionsDock .dma-btn{
+  426: #driveModeActionsDock .dma-btn.danger{
+  431: #driveModeActionsDock .dma-btn:active{
+  436: #driveModeActionsDock{
+  444: #driveModeActionsDock .dma-btn{
+  455: <script id="drive-mode-actions-independent-js">
+  457: function isDriveMode(){
+  458: const btn = document.getElementById("driveModeToggle");
+  468: bodyCls.includes("drive") ||
+  470: htmlCls.includes("drive") ||
+  476: let dock = document.getElementById("driveModeActionsDock");
+  480: dock.id = "driveModeActionsDock";
+  529: openFinishTripModal(); return;
+  550: const active = isDriveMode();
+  563: dock.style.bottom = "";
+  574: const btn = document.getElementById("driveModeToggle");
+  618: {% include "seats_parts/finish_trip_modal.html" %}
+  620: <style id="drive-dock-stability-final">
+  626: #driveInlineDock{
+  632: bottom:auto !important;
+  651: #driveInlineDock[style*="display: none"],
+  652: #driveInlineDock[style*="display:none"]{
+  656: #driveInlineDock > *{
+  661: bottom:auto !important;
+  668: #driveModeToggle{
+  693: #driveSpeedChip,
+  694: #driveEtaChip,
+  695: .drive-speed-chip,
+  696: .drive-eta-chip{
+  714: #driveSpeedChip,
+  715: .drive-speed-chip{
+  719: #driveEtaChip,
+  720: .drive-eta-chip{
+  725: .drive-speed-top,
+  726: .drive-eta-top{
+  737: .drive-speed-top b,
+  738: .drive-eta-top b{
+  745: .drive-speed-sub,
+  746: .drive-eta-sub{
+  775: #driveEtaChip *,
+  776: .drive-eta-chip *{
+  782: #driveInlineDock{
+  784: margin-bottom:10px !important;
+  787: #driveModeToggle{
+  795: #driveSpeedChip,
+  796: #driveEtaChip,
+  797: .drive-speed-chip,
+  798: .drive-eta-chip{
+  805: #driveSpeedChip,
+  806: .drive-speed-chip{
+  810: #driveEtaChip,
+  811: .drive-eta-chip{
+  815: .drive-speed-top,
+  816: .drive-eta-top{
+  820: .drive-speed-sub,
+  821: .drive-eta-sub{
+  829: <!-- DRIVE MODE FORCE TOGGLE START -->
+  830: <script id="drive-mode-force-toggle-js">
+  832: if(window.__driveModeForceToggleReady) return;
+  833: window.__driveModeForceToggleReady = true;
+  835: function driveKey(){
+  838: return "driveMode:" + tripKey;
+  841: function isDriveOn(){
+  843: return localStorage.getItem(driveKey()) === "1";
+  849: function setDrive(on){
+  851: localStorage.setItem(driveKey(), on ? "1" : "0");
+  854: document.body.classList.toggle("drive-mode", !!on);
+  855: document.documentElement.classList.toggle("drive-mode", !!on);
+  857: const btn = document.getElementById("driveModeToggle");
+  866: try{ if(typeof syncDriveEtaChip === "function") syncDriveEtaChip(); }catch(e){}
+  869: window.dispatchEvent(new CustomEvent("driveModeChanged", { detail:{ on:!!on } }));
+  874: setDrive(isDriveOn());
+  879: const btn = e.target.closest && e.target.closest("#driveModeToggle");
+  886: setDrive(!isDriveOn());
+  898: <!-- DRIVE MODE FORCE TOGGLE END -->
+  900: <!-- DRIVE VOICE MIRROR SCRIPT START -->
+  901: <script id="drive-voice-mirror-script">
+  903: function syncDriveVoiceStats(){
+  904: const oldFilled = document.getElementById("voiceSeatFilled");
+  905: const oldEmpty  = document.getElementById("voiceSeatEmpty");
+  906: const newFilled = document.getElementById("driveVoiceFilled");
+  907: const newEmpty  = document.getElementById("driveVoiceEmpty");
+  917: function bindDriveVoiceButton(){
+  918: const fakeBtn = document.getElementById("btnDeckAIDrive");
+  938: new MutationObserver(syncDriveVoiceStats).observe(el, {
+  946: bindDriveVoiceButton();
+  947: syncDriveVoiceStats();
+  948: watchNode("voiceSeatFilled");
+  949: watchNode("voiceSeatEmpty");
+  951: setTimeout(syncDriveVoiceStats, 150);
+  952: setTimeout(syncDriveVoiceStats, 600);
+  953: setTimeout(syncDriveVoiceStats, 1400);
+  955: window.addEventListener("driveModeChanged", syncDriveVoiceStats);
+  956: window.addEventListener("resize", syncDriveVoiceStats);
+  966: <!-- DRIVE VOICE MIRROR SCRIPT END -->
+ 1025: html.seat-simple-mode #driveInlineDock,
+ 1026: html.seat-simple-mode #driveModeActionsDock{
+ 1032: html.seat-simple-mode .voice-row,
+ 1033: html.seat-simple-mode .drive-voice-row,
+ 1093: margin-bottom:8px;
+ 1222: margin-bottom:10px;
+ 1272: margin-bottom:5px;
+ 1301: margin-bottom:10px !important;
+ 1308: margin-bottom:10px;
+ 1406: let filled = readText("#voiceSeatFilled") || readText("#driveVoiceFilled") || "";
+ 1407: let empty  = readText("#voiceSeatEmpty")  || readText("#driveVoiceEmpty")  || "";
+ 1453: <style id="seat-simple-bottom-bar-style">
+ 1459: .seat-simple-bottom-bar{
+ 1461: position:fixed;
+ 1464: bottom:10px;
+ 1480: html.seat-simple-mode .seat-simple-bottom-bar{
+ 1485: padding-bottom:92px !important;
+ 1488: .seat-simple-bottom-item{
+ 1511: .seat-simple-bottom-item .ico{
+ 1516: .seat-simple-bottom-item.primary{
+ 1523: .seat-simple-bottom-item.warn{
+ 1529: .seat-simple-bottom-item.danger{
+ 1535: .seat-simple-bottom-item:active{
+ 1540: .seat-simple-bottom-bar{
+ 1543: bottom:8px;
+ 1549: .seat-simple-bottom-item{
+ 1555: .seat-simple-bottom-item .ico{
+ 1561: <script id="seat-simple-bottom-bar-script">
+ 1563: if(window.__seatSimpleBottomBarReady) return;
+ 1564: window.__seatSimpleBottomBarReady = true;
+ 1589: function openVoice(){
+ 1591: if(window.SeatsVoice && typeof window.SeatsVoice.startDeckAIVoice === "function"){
+ 1592: window.SeatsVoice.startDeckAIVoice();
+ 1597: const btn = q("#btnDeckAI") || q("#btnDeckAIDrive");
+ 1602: if(q("#seatSimpleBottomBar")) return;
+ 1604: const bar = document.createElement("nav");
+ 1605: bar.id = "seatSimpleBottomBar";
+ 1606: bar.className = "seat-simple-bottom-bar";
+ 1608: <button type="button" class="seat-simple-bottom-item primary" id="seatSimpleOpenDurak">
+ 1613: <a class="seat-simple-bottom-item" href="{{ url_for('hesap_page') }}">
+ 1618: <a class="seat-simple-bottom-item" href="{{ url_for('consignments_page') }}">
+ 1623: <a class="seat-simple-bottom-item" href="{{ url_for('live_map_page') }}">
+ 1628: <button type="button" class="seat-simple-bottom-item warn" id="seatSimpleVoiceBtn" title="Sesli Komut" aria-label="Sesli Komut">
+ 1630: <span class="voice-bottom-text">Sesli<br>Komut</span>
+ 1652: const voice = q("#seatSimpleVoiceBtn");
+ 1653: if(voice){
+ 1654: voice.addEventListener("click", function(e){
+ 1658: openVoice();
+ 1673: <style id="seat-hide-bottom-menu-on-modal-style">
+ 1675: KOLTUK MODAL AÇILINCA ALT MENÜYÜ GİZLE
+ 1676: Modala dokunmaz; sadece sade mod alt barını saklar.
+ 1679: html.seat-modal-open .seat-simple-bottom-bar,
+ 1680: body.seat-modal-open .seat-simple-bottom-bar{
+ 1685: <script id="seat-hide-bottom-menu-on-modal-script">
+ 1687: if(window.__seatHideBottomMenuOnModalReady) return;
+ 1688: window.__seatHideBottomMenuOnModalReady = true;
+ 1708: const seatModal = q("#seatModal");
+ 1711: const open = isVisible(seatModal) || isVisible(seatBackdrop);
+ 1713: document.documentElement.classList.toggle("seat-modal-open", open);
+ 1714: document.body.classList.toggle("seat-modal-open", open);
+ 1721: "#seatModal",
+ 1764: <!-- STOP_FLOW_FOCUS_PATCH_START -->
+ 1765: <style id="stop-flow-focus-patch-style">
+ 1773: position:fixed;
+ 1781: padding:calc(env(safe-area-inset-top, 0px) + 14px) 14px calc(env(safe-area-inset-bottom, 0px) + 16px);
+ 1805: border-bottom:1px solid rgba(120,160,255,.18);
+ 1814: margin-bottom:14px;
+ 1945: <script id="stop-flow-focus-patch-script">
+ 1947: if(window.__stopFlowFocusPatchLoaded) return;
+ 1948: window.__stopFlowFocusPatchLoaded = true;
+ 2045: pickup.dispatchEvent(new Event("change", {bubbles:true}));
+ 2077: alertStop.dispatchEvent(new Event("change", {bubbles:true}));
+ 2086: }finally{
+ 2094: document.dispatchEvent(new CustomEvent("muavin:selected-stop-change", {detail:{stop:name}}));
+ 2105: '<div class="stop-focus-panel" role="dialog" aria-modal="true" aria-label="Durak Akışı">' +
+ 2213: function isBottomDurakButton(el){
+ 2214: var btn = el.closest("button, a, [role='button'], .tab-btn, .nav-item, .dock-item, .bottom-nav-item");
+ 2225: var parentHint = btn.closest(".bottom-nav, .bottom-bar, .dock, .mobile-nav, [class*='bottom'], [class*='dock']");
+ 2226: var isBottom = !!parentHint || rect.top > window.innerHeight * 0.58;
+ 2228: return isBottom ? btn : null;
+ 2232: var btn = isBottomDurakButton(e.target);
+ 2289: <!-- STOP_FLOW_FOCUS_PATCH_END -->
+ 2295: <!-- RIGHT_SEAT_COLUMN_SPACING_FIX_START -->
+ 2296: <style id="right-seat-column-spacing-fix-style">
+ 2337: body.drive-mode .deck{
+ 2342: body.drive-mode .deck{
+ 2347: <!-- RIGHT_SEAT_COLUMN_SPACING_FIX_END -->
+ 2349: <!-- BOTTOM_ROW_51_54_EQUAL_SPACING_START -->
+ 2350: <style id="bottom-row-51-54-equal-spacing-style">
+ 2363: body.drive-mode .deck .cell[style*="grid-row:14"],
+ 2364: body.drive-mode .deck .cell[style*="grid-row: 14"]{
+ 2368: <!-- BOTTOM_ROW_51_54_EQUAL_SPACING_END -->
+ 2374: BOTTOM_ROW_51_54_EQUAL_SPACING yaması 14. satırın transformunu sıfırladığı için
+ 2386: body.drive-mode .deck .cell[style*="grid-row:14"][style*="grid-column:4"],
+ 2387: body.drive-mode .deck .cell[style*="grid-row:14"][style*="grid-column: 4"],
+ 2388: body.drive-mode .deck .cell[style*="grid-row: 14"][style*="grid-column:4"],
+ 2389: body.drive-mode .deck .cell[style*="grid-row: 14"][style*="grid-column: 4"]{
+ 2401: <!-- FAB_LEFT_GAP_MOVE_START -->
+ 2402: <style id="fab-left-gap-move-style">
+ 2409: .fab-column.fab-left-gap-moved{
+ 2412: bottom:auto !important;
+ 2422: .fab-column.fab-left-gap-moved .fab{
+ 2430: body.drive-mode .fab-column.fab-left-gap-moved .fab{
+ 2438: .fab-column.fab-left-gap-moved{
+ 2442: .fab-column.fab-left-gap-moved .fab,
+ 2443: body.drive-mode .fab-column.fab-left-gap-moved .fab{
+ 2452: <script id="fab-left-gap-move-script">
+ 2454: if(window.__fabLeftGapMoveLoaded) return;
+ 2455: window.__fabLeftGapMoveLoaded = true;
+ 2461: function placeFabColumn(){
+ 2462: var col = q(".fab-column");
+ 2469: col.classList.add("fab-left-gap-moved");
+ 2484: var gapTop = r43.bottom + 12;
+ 2485: var gapBottom = r51.top - 12;
+ 2486: var centerY = (gapTop + gapBottom) / 2;
+ 2503: timer = setTimeout(placeFabColumn, 80);
+ 2525: setTimeout(placeFabColumn, 150);
+ 2526: setTimeout(placeFabColumn, 600);
+ 2527: setTimeout(placeFabColumn, 1400);
+ 2530: <!-- FAB_LEFT_GAP_MOVE_END -->
+ 2532: <!-- FAB_DISTINCT_PANEL_START -->
+ 2533: <style id="fab-distinct-panel-style">
+ 2539: .fab-column.fab-left-gap-moved{
+ 2557: .fab-column.fab-left-gap-moved::before{
+ 2572: .fab-column.fab-left-gap-moved .fab{
+ 2588: .fab-column.fab-left-gap-moved .fab::after{
+ 2597: .fab-column.fab-left-gap-moved .fab.primary{
+ 2603: .fab-column.fab-left-gap-moved .fab.green{
+ 2609: .fab-column.fab-left-gap-moved .fab.orange{
+ 2615: .fab-column.fab-left-gap-moved .fab:active{
+ 2620: .fab-column.fab-left-gap-moved{
+ 2625: .fab-column.fab-left-gap-moved .fab{
+ 2632: <!-- FAB_DISTINCT_PANEL_END -->
+ 2634: <!-- FAB_COMPACT_FIT_START -->
+ 2635: <style id="fab-compact-fit-style">
+ 2641: .fab-column.fab-left-gap-moved{
+ 2647: .fab-column.fab-left-gap-moved::before{
+ 2653: .fab-column.fab-left-gap-moved .fab,
+ 2654: body.drive-mode .fab-column.fab-left-gap-moved .fab{
+ 2664: .fab-column.fab-left-gap-moved .fab::after{
+ 2670: .fab-column.fab-left-gap-moved{
+ 2676: .fab-column.fab-left-gap-moved .fab,
+ 2677: body.drive-mode .fab-column.fab-left-gap-moved .fab{
+ 2688: <script id="fab-compact-fit-script">
+ 2690: function refreshFabPosition(){
+ 2692: window.dispatchEvent(new Event("resize"));
+ 2698: setTimeout(refreshFabPosition, 120);
+ 2699: setTimeout(refreshFabPosition, 600);
+ 2702: setTimeout(refreshFabPosition, 120);
+ 2703: setTimeout(refreshFabPosition, 600);
+ 2706: setTimeout(refreshFabPosition, 1200);
+ 2709: <!-- FAB_COMPACT_FIT_END -->
+ 2711: <!-- FAB_DRIVE_MODE_OVERRIDE_FIX_START -->
+ 2712: <style id="fab-drive-mode-override-fix-style">
+ 2715: static/seats/seats.css içindeki body.drive-mode .fab-column kuralı
+ 2719: .fab-left-gap-moved sınıfı varsa, drive-mode kurallarını ezip
+ 2723: .fab-column.fab-left-gap-moved,
+ 2724: body.drive-mode .fab-column.fab-left-gap-moved{
+ 2727: left:var(--fab-left-gap-left, 0px) !important;
+ 2728: top:var(--fab-left-gap-top, 0px) !important;
+ 2730: bottom:auto !important;
+ 2764: .fab-column.fab-left-gap-moved::before,
+ 2765: body.drive-mode .fab-column.fab-left-gap-moved::before{
+ 2781: .fab-column.fab-left-gap-moved .fab,
+ 2782: body.drive-mode .fab-column.fab-left-gap-moved .fab{
+ 2801: .fab-column.fab-left-gap-moved .fab::after,
+ 2802: body.drive-mode .fab-column.fab-left-gap-moved .fab::after{
+ 2808: .fab-column.fab-left-gap-moved,
+ 2809: body.drive-mode .fab-column.fab-left-gap-moved{
+ 2819: .fab-column.fab-left-gap-moved .fab,
+ 2820: body.drive-mode .fab-column.fab-left-gap-moved .fab{
+ 2831: <script id="fab-drive-mode-override-fix-script">
+ 2833: if(window.__fabDriveModeOverrideFixReady) return;
+ 2834: window.__fabDriveModeOverrideFixReady = true;
+ 2841: var col = q(".fab-column");
+ 2848: col.classList.add("fab-left-gap-moved");
+ 2862: var gapTop = r43.bottom + 12;
+ 2863: var gapBottom = r51.top - 12;
+ 2864: var centerY = (gapTop + gapBottom) / 2;
+ 2872: col.style.setProperty("--fab-left-gap-left", Math.round(left) + "px");
+ 2873: col.style.setProperty("--fab-left-gap-top", Math.round(top) + "px");
+ 2893: window.addEventListener("driveModeChanged", schedule);
+ 2900: <!-- FAB_DRIVE_MODE_OVERRIDE_FIX_END -->
+
+===== STATİK PATCH KLASÖRÜ =====
+bottom-voice-command.css                           739 byte
+manual-ticket-system.css                          1092 byte
+manual-ticket-system.js                           5038 byte
+modal-bottom-nav-autohide.css                      193 byte
+modal-bottom-nav-autohide.js                      4115 byte
+stop-selected-toast.css                           1575 byte
+stop-selected-toast.js                            1659 byte
+top-sound-toggle.css                              1439 byte
+top-sound-toggle.js                               3839 byte

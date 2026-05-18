@@ -1,0 +1,60 @@
+#seatSimpleTopSoundRow{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:10px;
+    align-items:center;
+    margin:0 0 12px 0;
+  }
+
+  #seatSimpleTopSoundRow #seatSimpleModeToggle{
+    width:100% !important;
+    margin:0 !important;
+  }
+
+  #seatSimpleSoundToggle{
+    min-width:112px;
+    min-height:56px;
+    border:0;
+    border-radius:22px;
+    color:#fff;
+    font-weight:1000;
+    font-size:14px;
+    letter-spacing:-.02em;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    white-space:nowrap;
+    background:
+      radial-gradient(circle at 22% 18%, rgba(255,255,255,.22), transparent 34%),
+      linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    box-shadow:0 14px 34px rgba(22,163,74,.22), inset 0 1px 0 rgba(255,255,255,.14);
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  #seatSimpleSoundToggle.is-off{
+    background:
+      radial-gradient(circle at 22% 18%, rgba(255,255,255,.18), transparent 34%),
+      linear-gradient(135deg, #475569 0%, #1e293b 100%);
+    box-shadow:0 14px 34px rgba(15,23,42,.25), inset 0 1px 0 rgba(255,255,255,.10);
+    color:#dbeafe;
+  }
+
+  #seatSimpleSoundToggle:active{
+    transform:scale(.985);
+  }
+
+  @media(max-width:380px){
+    #seatSimpleTopSoundRow{
+      gap:8px;
+    }
+
+    #seatSimpleSoundToggle{
+      min-width:96px;
+      min-height:52px;
+      border-radius:19px;
+      font-size:12.5px;
+      gap:5px;
+    }
+  }

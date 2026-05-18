@@ -1,0 +1,16 @@
+/*
+    En alt sıra 51-52-53-54 eşit aralık düzeltmesi.
+    Sağ kolon kaydırma 54'ü de etkilediği için bu satırda
+    kaydırmayı sıfırlıyoruz. Böylece 51-52-53-54 kendi grid
+    kolonlarında eşit aralıkla durur.
+  */
+
+  .deck .cell[style*="grid-row:14"],
+  .deck .cell[style*="grid-row: 14"]{
+    transform:none !important;
+  }
+
+  body.drive-mode .deck .cell[style*="grid-row:14"],
+  body.drive-mode .deck .cell[style*="grid-row: 14"]{
+    transform:none !important;
+  }

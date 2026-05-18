@@ -1,0 +1,408 @@
+/* ===== RIGHT_SEAT_COLUMN_SPACING_FIX ===== */
+/*
+    Sağ koltuk kolonunu ferahlatma:
+    4,8,12,16,20,24,28,34,38,42,46,50,54 gibi
+    grid-column:4 olan koltukları biraz sağa alır.
+
+    Amaç:
+    23-24 / 27-28 gibi yan yana koltuklarda alt yazıların
+    birbirine girmesini azaltmak.
+  */
+
+  .deck{
+    --right-seat-column-shift:16px;
+  }
+
+  .deck .cell[style*="grid-column:4"],
+  .deck .cell[style*="grid-column: 4"]{
+    transform:translateX(var(--right-seat-column-shift)) !important;
+  }
+
+  /*
+    Kapı sağ çift koltukların arasında durduğu için
+    çok az sağa alınır; görüntü dengeli kalır.
+  */
+  .deck .door{
+    transform:translateX(calc(var(--right-seat-column-shift) * .35)) !important;
+  }
+
+  /*
+    Çok dar ekranda fazla kaçmasın.
+  */
+  @media(max-width:380px){
+    .deck{
+      --right-seat-column-shift:13px;
+    }
+  }
+
+  /*
+    Sürüş modunda koltuklar biraz daha sıkıştığı için
+    sağ kolonu bir tık daha açıyoruz.
+  */
+  body.drive-mode .deck{
+    --right-seat-column-shift:18px;
+  }
+
+  @media(max-width:380px){
+    body.drive-mode .deck{
+      --right-seat-column-shift:15px;
+    }
+  }
+
+/* ===== BOTTOM_ROW_51_54_EQUAL_SPACING ===== */
+/*
+    En alt sıra 51-52-53-54 eşit aralık düzeltmesi.
+    Sağ kolon kaydırma 54'ü de etkilediği için bu satırda
+    kaydırmayı sıfırlıyoruz. Böylece 51-52-53-54 kendi grid
+    kolonlarında eşit aralıkla durur.
+  */
+
+  .deck .cell[style*="grid-row:14"],
+  .deck .cell[style*="grid-row: 14"]{
+    transform:none !important;
+  }
+
+  body.drive-mode .deck .cell[style*="grid-row:14"],
+  body.drive-mode .deck .cell[style*="grid-row: 14"]{
+    transform:none !important;
+  }
+
+/* ===== ONLY_54_REAPPLY_RIGHT_SHIFT ===== */
+/*
+    50 zaten sağ kolon kaydırmasından etkileniyor.
+    BOTTOM_ROW_51_54_EQUAL_SPACING yaması 14. satırın transformunu sıfırladığı için
+    sadece 54'e sağ kolon kaymasını geri veriyoruz.
+    51-52-53'e dokunmaz.
+  */
+
+  .deck .cell[style*="grid-row:14"][style*="grid-column:4"],
+  .deck .cell[style*="grid-row:14"][style*="grid-column: 4"],
+  .deck .cell[style*="grid-row: 14"][style*="grid-column:4"],
+  .deck .cell[style*="grid-row: 14"][style*="grid-column: 4"]{
+    transform:translateX(var(--right-seat-column-shift, 16px)) !important;
+  }
+
+  body.drive-mode .deck .cell[style*="grid-row:14"][style*="grid-column:4"],
+  body.drive-mode .deck .cell[style*="grid-row:14"][style*="grid-column: 4"],
+  body.drive-mode .deck .cell[style*="grid-row: 14"][style*="grid-column:4"],
+  body.drive-mode .deck .cell[style*="grid-row: 14"][style*="grid-column: 4"]{
+    transform:translateX(var(--right-seat-column-shift, 18px)) !important;
+  }
+
+/* ===== FAB_LEFT_GAP_MOVE ===== */
+/*
+    Hızlı işlem butonlarını sağ alttan alıp
+    43 ile 51 arasındaki boş sol alana yerleştirir.
+    HTML/ID değişmez; JS bağlantıları aynen çalışır.
+  */
+
+  .fab-column.fab-left-gap-moved{
+    position:absolute !important;
+    right:auto !important;
+    bottom:auto !important;
+    z-index:45 !important;
+
+    display:flex !important;
+    flex-direction:column !important;
+    gap:7px !important;
+
+    pointer-events:auto !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab{
+    width:46px !important;
+    height:46px !important;
+    border-radius:16px !important;
+    font-size:19px !important;
+    box-shadow:0 14px 28px rgba(0,0,0,.34) !important;
+  }
+
+  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+    width:46px !important;
+    height:46px !important;
+    border-radius:16px !important;
+    font-size:19px !important;
+  }
+
+  @media(max-width:380px){
+    .fab-column.fab-left-gap-moved{
+      gap:6px !important;
+    }
+
+    .fab-column.fab-left-gap-moved .fab,
+    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+      width:44px !important;
+      height:44px !important;
+      border-radius:15px !important;
+      font-size:18px !important;
+    }
+  }
+
+/* ===== FAB_DISTINCT_PANEL ===== */
+/*
+    Sol boş alana taşınan hızlı işlem butonlarını
+    koltuklardan görsel olarak ayırır.
+  */
+
+  .fab-column.fab-left-gap-moved{
+    padding:18px 8px 8px !important;
+    border-radius:24px !important;
+
+    background:
+      radial-gradient(circle at 50% 0%, rgba(56,189,248,.22), transparent 42%),
+      linear-gradient(180deg, rgba(15,23,42,.92), rgba(2,6,23,.86)) !important;
+
+    border:1px solid rgba(125,211,252,.36) !important;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.05) inset,
+      0 18px 42px rgba(0,0,0,.42),
+      0 0 28px rgba(37,99,235,.20) !important;
+
+    backdrop-filter:blur(14px) !important;
+    -webkit-backdrop-filter:blur(14px) !important;
+  }
+
+  .fab-column.fab-left-gap-moved::before{
+    content:"HIZLI";
+    position:absolute;
+    top:5px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:8px;
+    line-height:1;
+    font-weight:1000;
+    letter-spacing:.16em;
+    color:rgba(191,219,254,.92);
+    text-shadow:0 0 12px rgba(96,165,250,.55);
+    pointer-events:none;
+  }
+
+  .fab-column.fab-left-gap-moved .fab{
+    position:relative !important;
+    width:48px !important;
+    height:48px !important;
+    border-radius:18px !important;
+
+    border:1px solid rgba(255,255,255,.30) !important;
+    outline:1px solid rgba(125,211,252,.18) !important;
+    outline-offset:2px !important;
+
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.22),
+      inset 0 -10px 18px rgba(0,0,0,.20),
+      0 12px 24px rgba(0,0,0,.38) !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab::after{
+    content:"";
+    position:absolute;
+    inset:-5px;
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,.08);
+    pointer-events:none;
+  }
+
+  .fab-column.fab-left-gap-moved .fab.primary{
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,.24), transparent 34%),
+      linear-gradient(180deg, #60a5fa, #1d4ed8) !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab.green{
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,.22), transparent 34%),
+      linear-gradient(180deg, #34d399, #047857) !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab.orange{
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,.24), transparent 34%),
+      linear-gradient(180deg, #fbbf24, #b45309) !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab:active{
+    transform:scale(.94) !important;
+  }
+
+  @media(max-width:380px){
+    .fab-column.fab-left-gap-moved{
+      padding:17px 7px 7px !important;
+      border-radius:22px !important;
+    }
+
+    .fab-column.fab-left-gap-moved .fab{
+      width:46px !important;
+      height:46px !important;
+      border-radius:17px !important;
+    }
+  }
+
+/* ===== FAB_COMPACT_FIT ===== */
+/*
+    Hızlı işlem paneli 43 ile 51 arasına tam otursun diye
+    butonları ve panel yüksekliğini kompaktlaştırır.
+  */
+
+  .fab-column.fab-left-gap-moved{
+    padding:15px 6px 6px !important;
+    gap:5px !important;
+    border-radius:21px !important;
+  }
+
+  .fab-column.fab-left-gap-moved::before{
+    top:4px !important;
+    font-size:7px !important;
+    letter-spacing:.14em !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab,
+  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+    width:41px !important;
+    height:41px !important;
+    min-width:41px !important;
+    min-height:41px !important;
+    border-radius:15px !important;
+    font-size:17px !important;
+    outline-offset:1px !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab::after{
+    inset:-3px !important;
+    border-radius:18px !important;
+  }
+
+  @media(max-width:380px){
+    .fab-column.fab-left-gap-moved{
+      padding:14px 5px 5px !important;
+      gap:4px !important;
+      border-radius:19px !important;
+    }
+
+    .fab-column.fab-left-gap-moved .fab,
+    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+      width:39px !important;
+      height:39px !important;
+      min-width:39px !important;
+      min-height:39px !important;
+      border-radius:14px !important;
+      font-size:16px !important;
+    }
+  }
+
+/* ===== FAB_DRIVE_MODE_OVERRIDE_FIX ===== */
+/*
+    Sorun:
+    static/seats/seats.css içindeki body.drive-mode .fab-column kuralı
+    hızlı işlem panelini yatay alt bar gibi zorluyordu.
+
+    Çözüm:
+    .fab-left-gap-moved sınıfı varsa, drive-mode kurallarını ezip
+    paneli tekrar 43-51 arasındaki dikey mini panel yap.
+  */
+
+  .fab-column.fab-left-gap-moved,
+  body.drive-mode .fab-column.fab-left-gap-moved{
+    position:absolute !important;
+
+    left:var(--fab-left-gap-left, 0px) !important;
+    top:var(--fab-left-gap-top, 0px) !important;
+    right:auto !important;
+    bottom:auto !important;
+    transform:none !important;
+
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:flex-start !important;
+
+    width:64px !important;
+    min-width:64px !important;
+    max-width:64px !important;
+
+    height:auto !important;
+    min-height:0 !important;
+    max-height:none !important;
+
+    padding:15px 6px 6px !important;
+    gap:5px !important;
+    border-radius:21px !important;
+
+    background:
+      radial-gradient(circle at 50% 0%, rgba(56,189,248,.22), transparent 42%),
+      linear-gradient(180deg, rgba(15,23,42,.92), rgba(2,6,23,.88)) !important;
+
+    border:1px solid rgba(125,211,252,.36) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.08),
+      0 14px 28px rgba(0,0,0,.36),
+      0 0 22px rgba(37,99,235,.16) !important;
+
+    overflow:visible !important;
+    z-index:90 !important;
+  }
+
+  .fab-column.fab-left-gap-moved::before,
+  body.drive-mode .fab-column.fab-left-gap-moved::before{
+    content:"HIZLI" !important;
+    position:absolute !important;
+    top:4px !important;
+    left:50% !important;
+    transform:translateX(-50%) !important;
+
+    font-size:7px !important;
+    line-height:1 !important;
+    font-weight:1000 !important;
+    letter-spacing:.14em !important;
+    color:rgba(191,219,254,.92) !important;
+    text-shadow:0 0 12px rgba(96,165,250,.55) !important;
+    pointer-events:none !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab,
+  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+    width:41px !important;
+    height:41px !important;
+    min-width:41px !important;
+    min-height:41px !important;
+
+    border-radius:15px !important;
+    font-size:17px !important;
+
+    margin:0 !important;
+    padding:0 !important;
+
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+
+    outline-offset:1px !important;
+  }
+
+  .fab-column.fab-left-gap-moved .fab::after,
+  body.drive-mode .fab-column.fab-left-gap-moved .fab::after{
+    inset:-3px !important;
+    border-radius:18px !important;
+  }
+
+  @media(max-width:380px){
+    .fab-column.fab-left-gap-moved,
+    body.drive-mode .fab-column.fab-left-gap-moved{
+      width:60px !important;
+      min-width:60px !important;
+      max-width:60px !important;
+
+      padding:14px 5px 5px !important;
+      gap:4px !important;
+      border-radius:19px !important;
+    }
+
+    .fab-column.fab-left-gap-moved .fab,
+    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+      width:39px !important;
+      height:39px !important;
+      min-width:39px !important;
+      min-height:39px !important;
+      border-radius:14px !important;
+      font-size:16px !important;
+    }
+  }
