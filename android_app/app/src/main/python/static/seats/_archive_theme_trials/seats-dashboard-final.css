@@ -1,0 +1,827 @@
+/* =========================================================
+   SEATS DASHBOARD FINAL
+   Açık ana tema + koyu koltuk planı
+   JS / id / backend yapısına dokunmaz.
+========================================================= */
+
+:root{
+  --page-bg-1:#f8fbff;
+  --page-bg-2:#eaf3ff;
+  --card:#ffffff;
+  --card-soft:#f8fbff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --line:#e5edf6;
+  --blue:#2563eb;
+  --blue2:#0ea5e9;
+  --green:#22c55e;
+  --red:#ef4444;
+  --dark:#071423;
+  --dark2:#0d1726;
+  --radius:26px;
+}
+
+body{
+  background:
+    radial-gradient(circle at 18% 0%, rgba(37,99,235,.12), transparent 34%),
+    radial-gradient(circle at 100% 30%, rgba(14,165,233,.14), transparent 32%),
+    linear-gradient(180deg,var(--page-bg-1),var(--page-bg-2)) !important;
+  color:var(--text) !important;
+}
+
+.seats-shell{
+  width:calc(100vw - 14px) !important;
+  max-width:1180px !important;
+  margin:8px auto 18px !important;
+  padding:0 !important;
+}
+
+/* =========================================================
+   ÜST SEFER KARTI
+========================================================= */
+
+.topbar.glass{
+  border-radius:30px !important;
+  padding:18px !important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.98),rgba(248,251,255,.96)) !important;
+  border:1px solid rgba(255,255,255,.95) !important;
+  box-shadow:0 24px 60px rgba(15,23,42,.12) !important;
+  color:var(--text) !important;
+  display:grid !important;
+  grid-template-columns:1fr auto !important;
+  gap:14px !important;
+  align-items:start !important;
+}
+
+.route-meta{
+  min-width:0 !important;
+}
+
+.route-title-row{
+  display:grid !important;
+  grid-template-columns:74px 1fr !important;
+  align-items:center !important;
+  gap:14px !important;
+}
+
+.route-badge{
+  width:74px !important;
+  height:74px !important;
+  border-radius:24px !important;
+  display:grid !important;
+  place-items:center !important;
+  background:
+    linear-gradient(135deg,rgba(37,99,235,.12),rgba(14,165,233,.08)),
+    #f1f7ff !important;
+  border:1px solid #e5edf6 !important;
+  font-size:34px !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8) !important;
+}
+
+.route-title{
+  margin:0 !important;
+  color:var(--text) !important;
+  font-size:34px !important;
+  line-height:1 !important;
+  font-weight:1000 !important;
+  letter-spacing:-1px !important;
+  max-width:100% !important;
+}
+
+.route-sub{
+  margin-top:8px !important;
+  color:var(--muted) !important;
+  font-size:14px !important;
+  line-height:1.35 !important;
+  font-weight:750 !important;
+}
+
+.route-sub b{
+  color:#334155 !important;
+  font-weight:950 !important;
+}
+
+/* canlı chip satırı */
+.route-live-row{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:10px !important;
+  margin-top:14px !important;
+}
+
+.route-live-row .mini-chip{
+  min-height:58px !important;
+  border-radius:20px !important;
+  padding:10px 12px !important;
+  background:linear-gradient(180deg,#fff,#f8fbff) !important;
+  border:1px solid var(--line) !important;
+  box-shadow:0 10px 24px rgba(15,23,42,.06) !important;
+  color:var(--text) !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:9px !important;
+  justify-content:flex-start !important;
+  overflow:hidden !important;
+}
+
+.route-live-row .mini-chip span{
+  display:block !important;
+  color:var(--muted) !important;
+  font-size:12px !important;
+  font-weight:850 !important;
+}
+
+.route-live-row .mini-chip b{
+  display:block !important;
+  color:var(--text) !important;
+  font-size:17px !important;
+  font-weight:1000 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* üst ikonlar */
+.top-actions{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  justify-content:flex-end !important;
+  gap:9px !important;
+  max-width:210px !important;
+}
+
+.top-actions form{
+  margin:0 !important;
+}
+
+.icon-btn{
+  width:48px !important;
+  height:48px !important;
+  border-radius:18px !important;
+  border:1px solid var(--line) !important;
+  background:#fff !important;
+  color:var(--text) !important;
+  display:grid !important;
+  place-items:center !important;
+  box-shadow:0 10px 22px rgba(15,23,42,.07) !important;
+  font-size:22px !important;
+  text-decoration:none !important;
+}
+
+/* =========================================================
+   İSTATİSTİKLER
+========================================================= */
+
+.status-row{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:10px !important;
+  margin:12px 0 !important;
+}
+
+.status-pill{
+  min-height:96px !important;
+  border-radius:25px !important;
+  padding:18px !important;
+  background:linear-gradient(180deg,#fff,#f8fbff) !important;
+  border:1px solid var(--line) !important;
+  box-shadow:0 16px 34px rgba(15,23,42,.08) !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:14px !important;
+}
+
+.status-pill .k{
+  color:var(--muted) !important;
+  font-size:15px !important;
+  font-weight:900 !important;
+}
+
+.status-pill .v{
+  color:var(--text) !important;
+  font-size:38px !important;
+  line-height:1 !important;
+  font-weight:1000 !important;
+}
+
+.status-pill.total{
+  background:
+    linear-gradient(180deg,#fff,#f8fbff) !important;
+}
+
+.status-pill.empty{
+  background:
+    linear-gradient(180deg,#ffffff,#f0fdf4) !important;
+}
+
+.status-pill.standing,
+.status-pill.cash,
+.status-pill.service,
+.status-pill.parcel{
+  display:none !important;
+}
+
+/* =========================================================
+   ANA LAYOUT
+========================================================= */
+
+.layout{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) 360px !important;
+  gap:14px !important;
+  align-items:start !important;
+}
+
+.board-card.glass,
+.panel-card.glass{
+  border-radius:28px !important;
+  background:rgba(255,255,255,.98) !important;
+  border:1px solid rgba(255,255,255,.95) !important;
+  box-shadow:0 22px 60px rgba(15,23,42,.10) !important;
+  color:var(--text) !important;
+}
+
+.board-inner{
+  padding:16px !important;
+}
+
+/* =========================================================
+   SÜRÜŞ / HIZ / RÖTAR SATIRI
+========================================================= */
+
+#driveInlineDock{
+  position:static !important;
+  inset:auto !important;
+  left:auto !important;
+  top:auto !important;
+  right:auto !important;
+  bottom:auto !important;
+  transform:none !important;
+
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:120px 1fr 1.2fr !important;
+  gap:10px !important;
+  margin:0 0 14px 0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+}
+
+#driveInlineDock[style*="display: none"],
+#driveInlineDock[style*="display:none"]{
+  display:none !important;
+}
+
+#driveModeToggle,
+#driveSpeedChip,
+#driveEtaChip,
+.drive-speed-chip,
+.drive-eta-chip{
+  min-height:52px !important;
+  border-radius:19px !important;
+  border:1px solid var(--line) !important;
+  background:linear-gradient(180deg,#fff,#f8fbff) !important;
+  color:var(--text) !important;
+  box-shadow:0 10px 24px rgba(15,23,42,.06) !important;
+  overflow:hidden !important;
+}
+
+#driveModeToggle{
+  font-size:15px !important;
+  font-weight:1000 !important;
+  background:linear-gradient(135deg,#2563eb,#0ea5e9) !important;
+  color:#fff !important;
+}
+
+.drive-speed-top,
+.drive-eta-top{
+  color:var(--text) !important;
+  font-weight:950 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+.drive-speed-sub,
+.drive-eta-sub{
+  color:var(--muted) !important;
+  font-size:12px !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* =========================================================
+   KOLTUK PLANI BAŞLIK
+========================================================= */
+
+.board-head{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:13px !important;
+  margin-bottom:14px !important;
+  position:relative !important;
+}
+
+.board-kicker{
+  display:inline-flex !important;
+  width:max-content !important;
+  padding:6px 10px !important;
+  border-radius:999px !important;
+  background:#eff6ff !important;
+  color:#2563eb !important;
+  font-size:11px !important;
+  font-weight:1000 !important;
+  letter-spacing:.7px !important;
+}
+
+.board-title h2{
+  margin:8px 0 0 !important;
+  color:var(--text) !important;
+  font-size:31px !important;
+  line-height:1 !important;
+  font-weight:1000 !important;
+  letter-spacing:-.7px !important;
+}
+
+.board-title small{
+  display:none !important;
+}
+
+.selected-stop-chip{
+  margin-top:10px !important;
+  min-height:44px !important;
+  border-radius:18px !important;
+  padding:10px 13px !important;
+  background:#fff !important;
+  border:1px solid #fecdd3 !important;
+  color:var(--text) !important;
+  box-shadow:0 8px 20px rgba(244,63,94,.08) !important;
+  font-size:14px !important;
+  font-weight:900 !important;
+}
+
+.board-head-right{
+  display:grid !important;
+  gap:10px !important;
+}
+
+.voice-row{
+  display:grid !important;
+  grid-template-columns:1fr 110px !important;
+  gap:10px !important;
+}
+
+.voice-command-btn,
+.voice-state{
+  min-height:48px !important;
+  border-radius:19px !important;
+  border:1px solid var(--line) !important;
+  box-shadow:0 10px 24px rgba(15,23,42,.06) !important;
+}
+
+.voice-command-btn{
+  background:linear-gradient(135deg,#8b5cf6,#2563eb) !important;
+  color:#fff !important;
+  font-size:15px !important;
+  font-weight:1000 !important;
+}
+
+.voice-state{
+  background:#fff !important;
+  color:var(--text) !important;
+  display:grid !important;
+  place-items:center !important;
+  font-size:14px !important;
+  font-weight:1000 !important;
+}
+
+.legend{
+  display:grid !important;
+  grid-template-columns:repeat(6,minmax(0,1fr)) !important;
+  gap:8px !important;
+}
+
+.legend .mini-chip{
+  min-height:42px !important;
+  border-radius:17px !important;
+  background:#fff !important;
+  border:1px solid var(--line) !important;
+  color:var(--text) !important;
+  font-size:13px !important;
+  font-weight:900 !important;
+  box-shadow:0 8px 18px rgba(15,23,42,.05) !important;
+}
+
+/* =========================================================
+   DURAK AKIŞI
+========================================================= */
+
+.route-flow,
+.stop-flow,
+#routeFlow,
+.route-flow-card{
+  border-radius:22px !important;
+  background:#f8fbff !important;
+  border:1px solid var(--line) !important;
+  padding:12px !important;
+  margin:12px 0 !important;
+  color:var(--text) !important;
+  overflow:hidden !important;
+}
+
+/* =========================================================
+   KOLTUK DECK
+========================================================= */
+
+.board-stage{
+  border-radius:28px !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(37,99,235,.15), transparent 28%),
+    linear-gradient(180deg,#071423,#0b1726) !important;
+  border:1px solid rgba(15,23,42,.08) !important;
+  padding:14px !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+
+.deck-wrap{
+  border-radius:26px !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(148,163,184,.12), transparent 30%),
+    rgba(2,8,23,.55) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+  padding:14px !important;
+  overflow:auto !important;
+}
+
+.deck{
+  margin:0 auto !important;
+}
+
+.seat{
+  border-radius:15px !important;
+  box-shadow:
+    0 8px 18px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.15) !important;
+}
+
+.fab-column{
+  left:14px !important;
+  bottom:14px !important;
+}
+
+.fab{
+  width:48px !important;
+  height:48px !important;
+  border-radius:16px !important;
+}
+
+/* =========================================================
+   SAĞ PANEL
+========================================================= */
+
+.panel-card.glass{
+  padding:14px !important;
+  position:sticky !important;
+  top:8px !important;
+  max-height:calc(100vh - 16px) !important;
+  overflow:auto !important;
+}
+
+.panel-card::-webkit-scrollbar{
+  width:0;
+  height:0;
+}
+
+.panel-handle{
+  width:52px !important;
+  height:5px !important;
+  border-radius:999px !important;
+  background:#dbe4ef !important;
+  margin:0 auto 12px !important;
+}
+
+.panel-tabs{
+  display:flex !important;
+  gap:7px !important;
+  overflow-x:auto !important;
+  padding-bottom:8px !important;
+  margin-bottom:10px !important;
+}
+
+.panel-tabs::-webkit-scrollbar{
+  width:0;
+  height:0;
+}
+
+.tab-btn{
+  flex:0 0 auto !important;
+  min-height:38px !important;
+  padding:0 13px !important;
+  border:0 !important;
+  border-radius:15px !important;
+  background:#f1f5f9 !important;
+  color:#475569 !important;
+  font-size:13px !important;
+  font-weight:950 !important;
+}
+
+.tab-btn.active{
+  background:linear-gradient(135deg,#2563eb,#0ea5e9) !important;
+  color:#fff !important;
+}
+
+.pane-grid{
+  display:grid !important;
+  gap:11px !important;
+}
+
+.section-box{
+  border-radius:22px !important;
+  padding:14px !important;
+  background:#fff !important;
+  border:1px solid var(--line) !important;
+  box-shadow:0 12px 28px rgba(15,23,42,.06) !important;
+  color:var(--text) !important;
+}
+
+.section-head{
+  display:flex !important;
+  justify-content:space-between !important;
+  gap:10px !important;
+  align-items:center !important;
+  margin-bottom:10px !important;
+}
+
+.section-head h3{
+  margin:0 !important;
+  color:var(--text) !important;
+  font-size:16px !important;
+  font-weight:1000 !important;
+}
+
+.section-head small,
+.muted{
+  color:var(--muted) !important;
+  font-size:12px !important;
+  font-weight:800 !important;
+}
+
+.metrics-grid{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:9px !important;
+}
+
+.metric-card{
+  min-height:80px !important;
+  padding:12px !important;
+  border-radius:18px !important;
+  background:#f8fbff !important;
+  border:1px solid var(--line) !important;
+}
+
+.metric-card .k{
+  color:var(--muted) !important;
+  font-size:12px !important;
+  font-weight:850 !important;
+}
+
+.metric-card .v{
+  margin-top:6px !important;
+  color:var(--text) !important;
+  font-size:18px !important;
+  font-weight:1000 !important;
+}
+
+.metric-card .s{
+  margin-top:4px !important;
+  color:var(--muted) !important;
+  font-size:11px !important;
+}
+
+/* formlar */
+.field-grid{
+  display:grid !important;
+  gap:10px !important;
+}
+
+.field-row{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:9px !important;
+}
+
+.field{
+  display:grid !important;
+  gap:5px !important;
+}
+
+.field span{
+  color:var(--muted) !important;
+  font-size:12px !important;
+  font-weight:850 !important;
+}
+
+.field input,
+.field select{
+  min-height:42px !important;
+  border-radius:15px !important;
+  border:1px solid var(--line) !important;
+  background:#f8fbff !important;
+  color:var(--text) !important;
+  padding:0 11px !important;
+  outline:none !important;
+}
+
+.action-grid{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:9px !important;
+}
+
+.btn{
+  min-height:42px !important;
+  border:0 !important;
+  border-radius:15px !important;
+  padding:0 12px !important;
+  color:#fff !important;
+  font-weight:950 !important;
+  font-size:13px !important;
+}
+
+.btn.primary{ background:linear-gradient(135deg,#2563eb,#0ea5e9) !important; }
+.btn.green{ background:linear-gradient(135deg,#16a34a,#22c55e) !important; }
+.btn.warn{ background:linear-gradient(135deg,#f59e0b,#d97706) !important; }
+.btn.danger{ background:linear-gradient(135deg,#ef4444,#b91c1c) !important; }
+.btn.accent{ background:linear-gradient(135deg,#8b5cf6,#2563eb) !important; }
+.btn.ghost{
+  background:#f1f5f9 !important;
+  color:var(--text) !important;
+  border:1px solid var(--line) !important;
+}
+
+/* =========================================================
+   MOBİL
+========================================================= */
+
+@media(max-width:900px){
+  .layout{
+    display:block !important;
+  }
+
+  .panel-card.glass{
+    position:relative !important;
+    top:auto !important;
+    max-height:none !important;
+    margin-top:14px !important;
+  }
+}
+
+@media(max-width:700px){
+  .topbar.glass{
+    grid-template-columns:1fr !important;
+    padding:14px !important;
+    border-radius:26px !important;
+  }
+
+  .route-title-row{
+    grid-template-columns:58px 1fr !important;
+    gap:12px !important;
+  }
+
+  .route-badge{
+    width:58px !important;
+    height:58px !important;
+    border-radius:20px !important;
+    font-size:28px !important;
+  }
+
+  .route-title{
+    font-size:28px !important;
+  }
+
+  .route-sub{
+    font-size:13px !important;
+  }
+
+  .route-live-row{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:8px !important;
+  }
+
+  .route-live-row .mini-chip{
+    min-height:52px !important;
+    border-radius:18px !important;
+  }
+
+  .top-actions{
+    max-width:none !important;
+    justify-content:flex-start !important;
+  }
+
+  .status-row{
+    gap:8px !important;
+  }
+
+  .status-pill{
+    min-height:74px !important;
+    border-radius:21px !important;
+    padding:13px !important;
+  }
+
+  .status-pill .k{
+    font-size:13px !important;
+  }
+
+  .status-pill .v{
+    font-size:31px !important;
+  }
+
+  .board-inner{
+    padding:12px !important;
+  }
+
+  #driveInlineDock{
+    grid-template-columns:88px 1fr 1fr !important;
+    gap:7px !important;
+  }
+
+  #driveModeToggle,
+  #driveSpeedChip,
+  #driveEtaChip,
+  .drive-speed-chip,
+  .drive-eta-chip{
+    min-height:44px !important;
+    border-radius:16px !important;
+  }
+
+  .board-title h2{
+    font-size:29px !important;
+  }
+
+  .voice-row{
+    grid-template-columns:1fr 84px !important;
+  }
+
+  .legend{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  }
+
+  .legend .mini-chip{
+    min-height:38px !important;
+    font-size:12px !important;
+  }
+
+  .board-stage{
+    padding:10px !important;
+    border-radius:24px !important;
+  }
+
+  .deck-wrap{
+    padding:10px !important;
+    border-radius:22px !important;
+  }
+}
+
+@media(max-width:430px){
+  .seats-shell{
+    width:calc(100vw - 8px) !important;
+    margin-top:6px !important;
+  }
+
+  .route-title{
+    font-size:25px !important;
+  }
+
+  .route-sub{
+    font-size:12px !important;
+  }
+
+  .route-live-row .mini-chip b{
+    font-size:15px !important;
+  }
+
+  .status-pill{
+    min-height:68px !important;
+  }
+
+  .status-pill .v{
+    font-size:29px !important;
+  }
+
+  .board-title h2{
+    font-size:27px !important;
+  }
+
+  .selected-stop-chip{
+    font-size:12.5px !important;
+  }
+
+  .qtitle,
+  .section-head h3{
+    font-size:15px !important;
+  }
+}
