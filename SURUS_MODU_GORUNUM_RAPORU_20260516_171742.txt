@@ -1,0 +1,3302 @@
+============================================================
+SÜRÜŞ MODU GÖRÜNÜM RAPORU
+Tarih: Sat May 16 17:17:42 +03 2026
+============================================================
+
+===== 1) seats.html sürüş modu HTML alanı =====
+     1	{% extends "base.html" %}
+     2	{% block content %}
+     3	
+     4	<link rel="stylesheet" href="/static/style.css">
+     5	<link rel="stylesheet" href="/static/seats/seats.css?v=41">
+     6	<link rel="stylesheet" href="/static/seats/seats-final.css?v=drive-voice-real-width-test-1">
+     7	
+     8	<div class="seats-shell">
+     9	  {% include "seats_parts/topbar.html" %}
+    10	  {# {% include "seats_parts/stats.html" %} #}
+    11	
+    12	  <div class="layout">
+    13	    <section class="board-card glass">
+    14	      <div class="board-inner">
+    15	
+    16	        <div id="driveInlineDock">
+    17	          <button id="driveModeToggle" type="button" aria-label="Sürüş modu">🚘 Sürüş</button>
+    18	
+    19	          <div id="driveSpeedChip" class="drive-speed-chip neutral">
+    20	            <div class="drive-speed-top">
+    21	              <span class="drive-speed-ico">🚦</span>
+    22	              <b>0</b>
+    23	              <span>km/h</span>
+    24	            </div>
+    25	            <div class="drive-speed-sub">Limit: —</div>
+    26	          </div>
+    27	
+    28	          <div id="driveEtaChip" class="drive-eta-chip neutral">
+    29	            <div class="drive-eta-top">
+    30	              <span>⏱️</span>
+    31	              <b id="driveEtaMain">Rötar</b>
+    32	            </div>
+    33	            <div class="drive-eta-sub" id="driveEtaSub">ETA bekleniyor</div>
+    34	          </div>
+    35	</div>
+    36	
+    37	        <div class="board-head">
+    38	          <div class="board-title">
+    39	            <div class="board-kicker">Canlı Operasyon Paneli</div>
+    40	            <h2>Koltuk Planı</h2>
+    41	            <small>Tek ekrandan yolcu, durak, iniş ve hızlı işlemleri yönet.</small>
+    42	            <div class="selected-stop-chip">🎯 Seçili durak: <b id="selectedStopBadge">—</b></div>
+    43	          </div>
+    44	
+    45	          <div class="board-head-right">
+    46	            <div class="voice-row">
+    47	              <button class="voice-command-btn" id="btnDeckAI" type="button" title="Sesli Komut">
+    48	                🎤 <span>Sesli Komut</span>
+    49	              </button>
+    50	
+    51	              <div class="voice-seat-mini" id="voiceSeatMiniStats" title="Koltuk özeti">
+    52	                <span>Dolu <b id="voiceSeatFilled">0</b></span>
+    53	                <span>Boş <b id="voiceSeatEmpty">0</b></span>
+    54	              </div>
+    55	
+    56	              <div class="voice-state" id="voiceStateBadge">Hazır</div>
+    57	            </div>
+    58	
+    59	<!-- DRIVE VOICE ROW START -->
+    60	<div class="drive-voice-row" id="driveVoiceRow">
+    61	  <button class="drive-voice-btn" id="btnDeckAIDrive" type="button" title="Sesli Komut">
+    62	    🎤 <span>Sesli Komut</span>
+    63	  </button>
+    64	
+    65	  <div class="drive-voice-seat" id="driveVoiceSeatCard" title="Koltuk özeti">
+    66	    <span class="drive-voice-seat-ico">💺</span>
+    67	    <span class="drive-voice-seat-values">
+    68	      <b id="driveVoiceFilled">0</b>
+    69	      <em>/</em>
+    70	      <b id="driveVoiceEmpty">0</b>
+    71	    </span>
+    72	  </div>
+    73	</div>
+    74	<!-- DRIVE VOICE ROW END -->
+    75	<div class="legend">
+    76	              <div class="mini-chip">🟢 Boş</div>
+    77	              <div class="mini-chip">🔵 Bay</div>
+    78	              <div class="mini-chip">🩷 Bayan</div>
+    79	              <div class="mini-chip">🧳 Bagaj</div>
+    80	              <div class="mini-chip">🔔 İniş</div>
+    81	              <div class="mini-chip">🚌 Servis</div>
+    82	            </div>
+    83	          </div>
+    84	        </div>
+    85	
+    86	        {% include "seats_parts/route_flow.html" %}
+    87	        {% include "seats_parts/deck.html" %}
+    88	
+    89	      </div>
+    90	    </section>
+
+===== 2) driveInlineDock / driveSpeedChip / driveEtaChip araması =====
+templates/seats.html:16:        <div id="driveInlineDock">
+templates/seats.html:17:          <button id="driveModeToggle" type="button" aria-label="Sürüş modu">🚘 Sürüş</button>
+templates/seats.html:19:          <div id="driveSpeedChip" class="drive-speed-chip neutral">
+templates/seats.html:28:          <div id="driveEtaChip" class="drive-eta-chip neutral">
+templates/seats.html:373:<style id="drive-mode-actions-independent-style">
+templates/seats.html:376:   driveInlineDock içine girmez, kendi kendine görünür.
+templates/seats.html:458:<script id="drive-mode-actions-independent-js">
+templates/seats.html:461:    const btn = document.getElementById("driveModeToggle");
+templates/seats.html:577:    const btn = document.getElementById("driveModeToggle");
+templates/seats.html:631:#driveInlineDock{
+templates/seats.html:656:#driveInlineDock[style*="display: none"],
+templates/seats.html:657:#driveInlineDock[style*="display:none"]{
+templates/seats.html:661:#driveInlineDock > *{
+templates/seats.html:673:#driveModeToggle{
+templates/seats.html:698:#driveSpeedChip,
+templates/seats.html:699:#driveEtaChip,
+templates/seats.html:719:#driveSpeedChip,
+templates/seats.html:724:#driveEtaChip,
+templates/seats.html:780:#driveEtaChip *,
+templates/seats.html:787:  #driveInlineDock{
+templates/seats.html:792:  #driveModeToggle{
+templates/seats.html:800:  #driveSpeedChip,
+templates/seats.html:801:  #driveEtaChip,
+templates/seats.html:810:  #driveSpeedChip,
+templates/seats.html:815:  #driveEtaChip,
+templates/seats.html:853:<script id="drive-mode-force-toggle-js">
+templates/seats.html:877:    document.body.classList.toggle("drive-mode", !!on);
+templates/seats.html:878:    document.documentElement.classList.toggle("drive-mode", !!on);
+templates/seats.html:880:    const btn = document.getElementById("driveModeToggle");
+templates/seats.html:902:    const btn = e.target.closest && e.target.closest("#driveModeToggle");
+templates/seats.html:1052:html.seat-simple-mode #driveInlineDock,
+templates/seats.html:2692:  body.drive-mode .deck{
+templates/seats.html:2697:    body.drive-mode .deck{
+templates/seats.html:2719:  body.drive-mode .deck .cell[style*="grid-row:14"],
+templates/seats.html:2720:  body.drive-mode .deck .cell[style*="grid-row: 14"]{
+templates/seats.html:2776:  body.drive-mode .deck .cell[style*="grid-row:14"][style*="grid-column:4"],
+templates/seats.html:2777:  body.drive-mode .deck .cell[style*="grid-row:14"][style*="grid-column: 4"],
+templates/seats.html:2778:  body.drive-mode .deck .cell[style*="grid-row: 14"][style*="grid-column:4"],
+templates/seats.html:2779:  body.drive-mode .deck .cell[style*="grid-row: 14"][style*="grid-column: 4"]{
+templates/seats.html:3083:  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:3096:    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:3307:  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:3330:    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:3367:<style id="fab-drive-mode-override-fix-style">
+templates/seats.html:3370:    static/seats/seats.css içindeki body.drive-mode .fab-column kuralı
+templates/seats.html:3374:    .fab-left-gap-moved sınıfı varsa, drive-mode kurallarını ezip
+templates/seats.html:3379:  body.drive-mode .fab-column.fab-left-gap-moved{
+templates/seats.html:3420:  body.drive-mode .fab-column.fab-left-gap-moved::before{
+templates/seats.html:3437:  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:3457:  body.drive-mode .fab-column.fab-left-gap-moved .fab::after{
+templates/seats.html:3464:    body.drive-mode .fab-column.fab-left-gap-moved{
+templates/seats.html:3475:    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html:3486:<script id="fab-drive-mode-override-fix-script">
+static/seats/seats.css:1875:#driveModeToggle{
+static/seats/seats.css:1892:body.drive-mode #driveModeToggle{
+static/seats/seats.css:1896:body.drive-mode .topbar,
+static/seats/seats.css:1897:body.drive-mode .status-row,
+static/seats/seats.css:1898:body.drive-mode .panel-card{
+static/seats/seats.css:1902:body.drive-mode .seats-shell{
+static/seats/seats.css:1908:body.drive-mode .layout{
+static/seats/seats.css:1912:body.drive-mode .board-card{
+static/seats/seats.css:1918:body.drive-mode .board-head{
+static/seats/seats.css:1926:body.drive-mode .board-kicker,
+static/seats/seats.css:1927:body.drive-mode .board-title h2,
+static/seats/seats.css:1928:body.drive-mode .board-title small,
+static/seats/seats.css:1929:body.drive-mode .legend{
+static/seats/seats.css:1933:body.drive-mode .selected-stop-chip{
+static/seats/seats.css:1939:body.drive-mode .board-head-right{
+static/seats/seats.css:1944:body.drive-mode .voice-row{
+static/seats/seats.css:1949:body.drive-mode .voice-command-btn{
+static/seats/seats.css:1957:body.drive-mode .voice-state{
+static/seats/seats.css:1961:body.drive-mode .route-strip-shell{
+static/seats/seats.css:1968:body.drive-mode .route-strip-head{
+static/seats/seats.css:1972:body.drive-mode .route-strip-title{
+static/seats/seats.css:1976:body.drive-mode .route-pill{
+static/seats/seats.css:1982:body.drive-mode .route-stop{
+static/seats/seats.css:1989:body.drive-mode .board-stage{
+static/seats/seats.css:1995:  #driveModeToggle{
+static/seats/seats.css:2003:  body.drive-mode .seats-shell{
+static/seats/seats.css:2007:  body.drive-mode .board-card{
+static/seats/seats.css:2012:  body.drive-mode .board-head{
+static/seats/seats.css:2017:  body.drive-mode .board-head-right{
+static/seats/seats.css:2021:  body.drive-mode .voice-row{
+static/seats/seats.css:2026:  body.drive-mode .selected-stop-chip{
+static/seats/seats.css:2033:  body.drive-mode .voice-command-btn{
+static/seats/seats.css:2038:  body.drive-mode .route-strip-shell{
+static/seats/seats.css:2043:  body.drive-mode .route-stop{
+static/seats/seats.css:2048:  body.drive-mode .board-stage{
+static/seats/seats.css:2059:#driveModeToggle{
+static/seats/seats.css:2076:body.drive-mode #driveModeToggle{
+static/seats/seats.css:2080:body.drive-mode .topbar,
+static/seats/seats.css:2081:body.drive-mode .status-row,
+static/seats/seats.css:2082:body.drive-mode .panel-card{
+static/seats/seats.css:2086:body.drive-mode .seats-shell{
+static/seats/seats.css:2092:body.drive-mode .layout{
+static/seats/seats.css:2096:body.drive-mode .board-card{
+static/seats/seats.css:2102:body.drive-mode .board-head{
+static/seats/seats.css:2110:body.drive-mode .board-kicker,
+static/seats/seats.css:2111:body.drive-mode .board-title h2,
+static/seats/seats.css:2112:body.drive-mode .board-title small,
+static/seats/seats.css:2113:body.drive-mode .legend{
+static/seats/seats.css:2117:body.drive-mode .selected-stop-chip{
+static/seats/seats.css:2123:body.drive-mode .board-head-right{
+static/seats/seats.css:2128:body.drive-mode .voice-row{
+static/seats/seats.css:2133:body.drive-mode .voice-command-btn{
+static/seats/seats.css:2141:body.drive-mode .voice-state{
+static/seats/seats.css:2145:body.drive-mode .route-strip-shell{
+static/seats/seats.css:2152:body.drive-mode .route-strip-head{
+static/seats/seats.css:2156:body.drive-mode .route-strip-title{
+static/seats/seats.css:2160:body.drive-mode .route-pill{
+static/seats/seats.css:2166:body.drive-mode .route-stop{
+static/seats/seats.css:2173:body.drive-mode .board-stage{
+static/seats/seats.css:2179:  #driveModeToggle{
+static/seats/seats.css:2187:  body.drive-mode .seats-shell{
+static/seats/seats.css:2191:  body.drive-mode .board-card{
+static/seats/seats.css:2196:  body.drive-mode .board-head{
+static/seats/seats.css:2201:  body.drive-mode .board-head-right{
+static/seats/seats.css:2205:  body.drive-mode .voice-row{
+static/seats/seats.css:2210:  body.drive-mode .selected-stop-chip{
+static/seats/seats.css:2217:  body.drive-mode .voice-command-btn{
+static/seats/seats.css:2222:  body.drive-mode .route-strip-shell{
+static/seats/seats.css:2227:  body.drive-mode .route-stop{
+static/seats/seats.css:2232:  body.drive-mode .board-stage{
+static/seats/seats.css:2244:body.drive-mode{
+static/seats/seats.css:2249:body.drive-mode #driveModeToggle{
+static/seats/seats.css:2260:body.drive-mode .seats-shell{
+static/seats/seats.css:2264:body.drive-mode .board-card{
+static/seats/seats.css:2271:body.drive-mode .board-head{
+static/seats/seats.css:2279:body.drive-mode .selected-stop-chip{
+static/seats/seats.css:2293:body.drive-mode .voice-row{
+static/seats/seats.css:2297:body.drive-mode .voice-command-btn{
+static/seats/seats.css:2308:body.drive-mode .route-strip-shell{
+static/seats/seats.css:2318:body.drive-mode .route-strip-head{
+static/seats/seats.css:2326:body.drive-mode .route-strip-title{
+static/seats/seats.css:2332:body.drive-mode .route-strip-meta{
+static/seats/seats.css:2337:body.drive-mode .route-pill{
+static/seats/seats.css:2345:body.drive-mode .route-strip{
+static/seats/seats.css:2354:body.drive-mode .route-stop{
+static/seats/seats.css:2361:body.drive-mode .route-stop .name{
+static/seats/seats.css:2370:body.drive-mode .route-stop .meta{
+static/seats/seats.css:2378:body.drive-mode .route-stop .extra-line{
+static/seats/seats.css:2382:body.drive-mode .route-stop.active{
+static/seats/seats.css:2387:body.drive-mode .board-stage{
+static/seats/seats.css:2394:body.drive-mode .deck{
+static/seats/seats.css:2400:body.drive-mode .label{
+static/seats/seats.css:2413:body.drive-mode .cell{
+static/seats/seats.css:2418:body.drive-mode .bag-badge{
+static/seats/seats.css:2426:body.drive-mode .stop-badge{
+static/seats/seats.css:2435:body.drive-mode .fab-column{
+static/seats/seats.css:2441:body.drive-mode .fab{
+static/seats/seats.css:2450:  body.drive-mode #driveModeToggle{
+static/seats/seats.css:2458:  body.drive-mode .board-head{
+static/seats/seats.css:2462:  body.drive-mode .selected-stop-chip{
+static/seats/seats.css:2469:  body.drive-mode .voice-command-btn{
+static/seats/seats.css:2476:  body.drive-mode .route-strip-title{
+static/seats/seats.css:2480:  body.drive-mode .route-pill{
+static/seats/seats.css:2486:  body.drive-mode .route-stop{
+static/seats/seats.css:2492:  body.drive-mode .route-stop .name{
+static/seats/seats.css:2496:  body.drive-mode .route-stop .meta,
+static/seats/seats.css:2497:  body.drive-mode .route-stop .extra-line{
+static/seats/seats.css:2501:  body.drive-mode .board-stage{
+static/seats/seats.css:2505:  body.drive-mode .label{
+static/seats/seats.css:2514:  body.drive-mode #driveModeToggle{
+static/seats/seats.css:2521:  body.drive-mode .selected-stop-chip{
+static/seats/seats.css:2526:  body.drive-mode .voice-command-btn{
+static/seats/seats.css:2532:  body.drive-mode .route-stop{
+static/seats/seats.css:2536:  body.drive-mode .board-stage{
+static/seats/seats.css:2600:body.drive-mode{
+static/seats/seats.css:2606:body.drive-mode .seat .bag-badge{
+static/seats/seats.css:2615:body.drive-mode .seat .bag-count{
+static/seats/seats.css:2620:body.drive-mode .deck{
+static/seats/seats.css:2643:  body.drive-mode{
+static/seats/seats.css:2654:body.drive-mode{
+static/seats/seats.css:2660:body.drive-mode .board-stage{
+static/seats/seats.css:2667:body.drive-mode .deck-wrap{
+static/seats/seats.css:2674:body.drive-mode .deck{
+static/seats/seats.css:2682:body.drive-mode .label{
+static/seats/seats.css:2695:body.drive-mode .cell{
+static/seats/seats.css:2700:body.drive-mode .seat .bag-badge{
+static/seats/seats.css:2708:  body.drive-mode{
+static/seats/seats.css:2712:  body.drive-mode .deck{
+static/seats/seats.css:2716:  body.drive-mode .board-stage{
+static/seats/seats.css:2721:  body.drive-mode .label{
+static/seats/seats.css:2734:body.drive-mode .corr{
+static/seats/seats.css:2752:body.drive-mode .board-stage{
+static/seats/seats.css:2757:body.drive-mode .deck-wrap{
+static/seats/seats.css:2762:body.drive-mode .fab-column{
+static/seats/seats.css:2789:body.drive-mode .fab{
+static/seats/seats.css:2800:body.drive-mode .fab.primary{
+static/seats/seats.css:2804:body.drive-mode .fab.green{
+static/seats/seats.css:2808:body.drive-mode .fab.orange{
+static/seats/seats.css:2813:body.drive-mode .deck{
+static/seats/seats.css:2819:  body.drive-mode .fab-column{
+static/seats/seats.css:2826:  body.drive-mode .fab{
+static/seats/seats.css:2835:  body.drive-mode .board-stage{
+static/seats/seats.css:2839:  body.drive-mode .deck{
+static/seats/seats.css:2851:body.drive-mode .board-stage{
+static/seats/seats.css:2856:body.drive-mode .deck-wrap{
+static/seats/seats.css:2861:body.drive-mode .deck{
+static/seats/seats.css:2866:body.drive-mode .fab-column{
+static/seats/seats.css:2874:body.drive-mode .fab{
+static/seats/seats.css:2885:  body.drive-mode .board-stage{
+static/seats/seats.css:2889:  body.drive-mode .deck{
+static/seats/seats.css:2893:  body.drive-mode .fab-column{
+static/seats/seats.css:2899:  body.drive-mode .fab{
+static/seats/seats.css:2953:#driveSpeedChip{
+static/seats/seats.css:2958:body.drive-mode #driveSpeedChip{
+static/seats/seats.css:3056:  body.drive-mode #driveSpeedChip{
+static/seats/seats.css:3081:body.drive-mode #driveModeToggle{
+static/seats/seats.css:3098:body.drive-mode #driveSpeedChip{
+static/seats/seats.css:3119:body.drive-mode #driveSpeedChip .drive-speed-top{
+static/seats/seats.css:3124:body.drive-mode #driveSpeedChip .drive-speed-top b{
+static/seats/seats.css:3129:body.drive-mode #driveSpeedChip .drive-speed-top span{
+static/seats/seats.css:3133:body.drive-mode #driveSpeedChip .drive-speed-ico{
+static/seats/seats.css:3137:body.drive-mode #driveSpeedChip .drive-speed-sub{
+static/seats/seats.css:3147:  body.drive-mode #driveModeToggle{
+static/seats/seats.css:3157:  body.drive-mode #driveSpeedChip{
+static/seats/seats.css:3166:  body.drive-mode #driveSpeedChip .drive-speed-top b{
+static/seats/seats.css:3170:  body.drive-mode #driveSpeedChip .drive-speed-sub{
+static/seats/seats.css:3186:body.drive-mode #driveFixedDock{
+static/seats/seats.css:3203:body.drive-mode #driveFixedDock #driveModeToggle{
+static/seats/seats.css:3223:body.drive-mode #driveFixedDock #driveSpeedChip{
+static/seats/seats.css:3241:body.drive-mode #driveSpeedChip{
+static/seats/seats.css:3245:body.drive-mode #driveModeToggle{
+static/seats/seats.css:3250:body.drive-mode #driveFixedDock .drive-speed-top{
+static/seats/seats.css:3255:body.drive-mode #driveFixedDock .drive-speed-top b{
+static/seats/seats.css:3260:body.drive-mode #driveFixedDock .drive-speed-top span{
+static/seats/seats.css:3264:body.drive-mode #driveFixedDock .drive-speed-sub{
+static/seats/seats.css:3273:  body.drive-mode #driveFixedDock{
+static/seats/seats.css:3280:  body.drive-mode #driveFixedDock #driveModeToggle{
+static/seats/seats.css:3288:  body.drive-mode #driveFixedDock #driveSpeedChip{
+static/seats/seats.css:3294:  body.drive-mode #driveFixedDock .drive-speed-top b{
+static/seats/seats.css:3307:body.drive-mode #driveFixedDock{
+static/seats/seats.css:3312:#driveInlineDock{
+static/seats/seats.css:3316:body.drive-mode #driveInlineDock{
+static/seats/seats.css:3330:body.drive-mode .board-card,
+static/seats/seats.css:3331:body.drive-mode .board-inner{
+static/seats/seats.css:3336:body.drive-mode #driveInlineDock #driveModeToggle{
+static/seats/seats.css:3356:body.drive-mode #driveInlineDock #driveSpeedChip{
+static/seats/seats.css:3374:body.drive-mode #driveInlineDock .drive-speed-top{
+static/seats/seats.css:3379:body.drive-mode #driveInlineDock .drive-speed-top b{
+static/seats/seats.css:3384:body.drive-mode #driveInlineDock .drive-speed-top span{
+static/seats/seats.css:3388:body.drive-mode #driveInlineDock .drive-speed-sub{
+static/seats/seats.css:3397:body.drive-mode .board-head{
+static/seats/seats.css:3403:  body.drive-mode #driveInlineDock{
+static/seats/seats.css:3410:  body.drive-mode #driveInlineDock #driveModeToggle{
+static/seats/seats.css:3418:  body.drive-mode #driveInlineDock #driveSpeedChip{
+static/seats/seats.css:3424:  body.drive-mode .board-head{
+static/seats/seats.css:3435:body.drive-mode #driveInlineDock{
+static/seats/seats.css:3444:body.drive-mode #driveInlineDock #driveModeToggle{
+static/seats/seats.css:3461:body.drive-mode #driveInlineDock #driveSpeedChip{
+static/seats/seats.css:3473:body.drive-mode #driveInlineDock .drive-speed-top{
+static/seats/seats.css:3479:body.drive-mode #driveInlineDock .drive-speed-top b{
+static/seats/seats.css:3485:body.drive-mode #driveInlineDock .drive-speed-top span{
+static/seats/seats.css:3490:body.drive-mode #driveInlineDock .drive-speed-ico{
+static/seats/seats.css:3495:body.drive-mode #driveInlineDock .drive-speed-sub{
+static/seats/seats.css:3507:body.drive-mode .board-head{
+static/seats/seats.css:3513:  body.drive-mode #driveInlineDock{
+static/seats/seats.css:3520:  body.drive-mode #driveInlineDock #driveModeToggle{
+static/seats/seats.css:3529:  body.drive-mode #driveInlineDock #driveSpeedChip{
+
+===== 3) seats.html sürüş modu style/script blokları =====
+363-
+364-
+365-
+366-
+367-
+368-
+369-
+370-
+371-
+372-
+373:<style id="drive-mode-actions-independent-style">
+374-/* =========================================================
+375-   SÜRÜŞ MODU ÜST HIZLI MENÜ - BAĞIMSIZ FINAL
+376-   driveInlineDock içine girmez, kendi kendine görünür.
+377-========================================================= */
+378-
+379-.board-inner{
+380-  position:relative !important;
+381-}
+382-
+383-#driveModeActionsDock{
+384-  display:none;
+385-  position:absolute;
+386-  z-index:9999;
+387-
+388-  width:238px;
+389-  height:50px;
+390-  padding:7px;
+391-
+392-  border-radius:22px;
+393-  background:rgba(5,15,28,.95);
+394-  border:1px solid rgba(96,165,250,.28);
+395-  box-shadow:
+396-    inset 0 0 0 1px rgba(255,255,255,.05),
+397-    0 16px 34px rgba(0,0,0,.38);
+398-
+399-  align-items:center;
+400-  justify-content:center;
+401-  gap:7px;
+402-}
+403-
+404-#driveModeActionsDock .dma-btn{
+405-  width:38px;
+406-  height:38px;
+407-  min-width:38px;
+408-  min-height:38px;
+409-
+410-  border-radius:15px;
+411-  border:1px solid rgba(148,163,184,.20);
+412-  background:linear-gradient(180deg,rgba(31,63,102,.98),rgba(13,28,48,.98));
+413-  box-shadow:
+414-    inset 0 1px 0 rgba(255,255,255,.16),
+415-    0 9px 18px rgba(0,0,0,.24);
+416-
+417-  display:flex;
+418-  align-items:center;
+419-  justify-content:center;
+420-
+421-  color:#fff;
+422-  text-decoration:none;
+423-  font-size:21px;
+424-  line-height:1;
+425-  cursor:pointer;
+426-  padding:0;
+427-}
+428-
+429-#driveModeActionsDock .dma-btn.danger{
+430-  background:linear-gradient(180deg,rgba(239,68,68,.95),rgba(127,29,29,.95));
+431-  border-color:rgba(248,113,113,.35);
+432-}
+433-
+434-#driveModeActionsDock .dma-btn:active{
+435-  transform:scale(.94);
+436-}
+437-
+438-@media(max-width:430px){
+439-  #driveModeActionsDock{
+440-    width:218px;
+441-    height:46px;
+442-    padding:6px;
+443-    gap:6px;
+444-    border-radius:20px;
+445-  }
+446-
+447-  #driveModeActionsDock .dma-btn{
+448-    width:34px;
+449-    height:34px;
+450-    min-width:34px;
+451-    min-height:34px;
+452-    border-radius:13px;
+453-    font-size:20px;
+454-  }
+455-}
+456-</style>
+457-
+458:<script id="drive-mode-actions-independent-js">
+459-(function(){
+460-  function isDriveMode(){
+461-    const btn = document.getElementById("driveModeToggle");
+462-    const txt = (btn ? btn.textContent : "").toLowerCase();
+463-
+464-    // Sürüş modunda buton "Normal" oluyor
+465-    if(txt.includes("normal")) return true;
+466-
+467-    const bodyCls = document.body.className.toLowerCase();
+468-    const htmlCls = document.documentElement.className.toLowerCase();
+469-
+470-    return (
+471-      bodyCls.includes("drive") ||
+472-      bodyCls.includes("surus") ||
+473-      htmlCls.includes("drive") ||
+474-      htmlCls.includes("surus")
+475-    );
+476-  }
+477-
+478-  function ensureDock(){
+479-    let dock = document.getElementById("driveModeActionsDock");
+480-    if(dock) return dock;
+481-
+482-    dock = document.createElement("div");
+483-    dock.id = "driveModeActionsDock";
+484-    dock.innerHTML = `
+485-      <a class="dma-btn" href="{{ url_for('index') }}" title="Ana Sayfa">🏠</a>
+486-      <a class="dma-btn" href="{{ url_for('hesap_page') }}" title="Hesap">💵</a>
+487-      <a class="dma-btn" href="{{ url_for('consignments_page') }}" title="Emanetler">📦</a>
+488-      <a class="dma-btn" id="dmaAiBtn" href="/ai-console" title="AI Console">🧠</a>
+489-      <button class="dma-btn danger" type="button" id="dmaEndBtn" title="Seferi Bitir">🏁</button>
+490-    `;
+491-
+492-    const board = document.querySelector(".board-inner");
+493-    if(board){
+494-      const routeShell = board.querySelector(".route-strip-shell");
+495-
+496-      if(routeShell){
+497-        board.insertBefore(dock, routeShell);
+498-      }else{
+499-        board.appendChild(dock);
+500-      }
+501-    }
+502-
+503-    return dock;
+504-  }
+505-
+506-  function clickFirst(selectors){
+507-    for(const sel of selectors){
+508-      const el = document.querySelector(sel);
+509-      if(el){
+510-        el.click();
+511-        return true;
+512-      }
+513-    }
+514-    return false;
+515-  }
+516-
+517-  function bindButtons(){
+518-    const ai = document.getElementById("dmaAiBtn");
+519-    const end = document.getElementById("dmaEndBtn");
+520-
+521-    if(ai && !ai.dataset.bound){
+522-      ai.dataset.bound = "1";
+523-      ai.addEventListener("click", function(e){
+524-        e.preventDefault();
+525-        window.location.href = "/ai-console";
+526-      });
+527-    }
+528-
+529-    if(end && !end.dataset.bound){
+530-      end.dataset.bound = "1";
+531-      end.addEventListener("click", function(){
+532-        openFinishTripModal(); return;
+533-
+534-        const clicked = clickFirst([
+535-          "#endTripBtn",
+536-          "#btnEndTrip",
+537-          "[data-action='end-trip']",
+538-          "a[href*='end_trip']",
+539-          "a[href*='sefer-bitir']"
+540-        ]);
+541-
+542-        if(!clicked){
+543-          window.location.href = "/end_trip";
+544-        }
+545-      });
+546-    }
+547-  }
+548-
+549-  function placeDock(){
+550-    const dock = ensureDock();
+551-    if(!dock) return;
+552-
+553-    const active = isDriveMode();
+554-
+555-    if(!active){
+556-      dock.style.display = "none";
+557-      return;
+558-    }
+559-
+560-    /* Dock artık hesaplanıp sağa-sola gezdirilmiyor.
+561-       Normal HTML akışındaki yerinde sabit duracak. */
+562-    dock.style.display = "flex";
+563-    dock.style.left = "";
+564-    dock.style.top = "";
+565-    dock.style.right = "";
+566-    dock.style.bottom = "";
+567-    dock.style.width = "";
+568-    dock.style.position = "";
+569-    dock.style.transform = "";
+570-  }
+571-
+572-  function boot(){
+573-    ensureDock();
+574-    bindButtons();
+575-    placeDock();
+576-
+577-    const btn = document.getElementById("driveModeToggle");
+578-    if(btn){
+579-      btn.addEventListener("click", function(){
+580-        setTimeout(placeDock, 50);
+581-        setTimeout(placeDock, 250);
+582-        setTimeout(placeDock, 700);
+583-      });
+584-
+585-      new MutationObserver(placeDock).observe(btn, {
+586-        childList:true,
+587-        subtree:true,
+588-        characterData:true,
+589-        attributes:true
+590-      });
+591-    }
+592-
+593-    new MutationObserver(placeDock).observe(document.body, {
+594-      attributes:true,
+595-      attributeFilter:["class"]
+596-    });
+597-
+598-    window.addEventListener("resize", placeDock);
+599-    window.addEventListener("orientationchange", function(){
+600-      setTimeout(placeDock, 300);
+601-    });
+602-
+603-    let n = 0;
+604-    const t = setInterval(function(){
+605-      ensureDock();
+606-      bindButtons();
+607-      placeDock();
+608-      n++;
+609-      if(n > 30) clearInterval(t);
+610-    }, 250);
+611-  }
+612-
+613-  if(document.readyState === "loading"){
+614-    document.addEventListener("DOMContentLoaded", boot);
+615-  }else{
+616-    boot();
+617-  }
+618-})();
+619-</script>
+620-
+621-
+622-{% include "seats_parts/finish_trip_modal.html" %}
+623-
+624-
+625:<style id="drive-dock-stability-final">
+626-/* =========================================================
+627-   SÜRÜŞ / HIZ / RÖTAR SATIRI SABİTLEME
+628-   Üste binme ve sağa-sola kayma sorununu çözer.
+629-========================================================= */
+630-
+631-#driveInlineDock{
+632-  position:relative !important;
+633-  inset:auto !important;
+634-  left:auto !important;
+635-  right:auto !important;
+636-  top:auto !important;
+637-  bottom:auto !important;
+638-  transform:none !important;
+639-
+640-  width:100% !important;
+641-  max-width:100% !important;
+642-  min-height:46px !important;
+643-
+644-  display:flex !important;
+645-  align-items:stretch !important;
+646-  gap:8px !important;
+647-
+648-  margin:0 0 12px 0 !important;
+649-  padding:0 !important;
+650-  z-index:4 !important;
+651-
+652-  overflow:hidden !important;
+653-}
+654-
+655-/* Eğer JS gerçekten gizlemek isterse buna izin ver */
+656-#driveInlineDock[style*="display: none"],
+657-#driveInlineDock[style*="display:none"]{
+658-  display:none !important;
+659-}
+660-
+661-#driveInlineDock > *{
+662-  position:relative !important;
+663-  left:auto !important;
+664-  right:auto !important;
+665-  top:auto !important;
+666-  bottom:auto !important;
+667-  transform:none !important;
+668-  margin:0 !important;
+669-  min-width:0 !important;
+670-}
+671-
+672-/* Sürüş butonu */
+673-#driveModeToggle{
+674-  flex:0 0 88px !important;
+675-  height:46px !important;
+676-  min-height:46px !important;
+677-  border-radius:17px !important;
+678-  padding:0 10px !important;
+679-
+680-  display:flex !important;
+681-  align-items:center !important;
+682-  justify-content:center !important;
+683-  gap:6px !important;
+684-
+685-  white-space:nowrap !important;
+686-  overflow:hidden !important;
+687-  text-overflow:ellipsis !important;
+688-
+689-  font-size:13px !important;
+690-  font-weight:950 !important;
+691-  background:linear-gradient(135deg,#2563eb,#1d4ed8) !important;
+692-  color:#fff !important;
+693-  border:1px solid rgba(147,197,253,.20) !important;
+694-  box-shadow:0 10px 24px rgba(37,99,235,.22), inset 0 1px 0 rgba(255,255,255,.15) !important;
+695-}
+696-
+697-/* Hız ve rötar kutuları */
+698-#driveSpeedChip,
+699-#driveEtaChip,
+700-.drive-speed-chip,
+701-.drive-eta-chip{
+702-  position:relative !important;
+703-  height:46px !important;
+704-  min-height:46px !important;
+705-  border-radius:17px !important;
+706-  padding:7px 10px !important;
+707-
+708-  display:flex !important;
+709-  flex-direction:column !important;
+710-  justify-content:center !important;
+711-
+712-  background:rgba(255,255,255,.07) !important;
+713-  border:1px solid rgba(148,163,184,.16) !important;
+714-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08) !important;
+715-
+716-  overflow:hidden !important;
+717-}
+718-
+719-#driveSpeedChip,
+720-.drive-speed-chip{
+721-  flex:1 1 105px !important;
+722-}
+723-
+724-#driveEtaChip,
+725-.drive-eta-chip{
+726-  flex:1.25 1 130px !important;
+727-}
+728-
+729-/* İç yazılar taşmasın */
+730-.drive-speed-top,
+731-.drive-eta-top{
+732-  display:flex !important;
+733-  align-items:center !important;
+734-  gap:5px !important;
+735-  min-width:0 !important;
+736-  white-space:nowrap !important;
+737-  overflow:hidden !important;
+738-  text-overflow:ellipsis !important;
+739-  line-height:1 !important;
+740-}
+741-
+742-.drive-speed-top b,
+743-.drive-eta-top b{
+744-  min-width:0 !important;
+745-  overflow:hidden !important;
+746-  text-overflow:ellipsis !important;
+747-  white-space:nowrap !important;
+748-}
+749-
+750-.drive-speed-sub,
+751-.drive-eta-sub{
+752-  margin-top:3px !important;
+753-  min-width:0 !important;
+754-  overflow:hidden !important;
+755-  text-overflow:ellipsis !important;
+756-  white-space:nowrap !important;
+757-  font-size:10.5px !important;
+758-  line-height:1 !important;
+759-  color:rgba(226,232,240,.62) !important;
+760-}
+761-
+762-/* Dock başlığın üstüne binmesin */
+763-.board-head{
+764-  position:relative !important;
+765-  z-index:3 !important;
+766-  clear:both !important;
+767-  margin-top:0 !important;
+768-}
+769-
+770-.board-title{
+771-  position:relative !important;
+772-  z-index:3 !important;
+773-}
+774-
+775-.board-title h2{
+776-  margin-top:0 !important;
+777-}
+778-
+779-/* Rötar yazısı kesinlikle başlık alanında serbest dolaşmasın */
+780-#driveEtaChip *,
+781-.drive-eta-chip *{
+782-  max-width:100% !important;
+783-}
+784-
+785-/* Mobilde daha da kontrollü */
+786-@media(max-width:430px){
+787-  #driveInlineDock{
+788-    gap:6px !important;
+789-    margin-bottom:10px !important;
+790-  }
+791-
+792-  #driveModeToggle{
+793-    flex:0 0 82px !important;
+794-    height:43px !important;
+795-    min-height:43px !important;
+796-    font-size:12.5px !important;
+797-    border-radius:16px !important;
+798-  }
+799-
+800-  #driveSpeedChip,
+801-  #driveEtaChip,
+802-  .drive-speed-chip,
+803-  .drive-eta-chip{
+804-    height:43px !important;
+805-    min-height:43px !important;
+806-    border-radius:16px !important;
+807-    padding:6px 8px !important;
+808-  }
+809-
+810-  #driveSpeedChip,
+811-  .drive-speed-chip{
+812-    flex:1 1 95px !important;
+813-  }
+814-
+815-  #driveEtaChip,
+816-  .drive-eta-chip{
+817-    flex:1.15 1 112px !important;
+818-  }
+819-
+820-  .drive-speed-top,
+821-  .drive-eta-top{
+822-    font-size:12px !important;
+823-  }
+824-
+825-  .drive-speed-sub,
+826-  .drive-eta-sub{
+827-    font-size:10px !important;
+828-  }
+829-}
+830-</style>
+831-
+832-
+833-
+834-
+835-{% include "seats_parts/offload_confirm.html" %}
+836-
+837-
+838-
+839-
+840-
+841-
+842-
+843-
+844-
+845-
+846-
+847-
+848-
+849-
+850-
+851-
+852:<!-- DRIVE MODE FORCE TOGGLE START -->
+853-<script id="drive-mode-force-toggle-js">
+854-(function(){
+855-  if(window.__driveModeForceToggleReady) return;
+856-  window.__driveModeForceToggleReady = true;
+857-
+858-  function driveKey(){
+859-    const boot = window.SEATS_BOOT || {};
+860-    const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+861-    return "driveMode:" + tripKey;
+862-  }
+863-
+864-  function isDriveOn(){
+865-    try{
+866-      return localStorage.getItem(driveKey()) === "1";
+867-    }catch(e){
+868-      return false;
+869-    }
+870-  }
+871-
+872-  function setDrive(on){
+873-    try{
+874-      localStorage.setItem(driveKey(), on ? "1" : "0");
+875-    }catch(e){}
+876-
+877-    document.body.classList.toggle("drive-mode", !!on);
+878-    document.documentElement.classList.toggle("drive-mode", !!on);
+879-
+880-    const btn = document.getElementById("driveModeToggle");
+881-    if(btn){
+882-      btn.innerHTML = on ? "↩ Normal" : "🚘 Sürüş";
+883-      btn.title = on ? "Normal moda geç" : "Sürüş moduna geç";
+884-      btn.setAttribute("aria-pressed", on ? "true" : "false");
+885-    }
+886-
+887-    try{ if(typeof renderRouteStrip === "function") renderRouteStrip(); }catch(e){}
+888-    try{ if(typeof updateCompactHeader === "function") updateCompactHeader(); }catch(e){}
+889-    try{ if(typeof syncDriveEtaChip === "function") syncDriveEtaChip(); }catch(e){}
+890-
+891-    try{
+892-      window.dispatchEvent(new CustomEvent("driveModeChanged", { detail:{ on:!!on } }));
+893-    }catch(e){}
+894-  }
+895-
+896-  function sync(){
+897-    setDrive(isDriveOn());
+898-  }
+899-
+900-  // En üstten yakala: diğer click listener'lar aç-kapa karışıklığı yapmasın.
+901-  document.addEventListener("click", function(e){
+902-    const btn = e.target.closest && e.target.closest("#driveModeToggle");
+903-    if(!btn) return;
+904-
+905-    e.preventDefault();
+906-    e.stopPropagation();
+907-    e.stopImmediatePropagation();
+908-
+909-    setDrive(!isDriveOn());
+910-  }, true);
+911-
+912-  if(document.readyState === "loading"){
+913-    document.addEventListener("DOMContentLoaded", sync);
+914-  }else{
+915-    sync();
+916-  }
+917-
+918-  setTimeout(sync, 300);
+919-})();
+920-</script>
+921:<!-- DRIVE MODE FORCE TOGGLE END -->
+922-
+923-
+924-
+925-
+926-<!-- DRIVE VOICE MIRROR SCRIPT START -->
+927:<script id="drive-voice-mirror-script">
+928-(function(){
+929-  function syncDriveVoiceStats(){
+930-    const oldFilled = document.getElementById("voiceSeatFilled");
+931-    const oldEmpty  = document.getElementById("voiceSeatEmpty");
+932-    const newFilled = document.getElementById("driveVoiceFilled");
+933-    const newEmpty  = document.getElementById("driveVoiceEmpty");
+934-
+935-    if(oldFilled && newFilled){
+936-      newFilled.textContent = (oldFilled.textContent || "0").trim();
+937-    }
+938-    if(oldEmpty && newEmpty){
+939-      newEmpty.textContent = (oldEmpty.textContent || "0").trim();
+940-    }
+941-  }
+942-
+943-  function bindDriveVoiceButton(){
+944-    const fakeBtn = document.getElementById("btnDeckAIDrive");
+945-    const realBtn = document.getElementById("btnDeckAI");
+946-
+947-    if(!fakeBtn || fakeBtn.dataset.bound === "1") return;
+948-    fakeBtn.dataset.bound = "1";
+949-
+950-    fakeBtn.addEventListener("click", function(e){
+951-      e.preventDefault();
+952-      e.stopPropagation();
+953-
+954-      if(realBtn){
+955-        realBtn.click();
+956-      }
+957-    });
+958-  }
+959-
+960-  function watchNode(id){
+961-    const el = document.getElementById(id);
+962-    if(!el) return;
+963-
+964-    new MutationObserver(syncDriveVoiceStats).observe(el, {
+965-      childList:true,
+966-      characterData:true,
+967-      subtree:true
+968-    });
+969-  }
+970-
+971-  function boot(){
+972-    bindDriveVoiceButton();
+973-    syncDriveVoiceStats();
+974-    watchNode("voiceSeatFilled");
+975-    watchNode("voiceSeatEmpty");
+976-
+977-    setTimeout(syncDriveVoiceStats, 150);
+978-    setTimeout(syncDriveVoiceStats, 600);
+979-    setTimeout(syncDriveVoiceStats, 1400);
+980-
+981-    window.addEventListener("driveModeChanged", syncDriveVoiceStats);
+982-    window.addEventListener("resize", syncDriveVoiceStats);
+983-  }
+984-
+985-  if(document.readyState === "loading"){
+986-    document.addEventListener("DOMContentLoaded", boot);
+987-  }else{
+988-    boot();
+989-  }
+990-})();
+991-</script>
+992-<!-- DRIVE VOICE MIRROR SCRIPT END -->
+993-
+994-
+995-<style id="seat-simple-open-mode-style">
+996-/* =========================================================
+997-   SADE KOLTUK MODU
+998-   İlk açılışta koltuk planını öne alır, gelişmiş panelleri gizler.
+999-========================================================= */
+1000-
+1001-.seat-simple-toggle{
+1002-  position:sticky;
+1003-  top:8px;
+1004-  z-index:9999;
+1005-  width:100%;
+1006-  min-height:44px;
+1007-  margin:0 0 10px;
+1008-  border:1px solid rgba(96,165,250,.28);
+1009-  border-radius:18px;
+1010-  color:#eaf3ff;
+1011-  background:linear-gradient(135deg,rgba(37,99,235,.96),rgba(29,78,216,.92));
+1012-  box-shadow:0 12px 28px rgba(37,99,235,.24), inset 0 1px 0 rgba(255,255,255,.16);
+1013-  font-size:14px;
+1014-  font-weight:950;
+1015-  letter-spacing:.02em;
+1016-  display:flex;
+1017-  align-items:center;
+1018-  justify-content:center;
+1019-  gap:8px;
+1020-}
+1021-
+1022-html.seat-simple-mode .seats-shell{
+1023-  max-width:760px !important;
+1024-  margin:0 auto !important;
+1025-}
+1026-
+1027-/* seats-shell içindeki topbarı gizle; layout kalsın */
+1028-html.seat-simple-mode .seats-shell > :not(.layout){
+1029-  display:none !important;
+1030-}
+1031-
+1032-html.seat-simple-mode .layout{
+1033-  display:block !important;
+1034-  grid-template-columns:1fr !important;
+1035-}
+1036-
+1037-html.seat-simple-mode .panel-card{
+1038-  display:none !important;
+1039-}
+1040-
+1041-html.seat-simple-mode .board-card{
+1042-  width:100% !important;
+1043-  max-width:100% !important;
+1044-  margin:0 auto !important;
+1045-}
+1046-
+1047-html.seat-simple-mode .board-inner{
+1048-  padding-top:10px !important;
+1049-}
+1050-
+1051-/* üst sürüş/eta dock sade modda gizli */
+1052-html.seat-simple-mode #driveInlineDock,
+1053-html.seat-simple-mode #driveModeActionsDock{
+1054-  display:none !important;
+1055-}
+1056-
+1057-/* sağdaki ses/legend/kalabalık kontroller gizli */
+1058-html.seat-simple-mode .board-head-right,
+1059-html.seat-simple-mode .voice-row,
+1060-html.seat-simple-mode .drive-voice-row,
+1061-html.seat-simple-mode .legend{
+1062-  display:none !important;
+1063-}
+1064-
+1065-/* başlığı kompakt bırak */
+1066-html.seat-simple-mode .board-head{
+1067-  margin:0 0 10px !important;
+1068-  display:block !important;
+1069-}
+1070-
+1071-html.seat-simple-mode .board-title{
+1072-  width:100% !important;
+1073-}
+1074-
+1075-html.seat-simple-mode .board-kicker,
+1076-html.seat-simple-mode .board-title small{
+1077-  display:none !important;
+1078-}
+1079-
+1080-html.seat-simple-mode .board-title h2{
+1081-  margin:0 0 8px !important;
+1082-  font-size:clamp(30px, 8vw, 44px) !important;
+1083-  line-height:1 !important;
+1084-  letter-spacing:-.045em !important;
+1085-}
+1086-
+1087-html.seat-simple-mode .selected-stop-chip{
+1088-  min-height:42px !important;
+1089-  display:flex !important;
+1090-  align-items:center !important;
+1091-  justify-content:flex-start !important;
+1092-  border-radius:18px !important;
+1093-  padding:0 14px !important;
+1094-  font-size:14px !important;
+1095-}
+1096-
+1097-/* rota/durak akışı ilk açılışta gizli */
+1098-html.seat-simple-mode .route-strip-shell,
+1099-html.seat-simple-mode .route-flow-shell,
+1100-html.seat-simple-mode .route-flow,
+1101-html.seat-simple-mode #routeStrip,
+1102-html.seat-simple-mode .route-mini,
+1103-html.seat-simple-mode .route-pill{
+1104-  display:none !important;
+1105-}
+1106-
+1107-/* koltuk deck yukarı gelsin */
+1108-html.seat-simple-mode .deck-card,
+1109-html.seat-simple-mode .seat-deck,
+1110-html.seat-simple-mode .deck-shell{
+1111-  margin-top:8px !important;
+1112-}
+1113-
+1114-/* mobil sıkılık */
+1115-@media(max-width:430px){
+1116-  .seat-simple-toggle{
+1117-    min-height:42px;
+1118-    border-radius:16px;
+1119-    font-size:13px;
+1120-    margin-bottom:8px;
+1121-  }
+1122-
+1123-  html.seat-simple-mode .board-inner{
+1124-    padding:8px !important;
+1125-  }
+1126-
+1127-  html.seat-simple-mode .board-title h2{
+1128-    font-size:34px !important;
+1129-  }
+1130-}
+1131-</style>
+1132-
+1133-<script id="seat-simple-open-mode-script">
+1134-(function(){
+1135-  if(window.__seatSimpleOpenModeReady) return;
+1136-  window.__seatSimpleOpenModeReady = true;
+1137-
+1138-  function getTripKey(){
+1139-    try{
+1140-      return (window.SEATS_BOOT && window.SEATS_BOOT.tripKey) || window.BAG_TRIP || "default";
+1141-    }catch(_){
+1142-      return "default";
+1143-    }
+1144-  }
+1145-
+1146-  function key(){
+1147-    return "seatUiMode:" + getTripKey();
+
+===== 4) static/seats/seats.css drive-mode blokları =====
+1882-  border:1px solid rgba(255,255,255,.18);
+1883-  border-radius:999px;
+1884-  background:linear-gradient(180deg, rgba(37,99,235,.96), rgba(29,78,216,.96));
+1885-  color:#fff;
+1886-  font-weight:900;
+1887-  font-size:13px;
+1888-  box-shadow:0 14px 30px rgba(0,0,0,.35);
+1889-  backdrop-filter:blur(12px);
+1890-}
+1891-
+1892:body.drive-mode #driveModeToggle{
+1893-  background:linear-gradient(180deg, rgba(34,197,94,.98), rgba(21,128,61,.98));
+1894-}
+1895-
+1896:body.drive-mode .topbar,
+1897:body.drive-mode .status-row,
+1898:body.drive-mode .panel-card{
+1899-  display:none !important;
+1900-}
+1901-
+1902:body.drive-mode .seats-shell{
+1903-  width:100%;
+1904-  max-width:100%;
+1905-  padding:6px 6px 10px;
+1906-}
+1907-
+1908:body.drive-mode .layout{
+1909-  display:block !important;
+1910-}
+1911-
+1912:body.drive-mode .board-card{
+1913-  margin:0;
+1914-  padding:8px;
+1915-  border-radius:22px;
+1916-}
+1917-
+1918:body.drive-mode .board-head{
+1919-  display:grid;
+1920-  grid-template-columns:minmax(0,1fr) auto;
+1921-  gap:8px;
+1922-  align-items:center;
+1923-  margin-bottom:8px;
+1924-}
+1925-
+1926:body.drive-mode .board-kicker,
+1927:body.drive-mode .board-title h2,
+1928:body.drive-mode .board-title small,
+1929:body.drive-mode .legend{
+1930-  display:none !important;
+1931-}
+1932-
+1933:body.drive-mode .selected-stop-chip{
+1934-  min-height:36px;
+1935-  padding:8px 12px;
+1936-  font-size:13px;
+1937-}
+1938-
+1939:body.drive-mode .board-head-right{
+1940-  align-items:flex-end;
+1941-  gap:0;
+1942-}
+1943-
+1944:body.drive-mode .voice-row{
+1945-  justify-content:flex-end;
+1946-  gap:8px;
+1947-}
+1948-
+1949:body.drive-mode .voice-command-btn{
+1950-  height:38px;
+1951-  min-width:128px;
+1952-  padding:0 12px;
+1953-  border-radius:14px;
+1954-  font-size:12px;
+1955-}
+1956-
+1957:body.drive-mode .voice-state{
+1958-  display:none !important;
+1959-}
+1960-
+1961:body.drive-mode .route-strip-shell{
+1962-  margin-top:0;
+1963-  margin-bottom:8px;
+1964-  padding:8px;
+1965-  border-radius:20px;
+1966-}
+1967-
+1968:body.drive-mode .route-strip-head{
+1969-  margin-bottom:7px;
+1970-}
+1971-
+1972:body.drive-mode .route-strip-title{
+1973-  font-size:14px;
+1974-}
+1975-
+1976:body.drive-mode .route-pill{
+1977-  min-height:28px;
+1978-  padding:5px 9px;
+1979-  font-size:11px;
+1980-}
+1981-
+1982:body.drive-mode .route-stop{
+1983-  min-width:122px;
+1984-  min-height:74px;
+1985-  padding:9px 10px;
+1986-  border-radius:17px;
+1987-}
+1988-
+1989:body.drive-mode .board-stage{
+1990-  padding-top:8px;
+1991-  margin-top:0;
+1992-}
+1993-
+1994-@media (max-width:760px){
+1995-  #driveModeToggle{
+1996-    top:8px;
+1997-    right:8px;
+1998-    min-height:40px;
+1999-    padding:8px 12px;
+2000-    font-size:12px;
+2001-  }
+2002-
+2003:  body.drive-mode .seats-shell{
+2004-    padding:4px 4px 8px;
+2005-  }
+2006-
+2007:  body.drive-mode .board-card{
+2008-    border-radius:18px;
+2009-    padding:7px;
+2010-  }
+2011-
+2012:  body.drive-mode .board-head{
+2013-    grid-template-columns:1fr;
+2014-    gap:6px;
+2015-  }
+2016-
+2017:  body.drive-mode .board-head-right{
+2018-    align-items:flex-start;
+2019-  }
+2020-
+2021:  body.drive-mode .voice-row{
+2022-    width:100%;
+2023-    justify-content:space-between;
+2024-  }
+2025-
+2026:  body.drive-mode .selected-stop-chip{
+2027-    max-width:calc(100% - 92px);
+2028-    min-height:34px;
+2029-    font-size:12px;
+2030-    padding:7px 10px;
+2031-  }
+2032-
+2033:  body.drive-mode .voice-command-btn{
+2034-    height:38px;
+2035-    min-width:132px;
+2036-  }
+2037-
+2038:  body.drive-mode .route-strip-shell{
+2039-    padding:8px;
+2040-    margin-bottom:8px;
+2041-  }
+2042-
+2043:  body.drive-mode .route-stop{
+2044-    min-width:112px;
+2045-    min-height:70px;
+2046-  }
+2047-
+2048:  body.drive-mode .board-stage{
+2049-    padding-top:6px;
+2050-  }
+2051-}
+2052-
+2053-
+2054-/* =========================================================
+2055-   SÜRÜŞ MODU
+2056-   Amaç: Koltuk planını en üste almak, gereksiz kartları gizlemek
+2057-========================================================= */
+2058-
+2059-#driveModeToggle{
+2060-  position:fixed;
+2061-  right:10px;
+2062-  top:10px;
+2063-  z-index:7000;
+2064-  min-height:42px;
+2065-  padding:9px 13px;
+2066-  border:1px solid rgba(255,255,255,.18);
+2067-  border-radius:999px;
+2068-  background:linear-gradient(180deg, rgba(37,99,235,.96), rgba(29,78,216,.96));
+2069-  color:#fff;
+2070-  font-weight:900;
+2071-  font-size:13px;
+2072-  box-shadow:0 14px 30px rgba(0,0,0,.35);
+2073-  backdrop-filter:blur(12px);
+2074-}
+2075-
+2076:body.drive-mode #driveModeToggle{
+2077-  background:linear-gradient(180deg, rgba(34,197,94,.98), rgba(21,128,61,.98));
+2078-}
+2079-
+2080:body.drive-mode .topbar,
+2081:body.drive-mode .status-row,
+2082:body.drive-mode .panel-card{
+2083-  display:none !important;
+2084-}
+2085-
+2086:body.drive-mode .seats-shell{
+2087-  width:100%;
+2088-  max-width:100%;
+2089-  padding:6px 6px 10px;
+2090-}
+2091-
+2092:body.drive-mode .layout{
+2093-  display:block !important;
+2094-}
+2095-
+2096:body.drive-mode .board-card{
+2097-  margin:0;
+2098-  padding:8px;
+2099-  border-radius:22px;
+2100-}
+2101-
+2102:body.drive-mode .board-head{
+2103-  display:grid;
+2104-  grid-template-columns:minmax(0,1fr) auto;
+2105-  gap:8px;
+2106-  align-items:center;
+2107-  margin-bottom:8px;
+2108-}
+2109-
+2110:body.drive-mode .board-kicker,
+2111:body.drive-mode .board-title h2,
+2112:body.drive-mode .board-title small,
+2113:body.drive-mode .legend{
+2114-  display:none !important;
+2115-}
+2116-
+2117:body.drive-mode .selected-stop-chip{
+2118-  min-height:36px;
+2119-  padding:8px 12px;
+2120-  font-size:13px;
+2121-}
+2122-
+2123:body.drive-mode .board-head-right{
+2124-  align-items:flex-end;
+2125-  gap:0;
+2126-}
+2127-
+2128:body.drive-mode .voice-row{
+2129-  justify-content:flex-end;
+2130-  gap:8px;
+2131-}
+2132-
+2133:body.drive-mode .voice-command-btn{
+2134-  height:38px;
+2135-  min-width:128px;
+2136-  padding:0 12px;
+2137-  border-radius:14px;
+2138-  font-size:12px;
+2139-}
+2140-
+2141:body.drive-mode .voice-state{
+2142-  display:none !important;
+2143-}
+2144-
+2145:body.drive-mode .route-strip-shell{
+2146-  margin-top:0;
+2147-  margin-bottom:8px;
+2148-  padding:8px;
+2149-  border-radius:20px;
+2150-}
+2151-
+2152:body.drive-mode .route-strip-head{
+2153-  margin-bottom:7px;
+2154-}
+2155-
+2156:body.drive-mode .route-strip-title{
+2157-  font-size:14px;
+2158-}
+2159-
+2160:body.drive-mode .route-pill{
+2161-  min-height:28px;
+2162-  padding:5px 9px;
+2163-  font-size:11px;
+2164-}
+2165-
+2166:body.drive-mode .route-stop{
+2167-  min-width:122px;
+2168-  min-height:74px;
+2169-  padding:9px 10px;
+2170-  border-radius:17px;
+2171-}
+2172-
+2173:body.drive-mode .board-stage{
+2174-  padding-top:8px;
+2175-  margin-top:0;
+2176-}
+2177-
+2178-@media (max-width:760px){
+2179-  #driveModeToggle{
+2180-    top:8px;
+2181-    right:8px;
+2182-    min-height:40px;
+2183-    padding:8px 12px;
+2184-    font-size:12px;
+2185-  }
+2186-
+2187:  body.drive-mode .seats-shell{
+2188-    padding:4px 4px 8px;
+2189-  }
+2190-
+2191:  body.drive-mode .board-card{
+2192-    border-radius:18px;
+2193-    padding:7px;
+2194-  }
+2195-
+2196:  body.drive-mode .board-head{
+2197-    grid-template-columns:1fr;
+2198-    gap:6px;
+2199-  }
+2200-
+2201:  body.drive-mode .board-head-right{
+2202-    align-items:flex-start;
+2203-  }
+2204-
+2205:  body.drive-mode .voice-row{
+2206-    width:100%;
+2207-    justify-content:space-between;
+2208-  }
+2209-
+2210:  body.drive-mode .selected-stop-chip{
+2211-    max-width:calc(100% - 92px);
+2212-    min-height:34px;
+2213-    font-size:12px;
+2214-    padding:7px 10px;
+2215-  }
+2216-
+2217:  body.drive-mode .voice-command-btn{
+2218-    height:38px;
+2219-    min-width:132px;
+2220-  }
+2221-
+2222:  body.drive-mode .route-strip-shell{
+2223-    padding:8px;
+2224-    margin-bottom:8px;
+2225-  }
+2226-
+2227:  body.drive-mode .route-stop{
+2228-    min-width:112px;
+2229-    min-height:70px;
+2230-  }
+2231-
+2232:  body.drive-mode .board-stage{
+2233-    padding-top:6px;
+2234-  }
+2235-}
+2236-
+2237-
+2238-/* =========================================================
+2239-   SÜRÜŞ MODU İNCE AYAR v2
+2240-   Daha temiz üst alan + düzgün durak akışı + okunaklı koltuk yazıları
+2241-========================================================= */
+2242-
+2243-/* Sürüş modu ana ekranı daha sıkı */
+2244:body.drive-mode{
+2245-  background:#07101d;
+2246-}
+2247-
+2248-/* Normal butonu tarayıcı üst çubuğuna çok yapışmasın */
+2249:body.drive-mode #driveModeToggle{
+2250-  top:calc(8px + env(safe-area-inset-top));
+2251-  right:10px;
+2252-  min-width:132px;
+2253-  min-height:44px;
+2254-  padding:9px 14px;
+2255-  font-size:14px;
+2256-  border-radius:999px;
+2257-}
+2258-
+2259-/* Sürüş modunda ana kart ekrana tam otursun */
+2260:body.drive-mode .seats-shell{
+2261-  padding:6px 6px 10px !important;
+2262-}
+2263-
+2264:body.drive-mode .board-card{
+2265-  padding:8px !important;
+2266-  border-radius:22px !important;
+2267-  overflow:hidden;
+2268-}
+2269-
+2270-/* Üst başlık alanı: seçili durak + sesli komut */
+2271:body.drive-mode .board-head{
+2272-  grid-template-columns:minmax(0,1fr) auto !important;
+2273-  align-items:start !important;
+2274-  gap:8px !important;
+2275-  margin-bottom:8px !important;
+2276-}
+2277-
+2278-/* Seçili durak rozeti daha net */
+2279:body.drive-mode .selected-stop-chip{
+2280-  min-height:42px;
+2281-  max-width:calc(100vw - 170px);
+2282-  padding:9px 13px;
+2283-  border-radius:18px;
+2284-  font-size:15px;
+2285-  white-space:nowrap;
+2286-  overflow:hidden;
+2287-  text-overflow:ellipsis;
+2288-  background:linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+2289-  border-color:rgba(255,255,255,.14);
+2290-}
+2291-
+2292-/* Sesli komut butonu sürüş modunda daha kullanışlı */
+2293:body.drive-mode .voice-row{
+2294-  justify-content:flex-start !important;
+2295-}
+2296-
+2297:body.drive-mode .voice-command-btn{
+2298-  height:42px;
+2299-  min-width:160px;
+2300-  max-width:175px;
+2301-  padding:0 14px;
+2302-  border-radius:17px;
+2303-  font-size:14px;
+2304-  box-shadow:0 12px 24px rgba(0,0,0,.28);
+2305-}
+2306-
+2307-/* Durak akışı kutusu daha profesyonel */
+2308:body.drive-mode .route-strip-shell{
+2309-  margin:4px 0 8px !important;
+2310-  padding:9px !important;
+2311-  border-radius:22px !important;
+2312-  background:
+2313-    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.022)),
+2314-    radial-gradient(circle at 50% 0%, rgba(59,130,246,.10), transparent 55%);
+2315-}
+2316-
+2317-/* Başlık satırı daha derli toplu */
+2318:body.drive-mode .route-strip-head{
+2319-  display:flex;
+2320-  align-items:center;
+2321-  justify-content:space-between;
+2322-  gap:8px;
+2323-  margin-bottom:8px !important;
+2324-}
+2325-
+2326:body.drive-mode .route-strip-title{
+2327-  font-size:17px !important;
+2328-  font-weight:950;
+2329-  letter-spacing:-.02em;
+2330-}
+2331-
+2332:body.drive-mode .route-strip-meta{
+2333-  flex-wrap:nowrap;
+2334-  overflow:hidden;
+2335-}
+2336-
+2337:body.drive-mode .route-pill{
+2338-  min-height:34px !important;
+2339-  padding:7px 11px !important;
+2340-  font-size:13px !important;
+2341-  white-space:nowrap;
+2342-}
+2343-
+2344-/* Durak kartları: yarım kırpılma daha estetik görünsün */
+2345:body.drive-mode .route-strip{
+2346-  gap:10px !important;
+2347-  padding:0 8px 2px !important;
+2348-  scroll-padding-left:8px;
+2349-  scroll-padding-right:8px;
+2350-  -webkit-overflow-scrolling:touch;
+2351-}
+2352-
+2353-/* Sürüş modunda durak kartları daha okunaklı */
+2354:body.drive-mode .route-stop{
+2355-  min-width:150px !important;
+2356-  min-height:92px !important;
+2357-  padding:12px 13px !important;
+2358-  border-radius:20px !important;
+2359-}
+2360-
+2361:body.drive-mode .route-stop .name{
+2362-  font-size:17px !important;
+2363-  line-height:1.12 !important;
+2364-  max-width:100%;
+2365-  white-space:nowrap;
+2366-  overflow:hidden;
+2367-  text-overflow:ellipsis;
+2368-}
+2369-
+2370:body.drive-mode .route-stop .meta{
+2371-  font-size:13px !important;
+2372-  line-height:1.2 !important;
+2373-  white-space:nowrap;
+2374-  overflow:hidden;
+2375-  text-overflow:ellipsis;
+2376-}
+2377-
+2378:body.drive-mode .route-stop .extra-line{
+2379-  font-size:13px !important;
+2380-}
+2381-
+2382:body.drive-mode .route-stop.active{
+2383-  transform:translateY(-1px);
+2384-}
+2385-
+2386-/* Koltuk alanı daha yukarı ve daha temiz */
+2387:body.drive-mode .board-stage{
+2388-  margin-top:0 !important;
+2389-  padding:9px 70px 10px 6px !important;
+2390-  border-radius:22px !important;
+2391-}
+2392-
+2393-/* Koltuk çevresindeki dış boşluğu azalt */
+2394:body.drive-mode .deck{
+2395-  padding-top:8px !important;
+2396-  row-gap:14px !important;
+2397-}
+2398-
+2399-/* Koltuk altı yazılar taşmasın */
+2400:body.drive-mode .label{
+2401-  width:92px;
+
+===== 5) static/seats/seats-final.css drive-mode blokları =====
+240-.board-inner{
+241-  position:relative !important;
+242-  padding:0 !important;
+243-}
+244-
+245-/* =========================================================
+246-   SÜRÜŞ / HIZ / RÖTAR SATIRI
+247-========================================================= */
+248-
+249-#driveInlineDock,
+250:body.drive-mode #driveInlineDock,
+251-body:not(.drive-mode) #driveInlineDock{
+252-  position:static !important;
+253-  inset:auto !important;
+254-  left:auto !important;
+255-  top:auto !important;
+256-  right:auto !important;
+257-  bottom:auto !important;
+258-  transform:none !important;
+259-
+260-  width:100% !important;
+261-  max-width:100% !important;
+262-
+263-  display:grid !important;
+264-  grid-template-columns:92px minmax(0,1fr) minmax(0,1.2fr) !important;
+265-  align-items:stretch !important;
+266-  gap:7px !important;
+267-
+268-  margin:0 0 10px 0 !important;
+269-  padding:0 !important;
+270-  min-height:42px !important;
+271-  z-index:1 !important;
+272-  overflow:hidden !important;
+273-  pointer-events:auto !important;
+274-}
+275-
+276-#driveModeToggle,
+277-#driveSpeedChip,
+278-#driveEtaChip,
+279-.drive-speed-chip,
+280-.drive-eta-chip{
+281-  position:relative !important;
+282-  inset:auto !important;
+283-  left:auto !important;
+284-  top:auto !important;
+285-  right:auto !important;
+286-  bottom:auto !important;
+287-  transform:none !important;
+288-
+289-  width:100% !important;
+290-  min-width:0 !important;
+291-  height:42px !important;
+292-  min-height:42px !important;
+293-
+294-  border-radius:16px !important;
+295-  border:1px solid var(--sf-line) !important;
+--
+774-  .status-row{
+775-    grid-template-columns:1fr 1fr !important;
+776-  }
+777-
+778-  .board-card{
+779-    border-radius:22px !important;
+780-    padding:8px !important;
+781-  }
+782-
+783-  #driveInlineDock,
+784:  body.drive-mode #driveInlineDock,
+785-  body:not(.drive-mode) #driveInlineDock{
+786-    grid-template-columns:82px minmax(0,1fr) minmax(0,1.05fr) !important;
+787-    gap:6px !important;
+788-  }
+789-
+790-  #driveModeToggle{
+791-    font-size:12px !important;
+792-  }
+793-
+794-  .board-title h2{
+795-    font-size:25px !important;
+796-  }
+797-
+798-  .route-strip-meta{
+799-    grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr) 42px !important;
+800-  }
+801-
+802-  #nightVoiceToggle{
+803-    width:42px !important;
+804-    min-width:42px !important;
+805-  }
+806-
+807-  .board-stage{
+808-    padding-right:60px !important;
+809-  }
+810-}
+811-
+812-@media(max-width:420px){
+813-  .route-title{
+814-    font-size:24px !important;
+815-  }
+816-
+817-  .route-sub{
+818-    font-size:11.5px !important;
+819-  }
+820-
+821-  .status-pill{
+822-    min-height:54px !important;
+823-  }
+824-
+825-  .status-pill .v{
+826-    font-size:24px !important;
+827-  }
+828-
+829-  .voice-row{
+--
+893-  min-height:54px !important;
+894-  border-radius:18px !important;
+895-}
+896-
+897-.status-pill .v{
+898-  font-size:25px !important;
+899-}
+900-
+901-/* Sürüş + rötar satırı daha düzgün dursun */
+902-#driveInlineDock,
+903:body.drive-mode #driveInlineDock,
+904-body:not(.drive-mode) #driveInlineDock{
+905-  grid-template-columns:180px minmax(0,1fr) !important;
+906-  margin-bottom:12px !important;
+907-}
+908-
+909-/* Eğer hız kutusu eski CSS yüzünden gizleniyorsa, bu satırda göstermeyelim */
+910-#driveInlineDock #driveSpeedChip{
+911-  display:none !important;
+912-}
+913-
+914-#driveModeToggle{
+915-  height:44px !important;
+916-  min-height:44px !important;
+917-  border-radius:18px !important;
+918-  font-size:14px !important;
+919-}
+920-
+921-#driveEtaChip,
+922-.drive-eta-chip{
+923-  height:44px !important;
+924-  min-height:44px !important;
+925-  border-radius:18px !important;
+926-  padding:7px 10px !important;
+927-}
+928-
+929-/* Koltuk Planı başlığı biraz yukarı */
+930-.board-card{
+931-  padding-top:9px !important;
+932-}
+933-
+934-.board-title h2{
+935-  font-size:26px !important;
+936-}
+937-
+938-.selected-stop-chip{
+939-  min-height:38px !important;
+940-}
+941-
+942-/* Mobil ince ayar */
+943-@media(max-width:420px){
+944-  #driveInlineDock,
+945:  body.drive-mode #driveInlineDock,
+946-  body:not(.drive-mode) #driveInlineDock{
+947-    grid-template-columns:180px minmax(0,1fr) !important;
+948-  }
+949-
+950-  .route-title{
+951-    font-size:23px !important;
+952-  }
+953-
+954-  .route-live-row .mini-chip{
+955-    min-height:35px !important;
+956-  }
+957-}
+958-
+959-
+960-
+961-
+962-/* =========================================================
+963-   DRIVE ROUTE STOP PIN ICON
+964-   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+965-========================================================= */
+966-
+967:body.drive-mode .route-stop .name{
+968-  display:flex !important;
+969-  align-items:center !important;
+970-  gap:8px !important;
+971-}
+972-
+973:body.drive-mode .route-stop .name::before{
+974-  content:"📍";
+975-  width:24px;
+976-  height:24px;
+977-  min-width:24px;
+978-  display:inline-flex;
+979-  align-items:center;
+980-  justify-content:center;
+981-  border-radius:999px;
+982-  font-size:18px;
+983-  line-height:1;
+984-  filter:drop-shadow(0 6px 10px rgba(37,99,235,.25));
+985-}
+986-
+987:body.drive-mode .route-stop.active .name::before,
+988:body.drive-mode .route-stop.live-danger .name::before,
+989:body.drive-mode .route-stop.next-warning .name::before,
+990:body.drive-mode .route-stop.flow-green .name::before{
+991-  filter:drop-shadow(0 0 10px rgba(96,165,250,.55));
+992-}
+993-
+994:body.drive-mode .route-stop.done .name::before{
+995-  opacity:.72;
+996-}
+997-
+998-
+999-/* =========================================================
+1000-   DRIVE ROUTE STOP BLUE PIN ICON FINAL
+1001-   Emoji pin yerine 2. görseldeki gibi sade mavi konum ikonu.
+1002-========================================================= */
+1003-
+1004:body.drive-mode .route-stop .name{
+1005-  display:flex !important;
+1006-  align-items:center !important;
+1007-  gap:10px !important;
+1008-}
+1009-
+1010:body.drive-mode .route-stop .name::before{
+1011-  content:"" !important;
+1012-  width:25px !important;
+1013-  height:25px !important;
+1014-  min-width:25px !important;
+1015-  display:inline-block !important;
+1016-
+1017-  background:linear-gradient(180deg,#38bdf8,#2563eb) !important;
+1018-
+1019-  -webkit-mask:
+1020-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z'/%3E%3C/svg%3E")
+1021-    center / contain no-repeat !important;
+1022-
+1023-  mask:
+1024-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z'/%3E%3C/svg%3E")
+1025-    center / contain no-repeat !important;
+1026-
+1027-  filter:drop-shadow(0 6px 10px rgba(37,99,235,.40)) !important;
+1028-}
+1029-
+1030:body.drive-mode .route-stop.active .name::before,
+1031:body.drive-mode .route-stop.live-danger .name::before,
+1032:body.drive-mode .route-stop.next-warning .name::before,
+1033:body.drive-mode .route-stop.flow-green .name::before{
+1034-  background:linear-gradient(180deg,#60a5fa,#1d4ed8) !important;
+1035-  filter:
+1036-    drop-shadow(0 0 10px rgba(96,165,250,.65))
+1037-    drop-shadow(0 6px 12px rgba(37,99,235,.35)) !important;
+1038-}
+
+===== 6) drive-controls.js tam inceleme =====
+     1	
+     2	/* =========================================================
+     3	   HIZLI KOLTUK → OTOMATİK SÜRÜŞ MODU
+     4	   /seats?drive=1 ile gelirse sürüş modunu açar
+     5	========================================================= */
+     6	(function autoOpenDriveModeFromUrl(){
+     7	  try{
+     8	    const params = new URLSearchParams(window.location.search);
+     9	    const drive = params.get("drive");
+    10	
+    11	    if(drive !== "1") return;
+    12	
+    13	    const boot = window.SEATS_BOOT || {};
+    14	    const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+    15	    const key = "driveMode:" + tripKey;
+    16	
+    17	    localStorage.setItem(key, "1");
+    18	    document.body.classList.add("drive-mode");
+    19	
+    20	    setTimeout(() => {
+    21	      try{
+    22	        if(typeof renderRouteStrip === "function") renderRouteStrip();
+    23	        if(typeof updateCompactHeader === "function") updateCompactHeader();
+    24	      }catch(_){}
+    25	    }, 120);
+    26	
+    27	    // Adres çubuğundan ?drive=1 temizle, ama mod açık kalsın
+    28	    if(window.history && window.history.replaceState){
+    29	      const cleanUrl = window.location.pathname;
+    30	      window.history.replaceState({}, document.title, cleanUrl);
+    31	    }
+    32	  }catch(e){
+    33	    console.warn("Hızlı koltuk sürüş modu açılamadı:", e);
+    34	  }
+    35	})();
+    36	
+    37	/* =========================================================
+    38	   DRIVE CONTROLS
+    39	   Sürüş modu + hız kutusu + ses açık/sessiz
+    40	   Butonlar HTML'de sabit, JS sadece çalıştırır
+    41	========================================================= */
+    42	
+    43	(function(){
+    44	  const boot = window.SEATS_BOOT || {};
+    45	  const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+    46	
+    47	  const DRIVE_MODE_KEY = "driveMode:" + tripKey;
+    48	  function safeToast(msg, ms=1600){
+    49	    try{
+    50	      if(typeof toast === "function") toast(msg, ms);
+    51	    }catch(_){}
+    52	  }
+    53	
+    54	  function safeSpeak(msg){
+    55	    try{
+    56	      if(window.SeatsSpeak){
+    57	        window.SeatsSpeak(msg, { force:true });
+    58	        return;
+    59	      }
+    60	
+    61	      if(typeof speak === "function") speak(msg);
+    62	    }catch(_){}
+    63	  }
+    64	
+    65	  function getLiveStop(){
+    66	    try{
+    67	      if(typeof getDisplayLiveStop === "function"){
+    68	        return getDisplayLiveStop() || "";
+    69	      }
+    70	    }catch(_){}
+    71	
+    72	    try{
+    73	      return speedState?.liveStop || "";
+    74	    }catch(_){}
+    75	
+    76	    return "";
+    77	  }
+    78	
+    79	  function getSpeedLimitData(){
+    80	    let speed = 0;
+    81	    let limit = 0;
+    82	
+    83	    try{
+    84	      speed = Math.round(Number(speedState?.current || 0));
+    85	      limit = Number(speedState?.lastLimitValue || speedState?.lastLimitObj?.limit || 0);
+    86	    }catch(_){}
+    87	
+    88	    return { speed, limit };
+    89	  }
+    90	
+    91	  function isDriveOn(){
+    92	    return localStorage.getItem(DRIVE_MODE_KEY) === "1";
+    93	  }
+    94	
+    95	  function syncDriveMode(){
+    96	    const btn = document.getElementById("driveModeToggle");
+    97	    const on = isDriveOn();
+    98	
+    99	    document.body.classList.toggle("drive-mode", on);
+   100	    document.documentElement.classList.toggle("drive-mode", on);
+   101	
+   102	    if(btn){
+   103	      btn.innerHTML = on ? "↩ Normal" : "🚘 Sürüş";
+   104	      btn.title = on ? "Normal moda geç" : "Sürüş moduna geç";
+   105	      btn.setAttribute("aria-pressed", on ? "true" : "false");
+   106	    }
+   107	
+   108	    try{
+   109	      if(typeof renderRouteStrip === "function") renderRouteStrip();
+   110	      if(typeof updateCompactHeader === "function") updateCompactHeader();
+   111	      if(typeof syncDriveEtaChip === "function") syncDriveEtaChip();
+   112	    }catch(_){}
+   113	
+   114	    try{
+   115	      window.dispatchEvent(new CustomEvent("driveModeChanged", {
+   116	        detail:{ on }
+   117	      }));
+   118	    }catch(_){}
+   119	  }
+   120	
+   121	  function bindDriveMode(){
+   122	    const btn = document.getElementById("driveModeToggle");
+   123	    if(!btn) return;
+   124	
+   125	    if(btn.dataset.driveBound === "1"){
+   126	      syncDriveMode();
+   127	      return;
+   128	    }
+   129	
+   130	    btn.dataset.driveBound = "1";
+   131	
+   132	    btn.addEventListener("click", (e) => {
+   133	      e.preventDefault();
+   134	
+   135	      const next = !isDriveOn();
+   136	      localStorage.setItem(DRIVE_MODE_KEY, next ? "1" : "0");
+   137	
+   138	      syncDriveMode();
+   139	
+   140	      setTimeout(syncDriveMode, 80);
+   141	      setTimeout(syncDriveMode, 250);
+   142	    });
+   143	
+   144	    syncDriveMode();
+   145	  }
+   146	
+   147	  function updateDriveSpeedChip(){
+   148	    const el = document.getElementById("driveSpeedChip");
+   149	    if(!el) return;
+   150	
+   151	    const { speed, limit } = getSpeedLimitData();
+   152	    const liveStop = getLiveStop();
+   153	
+   154	    let cls = "neutral";
+   155	    if(limit > 0){
+   156	      if(speed <= limit) cls = "ok";
+   157	      else if(speed <= limit + 10) cls = "warn";
+   158	      else cls = "bad";
+   159	    }
+   160	
+   161	    el.className = "drive-speed-chip " + cls;
+   162	
+   163	    const limitText = limit > 0 ? `Limit: ${limit}` : "Limit: —";
+   164	    const stopText = liveStop ? ` · ${liveStop}` : "";
+   165	
+   166	    el.innerHTML = `
+   167	      <div class="drive-speed-top">
+   168	        <span class="drive-speed-ico">🚦</span>
+   169	        <b>${speed}</b>
+   170	        <span>km/h</span>
+   171	      </div>
+   172	      <div class="drive-speed-sub">${limitText}${stopText}</div>
+   173	    `;
+   174	  }
+   175	
+   176	  function getVoiceEnabled(){
+   177	    try{
+   178	      if(window.SeatsVoice && typeof window.SeatsVoice.isEnabled === "function"){
+   179	        return window.SeatsVoice.isEnabled();
+   180	      }
+   181	    }catch(_){}
+   182	
+   183	    const saved = localStorage.getItem("ttsEnabled");
+   184	    if(saved !== null) return saved === "1";
+   185	
+   186	    const cb = document.getElementById("soundToggle");
+   187	    if(cb) return cb.checked !== false;
+   188	
+   189	    return true;
+   190	  }
+   191	
+   192	  function updateNightVoiceToggle(){
+   193	    try{
+   194	      if(window.SeatsVoice && typeof window.SeatsVoice.syncButtons === "function"){
+   195	        window.SeatsVoice.syncButtons();
+   196	        return;
+   197	      }
+   198	    }catch(_){}
+   199	
+   200	    const btn = document.getElementById("nightVoiceToggle");
+   201	    if(!btn) return;
+   202	
+   203	    const on = getVoiceEnabled();
+   204	
+   205	    btn.classList.toggle("is-off", !on);
+   206	    btn.innerHTML = on
+   207	      ? `<span class="nv-ico">🔊</span><span>Ses Açık</span>`
+   208	      : `<span class="nv-ico">🔇</span><span>Sessiz</span>`;
+   209	
+   210	    btn.title = on
+   211	      ? "Sesli robot açık. Kapatmak için dokun."
+   212	      : "Sesli robot kapalı. Açmak için dokun.";
+   213	  }
+   214	    function setVoiceEnabled(on, opts={}){
+   215	      const enabled = !!on;
+   216	
+   217	      try{
+   218	        if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+   219	          window.SeatsVoice.setEnabled(enabled);
+   220	        }else{
+   221	          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+   222	        }
+   223	      }catch(_){
+   224	        try{
+   225	          localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+   226	        }catch(e){}
+   227	      }
+   228	
+   229	      const cb = document.getElementById("soundToggle");
+   230	      if(cb) cb.checked = enabled;
+   231	
+   232	      updateNightVoiceToggle();
+   233	
+   234	      if(!opts.silent){
+   235	        safeToast(enabled ? "Sesli robot açıldı" : "Sesli robot kapatıldı", 1600);
+   236	      }
+   237	
+   238	      if(enabled && opts.announce){
+   239	        setTimeout(() => safeSpeak("Sesli robot açık."), 80);
+   240	      }
+   241	    }
+   242	
+   243	
+   244	  function bindNightVoiceToggle(){
+   245	    const cb = document.getElementById("soundToggle");
+   246	
+   247	    if(cb){
+   248	      cb.checked = getVoiceEnabled();
+   249	
+   250	      if(cb.dataset.voiceBound !== "1"){
+   251	        cb.dataset.voiceBound = "1";
+   252	        cb.addEventListener("change", () => {
+   253	          setVoiceEnabled(cb.checked, { silent:true });
+   254	        });
+   255	      }
+   256	    }
+   257	
+   258	    /*
+   259	      #nightVoiceToggle butonunun tek sahibi voice-tts.js.
+   260	      Burada click event bağlamıyoruz; çift yönetim bozulma yapıyordu.
+   261	    */
+   262	    updateNightVoiceToggle();
+   263	  }
+   264	
+   265	  function bootDriveControls(){
+   266	    bindDriveMode();
+   267	    bindNightVoiceToggle();
+   268	    updateDriveSpeedChip();
+   269	  }
+   270	
+   271	  bootDriveControls();
+   272	
+   273	  window.addEventListener("load", bootDriveControls);
+   274	  window.addEventListener("resize", bootDriveControls);
+   275	
+   276	  setTimeout(bootDriveControls, 400);
+   277	  setTimeout(bootDriveControls, 1200);
+   278	
+   279	  setInterval(updateDriveSpeedChip, 1000);
+   280	
+   281	  window.DriveControls = {
+   282	    boot: bootDriveControls,
+   283	    updateSpeed: updateDriveSpeedChip,
+   284	    setVoiceEnabled
+   285	  };
+   286	})();
+
+===== 7) sürüş modunda hızlı işlem / fab etkileri =====
+static/seats/seats.css-1981-
+static/seats/seats.css-1982-body.drive-mode .route-stop{
+static/seats/seats.css-1983-  min-width:122px;
+static/seats/seats.css-1984-  min-height:74px;
+static/seats/seats.css-1985-  padding:9px 10px;
+static/seats/seats.css-1986-  border-radius:17px;
+static/seats/seats.css-1987-}
+static/seats/seats.css-1988-
+static/seats/seats.css:1989:body.drive-mode .board-stage{
+static/seats/seats.css-1990-  padding-top:8px;
+static/seats/seats.css-1991-  margin-top:0;
+static/seats/seats.css-1992-}
+static/seats/seats.css-1993-
+static/seats/seats.css-1994-@media (max-width:760px){
+static/seats/seats.css-1995-  #driveModeToggle{
+static/seats/seats.css-1996-    top:8px;
+static/seats/seats.css-1997-    right:8px;
+static/seats/seats.css-1998-    min-height:40px;
+static/seats/seats.css-1999-    padding:8px 12px;
+static/seats/seats.css-2000-    font-size:12px;
+static/seats/seats.css-2001-  }
+static/seats/seats.css-2002-
+static/seats/seats.css-2003-  body.drive-mode .seats-shell{
+static/seats/seats.css-2004-    padding:4px 4px 8px;
+static/seats/seats.css-2005-  }
+static/seats/seats.css-2006-
+static/seats/seats.css-2007-  body.drive-mode .board-card{
+static/seats/seats.css-2008-    border-radius:18px;
+static/seats/seats.css-2009-    padding:7px;
+static/seats/seats.css-2010-  }
+static/seats/seats.css-2011-
+static/seats/seats.css-2012-  body.drive-mode .board-head{
+static/seats/seats.css-2013-    grid-template-columns:1fr;
+static/seats/seats.css-2014-    gap:6px;
+static/seats/seats.css-2015-  }
+static/seats/seats.css-2016-
+static/seats/seats.css-2017-  body.drive-mode .board-head-right{
+static/seats/seats.css-2018-    align-items:flex-start;
+static/seats/seats.css-2019-  }
+static/seats/seats.css-2020-
+static/seats/seats.css-2021-  body.drive-mode .voice-row{
+static/seats/seats.css-2022-    width:100%;
+static/seats/seats.css-2023-    justify-content:space-between;
+static/seats/seats.css-2024-  }
+--
+static/seats/seats.css-2040-    margin-bottom:8px;
+static/seats/seats.css-2041-  }
+static/seats/seats.css-2042-
+static/seats/seats.css-2043-  body.drive-mode .route-stop{
+static/seats/seats.css-2044-    min-width:112px;
+static/seats/seats.css-2045-    min-height:70px;
+static/seats/seats.css-2046-  }
+static/seats/seats.css-2047-
+static/seats/seats.css:2048:  body.drive-mode .board-stage{
+static/seats/seats.css-2049-    padding-top:6px;
+static/seats/seats.css-2050-  }
+static/seats/seats.css-2051-}
+static/seats/seats.css-2052-
+static/seats/seats.css-2053-
+static/seats/seats.css-2054-/* =========================================================
+static/seats/seats.css-2055-   SÜRÜŞ MODU
+static/seats/seats.css-2056-   Amaç: Koltuk planını en üste almak, gereksiz kartları gizlemek
+static/seats/seats.css-2057-========================================================= */
+static/seats/seats.css-2058-
+static/seats/seats.css-2059-#driveModeToggle{
+static/seats/seats.css-2060-  position:fixed;
+static/seats/seats.css-2061-  right:10px;
+static/seats/seats.css-2062-  top:10px;
+static/seats/seats.css-2063-  z-index:7000;
+static/seats/seats.css-2064-  min-height:42px;
+static/seats/seats.css-2065-  padding:9px 13px;
+static/seats/seats.css-2066-  border:1px solid rgba(255,255,255,.18);
+static/seats/seats.css-2067-  border-radius:999px;
+static/seats/seats.css-2068-  background:linear-gradient(180deg, rgba(37,99,235,.96), rgba(29,78,216,.96));
+static/seats/seats.css-2069-  color:#fff;
+static/seats/seats.css-2070-  font-weight:900;
+static/seats/seats.css-2071-  font-size:13px;
+static/seats/seats.css-2072-  box-shadow:0 14px 30px rgba(0,0,0,.35);
+static/seats/seats.css-2073-  backdrop-filter:blur(12px);
+static/seats/seats.css-2074-}
+static/seats/seats.css-2075-
+static/seats/seats.css-2076-body.drive-mode #driveModeToggle{
+static/seats/seats.css-2077-  background:linear-gradient(180deg, rgba(34,197,94,.98), rgba(21,128,61,.98));
+static/seats/seats.css-2078-}
+static/seats/seats.css-2079-
+static/seats/seats.css-2080-body.drive-mode .topbar,
+static/seats/seats.css-2081-body.drive-mode .status-row,
+static/seats/seats.css-2082-body.drive-mode .panel-card{
+static/seats/seats.css-2083-  display:none !important;
+--
+static/seats/seats.css-2165-
+static/seats/seats.css-2166-body.drive-mode .route-stop{
+static/seats/seats.css-2167-  min-width:122px;
+static/seats/seats.css-2168-  min-height:74px;
+static/seats/seats.css-2169-  padding:9px 10px;
+static/seats/seats.css-2170-  border-radius:17px;
+static/seats/seats.css-2171-}
+static/seats/seats.css-2172-
+static/seats/seats.css:2173:body.drive-mode .board-stage{
+static/seats/seats.css-2174-  padding-top:8px;
+static/seats/seats.css-2175-  margin-top:0;
+static/seats/seats.css-2176-}
+static/seats/seats.css-2177-
+static/seats/seats.css-2178-@media (max-width:760px){
+static/seats/seats.css-2179-  #driveModeToggle{
+static/seats/seats.css-2180-    top:8px;
+static/seats/seats.css-2181-    right:8px;
+static/seats/seats.css-2182-    min-height:40px;
+static/seats/seats.css-2183-    padding:8px 12px;
+static/seats/seats.css-2184-    font-size:12px;
+static/seats/seats.css-2185-  }
+static/seats/seats.css-2186-
+static/seats/seats.css-2187-  body.drive-mode .seats-shell{
+static/seats/seats.css-2188-    padding:4px 4px 8px;
+static/seats/seats.css-2189-  }
+static/seats/seats.css-2190-
+static/seats/seats.css-2191-  body.drive-mode .board-card{
+static/seats/seats.css-2192-    border-radius:18px;
+static/seats/seats.css-2193-    padding:7px;
+static/seats/seats.css-2194-  }
+static/seats/seats.css-2195-
+static/seats/seats.css-2196-  body.drive-mode .board-head{
+static/seats/seats.css-2197-    grid-template-columns:1fr;
+static/seats/seats.css-2198-    gap:6px;
+static/seats/seats.css-2199-  }
+static/seats/seats.css-2200-
+static/seats/seats.css-2201-  body.drive-mode .board-head-right{
+static/seats/seats.css-2202-    align-items:flex-start;
+static/seats/seats.css-2203-  }
+static/seats/seats.css-2204-
+static/seats/seats.css-2205-  body.drive-mode .voice-row{
+static/seats/seats.css-2206-    width:100%;
+static/seats/seats.css-2207-    justify-content:space-between;
+static/seats/seats.css-2208-  }
+--
+static/seats/seats.css-2224-    margin-bottom:8px;
+static/seats/seats.css-2225-  }
+static/seats/seats.css-2226-
+static/seats/seats.css-2227-  body.drive-mode .route-stop{
+static/seats/seats.css-2228-    min-width:112px;
+static/seats/seats.css-2229-    min-height:70px;
+static/seats/seats.css-2230-  }
+static/seats/seats.css-2231-
+static/seats/seats.css:2232:  body.drive-mode .board-stage{
+static/seats/seats.css-2233-    padding-top:6px;
+static/seats/seats.css-2234-  }
+static/seats/seats.css-2235-}
+static/seats/seats.css-2236-
+static/seats/seats.css-2237-
+static/seats/seats.css-2238-/* =========================================================
+static/seats/seats.css-2239-   SÜRÜŞ MODU İNCE AYAR v2
+static/seats/seats.css-2240-   Daha temiz üst alan + düzgün durak akışı + okunaklı koltuk yazıları
+static/seats/seats.css-2241-========================================================= */
+static/seats/seats.css-2242-
+static/seats/seats.css-2243-/* Sürüş modu ana ekranı daha sıkı */
+static/seats/seats.css-2244-body.drive-mode{
+static/seats/seats.css-2245-  background:#07101d;
+static/seats/seats.css-2246-}
+static/seats/seats.css-2247-
+static/seats/seats.css-2248-/* Normal butonu tarayıcı üst çubuğuna çok yapışmasın */
+static/seats/seats.css-2249-body.drive-mode #driveModeToggle{
+static/seats/seats.css-2250-  top:calc(8px + env(safe-area-inset-top));
+static/seats/seats.css-2251-  right:10px;
+static/seats/seats.css-2252-  min-width:132px;
+static/seats/seats.css-2253-  min-height:44px;
+static/seats/seats.css-2254-  padding:9px 14px;
+static/seats/seats.css-2255-  font-size:14px;
+static/seats/seats.css-2256-  border-radius:999px;
+static/seats/seats.css-2257-}
+static/seats/seats.css-2258-
+static/seats/seats.css-2259-/* Sürüş modunda ana kart ekrana tam otursun */
+static/seats/seats.css-2260-body.drive-mode .seats-shell{
+static/seats/seats.css-2261-  padding:6px 6px 10px !important;
+static/seats/seats.css-2262-}
+static/seats/seats.css-2263-
+static/seats/seats.css-2264-body.drive-mode .board-card{
+static/seats/seats.css-2265-  padding:8px !important;
+static/seats/seats.css-2266-  border-radius:22px !important;
+static/seats/seats.css-2267-  overflow:hidden;
+--
+static/seats/seats.css-2379-  font-size:13px !important;
+static/seats/seats.css-2380-}
+static/seats/seats.css-2381-
+static/seats/seats.css-2382-body.drive-mode .route-stop.active{
+static/seats/seats.css-2383-  transform:translateY(-1px);
+static/seats/seats.css-2384-}
+static/seats/seats.css-2385-
+static/seats/seats.css-2386-/* Koltuk alanı daha yukarı ve daha temiz */
+static/seats/seats.css:2387:body.drive-mode .board-stage{
+static/seats/seats.css-2388-  margin-top:0 !important;
+static/seats/seats.css-2389-  padding:9px 70px 10px 6px !important;
+static/seats/seats.css-2390-  border-radius:22px !important;
+static/seats/seats.css-2391-}
+static/seats/seats.css-2392-
+static/seats/seats.css-2393-/* Koltuk çevresindeki dış boşluğu azalt */
+static/seats/seats.css:2394:body.drive-mode .deck{
+static/seats/seats.css-2395-  padding-top:8px !important;
+static/seats/seats.css-2396-  row-gap:14px !important;
+static/seats/seats.css-2397-}
+static/seats/seats.css-2398-
+static/seats/seats.css-2399-/* Koltuk altı yazılar taşmasın */
+static/seats/seats.css-2400-body.drive-mode .label{
+static/seats/seats.css-2401-  width:92px;
+static/seats/seats.css-2402-  min-height:34px;
+static/seats/seats.css-2403-  max-height:38px;
+static/seats/seats.css-2404-  font-size:12px;
+static/seats/seats.css-2405-  line-height:1.15;
+static/seats/seats.css-2406-  overflow:hidden;
+static/seats/seats.css-2407-  display:-webkit-box;
+static/seats/seats.css-2408-  -webkit-line-clamp:2;
+static/seats/seats.css-2409-  -webkit-box-orient:vertical;
+static/seats/seats.css-2410-}
+static/seats/seats.css-2411-
+static/seats/seats.css-2412-/* Uzun durak isimlerinde ok daha dengeli görünsün */
+static/seats/seats.css-2413-body.drive-mode .cell{
+static/seats/seats.css-2414-  gap:6px;
+static/seats/seats.css-2415-}
+static/seats/seats.css-2416-
+static/seats/seats.css-2417-/* Bagaj/iniş rozetleri koltuk üstünde daha düzgün dursun */
+static/seats/seats.css-2418-body.drive-mode .bag-badge{
+static/seats/seats.css-2419-  right:-8px;
+static/seats/seats.css-2420-  top:-10px;
+static/seats/seats.css-2421-  min-height:24px;
+static/seats/seats.css-2422-  min-width:28px;
+static/seats/seats.css-2423-  font-size:12px;
+static/seats/seats.css-2424-}
+static/seats/seats.css-2425-
+static/seats/seats.css-2426-body.drive-mode .stop-badge{
+static/seats/seats.css-2427-  left:-8px;
+static/seats/seats.css-2428-  bottom:-8px;
+static/seats/seats.css-2429-  min-height:24px;
+static/seats/seats.css-2430-  min-width:24px;
+static/seats/seats.css-2431-  font-size:12px;
+static/seats/seats.css-2432-}
+static/seats/seats.css-2433-
+static/seats/seats.css-2434-/* Sağdaki hızlı butonlar koltukların üstüne fazla binmesin */
+static/seats/seats.css:2435:body.drive-mode .fab-column{
+static/seats/seats.css-2436-  right:8px !important;
+static/seats/seats.css-2437-  bottom:10px !important;
+static/seats/seats.css-2438-  gap:8px !important;
+static/seats/seats.css-2439-}
+static/seats/seats.css-2440-
+static/seats/seats.css:2441:body.drive-mode .fab{
+static/seats/seats.css-2442-  width:48px !important;
+static/seats/seats.css-2443-  height:48px !important;
+static/seats/seats.css-2444-  font-size:18px !important;
+static/seats/seats.css-2445-}
+static/seats/seats.css-2446-
+static/seats/seats.css-2447-/* Küçük telefon ayarı */
+static/seats/seats.css-2448-@media (max-width:760px){
+static/seats/seats.css-2449-
+static/seats/seats.css-2450-  body.drive-mode #driveModeToggle{
+static/seats/seats.css-2451-    top:calc(8px + env(safe-area-inset-top));
+static/seats/seats.css-2452-    right:8px;
+static/seats/seats.css-2453-    min-width:128px;
+static/seats/seats.css-2454-    min-height:42px;
+static/seats/seats.css-2455-    font-size:14px;
+static/seats/seats.css-2456-  }
+static/seats/seats.css-2457-
+static/seats/seats.css-2458-  body.drive-mode .board-head{
+static/seats/seats.css-2459-    grid-template-columns:1fr !important;
+static/seats/seats.css-2460-  }
+static/seats/seats.css-2461-
+static/seats/seats.css-2462-  body.drive-mode .selected-stop-chip{
+static/seats/seats.css-2463-    max-width:calc(100vw - 150px);
+static/seats/seats.css-2464-    min-height:38px;
+static/seats/seats.css-2465-    font-size:14px;
+static/seats/seats.css-2466-    padding:8px 12px;
+static/seats/seats.css-2467-  }
+static/seats/seats.css-2468-
+static/seats/seats.css-2469-  body.drive-mode .voice-command-btn{
+static/seats/seats.css-2470-    height:40px;
+static/seats/seats.css-2471-    min-width:150px;
+static/seats/seats.css-2472-    max-width:165px;
+static/seats/seats.css-2473-    font-size:13px;
+static/seats/seats.css-2474-  }
+static/seats/seats.css-2475-
+static/seats/seats.css-2476-  body.drive-mode .route-strip-title{
+--
+static/seats/seats.css-2493-    font-size:16px !important;
+static/seats/seats.css-2494-  }
+static/seats/seats.css-2495-
+static/seats/seats.css-2496-  body.drive-mode .route-stop .meta,
+static/seats/seats.css-2497-  body.drive-mode .route-stop .extra-line{
+static/seats/seats.css-2498-    font-size:12px !important;
+static/seats/seats.css-2499-  }
+static/seats/seats.css-2500-
+static/seats/seats.css:2501:  body.drive-mode .board-stage{
+static/seats/seats.css-2502-    padding-right:66px !important;
+static/seats/seats.css-2503-  }
+static/seats/seats.css-2504-
+static/seats/seats.css-2505-  body.drive-mode .label{
+static/seats/seats.css-2506-    width:88px;
+static/seats/seats.css-2507-    font-size:11px;
+static/seats/seats.css-2508-  }
+static/seats/seats.css-2509-}
+static/seats/seats.css-2510-
+static/seats/seats.css-2511-/* Çok dar ekran */
+static/seats/seats.css-2512-@media (max-width:420px){
+static/seats/seats.css-2513-
+static/seats/seats.css-2514-  body.drive-mode #driveModeToggle{
+static/seats/seats.css-2515-    min-width:118px;
+static/seats/seats.css-2516-    min-height:40px;
+static/seats/seats.css-2517-    font-size:13px;
+static/seats/seats.css-2518-    padding:8px 11px;
+static/seats/seats.css-2519-  }
+static/seats/seats.css-2520-
+static/seats/seats.css-2521-  body.drive-mode .selected-stop-chip{
+static/seats/seats.css-2522-    max-width:calc(100vw - 138px);
+static/seats/seats.css-2523-    font-size:13px;
+static/seats/seats.css-2524-  }
+static/seats/seats.css-2525-
+static/seats/seats.css-2526-  body.drive-mode .voice-command-btn{
+static/seats/seats.css-2527-    min-width:142px;
+static/seats/seats.css-2528-    max-width:150px;
+static/seats/seats.css-2529-    font-size:12px;
+static/seats/seats.css-2530-  }
+static/seats/seats.css-2531-
+static/seats/seats.css-2532-  body.drive-mode .route-stop{
+static/seats/seats.css-2533-    min-width:132px !important;
+static/seats/seats.css-2534-  }
+static/seats/seats.css-2535-
+static/seats/seats.css:2536:  body.drive-mode .board-stage{
+static/seats/seats.css-2537-    padding-right:62px !important;
+static/seats/seats.css-2538-  }
+static/seats/seats.css-2539-}
+static/seats/seats.css-2540-
+static/seats/seats.css-2541-
+static/seats/seats.css-2542-/* =========================================================
+static/seats/seats.css-2543-   BAGAJ BALONU + SÜRÜŞ MODU KOLTUK SIKIŞTIRMA
+static/seats/seats.css-2544-========================================================= */
+static/seats/seats.css-2545-
+static/seats/seats.css-2546-/* Koltuk numarası kapanmasın diye rozet koltuğun üstüne çıkar */
+static/seats/seats.css-2547-.seat .bag-badge{
+static/seats/seats.css-2548-  top:-28px !important;
+static/seats/seats.css-2549-  right:-12px !important;
+static/seats/seats.css-2550-  min-height:25px !important;
+static/seats/seats.css-2551-  min-width:34px !important;
+static/seats/seats.css-2552-  padding:4px 8px !important;
+static/seats/seats.css-2553-  border-radius:999px !important;
+static/seats/seats.css-2554-  background:linear-gradient(180deg, #2563eb, #1d4ed8) !important;
+static/seats/seats.css-2555-  border:1px solid rgba(255,255,255,.25);
+static/seats/seats.css-2556-  box-shadow:
+static/seats/seats.css-2557-    0 10px 18px rgba(0,0,0,.34),
+static/seats/seats.css-2558-    0 0 0 2px rgba(37,99,235,.20);
+static/seats/seats.css-2559-  z-index:8;
+static/seats/seats.css-2560-  font-size:12px !important;
+static/seats/seats.css-2561-  line-height:1;
+static/seats/seats.css-2562-}
+static/seats/seats.css-2563-
+static/seats/seats.css-2564-/* Küçük konuşma balonu kuyruğu */
+static/seats/seats.css-2565-.seat .bag-badge::after{
+static/seats/seats.css-2566-  content:"";
+static/seats/seats.css-2567-  position:absolute;
+static/seats/seats.css-2568-  right:14px;
+static/seats/seats.css-2569-  bottom:-5px;
+static/seats/seats.css-2570-  width:9px;
+static/seats/seats.css-2571-  height:9px;
+--
+static/seats/seats.css-2612-  font-size:11px !important;
+static/seats/seats.css-2613-}
+static/seats/seats.css-2614-
+static/seats/seats.css-2615-body.drive-mode .seat .bag-count{
+static/seats/seats.css-2616-  font-size:12px;
+static/seats/seats.css-2617-}
+static/seats/seats.css-2618-
+static/seats/seats.css-2619-/* Sürüş modunda üst sıradaki bagaj balonları kesilmesin */
+static/seats/seats.css:2620:body.drive-mode .deck{
+static/seats/seats.css-2621-  padding-top:36px !important;
+static/seats/seats.css-2622-}
+static/seats/seats.css-2623-
+static/seats/seats.css-2624-/* Dar ekranda rozet biraz daha küçük */
+static/seats/seats.css-2625-@media (max-width:420px){
+static/seats/seats.css-2626-  .seat .bag-badge{
+static/seats/seats.css-2627-    top:-25px !important;
+static/seats/seats.css-2628-    right:-9px !important;
+static/seats/seats.css-2629-    min-width:30px !important;
+static/seats/seats.css-2630-    min-height:23px !important;
+static/seats/seats.css-2631-    padding:4px 7px !important;
+static/seats/seats.css-2632-  }
+static/seats/seats.css-2633-
+static/seats/seats.css-2634-  .seat .bag-dir{
+static/seats/seats.css-2635-    max-width:36px;
+static/seats/seats.css-2636-    font-size:10px;
+static/seats/seats.css-2637-  }
+static/seats/seats.css-2638-
+static/seats/seats.css-2639-  .seat .bag-count{
+static/seats/seats.css-2640-    font-size:12px;
+static/seats/seats.css-2641-  }
+static/seats/seats.css-2642-
+static/seats/seats.css-2643-  body.drive-mode{
+static/seats/seats.css-2644-    --seat-gap-x:10px;
+static/seats/seats.css-2645-  }
+static/seats/seats.css-2646-}
+static/seats/seats.css-2647-
+static/seats/seats.css-2648-
+static/seats/seats.css-2649-/* =========================================================
+static/seats/seats.css-2650-   SÜRÜŞ MODU KOLTUK ARASI v3
+static/seats/seats.css-2651-   Sağ boşluğu kullanır, çiftli koltukları açar, yazı çakışmasını azaltır
+static/seats/seats.css-2652-========================================================= */
+static/seats/seats.css-2653-
+static/seats/seats.css-2654-body.drive-mode{
+static/seats/seats.css-2655-  --seat-gap-x:24px !important;
+static/seats/seats.css-2656-  --seat-gap-y:16px !important;
+static/seats/seats.css-2657-}
+static/seats/seats.css-2658-
+static/seats/seats.css-2659-/* Sağ tarafta boş kalan alanı koltuk planına geri ver */
+static/seats/seats.css:2660:body.drive-mode .board-stage{
+static/seats/seats.css-2661-  padding-left:8px !important;
+static/seats/seats.css-2662-  padding-right:22px !important;
+static/seats/seats.css-2663-  overflow-x:hidden !important;
+static/seats/seats.css-2664-}
+static/seats/seats.css-2665-
+static/seats/seats.css-2666-/* Deck biraz daha ortaya otursun */
+static/seats/seats.css:2667:body.drive-mode .deck-wrap{
+static/seats/seats.css-2668-  min-width:100% !important;
+static/seats/seats.css-2669-  padding-right:0 !important;
+static/seats/seats.css-2670-  display:flex;
+static/seats/seats.css-2671-  justify-content:center;
+static/seats/seats.css-2672-}
+static/seats/seats.css-2673-
+static/seats/seats.css:2674:body.drive-mode .deck{
+static/seats/seats.css-2675-  width:max-content;
+static/seats/seats.css-2676-  justify-content:center !important;
+static/seats/seats.css-2677-  column-gap:24px !important;
+static/seats/seats.css-2678-  row-gap:16px !important;
+static/seats/seats.css-2679-}
+static/seats/seats.css-2680-
+static/seats/seats.css-2681-/* Koltuk altı yazılar birbirine girmesin */
+static/seats/seats.css-2682-body.drive-mode .label{
+static/seats/seats.css-2683-  width:82px !important;
+static/seats/seats.css-2684-  max-width:82px !important;
+static/seats/seats.css-2685-  font-size:11px !important;
+static/seats/seats.css-2686-  line-height:1.16 !important;
+static/seats/seats.css-2687-  text-align:center;
+static/seats/seats.css-2688-  overflow:hidden;
+static/seats/seats.css-2689-  display:-webkit-box;
+static/seats/seats.css-2690-  -webkit-line-clamp:2;
+static/seats/seats.css-2691-  -webkit-box-orient:vertical;
+static/seats/seats.css-2692-}
+static/seats/seats.css-2693-
+static/seats/seats.css-2694-/* Sağ çift koltuklarda metni biraz daha kontrollü yap */
+static/seats/seats.css-2695-body.drive-mode .cell{
+static/seats/seats.css-2696-  align-items:center !important;
+static/seats/seats.css-2697-}
+static/seats/seats.css-2698-
+static/seats/seats.css-2699-/* Bagaj balonları koltuk üstünde kalsın ama yan koltuğa fazla taşmasın */
+static/seats/seats.css-2700-body.drive-mode .seat .bag-badge{
+static/seats/seats.css-2701-  right:-8px !important;
+static/seats/seats.css-2702-  top:-27px !important;
+static/seats/seats.css-2703-  transform:scale(.96);
+static/seats/seats.css-2704-}
+static/seats/seats.css-2705-
+static/seats/seats.css-2706-/* 420px altı telefonlarda çok taşarsa kontrollü daralt */
+static/seats/seats.css-2707-@media (max-width:420px){
+static/seats/seats.css-2708-  body.drive-mode{
+static/seats/seats.css-2709-    --seat-gap-x:20px !important;
+static/seats/seats.css-2710-  }
+static/seats/seats.css-2711-
+static/seats/seats.css:2712:  body.drive-mode .deck{
+static/seats/seats.css-2713-    column-gap:20px !important;
+static/seats/seats.css-2714-  }
+static/seats/seats.css-2715-
+static/seats/seats.css:2716:  body.drive-mode .board-stage{
+static/seats/seats.css-2717-    padding-left:6px !important;
+static/seats/seats.css-2718-    padding-right:16px !important;
+static/seats/seats.css-2719-  }
+static/seats/seats.css-2720-
+static/seats/seats.css-2721-  body.drive-mode .label{
+static/seats/seats.css-2722-    width:78px !important;
+static/seats/seats.css-2723-    max-width:78px !important;
+static/seats/seats.css-2724-    font-size:10.5px !important;
+static/seats/seats.css-2725-  }
+static/seats/seats.css-2726-}
+static/seats/seats.css-2727-
+static/seats/seats.css-2728-
+static/seats/seats.css-2729-/* =========================================================
+static/seats/seats.css-2730-   SÜRÜŞ MODU KORİDOR ALT HİZALAMA
+static/seats/seats.css-2731-   Koridor 51-52-53-54 arka sıranın altına taşmasın
+static/seats/seats.css-2732-========================================================= */
+static/seats/seats.css-2733-
+static/seats/seats.css-2734-body.drive-mode .corr{
+static/seats/seats.css-2735-  grid-row:1 / 14 !important;
+static/seats/seats.css-2736-  align-self:stretch !important;
+static/seats/seats.css-2737-  margin-bottom:18px !important;
+static/seats/seats.css-2738-}
+static/seats/seats.css-2739-
+static/seats/seats.css-2740-/* Normal modda da aynı düzgünlük istenirse */
+static/seats/seats.css-2741-.corr{
+static/seats/seats.css-2742-  grid-row:1 / 14;
+static/seats/seats.css-2743-}
+static/seats/seats.css-2744-
+static/seats/seats.css-2745-
+static/seats/seats.css-2746-/* =========================================================
+static/seats/seats.css-2747-   SÜRÜŞ MODU ALT HIZLI İŞLEM BARI
+static/seats/seats.css-2748-   Sağ alttaki + ₺ ⇩ butonlarını alta yatay dizer
+static/seats/seats.css-2749-========================================================= */
+static/seats/seats.css-2750-
+static/seats/seats.css-2751-/* Alt bar için koltuk planının altında yer aç */
+static/seats/seats.css:2752:body.drive-mode .board-stage{
+static/seats/seats.css-2753-  padding-bottom:92px !important;
+static/seats/seats.css-2754-}
+static/seats/seats.css-2755-
+static/seats/seats.css-2756-/* Deck içinde butonlara alt boşluk bırak */
+static/seats/seats.css:2757:body.drive-mode .deck-wrap{
+static/seats/seats.css-2758-  padding-bottom:78px !important;
+static/seats/seats.css-2759-}
+static/seats/seats.css-2760-
+static/seats/seats.css-2761-/* Sağdaki dikey FAB kolonunu sürüş modunda yatay alt bara çevir */
+static/seats/seats.css:2762:body.drive-mode .fab-column{
+static/seats/seats.css-2763-  position:absolute !important;
+static/seats/seats.css-2764-  left:50% !important;
+static/seats/seats.css-2765-  right:auto !important;
+static/seats/seats.css-2766-  bottom:14px !important;
+static/seats/seats.css-2767-  transform:translateX(-50%) !important;
+static/seats/seats.css-2768-
+static/seats/seats.css-2769-  display:flex !important;
+static/seats/seats.css-2770-  flex-direction:row !important;
+static/seats/seats.css-2771-  align-items:center !important;
+static/seats/seats.css-2772-  justify-content:center !important;
+static/seats/seats.css-2773-  gap:14px !important;
+static/seats/seats.css-2774-
+static/seats/seats.css-2775-  width:auto !important;
+static/seats/seats.css-2776-  padding:10px 14px !important;
+static/seats/seats.css-2777-  border-radius:26px !important;
+static/seats/seats.css-2778-
+static/seats/seats.css-2779-  background:linear-gradient(180deg, rgba(15,23,42,.88), rgba(2,6,23,.88));
+static/seats/seats.css-2780-  border:1px solid rgba(255,255,255,.12);
+static/seats/seats.css-2781-  box-shadow:
+static/seats/seats.css-2782-    0 16px 34px rgba(0,0,0,.38),
+static/seats/seats.css-2783-    0 0 0 1px rgba(255,255,255,.04) inset;
+static/seats/seats.css-2784-  backdrop-filter:blur(10px);
+static/seats/seats.css-2785-  z-index:80 !important;
+static/seats/seats.css-2786-}
+static/seats/seats.css-2787-
+static/seats/seats.css-2788-/* Alt bar butonları */
+static/seats/seats.css:2789:body.drive-mode .fab{
+static/seats/seats.css-2790-  width:56px !important;
+static/seats/seats.css-2791-  height:56px !important;
+static/seats/seats.css-2792-  min-width:56px !important;
+static/seats/seats.css-2793-  min-height:56px !important;
+static/seats/seats.css-2794-  border-radius:20px !important;
+static/seats/seats.css-2795-  font-size:23px !important;
+static/seats/seats.css-2796-  box-shadow:0 12px 24px rgba(0,0,0,.34);
+static/seats/seats.css-2797-}
+static/seats/seats.css-2798-
+static/seats/seats.css-2799-/* Butonların rengi daha net kalsın */
+static/seats/seats.css:2800:body.drive-mode .fab.primary{
+static/seats/seats.css-2801-  background:linear-gradient(180deg, #3b82f6, #1d4ed8) !important;
+static/seats/seats.css-2802-}
+static/seats/seats.css-2803-
+static/seats/seats.css:2804:body.drive-mode .fab.green{
+static/seats/seats.css-2805-  background:linear-gradient(180deg, #22c55e, #15803d) !important;
+static/seats/seats.css-2806-}
+static/seats/seats.css-2807-
+static/seats/seats.css:2808:body.drive-mode .fab.orange{
+static/seats/seats.css-2809-  background:linear-gradient(180deg, #f59e0b, #d97706) !important;
+static/seats/seats.css-2810-}
+static/seats/seats.css-2811-
+static/seats/seats.css-2812-/* 51-52-53-54 satırı ile çakışmasın */
+static/seats/seats.css:2813:body.drive-mode .deck{
+static/seats/seats.css-2814-  padding-bottom:88px !important;
+static/seats/seats.css-2815-}
+static/seats/seats.css-2816-
+static/seats/seats.css-2817-/* Dar telefonlarda biraz küçült */
+static/seats/seats.css-2818-@media (max-width:420px){
+static/seats/seats.css:2819:  body.drive-mode .fab-column{
+static/seats/seats.css-2820-    bottom:12px !important;
+static/seats/seats.css-2821-    gap:10px !important;
+static/seats/seats.css-2822-    padding:9px 12px !important;
+static/seats/seats.css-2823-    border-radius:24px !important;
+static/seats/seats.css-2824-  }
+static/seats/seats.css-2825-
+static/seats/seats.css:2826:  body.drive-mode .fab{
+static/seats/seats.css-2827-    width:52px !important;
+static/seats/seats.css-2828-    height:52px !important;
+static/seats/seats.css-2829-    min-width:52px !important;
+static/seats/seats.css-2830-    min-height:52px !important;
+static/seats/seats.css-2831-    font-size:21px !important;
+static/seats/seats.css-2832-    border-radius:18px !important;
+static/seats/seats.css-2833-  }
+static/seats/seats.css-2834-
+static/seats/seats.css:2835:  body.drive-mode .board-stage{
+static/seats/seats.css-2836-    padding-bottom:88px !important;
+static/seats/seats.css-2837-  }
+static/seats/seats.css-2838-
+static/seats/seats.css:2839:  body.drive-mode .deck{
+static/seats/seats.css-2840-    padding-bottom:84px !important;
+static/seats/seats.css-2841-  }
+static/seats/seats.css-2842-}
+static/seats/seats.css-2843-
+static/seats/seats.css-2844-
+static/seats/seats.css-2845-/* =========================================================
+static/seats/seats.css-2846-   SÜRÜŞ MODU ALT BAR KOMPAKT v4
+static/seats/seats.css-2847-   51-52-53-54 ile buton barı arasındaki fazla boşluğu azaltır
+static/seats/seats.css-2848-========================================================= */
+static/seats/seats.css-2849-
+static/seats/seats.css-2850-/* Önceki fazla alt boşlukları ezer */
+static/seats/seats.css:2851:body.drive-mode .board-stage{
+static/seats/seats.css-2852-  padding-bottom:14px !important;
+static/seats/seats.css-2853-}
+static/seats/seats.css-2854-
+static/seats/seats.css-2855-/* Deck-wrap ekstra boşluk vermesin */
+static/seats/seats.css:2856:body.drive-mode .deck-wrap{
+static/seats/seats.css-2857-  padding-bottom:0 !important;
+static/seats/seats.css-2858-}
+static/seats/seats.css-2859-
+static/seats/seats.css-2860-/* Sadece buton bar kadar kontrollü boşluk bırak */
+static/seats/seats.css:2861:body.drive-mode .deck{
+static/seats/seats.css-2862-  padding-bottom:76px !important;
+static/seats/seats.css-2863-}
+static/seats/seats.css-2864-
+static/seats/seats.css-2865-/* Alt hızlı işlem barını 51-54 satırına daha yakın taşı */
+static/seats/seats.css:2866:body.drive-mode .fab-column{
+static/seats/seats.css-2867-  bottom:8px !important;
+static/seats/seats.css-2868-  padding:8px 12px !important;
+static/seats/seats.css-2869-  gap:12px !important;
+static/seats/seats.css-2870-  border-radius:24px !important;
+static/seats/seats.css-2871-}
+static/seats/seats.css-2872-
+static/seats/seats.css-2873-/* Butonlar biraz daha kompakt */
+static/seats/seats.css:2874:body.drive-mode .fab{
+static/seats/seats.css-2875-  width:52px !important;
+static/seats/seats.css-2876-  height:52px !important;
+static/seats/seats.css-2877-  min-width:52px !important;
+static/seats/seats.css-2878-  min-height:52px !important;
+static/seats/seats.css-2879-  border-radius:18px !important;
+static/seats/seats.css-2880-  font-size:21px !important;
+static/seats/seats.css-2881-}
+static/seats/seats.css-2882-
+static/seats/seats.css-2883-/* Çok dar ekranda daha da sıkı */
+static/seats/seats.css-2884-@media (max-width:420px){
+static/seats/seats.css:2885:  body.drive-mode .board-stage{
+static/seats/seats.css-2886-    padding-bottom:10px !important;
+static/seats/seats.css-2887-  }
+static/seats/seats.css-2888-
+static/seats/seats.css:2889:  body.drive-mode .deck{
+static/seats/seats.css-2890-    padding-bottom:68px !important;
+static/seats/seats.css-2891-  }
+static/seats/seats.css-2892-
+static/seats/seats.css:2893:  body.drive-mode .fab-column{
+static/seats/seats.css-2894-    bottom:6px !important;
+static/seats/seats.css-2895-    padding:7px 10px !important;
+static/seats/seats.css-2896-    gap:9px !important;
+static/seats/seats.css-2897-  }
+static/seats/seats.css-2898-
+static/seats/seats.css:2899:  body.drive-mode .fab{
+static/seats/seats.css-2900-    width:48px !important;
+static/seats/seats.css-2901-    height:48px !important;
+static/seats/seats.css-2902-    min-width:48px !important;
+static/seats/seats.css-2903-    min-height:48px !important;
+static/seats/seats.css-2904-    font-size:20px !important;
+static/seats/seats.css-2905-  }
+static/seats/seats.css-2906-}
+static/seats/seats.css-2907-
+static/seats/seats.css-2908-
+static/seats/seats.css-2909-/* =========================================================
+static/seats/seats.css-2910-   DURAK AKIŞI CANLI / SIRADAKİ TIKLANABİLİR PILL
+static/seats/seats.css-2911-========================================================= */
+static/seats/seats.css-2912-
+static/seats/seats.css-2913-.route-pill{
+static/seats/seats.css-2914-  cursor:pointer;
+static/seats/seats.css-2915-  user-select:none;
+static/seats/seats.css-2916-  transition:.16s ease;
+static/seats/seats.css-2917-}
+static/seats/seats.css-2918-
+static/seats/seats.css-2919-.route-pill:hover{
+static/seats/seats.css-2920-  transform:translateY(-1px);
+static/seats/seats.css-2921-  filter:brightness(1.08);
+static/seats/seats.css-2922-}
+static/seats/seats.css-2923-
+static/seats/seats.css-2924-.route-pill:active{
+static/seats/seats.css-2925-  transform:scale(.98);
+static/seats/seats.css-2926-}
+static/seats/seats.css-2927-
+static/seats/seats.css-2928-.route-stop.route-focus-flash{
+static/seats/seats.css-2929-  animation:routeFocusFlash 1.1s ease-in-out 1;
+static/seats/seats.css-2930-}
+static/seats/seats.css-2931-
+static/seats/seats.css-2932-@keyframes routeFocusFlash{
+static/seats/seats.css-2933-  0%,100%{
+static/seats/seats.css-2934-    box-shadow:
+--
+templates/seats.html-2684-      --right-seat-column-shift:13px;
+templates/seats.html-2685-    }
+templates/seats.html-2686-  }
+templates/seats.html-2687-
+templates/seats.html-2688-  /*
+templates/seats.html-2689-    Sürüş modunda koltuklar biraz daha sıkıştığı için
+templates/seats.html-2690-    sağ kolonu bir tık daha açıyoruz.
+templates/seats.html-2691-  */
+templates/seats.html:2692:  body.drive-mode .deck{
+templates/seats.html-2693-    --right-seat-column-shift:18px;
+templates/seats.html-2694-  }
+templates/seats.html-2695-
+templates/seats.html-2696-  @media(max-width:380px){
+templates/seats.html:2697:    body.drive-mode .deck{
+templates/seats.html-2698-      --right-seat-column-shift:15px;
+templates/seats.html-2699-    }
+templates/seats.html-2700-  }
+templates/seats.html-2701-</style>
+templates/seats.html-2702-<!-- RIGHT_SEAT_COLUMN_SPACING_FIX_END -->
+templates/seats.html-2703-
+templates/seats.html-2704-
+templates/seats.html-2705-<!-- BOTTOM_ROW_51_54_EQUAL_SPACING_START -->
+templates/seats.html-2706-<style id="bottom-row-51-54-equal-spacing-style">
+templates/seats.html-2707-  /*
+templates/seats.html-2708-    En alt sıra 51-52-53-54 eşit aralık düzeltmesi.
+templates/seats.html-2709-    Sağ kolon kaydırma 54'ü de etkilediği için bu satırda
+templates/seats.html-2710-    kaydırmayı sıfırlıyoruz. Böylece 51-52-53-54 kendi grid
+templates/seats.html-2711-    kolonlarında eşit aralıkla durur.
+templates/seats.html-2712-  */
+templates/seats.html-2713-
+templates/seats.html-2714-  .deck .cell[style*="grid-row:14"],
+templates/seats.html-2715-  .deck .cell[style*="grid-row: 14"]{
+templates/seats.html-2716-    transform:none !important;
+templates/seats.html-2717-  }
+templates/seats.html-2718-
+templates/seats.html:2719:  body.drive-mode .deck .cell[style*="grid-row:14"],
+templates/seats.html:2720:  body.drive-mode .deck .cell[style*="grid-row: 14"]{
+templates/seats.html-2721-    transform:none !important;
+templates/seats.html-2722-  }
+templates/seats.html-2723-</style>
+templates/seats.html-2724-<!-- BOTTOM_ROW_51_54_EQUAL_SPACING_END -->
+templates/seats.html-2725-
+templates/seats.html-2726-
+templates/seats.html-2727-
+templates/seats.html-2728-
+templates/seats.html-2729-
+templates/seats.html-2730-
+templates/seats.html-2731-
+templates/seats.html-2732-
+templates/seats.html-2733-
+templates/seats.html-2734-
+templates/seats.html-2735-
+templates/seats.html-2736-
+templates/seats.html-2737-
+templates/seats.html-2738-
+templates/seats.html-2739-
+templates/seats.html-2740-
+templates/seats.html-2741-
+templates/seats.html-2742-
+templates/seats.html-2743-
+templates/seats.html-2744-
+templates/seats.html-2745-
+templates/seats.html-2746-
+templates/seats.html-2747-
+templates/seats.html-2748-
+templates/seats.html-2749-
+templates/seats.html-2750-
+templates/seats.html-2751-
+templates/seats.html-2752-
+templates/seats.html-2753-
+templates/seats.html-2754-
+templates/seats.html-2755-
+--
+templates/seats.html-2768-
+templates/seats.html-2769-  .deck .cell[style*="grid-row:14"][style*="grid-column:4"],
+templates/seats.html-2770-  .deck .cell[style*="grid-row:14"][style*="grid-column: 4"],
+templates/seats.html-2771-  .deck .cell[style*="grid-row: 14"][style*="grid-column:4"],
+templates/seats.html-2772-  .deck .cell[style*="grid-row: 14"][style*="grid-column: 4"]{
+templates/seats.html-2773-    transform:translateX(var(--right-seat-column-shift, 16px)) !important;
+templates/seats.html-2774-  }
+templates/seats.html-2775-
+templates/seats.html:2776:  body.drive-mode .deck .cell[style*="grid-row:14"][style*="grid-column:4"],
+templates/seats.html:2777:  body.drive-mode .deck .cell[style*="grid-row:14"][style*="grid-column: 4"],
+templates/seats.html:2778:  body.drive-mode .deck .cell[style*="grid-row: 14"][style*="grid-column:4"],
+templates/seats.html:2779:  body.drive-mode .deck .cell[style*="grid-row: 14"][style*="grid-column: 4"]{
+templates/seats.html-2780-    transform:translateX(var(--right-seat-column-shift, 18px)) !important;
+templates/seats.html-2781-  }
+templates/seats.html-2782-</style>
+templates/seats.html-2783-<!-- ONLY_54_REAPPLY_RIGHT_SHIFT_END -->
+templates/seats.html-2784-
+templates/seats.html-2785-
+templates/seats.html-2786-
+templates/seats.html-2787-<!-- BOTTOM_VOICE_COMMAND_FINAL_START -->
+templates/seats.html-2788-<style id="bottom-voice-command-final-style">
+templates/seats.html-2789-  #seatSimpleVoiceBtn{
+templates/seats.html-2790-    background:
+templates/seats.html-2791-      radial-gradient(circle at 24% 18%, rgba(255,255,255,.20), transparent 34%),
+templates/seats.html-2792-      linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
+templates/seats.html-2793-    color:#fff !important;
+templates/seats.html-2794-  }
+templates/seats.html-2795-
+templates/seats.html-2796-  #seatSimpleVoiceBtn .ico{
+templates/seats.html-2797-    font-size:19px !important;
+templates/seats.html-2798-  }
+templates/seats.html-2799-
+templates/seats.html-2800-  #seatSimpleVoiceBtn .voice-bottom-text{
+templates/seats.html-2801-    display:block;
+templates/seats.html-2802-    line-height:1.02;
+templates/seats.html-2803-    font-size:10.5px;
+templates/seats.html-2804-    font-weight:1000;
+templates/seats.html-2805-    letter-spacing:-.02em;
+templates/seats.html-2806-  }
+templates/seats.html-2807-</style>
+templates/seats.html-2808-<!-- BOTTOM_VOICE_COMMAND_FINAL_END -->
+templates/seats.html-2809-
+templates/seats.html-2810-
+templates/seats.html-2811-<!-- BOTTOM_VOICE_LISTENING_STATE_FIX_START -->
+templates/seats.html-2812-<style id="bottom-voice-listening-state-fix-style">
+templates/seats.html-2813-  #seatSimpleVoiceBtn.listening{
+templates/seats.html-2814-    background:
+--
+templates/seats.html-3075-  .fab-column.fab-left-gap-moved .fab{
+templates/seats.html-3076-    width:46px !important;
+templates/seats.html-3077-    height:46px !important;
+templates/seats.html-3078-    border-radius:16px !important;
+templates/seats.html-3079-    font-size:19px !important;
+templates/seats.html-3080-    box-shadow:0 14px 28px rgba(0,0,0,.34) !important;
+templates/seats.html-3081-  }
+templates/seats.html-3082-
+templates/seats.html:3083:  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html-3084-    width:46px !important;
+templates/seats.html-3085-    height:46px !important;
+templates/seats.html-3086-    border-radius:16px !important;
+templates/seats.html-3087-    font-size:19px !important;
+templates/seats.html-3088-  }
+templates/seats.html-3089-
+templates/seats.html-3090-  @media(max-width:380px){
+templates/seats.html-3091-    .fab-column.fab-left-gap-moved{
+templates/seats.html-3092-      gap:6px !important;
+templates/seats.html-3093-    }
+templates/seats.html-3094-
+templates/seats.html-3095-    .fab-column.fab-left-gap-moved .fab,
+templates/seats.html:3096:    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html-3097-      width:44px !important;
+templates/seats.html-3098-      height:44px !important;
+templates/seats.html-3099-      border-radius:15px !important;
+templates/seats.html-3100-      font-size:18px !important;
+templates/seats.html-3101-    }
+templates/seats.html-3102-  }
+templates/seats.html-3103-</style>
+templates/seats.html-3104-
+templates/seats.html-3105-<script id="fab-left-gap-move-script">
+templates/seats.html-3106-(function(){
+templates/seats.html-3107-  if(window.__fabLeftGapMoveLoaded) return;
+templates/seats.html-3108-  window.__fabLeftGapMoveLoaded = true;
+templates/seats.html-3109-
+templates/seats.html-3110-  function q(sel){
+templates/seats.html-3111-    return document.querySelector(sel);
+templates/seats.html-3112-  }
+templates/seats.html-3113-
+templates/seats.html-3114-  function placeFabColumn(){
+templates/seats.html-3115-    var col = q(".fab-column");
+templates/seats.html-3116-    var wrap = q(".deck-wrap");
+templates/seats.html-3117-    var seat43 = q("#seat-43");
+templates/seats.html-3118-    var seat51 = q("#seat-51");
+templates/seats.html-3119-
+templates/seats.html-3120-    if(!col || !wrap || !seat43 || !seat51) return;
+templates/seats.html-3121-
+templates/seats.html-3122-    col.classList.add("fab-left-gap-moved");
+templates/seats.html-3123-
+templates/seats.html-3124-    // Ölçülerin oturması için önce sınıfı verip sonra ölçü alıyoruz.
+templates/seats.html-3125-    var wrapRect = wrap.getBoundingClientRect();
+templates/seats.html-3126-    var r43 = seat43.getBoundingClientRect();
+templates/seats.html-3127-    var r51 = seat51.getBoundingClientRect();
+templates/seats.html-3128-    var cRect = col.getBoundingClientRect();
+templates/seats.html-3129-
+templates/seats.html-3130-    var colW = cRect.width || 46;
+templates/seats.html-3131-    var colH = cRect.height || 152;
+--
+templates/seats.html-3299-
+templates/seats.html-3300-  .fab-column.fab-left-gap-moved::before{
+templates/seats.html-3301-    top:4px !important;
+templates/seats.html-3302-    font-size:7px !important;
+templates/seats.html-3303-    letter-spacing:.14em !important;
+templates/seats.html-3304-  }
+templates/seats.html-3305-
+templates/seats.html-3306-  .fab-column.fab-left-gap-moved .fab,
+templates/seats.html:3307:  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html-3308-    width:41px !important;
+templates/seats.html-3309-    height:41px !important;
+templates/seats.html-3310-    min-width:41px !important;
+templates/seats.html-3311-    min-height:41px !important;
+templates/seats.html-3312-    border-radius:15px !important;
+templates/seats.html-3313-    font-size:17px !important;
+templates/seats.html-3314-    outline-offset:1px !important;
+templates/seats.html-3315-  }
+templates/seats.html-3316-
+templates/seats.html-3317-  .fab-column.fab-left-gap-moved .fab::after{
+templates/seats.html-3318-    inset:-3px !important;
+templates/seats.html-3319-    border-radius:18px !important;
+templates/seats.html-3320-  }
+templates/seats.html-3321-
+templates/seats.html-3322-  @media(max-width:380px){
+templates/seats.html-3323-    .fab-column.fab-left-gap-moved{
+templates/seats.html-3324-      padding:14px 5px 5px !important;
+templates/seats.html-3325-      gap:4px !important;
+templates/seats.html-3326-      border-radius:19px !important;
+templates/seats.html-3327-    }
+templates/seats.html-3328-
+templates/seats.html-3329-    .fab-column.fab-left-gap-moved .fab,
+templates/seats.html:3330:    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html-3331-      width:39px !important;
+templates/seats.html-3332-      height:39px !important;
+templates/seats.html-3333-      min-width:39px !important;
+templates/seats.html-3334-      min-height:39px !important;
+templates/seats.html-3335-      border-radius:14px !important;
+templates/seats.html-3336-      font-size:16px !important;
+templates/seats.html-3337-    }
+templates/seats.html-3338-  }
+templates/seats.html-3339-</style>
+templates/seats.html-3340-
+templates/seats.html-3341-<script id="fab-compact-fit-script">
+templates/seats.html-3342-(function(){
+templates/seats.html-3343-  function refreshFabPosition(){
+templates/seats.html-3344-    try{
+templates/seats.html-3345-      window.dispatchEvent(new Event("resize"));
+templates/seats.html-3346-    }catch(_){}
+templates/seats.html-3347-  }
+templates/seats.html-3348-
+templates/seats.html-3349-  if(document.readyState === "loading"){
+templates/seats.html-3350-    document.addEventListener("DOMContentLoaded", function(){
+templates/seats.html-3351-      setTimeout(refreshFabPosition, 120);
+templates/seats.html-3352-      setTimeout(refreshFabPosition, 600);
+templates/seats.html-3353-    });
+templates/seats.html-3354-  }else{
+templates/seats.html-3355-    setTimeout(refreshFabPosition, 120);
+templates/seats.html-3356-    setTimeout(refreshFabPosition, 600);
+templates/seats.html-3357-  }
+templates/seats.html-3358-
+templates/seats.html-3359-  setTimeout(refreshFabPosition, 1200);
+templates/seats.html-3360-})();
+templates/seats.html-3361-</script>
+templates/seats.html-3362-<!-- FAB_COMPACT_FIT_END -->
+templates/seats.html-3363-
+templates/seats.html-3364-
+templates/seats.html-3365-
+templates/seats.html-3366-<!-- FAB_DRIVE_MODE_OVERRIDE_FIX_START -->
+templates/seats.html-3367-<style id="fab-drive-mode-override-fix-style">
+templates/seats.html-3368-  /*
+templates/seats.html-3369-    Sorun:
+templates/seats.html:3370:    static/seats/seats.css içindeki body.drive-mode .fab-column kuralı
+templates/seats.html-3371-    hızlı işlem panelini yatay alt bar gibi zorluyordu.
+templates/seats.html-3372-
+templates/seats.html-3373-    Çözüm:
+templates/seats.html-3374-    .fab-left-gap-moved sınıfı varsa, drive-mode kurallarını ezip
+templates/seats.html-3375-    paneli tekrar 43-51 arasındaki dikey mini panel yap.
+templates/seats.html-3376-  */
+templates/seats.html-3377-
+templates/seats.html-3378-  .fab-column.fab-left-gap-moved,
+templates/seats.html:3379:  body.drive-mode .fab-column.fab-left-gap-moved{
+templates/seats.html-3380-    position:absolute !important;
+templates/seats.html-3381-
+templates/seats.html-3382-    left:var(--fab-left-gap-left, 0px) !important;
+templates/seats.html-3383-    top:var(--fab-left-gap-top, 0px) !important;
+templates/seats.html-3384-    right:auto !important;
+templates/seats.html-3385-    bottom:auto !important;
+templates/seats.html-3386-    transform:none !important;
+templates/seats.html-3387-
+templates/seats.html-3388-    display:flex !important;
+templates/seats.html-3389-    flex-direction:column !important;
+templates/seats.html-3390-    align-items:center !important;
+templates/seats.html-3391-    justify-content:flex-start !important;
+templates/seats.html-3392-
+templates/seats.html-3393-    width:64px !important;
+templates/seats.html-3394-    min-width:64px !important;
+templates/seats.html-3395-    max-width:64px !important;
+templates/seats.html-3396-
+templates/seats.html-3397-    height:auto !important;
+templates/seats.html-3398-    min-height:0 !important;
+templates/seats.html-3399-    max-height:none !important;
+templates/seats.html-3400-
+templates/seats.html-3401-    padding:15px 6px 6px !important;
+templates/seats.html-3402-    gap:5px !important;
+templates/seats.html-3403-    border-radius:21px !important;
+templates/seats.html-3404-
+templates/seats.html-3405-    background:
+templates/seats.html-3406-      radial-gradient(circle at 50% 0%, rgba(56,189,248,.22), transparent 42%),
+templates/seats.html-3407-      linear-gradient(180deg, rgba(15,23,42,.92), rgba(2,6,23,.88)) !important;
+templates/seats.html-3408-
+templates/seats.html-3409-    border:1px solid rgba(125,211,252,.36) !important;
+templates/seats.html-3410-    box-shadow:
+templates/seats.html-3411-      inset 0 1px 0 rgba(255,255,255,.08),
+templates/seats.html-3412-      0 14px 28px rgba(0,0,0,.36),
+templates/seats.html-3413-      0 0 22px rgba(37,99,235,.16) !important;
+templates/seats.html-3414-
+templates/seats.html-3415-    overflow:visible !important;
+templates/seats.html-3416-    z-index:90 !important;
+templates/seats.html-3417-  }
+templates/seats.html-3418-
+templates/seats.html-3419-  .fab-column.fab-left-gap-moved::before,
+templates/seats.html:3420:  body.drive-mode .fab-column.fab-left-gap-moved::before{
+templates/seats.html-3421-    content:"HIZLI" !important;
+templates/seats.html-3422-    position:absolute !important;
+templates/seats.html-3423-    top:4px !important;
+templates/seats.html-3424-    left:50% !important;
+templates/seats.html-3425-    transform:translateX(-50%) !important;
+templates/seats.html-3426-
+templates/seats.html-3427-    font-size:7px !important;
+templates/seats.html-3428-    line-height:1 !important;
+templates/seats.html-3429-    font-weight:1000 !important;
+templates/seats.html-3430-    letter-spacing:.14em !important;
+templates/seats.html-3431-    color:rgba(191,219,254,.92) !important;
+templates/seats.html-3432-    text-shadow:0 0 12px rgba(96,165,250,.55) !important;
+templates/seats.html-3433-    pointer-events:none !important;
+templates/seats.html-3434-  }
+templates/seats.html-3435-
+templates/seats.html-3436-  .fab-column.fab-left-gap-moved .fab,
+templates/seats.html:3437:  body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html-3438-    width:41px !important;
+templates/seats.html-3439-    height:41px !important;
+templates/seats.html-3440-    min-width:41px !important;
+templates/seats.html-3441-    min-height:41px !important;
+templates/seats.html-3442-
+templates/seats.html-3443-    border-radius:15px !important;
+templates/seats.html-3444-    font-size:17px !important;
+templates/seats.html-3445-
+templates/seats.html-3446-    margin:0 !important;
+templates/seats.html-3447-    padding:0 !important;
+templates/seats.html-3448-
+templates/seats.html-3449-    display:flex !important;
+templates/seats.html-3450-    align-items:center !important;
+templates/seats.html-3451-    justify-content:center !important;
+templates/seats.html-3452-
+templates/seats.html-3453-    outline-offset:1px !important;
+templates/seats.html-3454-  }
+templates/seats.html-3455-
+templates/seats.html-3456-  .fab-column.fab-left-gap-moved .fab::after,
+templates/seats.html:3457:  body.drive-mode .fab-column.fab-left-gap-moved .fab::after{
+templates/seats.html-3458-    inset:-3px !important;
+templates/seats.html-3459-    border-radius:18px !important;
+templates/seats.html-3460-  }
+templates/seats.html-3461-
+templates/seats.html-3462-  @media(max-width:380px){
+templates/seats.html-3463-    .fab-column.fab-left-gap-moved,
+templates/seats.html:3464:    body.drive-mode .fab-column.fab-left-gap-moved{
+templates/seats.html-3465-      width:60px !important;
+templates/seats.html-3466-      min-width:60px !important;
+templates/seats.html-3467-      max-width:60px !important;
+templates/seats.html-3468-
+templates/seats.html-3469-      padding:14px 5px 5px !important;
+templates/seats.html-3470-      gap:4px !important;
+templates/seats.html-3471-      border-radius:19px !important;
+templates/seats.html-3472-    }
+templates/seats.html-3473-
+templates/seats.html-3474-    .fab-column.fab-left-gap-moved .fab,
+templates/seats.html:3475:    body.drive-mode .fab-column.fab-left-gap-moved .fab{
+templates/seats.html-3476-      width:39px !important;
+templates/seats.html-3477-      height:39px !important;
+templates/seats.html-3478-      min-width:39px !important;
+templates/seats.html-3479-      min-height:39px !important;
+templates/seats.html-3480-      border-radius:14px !important;
+templates/seats.html-3481-      font-size:16px !important;
+templates/seats.html-3482-    }
+templates/seats.html-3483-  }
+templates/seats.html-3484-</style>
+templates/seats.html-3485-
+templates/seats.html-3486-<script id="fab-drive-mode-override-fix-script">
+templates/seats.html-3487-(function(){
+templates/seats.html-3488-  if(window.__fabDriveModeOverrideFixReady) return;
+templates/seats.html-3489-  window.__fabDriveModeOverrideFixReady = true;
+templates/seats.html-3490-
+templates/seats.html-3491-  function q(sel){
+templates/seats.html-3492-    return document.querySelector(sel);
+templates/seats.html-3493-  }
+templates/seats.html-3494-
+templates/seats.html-3495-  function place(){
+templates/seats.html-3496-    var col = q(".fab-column");
+templates/seats.html-3497-    var wrap = q(".deck-wrap");
+templates/seats.html-3498-    var seat43 = q("#seat-43");
+templates/seats.html-3499-    var seat51 = q("#seat-51");
+templates/seats.html-3500-
+templates/seats.html-3501-    if(!col || !wrap || !seat43 || !seat51) return;
+templates/seats.html-3502-
+templates/seats.html-3503-    col.classList.add("fab-left-gap-moved");
+templates/seats.html-3504-
+templates/seats.html-3505-    var wrapRect = wrap.getBoundingClientRect();
+templates/seats.html-3506-    var r43 = seat43.getBoundingClientRect();
+templates/seats.html-3507-    var r51 = seat51.getBoundingClientRect();
+templates/seats.html-3508-    var cRect = col.getBoundingClientRect();
+templates/seats.html-3509-
+templates/seats.html-3510-    var colW = cRect.width || 64;
+
+===== 8) CSS açılış/kapanış kontrol =====
+style açılış: 0
+style kapanış: 20
+script açılış: 0
+script kapanış: 25
+
+===== 9) Python kontrol =====
+app.py syntax OK

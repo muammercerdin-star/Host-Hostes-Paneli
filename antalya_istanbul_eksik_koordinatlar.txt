@@ -1,0 +1,27 @@
+# Format:
+# Durak Adı | lat | lng
+#
+# Örnek:
+# Korkuteli | 37.064000 | 30.195000
+
+Korkuteli |  |
+Korkuteli Elmalı Kavşağı |  |
+Çavdır |  |
+Acıpayam Kavşağı |  |
+Mevlütlü |  |
+Gölmarmara |  |
+Tuzla |  |
+Güzelyalı |  |
+İçmeler Köprüsü |  |
+Kaynarca |  |
+Pendik |  |
+Kartal Köprüsü |  |
+70 Evler |  |
+Cevizli |  |
+Maltepe Köprüsü |  |
+Zümrütevler (Huzur Evi) |  |
+Küçükyalı |  |
+Bostancı |  |
+Göztepe Köprüsü |  |
+Arabalı Vapur / Harem İskele |  |
+Sirkeci |  |

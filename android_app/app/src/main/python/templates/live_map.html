@@ -2792,5 +2792,135 @@ body.map-fullscreen-mode .map-speed-badge{
 <!-- MUAVIN_LIVE_MAP_EXTRA_JS_LINK_V1 -->
 <script src="{{ url_for('static', filename='live_map/muavin_live_map_extra.js') }}?v=final15"></script>
 <!-- END_MUAVIN_LIVE_MAP_EXTRA_JS_LINK_V1 -->
+
+<!-- VOICE_MAP_FULLSCREEN_PATCH_START -->
+<style id="voice-map-fullscreen-style">
+  html.voice-map-fullscreen,
+  body.voice-map-fullscreen{
+    width:100% !important;
+    height:100% !important;
+    margin:0 !important;
+    padding:0 !important;
+    overflow:hidden !important;
+    background:#020617 !important;
+  }
+
+  body.voice-map-fullscreen #map{
+    position:fixed !important;
+    inset:0 !important;
+    width:100vw !important;
+    height:100dvh !important;
+    min-height:100dvh !important;
+    margin:0 !important;
+    padding:0 !important;
+    border-radius:0 !important;
+    z-index:2147482000 !important;
+  }
+
+  body.voice-map-fullscreen .leaflet-control-container{
+    position:relative !important;
+    z-index:2147482200 !important;
+  }
+
+  body.voice-map-fullscreen .topbar,
+  body.voice-map-fullscreen .page-header,
+  body.voice-map-fullscreen .map-header,
+  body.voice-map-fullscreen .live-map-header,
+  body.voice-map-fullscreen .map-hero,
+  body.voice-map-fullscreen .map-summary,
+  body.voice-map-fullscreen .bottom-nav,
+  body.voice-map-fullscreen .bottom-bar{
+    display:none !important;
+  }
+
+  body.voice-map-fullscreen main,
+  body.voice-map-fullscreen .map-shell,
+  body.voice-map-fullscreen .live-map-shell,
+  body.voice-map-fullscreen .content{
+    width:100vw !important;
+    height:100dvh !important;
+    margin:0 !important;
+    padding:0 !important;
+    max-width:none !important;
+    overflow:hidden !important;
+  }
+
+  #voiceMapFullscreenExit{
+    position:fixed;
+    top:calc(env(safe-area-inset-top, 0px) + 12px);
+    right:12px;
+    z-index:2147482600;
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:16px;
+    min-height:42px;
+    padding:0 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-weight:1000;
+    font-size:13px;
+    background:rgba(2,6,23,.78);
+    box-shadow:0 12px 28px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.08);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+  }
+
+  #voiceMapFullscreenExit:active{
+    transform:scale(.96);
+  }
+</style>
+
+<script id="voice-map-fullscreen-script">
+(function(){
+  const params = new URLSearchParams(location.search);
+  const fullscreen =
+    params.get("fullscreen") === "1" ||
+    params.get("fs") === "1" ||
+    params.get("mode") === "fullscreen";
+
+  if(!fullscreen) return;
+
+  document.documentElement.classList.add("voice-map-fullscreen");
+  document.body.classList.add("voice-map-fullscreen");
+
+  function ensureExit(){
+    if(document.getElementById("voiceMapFullscreenExit")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "voiceMapFullscreenExit";
+    btn.type = "button";
+    btn.textContent = "↩ Koltuk";
+
+    btn.addEventListener("click", function(e){
+      e.preventDefault();
+      if(document.referrer && document.referrer.includes(location.host)){
+        history.back();
+      }else{
+        location.href = "/seats";
+      }
+    });
+
+    document.body.appendChild(btn);
+  }
+
+  function resizeMap(){
+    try{
+      if(window.MUAVIN_LIVE_MAP && typeof window.MUAVIN_LIVE_MAP.invalidateSize === "function"){
+        window.MUAVIN_LIVE_MAP.invalidateSize();
+      }
+    }catch(_){}
+  }
+
+  ensureExit();
+
+  setTimeout(resizeMap, 100);
+  setTimeout(resizeMap, 500);
+  setTimeout(resizeMap, 1200);
+  window.addEventListener("resize", resizeMap);
+})();
+</script>
+<!-- VOICE_MAP_FULLSCREEN_PATCH_END -->
+
 </body>
 </html>

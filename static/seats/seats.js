@@ -1483,6 +1483,12 @@ if(routeFocusItem && live){
   }
 
   function clearSeatUI(seatNo){
+    try{
+      if(typeof window.clearBiletsizSeatBadges === "function"){
+        window.clearBiletsizSeatBadges([seatNo]);
+      }
+    }catch(_){}
+
     delete assigned[String(seatNo)];
     delete stopsMap[String(seatNo)];
     delete genders[String(seatNo)];

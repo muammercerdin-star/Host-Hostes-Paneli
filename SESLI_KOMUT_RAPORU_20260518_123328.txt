@@ -1,0 +1,971 @@
+============================================================
+SESİ KOMUT RAPORU
+Tarih: Mon May 18 12:33:28 +03 2026
+============================================================
+
+===== 1) VOICE_HELP =====
+6:const VOICE_HELP = [
+7-  "kaç yolcu var",
+8-  "ayakta kaç kişi var",
+9-  "hesap aç",
+10-  "emanet aç",
+11-  "sıradaki durak [durak adı]",
+12-  "durak seç [durak adı]",
+13-  "[durak adı] kaç yolcu var",
+14-  "bir sonraki durak",
+15-  "rötar kaç",
+16-  "hangi duraktayız",
+17-  "sesli yardım",
+18-  "bu durakta işlem var mı",
+19-  "bu durakta kimler inecek",
+20-  "bu durakta bagaj var mı",
+21-  "inecekleri indir",
+22-];
+23-
+24-function stopHumanVoiceSummary(stopName){
+25-  const stop = String(stopName || "").trim();
+26-  if(!stop) return "Durak bilgisi bulunamadı.";
+27-
+28-  let seats = [];
+29-  let parcelCt = 0;
+30-  let standingCt = 0;
+31-
+32-  try{
+33-    seats = seatsForStop(stop).map(Number).filter(Boolean);
+34-  }catch(_){
+35-    seats = [];
+36-  }
+37-
+38-  try{
+39-    parcelCt = computeParcelCountsByStop()[stop] || 0;
+40-  }catch(_){
+41-    parcelCt = 0;
+42-  }
+43-
+44-  try{
+45-    standingCt = computeStandingCountsByStop()[stop] || 0;
+46-  }catch(_){
+--
+623:    const help = "Temel komutlar: " + VOICE_HELP.join(", ");
+624-    toast(help, 4200);
+625-    speak(help);
+626-    return true;
+627-  }
+628-
+629-  if(cmd.type === "open_hesap"){
+630-    speak("Hesap sayfası açılıyor.");
+631-    location.href = URLS.hesap || "/hesap";
+632-    return true;
+633-  }
+634-
+635-  if(cmd.type === "open_emanet"){
+636-    speak("Emanet sayfası açılıyor.");
+637-    location.href = URLS.consignments || "/emanetler";
+638-    return true;
+639-  }
+640-
+641-  if(cmd.type === "set_gender"){
+642-    await applySeatGender(cmd.seats, cmd.gender);
+643-    return true;
+644-  }
+645-
+646-  if(cmd.type === "ask_total"){
+647-    const seated = Object.values(assigned || {}).filter(Boolean).length;
+648-    const total = seated + (standingCount || 0);
+649-    const standing = Number(standingCount || 0);
+650-      const msg = standing > 0
+651-        ? `Toplam ${total} yolcu var. Bunun ${standing} kişisi ayakta.`
+652-        : `Toplam ${total} yolcu var.`;
+653-    toast(msg, 3600);
+654-    speak(msg);
+655-    return true;
+656-  }
+657-
+658-  if(cmd.type === "ask_standing"){
+659-    const msg = `Ayakta ${standingCount || 0} kişi var. Tahsilat ${fmtTL(standingRevenue || 0)}.`;
+660-    toast(msg, 3600);
+661-    speak(msg);
+662-    return true;
+663-  }
+
+===== 2) parseVoiceCommand =====
+369:function parseVoiceCommand(text){
+370-  const t = norm(text);
+371-  const mentionedStop = findStopMention(text);
+372-  const seats = extractSeatNumbersFromText(text);
+373-  const gender = detectGenderFromText(text);
+374-
+375-  if(/^(hesap ac|hesap aç)$/.test(t)) return { type:"open_hesap" };
+376-  if(/^(emanet ac|emanet aç|emanetler ac|emanetler aç)$/.test(t)) return { type:"open_emanet" };
+377-  if(/^(sesli yardim|sesli yardım|yardim|yardım)$/.test(t)) return { type:"help" };
+378-  if(/(kac yolcu var|kaç yolcu var|toplam yolcu)/.test(t)) return { type:"ask_total" };
+379-  if(/(ayakta kac|ayakta kaç)/.test(t)) return { type:"ask_standing" };
+380-  if(/(hangi duraktayiz|hangi duraktayız|neredeyiz)/.test(t)) return { type:"ask_live_stop" };
+381-  if(/(rotar kac|rötar kaç|gecikme kac|gecikme kaç)/.test(t)) return { type:"ask_delay" };
+382-  if(/(bir sonraki durak|siradaki saatli|sıradaki saatli)/.test(t)) return { type:"ask_next_timed" };
+383-
+384-  if(mentionedStop && /(kaç yolcu var|kac yolcu var|orada kaç yolcu var|orada kac yolcu var|kaç kişi var|kac kisi var)/.test(t)){
+385-    return { type:"ask_stop_count", stop: mentionedStop };
+386-  }
+387-
+388-  if(seats.length && gender !== null){
+389-    return { type:"set_gender", seats, gender };
+390-  }
+391-
+392-  if((/(siradaki durak|sıradaki durak|durak sec|durak seç)/.test(t)) && mentionedStop){
+393-    return { type:"set_stop", stop: mentionedStop };
+394-  }
+395-
+396-  if(mentionedStop && /(durak|sec|seç)/.test(t)){
+397-    return { type:"set_stop", stop: mentionedStop };
+398-  }
+399-
+400-
+401-  if(/(bu durakta islem var mi|bu durakta işlem var mı|secili durakta islem var mi|seçili durakta işlem var mı|bu durakta ne var)/.test(t)){
+402-    return { type:"ask_stop_ops" };
+403-  }
+404-
+405-  if(/(bu durakta kimler inecek|secili durakta kim inecek|seçili durakta kim inecek|inecekleri soyle|inecekleri söyle)/.test(t)){
+406-    return { type:"ask_selected_stop_passengers" };
+407-  }
+408-
+409-  if(mentionedStop && /(bagaj var mi|bagaj var mı)/.test(t)){
+410-    return { type:"ask_stop_bags", stop: mentionedStop };
+411-  }
+412-
+413-  if(/(bu durakta bagaj var mi|bu durakta bagaj var mı|secili durakta bagaj var mi|seçili durakta bagaj var mı|bagajli var mi|bagajlı var mı)/.test(t)){
+414-    return { type:"ask_stop_bags" };
+415-  }
+416-
+417-  if(/(inecekleri indir|bu durakta indir|secili duraktakileri indir|seçili duraktakileri indir)/.test(t)){
+418-    return { type:"offload_selected_stop" };
+419-  }
+420-
+421-  return { type:"unknown", raw:text };
+422-}
+423-
+424-function aiIntentTitle(intent){
+425-  const map = {
+426-    seat_add_single: "Tek koltuk ekleme",
+427-    seat_add_group: "Çoklu koltuk ekleme",
+428-    seat_remove_single: "Tek koltuk boşaltma",
+429-    seat_remove_group: "Çoklu koltuk boşaltma",
+430-    standing_add: "Ayakta ekleme",
+431-    service_mark: "Servis işaretleme",
+432-    query: "Sorgu"
+433-  };
+434-
+435-  return map[intent] || intent || "Bilinmeyen işlem";
+436-}
+437-
+438-async function resolveVoiceWithBackendAI(text){
+439-  const j = await safeJsonFetch("/api/ai/resolve", {
+440-    method: "POST",
+441-    headers: {
+442-      "Content-Type": "application/json",
+443-      "X-CSRF-Token": csrf
+444-    },
+445-    body: JSON.stringify({ command: text })
+446-  });
+447-
+448-  return j?.result || null;
+449-}
+450-
+451-function extractFirstNumberFromText(text, fallback=1){
+452-  const m = String(text || "").match(/\b\d+\b/);
+453-  if(!m) return fallback;
+454-
+455-  const n = parseInt(m[0], 10);
+456-  return Number.isFinite(n) && n > 0 ? n : fallback;
+457-}
+458-
+459-async function openSingleSeatAddFlow(seatNo){
+460-  await populateStops();
+461-  openSeat(seatNo);
+462-
+463-  const selectedStop = getSelectedStopName() || "";
+464-  if(selectedStop && $("#pickup")) $("#pickup").value = selectedStop;
+465-
+466-  toast(`Koltuk ${seatNo} için giriş formu açıldı`);
+467-  speak(`Koltuk ${seatNo} için giriş formu açıldı.`);
+468-}
+469-
+470-async function openBulkSeatAddFlow(seats){
+471-  await populateStops();
+472-
+473-  openModal("#bulkBackdrop", "#bulkModal");
+474-
+475-  const selectedStop = getSelectedStopName() || "";
+476-  if(selectedStop && $("#bulkTo")) $("#bulkTo").value = selectedStop;
+477-
+478-  clearMultiPicks();
+479-  setMultiMode(true);
+480-
+481-  seats.forEach(seatNo => {
+482-    const el = $("#seat-" + seatNo);
+483-    if(!el) return;
+484-    if(assigned[String(seatNo)]) return;
+485-    if(!multiSelected.has(el)) toggleSeatPick(el);
+486-  });
+487-
+488-  if($("#bulkCount")) $("#bulkCount").value = String(seats.length || 1);
+489-
+490-  toast("Toplu giriş formu hazırlandı");
+491-  speak("Toplu giriş formu açıldı.");
+492-}
+493-
+494-async function openStandingAddFlow(text, resolved){
+495-  await populateStops();
+496-
+497-  openModal("#cashBackdrop", "#cashModal");
+498-
+499-  const selectedStop = getSelectedStopName() || "";
+
+===== 3) handleLocalVoiceCommand =====
+619:async function handleLocalVoiceCommand(text){
+620-  const cmd = parseVoiceCommand(text);
+621-
+622-  if(cmd.type === "help"){
+623-    const help = "Temel komutlar: " + VOICE_HELP.join(", ");
+624-    toast(help, 4200);
+625-    speak(help);
+626-    return true;
+627-  }
+628-
+629-  if(cmd.type === "open_hesap"){
+630-    speak("Hesap sayfası açılıyor.");
+631-    location.href = URLS.hesap || "/hesap";
+632-    return true;
+633-  }
+634-
+635-  if(cmd.type === "open_emanet"){
+636-    speak("Emanet sayfası açılıyor.");
+637-    location.href = URLS.consignments || "/emanetler";
+638-    return true;
+639-  }
+640-
+641-  if(cmd.type === "set_gender"){
+642-    await applySeatGender(cmd.seats, cmd.gender);
+643-    return true;
+644-  }
+645-
+646-  if(cmd.type === "ask_total"){
+647-    const seated = Object.values(assigned || {}).filter(Boolean).length;
+648-    const total = seated + (standingCount || 0);
+649-    const standing = Number(standingCount || 0);
+650-      const msg = standing > 0
+651-        ? `Toplam ${total} yolcu var. Bunun ${standing} kişisi ayakta.`
+652-        : `Toplam ${total} yolcu var.`;
+653-    toast(msg, 3600);
+654-    speak(msg);
+655-    return true;
+656-  }
+657-
+658-  if(cmd.type === "ask_standing"){
+659-    const msg = `Ayakta ${standingCount || 0} kişi var. Tahsilat ${fmtTL(standingRevenue || 0)}.`;
+660-    toast(msg, 3600);
+661-    speak(msg);
+662-    return true;
+663-  }
+664-
+665-
+666-  if(cmd.type === "ask_stop_ops"){
+667-    const stop = getSelectedStopName() || speedState.liveStop || "";
+668-    const msg = stopOperationVoiceSummary(stop);
+669-
+670-    toast(msg, 4200);
+671-    speak(msg);
+672-    return true;
+673-  }
+674-
+675-  if(cmd.type === "ask_selected_stop_passengers"){
+676-    const stop = getSelectedStopName() || speedState.liveStop || "";
+677-    const msg = stopHumanVoiceSummary(stop);
+678-
+679-    toast(msg, 4200);
+680-    speak(msg);
+681-    return true;
+682-  }
+683-
+684-  if(cmd.type === "ask_stop_bags"){
+685-    const stop = cmd.stop || getSelectedStopName() || speedState.liveStop || "";
+686-    const msg = stopBagVoiceOnly(stop);
+687-
+688-    toast(msg, 4200);
+689-    speak(msg);
+690-    return true;
+691-  }
+692-
+693-  if(cmd.type === "offload_selected_stop"){
+694-    return await offloadSelectedStopByVoice();
+695-  }
+696-
+697-  if(cmd.type === "ask_stop_count"){
+698-    const stop = cmd.stop;
+699-    const msg = stopHumanVoiceSummary(stop);
+700-
+701-    toast(msg, 4200);
+702-    speak(msg);
+703-    return true;
+704-  }
+705-
+706-  if(cmd.type === "ask_live_stop"){
+707-    const live = speedState.liveStop || getSelectedStopName() || "henüz belli değil";
+708-    const msg = `Şu an ${live} civarındasın.`;
+709-    toast(msg, 3200);
+710-    speak(msg);
+711-    return true;
+712-  }
+713-
+714-  if(cmd.type === "ask_delay"){
+715-    const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+716-    if(!nextTimed){
+717-      const msg = "Saatli durak bilgisi yok.";
+718-      toast(msg, 3200);
+719-      speak(msg);
+720-      return true;
+721-    }
+722-
+723-    const msg = `${nextTimed.stop} için ${fmtSignedMin(nextTimed.delayMin)}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
+724-    toast(msg, 4200);
+725-    speak(msg);
+726-    return true;
+727-  }
+728-
+729-  if(cmd.type === "ask_next_timed"){
+730-    const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+731-    if(!nextTimed){
+732-      const msg = "Sıradaki saatli durak bulunamadı.";
+733-      toast(msg, 3200);
+734-      speak(msg);
+735-      return true;
+736-    }
+737-
+738-    const msg = `Sıradaki saatli nokta ${nextTimed.stop}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
+739-    toast(msg, 4200);
+740-    speak(msg);
+741-    return true;
+742-  }
+743-
+744-  if(cmd.type === "set_stop"){
+745-    const ok = setSelectedStop(cmd.stop, { silent:true, voiceReply:false });
+746-    if(!ok){
+747-      toast("Bu durak güzergâhta yok");
+748-      speak("Bu durak bu güzergâhta bulunmuyor.");
+749-      return true;
+750-    }
+751-
+752-    const stop = getSelectedStopName();
+753-    const msg = stopHumanVoiceSummary(stop);
+754-    toast(msg, 3600);
+755-    speak(msg);
+756-    return true;
+757-  }
+758-
+759-  return false;
+760-}
+761-
+762-async function handleBasicVoiceCommand(text){
+763-  const localHandled = await handleLocalVoiceCommand(text);
+764-  if(localHandled) return;
+765-
+766-  try{
+767-    const resolved = await resolveVoiceWithBackendAI(text);
+768-    const handled = await executeResolvedAiOnSeats(resolved, text);
+769-
+770-    if(handled) return;
+771-
+772-    if(resolved?.intent === "query"){
+773-      const cmd = parseVoiceCommand(text);
+774-
+775-      if(cmd.type === "ask_stop_count"){
+776-        const stop = cmd.stop;
+777-        const msg = stopHumanVoiceSummary(stop);
+778-        toast(msg, 4200);
+779-        speak(msg);
+780-        return;
+781-      }
+782-
+783-      if(cmd.type === "ask_total"){
+784-        const seated = Object.values(assigned || {}).filter(Boolean).length;
+785-        const total = seated + (standingCount || 0);
+786-        const standing = Number(standingCount || 0);
+787-      const msg = standing > 0
+788-        ? `Toplam ${total} yolcu var. Bunun ${standing} kişisi ayakta.`
+789-        : `Toplam ${total} yolcu var.`;
+790-        toast(msg, 3600);
+791-        speak(msg);
+792-        return;
+793-      }
+794-
+795-      if(cmd.type === "ask_standing"){
+796-        const msg = `Ayakta ${standingCount || 0} kişi var. Tahsilat ${fmtTL(standingRevenue || 0)}.`;
+797-        toast(msg, 3600);
+798-        speak(msg);
+799-        return;
+800-      }
+801-    }
+802-
+803-    toast("Komut anlaşılmadı");
+804-    speak("Komutu anlayamadım. Sesli yardım diyebilirsin.");
+805-  }catch(e){
+806-    console.error("AI voice resolve error:", e);
+807-    toast("AI sesli komut hatası");
+808-    speak("AI sesli komut tarafında bir hata oluştu.");
+809-  }
+
+===== 4) AI resolver / backend komutları =====
+438:async function resolveVoiceWithBackendAI(text){
+439-  const j = await safeJsonFetch("/api/ai/resolve", {
+440-    method: "POST",
+441-    headers: {
+442-      "Content-Type": "application/json",
+443-      "X-CSRF-Token": csrf
+444-    },
+445-    body: JSON.stringify({ command: text })
+446-  });
+447-
+448-  return j?.result || null;
+449-}
+450-
+451-function extractFirstNumberFromText(text, fallback=1){
+452-  const m = String(text || "").match(/\b\d+\b/);
+453-  if(!m) return fallback;
+454-
+455-  const n = parseInt(m[0], 10);
+456-  return Number.isFinite(n) && n > 0 ? n : fallback;
+457-}
+458-
+459-async function openSingleSeatAddFlow(seatNo){
+460-  await populateStops();
+461-  openSeat(seatNo);
+462-
+463-  const selectedStop = getSelectedStopName() || "";
+464-  if(selectedStop && $("#pickup")) $("#pickup").value = selectedStop;
+465-
+466-  toast(`Koltuk ${seatNo} için giriş formu açıldı`);
+467-  speak(`Koltuk ${seatNo} için giriş formu açıldı.`);
+468-}
+469-
+470-async function openBulkSeatAddFlow(seats){
+471-  await populateStops();
+472-
+473-  openModal("#bulkBackdrop", "#bulkModal");
+474-
+475-  const selectedStop = getSelectedStopName() || "";
+476-  if(selectedStop && $("#bulkTo")) $("#bulkTo").value = selectedStop;
+477-
+478-  clearMultiPicks();
+479-  setMultiMode(true);
+480-
+481-  seats.forEach(seatNo => {
+482-    const el = $("#seat-" + seatNo);
+483-    if(!el) return;
+484-    if(assigned[String(seatNo)]) return;
+485-    if(!multiSelected.has(el)) toggleSeatPick(el);
+486-  });
+487-
+488-  if($("#bulkCount")) $("#bulkCount").value = String(seats.length || 1);
+489-
+490-  toast("Toplu giriş formu hazırlandı");
+491-  speak("Toplu giriş formu açıldı.");
+492-}
+493-
+494-async function openStandingAddFlow(text, resolved){
+495-  await populateStops();
+496-
+497-  openModal("#cashBackdrop", "#cashModal");
+498-
+499-  const selectedStop = getSelectedStopName() || "";
+500-  if(selectedStop && $("#cashTo")) $("#cashTo").value = selectedStop;
+501-
+502-  const inferred =
+503-    (Array.isArray(resolved?.seats) && resolved.seats.length === 1)
+504-      ? Number(resolved.seats[0] || 1)
+505-      : extractFirstNumberFromText(text, 1);
+506-
+507-  if($("#cashCount")) $("#cashCount").value = String(inferred > 0 ? inferred : 1);
+508-
+509-  toast("Ayakta satış formu açıldı");
+510-  speak("Ayakta satış formu açıldı.");
+511-}
+512-
+513-async function applyServiceMark(seats){
+514-  if(!Array.isArray(seats) || !seats.length){
+515-    toast("Servis için koltuk bulunamadı");
+516-    speak("Servis için koltuk bulunamadı.");
+517-    return;
+518-  }
+519-
+520-  const note = "Sesli komut";
+521-
+522-  const j = await safeJsonFetch("/api/seats/service", {
+523-    method: "POST",
+524-    headers: {
+525-      "Content-Type": "application/json",
+526-      "X-CSRF-Token": csrf
+527-    },
+528-    body: JSON.stringify({
+529-      seats,
+530-      service: 1,
+531-      service_note: note
+532-    })
+533-  });
+534-
+535-  if(!j.ok) throw new Error(j.msg || "Servis işaretleme başarısız");
+536-
+537-  seats.forEach(n => {
+538-    serviceMap[String(n)] = true;
+539-    serviceNotes[String(n)] = note;
+540-    setSeatVisual(n);
+541-  });
+542-
+543-  updateStats();
+544-  renderAI();
+545-  renderTimeline();
+546-  updateCompactHeader();
+547-
+548-  toast(`Servis işlendi: ${seats.join(", ")}`);
+549-  speak(`Servis işlendi. Koltuklar ${seats.join(", ")}`);
+550-}
+551-
+552:async function executeResolvedAiOnSeats(resolved, rawText){
+553-  if(!resolved) return false;
+554-
+555-  const intent = resolved.intent || "";
+556-  const seats = Array.isArray(resolved.seats) ? resolved.seats.map(Number).filter(Number.isFinite) : [];
+557-
+558-  if(resolved.status === "suggest"){
+559-    toast(`Düşük güven: ${aiIntentTitle(intent)}`);
+560-    speak(`Komut düşük güvenle algılandı. Tahmin edilen işlem ${aiIntentTitle(intent)}.`);
+561-    return true;
+562-  }
+563-
+564-  if(resolved.status !== "matched"){
+565-    return false;
+566-  }
+567-
+568-  if(intent === "seat_remove_single" || intent === "seat_remove_group"){
+569-    if(!seats.length){
+570-      toast("Boşaltılacak koltuk bulunamadı");
+571-      speak("Boşaltılacak koltuk bulunamadı.");
+572-      return true;
+573-    }
+574-
+575-    await bulkOffload(seats);
+576-    speak(`${seats.join(" ve ")} numaralı koltuk boşaltıldı.`);
+577-    return true;
+578-  }
+579-
+580-  if(intent === "service_mark"){
+581-    await applyServiceMark(seats);
+582-    return true;
+583-  }
+584-
+585-  if(intent === "seat_add_single"){
+586-    if(!seats.length){
+587-      toast("Koltuk bulunamadı");
+588-      speak("Koltuk bulunamadı.");
+589-      return true;
+590-    }
+591-
+592-    await openSingleSeatAddFlow(seats[0]);
+593-    return true;
+594-  }
+595-
+596-  if(intent === "seat_add_group"){
+597-    if(!seats.length){
+598-      toast("Koltuk listesi bulunamadı");
+599-      speak("Koltuk listesi bulunamadı.");
+600-      return true;
+601-    }
+602-
+603-    await openBulkSeatAddFlow(seats);
+604-    return true;
+605-  }
+606-
+607-  if(intent === "standing_add"){
+608-    await openStandingAddFlow(rawText, resolved);
+609-    return true;
+610-  }
+611-
+612-  if(intent === "query"){
+613-    return false;
+614-  }
+615-
+616-  return false;
+617-}
+618-
+619-async function handleLocalVoiceCommand(text){
+620-  const cmd = parseVoiceCommand(text);
+621-
+622-  if(cmd.type === "help"){
+623-    const help = "Temel komutlar: " + VOICE_HELP.join(", ");
+624-    toast(help, 4200);
+625-    speak(help);
+626-    return true;
+627-  }
+628-
+629-  if(cmd.type === "open_hesap"){
+630-    speak("Hesap sayfası açılıyor.");
+631-    location.href = URLS.hesap || "/hesap";
+632-    return true;
+633-  }
+634-
+635-  if(cmd.type === "open_emanet"){
+636-    speak("Emanet sayfası açılıyor.");
+637-    location.href = URLS.consignments || "/emanetler";
+638-    return true;
+639-  }
+640-
+641-  if(cmd.type === "set_gender"){
+642-    await applySeatGender(cmd.seats, cmd.gender);
+643-    return true;
+644-  }
+645-
+646-  if(cmd.type === "ask_total"){
+647-    const seated = Object.values(assigned || {}).filter(Boolean).length;
+648-    const total = seated + (standingCount || 0);
+649-    const standing = Number(standingCount || 0);
+650-      const msg = standing > 0
+651-        ? `Toplam ${total} yolcu var. Bunun ${standing} kişisi ayakta.`
+652-        : `Toplam ${total} yolcu var.`;
+653-    toast(msg, 3600);
+654-    speak(msg);
+655-    return true;
+656-  }
+657-
+658-  if(cmd.type === "ask_standing"){
+659-    const msg = `Ayakta ${standingCount || 0} kişi var. Tahsilat ${fmtTL(standingRevenue || 0)}.`;
+660-    toast(msg, 3600);
+661-    speak(msg);
+662-    return true;
+663-  }
+664-
+665-
+666-  if(cmd.type === "ask_stop_ops"){
+667-    const stop = getSelectedStopName() || speedState.liveStop || "";
+668-    const msg = stopOperationVoiceSummary(stop);
+669-
+670-    toast(msg, 4200);
+671-    speak(msg);
+672-    return true;
+673-  }
+674-
+675-  if(cmd.type === "ask_selected_stop_passengers"){
+676-    const stop = getSelectedStopName() || speedState.liveStop || "";
+677-    const msg = stopHumanVoiceSummary(stop);
+678-
+679-    toast(msg, 4200);
+680-    speak(msg);
+681-    return true;
+682-  }
+683-
+684-  if(cmd.type === "ask_stop_bags"){
+685-    const stop = cmd.stop || getSelectedStopName() || speedState.liveStop || "";
+686-    const msg = stopBagVoiceOnly(stop);
+687-
+688-    toast(msg, 4200);
+689-    speak(msg);
+690-    return true;
+691-  }
+692-
+693-  if(cmd.type === "offload_selected_stop"){
+694-    return await offloadSelectedStopByVoice();
+695-  }
+696-
+697-  if(cmd.type === "ask_stop_count"){
+698-    const stop = cmd.stop;
+699-    const msg = stopHumanVoiceSummary(stop);
+700-
+701-    toast(msg, 4200);
+702-    speak(msg);
+703-    return true;
+704-  }
+705-
+706-  if(cmd.type === "ask_live_stop"){
+707-    const live = speedState.liveStop || getSelectedStopName() || "henüz belli değil";
+708-    const msg = `Şu an ${live} civarındasın.`;
+709-    toast(msg, 3200);
+710-    speak(msg);
+711-    return true;
+712-  }
+713-
+714-  if(cmd.type === "ask_delay"){
+715-    const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+716-    if(!nextTimed){
+717-      const msg = "Saatli durak bilgisi yok.";
+718-      toast(msg, 3200);
+719-      speak(msg);
+720-      return true;
+721-    }
+722-
+723-    const msg = `${nextTimed.stop} için ${fmtSignedMin(nextTimed.delayMin)}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
+724-    toast(msg, 4200);
+725-    speak(msg);
+726-    return true;
+727-  }
+728-
+729-  if(cmd.type === "ask_next_timed"){
+730-    const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+731-    if(!nextTimed){
+732-      const msg = "Sıradaki saatli durak bulunamadı.";
+--
+762:async function handleBasicVoiceCommand(text){
+763-  const localHandled = await handleLocalVoiceCommand(text);
+764-  if(localHandled) return;
+765-
+766-  try{
+767:    const resolved = await resolveVoiceWithBackendAI(text);
+768:    const handled = await executeResolvedAiOnSeats(resolved, text);
+769-
+770-    if(handled) return;
+771-
+772-    if(resolved?.intent === "query"){
+773-      const cmd = parseVoiceCommand(text);
+774-
+775-      if(cmd.type === "ask_stop_count"){
+776-        const stop = cmd.stop;
+777-        const msg = stopHumanVoiceSummary(stop);
+778-        toast(msg, 4200);
+779-        speak(msg);
+780-        return;
+781-      }
+782-
+783-      if(cmd.type === "ask_total"){
+784-        const seated = Object.values(assigned || {}).filter(Boolean).length;
+785-        const total = seated + (standingCount || 0);
+786-        const standing = Number(standingCount || 0);
+787-      const msg = standing > 0
+788-        ? `Toplam ${total} yolcu var. Bunun ${standing} kişisi ayakta.`
+789-        : `Toplam ${total} yolcu var.`;
+790-        toast(msg, 3600);
+791-        speak(msg);
+792-        return;
+793-      }
+794-
+795-      if(cmd.type === "ask_standing"){
+796-        const msg = `Ayakta ${standingCount || 0} kişi var. Tahsilat ${fmtTL(standingRevenue || 0)}.`;
+797-        toast(msg, 3600);
+798-        speak(msg);
+799-        return;
+800-      }
+801-    }
+802-
+803-    toast("Komut anlaşılmadı");
+804-    speak("Komutu anlayamadım. Sesli yardım diyebilirsin.");
+805-  }catch(e){
+806-    console.error("AI voice resolve error:", e);
+807-    toast("AI sesli komut hatası");
+808-    speak("AI sesli komut tarafında bir hata oluştu.");
+809-  }
+810-}
+811-
+812-function getVoiceCommandButtons(){
+813-  const out = [];
+814-  const mainBtn = $("#btnDeckAI");
+815-  const driveBtn = document.getElementById("btnDeckAIDrive");
+816-  const bottomBtn = document.getElementById("seatSimpleVoiceBtn");
+817-
+818-  if(mainBtn) out.push(mainBtn);
+819-  if(driveBtn) out.push(driveBtn);
+820-  if(bottomBtn) out.push(bottomBtn);
+821-
+822-  return out;
+823-}
+824-
+825-function setVoiceCommandButtonsListening(buttons, on){
+826-  (buttons || []).forEach(btn => {
+827-    btn.classList.toggle("listening", !!on);
+828-
+829-    if(btn.id === "seatSimpleVoiceBtn"){
+830-      btn.innerHTML = on
+831-        ? '<span class="ico">🔴</span><span class="voice-bottom-text">Dinliyor</span>'
+832-        : '<span class="ico">🎙️</span><span class="voice-bottom-text">Sesli<br>Komut</span>';
+833-      btn.setAttribute("title", on ? "Dinliyor" : "Sesli Komut");
+834-      btn.setAttribute("aria-label", on ? "Dinliyor" : "Sesli Komut");
+835-      return;
+836-    }
+837-
+838-    btn.innerHTML = on
+839-      ? '🔴 <span>Dinliyor</span>'
+840-      : '🎤 <span>Sesli Komut</span>';
+841-  });
+842-}
+843-
+844-function startDeckAIVoice(){
+845-  const buttons = getVoiceCommandButtons();
+846-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+847-
+848-  if(!SR){
+849-    toast("Bu tarayıcı sesli komutu desteklemiyor");
+850-    setVoiceBadge("Destek yok");
+851-    return;
+852-  }
+853-
+854-  const rec = new SR();
+855-  rec.lang = "tr-TR";
+856-  rec.continuous = false;
+857-  rec.interimResults = false;
+858-  rec.maxAlternatives = 1;
+859-
+860-  setVoiceCommandButtonsListening(buttons, true);
+861-
+862-  setVoiceBadge("Dinleniyor");
+863-
+864-  rec.onresult = async (e) => {
+865-    const text = e.results?.[0]?.[0]?.transcript?.trim() || "";
+866-
+867-    if(!text){
+868-      toast("Ses algılandı ama metin çıkarılamadı");
+869-      setVoiceBadge("Tekrar dene");
+870-      return;
+871-    }
+872-
+873-    toast("Algılandı: " + text, 1600);
+874-    setVoiceBadge(text.length > 18 ? text.slice(0, 18) + "…" : text);
+875:    await handleBasicVoiceCommand(text);
+876-  };
+877-
+878-  rec.onerror = (e) => {
+879-    toast("Sesli komut hatası: " + (e.error || "bilinmiyor"));
+880-    setVoiceBadge("Hata");
+881-  };
+882-
+883-  rec.onend = () => {
+884-    setVoiceCommandButtonsListening(buttons, false);
+885-
+886-    setTimeout(() => setVoiceBadge("Hazır"), 900);
+887-  };
+888-
+889-  try{
+890-    rec.start();
+891-  }catch(_){
+892-    setVoiceCommandButtonsListening(buttons, false);
+893-
+894-    setVoiceBadge("Başlatılamadı");
+895-    toast("Mikrofon başlatılamadı");
+896-  }
+897-}
+898-
+899-window.SeatsVoice = {
+900-  stopHumanVoiceSummary,
+901-  maybeSpeakApproachStop,
+902-  speak,
+903-  speakFinalStopSequence,
+904-  parseVoiceCommand,
+905:  handleBasicVoiceCommand,
+906-  startDeckAIVoice
+907-};
+
+===== 5) Buton bağlantıları =====
+static/seats/voice-commands.js:812:function getVoiceCommandButtons(){
+static/seats/voice-commands.js:814:  const mainBtn = $("#btnDeckAI");
+static/seats/voice-commands.js:815:  const driveBtn = document.getElementById("btnDeckAIDrive");
+static/seats/voice-commands.js:816:  const bottomBtn = document.getElementById("seatSimpleVoiceBtn");
+static/seats/voice-commands.js:825:function setVoiceCommandButtonsListening(buttons, on){
+static/seats/voice-commands.js:829:    if(btn.id === "seatSimpleVoiceBtn"){
+static/seats/voice-commands.js:844:function startDeckAIVoice(){
+static/seats/voice-commands.js:845:  const buttons = getVoiceCommandButtons();
+static/seats/voice-commands.js:860:  setVoiceCommandButtonsListening(buttons, true);
+static/seats/voice-commands.js:884:    setVoiceCommandButtonsListening(buttons, false);
+static/seats/voice-commands.js:892:    setVoiceCommandButtonsListening(buttons, false);
+static/seats/voice-commands.js:906:  startDeckAIVoice
+templates/seats.html:47:              <button class="voice-command-btn" id="btnDeckAI" type="button" title="Sesli Komut">
+templates/seats.html:61:  <button class="drive-voice-btn" id="btnDeckAIDrive" type="button" title="Sesli Komut">
+templates/seats.html:944:    const fakeBtn = document.getElementById("btnDeckAIDrive");
+templates/seats.html:945:    const realBtn = document.getElementById("btnDeckAI");
+templates/seats.html:1622:      if(window.SeatsVoice && typeof window.SeatsVoice.startDeckAIVoice === "function"){
+templates/seats.html:1623:        window.SeatsVoice.startDeckAIVoice();
+templates/seats.html:1628:    const btn = q("#btnDeckAI") || q("#btnDeckAIDrive");
+templates/seats.html:1659:      <button type="button" class="seat-simple-bottom-item warn" id="seatSimpleVoiceBtn" title="Sesli Komut" aria-label="Sesli Komut">
+templates/seats.html:1683:    const voice = q("#seatSimpleVoiceBtn");
+templates/seats.html:2789:  #seatSimpleVoiceBtn{
+templates/seats.html:2796:  #seatSimpleVoiceBtn .ico{
+templates/seats.html:2800:  #seatSimpleVoiceBtn .voice-bottom-text{
+templates/seats.html:2813:  #seatSimpleVoiceBtn.listening{
+
+===== 6) Sesli cevap metinleri =====
+171:    toast("Önce durak seç");
+172:    speak("Önce durak seç.");
+194:    toast("Bu durakta indirilecek yolcu yok");
+195:    speak("Bu durakta indirilecek yolcu yok.");
+202:    speak(`${stop} için indirilecek yolcular işleme alındı.`);
+208:    speak(`${stop} için indirilecek yolcular indirildi.`);
+212:  speak("İndirme işlemi başlatılamadı.");
+226:  speak(`${stopName} durağına yaklaşılıyor. ${stopHumanVoiceSummary(stopName)}`);
+229:function speak(text){
+245:      window.SeatsVoice.speak(msg);
+260:        speechSynthesis.speak(u);
+271:  speak(stopHumanVoiceSummary(name));
+273:    speak("Sarıkız Turizm ailesini tercih ettiğiniz için teşekkür ederiz. Bir sonraki yolculukta görüşmek üzere.");
+322:    toast("Koltuk bulunamadı");
+323:    speak("Koltuk bulunamadı.");
+331:    toast("Önce koltuğa yolcu ekle");
+332:    speak("Önce koltuğa yolcu eklemelisin.");
+364:  toast(msg, 3200);
+365:  speak(msg);
+466:  toast(`Koltuk ${seatNo} için giriş formu açıldı`);
+467:  speak(`Koltuk ${seatNo} için giriş formu açıldı.`);
+490:  toast("Toplu giriş formu hazırlandı");
+491:  speak("Toplu giriş formu açıldı.");
+509:  toast("Ayakta satış formu açıldı");
+510:  speak("Ayakta satış formu açıldı.");
+515:    toast("Servis için koltuk bulunamadı");
+516:    speak("Servis için koltuk bulunamadı.");
+548:  toast(`Servis işlendi: ${seats.join(", ")}`);
+549:  speak(`Servis işlendi. Koltuklar ${seats.join(", ")}`);
+559:    toast(`Düşük güven: ${aiIntentTitle(intent)}`);
+560:    speak(`Komut düşük güvenle algılandı. Tahmin edilen işlem ${aiIntentTitle(intent)}.`);
+570:      toast("Boşaltılacak koltuk bulunamadı");
+571:      speak("Boşaltılacak koltuk bulunamadı.");
+576:    speak(`${seats.join(" ve ")} numaralı koltuk boşaltıldı.`);
+587:      toast("Koltuk bulunamadı");
+588:      speak("Koltuk bulunamadı.");
+598:      toast("Koltuk listesi bulunamadı");
+599:      speak("Koltuk listesi bulunamadı.");
+624:    toast(help, 4200);
+625:    speak(help);
+630:    speak("Hesap sayfası açılıyor.");
+636:    speak("Emanet sayfası açılıyor.");
+653:    toast(msg, 3600);
+654:    speak(msg);
+660:    toast(msg, 3600);
+661:    speak(msg);
+670:    toast(msg, 4200);
+671:    speak(msg);
+679:    toast(msg, 4200);
+680:    speak(msg);
+688:    toast(msg, 4200);
+689:    speak(msg);
+701:    toast(msg, 4200);
+702:    speak(msg);
+709:    toast(msg, 3200);
+710:    speak(msg);
+718:      toast(msg, 3200);
+719:      speak(msg);
+724:    toast(msg, 4200);
+725:    speak(msg);
+733:      toast(msg, 3200);
+734:      speak(msg);
+739:    toast(msg, 4200);
+740:    speak(msg);
+747:      toast("Bu durak güzergâhta yok");
+748:      speak("Bu durak bu güzergâhta bulunmuyor.");
+754:    toast(msg, 3600);
+755:    speak(msg);
+778:        toast(msg, 4200);
+779:        speak(msg);
+790:        toast(msg, 3600);
+791:        speak(msg);
+797:        toast(msg, 3600);
+798:        speak(msg);
+803:    toast("Komut anlaşılmadı");
+804:    speak("Komutu anlayamadım. Sesli yardım diyebilirsin.");
+807:    toast("AI sesli komut hatası");
+808:    speak("AI sesli komut tarafında bir hata oluştu.");
+849:    toast("Bu tarayıcı sesli komutu desteklemiyor");
+868:      toast("Ses algılandı ama metin çıkarılamadı");
+873:    toast("Algılandı: " + text, 1600);
+879:    toast("Sesli komut hatası: " + (e.error || "bilinmiyor"));
+895:    toast("Mikrofon başlatılamadı");

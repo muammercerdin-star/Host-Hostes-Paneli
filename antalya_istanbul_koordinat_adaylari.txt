@@ -1,0 +1,22 @@
+# Durak | lat | lng | bulunan yer
+Korkuteli | 37.0614489 | 30.2251592 | Korkuteli Otobüs Terminali, Fatih Bulvarı, Yeni, İmrahor, Korkuteli, Antalya, Akdeniz Bölgesi, Türkiye
+Korkuteli Elmalı Kavşağı |  |  | BULUNAMADI
+Çavdır |  |  | BULUNAMADI
+Acıpayam Kavşağı |  |  | BULUNAMADI
+Mevlütlü | 38.4764606 | 28.3406135 | Mevlutlu, Salihli, Adala, Manisa, Ege Bölgesi, Türkiye
+Gölmarmara |  |  | BULUNAMADI
+Tuzla | 40.8161732 | 29.3034194 | Tuzla, İstanbul, Marmara Bölgesi, Türkiye
+Güzelyalı | 40.8605709 | 29.2821813 | Güzelyalı Mahallesi, Pendik, İstanbul, Marmara Bölgesi, Türkiye
+İçmeler Köprüsü | 40.8494515 | 29.2974917 | İçmeler Köprüsü, Aydıntepe Mahallesi, Tuzla, İstanbul, Marmara Bölgesi, 34947, Türkiye
+Kaynarca | 40.8752422 | 29.2552958 | Kaynarca Mahallesi, Pendik, İstanbul, Marmara Bölgesi, 34890, Türkiye
+Pendik | 40.8768715 | 29.2349672 | Pendik, İstanbul, Marmara Bölgesi, Türkiye
+Kartal Köprüsü | 40.9061467 | 29.2110440 | Kartal Köprüsü, Orta Mahallesi, Kartal, İstanbul, Marmara Bölgesi, 34880, Türkiye
+70 Evler |  |  | BULUNAMADI
+Cevizli | 40.9131929 | 29.1687352 | Cevizli Mahallesi, Kartal, İstanbul, Marmara Bölgesi, Türkiye
+Maltepe Köprüsü | 40.9359620 | 29.1387105 | Maltepe Köprüsü, Bağlarbaşı Mahallesi, Maltepe, İstanbul, Marmara Bölgesi, 34844, Türkiye
+Zümrütevler (Huzur Evi) |  |  | BULUNAMADI
+Küçükyalı | 40.9471511 | 29.1075847 | Küçükyalı, Küçükyalı Merkez Mahallesi, Maltepe, İstanbul, Marmara Bölgesi, 34840, Türkiye
+Bostancı |  |  | BULUNAMADI
+Göztepe Köprüsü | 40.9924840 | 29.0734032 | Göztepe Köprüsü, Merdivenköy Mahallesi, Kadıköy, İstanbul, Marmara Bölgesi, 34732, Türkiye
+Arabalı Vapur / Harem İskele |  |  | BULUNAMADI
+Sirkeci |  |  | BULUNAMADI

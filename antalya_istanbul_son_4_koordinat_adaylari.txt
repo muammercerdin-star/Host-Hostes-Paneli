@@ -1,0 +1,5 @@
+# Durak | lat | lng | bulunan yer
+Gölmarmara |  |  | BULUNAMADI
+Acıpayam Kavşağı |  |  | BULUNAMADI
+Çavdır | 37.5458363 | 30.0700698 | Burdur - Çavdır Yolu, Karaçal, Burdur Merkez, Burdur, Akdeniz Bölgesi, Türkiye
+Korkuteli Elmalı Kavşağı |  |  | BULUNAMADI

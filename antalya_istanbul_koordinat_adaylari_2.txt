@@ -1,0 +1,10 @@
+# Durak | lat | lng | bulunan yer
+Korkuteli Elmalı Kavşağı | 36.8421931 | 30.0217394 | Elmalı - Korkuteli Yolu, Çobanisa, Elmalı, Antalya, Akdeniz Bölgesi, Türkiye
+Çavdır | 37.5236190 | 30.0560208 | Burdur - Çavdır Yolu, Boğaziçi, Burdur Merkez, Burdur, Akdeniz Bölgesi, Türkiye
+Acıpayam Kavşağı |  |  | BULUNAMADI
+Gölmarmara | 38.9172018 | 27.8368732 | Gölmarmara Seyahat Yazıhanesi, 15. Cadde, Hürriyet Mahallesi, Akhisar, Manisa, Ege Bölgesi, 45200, Türkiye
+70 Evler | 40.9000629 | 29.1886275 | Blok Evler Sokak, Karlıktepe Mahallesi, Kartal, İstanbul, Marmara Bölgesi, 34870, Türkiye
+Zümrütevler (Huzur Evi) | 40.9363954 | 29.1475890 | Zümrütevler Mahallesi, Maltepe, İstanbul, Marmara Bölgesi, 34852, Türkiye
+Bostancı | 40.9652090 | 29.1044971 | Bostancı Köprüsü, D100 Karayolu, Bostancı Mahallesi, Kadıköy, İstanbul, Marmara Bölgesi, 34742, Türkiye
+Arabalı Vapur / Harem İskele |  |  | BULUNAMADI
+Sirkeci |  |  | BULUNAMADI

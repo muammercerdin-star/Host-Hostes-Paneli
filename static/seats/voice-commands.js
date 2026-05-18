@@ -8,8 +8,13 @@ const VOICE_HELP = [
   "ayakta kaç kişi var",
   "hesap aç",
   "emanet aç",
+  "harita aç",
   "sıradaki durak [durak adı]",
   "durak seç [durak adı]",
+  "5 numaralı yolcu [durak]",
+  "5 numara erkek [durak]",
+  "5 numara bayan [durak]",
+  "15 numara biletsiz yolcu",
   "[durak adı] kaç yolcu var",
   "bir sonraki durak",
   "rötar kaç",
@@ -19,7 +24,131 @@ const VOICE_HELP = [
   "bu durakta kimler inecek",
   "bu durakta bagaj var mı",
   "inecekleri indir",
+  "özet ver",
+  "durumu söyle",
+  "sefer özeti",
 ];
+
+/* VOICE_SUMMARY_PATCH_START */
+function buildTripVoiceSummary(){
+  let seated = 0;
+  let standing = 0;
+
+  try{
+    seated = Object.values(assigned || {}).filter(Boolean).length;
+  }catch(_){
+    seated = 0;
+  }
+
+  try{
+    standing = Number(standingCount || 0);
+  }catch(_){
+    standing = 0;
+  }
+
+  const total = seated + standing;
+  const parts = [];
+
+  if(standing > 0){
+    parts.push(`Toplam ${total} yolcu var. Bunun ${standing} kişisi ayakta.`);
+  }else{
+    parts.push(`Toplam ${total} yolcu var.`);
+  }
+
+  let selected = "";
+
+  try{
+    if(typeof getSelectedStopName === "function"){
+      selected = getSelectedStopName() || "";
+    }
+  }catch(_){}
+
+  try{
+    if(!selected && speedState && speedState.liveStop){
+      selected = speedState.liveStop || "";
+    }
+  }catch(_){}
+
+  selected = String(selected || "").trim();
+
+  if(selected){
+    parts.push(`Seçili durak ${selected}.`);
+
+    let seatCt = 0;
+    let standingCt = 0;
+    let parcelCt = 0;
+    let bagMsg = "";
+
+    try{
+      seatCt = seatsForStop(selected).map(Number).filter(Boolean).length;
+    }catch(_){
+      seatCt = 0;
+    }
+
+    try{
+      standingCt = Number((computeStandingCountsByStop() || {})[selected] || 0);
+    }catch(_){
+      standingCt = 0;
+    }
+
+    try{
+      parcelCt = Number((computeParcelCountsByStop() || {})[selected] || 0);
+    }catch(_){
+      parcelCt = 0;
+    }
+
+    try{
+      bagMsg = String(bagVoiceSummaryForStop(selected) || "").trim();
+    }catch(_){
+      bagMsg = "";
+    }
+
+    const ops = [];
+    const passengerTotal = seatCt + standingCt;
+
+    if(passengerTotal > 0){
+      ops.push(`${passengerTotal} yolcu inecek`);
+    }
+
+    if(parcelCt > 0){
+      ops.push(`${parcelCt} emanet teslim`);
+    }
+
+    if(bagMsg){
+      ops.push(bagMsg.replace(/\.$/, ""));
+    }
+
+    if(ops.length){
+      parts.push(`Bu durakta ${ops.join(", ")}.`);
+    }else{
+      parts.push("Bu durakta görünen işlem yok.");
+    }
+  }
+
+  let next = "";
+
+  try{
+    if(speedState && Array.isArray(speedState.etaItems)){
+      const nextTimed = speedState.etaItems.find(x => !x.passed);
+      if(nextTimed && nextTimed.stop) next = nextTimed.stop;
+    }
+  }catch(_){}
+
+  try{
+    if(!next && typeof computeNextStopName === "function"){
+      next = computeNextStopName(selected || "", "nextWithSeats") || "";
+    }
+  }catch(_){}
+
+  next = String(next || "").trim();
+
+  if(next){
+    parts.push(`Sıradaki işlem ${next}.`);
+  }
+
+  return parts.join(" ");
+}
+/* VOICE_SUMMARY_PATCH_END */
 
 function stopHumanVoiceSummary(stopName){
   const stop = String(stopName || "").trim();
@@ -374,7 +503,9 @@ function parseVoiceCommand(text){
 
   if(/^(hesap ac|hesap aç)$/.test(t)) return { type:"open_hesap" };
   if(/^(emanet ac|emanet aç|emanetler ac|emanetler aç)$/.test(t)) return { type:"open_emanet" };
+  if(/^(harita ac|harita aç|haritayi ac|haritayı aç|canli harita ac|canlı harita aç|yol haritasi ac|yol haritası aç)$/.test(t)) return { type:"open_map" };
   if(/^(sesli yardim|sesli yardım|yardim|yardım)$/.test(t)) return { type:"help" };
+  if(/(ozet ver|özet ver|durumu soyle|durumu söyle|sefer ozeti|sefer özeti|genel ozet|genel özet)/.test(t)) return { type:"trip_summary" };
   if(/(kac yolcu var|kaç yolcu var|toplam yolcu)/.test(t)) return { type:"ask_total" };
   if(/(ayakta kac|ayakta kaç)/.test(t)) return { type:"ask_standing" };
   if(/(hangi duraktayiz|hangi duraktayız|neredeyiz)/.test(t)) return { type:"ask_live_stop" };
@@ -383,6 +514,14 @@ function parseVoiceCommand(text){
 
   if(mentionedStop && /(kaç yolcu var|kac yolcu var|orada kaç yolcu var|orada kac yolcu var|kaç kişi var|kac kisi var)/.test(t)){
     return { type:"ask_stop_count", stop: mentionedStop };
+  }
+
+  if(seats.length && /(biletsiz|biletsiz yolcu|biletsiz yap|biletsiz isaretle|biletsiz işaretle)/.test(t)){
+    return { type:"mark_biletsiz", seats };
+  }
+
+  if(seats.length && mentionedStop && /(yolcu|bindir|binis|biniş|al|ekle|yaz|kaydet|gitsin|gidecek|numara|numaralı)/.test(t)){
+    return { type:"direct_board", seats, stop: mentionedStop, gender };
   }
 
   if(seats.length && gender !== null){
@@ -455,6 +594,225 @@ function extractFirstNumberFromText(text, fallback=1){
   const n = parseInt(m[0], 10);
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
+
+/* VOICE_DIRECT_BOARD_GENERAL_START */
+function voiceCleanStopValue(v){
+  v = String(v || "").replace(/\s+/g, " ").trim();
+  if(!v || v === "-" || v === "—") return "";
+  v = v.replace(/^🎯\s*/g, "");
+  v = v.replace(/^Seçili\s+durak\s*:\s*/i, "");
+  return v.trim();
+}
+
+function voiceCurrentBoardingStop(){
+  let stop = "";
+
+  /*
+    Öncelik seçili durakta olmalı.
+    Çünkü liveStop localStorage'dan eski Sarıgöl gibi bir değeri geri getirebilir.
+  */
+
+  try{
+    const alertStop = document.querySelector("#alertStop");
+    if(alertStop){
+      stop = voiceCleanStopValue(alertStop.value);
+    }
+  }catch(_){}
+
+  try{
+    if(!stop && typeof getSelectedStopName === "function"){
+      stop = voiceCleanStopValue(getSelectedStopName());
+    }
+  }catch(_){}
+
+  try{
+    if(!stop){
+      const badge = document.querySelector("#selectedStopBadge");
+      if(badge) stop = voiceCleanStopValue(badge.textContent);
+    }
+  }catch(_){}
+
+  try{
+    if(!stop){
+      const simpleStop = document.querySelector("#seatSimpleStop");
+      if(simpleStop) stop = voiceCleanStopValue(simpleStop.textContent);
+    }
+  }catch(_){}
+
+  /*
+    Canlı durak en son fallback.
+    Böylece eski liveStop hafızası seçili durağı ezmez.
+  */
+  try{
+    if(!stop && typeof getDisplayLiveStop === "function"){
+      stop = voiceCleanStopValue(getDisplayLiveStop());
+    }
+  }catch(_){}
+
+  try{
+    if(!stop && speedState && speedState.liveStop){
+      stop = voiceCleanStopValue(speedState.liveStop);
+    }
+  }catch(_){}
+
+  try{
+    if(stop && typeof findCanonicalStopName === "function"){
+      const fixed = findCanonicalStopName(stop);
+      if(fixed) stop = fixed;
+    }
+  }catch(_){}
+
+  return stop;
+}
+
+async function voiceDirectBoardSeats(seats, toStop, genderValue=""){
+  const seatList = (Array.isArray(seats) ? seats : [seats])
+    .map(x => Number(x))
+    .filter(x => Number.isInteger(x) && x > 0);
+
+  if(!seatList.length){
+    toast("Koltuk numarası bulunamadı");
+    speak("Koltuk numarası bulunamadı.");
+    return true;
+  }
+
+  let fromStop = voiceCurrentBoardingStop();
+  toStop = voiceCleanStopValue(toStop);
+
+  genderValue = String(genderValue || "").trim().toLowerCase();
+
+  if(genderValue === "erkek"){
+    genderValue = "bay";
+  }else if(genderValue === "kadın" || genderValue === "kadin" || genderValue === "kız" || genderValue === "kiz"){
+    genderValue = "bayan";
+  }
+
+  if(genderValue !== "bay" && genderValue !== "bayan"){
+    genderValue = "";
+  }
+
+  try{
+    if(toStop && typeof findCanonicalStopName === "function"){
+      const fixedTo = findCanonicalStopName(toStop);
+      if(fixedTo) toStop = fixedTo;
+    }
+
+    if(fromStop && typeof findCanonicalStopName === "function"){
+      const fixedFrom = findCanonicalStopName(fromStop);
+      if(fixedFrom) fromStop = fixedFrom;
+    }
+  }catch(_){}
+
+  if(!fromStop){
+    toast("Canlı durak veya seçili durak yok");
+    speak("Önce canlı durak ya da seçili durak belirlenmeli.");
+    return true;
+  }
+
+  if(!toStop){
+    toast("İniş durağı bulunamadı");
+    speak("İniş durağı bulunamadı.");
+    return true;
+  }
+
+  if(typeof norm === "function" && norm(fromStop) === norm(toStop)){
+    toast("Biniş ve iniş durağı aynı olamaz");
+    speak("Biniş ve iniş durağı aynı olamaz.");
+    return true;
+  }
+
+  const csrfToken =
+    (typeof csrf !== "undefined" && csrf) ||
+    (window.SEATS_BOOT && window.SEATS_BOOT.csrf) ||
+    "";
+
+  async function postSeat(payload){
+    const opts = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken
+      },
+      body: JSON.stringify(payload)
+    };
+
+    if(typeof safeJsonFetch === "function"){
+      return await safeJsonFetch("/api/seat", opts);
+    }
+
+    const r = await fetch("/api/seat", opts);
+    return await r.json();
+  }
+
+  const saved = [];
+  const failed = [];
+
+  for(const seatNo of seatList){
+    try{
+      const payload = {
+        seat_no: seatNo,
+        from_stop: fromStop,
+        to_stop: toStop,
+        ticket_type: "biletsiz",
+        payment: "nakit",
+        amount: 0,
+        gender: genderValue,
+        pair_ok: 0,
+        service: 0,
+        service_note: "",
+        passenger_name: "",
+        passenger_phone: ""
+      };
+
+      const j = await postSeat(payload);
+
+      if(!j || j.ok === false){
+        throw new Error((j && (j.msg || j.error)) || "Kayıt başarısız");
+      }
+
+      const key = String(seatNo);
+
+      try{ assigned[key] = true; }catch(_){}
+      try{ boardsMap[key] = fromStop; }catch(_){}
+      try{ stopsMap[key] = toStop; }catch(_){}
+      try{ genders[key] = genderValue || ""; }catch(_){}
+
+      try{ if(typeof setSeatVisual === "function") setSeatVisual(seatNo); }catch(_){}
+      try{ if(typeof updateStats === "function") updateStats(); }catch(_){}
+      try{ if(typeof renderAI === "function") renderAI(); }catch(_){}
+      try{ if(typeof renderTimeline === "function") renderTimeline(); }catch(_){}
+      try{ if(typeof updateCompactHeader === "function") updateCompactHeader(); }catch(_){}
+      try{ if(typeof updateStopSeatBadges === "function") updateStopSeatBadges(); }catch(_){}
+      try{ if(typeof refreshStopBadges === "function") refreshStopBadges(); }catch(_){}
+
+      saved.push(seatNo);
+    }catch(e){
+      console.warn("Sesli direkt bindirme hatası:", seatNo, e);
+      failed.push(seatNo);
+    }
+  }
+
+  if(saved.length){
+    const seatText = saved.length === 1
+      ? `${saved[0]} numara`
+      : `${saved.join(", ")} numaralar`;
+
+    const genderText =
+      genderValue === "bay" ? " Erkek." :
+      genderValue === "bayan" ? " Bayan." : "";
+
+    const msg = `${seatText} yolcu alındı. Biniş ${fromStop}. İniş ${toStop}.${genderText}`;
+    toast(msg, 4200);
+    speak(msg);
+  }
+
+  if(failed.length){
+    speak(`${failed.join(", ")} numarada kayıt yapılamadı.`);
+  }
+
+  return true;
+}
+/* VOICE_DIRECT_BOARD_GENERAL_END */
 
 async function openSingleSeatAddFlow(seatNo){
   await populateStops();
@@ -626,6 +984,13 @@ async function handleLocalVoiceCommand(text){
     return true;
   }
 
+  if(cmd.type === "trip_summary"){
+    const msg = buildTripVoiceSummary();
+    toast(msg, 5200);
+    speak(msg);
+    return true;
+  }
+
   if(cmd.type === "open_hesap"){
     speak("Hesap sayfası açılıyor.");
     location.href = URLS.hesap || "/hesap";
@@ -638,8 +1003,43 @@ async function handleLocalVoiceCommand(text){
     return true;
   }
 
+  if(cmd.type === "open_map"){
+    speak("Canlı harita tam ekran açılıyor.");
+    location.href = "/canli-harita?fullscreen=1";
+    return true;
+  }
+
   if(cmd.type === "set_gender"){
     await applySeatGender(cmd.seats, cmd.gender);
+    return true;
+  }
+
+  if(cmd.type === "direct_board"){
+    await voiceDirectBoardSeats(cmd.seats, cmd.stop, cmd.gender);
+    return true;
+  }
+
+  if(cmd.type === "mark_biletsiz"){
+    if(typeof window.markBiletsizSeatBadges !== "function"){
+      toast("Biletsiz işaretleme hazır değil");
+      speak("Biletsiz işaretleme hazır değil.");
+      return true;
+    }
+
+    const res = window.markBiletsizSeatBadges(cmd.seats || []);
+    const done = (res && res.done) || [];
+    const failed = (res && res.failed) || [];
+
+    if(done.length){
+      const txt = done.length === 1 ? `${done[0]} numara` : `${done.join(", ")} numaralar`;
+      toast(`${txt} biletsiz işaretlendi`, 3600);
+      speak(`${txt} biletsiz yolcu olarak işaretlendi.`);
+    }
+
+    if(failed.length){
+      speak(`${failed.join(", ")} numarada dolu yolcu bulunamadı.`);
+    }
+
     return true;
   }
 
