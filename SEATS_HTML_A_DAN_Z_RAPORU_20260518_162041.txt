@@ -1,0 +1,210 @@
+============================================================
+SEATS.HTML A'DAN Z'YE İNCELEME RAPORU
+Tarih: Mon May 18 16:20:41 +03 2026
+Dosya: templates/seats.html
+============================================================
+
+===== 1) SATIR SAYISI =====
+3863 templates/seats.html
+
+===== 2) İLK GENEL YAPI / INCLUDE HARİTASI =====
+9:  {% include "seats_parts/topbar.html" %}
+10:  {# {% include "seats_parts/stats.html" %} #}
+86:        {% include "seats_parts/route_flow.html" %}
+87:        {% include "seats_parts/deck.html" %}
+324:{% include "seats_parts/modals.html" %}
+622:{% include "seats_parts/finish_trip_modal.html" %}
+835:{% include "seats_parts/offload_confirm.html" %}
+
+===== 3) DIŞ CSS / JS BAĞLANTILARI =====
+4:<link rel="stylesheet" href="/static/style.css">
+5:<link rel="stylesheet" href="/static/seats/seats.css?v=41">
+6:<link rel="stylesheet" href="/static/seats/seats-final.css?v=drive-voice-real-width-test-1">
+351:<script src="/static/seats/bags.js?v=1"></script>
+352:<script src="/static/seats/voice-commands.js?v=boarding-stop-priority-1"></script>
+353:<script src="/static/seats/standing.js?v=1"></script>
+354:<script src="/static/seats/seats.js?v=clear-ticket-on-offload-1"></script>
+355:<script src="/static/seats/route-marquee.js?v=route-clean-ticker-single-1"></script>
+356:<script src="/static/seats/seats-time-prayer.js?v=time-prayer-apk-1"></script>
+357:<script src="/static/seats/voice-tts.js?v=voice-owner-fix-1"></script>
+358:<script src="/static/seats/drive-eta-chip.js?v=1"></script>
+359:<script src="/static/seats/drive-controls.js?v=drive-toggle-fix-1"></script>
+
+===== 4) TÜM STYLE / SCRIPT ID BLOKLARI =====
+373:<style id="drive-mode-actions-independent-style">
+458:<script id="drive-mode-actions-independent-js">
+625:<style id="drive-dock-stability-final">
+853:<script id="drive-mode-force-toggle-js">
+927:<script id="drive-voice-mirror-script">
+995:<style id="seat-simple-open-mode-style">
+1133:<script id="seat-simple-open-mode-script">
+1221:<style id="seat-simple-summary-polish-style">
+1365:<script id="seat-simple-summary-polish-script">
+1484:<style id="seat-simple-bottom-bar-style">
+1592:<script id="seat-simple-bottom-bar-script">
+1701:<style id="seat-hide-bottom-menu-on-modal-style">
+1713:<script id="seat-hide-bottom-menu-on-modal-script">
+1795:<style id="stop-flow-focus-patch-style">
+1975:<script id="stop-flow-focus-patch-script">
+2323:<style id="stop-selected-toast-style">
+2394:<script id="stop-selected-toast-script">
+2469:<style id="modal-bottom-nav-autohide-v3-style">
+2478:<script id="modal-bottom-nav-autohide-v3-script">
+2651:<style id="right-seat-column-spacing-fix-style">
+2706:<style id="bottom-row-51-54-equal-spacing-style">
+2761:<style id="only-54-reapply-right-shift-style">
+2788:<style id="bottom-voice-command-final-style">
+2812:<style id="bottom-voice-listening-state-fix-style">
+2824:<style id="top-sound-toggle-style">
+2887:<script id="top-sound-toggle-script">
+3055:<style id="fab-left-gap-move-style">
+3105:<script id="fab-left-gap-move-script">
+3186:<style id="fab-distinct-panel-style">
+3288:<style id="fab-compact-fit-style">
+3341:<script id="fab-compact-fit-script">
+3367:<style id="fab-drive-mode-override-fix-style">
+3486:<script id="fab-drive-mode-override-fix-script">
+3574:<style id="manual-ticket-system-clean-style">
+3632:<script id="manual-ticket-system-clean-script">
+
+===== 5) TÜM PATCH MARKERLARI =====
+59:<!-- DRIVE VOICE ROW START -->
+74:<!-- DRIVE VOICE ROW END -->
+852:<!-- DRIVE MODE FORCE TOGGLE START -->
+921:<!-- DRIVE MODE FORCE TOGGLE END -->
+926:<!-- DRIVE VOICE MIRROR SCRIPT START -->
+992:<!-- DRIVE VOICE MIRROR SCRIPT END -->
+1794:<!-- STOP_FLOW_FOCUS_PATCH_START -->
+2319:<!-- STOP_FLOW_FOCUS_PATCH_END -->
+2322:<!-- STOP_SELECTED_TOAST_PATCH_START -->
+2459:<!-- STOP_SELECTED_TOAST_PATCH_END -->
+2468:<!-- MODAL_BOTTOM_NAV_AUTOHIDE_V3_START -->
+2629:<!-- MODAL_BOTTOM_NAV_AUTOHIDE_V3_END -->
+2650:<!-- RIGHT_SEAT_COLUMN_SPACING_FIX_START -->
+2702:<!-- RIGHT_SEAT_COLUMN_SPACING_FIX_END -->
+2705:<!-- BOTTOM_ROW_51_54_EQUAL_SPACING_START -->
+2724:<!-- BOTTOM_ROW_51_54_EQUAL_SPACING_END -->
+2760:<!-- ONLY_54_REAPPLY_RIGHT_SHIFT_START -->
+2783:<!-- ONLY_54_REAPPLY_RIGHT_SHIFT_END -->
+2787:<!-- BOTTOM_VOICE_COMMAND_FINAL_START -->
+2808:<!-- BOTTOM_VOICE_COMMAND_FINAL_END -->
+2811:<!-- BOTTOM_VOICE_LISTENING_STATE_FIX_START -->
+2820:<!-- BOTTOM_VOICE_LISTENING_STATE_FIX_END -->
+2823:<!-- TOP_SOUND_TOGGLE_START -->
+3048:<!-- TOP_SOUND_TOGGLE_END -->
+3054:<!-- FAB_LEFT_GAP_MOVE_START -->
+3183:<!-- FAB_LEFT_GAP_MOVE_END -->
+3185:<!-- FAB_DISTINCT_PANEL_START -->
+3285:<!-- FAB_DISTINCT_PANEL_END -->
+3287:<!-- FAB_COMPACT_FIT_START -->
+3362:<!-- FAB_COMPACT_FIT_END -->
+3366:<!-- FAB_DRIVE_MODE_OVERRIDE_FIX_START -->
+3555:<!-- FAB_DRIVE_MODE_OVERRIDE_FIX_END -->
+3573:<!-- MANUAL_TICKET_SYSTEM_CLEAN_START -->
+3861:<!-- MANUAL_TICKET_SYSTEM_CLEAN_END -->
+
+===== 6) BLOK RAPORU =====
+Toplam satır: 3863
+
+STYLE / SCRIPT BLOKLARI
+  373-  456 | STYLE  | drive-mode-actions-independent-style | satır=84
+  458-  619 | SCRIPT | drive-mode-actions-independent-js | satır=162
+  625-  830 | STYLE  | drive-dock-stability-final | satır=206
+  853-  920 | SCRIPT | drive-mode-force-toggle-js | satır=68
+  927-  991 | SCRIPT | drive-voice-mirror-script | satır=65
+  995- 1131 | STYLE  | seat-simple-open-mode-style | satır=137
+ 1133- 1217 | SCRIPT | seat-simple-open-mode-script | satır=85
+ 1221- 1363 | STYLE  | seat-simple-summary-polish-style | satır=143
+ 1365- 1480 | SCRIPT | seat-simple-summary-polish-script | satır=116
+ 1484- 1590 | STYLE  | seat-simple-bottom-bar-style | satır=107
+ 1592- 1697 | SCRIPT | seat-simple-bottom-bar-script | satır=106
+ 1701- 1711 | STYLE  | seat-hide-bottom-menu-on-modal-style | satır=11
+ 1713- 1790 | SCRIPT | seat-hide-bottom-menu-on-modal-script | satır=78
+ 1795- 1973 | STYLE  | stop-flow-focus-patch-style | satır=179
+ 1975- 2318 | SCRIPT | stop-flow-focus-patch-script | satır=344
+ 2323- 2392 | STYLE  | stop-selected-toast-style | satır=70
+ 2394- 2458 | SCRIPT | stop-selected-toast-script | satır=65
+ 2469- 2476 | STYLE  | modal-bottom-nav-autohide-v3-style | satır=8
+ 2478- 2628 | SCRIPT | modal-bottom-nav-autohide-v3-script | satır=151
+ 2651- 2701 | STYLE  | right-seat-column-spacing-fix-style | satır=51
+ 2706- 2723 | STYLE  | bottom-row-51-54-equal-spacing-style | satır=18
+ 2761- 2782 | STYLE  | only-54-reapply-right-shift-style | satır=22
+ 2788- 2807 | STYLE  | bottom-voice-command-final-style | satır=20
+ 2812- 2819 | STYLE  | bottom-voice-listening-state-fix-style | satır=8
+ 2824- 2885 | STYLE  | top-sound-toggle-style | satır=62
+ 2887- 3047 | SCRIPT | top-sound-toggle-script | satır=161
+ 3055- 3103 | STYLE  | fab-left-gap-move-style | satır=49
+ 3105- 3182 | SCRIPT | fab-left-gap-move-script | satır=78
+ 3186- 3284 | STYLE  | fab-distinct-panel-style | satır=99
+ 3288- 3339 | STYLE  | fab-compact-fit-style | satır=52
+ 3341- 3361 | SCRIPT | fab-compact-fit-script | satır=21
+ 3367- 3484 | STYLE  | fab-drive-mode-override-fix-style | satır=118
+ 3486- 3554 | SCRIPT | fab-drive-mode-override-fix-script | satır=69
+ 3574- 3630 | STYLE  | manual-ticket-system-clean-style | satır=57
+ 3632- 3860 | SCRIPT | manual-ticket-system-clean-script | satır=229
+
+COMMENT PATCH BLOKLARI
+ 1794- 2319 | STOP_FLOW_FOCUS_PATCH | satır=526
+ 2322- 2459 | STOP_SELECTED_TOAST_PATCH | satır=138
+ 2468- 2629 | MODAL_BOTTOM_NAV_AUTOHIDE_V3 | satır=162
+ 2650- 2702 | RIGHT_SEAT_COLUMN_SPACING_FIX | satır=53
+ 2705- 2724 | BOTTOM_ROW_51_54_EQUAL_SPACING | satır=20
+ 2760- 2783 | ONLY_54_REAPPLY_RIGHT_SHIFT | satır=24
+ 2787- 2808 | BOTTOM_VOICE_COMMAND_FINAL | satır=22
+ 2811- 2820 | BOTTOM_VOICE_LISTENING_STATE_FIX | satır=10
+ 2823- 3048 | TOP_SOUND_TOGGLE | satır=226
+ 3054- 3183 | FAB_LEFT_GAP_MOVE | satır=130
+ 3185- 3285 | FAB_DISTINCT_PANEL | satır=101
+ 3287- 3362 | FAB_COMPACT_FIT | satır=76
+ 3366- 3555 | FAB_DRIVE_MODE_OVERRIDE_FIX | satır=190
+ 3573- 3861 | MANUAL_TICKET_SYSTEM_CLEAN | satır=289
+
+===== 7) AÇILIŞ / KAPANIŞ KONTROLÜ =====
+style açılış: 20
+style kapanış: 20
+script açılış: 25
+script kapanış: 25
+START sayısı: 14
+END sayısı: 14
+END olmayan START: []
+START olmayan END: []
+
+===== 8) ENDBLOCK SONRASI KONTROL =====
+endblock satırları: [3863]
+endblock sonrası dolu satır: 0
+
+===== 9) ŞÜPHELİ / ESKİ YAMA ANAHTARLARI =====
+1794:<!-- STOP_FLOW_FOCUS_PATCH_START -->
+2319:<!-- STOP_FLOW_FOCUS_PATCH_END -->
+2322:<!-- STOP_SELECTED_TOAST_PATCH_START -->
+2459:<!-- STOP_SELECTED_TOAST_PATCH_END -->
+2650:<!-- RIGHT_SEAT_COLUMN_SPACING_FIX_START -->
+2702:<!-- RIGHT_SEAT_COLUMN_SPACING_FIX_END -->
+2787:<!-- BOTTOM_VOICE_COMMAND_FINAL_START -->
+2808:<!-- BOTTOM_VOICE_COMMAND_FINAL_END -->
+2811:<!-- BOTTOM_VOICE_LISTENING_STATE_FIX_START -->
+2820:<!-- BOTTOM_VOICE_LISTENING_STATE_FIX_END -->
+2823:<!-- TOP_SOUND_TOGGLE_START -->
+3048:<!-- TOP_SOUND_TOGGLE_END -->
+3054:<!-- FAB_LEFT_GAP_MOVE_START -->
+3183:<!-- FAB_LEFT_GAP_MOVE_END -->
+3185:<!-- FAB_DISTINCT_PANEL_START -->
+3285:<!-- FAB_DISTINCT_PANEL_END -->
+3287:<!-- FAB_COMPACT_FIT_START -->
+3362:<!-- FAB_COMPACT_FIT_END -->
+3366:<!-- FAB_DRIVE_MODE_OVERRIDE_FIX_START -->
+3555:<!-- FAB_DRIVE_MODE_OVERRIDE_FIX_END -->
+3573:<!-- MANUAL_TICKET_SYSTEM_CLEAN_START -->
+3861:<!-- MANUAL_TICKET_SYSTEM_CLEAN_END -->
+
+===== 10) DUPLICATE ID KONTROLÜ =====
+Duplicate id yok.
+
+===== 11) DOSYANIN 3 PARÇA SINIRLARI =====
+Toplam: 3863
+1. parça: 1-1287
+2. parça: 1288-2574
+3. parça: 2575-3863
+
+===== 12) PYTHON KONTROL =====
+app.py syntax OK

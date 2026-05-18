@@ -3558,30 +3558,7 @@ body.seat-modal-open .seat-simple-bottom-bar{
 
 
 
-<!-- REAR_BOTTOM_GAP_SOFT_TRIM_START -->
-<style id="rear-bottom-gap-soft-trim-style">
-  /*
-    51-52-53-54 altındaki iç boşluğu hafif daraltır.
-    Koltuk satır yüksekliğine ve label yazılarına dokunmaz.
-  */
 
-  html.seat-simple-mode .board-stage,
-  body.seat-simple-mode .board-stage{
-    padding-bottom:4px !important;
-  }
-
-  html.seat-simple-mode .deck,
-  body.seat-simple-mode .deck{
-    padding-bottom:0 !important;
-  }
-
-  html.seat-simple-mode .deck-wrap,
-  body.seat-simple-mode .deck-wrap{
-    padding-bottom:0 !important;
-    margin-bottom:0 !important;
-  }
-</style>
-<!-- REAR_BOTTOM_GAP_SOFT_TRIM_END -->
 
 
 
@@ -3884,65 +3861,3 @@ body.seat-modal-open .seat-simple-bottom-bar{
 <!-- MANUAL_TICKET_SYSTEM_CLEAN_END -->
 
 {% endblock %}
-
-
-<script id="continue-trip-selected-stop-store">
-(function(){
-  function getTripKey(){
-    try{
-      if(window.BAG_TRIP) return String(window.BAG_TRIP);
-      if(window.boot && window.boot.tripKey) return String(window.boot.tripKey);
-      if(typeof boot !== "undefined" && boot.tripKey) return String(boot.tripKey);
-    }catch(_){}
-    return "default";
-  }
-
-  function cleanStop(v){
-    return String(v || "").trim();
-  }
-
-  function saveSelectedStop(){
-    const el = document.getElementById("selectedStopBadge");
-    if(!el) return;
-
-    const stop = cleanStop(el.textContent);
-    if(!stop || stop === "—" || stop === "-") return;
-
-    const key = "continueTripStop:" + getTripKey();
-
-    try{
-      localStorage.setItem(key, stop);
-      localStorage.setItem("continueTripStop:last", stop);
-    }catch(_){}
-  }
-
-  function boot(){
-    const el = document.getElementById("selectedStopBadge");
-    if(!el) return;
-
-    saveSelectedStop();
-
-    const mo = new MutationObserver(saveSelectedStop);
-    mo.observe(el, { childList:true, characterData:true, subtree:true });
-
-    document.addEventListener("click", function(){
-      setTimeout(saveSelectedStop, 80);
-    }, true);
-
-    document.addEventListener("change", function(){
-      setTimeout(saveSelectedStop, 80);
-    }, true);
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", boot);
-  }else{
-    boot();
-  }
-})();
-</script>
-
-
-
-
-

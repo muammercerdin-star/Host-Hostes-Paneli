@@ -1,0 +1,241 @@
+============================================================
+SEATS.HTML TEMİZLİK / YAMA RAPORU
+Dosya: templates/seats.html
+Toplam satır: 3948
+============================================================
+
+===== 1) INCLUDE HARİTASI =====
+    9:   {% include "seats_parts/topbar.html" %}
+   10:   {# {% include "seats_parts/stats.html" %} #}
+   86:         {% include "seats_parts/route_flow.html" %}
+   87:         {% include "seats_parts/deck.html" %}
+  324: {% include "seats_parts/modals.html" %}
+  622: {% include "seats_parts/finish_trip_modal.html" %}
+  835: {% include "seats_parts/offload_confirm.html" %}
+
+===== 2) CSS / JS DIŞ BAĞLANTILAR =====
+    4: <link rel="stylesheet" href="/static/style.css">
+    5: <link rel="stylesheet" href="/static/seats/seats.css?v=41">
+    6: <link rel="stylesheet" href="/static/seats/seats-final.css?v=drive-voice-real-width-test-1">
+  351: <script src="/static/seats/bags.js?v=1"></script>
+  352: <script src="/static/seats/voice-commands.js?v=boarding-stop-priority-1"></script>
+  353: <script src="/static/seats/standing.js?v=1"></script>
+  354: <script src="/static/seats/seats.js?v=clear-ticket-on-offload-1"></script>
+  355: <script src="/static/seats/route-marquee.js?v=route-clean-ticker-single-1"></script>
+  356: <script src="/static/seats/seats-time-prayer.js?v=time-prayer-apk-1"></script>
+  357: <script src="/static/seats/voice-tts.js?v=voice-owner-fix-1"></script>
+  358: <script src="/static/seats/drive-eta-chip.js?v=1"></script>
+  359: <script src="/static/seats/drive-controls.js?v=drive-toggle-fix-1"></script>
+
+===== 3) STYLE/SCRIPT ID BLOKLARI =====
+  373-  456 | STYLE  | drive-mode-actions-independent-style | satır=84
+  458-  619 | SCRIPT | drive-mode-actions-independent-js | satır=162
+  625-  830 | STYLE  | drive-dock-stability-final | satır=206
+  853-  920 | SCRIPT | drive-mode-force-toggle-js | satır=68
+  927-  991 | SCRIPT | drive-voice-mirror-script | satır=65
+  995- 1131 | STYLE  | seat-simple-open-mode-style | satır=137
+ 1133- 1217 | SCRIPT | seat-simple-open-mode-script | satır=85
+ 1221- 1363 | STYLE  | seat-simple-summary-polish-style | satır=143
+ 1365- 1480 | SCRIPT | seat-simple-summary-polish-script | satır=116
+ 1484- 1590 | STYLE  | seat-simple-bottom-bar-style | satır=107
+ 1592- 1697 | SCRIPT | seat-simple-bottom-bar-script | satır=106
+ 1701- 1711 | STYLE  | seat-hide-bottom-menu-on-modal-style | satır=11
+ 1713- 1790 | SCRIPT | seat-hide-bottom-menu-on-modal-script | satır=78
+ 1795- 1973 | STYLE  | stop-flow-focus-patch-style | satır=179
+ 1975- 2318 | SCRIPT | stop-flow-focus-patch-script | satır=344
+ 2323- 2392 | STYLE  | stop-selected-toast-style | satır=70
+ 2394- 2458 | SCRIPT | stop-selected-toast-script | satır=65
+ 2469- 2476 | STYLE  | modal-bottom-nav-autohide-v3-style | satır=8
+ 2478- 2628 | SCRIPT | modal-bottom-nav-autohide-v3-script | satır=151
+ 2651- 2701 | STYLE  | right-seat-column-spacing-fix-style | satır=51
+ 2706- 2723 | STYLE  | bottom-row-51-54-equal-spacing-style | satır=18
+ 2761- 2782 | STYLE  | only-54-reapply-right-shift-style | satır=22
+ 2788- 2807 | STYLE  | bottom-voice-command-final-style | satır=20
+ 2812- 2819 | STYLE  | bottom-voice-listening-state-fix-style | satır=8
+ 2824- 2885 | STYLE  | top-sound-toggle-style | satır=62
+ 2887- 3047 | SCRIPT | top-sound-toggle-script | satır=161
+ 3055- 3103 | STYLE  | fab-left-gap-move-style | satır=49
+ 3105- 3182 | SCRIPT | fab-left-gap-move-script | satır=78
+ 3186- 3284 | STYLE  | fab-distinct-panel-style | satır=99
+ 3288- 3339 | STYLE  | fab-compact-fit-style | satır=52
+ 3341- 3361 | SCRIPT | fab-compact-fit-script | satır=21
+ 3367- 3484 | STYLE  | fab-drive-mode-override-fix-style | satır=118
+ 3486- 3554 | SCRIPT | fab-drive-mode-override-fix-script | satır=69
+ 3562- 3583 | STYLE  | rear-bottom-gap-soft-trim-style | satır=22
+ 3597- 3653 | STYLE  | manual-ticket-system-clean-style | satır=57
+ 3655- 3883 | SCRIPT | manual-ticket-system-clean-script | satır=229
+ 3889- 3943 | SCRIPT | continue-trip-selected-stop-store | satır=55
+
+===== 4) COMMENT PATCH MARKER BLOKLARI =====
+ 1794- 2319 | STOP_FLOW_FOCUS_PATCH | satır=526
+ 2322- 2459 | STOP_SELECTED_TOAST_PATCH | satır=138
+ 2468- 2629 | MODAL_BOTTOM_NAV_AUTOHIDE_V3 | satır=162
+ 2650- 2702 | RIGHT_SEAT_COLUMN_SPACING_FIX | satır=53
+ 2705- 2724 | BOTTOM_ROW_51_54_EQUAL_SPACING | satır=20
+ 2760- 2783 | ONLY_54_REAPPLY_RIGHT_SHIFT | satır=24
+ 2787- 2808 | BOTTOM_VOICE_COMMAND_FINAL | satır=22
+ 2811- 2820 | BOTTOM_VOICE_LISTENING_STATE_FIX | satır=10
+ 2823- 3048 | TOP_SOUND_TOGGLE | satır=226
+ 3054- 3183 | FAB_LEFT_GAP_MOVE | satır=130
+ 3185- 3285 | FAB_DISTINCT_PANEL | satır=101
+ 3287- 3362 | FAB_COMPACT_FIT | satır=76
+ 3366- 3555 | FAB_DRIVE_MODE_OVERRIDE_FIX | satır=190
+ 3561- 3584 | REAR_BOTTOM_GAP_SOFT_TRIM | satır=24
+ 3596- 3884 | MANUAL_TICKET_SYSTEM_CLEAN | satır=289
+
+===== 5) AÇILIŞ / KAPANIŞ SAYIMI =====
+style açılış: 21
+style kapanış: 21
+script açılış: 26
+script kapanış: 26
+START sayısı: 15
+END sayısı: 15
+END olmayan START: []
+START olmayan END: []
+
+===== 6) END BLOCK SONRASI İÇERİK KONTROLÜ =====
+endblock satırları: [3886]
+Son endblock sonrası dolu satır sayısı: 44
+ 3889: <script id="continue-trip-selected-stop-store">
+ 3890: (function(){
+ 3891:   function getTripKey(){
+ 3892:     try{
+ 3893:       if(window.BAG_TRIP) return String(window.BAG_TRIP);
+ 3894:       if(window.boot && window.boot.tripKey) return String(window.boot.tripKey);
+ 3895:       if(typeof boot !== "undefined" && boot.tripKey) return String(boot.tripKey);
+ 3896:     }catch(_){}
+ 3897:     return "default";
+ 3898:   }
+ 3900:   function cleanStop(v){
+ 3901:     return String(v || "").trim();
+ 3902:   }
+ 3904:   function saveSelectedStop(){
+ 3905:     const el = document.getElementById("selectedStopBadge");
+ 3906:     if(!el) return;
+ 3908:     const stop = cleanStop(el.textContent);
+ 3909:     if(!stop || stop === "—" || stop === "-") return;
+ 3911:     const key = "continueTripStop:" + getTripKey();
+ 3913:     try{
+ 3914:       localStorage.setItem(key, stop);
+ 3915:       localStorage.setItem("continueTripStop:last", stop);
+ 3916:     }catch(_){}
+ 3917:   }
+ 3919:   function boot(){
+ 3920:     const el = document.getElementById("selectedStopBadge");
+ 3921:     if(!el) return;
+ 3923:     saveSelectedStop();
+ 3925:     const mo = new MutationObserver(saveSelectedStop);
+ 3926:     mo.observe(el, { childList:true, characterData:true, subtree:true });
+ 3928:     document.addEventListener("click", function(){
+ 3929:       setTimeout(saveSelectedStop, 80);
+ 3930:     }, true);
+ 3932:     document.addEventListener("change", function(){
+ 3933:       setTimeout(saveSelectedStop, 80);
+ 3934:     }, true);
+ 3935:   }
+ 3937:   if(document.readyState === "loading"){
+ 3938:     document.addEventListener("DOMContentLoaded", boot);
+ 3939:   }else{
+ 3940:     boot();
+ 3941:   }
+ 3942: })();
+ 3943: </script>
+
+===== 7) ESKİ / ŞÜPHELİ YAMA ANAHTARLARI =====
+  357: <script src="/static/seats/voice-tts.js?v=voice-owner-fix-1"></script>
+  359: <script src="/static/seats/drive-controls.js?v=drive-toggle-fix-1"></script>
+  892:       window.dispatchEvent(new CustomEvent("driveModeChanged", { detail:{ on:!!on } }));
+ 1492:   position:fixed;
+ 1794: <!-- STOP_FLOW_FOCUS_PATCH_START -->
+ 1795: <style id="stop-flow-focus-patch-style">
+ 1803:     position:fixed;
+ 1975: <script id="stop-flow-focus-patch-script">
+ 1977:   if(window.__stopFlowFocusPatchLoaded) return;
+ 1978:   window.__stopFlowFocusPatchLoaded = true;
+ 2075:     pickup.dispatchEvent(new Event("change", {bubbles:true}));
+ 2107:       alertStop.dispatchEvent(new Event("change", {bubbles:true}));
+ 2124:     document.dispatchEvent(new CustomEvent("muavin:selected-stop-change", {detail:{stop:name}}));
+ 2319: <!-- STOP_FLOW_FOCUS_PATCH_END -->
+ 2322: <!-- STOP_SELECTED_TOAST_PATCH_START -->
+ 2325:     position:fixed;
+ 2396:   if(window.__stopSelectedToastPatchLoaded) return;
+ 2397:   window.__stopSelectedToastPatchLoaded = true;
+ 2459: <!-- STOP_SELECTED_TOAST_PATCH_END -->
+ 2468: <!-- MODAL_BOTTOM_NAV_AUTOHIDE_V3_START -->
+ 2629: <!-- MODAL_BOTTOM_NAV_AUTOHIDE_V3_END -->
+ 2650: <!-- RIGHT_SEAT_COLUMN_SPACING_FIX_START -->
+ 2651: <style id="right-seat-column-spacing-fix-style">
+ 2702: <!-- RIGHT_SEAT_COLUMN_SPACING_FIX_END -->
+ 2705: <!-- BOTTOM_ROW_51_54_EQUAL_SPACING_START -->
+ 2724: <!-- BOTTOM_ROW_51_54_EQUAL_SPACING_END -->
+ 2760: <!-- ONLY_54_REAPPLY_RIGHT_SHIFT_START -->
+ 2764:     BOTTOM_ROW_51_54_EQUAL_SPACING yaması 14. satırın transformunu sıfırladığı için
+ 2783: <!-- ONLY_54_REAPPLY_RIGHT_SHIFT_END -->
+ 2787: <!-- BOTTOM_VOICE_COMMAND_FINAL_START -->
+ 2808: <!-- BOTTOM_VOICE_COMMAND_FINAL_END -->
+ 2811: <!-- BOTTOM_VOICE_LISTENING_STATE_FIX_START -->
+ 2812: <style id="bottom-voice-listening-state-fix-style">
+ 2820: <!-- BOTTOM_VOICE_LISTENING_STATE_FIX_END -->
+ 2823: <!-- TOP_SOUND_TOGGLE_START -->
+ 2931:       try{ sound.dispatchEvent(new Event("change", {bubbles:true})); }catch(_){}
+ 2953:       window.dispatchEvent(new CustomEvent("ttsEnabledChanged", {detail:{enabled:on}}));
+ 3048: <!-- TOP_SOUND_TOGGLE_END -->
+ 3054: <!-- FAB_LEFT_GAP_MOVE_START -->
+ 3183: <!-- FAB_LEFT_GAP_MOVE_END -->
+ 3185: <!-- FAB_DISTINCT_PANEL_START -->
+ 3285: <!-- FAB_DISTINCT_PANEL_END -->
+ 3287: <!-- FAB_COMPACT_FIT_START -->
+ 3345:       window.dispatchEvent(new Event("resize"));
+ 3362: <!-- FAB_COMPACT_FIT_END -->
+ 3366: <!-- FAB_DRIVE_MODE_OVERRIDE_FIX_START -->
+ 3367: <style id="fab-drive-mode-override-fix-style">
+ 3486: <script id="fab-drive-mode-override-fix-script">
+ 3488:   if(window.__fabDriveModeOverrideFixReady) return;
+ 3489:   window.__fabDriveModeOverrideFixReady = true;
+ 3555: <!-- FAB_DRIVE_MODE_OVERRIDE_FIX_END -->
+ 3561: <!-- REAR_BOTTOM_GAP_SOFT_TRIM_START -->
+ 3584: <!-- REAR_BOTTOM_GAP_SOFT_TRIM_END -->
+ 3596: <!-- MANUAL_TICKET_SYSTEM_CLEAN_START -->
+ 3884: <!-- MANUAL_TICKET_SYSTEM_CLEAN_END -->
+
+===== 8) DUPLICATE ID KONTROLÜ =====
+Duplicate id yok.
+
+===== 9) TEMİZLİK İÇİN ÖN SINIFLANDIRMA =====
+İNCELE     |   373-  456 | STYLE  | drive-mode-actions-independent-style
+İNCELE     |   458-  619 | SCRIPT | drive-mode-actions-independent-js
+İNCELE     |   625-  830 | STYLE  | drive-dock-stability-final
+İNCELE     |   853-  920 | SCRIPT | drive-mode-force-toggle-js
+İNCELE     |   927-  991 | SCRIPT | drive-voice-mirror-script
+KALABİLİR  |   995- 1131 | STYLE  | seat-simple-open-mode-style
+KALABİLİR  |  1133- 1217 | SCRIPT | seat-simple-open-mode-script
+KALABİLİR  |  1221- 1363 | STYLE  | seat-simple-summary-polish-style
+KALABİLİR  |  1365- 1480 | SCRIPT | seat-simple-summary-polish-script
+KALABİLİR  |  1484- 1590 | STYLE  | seat-simple-bottom-bar-style
+KALABİLİR  |  1592- 1697 | SCRIPT | seat-simple-bottom-bar-script
+BELİRSİZ   |  1701- 1711 | STYLE  | seat-hide-bottom-menu-on-modal-style
+BELİRSİZ   |  1713- 1790 | SCRIPT | seat-hide-bottom-menu-on-modal-script
+KALABİLİR  |  1795- 1973 | STYLE  | stop-flow-focus-patch-style
+KALABİLİR  |  1975- 2318 | SCRIPT | stop-flow-focus-patch-script
+KALABİLİR  |  2323- 2392 | STYLE  | stop-selected-toast-style
+KALABİLİR  |  2394- 2458 | SCRIPT | stop-selected-toast-script
+KALABİLİR  |  2469- 2476 | STYLE  | modal-bottom-nav-autohide-v3-style
+KALABİLİR  |  2478- 2628 | SCRIPT | modal-bottom-nav-autohide-v3-script
+İNCELE     |  2651- 2701 | STYLE  | right-seat-column-spacing-fix-style
+İNCELE     |  2706- 2723 | STYLE  | bottom-row-51-54-equal-spacing-style
+İNCELE     |  2761- 2782 | STYLE  | only-54-reapply-right-shift-style
+KALABİLİR  |  2788- 2807 | STYLE  | bottom-voice-command-final-style
+KALABİLİR  |  2812- 2819 | STYLE  | bottom-voice-listening-state-fix-style
+İNCELE     |  2824- 2885 | STYLE  | top-sound-toggle-style
+İNCELE     |  2887- 3047 | SCRIPT | top-sound-toggle-script
+İNCELE     |  3055- 3103 | STYLE  | fab-left-gap-move-style
+İNCELE     |  3105- 3182 | SCRIPT | fab-left-gap-move-script
+İNCELE     |  3186- 3284 | STYLE  | fab-distinct-panel-style
+İNCELE     |  3288- 3339 | STYLE  | fab-compact-fit-style
+İNCELE     |  3341- 3361 | SCRIPT | fab-compact-fit-script
+İNCELE     |  3367- 3484 | STYLE  | fab-drive-mode-override-fix-style
+İNCELE     |  3486- 3554 | SCRIPT | fab-drive-mode-override-fix-script
+İNCELE     |  3562- 3583 | STYLE  | rear-bottom-gap-soft-trim-style
+KALABİLİR  |  3597- 3653 | STYLE  | manual-ticket-system-clean-style
+KALABİLİR  |  3655- 3883 | SCRIPT | manual-ticket-system-clean-script
+İNCELE     |  3889- 3943 | SCRIPT | continue-trip-selected-stop-store
