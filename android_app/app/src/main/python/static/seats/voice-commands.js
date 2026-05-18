@@ -1242,10 +1242,19 @@ function setVoiceCommandButtonsListening(buttons, on){
 }
 
 function startDeckAIVoice(){
+  if(window.__deckAIListening){
+    try{ toast("Zaten dinliyorum"); }catch(_){}
+    try{ setVoiceBadge("Dinleniyor"); }catch(_){}
+    return;
+  }
+
+  window.__deckAIListening = true;
+
   const buttons = getVoiceCommandButtons();
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if(!SR){
+    window.__deckAIListening = false;
     toast("Bu tarayıcı sesli komutu desteklemiyor");
     setVoiceBadge("Destek yok");
     return;
@@ -1276,11 +1285,13 @@ function startDeckAIVoice(){
   };
 
   rec.onerror = (e) => {
+    window.__deckAIListening = false;
     toast("Sesli komut hatası: " + (e.error || "bilinmiyor"));
     setVoiceBadge("Hata");
   };
 
   rec.onend = () => {
+    window.__deckAIListening = false;
     setVoiceCommandButtonsListening(buttons, false);
 
     setTimeout(() => setVoiceBadge("Hazır"), 900);
@@ -1289,6 +1300,7 @@ function startDeckAIVoice(){
   try{
     rec.start();
   }catch(_){
+    window.__deckAIListening = false;
     setVoiceCommandButtonsListening(buttons, false);
 
     setVoiceBadge("Başlatılamadı");

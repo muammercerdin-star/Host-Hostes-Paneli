@@ -1,0 +1,6 @@
+body.muavin-work-modal-open .muavin-hidden-bottom-nav-by-modal{
+    display:none !important;
+    opacity:0 !important;
+    visibility:hidden !important;
+    pointer-events:none !important;
+  }

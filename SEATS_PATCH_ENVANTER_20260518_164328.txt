@@ -1,0 +1,77 @@
+============================================================
+SEATS.HTML YAMA ENVANTERİ
+Dosya: templates/seats.html
+Toplam satır: 3731
+============================================================
+
+===== STYLE / SCRIPT ID BLOKLARI =====
+  361-  444 | STYLE  | drive-mode-actions-independent-style | satır=84
+  446-  607 | SCRIPT | drive-mode-actions-independent-js | satır=162
+  611-  816 | STYLE  | drive-dock-stability-final | satır=206
+  821-  888 | SCRIPT | drive-mode-force-toggle-js | satır=68
+  892-  956 | SCRIPT | drive-voice-mirror-script | satır=65
+  959- 1095 | STYLE  | seat-simple-open-mode-style | satır=137
+ 1097- 1181 | SCRIPT | seat-simple-open-mode-script | satır=85
+ 1183- 1325 | STYLE  | seat-simple-summary-polish-style | satır=143
+ 1327- 1442 | SCRIPT | seat-simple-summary-polish-script | satır=116
+ 1444- 1550 | STYLE  | seat-simple-bottom-bar-style | satır=107
+ 1552- 1657 | SCRIPT | seat-simple-bottom-bar-script | satır=106
+ 1659- 1669 | STYLE  | seat-hide-bottom-menu-on-modal-style | satır=11
+ 1671- 1748 | SCRIPT | seat-hide-bottom-menu-on-modal-script | satır=78
+ 1751- 1929 | STYLE  | stop-flow-focus-patch-style | satır=179
+ 1931- 2274 | SCRIPT | stop-flow-focus-patch-script | satır=344
+ 2278- 2347 | STYLE  | stop-selected-toast-style | satır=70
+ 2349- 2413 | SCRIPT | stop-selected-toast-script | satır=65
+ 2417- 2424 | STYLE  | modal-bottom-nav-autohide-v3-style | satır=8
+ 2426- 2576 | SCRIPT | modal-bottom-nav-autohide-v3-script | satır=151
+ 2580- 2630 | STYLE  | right-seat-column-spacing-fix-style | satır=51
+ 2634- 2651 | STYLE  | bottom-row-51-54-equal-spacing-style | satır=18
+ 2655- 2676 | STYLE  | only-54-reapply-right-shift-style | satır=22
+ 2680- 2699 | STYLE  | bottom-voice-command-final-style | satır=20
+ 2703- 2710 | STYLE  | bottom-voice-listening-state-fix-style | satır=8
+ 2714- 2775 | STYLE  | top-sound-toggle-style | satır=62
+ 2777- 2937 | SCRIPT | top-sound-toggle-script | satır=161
+ 2941- 2989 | STYLE  | fab-left-gap-move-style | satır=49
+ 2991- 3068 | SCRIPT | fab-left-gap-move-script | satır=78
+ 3072- 3170 | STYLE  | fab-distinct-panel-style | satır=99
+ 3174- 3225 | STYLE  | fab-compact-fit-style | satır=52
+ 3227- 3247 | SCRIPT | fab-compact-fit-script | satır=21
+ 3251- 3368 | STYLE  | fab-drive-mode-override-fix-style | satır=118
+ 3370- 3438 | SCRIPT | fab-drive-mode-override-fix-script | satır=69
+ 3442- 3498 | STYLE  | manual-ticket-system-clean-style | satır=57
+ 3500- 3728 | SCRIPT | manual-ticket-system-clean-script | satır=229
+
+===== PATCH MARKER BLOKLARI =====
+ 1750- 2275 | STOP_FLOW_FOCUS_PATCH | satır=526
+ 2277- 2414 | STOP_SELECTED_TOAST_PATCH | satır=138
+ 2416- 2577 | MODAL_BOTTOM_NAV_AUTOHIDE_V3 | satır=162
+ 2579- 2631 | RIGHT_SEAT_COLUMN_SPACING_FIX | satır=53
+ 2633- 2652 | BOTTOM_ROW_51_54_EQUAL_SPACING | satır=20
+ 2654- 2677 | ONLY_54_REAPPLY_RIGHT_SHIFT | satır=24
+ 2679- 2700 | BOTTOM_VOICE_COMMAND_FINAL | satır=22
+ 2702- 2711 | BOTTOM_VOICE_LISTENING_STATE_FIX | satır=10
+ 2713- 2938 | TOP_SOUND_TOGGLE | satır=226
+ 2940- 3069 | FAB_LEFT_GAP_MOVE | satır=130
+ 3071- 3171 | FAB_DISTINCT_PANEL | satır=101
+ 3173- 3248 | FAB_COMPACT_FIT | satır=76
+ 3250- 3439 | FAB_DRIVE_MODE_OVERRIDE_FIX | satır=190
+ 3441- 3729 | MANUAL_TICKET_SYSTEM_CLEAN | satır=289
+
+===== ÖNERİLEN TAŞIMA PLANI =====
+VAR | STOP_FLOW_FOCUS_PATCH              → static/seats/patches/stop-flow-focus.css + .js | Durak tam ekran odak menüsü
+VAR | STOP_SELECTED_TOAST_PATCH          → static/seats/patches/stop-selected-toast.css + .js | Durak seçildi bildirimi
+VAR | MODAL_BOTTOM_NAV_AUTOHIDE_V3       → static/seats/patches/modal-bottom-nav-autohide.css + .js | Modal açılınca alt menü gizleme
+VAR | BOTTOM_VOICE_COMMAND_FINAL         → static/seats/patches/bottom-voice-command.css | Alt bar sesli komut görünümü
+VAR | BOTTOM_VOICE_LISTENING_STATE_FIX   → static/seats/patches/bottom-voice-listening.css | Dinliyor görünümü
+VAR | TOP_SOUND_TOGGLE                   → static/seats/patches/top-sound-toggle.css + .js | Üst ses aç/kapat
+VAR | FAB_LEFT_GAP_MOVE                  → static/seats/patches/fab-left-gap-move.css + .js | Hızlı işlem konumu
+VAR | FAB_DISTINCT_PANEL                 → static/seats/patches/fab-distinct-panel.css | Hızlı işlem panel görünümü
+VAR | FAB_COMPACT_FIT                    → static/seats/patches/fab-compact-fit.css + .js | Hızlı işlem kompakt ayar
+VAR | FAB_DRIVE_MODE_OVERRIDE_FIX        → static/seats/patches/fab-drive-mode-override.css + .js | Drive-mode fab çakışma düzeltmesi
+VAR | MANUAL_TICKET_SYSTEM_CLEAN         → static/seats/patches/manual-ticket-system.css + .js | Biletsiz rozet sistemi
+
+===== TEKNİK KONTROL =====
+style açılış: 0
+style kapanış: 20
+script açılış: 0
+script kapanış: 25

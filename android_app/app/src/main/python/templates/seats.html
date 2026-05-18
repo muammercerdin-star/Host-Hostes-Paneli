@@ -4,6 +4,10 @@
 <link rel="stylesheet" href="/static/style.css">
 <link rel="stylesheet" href="/static/seats/seats.css?v=41">
 <link rel="stylesheet" href="/static/seats/seats-final.css?v=drive-voice-real-width-test-1">
+<link rel="stylesheet" href="/static/seats/patches/stop-selected-toast.css?v=1">
+<link rel="stylesheet" href="/static/seats/patches/bottom-voice-command.css?v=1">
+<link rel="stylesheet" href="/static/seats/patches/modal-bottom-nav-autohide.css?v=1">
+<link rel="stylesheet" href="/static/seats/patches/manual-ticket-system.css?v=1">
 
 <div class="seats-shell">
   {% include "seats_parts/topbar.html" %}
@@ -349,7 +353,7 @@
 </script>
 
 <script src="/static/seats/bags.js?v=1"></script>
-<script src="/static/seats/voice-commands.js?v=boarding-stop-priority-1"></script>
+<script src="/static/seats/voice-commands.js?v=voice-listen-guard-1"></script>
 <script src="/static/seats/standing.js?v=1"></script>
 <script src="/static/seats/seats.js?v=clear-ticket-on-offload-1"></script>
 <script src="/static/seats/route-marquee.js?v=route-clean-ticker-single-1"></script>
@@ -357,6 +361,9 @@
 <script src="/static/seats/voice-tts.js?v=voice-owner-fix-1"></script>
 <script src="/static/seats/drive-eta-chip.js?v=1"></script>
 <script src="/static/seats/drive-controls.js?v=drive-toggle-fix-1"></script>
+<script src="/static/seats/patches/stop-selected-toast.js?v=1"></script>
+<script src="/static/seats/patches/modal-bottom-nav-autohide.js?v=1"></script>
+<script src="/static/seats/patches/manual-ticket-system.js?v=1"></script>
 
 <style id="drive-mode-actions-independent-style">
 /* =========================================================
@@ -1642,7 +1649,12 @@ html.seat-simple-mode body{
 
     const voice = q("#seatSimpleVoiceBtn");
     if(voice){
-      voice.addEventListener("click", openVoice);
+      voice.addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+        openVoice();
+      });
     }
   }
 
@@ -2274,307 +2286,9 @@ body.seat-modal-open .seat-simple-bottom-bar{
 </script>
 <!-- STOP_FLOW_FOCUS_PATCH_END -->
 
-<!-- STOP_SELECTED_TOAST_PATCH_START -->
-<style id="stop-selected-toast-style">
-  #stopSelectedToast{
-    position:fixed;
-    left:50%;
-    bottom:calc(env(safe-area-inset-bottom, 0px) + 92px);
-    transform:translateX(-50%) translateY(22px) scale(.96);
-    z-index:2147483600;
-    width:calc(100% - 28px);
-    max-width:520px;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .22s ease, transform .22s ease;
-  }
 
-  #stopSelectedToast.show{
-    opacity:1;
-    transform:translateX(-50%) translateY(0) scale(1);
-  }
 
-  .stop-toast-inner{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    border-radius:22px;
-    padding:14px 16px;
-    color:#fff;
-    background:
-      radial-gradient(circle at 14% 20%, rgba(69,255,153,.24), transparent 34%),
-      linear-gradient(135deg, rgba(16,126,68,.94), rgba(9,35,31,.96));
-    border:1px solid rgba(111,255,174,.36);
-    box-shadow:0 18px 44px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.12);
-    backdrop-filter:blur(16px);
-    -webkit-backdrop-filter:blur(16px);
-  }
 
-  .stop-toast-icon{
-    width:42px;
-    height:42px;
-    flex:0 0 42px;
-    border-radius:16px;
-    display:grid;
-    place-items:center;
-    font-size:22px;
-    background:rgba(255,255,255,.12);
-    border:1px solid rgba(255,255,255,.14);
-  }
-
-  .stop-toast-text{
-    min-width:0;
-    flex:1;
-  }
-
-  .stop-toast-title{
-    display:block;
-    font-weight:1000;
-    font-size:16px;
-    line-height:1.15;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-
-  .stop-toast-sub{
-    display:block;
-    margin-top:4px;
-    color:rgba(232,255,241,.78);
-    font-weight:800;
-    font-size:13px;
-  }
-</style>
-
-<script id="stop-selected-toast-script">
-(function(){
-  if(window.__stopSelectedToastPatchLoaded) return;
-  window.__stopSelectedToastPatchLoaded = true;
-
-  var timer = null;
-
-  function cleanStopName(v){
-    return String(v || "")
-      .replace(/\s+/g, " ")
-      .replace(/^🎯\s*/g, "")
-      .replace(/^Seçili\s+durak\s*:\s*/i, "")
-      .trim();
-  }
-
-  function ensureToast(){
-    var el = document.getElementById("stopSelectedToast");
-    if(el) return el;
-
-    el = document.createElement("div");
-    el.id = "stopSelectedToast";
-    el.innerHTML =
-      '<div class="stop-toast-inner">' +
-        '<div class="stop-toast-icon">✅</div>' +
-        '<div class="stop-toast-text">' +
-          '<span class="stop-toast-title" data-stop-toast-title>Durak seçildi</span>' +
-          '<span class="stop-toast-sub">Biniş yeri otomatik hazır</span>' +
-        '</div>' +
-      '</div>';
-
-    document.body.appendChild(el);
-    return el;
-  }
-
-  function showStopToast(stopName){
-    stopName = cleanStopName(stopName);
-    if(!stopName) return;
-
-    var el = ensureToast();
-    var title = el.querySelector("[data-stop-toast-title]");
-    if(title) title.textContent = stopName + " seçildi";
-
-    clearTimeout(timer);
-
-    el.classList.remove("show");
-    void el.offsetWidth;
-    el.classList.add("show");
-
-    try{
-      if(navigator.vibrate) navigator.vibrate(35);
-    }catch(e){}
-
-    timer = setTimeout(function(){
-      el.classList.remove("show");
-    }, 2100);
-  }
-
-  window.showStopSelectedToast = showStopToast;
-
-  document.addEventListener("muavin:selected-stop-change", function(e){
-    var stopName = e && e.detail ? e.detail.stop : "";
-    showStopToast(stopName);
-  });
-})();
-</script>
-<!-- STOP_SELECTED_TOAST_PATCH_END -->
-
-<!-- MODAL_BOTTOM_NAV_AUTOHIDE_V3_START -->
-<style id="modal-bottom-nav-autohide-v3-style">
-  body.muavin-work-modal-open .muavin-hidden-bottom-nav-by-modal{
-    display:none !important;
-    opacity:0 !important;
-    visibility:hidden !important;
-    pointer-events:none !important;
-  }
-</style>
-
-<script id="modal-bottom-nav-autohide-v3-script">
-(function(){
-  if(window.__muavinModalBottomNavAutohideV3) return;
-  window.__muavinModalBottomNavAutohideV3 = true;
-
-  var lastBottomNav = null;
-  var bottomWords = ["durak", "hesap", "emanet", "harita", "anons"];
-
-  function textOf(el){
-    return String((el && (el.innerText || el.textContent)) || "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toLocaleLowerCase("tr-TR");
-  }
-
-  function isVisible(el){
-    if(!el) return false;
-    var cs = getComputedStyle(el);
-    if(cs.display === "none" || cs.visibility === "hidden") return false;
-
-    var r = el.getBoundingClientRect();
-    return r.width > 20 && r.height > 20 && r.bottom > 0 && r.top < window.innerHeight;
-  }
-
-  function isWorkModalText(t){
-    var isBulk =
-      (t.includes("toplu giriş") || t.includes("toplu giris")) &&
-      t.includes("nereden") &&
-      t.includes("nereye") &&
-      t.includes("adet") &&
-      t.includes("bilet");
-
-    var isQuickCash =
-      (t.includes("hızlı tahsilat") || t.includes("hizli tahsilat")) &&
-      t.includes("adet") &&
-      t.includes("tutar") &&
-      t.includes("nereden") &&
-      t.includes("nereye") &&
-      (t.includes("ödeme") || t.includes("odeme"));
-
-    return isBulk || isQuickCash;
-  }
-
-  function workModalIsOpen(){
-    var nodes = Array.prototype.slice.call(document.querySelectorAll(
-      "[role='dialog'], .modal, .modal-content, .sheet, .sheet-panel, .drawer, " +
-      "[class*='modal'], [class*='sheet'], [class*='drawer'], [class*='panel'], form, section, div"
-    ));
-
-    return nodes.some(function(el){
-      if(!isVisible(el)) return false;
-
-      var r = el.getBoundingClientRect();
-
-      // Modal geniş ve yüksek bir panel olmalı
-      if(r.width < window.innerWidth * 0.62) return false;
-      if(r.height < 250) return false;
-
-      return isWorkModalText(textOf(el));
-    });
-  }
-
-  function findBottomNav(){
-    var nodes = Array.prototype.slice.call(document.querySelectorAll(
-      "nav, footer, .bottom-nav, .bottom-bar, .dock, .tabbar, .mobile-nav, " +
-      "[class*='bottom'], [class*='dock'], [class*='nav'], div"
-    ));
-
-    var best = null;
-    var bestScore = -1;
-
-    nodes.forEach(function(el){
-      if(!isVisible(el)) return;
-
-      var r = el.getBoundingClientRect();
-      var t = textOf(el);
-
-      var count = 0;
-      bottomWords.forEach(function(w){
-        if(t.includes(w)) count++;
-      });
-
-      if(count < 4) return;
-      if(r.top < window.innerHeight * 0.55) return;
-      if(r.width < window.innerWidth * 0.60) return;
-      if(r.height < 45 || r.height > 180) return;
-
-      var score = count * 1000 + r.top;
-      if(score > bestScore){
-        bestScore = score;
-        best = el;
-      }
-    });
-
-    return best;
-  }
-
-  function applyState(){
-    var open = workModalIsOpen();
-
-    document.body.classList.toggle("muavin-work-modal-open", open);
-
-    if(open){
-      var nav = findBottomNav() || lastBottomNav;
-      if(nav){
-        lastBottomNav = nav;
-        nav.classList.add("muavin-hidden-bottom-nav-by-modal");
-      }
-    }else{
-      document.querySelectorAll(".muavin-hidden-bottom-nav-by-modal").forEach(function(el){
-        el.classList.remove("muavin-hidden-bottom-nav-by-modal");
-      });
-      lastBottomNav = null;
-    }
-  }
-
-  var scheduled = false;
-
-  function scheduleApply(){
-    if(scheduled) return;
-    scheduled = true;
-
-    requestAnimationFrame(function(){
-      scheduled = false;
-      applyState();
-    });
-  }
-
-  document.addEventListener("click", function(){
-    setTimeout(scheduleApply, 30);
-    setTimeout(scheduleApply, 160);
-    setTimeout(scheduleApply, 420);
-  }, true);
-
-  document.addEventListener("input", scheduleApply, true);
-  document.addEventListener("change", scheduleApply, true);
-  window.addEventListener("resize", scheduleApply);
-  window.addEventListener("scroll", scheduleApply, true);
-
-  var obs = new MutationObserver(scheduleApply);
-  obs.observe(document.documentElement, {
-    childList:true,
-    subtree:true,
-    attributes:true,
-    attributeFilter:["class", "style", "hidden", "aria-hidden"]
-  });
-
-  setInterval(applyState, 700);
-  scheduleApply();
-})();
-</script>
-<!-- MODAL_BOTTOM_NAV_AUTOHIDE_V3_END -->
 
 <!-- RIGHT_SEAT_COLUMN_SPACING_FIX_START -->
 <style id="right-seat-column-spacing-fix-style">
@@ -2676,39 +2390,9 @@ body.seat-modal-open .seat-simple-bottom-bar{
 </style>
 <!-- ONLY_54_REAPPLY_RIGHT_SHIFT_END -->
 
-<!-- BOTTOM_VOICE_COMMAND_FINAL_START -->
-<style id="bottom-voice-command-final-style">
-  #seatSimpleVoiceBtn{
-    background:
-      radial-gradient(circle at 24% 18%, rgba(255,255,255,.20), transparent 34%),
-      linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
-    color:#fff !important;
-  }
 
-  #seatSimpleVoiceBtn .ico{
-    font-size:19px !important;
-  }
 
-  #seatSimpleVoiceBtn .voice-bottom-text{
-    display:block;
-    line-height:1.02;
-    font-size:10.5px;
-    font-weight:1000;
-    letter-spacing:-.02em;
-  }
-</style>
-<!-- BOTTOM_VOICE_COMMAND_FINAL_END -->
 
-<!-- BOTTOM_VOICE_LISTENING_STATE_FIX_START -->
-<style id="bottom-voice-listening-state-fix-style">
-  #seatSimpleVoiceBtn.listening{
-    background:
-      radial-gradient(circle at 24% 18%, rgba(255,255,255,.22), transparent 34%),
-      linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%) !important;
-    box-shadow:0 14px 34px rgba(220,38,38,.30), inset 0 1px 0 rgba(255,255,255,.14) !important;
-  }
-</style>
-<!-- BOTTOM_VOICE_LISTENING_STATE_FIX_END -->
 
 <!-- TOP_SOUND_TOGGLE_START -->
 <style id="top-sound-toggle-style">
@@ -3438,294 +3122,6 @@ body.seat-modal-open .seat-simple-bottom-bar{
 </script>
 <!-- FAB_DRIVE_MODE_OVERRIDE_FIX_END -->
 
-<!-- MANUAL_TICKET_SYSTEM_CLEAN_START -->
-<style id="manual-ticket-system-clean-style">
-  /*
-    Temiz biletsiz yolcu sistemi.
-    Otomatik herkese basmaz.
-    Sadece sesli komutla işaretlenen mevcut yolcuya 🎫 verir.
-  */
 
-  .seat{
-    position:relative !important;
-  }
-
-  .seat .manual-ticket-badge{
-    position:absolute;
-    right:-8px;
-    bottom:-8px;
-    width:24px;
-    height:24px;
-    border-radius:999px;
-
-    display:none;
-    align-items:center;
-    justify-content:center;
-
-    font-size:13px;
-    line-height:1;
-    background:linear-gradient(180deg,#fbbf24,#d97706);
-    color:#111827;
-    border:1px solid rgba(255,255,255,.78);
-    box-shadow:
-      0 8px 18px rgba(0,0,0,.35),
-      inset 0 1px 0 rgba(255,255,255,.45);
-    z-index:12;
-    pointer-events:none;
-  }
-
-  .seat.has-manual-ticket-badge-sig .manual-ticket-badge{
-    display:flex !important;
-  }
-
-  body.drive-mode .seat .manual-ticket-badge{
-    right:-9px;
-    bottom:-9px;
-    width:25px;
-    height:25px;
-    font-size:13px;
-  }
-
-  @media(max-width:380px){
-    .seat .manual-ticket-badge{
-      right:-7px;
-      bottom:-7px;
-      width:22px;
-      height:22px;
-      font-size:12px;
-    }
-  }
-</style>
-
-<script id="manual-ticket-system-clean-script">
-(function(){
-  if(window.__manualTicketSystemCleanReady) return;
-  window.__manualTicketSystemCleanReady = true;
-
-  function tripKey(){
-    try{
-      return String(
-        window.BAG_TRIP ||
-        (window.SEATS_BOOT && window.SEATS_BOOT.tripKey) ||
-        "default"
-      );
-    }catch(_){
-      return "default";
-    }
-  }
-
-  function sigKey(){
-    return "manualTicketBadgeSigs:" + tripKey();
-  }
-
-  function legacyKey(){
-    return "manualTicketBadges:" + tripKey();
-  }
-
-  function loadMap(){
-    try{
-      const raw = localStorage.getItem(sigKey()) || "{}";
-      const obj = JSON.parse(raw);
-      return obj && typeof obj === "object" && !Array.isArray(obj) ? obj : {};
-    }catch(_){
-      return {};
-    }
-  }
-
-  function saveMap(obj){
-    try{
-      localStorage.setItem(sigKey(), JSON.stringify(obj || {}));
-    }catch(_){}
-  }
-
-  function clearLegacy(){
-    try{
-      localStorage.setItem(legacyKey(), "[]");
-    }catch(_){}
-  }
-
-  function seatEl(no){
-    return document.getElementById("seat-" + no);
-  }
-
-  function ensureBadge(el){
-    if(!el) return;
-
-    let b = el.querySelector(".manual-ticket-badge");
-    if(!b){
-      b = document.createElement("span");
-      b.className = "manual-ticket-badge";
-      b.textContent = "🎫";
-      b.title = "Biletsiz yolcu";
-      el.appendChild(b);
-    }
-  }
-
-  function seatAssigned(no){
-    const el = seatEl(no);
-    if(!el) return false;
-
-    return (
-      el.classList.contains("isAssigned") ||
-      el.classList.contains("male") ||
-      el.classList.contains("female")
-    );
-  }
-
-  function seatSignature(no){
-    const label = document.getElementById("label-" + no);
-    const text = label ? String(label.textContent || "").replace(/\s+/g, " ").trim() : "";
-
-    if(text) return text;
-
-    if(seatAssigned(no)){
-      return "__assigned__";
-    }
-
-    return "";
-  }
-
-  function applyBadges(){
-    clearLegacy();
-
-    const map = loadMap();
-    let changed = false;
-
-    document.querySelectorAll(".seat[id^='seat-']").forEach(function(el){
-      const no = String(el.dataset.seat || (el.id || "").replace(/^seat-/, "") || "").trim();
-      if(!no) return;
-
-      ensureBadge(el);
-
-      const savedSig = map[no] || "";
-      const curSig = seatSignature(no);
-
-      el.classList.remove("has-manual-ticket-badge");
-      el.classList.remove("has-manual-ticket-badge-sig");
-
-      if(savedSig && seatAssigned(no) && curSig && savedSig === curSig){
-        el.classList.add("has-manual-ticket-badge-sig");
-        return;
-      }
-
-      /*
-        Koltuk dolu ama imza değişmişse yeni yolcu gelmiştir.
-        Eski 🎫 işareti silinir.
-      */
-      if(savedSig && seatAssigned(no) && curSig && savedSig !== curSig){
-        delete map[no];
-        changed = true;
-      }
-    });
-
-    if(changed){
-      saveMap(map);
-    }
-  }
-
-  window.markBiletsizSeatBadges = function(seats){
-    const list = (Array.isArray(seats) ? seats : [seats])
-      .map(x => Number(x))
-      .filter(x => Number.isInteger(x) && x > 0);
-
-    const map = loadMap();
-    const done = [];
-    const failed = [];
-
-    list.forEach(function(no){
-      const el = seatEl(no);
-
-      if(!el || !seatAssigned(no)){
-        failed.push(no);
-        return;
-      }
-
-      ensureBadge(el);
-
-      const sig = seatSignature(no);
-
-      if(!sig){
-        failed.push(no);
-        return;
-      }
-
-      map[String(no)] = sig;
-      el.classList.add("has-manual-ticket-badge-sig");
-      el.classList.remove("has-manual-ticket-badge");
-      done.push(no);
-    });
-
-    saveMap(map);
-    clearLegacy();
-
-    setTimeout(applyBadges, 150);
-    setTimeout(applyBadges, 600);
-    setTimeout(applyBadges, 1200);
-
-    return { done, failed };
-  };
-
-  window.clearBiletsizSeatBadges = function(seats){
-    const list = (Array.isArray(seats) ? seats : [seats])
-      .map(x => Number(x))
-      .filter(x => Number.isInteger(x) && x > 0);
-
-    const map = loadMap();
-
-    list.forEach(function(no){
-      delete map[String(no)];
-
-      const el = seatEl(no);
-      if(el){
-        el.classList.remove("has-manual-ticket-badge");
-        el.classList.remove("has-manual-ticket-badge-sig");
-      }
-    });
-
-    saveMap(map);
-    clearLegacy();
-    applyBadges();
-
-    return true;
-  };
-
-  window.refreshManualTicketBadges = applyBadges;
-
-  let timer = null;
-
-  function schedule(){
-    clearTimeout(timer);
-    timer = setTimeout(applyBadges, 180);
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", schedule);
-  }else{
-    schedule();
-  }
-
-  window.addEventListener("load", schedule);
-
-  document.addEventListener("click", function(){
-    setTimeout(schedule, 250);
-    setTimeout(schedule, 900);
-    setTimeout(schedule, 1600);
-  }, true);
-
-  document.addEventListener("change", schedule, true);
-
-  const obs = new MutationObserver(schedule);
-  obs.observe(document.documentElement, {
-    childList:true,
-    subtree:true,
-    attributes:true,
-    attributeFilter:["class"]
-  });
-
-  setTimeout(applyBadges, 500);
-  setTimeout(applyBadges, 1400);
-})();
-</script>
-<!-- MANUAL_TICKET_SYSTEM_CLEAN_END -->
 
 {% endblock %}
