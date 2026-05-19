@@ -4959,3 +4959,103 @@ body.drive-mode .route-stop.done.has-flow-summary .meta.done-summary{
 }
 /* LAST_ROW_TIGHTER_FIX_END */
 
+
+/* =========================================================
+   MUAVIN TASARIM YAMASI v1
+   Koltuk boyutları ve görsel iyileştirmeler
+========================================================= */
+
+/* Koltuk border-radius artırıldı */
+.seat {
+  border-radius: 22px !important;
+  box-shadow:
+    inset 0 -10px 18px rgba(0,0,0,.14),
+    0 14px 28px rgba(0,0,0,.34) !important;
+  transition: .15s ease !important;
+}
+
+/* Koltuk hover efekti */
+.seat:hover {
+  transform: translateY(-2px) scale(1.03) !important;
+  filter: brightness(1.08) !important;
+}
+
+/* Koltuk active efekti */
+.seat:active {
+  transform: scale(.96) !important;
+}
+
+/* Seçili koltuk daha belirgin */
+.seat.selected {
+  outline: 3px solid #7fc7ff !important;
+  outline-offset: 2px !important;
+  box-shadow:
+    inset 0 -10px 18px rgba(0,0,0,.14),
+    0 14px 28px rgba(0,0,0,.34),
+    0 0 20px rgba(127,199,255,.35) !important;
+}
+
+/* Koltuk altı label daha okunaklı */
+.label {
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+  color: rgba(220,230,239,.92) !important;
+  font-weight: 700 !important;
+}
+
+/* Board card arka plan efekti */
+.board-card::before {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(59,130,246,.12), transparent 30%),
+    radial-gradient(circle at 100% 20%, rgba(14,165,233,.10), transparent 26%) !important;
+}
+
+/* Sesli komut butonu shine efekti */
+.voice-command-btn::after {
+  animation-duration: 3.2s !important;
+}
+
+/* Route stop active daha parlak */
+.route-stop.active {
+  box-shadow:
+    0 14px 28px rgba(0,0,0,.22),
+    0 0 0 1px rgba(96,165,250,.22) inset,
+    0 0 18px rgba(59,130,246,.18) !important;
+}
+
+/* Tab butonları daha yuvarlak */
+.tab-btn {
+  border-radius: 16px !important;
+}
+
+.tab-btn.active {
+  box-shadow:
+    0 10px 20px rgba(0,0,0,.14),
+    0 0 12px rgba(37,99,235,.15) !important;
+}
+
+/* Section box hover */
+.section-box {
+  transition: .15s ease !important;
+}
+
+
+/* KOLTUK CANLILIK YAMASI v2 */
+.seat {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -10px 18px rgba(0,0,0,.18),
+    0 14px 28px rgba(0,0,0,.38) !important;
+}
+
+.seat:not(.isAssigned):not(.male):not(.female) {
+  background: linear-gradient(180deg, #22c55e, #16a34a) !important;
+}
+
+.seat.male {
+  background: linear-gradient(180deg, #3b82f6, #1d4ed8) !important;
+}
+
+.seat.female {
+  background: linear-gradient(180deg, #f472b6, #db2777) !important;
+}

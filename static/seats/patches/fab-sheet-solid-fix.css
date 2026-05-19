@@ -1,0 +1,64 @@
+/* =========================================================
+   FAB SHEET SOLID FIX
+   Toplu Giriş / Hızlı Tahsilat / Ayakta Listesi modallarının
+   fazla transparan görünmesini engeller.
+   ========================================================= */
+
+@media (max-width: 900px){
+
+  #bulkBackdrop,
+  #cashBackdrop,
+  #standingBackdrop,
+  #approachBackdrop{
+    background:rgba(2, 7, 16, .76) !important;
+    opacity:1 !important;
+  }
+
+  #bulkModal.sheet-modal.glass,
+  #cashModal.sheet-modal.glass,
+  #standingModal.sheet-modal.glass,
+  #approachModal.sheet-modal.glass{
+    background:linear-gradient(180deg, rgba(8,18,34,.985), rgba(3,9,20,.992)) !important;
+    border:1px solid rgba(148,163,184,.20) !important;
+    box-shadow:0 22px 58px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.06) !important;
+    -webkit-backdrop-filter:none !important;
+    backdrop-filter:none !important;
+  }
+
+  #bulkModal.sheet-modal.glass *,
+  #cashModal.sheet-modal.glass *,
+  #standingModal.sheet-modal.glass *,
+  #approachModal.sheet-modal.glass *{
+    text-shadow:none !important;
+  }
+
+  #bulkModal input,
+  #bulkModal select,
+  #cashModal input,
+  #cashModal select,
+  #standingModal input,
+  #standingModal select,
+  #approachModal input,
+  #approachModal select{
+    background:rgba(3,10,22,.98) !important;
+    color:#f8fafc !important;
+    border-color:rgba(255,255,255,.14) !important;
+  }
+
+  #bulkModal .muted,
+  #cashModal .muted,
+  #standingModal .muted,
+  #approachModal .muted{
+    color:rgba(226,237,255,.72) !important;
+  }
+
+  /* Modal açıkken sol hızlı butonlar arkada çok bağırmasın */
+  body:has(#bulkModal[style*="display: block"]) .fab-column,
+  body:has(#cashModal[style*="display: block"]) .fab-column,
+  body:has(#standingModal[style*="display: block"]) .fab-column,
+  body:has(#approachModal[style*="display: block"]) .fab-column{
+    opacity:.18 !important;
+    pointer-events:none !important;
+  }
+
+}

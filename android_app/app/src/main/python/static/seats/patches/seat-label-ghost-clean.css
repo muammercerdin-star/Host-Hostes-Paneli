@@ -1,0 +1,45 @@
+/* =========================================================
+   SEAT LABEL GHOST CLEAN
+   Boş koltuk altı label kutularındaki kare karartmayı kaldırır.
+   Dolu label yazısını korur.
+   ========================================================= */
+
+@media (max-width: 900px){
+
+  /* Boş label tamamen yok olsun */
+  html.seat-simple-mode .deck .cell .label:empty,
+  body.seat-simple-mode .deck .cell .label:empty,
+  .deck .cell .label:empty{
+    display:none !important;
+    height:0 !important;
+    min-height:0 !important;
+    max-height:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+    border:0 !important;
+    background:transparent !important;
+    box-shadow:none !important;
+    opacity:0 !important;
+    overflow:hidden !important;
+  }
+
+  /* Dolu label varsa yazı kalsın, kare arka plan kalksın */
+  html.seat-simple-mode .deck .cell .label,
+  body.seat-simple-mode .deck .cell .label{
+    background:transparent !important;
+    box-shadow:none !important;
+    border:0 !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+
+  /* Label içindeki yazıyı okunur tut */
+  html.seat-simple-mode .deck .cell .label:not(:empty),
+  body.seat-simple-mode .deck .cell .label:not(:empty){
+    display:block !important;
+    opacity:.92 !important;
+    color:rgba(235,245,255,.88) !important;
+    text-shadow:0 2px 8px rgba(0,0,0,.35) !important;
+  }
+
+}
