@@ -889,6 +889,21 @@ def upsert_live_runtime_state(
     db.commit()
 
 
+
+
+# DEV_NO_CACHE_HEADERS_FINAL
+@app.after_request
+def dev_no_cache_headers(response):
+    """
+    Geliştirme sırasında Android Chrome'un eski HTML/CSS/JS göstermesini engeller.
+    Üretimde performans için kaldırılabilir.
+    """
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
 @app.route("/api/live-runtime-state")
 def api_live_runtime_state():
     tid_raw = (request.args.get("trip_id") or "").strip()
@@ -2193,6 +2208,31 @@ def api_live_seat_destination():
         """,
         (new_to_stop, tid, seat_no),
     )
+
+    # LIVE_SEAT_DESTINATION_CHANGE_LOG_FINAL
+    try:
+        if (old_to_stop or "").strip() != (new_to_stop or "").strip():
+            updated_row = db.execute(
+                "SELECT * FROM seats WHERE trip_id=? AND seat_no=?",
+                (tid, seat_no),
+            ).fetchone()
+
+            if updated_row:
+                log_trip_stop_event(
+                    db,
+                    tid,
+                    new_to_stop,
+                    "seat_destination_change",
+                    _seat_event_meta(updated_row, {
+                        "action": "seat_destination_change",
+                        "old_from_stop": row["from_stop"] or "",
+                        "old_to_stop": old_to_stop or "",
+                        "new_from_stop": row["from_stop"] or "",
+                        "new_to_stop": new_to_stop or "",
+                    }),
+                )
+    except Exception:
+        pass
     db.commit()
 
     return jsonify({
@@ -3840,6 +3880,7 @@ def api_trip_report():
                 "standing_off": [],
                 "parcel_deliver": [],
                 "pass_stop": [],
+                "seat_destination_change": [],
                 "other": [],
                 "summary": {
                     "board_count": 0,
@@ -3847,6 +3888,7 @@ def api_trip_report():
                     "standing_board_count": 0,
                     "standing_off_count": 0,
                     "parcel_count": 0,
+                    "destination_change_count": 0,
                 },
             }
             order.append(stop)
@@ -3893,6 +3935,10 @@ def api_trip_report():
 
         elif event == "pass_stop":
             g["pass_stop"].append(item)
+
+        elif event == "seat_destination_change":
+            g["seat_destination_change"].append(item)
+            g["summary"]["destination_change_count"] += 1
 
         else:
             g["other"].append(item)

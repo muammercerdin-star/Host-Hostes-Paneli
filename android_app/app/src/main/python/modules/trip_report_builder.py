@@ -49,6 +49,7 @@ def register_trip_report_builder(app, deps):
                     "standing_off": [],
                     "parcel_deliver": [],
                     "pass_stop": [],
+                    "seat_destination_change": [],
                     "other": [],
                     "summary": {
                         "board_count": 0,
@@ -56,6 +57,7 @@ def register_trip_report_builder(app, deps):
                         "standing_board_count": 0,
                         "standing_off_count": 0,
                         "parcel_count": 0,
+                        "destination_change_count": 0,
                     },
                 }
                 order.append(stop)
@@ -97,6 +99,9 @@ def register_trip_report_builder(app, deps):
                 g["summary"]["parcel_count"] += int(meta.get("count") or 1)
             elif event == "pass_stop":
                 g["pass_stop"].append(item)
+            elif event == "seat_destination_change":
+                g["seat_destination_change"].append(item)
+                g["summary"]["destination_change_count"] += 1
             else:
                 g["other"].append(item)
 
@@ -263,6 +268,7 @@ def register_trip_report_builder(app, deps):
             name = stop.get("stop_name") or ""
             add(name, "bindi", stop.get("board"))
             add(name, "indi", stop.get("offload"))
+            add(name, "inis_duragi_degisti", stop.get("seat_destination_change"))
             add(name, "ayakta_bindi", stop.get("standing_add"))
             add(name, "ayakta_indi", stop.get("standing_off"))
 

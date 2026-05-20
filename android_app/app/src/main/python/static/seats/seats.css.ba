@@ -2052,6 +2052,190 @@ body.drive-mode .board-stage{
 
 
 /* =========================================================
+   SÜRÜŞ MODU
+   Amaç: Koltuk planını en üste almak, gereksiz kartları gizlemek
+========================================================= */
+
+#driveModeToggle{
+  position:fixed;
+  right:10px;
+  top:10px;
+  z-index:7000;
+  min-height:42px;
+  padding:9px 13px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(37,99,235,.96), rgba(29,78,216,.96));
+  color:#fff;
+  font-weight:900;
+  font-size:13px;
+  box-shadow:0 14px 30px rgba(0,0,0,.35);
+  backdrop-filter:blur(12px);
+}
+
+body.drive-mode #driveModeToggle{
+  background:linear-gradient(180deg, rgba(34,197,94,.98), rgba(21,128,61,.98));
+}
+
+body.drive-mode .topbar,
+body.drive-mode .status-row,
+body.drive-mode .panel-card{
+  display:none !important;
+}
+
+body.drive-mode .seats-shell{
+  width:100%;
+  max-width:100%;
+  padding:6px 6px 10px;
+}
+
+body.drive-mode .layout{
+  display:block !important;
+}
+
+body.drive-mode .board-card{
+  margin:0;
+  padding:8px;
+  border-radius:22px;
+}
+
+body.drive-mode .board-head{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+  margin-bottom:8px;
+}
+
+body.drive-mode .board-kicker,
+body.drive-mode .board-title h2,
+body.drive-mode .board-title small,
+body.drive-mode .legend{
+  display:none !important;
+}
+
+body.drive-mode .selected-stop-chip{
+  min-height:36px;
+  padding:8px 12px;
+  font-size:13px;
+}
+
+body.drive-mode .board-head-right{
+  align-items:flex-end;
+  gap:0;
+}
+
+body.drive-mode .voice-row{
+  justify-content:flex-end;
+  gap:8px;
+}
+
+body.drive-mode .voice-command-btn{
+  height:38px;
+  min-width:128px;
+  padding:0 12px;
+  border-radius:14px;
+  font-size:12px;
+}
+
+body.drive-mode .voice-state{
+  display:none !important;
+}
+
+body.drive-mode .route-strip-shell{
+  margin-top:0;
+  margin-bottom:8px;
+  padding:8px;
+  border-radius:20px;
+}
+
+body.drive-mode .route-strip-head{
+  margin-bottom:7px;
+}
+
+body.drive-mode .route-strip-title{
+  font-size:14px;
+}
+
+body.drive-mode .route-pill{
+  min-height:28px;
+  padding:5px 9px;
+  font-size:11px;
+}
+
+body.drive-mode .route-stop{
+  min-width:122px;
+  min-height:74px;
+  padding:9px 10px;
+  border-radius:17px;
+}
+
+body.drive-mode .board-stage{
+  padding-top:8px;
+  margin-top:0;
+}
+
+@media (max-width:760px){
+  #driveModeToggle{
+    top:8px;
+    right:8px;
+    min-height:40px;
+    padding:8px 12px;
+    font-size:12px;
+  }
+
+  body.drive-mode .seats-shell{
+    padding:4px 4px 8px;
+  }
+
+  body.drive-mode .board-card{
+    border-radius:18px;
+    padding:7px;
+  }
+
+  body.drive-mode .board-head{
+    grid-template-columns:1fr;
+    gap:6px;
+  }
+
+  body.drive-mode .board-head-right{
+    align-items:flex-start;
+  }
+
+  body.drive-mode .voice-row{
+    width:100%;
+    justify-content:space-between;
+  }
+
+  body.drive-mode .selected-stop-chip{
+    max-width:calc(100% - 92px);
+    min-height:34px;
+    font-size:12px;
+    padding:7px 10px;
+  }
+
+  body.drive-mode .voice-command-btn{
+    height:38px;
+    min-width:132px;
+  }
+
+  body.drive-mode .route-strip-shell{
+    padding:8px;
+    margin-bottom:8px;
+  }
+
+  body.drive-mode .route-stop{
+    min-width:112px;
+    min-height:70px;
+  }
+
+  body.drive-mode .board-stage{
+    padding-top:6px;
+  }
+}
+
+
+/* =========================================================
    SÜRÜŞ MODU İNCE AYAR v2
    Daha temiz üst alan + düzgün durak akışı + okunaklı koltuk yazıları
 ========================================================= */
@@ -2565,8 +2749,14 @@ body.drive-mode .corr{
 ========================================================= */
 
 /* Alt bar için koltuk planının altında yer aç */
+body.drive-mode .board-stage{
+  padding-bottom:92px !important;
+}
 
 /* Deck içinde butonlara alt boşluk bırak */
+body.drive-mode .deck-wrap{
+  padding-bottom:78px !important;
+}
 
 /* Sağdaki dikey FAB kolonunu sürüş modunda yatay alt bara çevir */
 body.drive-mode .fab-column{

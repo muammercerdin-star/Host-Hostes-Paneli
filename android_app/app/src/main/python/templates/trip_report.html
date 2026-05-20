@@ -429,6 +429,11 @@
   }
 
   .tl-kind.board{ color:#86efac; }
+  .tl-kind.change{
+    background:rgba(168,85,247,.18);
+    color:#d9b3ff;
+    border:1px solid rgba(168,85,247,.34);
+  }
   .tl-kind.offload{ color:#fca5a5; }
 
   .tl-main{
@@ -650,7 +655,7 @@ function flattenEvents(data){
   const events = [];
 
   (data.stops || []).forEach(stop => {
-    ["board","offload","standing_add","standing_off","parcel_deliver"].forEach(type => {
+    ["board","offload","seat_destination_change","standing_add","standing_off","parcel_deliver"].forEach(type => {
       (stop[type] || []).forEach(item => {
         events.push({
           ...item,
@@ -764,31 +769,49 @@ function openSeatReport(seatNo){
   document.getElementById("seatModalTitle").textContent = `Koltuk ${seatNo} Raporu`;
   document.getElementById("seatModalSub").textContent = seatStatusText(h);
 
-  const timeline = h.events.map(e => {
-    const m = e.meta || {};
-    const isBoard = e.type === "board";
-    const title = isBoard ? "🟢 Bindi" : "🔴 İndi";
-    const kindCls = isBoard ? "board" : "offload";
-    const route = isBoard
-      ? `${m.from_stop || "-"} → ${m.to_stop || "-"}`
-      : `${m.to_stop || e.stop_name || "-"} durağında indi`;
+      const timeline = h.events.map(e => {
+      const m = e.meta || {};
 
-    const extra = [
-      niceGender(m.gender),
-      nicePayment(m.payment),
-      Number(m.amount || 0) ? money(m.amount) : ""
-    ].filter(Boolean).join(" · ");
+      let title = "⚪ Hareket";
+      let kindCls = "other";
+      let route = "Detay yok";
+      let extra = "";
 
-    return `
-      <div class="tl-item">
-        <div class="tl-kind ${kindCls}">${title}</div>
-        <div class="tl-main">${esc(route)}</div>
-        <div class="tl-sub">${esc(extra || "Detay yok")} · ${esc(e.ts || "")}</div>
-      </div>
-    `;
-  }).join("");
+      if(e.type === "board"){
+        title = "🟢 Bindi";
+        kindCls = "board";
+        route = `${m.from_stop || "-"} → ${m.to_stop || "-"}`;
+        extra = [
+          niceGender(m.gender),
+          nicePayment(m.payment),
+          Number(m.amount || 0) ? money(m.amount) : ""
+        ].filter(Boolean).join(" · ");
+      }else if(e.type === "offload"){
+        title = "🔴 İndi";
+        kindCls = "offload";
+        route = `${m.to_stop || e.stop_name || "-"} durağında indi`;
+        extra = [
+          niceGender(m.gender),
+          nicePayment(m.payment),
+          Number(m.amount || 0) ? money(m.amount) : ""
+        ].filter(Boolean).join(" · ");
+      }else if(e.type === "seat_destination_change"){
+        title = "🟣 İniş durağı değişti";
+        kindCls = "change";
+        route = `${m.old_to_stop || "-"} → ${m.new_to_stop || m.to_stop || "-"}`;
+        extra = "Yolcunun ineceği durak güncellendi";
+      }
 
-  document.getElementById("seatModalBody").innerHTML = `
+      return `
+        <div class="tl-item">
+          <div class="tl-kind ${kindCls}">${title}</div>
+          <div class="tl-main">${esc(route)}</div>
+          <div class="tl-sub">${esc(extra || "Detay yok")} · ${esc(e.ts || "")}</div>
+        </div>
+      `;
+    }).join("");
+
+document.getElementById("seatModalBody").innerHTML = `
     <div class="seat-stats">
       <div class="seat-stat"><div class="k">Satış</div><div class="v">${h.board_count || 0}</div></div>
       <div class="seat-stat"><div class="k">İniş</div><div class="v">${h.offload_count || 0}</div></div>

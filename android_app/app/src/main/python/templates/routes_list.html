@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 {% block content %}
 <link rel="stylesheet" href="/static/style.css">
@@ -84,7 +85,7 @@ body{
 
 .summary-grid{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1fr;
   gap:12px;
   margin-bottom:18px;
 }
@@ -373,11 +374,6 @@ body{
       <div class="summary-label">Dinamik Hat</div>
       <div class="summary-value">{{ routes|length }}</div>
     </div>
-
-    <div class="summary-card">
-      <div class="summary-label">Sabit Hat</div>
-      <div class="summary-value">{{ builtin_routes|length }}</div>
-    </div>
   </section>
 
   <div class="section-head">
@@ -420,38 +416,9 @@ body{
     {% endfor %}
   </section>
 
-  <div class="section-head">
-    <h2>Sabit Hatlar</h2>
-    <span class="section-pill">Hazır</span>
-  </div>
 
-  <div class="info-box">
-    Sabit hatlarda saat ekranına geçmeden önce hattı bir kez <b>Düzenle</b> ile açıp dinamik hale getirmen daha sağlıklı olur.
-  </div>
+  <!-- Sabit Hatlar bölümü kaldırıldı: sadece Dinamik Hatlar kullanılıyor. -->
 
-  <section class="routes-list">
-    {% for r in builtin_routes %}
-      <article class="route-card">
-        <div class="route-main">
-          <div class="route-icon">🚌</div>
-          <div>
-            <div class="route-name">{{ r.name }}</div>
-            <div class="route-sub">
-              <span class="badge fixed">Sabit hat</span>
-              {% if r.overridden %}
-                <span class="badge special">Özel</span>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-
-        <div class="route-actions fixed-actions">
-          <button class="action-btn select" type="button" onclick="setRoute({{ r.name | tojson }})">Seç</button>
-          <a class="action-link edit" href="{{ url_for('builtin_route_edit', name=r.name) }}">Düzenle</a>
-        </div>
-      </article>
-    {% endfor %}
-  </section>
 
 </main>
 

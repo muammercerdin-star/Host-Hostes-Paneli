@@ -206,23 +206,47 @@ def register_seats_routes(app, deps):
             ),
         )
 
-        if from_stop and (
-            not old_row
-            or (old_row["from_stop"] or "") != from_stop
-            or (old_row["to_stop"] or "") != to_stop
-        ):
-            new_row = db.execute(
-                "SELECT * FROM seats WHERE trip_id=? AND seat_no=?",
-                (tid, seat_no),
-            ).fetchone()
+        new_row = db.execute(
+            "SELECT * FROM seats WHERE trip_id=? AND seat_no=?",
+            (tid, seat_no),
+        ).fetchone()
 
-            log_trip_stop_event(
-                db,
-                tid,
-                from_stop,
-                "board",
-                _seat_event_meta(new_row, {"action": "board_single"}),
-            )
+        # SEAT_DESTINATION_CHANGE_LOG_SINGLE_FINAL
+        if from_stop and new_row:
+            if not old_row:
+                log_trip_stop_event(
+                    db,
+                    tid,
+                    from_stop,
+                    "board",
+                    _seat_event_meta(new_row, {"action": "board_single"}),
+                )
+            else:
+                old_from = (old_row["from_stop"] or "").strip()
+                old_to = (old_row["to_stop"] or "").strip()
+                new_from = (from_stop or "").strip()
+                new_to = (to_stop or "").strip()
+
+                changed_from = old_from != new_from
+                changed_to = old_to != new_to
+
+                if changed_from or changed_to:
+                    event_name = "seat_destination_change" if changed_to else "seat_update"
+                    event_stop = new_to or new_from
+
+                    log_trip_stop_event(
+                        db,
+                        tid,
+                        event_stop,
+                        event_name,
+                        _seat_event_meta(new_row, {
+                            "action": event_name,
+                            "old_from_stop": old_from,
+                            "old_to_stop": old_to,
+                            "new_from_stop": new_from,
+                            "new_to_stop": new_to,
+                        }),
+                    )
 
         db.commit()
         return jsonify({"ok": True})
@@ -345,6 +369,15 @@ def register_seats_routes(app, deps):
                     "", 0, service, service_note, "", "",
                 ))
 
+        # SEAT_DESTINATION_CHANGE_LOG_BULK_PREPARE_FINAL
+        old_rows_by_seat = {}
+        for _r in rows:
+            _seat_no = _r[1]
+            old_rows_by_seat[_seat_no] = db.execute(
+                "SELECT * FROM seats WHERE trip_id=? AND seat_no=?",
+                (tid, _seat_no),
+            ).fetchone()
+
         db.executemany(
             """
             INSERT INTO seats(
@@ -370,21 +403,52 @@ def register_seats_routes(app, deps):
 
         for r in rows:
             row_from = r[2]
+            row_to = r[3]
             seat_no = r[1]
 
-            if row_from:
-                saved_row = db.execute(
-                    "SELECT * FROM seats WHERE trip_id=? AND seat_no=?",
-                    (tid, seat_no),
-                ).fetchone()
+            saved_row = db.execute(
+                "SELECT * FROM seats WHERE trip_id=? AND seat_no=?",
+                (tid, seat_no),
+            ).fetchone()
 
-                log_trip_stop_event(
-                    db,
-                    tid,
-                    row_from,
-                    "board",
-                    _seat_event_meta(saved_row, {"action": "board_bulk"}),
-                )
+            old_row = old_rows_by_seat.get(seat_no)
+
+            # SEAT_DESTINATION_CHANGE_LOG_BULK_FINAL
+            if row_from and saved_row:
+                if not old_row:
+                    log_trip_stop_event(
+                        db,
+                        tid,
+                        row_from,
+                        "board",
+                        _seat_event_meta(saved_row, {"action": "board_bulk"}),
+                    )
+                else:
+                    old_from = (old_row["from_stop"] or "").strip()
+                    old_to = (old_row["to_stop"] or "").strip()
+                    new_from = (row_from or "").strip()
+                    new_to = (row_to or "").strip()
+
+                    changed_from = old_from != new_from
+                    changed_to = old_to != new_to
+
+                    if changed_from or changed_to:
+                        event_name = "seat_destination_change" if changed_to else "seat_update"
+                        event_stop = new_to or new_from
+
+                        log_trip_stop_event(
+                            db,
+                            tid,
+                            event_stop,
+                            event_name,
+                            _seat_event_meta(saved_row, {
+                                "action": event_name,
+                                "old_from_stop": old_from,
+                                "old_to_stop": old_to,
+                                "new_from_stop": new_from,
+                                "new_to_stop": new_to,
+                            }),
+                        )
 
         db.commit()
 
