@@ -1,0 +1,573 @@
+/* ===== STYLE BLOCK: continue-live-v2-style ===== */
+/* =========================================================
+   CONTINUE TRIP - CANLI AKIŞ V2
+   Hedef: templates/continue_trip.html içindeki canlı durak kartı
+========================================================= */
+
+body.continue-live-v2{
+  --clv2-ink:#0a0a0f;
+  --clv2-card:#13131a;
+  --clv2-card2:#1a1a24;
+  --clv2-line:rgba(255,255,255,.06);
+  --clv2-red:#ff2d55;
+  --clv2-amber:#ffcc00;
+  --clv2-blue:#0a84ff;
+  --clv2-green:#30d158;
+  --clv2-white:#ffffff;
+  --clv2-dim:rgba(255,255,255,.42);
+}
+
+/* Canlı akış alanını v2 için genişlet */
+body.continue-live-v2 .timeline{
+  padding-left:0 !important;
+  margin-top:18px !important;
+}
+
+body.continue-live-v2 .timeline-line,
+body.continue-live-v2 .node{
+  display:none !important;
+}
+
+body.continue-live-v2 .journey-card{
+  margin-bottom:12px !important;
+}
+
+/* Aktif canlı durak kartı */
+body.continue-live-v2 #liveCurrentCard.card.live{
+  position:relative !important;
+  overflow:hidden !important;
+  padding:0 !important;
+  border-radius:28px !important;
+  background:var(--clv2-card) !important;
+  border:1px solid rgba(255,45,85,.22) !important;
+  box-shadow:
+    0 22px 58px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+
+body.continue-live-v2 #liveCurrentCard.card.live::before{
+  content:"" !important;
+  position:absolute !important;
+  left:0 !important;
+  top:20% !important;
+  bottom:20% !important;
+  width:3px !important;
+  border-radius:0 3px 3px 0 !important;
+  background:var(--clv2-red) !important;
+  box-shadow:0 0 16px var(--clv2-red) !important;
+}
+
+/* Üst satır */
+body.continue-live-v2 #liveCurrentCard .card-head{
+  padding:22px 22px 0 !important;
+  margin:0 !important;
+  display:flex !important;
+  align-items:flex-start !important;
+  justify-content:space-between !important;
+  gap:12px !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .card-label{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  margin-bottom:12px !important;
+  font-size:11px !important;
+  font-weight:1000 !important;
+  letter-spacing:.14em !important;
+  text-transform:uppercase !important;
+  color:var(--clv2-red) !important;
+}
+
+body.continue-live-v2 .continue-v2-dot{
+  width:8px !important;
+  height:8px !important;
+  border-radius:50% !important;
+  background:var(--clv2-red) !important;
+  box-shadow:0 0 12px var(--clv2-red) !important;
+  display:inline-block !important;
+  flex:0 0 auto !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .status-pill.live{
+  max-width:120px !important;
+  min-height:34px !important;
+  padding:7px 12px !important;
+  border-radius:12px !important;
+  color:var(--clv2-dim) !important;
+  background:rgba(255,255,255,.06) !important;
+  border:0 !important;
+  box-shadow:none !important;
+  font-size:12px !important;
+  font-weight:850 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* Durak adı */
+body.continue-live-v2 #liveCurrentStopName{
+  font-size:clamp(42px, 11vw, 58px) !important;
+  line-height:.95 !important;
+  letter-spacing:-.055em !important;
+  font-weight:1000 !important;
+  color:var(--clv2-white) !important;
+  max-width:100% !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* Kalan mesafe satırı */
+body.continue-live-v2 .continue-v2-distance-line{
+  padding:8px 22px 20px !important;
+  font-size:14px !important;
+  color:var(--clv2-dim) !important;
+  font-weight:800 !important;
+  line-height:1.2 !important;
+}
+
+body.continue-live-v2 .continue-v2-distance-line span{
+  color:var(--clv2-white) !important;
+  font-weight:1000 !important;
+}
+
+/* İlk iki eski metrik gizli: ETA ve mesafe artık başlık alanında */
+body.continue-live-v2 #liveCurrentCard .metric-grid > .metric:nth-child(1),
+body.continue-live-v2 #liveCurrentCard .metric-grid > .metric:nth-child(2){
+  display:none !important;
+}
+
+/* Altta 2 büyük operasyon kutusu */
+body.continue-live-v2 #liveCurrentCard .metric-grid{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:0 !important;
+  margin:0 !important;
+  border-top:1px solid var(--clv2-line) !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-action{
+  min-height:96px !important;
+  border-radius:0 !important;
+  padding:18px 20px !important;
+  background:transparent !important;
+  border:0 !important;
+  border-right:1px solid var(--clv2-line) !important;
+  box-shadow:none !important;
+  display:flex !important;
+  align-items:flex-start !important;
+  justify-content:center !important;
+  text-align:left !important;
+  position:relative !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-action:last-child{
+  border-right:0 !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-action[data-kind="offload"]{
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255,45,85,.18), transparent 62%) !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-action small{
+  order:3 !important;
+  margin:0 !important;
+  color:var(--clv2-dim) !important;
+  font-size:11px !important;
+  font-weight:950 !important;
+  letter-spacing:.11em !important;
+  text-transform:uppercase !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-action b{
+  order:2 !important;
+  margin:0 0 6px !important;
+  color:var(--clv2-white) !important;
+  font-size:34px !important;
+  line-height:.95 !important;
+  letter-spacing:-.045em !important;
+  font-weight:1000 !important;
+}
+
+body.continue-live-v2 #liveCurrentCard #liveOffloadCount{
+  color:var(--clv2-red) !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-action::before{
+  order:1 !important;
+  display:block !important;
+  margin-bottom:7px !important;
+  font-size:26px !important;
+  line-height:1 !important;
+}
+
+body.continue-live-v2 #liveCurrentCard #liveOffloadMetric::before{
+  content:"👤" !important;
+}
+
+body.continue-live-v2 #liveCurrentCard #liveBagajMetric::before{
+  content:"🧳" !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-hint{
+  position:absolute !important;
+  right:14px !important;
+  bottom:14px !important;
+  padding:5px 9px !important;
+  border-radius:9px !important;
+  background:rgba(255,45,85,.12) !important;
+  color:var(--clv2-red) !important;
+  font-size:11px !important;
+  font-weight:1000 !important;
+  letter-spacing:.04em !important;
+}
+
+body.continue-live-v2 #liveBagajMetric .metric-hint{
+  background:rgba(255,255,255,.05) !important;
+  color:var(--clv2-dim) !important;
+}
+
+/* Sonraki durak kartlarını biraz daha kompakt ve aynı palete yakın yap */
+body.continue-live-v2 .card.regular{
+  border-radius:22px !important;
+  background:var(--clv2-card) !important;
+  border:1px solid var(--clv2-line) !important;
+  box-shadow:0 12px 34px rgba(0,0,0,.24) !important;
+}
+
+body.continue-live-v2 .card.regular .card-title{
+  font-size:clamp(24px, 7vw, 36px) !important;
+  line-height:1 !important;
+  letter-spacing:-.045em !important;
+  color:rgba(255,255,255,.86) !important;
+}
+
+body.continue-live-v2 .status-pill.next{
+  color:var(--clv2-amber) !important;
+  background:rgba(255,204,0,.10) !important;
+  border-color:rgba(255,204,0,.24) !important;
+}
+
+body.continue-live-v2 .status-pill.upcoming{
+  color:#93c5fd !important;
+  background:rgba(10,132,255,.10) !important;
+  border-color:rgba(10,132,255,.22) !important;
+}
+
+body.continue-live-v2 .card.regular .metric{
+  min-height:76px !important;
+  border-radius:16px !important;
+  background:rgba(255,255,255,.035) !important;
+  border-color:var(--clv2-line) !important;
+}
+
+@media(max-width:430px){
+  body.continue-live-v2 .shell{
+    padding-left:14px !important;
+    padding-right:14px !important;
+  }
+
+  body.continue-live-v2 #liveCurrentCard .card-head{
+    padding:20px 20px 0 !important;
+  }
+
+  body.continue-live-v2 #liveCurrentStopName{
+    font-size:clamp(42px, 13vw, 56px) !important;
+  }
+
+  body.continue-live-v2 .continue-v2-distance-line{
+    padding-left:20px !important;
+    padding-right:20px !important;
+  }
+
+  body.continue-live-v2 #liveCurrentCard .metric-action{
+    min-height:92px !important;
+    padding:16px 18px !important;
+  }
+
+  body.continue-live-v2 #liveCurrentCard .metric-action b{
+    font-size:32px !important;
+  }
+}
+/* ===== END STYLE BLOCK: continue-live-v2-style ===== */
+
+
+/* ===== STYLE BLOCK: continue-live-v2-dot-blink ===== */
+/* CANLI yanındaki kırmızı nokta yanıp sönsün */
+body.continue-live-v2 .continue-v2-dot{
+  animation:continueLiveDotBlink 1s ease-in-out infinite !important;
+}
+
+@keyframes continueLiveDotBlink{
+  0%,100%{
+    opacity:1;
+    transform:scale(1);
+    box-shadow:
+      0 0 0 0 rgba(255,45,85,.42),
+      0 0 10px rgba(255,45,85,.95) !important;
+  }
+  50%{
+    opacity:.28;
+    transform:scale(.82);
+    box-shadow:
+      0 0 0 7px rgba(255,45,85,0),
+      0 0 18px rgba(255,45,85,.55) !important;
+  }
+}
+/* ===== END STYLE BLOCK: continue-live-v2-dot-blink ===== */
+
+
+/* ===== STYLE BLOCK: continue-top-status-stable-compact-style ===== */
+/* Üst DURUM yazısı: tek stabil kompakt format */
+.stats-row .stat-box.status{
+  overflow:hidden !important;
+}
+
+#liveTopStatusText{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  justify-content:center !important;
+  gap:2px !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+  white-space:normal !important;
+  line-height:1 !important;
+  animation:liveTopStatusSoftBlink 1.35s ease-in-out infinite !important;
+}
+
+#liveTopStatusText .status-main{
+  display:block !important;
+  color:#4ade80 !important;
+  font-size:17px !important;
+  font-weight:1000 !important;
+  line-height:1 !important;
+  letter-spacing:-.035em !important;
+  white-space:nowrap !important;
+}
+
+#liveTopStatusText .status-sub{
+  display:block !important;
+  color:rgba(74,222,128,.72) !important;
+  font-size:9px !important;
+  font-weight:950 !important;
+  line-height:1 !important;
+  letter-spacing:.13em !important;
+  text-transform:uppercase !important;
+  white-space:nowrap !important;
+}
+
+#liveTopStatusText.status-late .status-main,
+#liveTopStatusText.status-late .status-sub{
+  color:#f87171 !important;
+}
+
+#liveTopStatusText.status-plan .status-main{
+  font-size:15px !important;
+}
+
+#liveTopStatusText.status-plan .status-sub{
+  display:none !important;
+}
+
+@keyframes liveTopStatusSoftBlink{
+  0%,100%{
+    opacity:1;
+    filter:brightness(1.05);
+    text-shadow:0 0 10px rgba(74,222,128,.20);
+  }
+  50%{
+    opacity:.58;
+    filter:brightness(.92);
+    text-shadow:0 0 4px rgba(74,222,128,.10);
+  }
+}
+/* ===== END STYLE BLOCK: continue-top-status-stable-compact-style ===== */
+
+
+/* ===== STYLE BLOCK: live-occupancy-gender-style ===== */
+/* Doluluk kutusu altında Bay/Bayan mini satırı */
+.stat-box.occupancy-box{
+  justify-content:center !important;
+  gap:2px !important;
+}
+
+.stat-box.occupancy-box b{
+  line-height:1.02 !important;
+  margin-bottom:2px !important;
+}
+
+.live-gender-mini{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:5px !important;
+  max-width:100% !important;
+  overflow:hidden !important;
+
+  font-size:9.5px !important;
+  line-height:1 !important;
+  font-weight:950 !important;
+  letter-spacing:.015em !important;
+  white-space:nowrap !important;
+}
+
+.live-gender-mini .male{
+  color:#93c5fd !important;
+}
+
+.live-gender-mini .female{
+  color:#f9a8d4 !important;
+}
+
+.live-gender-mini .unknown{
+  color:rgba(226,232,240,.58) !important;
+}
+
+@media(max-width:430px){
+  .live-gender-mini{
+    font-size:8.5px !important;
+    gap:4px !important;
+  }
+}
+/* ===== END STYLE BLOCK: live-occupancy-gender-style ===== */
+
+
+/* ===== STYLE BLOCK: continue-clean-top-no-announcement ===== */
+/* Sağ üst anons / megafon ikonunu kaldırır */
+.top-brand > :last-child:not(.brand-left){
+  display:none !important;
+}
+
+/* Eğer megafon özel buton sınıfıyla geldiyse onu da kapat */
+.announce-btn,
+.anons-btn,
+.brand-announce,
+.top-announce,
+.megaphone-btn{
+  display:none !important;
+}
+/* ===== END STYLE BLOCK: continue-clean-top-no-announcement ===== */
+
+
+/* ===== STYLE BLOCK: next-stop-glow-style ===== */
+@keyframes nextStopGlowPulse{
+  0%{
+    box-shadow:
+      0 0 0 1px rgba(250,204,21,.10) inset,
+      0 0 0 rgba(250,204,21,0),
+      0 16px 36px rgba(0,0,0,.28);
+  }
+  50%{
+    box-shadow:
+      0 0 0 1px rgba(250,204,21,.22) inset,
+      0 0 24px rgba(250,204,21,.18),
+      0 18px 38px rgba(0,0,0,.30);
+  }
+  100%{
+    box-shadow:
+      0 0 0 1px rgba(250,204,21,.10) inset,
+      0 0 0 rgba(250,204,21,0),
+      0 16px 36px rgba(0,0,0,.28);
+  }
+}
+
+.card.regular.next-card{
+  position:relative !important;
+  overflow:hidden !important;
+  isolation:isolate !important;
+  border:1px solid rgba(250,204,21,.26) !important;
+  border-radius:28px !important;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(250,204,21,.13), transparent 32%),
+    radial-gradient(circle at 92% 0%, rgba(245,158,11,.10), transparent 28%),
+    linear-gradient(180deg, rgba(255,215,64,.035), rgba(255,255,255,.02)),
+    rgba(10,16,30,.88) !important;
+  animation:nextStopGlowPulse 2.5s ease-in-out infinite !important;
+}
+
+/* Kartın tamamını canlı durak gibi çevreleyen sarı hat */
+.card.regular.next-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:28px;
+  pointer-events:none;
+  border:1px solid rgba(250,204,21,.22);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,220,90,.05),
+    0 0 0 1px rgba(250,204,21,.06),
+    0 0 18px rgba(250,204,21,.10);
+  z-index:0;
+}
+
+/* Soldaki sarı canlı çizgi kalsın */
+.card.regular.next-card::after{
+  content:"";
+  position:absolute;
+  left:0;
+  top:18px;
+  bottom:18px;
+  width:6px;
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(250,204,21,.98), rgba(245,158,11,.52));
+  box-shadow:
+    0 0 10px rgba(250,204,21,.72),
+    0 0 22px rgba(250,204,21,.30);
+  z-index:1;
+}
+
+.card.regular.next-card > *{
+  position:relative;
+  z-index:2;
+}
+
+.card.regular.next-card .status-pill.next{
+  border-color:rgba(250,204,21,.34) !important;
+  box-shadow:
+    0 0 0 1px rgba(250,204,21,.22) inset,
+    0 0 18px rgba(250,204,21,.16) !important;
+}
+
+.card.regular.next-card .metric{
+  border-color:rgba(250,204,21,.12) !important;
+}
+/* ===== END STYLE BLOCK: next-stop-glow-style ===== */
+
+
+/* ===== STYLE BLOCK: live-bag-emanet-hard-fix-style ===== */
+#liveBagajMetric{
+  position:relative !important;
+}
+
+#liveEmanetMini{
+  position:absolute !important;
+  top:22px !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+  z-index:6 !important;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+  pointer-events:none;
+  color:#fde047 !important;
+  font-size:14px !important;
+  line-height:1 !important;
+  font-weight:1000 !important;
+  letter-spacing:.01em !important;
+  text-shadow:
+    0 0 12px rgba(250,204,21,.36),
+    0 2px 6px rgba(0,0,0,.55);
+}
+
+@media(max-width:430px){
+  #liveEmanetMini{
+    font-size:13px !important;
+    top:21px !important;
+  }
+}
+/* ===== END STYLE BLOCK: live-bag-emanet-hard-fix-style ===== */

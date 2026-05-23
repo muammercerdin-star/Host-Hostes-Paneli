@@ -1,0 +1,13 @@
+/* =========================================================
+   CONTINUE CSS PARTS INDEX
+   Bu dosya bilinçli olarak küçültüldü.
+   Asıl stiller static/continue/css_parts/ altında.
+========================================================= */
+
+@import url("./css_parts/00-base-legacy.css");
+@import url("./css_parts/10-compact-timeline-hero.css");
+@import url("./css_parts/20-live-stop-sheet-base.css");
+@import url("./css_parts/30-sheet-bag-photo.css");
+@import url("./css_parts/40-cargo-gender-summary.css");
+@import url("./css_parts/50-live-v2-top-glow.css");
+@import url("./css_parts/60-live-diagnostics.css");

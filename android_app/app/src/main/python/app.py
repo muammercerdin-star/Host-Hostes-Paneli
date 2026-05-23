@@ -1427,6 +1427,32 @@ def continue_trip():
         (tid,),
     ).fetchone()[0] or 0
 
+    # LIVE_GENDER_COUNTS_START
+    gender_rows = db.execute(
+        """
+        SELECT LOWER(COALESCE(gender,'')) AS gender, COUNT(*) AS c
+        FROM seats
+        WHERE trip_id=?
+        GROUP BY LOWER(COALESCE(gender,''))
+        """,
+        (tid,),
+    ).fetchall()
+
+    male_count = 0
+    female_count = 0
+
+    for gr in gender_rows:
+        g = (gr["gender"] or "").strip().lower()
+        c = int(gr["c"] or 0)
+
+        if g in ("bay", "erkek", "male", "m"):
+            male_count += c
+        elif g in ("bayan", "kadın", "kadin", "female", "f"):
+            female_count += c
+
+    unknown_gender_count = max(int(passenger_count or 0) - male_count - female_count, 0)
+    # LIVE_GENDER_COUNTS_END
+
     total_seats = len(SEAT_POSITIONS)
     empty_seats = max(total_seats - passenger_count, 0)
     occupancy = round((passenger_count / total_seats) * 100) if total_seats else 0
@@ -1454,6 +1480,65 @@ def continue_trip():
     last_stop = stops[-1] if stops else ""
 
     live_runtime = fetch_live_runtime_state(tid)
+
+    # Canlı Durak Akışı ekranında anlık GPS/ETA hesabı için veri
+    continue_route_coords = []
+    try:
+        coord_rows = db.execute(
+            """
+            SELECT stop, lat, lng
+            FROM route_stop_coords
+            WHERE route=?
+            """,
+            (trip["route"],),
+        ).fetchall()
+
+        for r in coord_rows:
+            try:
+                continue_route_coords.append({
+                    "stop": r["stop"] or "",
+                    "lat": float(r["lat"]),
+                    "lng": float(r["lng"]),
+                })
+            except Exception:
+                pass
+    except Exception:
+        continue_route_coords = []
+
+    continue_schedule_items = []
+    try:
+        profile = db.execute(
+            """
+            SELECT id
+            FROM route_schedule_profiles
+            WHERE route_name=?
+            ORDER BY COALESCE(is_default,0) DESC, id DESC
+            LIMIT 1
+            """,
+            (trip["route"],),
+        ).fetchone()
+
+        if profile:
+            item_rows = db.execute(
+                """
+                SELECT stop_name, planned_time, segment_km, is_timed, sort_order
+                FROM route_schedule_items
+                WHERE profile_id=?
+                ORDER BY sort_order, id
+                """,
+                (profile["id"],),
+            ).fetchall()
+
+            for r in item_rows:
+                continue_schedule_items.append({
+                    "stop": r["stop_name"] or "",
+                    "time": r["planned_time"] or "",
+                    "segment_km": r["segment_km"] or "",
+                    "is_timed": int(r["is_timed"] or 0),
+                    "sort_order": int(r["sort_order"] or 0),
+                })
+    except Exception:
+        continue_schedule_items = []
     runtime_live_stop = ""
     try:
         runtime_live_stop = find_route_stop((live_runtime.get("live_stop") or "").strip())
@@ -1552,6 +1637,7 @@ def continue_trip():
 
     # Durak bazlı emanet/bagaj sayısı - tablo/kolon farklarına dayanıklı
     stop_consignment_counts = {}
+    stop_bag_counts = {}
     try:
         cols = [
             x["name"]
@@ -1637,7 +1723,7 @@ def continue_trip():
             cnt = _bag_count_from_meta(meta)
             if cnt > 0:
                 key = norm_stop(to_stop)
-                stop_consignment_counts[key] = int(stop_consignment_counts.get(key, 0) or 0) + cnt
+                stop_bag_counts[key] = int(stop_bag_counts.get(key, 0) or 0) + cnt
     except Exception:
         pass
 
@@ -1671,6 +1757,7 @@ def continue_trip():
         operation_keys.update(k for k, v in stop_board_counts.items() if v)
         operation_keys.update(k for k, v in stop_walkon_counts.items() if v)
         operation_keys.update(k for k, v in stop_consignment_counts.items() if v)
+        operation_keys.update(k for k, v in stop_bag_counts.items() if v)
         operation_keys.update(k for k, v in stop_service_counts.items() if v)
 
         for stop_name in stops:
@@ -1689,7 +1776,8 @@ def continue_trip():
         off_count = int(stop_off_counts.get(key, 0) or 0)
         board_count = int(stop_board_counts.get(key, 0) or 0)
         walkon_count = int(stop_walkon_counts.get(key, 0) or 0)
-        bagaj_count = int(stop_consignment_counts.get(key, 0) or 0)
+        emanet_count = int(stop_consignment_counts.get(key, 0) or 0)
+        bagaj_count = int(stop_bag_counts.get(key, 0) or 0)
         service_count = int(stop_service_counts.get(key, 0) or 0)
 
         if idx == current_index:
@@ -1726,6 +1814,8 @@ def continue_trip():
             "off_count": off_count,
             "board_count": board_count + walkon_count,
             "bagaj_count": bagaj_count,
+            "emanet_count": emanet_count,
+            "consignment_count": emanet_count,
             "service_count": service_count,
             "bagaj_label": "var" if bagaj_count else "yok",
         }
@@ -1750,6 +1840,8 @@ def continue_trip():
         "off_count": 0,
         "board_count": 0,
         "bagaj_count": 0,
+        "emanet_count": 0,
+        "consignment_count": 0,
         "service_count": 0,
         "bagaj_label": "yok",
     }
@@ -1770,12 +1862,17 @@ def continue_trip():
 
     live_summary = {
         "passenger_count": passenger_count,
+        "male_count": male_count,
+        "female_count": female_count,
+        "unknown_gender_count": unknown_gender_count,
         "total_seats": total_seats,
         "empty_seats": empty_seats,
         "occupancy": occupancy,
         "off_count": live_current.get("off_count", 0),
         "board_count": live_current.get("board_count", 0),
         "bagaj_count": live_current.get("bagaj_count", 0),
+        "emanet_count": live_current.get("emanet_count", 0),
+        "consignment_count": live_current.get("consignment_count", live_current.get("emanet_count", 0)),
         "service_count": live_current.get("service_count", 0),
         "total_revenue": total_revenue,
     }
@@ -1802,6 +1899,8 @@ def continue_trip():
         live_stops=live_stops,
         live_summary=live_summary,
         live_runtime=live_runtime,
+        continue_route_coords=continue_route_coords,
+        continue_schedule_items=continue_schedule_items,
     )
 
 

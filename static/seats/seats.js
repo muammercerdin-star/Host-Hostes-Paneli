@@ -2234,7 +2234,7 @@ function buildEtaModel(){
   }
 
   const LIVE_DETECT_KM = 5;        // Muavin hazırlık/canlı durak eşiği
-  const LIVE_FORCE_KM = 5;         // Bu mesafede beklemeden canlı yap
+  const LIVE_FORCE_KM = 1.2;       // Çok yakına girerse beklemeden canlı yap
   const LIVE_STABLE_HITS = 2;      // GPS sapmasına karşı aynı durak kaç kez görülsün
   const LIVE_LOOKAHEAD_STOPS = 4;  // Mevcut canlı duraktan sonra kaç durağa bakılsın
 
@@ -2289,89 +2289,156 @@ function buildEtaModel(){
   }
 
 
-    function autoDetectLiveStop(coords){
-    if(!coords || !cachedStops?.length) return;
+        function autoDetectLiveStop(coords){
+      if(!coords || !cachedStops?.length) return;
 
-    const list = allStopsList();
-    if(!Array.isArray(list) || !list.length) return;
+      const list = allStopsList();
+      if(!Array.isArray(list) || !list.length) return;
 
-    const candidates = [];
+      const currentLive = speedState.liveStop || "";
+      const currentLiveIdx = currentLive ? indexOfStopByName(currentLive) : -1;
 
-    // 5 km içindeki ve işlem olan rota duraklarını topla.
-    for(const stopName of list){
-      const canonical = findCanonicalStopName(stopName) || stopName;
-      const stopObj = findStopByName(canonical);
+      const candidates = [];
 
-      if(!stopObj || !hasCoord(stopObj)) continue;
+      function isPassedStopName(name){
+        try{
+          const arr = Array.from(speedState.passedStops || []);
+          return arr.some(x => norm(x) === norm(name));
+        }catch(_){
+          return false;
+        }
+      }
 
-      // İşlem yoksa canlı durak yapma.
-      if(!hasLiveStopOperation(canonical)) continue;
+      for(const stopName of list){
+        const canonical = findCanonicalStopName(stopName) || stopName;
+        const stopObj = findStopByName(canonical);
 
-      const km = distKm(coords, {
-        lat:Number(stopObj.lat),
-        lng:Number(stopObj.lng)
+        if(!stopObj || !hasCoord(stopObj)) continue;
+
+        const idx = indexOfStopByName(canonical);
+
+        /*
+          Canlı durak zaten belliyse:
+          - geride kalan duraklara geri zıplama
+          - çok ilerideki duraklara erken atlama
+        */
+        if(currentLiveIdx >= 0 && idx >= 0){
+          if(idx < currentLiveIdx) continue;
+          if(idx > currentLiveIdx + LIVE_LOOKAHEAD_STOPS) continue;
+        }
+
+        /*
+          Geçilmiş durak tekrar canlı aday olmasın.
+          Mevcut canlı durak buna istisna; çünkü markPassedStopsUntil()
+          canlı durağı da passed listesine dahil ediyor.
+        */
+        if(currentLive && norm(canonical) !== norm(currentLive) && isPassedStopName(canonical)){
+          continue;
+        }
+
+        // İşlem yoksa canlı durak yapma.
+        if(!hasLiveStopOperation(canonical)) continue;
+
+        const km = distKm(coords, {
+          lat:Number(stopObj.lat),
+          lng:Number(stopObj.lng)
+        });
+
+        if(Number.isFinite(km) && km <= LIVE_DETECT_KM){
+          candidates.push({
+            stop: canonical,
+            km,
+            idx
+          });
+        }
+      }
+
+      if(!candidates.length){
+        liveDetectCandidate = {
+          name: "",
+          hits: 0,
+          lastAt: 0
+        };
+
+        // Mevcut canlı durakta artık işlem yoksa canlıyı boşalt.
+        if(speedState.liveStop && !hasLiveStopOperation(speedState.liveStop)){
+          speedState.liveStop = "";
+          speedState.passedStops = new Set();
+
+          try{
+            localStorage.removeItem("liveStop:" + TRIP_KEY);
+            localStorage.removeItem("passedStops:" + TRIP_KEY);
+          }catch(_){}
+
+          renderRouteStrip();
+          updateCompactHeader();
+        }
+
+        return;
+      }
+
+      /*
+        Sıralama:
+        - canlı durak varsa rota sırasına göre ilerle
+        - canlı durak yoksa en yakındaki işlemli durağı yakala
+      */
+      candidates.sort((a, b) => {
+        const ai = Number.isFinite(a.idx) && a.idx >= 0 ? a.idx : 999999;
+        const bi = Number.isFinite(b.idx) && b.idx >= 0 ? b.idx : 999999;
+
+        if(currentLiveIdx >= 0){
+          if(ai !== bi) return ai - bi;
+          return a.km - b.km;
+        }
+
+        if(a.km !== b.km) return a.km - b.km;
+        return ai - bi;
       });
 
-      if(Number.isFinite(km) && km <= LIVE_DETECT_KM){
-        candidates.push({
-          stop: canonical,
-          km,
-          idx: indexOfStopByName(canonical)
-        });
+      const best = candidates[0];
+      if(!best) return;
+
+      const now = Date.now();
+
+      if(currentLive && norm(currentLive) === norm(best.stop)){
+        liveDetectCandidate = {
+          name: best.stop,
+          hits: LIVE_STABLE_HITS,
+          lastAt: now
+        };
+        return;
       }
-    }
 
-    if(!candidates.length){
-      // Mevcut canlı durakta artık işlem yoksa veya işlemli aday yoksa canlıyı boşalt.
-      if(speedState.liveStop && !hasLiveStopOperation(speedState.liveStop)){
-        speedState.liveStop = "";
-        speedState.passedStops = new Set();
+      const sameCandidate =
+        liveDetectCandidate &&
+        norm(liveDetectCandidate.name || "") === norm(best.stop) &&
+        now - Number(liveDetectCandidate.lastAt || 0) < 15000;
 
-        try{
-          localStorage.removeItem("liveStop:" + TRIP_KEY);
-          localStorage.removeItem("passedStops:" + TRIP_KEY);
-        }catch(_){}
+      const nextHits = sameCandidate
+        ? Number(liveDetectCandidate.hits || 0) + 1
+        : 1;
 
-        renderRouteStrip();
-        updateCompactHeader();
-      }
-      return;
-    }
-
-    // Birden fazla işlemli durak 5 km içindeyse rota sırasında önce gelen canlı olur.
-    candidates.sort((a, b) => {
-      const ai = Number.isFinite(a.idx) && a.idx >= 0 ? a.idx : 999999;
-      const bi = Number.isFinite(b.idx) && b.idx >= 0 ? b.idx : 999999;
-
-      if(ai !== bi) return ai - bi;
-      return a.km - b.km;
-    });
-
-    const best = candidates[0];
-    if(!best) return;
-
-    const currentLive = speedState.liveStop || "";
-    const now = Date.now();
-
-    if(currentLive && norm(currentLive) === norm(best.stop)){
       liveDetectCandidate = {
         name: best.stop,
-        hits: LIVE_STABLE_HITS,
+        hits: nextHits,
         lastAt: now
       };
-      return;
+
+      const forceNow = Number(best.km) <= LIVE_FORCE_KM;
+
+      /*
+        GPS tek sefer saparsa durak değiştirmesin.
+        Aynı aday 2 kez görülürse canlı yap.
+        Çok yakına girdiyse beklemeden canlı yap.
+      */
+      if(!forceNow && nextHits < LIVE_STABLE_HITS){
+        return;
+      }
+
+      setLiveStop(best.stop);
     }
 
-    setLiveStop(best.stop);
-
-    liveDetectCandidate = {
-      name: best.stop,
-      hits: LIVE_STABLE_HITS,
-      lastAt: now
-    };
-  }
-
-function initTabs(){
+  function initTabs(){
     $$(".tab-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const tab = btn.dataset.tab;

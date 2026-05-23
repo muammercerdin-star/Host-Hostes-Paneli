@@ -1,0 +1,1564 @@
+===== OTOMATİK CANLI DURAK MOTORU DENETİMİ =====
+Taranan dosya sayısı: 192
+
+
+===== GPS takip izleri =====
+- templates/live_map.html
+  eşleşen: navigator.geolocation, watchPosition, coords.latitude, coords.longitude
+- static/seats/seats.js
+  eşleşen: navigator.geolocation, watchPosition, coords.latitude, coords.longitude
+- static/seats/seats-time-prayer.js
+  eşleşen: navigator.geolocation, getCurrentPosition, coords.latitude, coords.longitude
+- static/live_map/muavin_live_map_extra.js
+  eşleşen: navigator.geolocation, watchPosition
+- static/continue/continue_trip_core.js
+  eşleşen: navigator.geolocation, watchPosition
+- android_app/app/src/main/python/templates/live_map.html
+  eşleşen: navigator.geolocation, watchPosition, coords.latitude, coords.longitude
+- android_app/app/src/main/python/static/seats/seats.js
+  eşleşen: navigator.geolocation, watchPosition, coords.latitude, coords.longitude
+- android_app/app/src/main/python/static/seats/seats-time-prayer.js
+  eşleşen: navigator.geolocation, getCurrentPosition, coords.latitude, coords.longitude
+- android_app/app/src/main/python/static/live_map/muavin_live_map_extra.js
+  eşleşen: navigator.geolocation, watchPosition
+
+===== Mesafe hesabı izleri =====
+- app.py
+  eşleşen: distance, gps_km
+- templates/live_map.html
+  eşleşen: distance, kalan mesafe
+- templates/continue_trip.html
+  eşleşen: distance, gps_km
+- static/seats/seats.js
+  eşleşen: distKm, distance, gps_km
+- static/data/route_segments.json
+  eşleşen: distance
+- static/data/route_profile_segments.json
+  eşleşen: distance
+- static/live_map/muavin_live_map_extra.css
+  eşleşen: distance
+- static/live_map/muavin_live_map_extra.js
+  eşleşen: distance, kalan mesafe
+- static/continue/continue_trip.css
+  eşleşen: distance, kalan mesafe
+- static/continue/continue_trip_ui.js
+  eşleşen: distance, kalan mesafe
+- static/continue/continue_trip_core.js
+  eşleşen: distKm, distance, gps_km
+- static/continue/continue_flow_refresh.js
+  eşleşen: distance
+- android_app/app/src/main/python/templates/live_map.html
+  eşleşen: distance, kalan mesafe
+- android_app/app/src/main/python/templates/continue_trip.html
+  eşleşen: distance, gps_km
+- android_app/app/src/main/python/static/seats/seats.js
+  eşleşen: distKm, distance, gps_km
+- android_app/app/src/main/python/static/data/route_segments.json
+  eşleşen: distance
+- android_app/app/src/main/python/static/data/route_profile_segments.json
+  eşleşen: distance
+- android_app/app/src/main/python/static/live_map/muavin_live_map_extra.css
+  eşleşen: distance
+- android_app/app/src/main/python/static/live_map/muavin_live_map_extra.js
+  eşleşen: distance, kalan mesafe
+- android_app/app/src/main/python/static/continue/continue_trip_core.js
+  eşleşen: distance, gps_km
+- android_app/app/src/main/python/static/continue/continue_flow_refresh.js
+  eşleşen: distance
+
+===== Durak koordinatı izleri =====
+- app.py
+  eşleşen: route_stop_coords, continue_route_coords, lat, lng
+- templates/add_route.html
+  eşleşen: lat
+- templates/consignments.html
+  eşleşen: lat
+- templates/events.html
+  eşleşen: lat
+- templates/fare_admin.html
+  eşleşen: lat
+- templates/fare_query.html
+  eşleşen: lat
+- templates/hesap.html
+  eşleşen: lat
+- templates/home.html
+  eşleşen: lat
+- templates/index.html
+  eşleşen: lat
+- templates/login.html
+  eşleşen: lat
+- templates/passenger_control.html
+  eşleşen: lat
+- templates/reports.html
+  eşleşen: lat
+- templates/route_edit.html
+  eşleşen: lat, lng
+- templates/route_stops.html
+  eşleşen: lat, lng
+- templates/routes_list.html
+  eşleşen: lat
+- templates/seats.html
+  eşleşen: route_stop_coords, lat, lng
+- templates/settings.html
+  eşleşen: lat
+- templates/start_trip.html
+  eşleşen: lat
+- templates/trip_new.html
+  eşleşen: lat
+- templates/ai_console.html
+  eşleşen: lat
+- templates/route_schedule_edit.html
+  eşleşen: lat
+- templates/trip_report.html
+  eşleşen: lat
+- templates/report_archive.html
+  eşleşen: lat
+- templates/rehber.html
+  eşleşen: lat
+- templates/settings_password.html
+  eşleşen: lat
+- templates/live_map.html
+  eşleşen: lat, lng
+- templates/settings_recovery.html
+  eşleşen: lat
+- templates/forgot_password.html
+  eşleşen: lat
+- templates/setup.html
+  eşleşen: lat
+- templates/settings_profile.html
+  eşleşen: lat
+- templates/settings_backup.html
+  eşleşen: lat
+- templates/settings_subscription.html
+  eşleşen: lat
+- templates/onboarding.html
+  eşleşen: lat
+- templates/continue_trip.html
+  eşleşen: routeCoords, continue_route_coords, lat
+- templates/no_active_trip.html
+  eşleşen: lat
+- templates/seats_parts/modals.html
+  eşleşen: lat
+- templates/seats_parts/topbar.html
+  eşleşen: lat
+- templates/seats_parts/stats.html
+  eşleşen: lat
+- templates/seats_parts/deck.html
+  eşleşen: lat
+- templates/seats_parts/offload_confirm.html
+  eşleşen: lat
+- templates/seats_parts/finish_trip_modal.html
+  eşleşen: lat
+- static/style.css
+  eşleşen: lat
+- static/seats/seats.css
+  eşleşen: lat
+- static/seats/seats.js
+  eşleşen: lat, lng
+- static/seats/seats-time-prayer.js
+  eşleşen: lat, lng
+- static/seats/voice-commands.js
+  eşleşen: lat
+- static/seats/standing.js
+  eşleşen: lat
+- static/seats/seats-final.css
+  eşleşen: lat
+- static/live_map/muavin_live_map_extra.css
+  eşleşen: lat
+- static/live_map/muavin_live_map_extra.js
+  eşleşen: lat, lng
+- static/continue/continue_trip.css
+  eşleşen: lat
+- static/continue/continue_trip_ui.js
+  eşleşen: lat
+- static/continue/continue_trip_core.js
+  eşleşen: routeCoords, lat, lng
+- static/continue/continue_flow_refresh.js
+  eşleşen: lat
+- static/seats/patches/stop-selected-toast.css
+  eşleşen: lat
+- static/seats/patches/modal-bottom-nav-autohide.js
+  eşleşen: lat
+- static/seats/patches/manual-ticket-system.css
+  eşleşen: lat
+- static/seats/patches/top-sound-toggle.css
+  eşleşen: lat
+- static/seats/patches/right-seat-column-spacing-fix.css
+  eşleşen: lat
+- static/seats/patches/only-54-reapply-right-shift.css
+  eşleşen: lat
+- static/seats/patches/seat-layout-fab-pack.css
+  eşleşen: lat
+- static/seats/patches/seat-simple-ui-pack.css
+  eşleşen: lat
+- static/seats/patches/mobile-performance-fix.css
+  eşleşen: lat
+- static/seats/patches/fab-sheet-solid-fix.css
+  eşleşen: lat
+- static/seats/patches/unified-seat-deck-report-style.css
+  eşleşen: lat
+- static/seats/_archive_theme_trials/seats-dashboard-final.css
+  eşleşen: lat
+- static/vendor/bootstrap/bootstrap.bundle.min.js
+  eşleşen: lat
+- static/vendor/bootstrap/bootstrap.min.css
+  eşleşen: lat
+- android_app/app/src/main/python/templates/add_route.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/consignments.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/events.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/fare_admin.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/fare_query.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/hesap.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/home.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/index.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/login.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/passenger_control.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/reports.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/route_edit.html
+  eşleşen: lat, lng
+- android_app/app/src/main/python/templates/route_stops.html
+  eşleşen: lat, lng
+- android_app/app/src/main/python/templates/routes_list.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/seats.html
+  eşleşen: route_stop_coords, lat, lng
+- android_app/app/src/main/python/templates/settings.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/start_trip.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/trip_new.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/ai_console.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/route_schedule_edit.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/trip_report.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/rehber.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/settings_password.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/live_map.html
+  eşleşen: lat, lng
+- android_app/app/src/main/python/templates/settings_recovery.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/forgot_password.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/setup.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/settings_profile.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/settings_backup.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/settings_subscription.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/onboarding.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/continue_trip.html
+  eşleşen: routeCoords, continue_route_coords, lat
+- android_app/app/src/main/python/templates/no_active_trip.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/seats_parts/modals.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/seats_parts/topbar.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/seats_parts/stats.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/seats_parts/deck.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/seats_parts/offload_confirm.html
+  eşleşen: lat
+- android_app/app/src/main/python/templates/seats_parts/finish_trip_modal.html
+  eşleşen: lat
+- android_app/app/src/main/python/static/style.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/seats.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/seats.js
+  eşleşen: lat, lng
+- android_app/app/src/main/python/static/seats/seats-time-prayer.js
+  eşleşen: lat, lng
+- android_app/app/src/main/python/static/seats/voice-commands.js
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/standing.js
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/seats-final.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/live_map/muavin_live_map_extra.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/live_map/muavin_live_map_extra.js
+  eşleşen: lat, lng
+- android_app/app/src/main/python/static/continue/continue_trip.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/continue/continue_flow_refresh.js
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/patches/stop-selected-toast.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/patches/modal-bottom-nav-autohide.js
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/patches/manual-ticket-system.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/patches/top-sound-toggle.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/patches/right-seat-column-spacing-fix.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/patches/only-54-reapply-right-shift.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/patches/seat-layout-fab-pack.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/patches/seat-simple-ui-pack.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/patches/mobile-performance-fix.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/patches/fab-sheet-solid-fix.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/seats/_archive_theme_trials/seats-dashboard-final.css
+  eşleşen: lat
+- android_app/app/src/main/python/static/vendor/bootstrap/bootstrap.bundle.min.js
+  eşleşen: lat
+- android_app/app/src/main/python/static/vendor/bootstrap/bootstrap.min.css
+  eşleşen: lat
+
+===== Canlı durak yazma izleri =====
+- app.py
+  eşleşen: live_stop, /api/live-runtime-state, continue_current_stop
+- templates/seats.html
+  eşleşen: liveStop
+- templates/live_map.html
+  eşleşen: live_stop, liveStop
+- templates/continue_trip.html
+  eşleşen: live_stop, liveStop, liveStop:
+- templates/seats_parts/topbar.html
+  eşleşen: liveStop
+- static/seats/seats.css
+  eşleşen: liveStop
+- static/seats/seats.js
+  eşleşen: live_stop, liveStop, liveStop:, write=1, /api/live-runtime-state
+- static/seats/drive-controls.js
+  eşleşen: liveStop
+- static/seats/voice-commands.js
+  eşleşen: live_stop, liveStop
+- static/seats/standing.js
+  eşleşen: liveStop
+- static/seats/seats-final.css
+  eşleşen: liveStop
+- static/continue/continue_trip_ui.js
+  eşleşen: liveStop
+- static/continue/continue_trip_core.js
+  eşleşen: live_stop, liveStop, write=1, /api/live-runtime-state
+- static/seats/patches/stop-flow-focus-patch.js
+  eşleşen: liveStop
+- android_app/app/src/main/python/templates/seats.html
+  eşleşen: liveStop
+- android_app/app/src/main/python/templates/live_map.html
+  eşleşen: live_stop, liveStop
+- android_app/app/src/main/python/templates/continue_trip.html
+  eşleşen: live_stop, liveStop, liveStop:
+- android_app/app/src/main/python/templates/seats_parts/topbar.html
+  eşleşen: liveStop
+- android_app/app/src/main/python/static/seats/seats.css
+  eşleşen: liveStop
+- android_app/app/src/main/python/static/seats/seats.js
+  eşleşen: live_stop, liveStop, liveStop:, write=1, /api/live-runtime-state
+- android_app/app/src/main/python/static/seats/drive-controls.js
+  eşleşen: liveStop
+- android_app/app/src/main/python/static/seats/voice-commands.js
+  eşleşen: live_stop, liveStop
+- android_app/app/src/main/python/static/seats/standing.js
+  eşleşen: liveStop
+- android_app/app/src/main/python/static/seats/seats-final.css
+  eşleşen: liveStop
+- android_app/app/src/main/python/static/continue/continue_trip_ui.js
+  eşleşen: liveStop
+- android_app/app/src/main/python/static/continue/continue_trip_core.js
+  eşleşen: live_stop, liveStop, /api/live-runtime-state
+- android_app/app/src/main/python/static/seats/patches/stop-flow-focus-patch.js
+  eşleşen: liveStop
+
+===== Otomatik seçim ipucu izleri =====
+- app.py
+  eşleşen: approach, 500, passed, geçildi
+- templates/events.html
+  eşleşen: 500
+- templates/fare_admin.html
+  eşleşen: closest
+- templates/home.html
+  eşleşen: yakın, 500
+- templates/index.html
+  eşleşen: closest, 500
+- templates/passenger_control.html
+  eşleşen: closest
+- templates/reports.html
+  eşleşen: 500
+- templates/seats.html
+  eşleşen: closest, 500
+- templates/settings.html
+  eşleşen: 500
+- templates/ai_console.html
+  eşleşen: closest
+- templates/route_schedule_edit.html
+  eşleşen: closest
+- templates/trip_report.html
+  eşleşen: 500
+- templates/report_archive.html
+  eşleşen: 500
+- templates/rehber.html
+  eşleşen: closest, threshold, 500
+- templates/settings_password.html
+  eşleşen: 500
+- templates/live_map.html
+  eşleşen: closest, approach, 500, passed
+- templates/settings_recovery.html
+  eşleşen: 500
+- templates/settings_profile.html
+  eşleşen: 500
+- templates/settings_backup.html
+  eşleşen: 500
+- templates/settings_subscription.html
+  eşleşen: 500
+- templates/continue_trip.html
+  eşleşen: passed
+- templates/seats_parts/modals.html
+  eşleşen: approach
+- static/seats/seats.css
+  eşleşen: yakın, approach, 5 km, 500, passed
+- static/seats/voice-tts.js
+  eşleşen: closest, 500
+- static/seats/seats.js
+  eşleşen: nearest, closest, yakın, approach, 5 km, 500, passed, geçildi, routeIndex
+- static/seats/drive-eta-chip.js
+  eşleşen: 500
+- static/seats/voice-commands.js
+  eşleşen: approach, passed
+- static/seats/standing.js
+  eşleşen: closest
+- static/seats/seats-final.css
+  eşleşen: geçildi
+- static/data/route_segments.json
+  eşleşen: 500
+- static/data/route_profile_segments.json
+  eşleşen: 500
+- static/live_map/muavin_live_map_extra.css
+  eşleşen: approach
+- static/live_map/muavin_live_map_extra.js
+  eşleşen: nearest, closest, 500, routeIndex
+- static/continue/continue_trip.css
+  eşleşen: yakın, passed
+- static/continue/continue_trip_ui.js
+  eşleşen: closest
+- static/continue/continue_trip_core.js
+  eşleşen: closest, 500, routeIndex
+- static/continue/continue_bag_emanet.js
+  eşleşen: 500
+- static/continue/continue_flow_refresh.js
+  eşleşen: closest, 500, passed, routeIndex
+- static/seats/patches/manual-ticket-system.js
+  eşleşen: 500
+- static/seats/patches/stop-flow-focus-patch.js
+  eşleşen: closest, geçildi
+- static/seats/patches/seat-simple-ui-pack.js
+  eşleşen: 500
+- static/seats/patches/fab-sheet-solid-fix.css
+  eşleşen: approach
+- static/vendor/bootstrap/bootstrap.bundle.min.js
+  eşleşen: closest, threshold, 500
+- static/vendor/bootstrap/bootstrap.min.css
+  eşleşen: 500
+- android_app/app/src/main/python/templates/events.html
+  eşleşen: 500
+- android_app/app/src/main/python/templates/fare_admin.html
+  eşleşen: closest
+- android_app/app/src/main/python/templates/home.html
+  eşleşen: yakın, 500
+- android_app/app/src/main/python/templates/passenger_control.html
+  eşleşen: closest
+- android_app/app/src/main/python/templates/reports.html
+  eşleşen: 500
+- android_app/app/src/main/python/templates/seats.html
+  eşleşen: closest, 500
+- android_app/app/src/main/python/templates/ai_console.html
+  eşleşen: closest
+- android_app/app/src/main/python/templates/route_schedule_edit.html
+  eşleşen: closest
+- android_app/app/src/main/python/templates/rehber.html
+  eşleşen: closest, threshold, 500
+- android_app/app/src/main/python/templates/live_map.html
+  eşleşen: closest, approach, 500, passed
+- android_app/app/src/main/python/templates/continue_trip.html
+  eşleşen: passed
+- android_app/app/src/main/python/templates/seats_parts/modals.html
+  eşleşen: approach
+- android_app/app/src/main/python/static/seats/seats.css
+  eşleşen: yakın, approach, 5 km, 500, passed
+- android_app/app/src/main/python/static/seats/voice-tts.js
+  eşleşen: closest, 500
+- android_app/app/src/main/python/static/seats/seats.js
+  eşleşen: nearest, closest, yakın, approach, 5 km, 500, passed, geçildi, routeIndex
+- android_app/app/src/main/python/static/seats/drive-eta-chip.js
+  eşleşen: 500
+- android_app/app/src/main/python/static/seats/voice-commands.js
+  eşleşen: approach, passed
+- android_app/app/src/main/python/static/seats/standing.js
+  eşleşen: closest
+- android_app/app/src/main/python/static/seats/seats-final.css
+  eşleşen: geçildi
+- android_app/app/src/main/python/static/data/route_segments.json
+  eşleşen: 500
+- android_app/app/src/main/python/static/data/route_profile_segments.json
+  eşleşen: 500
+- android_app/app/src/main/python/static/live_map/muavin_live_map_extra.css
+  eşleşen: approach
+- android_app/app/src/main/python/static/live_map/muavin_live_map_extra.js
+  eşleşen: nearest, closest, 500, routeIndex
+- android_app/app/src/main/python/static/continue/continue_trip.css
+  eşleşen: passed
+- android_app/app/src/main/python/static/continue/continue_trip_ui.js
+  eşleşen: closest
+- android_app/app/src/main/python/static/continue/continue_trip_core.js
+  eşleşen: closest, 500
+- android_app/app/src/main/python/static/continue/continue_bag_emanet.js
+  eşleşen: 500
+- android_app/app/src/main/python/static/continue/continue_flow_refresh.js
+  eşleşen: closest, 500, passed, routeIndex
+- android_app/app/src/main/python/static/seats/patches/manual-ticket-system.js
+  eşleşen: 500
+- android_app/app/src/main/python/static/seats/patches/stop-flow-focus-patch.js
+  eşleşen: closest, geçildi
+- android_app/app/src/main/python/static/seats/patches/seat-simple-ui-pack.js
+  eşleşen: 500
+- android_app/app/src/main/python/static/seats/patches/fab-sheet-solid-fix.css
+  eşleşen: approach
+- android_app/app/src/main/python/static/vendor/bootstrap/bootstrap.bundle.min.js
+  eşleşen: closest, threshold, 500
+- android_app/app/src/main/python/static/vendor/bootstrap/bootstrap.min.css
+  eşleşen: 500
+
+
+===== GÜÇLÜ ADAY DOSYALAR =====
+Kriter: GPS + live_stop yazma + mesafe/route/threshold izleri birlikte olmalı.
+- static/continue/continue_trip_core.js | skor=4 gps=True write=True route=True logic=True
+- templates/live_map.html | skor=3 gps=True write=True route=False logic=True
+- templates/continue_trip.html | skor=3 gps=False write=True route=True logic=True
+- static/seats/seats.js | skor=3 gps=True write=True route=False logic=True
+- app.py | skor=3 gps=False write=True route=True logic=True
+- android_app/app/src/main/python/templates/live_map.html | skor=3 gps=True write=True route=False logic=True
+- android_app/app/src/main/python/templates/continue_trip.html | skor=3 gps=False write=True route=True logic=True
+- android_app/app/src/main/python/static/seats/seats.js | skor=3 gps=True write=True route=False logic=True
+- android_app/app/src/main/python/static/continue/continue_trip_core.js | skor=3 gps=False write=True route=True logic=True
+
+
+===== KRİTİK SATIR BAĞLAMLARI =====
+
+--- app.py ---
+     812:         CREATE TABLE IF NOT EXISTS live_runtime_state(
+     813:             trip_id INTEGER PRIMARY KEY,
+>>   814:             live_stop TEXT DEFAULT '',
+     815:             speed REAL DEFAULT 0,
+     816:             gps_km TEXT DEFAULT '',
+
+     828:     row = get_db().execute(
+     829:         """
+>>   830:         SELECT trip_id, live_stop, speed, gps_km, eta_main, eta_sub, updated_at
+     831:         FROM live_runtime_state
+     832:         WHERE trip_id=?
+
+     837:         return {
+     838:             "trip_id": trip_id,
+>>   839:             "live_stop": "",
+     840:             "speed": 0,
+     841:             "gps_km": "",
+
+     846:     return {
+     847:         "trip_id": row["trip_id"],
+>>   848:         "live_stop": row["live_stop"] or "",
+     849:         "speed": row["speed"] or 0,
+     850:         "gps_km": row["gps_km"] or "",
+
+     858:     trip_id: int,
+     859:     *,
+>>   860:     live_stop: str = "",
+     861:     speed: float = 0,
+     862:     gps_km: str = "",
+
+     868:     db.execute(
+     869:         """
+>>   870:         INSERT INTO live_runtime_state(trip_id, live_stop, speed, gps_km, eta_main, eta_sub, updated_at)
+     871:         VALUES(?, ?, ?, ?, ?, ?, datetime('now','localtime'))
+     872:         ON CONFLICT(trip_id) DO UPDATE SET
+
+     871:         VALUES(?, ?, ?, ?, ?, ?, datetime('now','localtime'))
+     872:         ON CONFLICT(trip_id) DO UPDATE SET
+>>   873:             live_stop=excluded.live_stop,
+     874:             speed=excluded.speed,
+     875:             gps_km=excluded.gps_km,
+
+     880:         (
+     881:             trip_id,
+>>   882:             (live_stop or "").strip(),
+     883:             float(speed or 0),
+     884:             (gps_km or "").strip(),
+
+     905: 
+     906: 
+>>   907: @app.route("/api/live-runtime-state")
+     908: def api_live_runtime_state():
+     909:     tid_raw = (request.args.get("trip_id") or "").strip()
+
+     919: 
+     920:     if write_mode:
+>>   921:         live_stop = (request.args.get("live_stop") or "").strip()
+     922:         gps_km = (request.args.get("gps_km") or "").strip()
+     923:         eta_main = (request.args.get("eta_main") or "").strip()
+
+     932:         upsert_live_runtime_state(
+     933:             tid,
+>>   934:             live_stop=live_stop,
+     935:             speed=speed,
+     936:             gps_km=gps_km,
+
+    1488: 
+    1489:     # Canlı Durak Akışı ekranında anlık GPS/ETA hesabı için veri
+>>  1490:     continue_route_coords = []
+    1491:     try:
+    1492:         coord_rows = db.execute(
+
+    1501:         for r in coord_rows:
+    1502:             try:
+>>  1503:                 continue_route_coords.append({
+    1504:                     "stop": r["stop"] or "",
+    1505:                     "lat": float(r["lat"]),
+
+    1509:                 pass
+    1510:     except Exception:
+>>  1511:         continue_route_coords = []
+    1512: 
+    1513:     continue_schedule_items = []
+
+    1545:     except Exception:
+    1546:         continue_schedule_items = []
+>>  1547:     runtime_live_stop = ""
+    1548:     try:
+    1549:         runtime_live_stop = find_route_stop((live_runtime.get("live_stop") or "").strip())
+
+    1547:     runtime_live_stop = ""
+    1548:     try:
+>>  1549:         runtime_live_stop = find_route_stop((live_runtime.get("live_stop") or "").strip())
+    1550:     except Exception:
+    1551:         runtime_live_stop = (live_runtime.get("live_stop") or "").strip()
+
+    1549:         runtime_live_stop = find_route_stop((live_runtime.get("live_stop") or "").strip())
+    1550:     except Exception:
+>>  1551:         runtime_live_stop = (live_runtime.get("live_stop") or "").strip()
+    1552: 
+    1553:     def norm_stop(v):
+
+    1745: 
+    1746:     matched_requested_stop = find_route_stop(requested_stop)
+>>  1747:     matched_runtime_stop = find_route_stop(runtime_live_stop)
+    1748:     matched_session_stop = find_route_stop(session_stop)
+    1749: 
+
+    1799:             eta = f"{idx - current_index} durak sonra"
+    1800:         else:
+>>  1801:             kind = "passed"
+    1802:             status = "Geçildi"
+    1803:             eta = "Geçildi"
+
+    1800:         else:
+    1801:             kind = "passed"
+>>  1802:             status = "Geçildi"
+    1803:             eta = "Geçildi"
+    1804: 
+
+    1801:             kind = "passed"
+    1802:             status = "Geçildi"
+>>  1803:             eta = "Geçildi"
+    1804: 
+    1805:         # mesafe gerçek canlı konum yoksa sıra bazlı gösterim
+
+    1809:             distance = f"{idx - current_index} durak"
+    1810:         else:
+>>  1811:             distance = "Geçildi"
+    1812: 
+    1813:         return {
+
+    1832:         selected_stops.insert(0, current_stop)
+    1833: 
+>>  1834:     live_stops = [
+    1835:         make_stop_payload(stop_name, stops.index(stop_name) if stop_name in stops else i)
+    1836:         for i, stop_name in enumerate(selected_stops)
+
+    1853: 
+    1854:     if live_runtime:
+>>  1855:         if runtime_live_stop:
+    1856:             live_current["name"] = runtime_live_stop
+    1857:         if str(live_runtime.get("gps_km") or "").strip():
+
+    1854:     if live_runtime:
+    1855:         if runtime_live_stop:
+>>  1856:             live_current["name"] = runtime_live_stop
+    1857:         if str(live_runtime.get("gps_km") or "").strip():
+    1858:             live_current["distance"] = str(live_runtime.get("gps_km") or "").strip()
+
+    1893:         "first_stop": first_stop,
+    1894:         "last_stop": last_stop,
+>>  1895:         "next_stop": live_stops[1]["name"] if len(live_stops) > 1 else current_stop,
+    1896:     }
+    1897: 
+
+    1902:         stops=stops,
+    1903:         live_current=live_current,
+>>  1904:         live_stops=live_stops,
+    1905:         live_summary=live_summary,
+    1906:         live_runtime=live_runtime,
+
+    1905:         live_summary=live_summary,
+    1906:         live_runtime=live_runtime,
+>>  1907:         continue_route_coords=continue_route_coords,
+    1908:         continue_schedule_items=continue_schedule_items,
+    1909:     )
+
+    2021: 
+    2022: @app.route("/api/live-stop-offload", methods=["POST"])
+>>  2023: def api_live_stop_offload():
+    2024:     tid = get_active_trip()
+    2025:     if not tid:
+
+    2081:                 r["to_stop"],
+    2082:                 "offload",
+>>  2083:                 _seat_event_meta(r, {"action": "live_stop_bulk_offload"}),
+    2084:             )
+    2085: 
+
+    2497: 
+    2498: @app.route("/api/live-stop-complete", methods=["POST"])
+>>  2499: def api_live_stop_complete():
+    2500:     tid = get_active_trip()
+    2501:     if not tid:
+
+    2689:             "pass_stop",
+    2690:             {
+>>  2691:                 "action": "live_stop_complete",
+    2692:                 "stop": stop_name,
+    2693:                 "count": 1,
+
+    2708: 
+    2709: @app.route("/api/live-stop-detail")
+>>  2710: def api_live_stop_detail():
+    2711:     tid = get_active_trip()
+    2712:     if not tid:
+
+    3134:         pass
+    3135: 
+>>  3136:     live_stop = (live_runtime.get("live_stop") or "").strip()
+    3137:     live_key = norm_stop(live_stop)
+    3138: 
+
+    3135: 
+    3136:     live_stop = (live_runtime.get("live_stop") or "").strip()
+>>  3137:     live_key = norm_stop(live_stop)
+    3138: 
+    3139:     stop_items = []
+
+    3252:         },
+    3253:         "live_runtime": live_runtime,
+>>  3254:         "live_stop": live_stop,
+    3255:         "next_operation": next_operation,
+    3256:         "route_segments": route_segments,
+
+
+--- templates/fare_admin.html ---
+     118:   // Liste satırına tıklayınca forma doldur
+     119:   document.getElementById('fareList')?.addEventListener('click', function(e){
+>>   120:     const row = e.target.closest('.item'); if(!row) return;
+     121:     document.getElementById('fromSel').value = row.dataset.from;
+     122:     document.getElementById('toSel').value   = row.dataset.to;
+
+
+--- templates/index.html ---
+    1985:   */
+    1986:   document.addEventListener("click", function(e){
+>>  1987:     const hitRoute = e.target.closest && e.target.closest("#routePickerBtn");
+    1988: 
+    1989:     if(hitRoute){
+
+
+--- templates/passenger_control.html ---
+     909: 
+     910: document.getElementById('deck').addEventListener('click', (e)=>{
+>>   911:   const el = e.target.closest('.seat');
+     912:   if(!el) return;
+     913: 
+
+
+--- templates/seats.html ---
+     887:   // En üstten yakala: diğer click listener'lar aç-kapa karışıklığı yapmasın.
+     888:   document.addEventListener("click", function(e){
+>>   889:     const btn = e.target.closest && e.target.closest("#driveModeToggle");
+     890:     if(!btn) return;
+     891: 
+
+
+--- templates/ai_console.html ---
+    1581: 
+    1582:     els.modeSwitch.addEventListener('click', (e) => {
+>>  1583:       const btn = e.target.closest('[data-mode]');
+    1584:       if (!btn) return;
+    1585:       setMode(btn.dataset.mode);
+
+
+--- templates/route_schedule_edit.html ---
+    1575: 
+    1576:   function labelText(select){
+>>  1577:     const field = select.closest(".field");
+    1578:     const label = field ? field.querySelector("label") : null;
+    1579:     return label ? label.textContent.trim() : "Seçim Yap";
+
+    1672: 
+    1673:   document.addEventListener("click", function(e){
+>>  1674:     const trigger = e.target.closest(".rs-select-trigger");
+    1675:     if(!trigger) return;
+    1676: 
+
+    1685: 
+    1686:   listEl.addEventListener("click", function(e){
+>>  1687:     const opt = e.target.closest(".rs-picker-option");
+    1688:     if(!opt) return;
+    1689: 
+
+
+--- templates/rehber.html ---
+    2643: 
+    2644:   function showFallback(img){
+>>  2645:     const box = img.closest(".hero-device, .highlight-img, .cinema-visual, .scene-media");
+    2646:     if(!box) return;
+    2647: 
+
+    2680:       }
+    2681:     });
+>>  2682:   }, { threshold:.14 });
+    2683: 
+    2684:   revealItems.forEach(el => io.observe(el));
+
+
+--- templates/live_map.html ---
+     758: 
+     759: <style id="live-map-route-progress-style">
+>>   760: .leaflet-interactive.route-line-passed{
+     761:   filter:drop-shadow(0 0 8px rgba(239,68,68,.38));
+     762: }
+
+    1822:     const stops = Array.isArray(BOOT.stops) ? BOOT.stops : [];
+    1823:     const routeSegments = Array.isArray(BOOT.route_segments) ? BOOT.route_segments : [];
+>>  1824:     const liveStop = BOOT.live_stop || "";
+    1825:     const nextOperation = BOOT.next_operation || null;
+    1826: 
+
+    1847:     const markerItems = [];
+    1848:     let routeLine = null;
+>>  1849:     let routeLinePassed = null;
+    1850:     let routeLineAhead = null;
+    1851:     let routeLineVisible = true;
+
+    2284:     }
+    2285: 
+>>  2286:     function closestRouteProjection(latlng){
+    2287:       if(!Array.isArray(routePoints) || routePoints.length < 2) return null;
+    2288: 
+
+    2328:       }
+    2329: 
+>>  2330:       const pr = closestRouteProjection(latlng);
+    2331: 
+    2332:       if(!pr || !Array.isArray(pr.point)){
+
+    2364: 
+    2365:     function updateRouteProgressLine(latlng){
+>>  2366:       if(!routeLineAhead || !routeLinePassed) return;
+    2367:       if(!Array.isArray(routePoints) || routePoints.length < 2) return;
+    2368: 
+
+    2368: 
+    2369:       if(!latlng){
+>>  2370:         routeLinePassed.setLatLngs([]);
+    2371:         routeLineAhead.setLatLngs(routePoints);
+    2372:         return;
+
+    2373:       }
+    2374: 
+>>  2375:       const pr = closestRouteProjection(latlng);
+    2376: 
+    2377:       if(!pr){
+
+    2376: 
+    2377:       if(!pr){
+>>  2378:         routeLinePassed.setLatLngs([]);
+    2379:         routeLineAhead.setLatLngs(routePoints);
+    2380:         return;
+
+    2381:       }
+    2382: 
+>>  2383:       const passed = routePoints.slice(0, pr.index + 1);
+    2384:       passed.push(pr.point);
+    2385: 
+
+    2382: 
+    2383:       const passed = routePoints.slice(0, pr.index + 1);
+>>  2384:       passed.push(pr.point);
+    2385: 
+    2386:       const ahead = [pr.point].concat(routePoints.slice(pr.index + 1));
+
+    2386:       const ahead = [pr.point].concat(routePoints.slice(pr.index + 1));
+    2387: 
+>>  2388:       routeLinePassed.setLatLngs(passed);
+    2389:       routeLineAhead.setLatLngs(ahead);
+    2390:     }
+
+    2634: 
+    2635:     if("geolocation" in navigator){
+>>  2636:       navigator.geolocation.watchPosition(pos => {
+    2637:         updateBusPosition(pos.coords.latitude, pos.coords.longitude);
+    2638: 
+
+    2651: 
+    2652:     document.getElementById("nextOpsList")?.addEventListener("click", e => {
+>>  2653:       const btn = e.target.closest("[data-next-op-stop]");
+    2654:       if(!btn) return;
+    2655: 
+
+
+--- templates/continue_trip.html ---
+     159:             <div>
+     160:               <span class="card-label">Şu anki durak</span>
+>>   161:               <h2 class="card-title" id="liveCurrentStopName">{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or "Durak seçilmedi" }}</h2>
+     162:             </div>
+     163: 
+
+     173:             <div class="metric">
+     174:               <small>Kalan<br>mesafe</small>
+>>   175:               <b id="liveDistanceValue" class="stop-distance-value" data-stop-name="{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or '' }}">{{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else live_current.distance) or "-" }}</b>
+     176:             </div>
+     177: 
+
+     192:       </article>
+     193: 
+>>   194:       {% for stop in live_stops[1:] %}
+     195:       <article class="journey-card">
+     196:         <div class="node {{ stop.kind }}"></div>
+
+     206:             {% elif stop.kind == "upcoming" %}
+     207:               <span class="status-pill upcoming">{{ stop.status }}</span>
+>>   208:             {% elif stop.kind == "passed" %}
+     209:               <span class="status-pill passed">{{ stop.status }}</span>
+     210:             {% else %}
+
+     207:               <span class="status-pill upcoming">{{ stop.status }}</span>
+     208:             {% elif stop.kind == "passed" %}
+>>   209:               <span class="status-pill passed">{{ stop.status }}</span>
+     210:             {% else %}
+     211:               <span class="status-pill live">{{ stop.status }}</span>
+
+     368:           const exactKeys = [
+     369:             "liveStop:" + tripKey,
+>>   370:             "passedStops:" + tripKey,
+     371:             "boardsMap:" + tripKey,
+     372:             "standingTotals:" + tripKey,
+
+     385:               (
+     386:                 k.startsWith("liveStop:") ||
+>>   387:                 k.startsWith("passedStops:") ||
+     388:                 k.startsWith("boardsMap:") ||
+     389:                 k.startsWith("standingTotals:") ||
+
+     488:     runtimeGpsKm: {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }},
+     489:     runtimeSpeed: {{ (live_runtime.speed if live_runtime else 0) | tojson | safe }},
+>>   490:     runtimeStop: {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }},
+     491:     runtimeEta: {{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else "") | tojson | safe }},
+     492: 
+
+     494:     csrfToken: {{ (csrf_token if csrf_token is defined else "") | tojson | safe }},
+     495: 
+>>   496:     routeCoords: {{ continue_route_coords | default([]) | tojson | safe }},
+     497:     scheduleItems: {{ continue_schedule_items | default([]) | tojson | safe }},
+     498: 
+
+
+--- static/seats/seats.css ---
+    1158:   }
+    1159: 
+>>  1160:   .eta-row.passed{ opacity:.58; }
+    1161: 
+    1162:   .eta-name{
+
+
+--- static/seats/voice-tts.js ---
+     125:   // Yeşil Ses Açık / Sessiz butonu
+     126:   document.addEventListener("click", function(e){
+>>   127:     const btn = e.target.closest && e.target.closest("#nightVoiceToggle");
+     128:     if(!btn) return;
+     129: 
+
+
+--- static/seats/seats.js ---
+      20: /* =========================================================
+      21:    ONE TIME STOP FLOW HARD CLEAN
+>>    22:    Eski sürümden kalan geçildi / işlem bitti izlerini temizler.
+      23: ========================================================= */
+      24: (function hardCleanOldStopFlowOnce(){
+
+      33:     [
+      34:       "stopFlowSummary:" + TRIP_KEY,
+>>    35:       "passedStops:" + TRIP_KEY,
+      36:       "liveStop:" + TRIP_KEY,
+      37:       "continueTripStop:" + TRIP_KEY,
+
+     123:    TRIP MEMORY GUARD
+     124:    Aynı rota/plaka ile yeni sefer açılınca eski canlı durak,
+>>   125:    geçildi bilgisi ve durak akışı özeti taşınmasın.
+     126: ========================================================= */
+     127: (function resetTripMemoryIfActiveTripChanged(){
+
+     154:     const prefixes = [
+     155:       "liveStop:",
+>>   156:       "passedStops:",
+     157:       "boardsMap:",
+     158:       "standingTotals:",
+
+     217:     lastWarnNearAt: 0,
+     218:     liveStop: "",
+>>   219:     passedStops: new Set(),
+     220:     etaItems: []
+     221:   };
+
+     277:   function persistVoiceState(){
+     278:     localStorage.setItem("liveStop:" + TRIP_KEY, speedState.liveStop || "");
+>>   279:     localStorage.setItem("passedStops:" + TRIP_KEY, JSON.stringify([...speedState.passedStops]));
+     280:   }
+     281: 
+
+     283:     speedState.liveStop = localStorage.getItem("liveStop:" + TRIP_KEY) || "";
+     284:     try{
+>>   285:       speedState.passedStops = new Set(JSON.parse(localStorage.getItem("passedStops:" + TRIP_KEY) || "[]"));
+     286:     }catch(_){
+     287:       speedState.passedStops = new Set();
+
+     285:       speedState.passedStops = new Set(JSON.parse(localStorage.getItem("passedStops:" + TRIP_KEY) || "[]"));
+     286:     }catch(_){
+>>   287:       speedState.passedStops = new Set();
+     288:     }
+     289:   }
+
+     340:   }
+     341: 
+>>   342:   function distKm(a, b){
+     343:     const R = 6371;
+     344:     const toRad = d => d * Math.PI / 180;
+
+     351:   }
+     352: 
+>>   353: function nearestStopByGps(maxKm = 15){
+     354:   if(!currentCoords || !Array.isArray(cachedStops)) return "";
+     355: 
+
+     359:     if(!s || !hasCoord(s)) continue;
+     360: 
+>>   361:     const km = distKm(currentCoords, {
+     362:       lat: Number(s.lat),
+     363:       lng: Number(s.lng)
+
+     388:     if(typeof hasLiveStopOperation === "function" && !hasLiveStopOperation(live)){
+     389:       speedState.liveStop = "";
+>>   390:       speedState.passedStops = new Set();
+     391: 
+     392:       try{
+
+     392:       try{
+     393:         localStorage.removeItem("liveStop:" + TRIP_KEY);
+>>   394:         localStorage.removeItem("passedStops:" + TRIP_KEY);
+     395:       }catch(_){}
+     396: 
+
+     405:     if(Number.isFinite(km) && km > 5.5){
+     406:       speedState.liveStop = "";
+>>   407:       speedState.passedStops = new Set();
+     408: 
+     409:       try{
+
+     409:       try{
+     410:         localStorage.removeItem("liveStop:" + TRIP_KEY);
+>>   411:         localStorage.removeItem("passedStops:" + TRIP_KEY);
+     412:       }catch(_){}
+     413: 
+
+     425:   if(!stopObj || !hasCoord(stopObj)) return NaN;
+     426: 
+>>   427:   return distKm(currentCoords, {
+     428:     lat: Number(stopObj.lat),
+     429:     lng: Number(stopObj.lng)
+
+     522:       planDate: new Date(start.getTime() + x.offsetMin * 60000),
+     523:       offsetMin: x.offsetMin,
+>>   524:       routeIndex: indexOfStopByName(x.stop)
+     525:     }));
+     526:   }
+
+     685:         "stopFlowSummary:" + TRIP_KEY,
+     686:         "liveStop:" + TRIP_KEY,
+>>   687:         "passedStops:" + TRIP_KEY,
+     688:         "boardsMap:" + TRIP_KEY,
+     689:         "standingTotals:" + TRIP_KEY,
+
+     699:       if(speedState){
+     700:         speedState.liveStop = "";
+>>   701:         speedState.passedStops = new Set();
+     702:       }
+     703: 
+
+    1120:     const isActive = !!selectedNorm && norm(stop) === selectedNorm;
+    1121:     const isLive = !!liveNorm && norm(stop) === liveNorm;
+>>  1122:     const isDone = speedState.passedStops.has(stop) && !isActive && !isLive;
+    1123:     const isNextWarn = liveDangerOn && !!nextWarnNorm && norm(stop) === nextWarnNorm;
+    1124:     const isFlowGreen = liveDangerOn && !!greenNorm && norm(stop) === greenNorm;
+
+    1129: 
+    1130:     if(currentCoords && stopObj && hasCoord(stopObj)){
+>>  1131:       const km = distKm(currentCoords, {
+    1132:         lat: Number(stopObj.lat),
+    1133:         lng: Number(stopObj.lng)
+
+    1139:     if(isLive) metaLine1 = "Canlı";
+    1140:     else if(isActive) metaLine1 = "Seçili";
+>>  1141:     else if(isDone) metaLine1 = "Geçildi";
+    1142:     else metaLine1 = "Bekliyor";
+    1143: 
+
+    1315:   }
+    1316: 
+>>  1317:   function markPassedStopsUntil(stopName){
+    1318:     const idx = indexOfStopByName(stopName);
+    1319:     const list = allStopsList();
+
+    1322:     for(let i = 0; i <= idx; i++){
+    1323:       snapshotStopFlowSummary(list[i]);
+>>  1324:       speedState.passedStops.add(list[i]);
+    1325:     }
+    1326:     persistVoiceState();
+
+    1332: 
+    1333:     speedState.liveStop = canonical;
+>>  1334:     markPassedStopsUntil(canonical);
+    1335:     persistVoiceState();
+    1336:     updateCompactHeader();
+
+    1871:     if(removed > 0) toast(`Ayakta ${removed} kişi indirildi`);
+    1872: 
+>>  1873:     markPassedStopsUntil(stop);
+    1874:     setLiveStop(stop);
+    1875:     refreshStopBadges();
+
+    1882: 
+    1883:     if(geoWatchId){
+>>  1884:       navigator.geolocation.clearWatch(geoWatchId);
+    1885:       geoWatchId = null;
+    1886:       if(btn) btn.textContent = "KAPALI";
+
+    1906:     const radiusKm = parseFloat($("#alertRadius")?.value || "3");
+    1907: 
+>>  1908:     geoWatchId = navigator.geolocation.watchPosition((pos) => {
+    1909:       const p = { lat:pos.coords.latitude, lng:pos.coords.longitude };
+    1910:       currentCoords = p;
+
+    1910:       currentCoords = p;
+    1911: 
+>>  1912:       const d = distKm(p, { lat:Number(s.lat), lng:Number(s.lng) });
+    1913:       setText("#geoHint", `Mesafe: ${d.toFixed(2)} km (eşik ${radiusKm} km)`);
+    1914: 
+
+    1997: 
+    1998:     if(liveIdx >= 0){
+>>  1999:       anchor = [...items].reverse().find(x => x.routeIndex >= 0 && x.routeIndex < liveIdx) || items[0];
+    2000:     }else if(selectedIdx >= 0){
+    2001:       anchor = [...items].reverse().find(x => x.routeIndex >= 0 && x.routeIndex <= selectedIdx) || items[0];
+
+    1999:       anchor = [...items].reverse().find(x => x.routeIndex >= 0 && x.routeIndex < liveIdx) || items[0];
+    2000:     }else if(selectedIdx >= 0){
+>>  2001:       anchor = [...items].reverse().find(x => x.routeIndex >= 0 && x.routeIndex <= selectedIdx) || items[0];
+    2002:     }else{
+    2003:       anchor = items[0];
+
+    2034:       let badgeCls = "good";
+    2035: 
+>>  2036:       if(item.passed) badgeCls = "info";
+    2037:       else if(item.delayMin > 15) badgeCls = "bad";
+    2038:       else if(item.delayMin > 0) badgeCls = "warn";
+
+    2039: 
+    2040:       item.badgeCls = badgeCls;
+>>  2041:       item.badgeText = item.passed ? "Geçildi" : fmtSignedMin(item.delayMin);
+    2042:       return item;
+    2043:     }
+
+    2048: 
+    2049:       // Örn: Denizli'de sefer başladıysa hedef Denizli değil Sarayköy olur.
+>>  2050:       const passed = liveIdx >= 0
+    2051:         ? (item.routeIndex >= 0 && item.routeIndex < liveIdx)
+    2052:         : etaDate.getTime() < now.getTime() - (5 * 60000);
+
+    2049:       // Örn: Denizli'de sefer başladıysa hedef Denizli değil Sarayköy olur.
+    2050:       const passed = liveIdx >= 0
+>>  2051:         ? (item.routeIndex >= 0 && item.routeIndex < liveIdx)
+    2052:         : etaDate.getTime() < now.getTime() - (5 * 60000);
+    2053: 
+
+    2055:       const active = activeName
+    2056:         ? norm(activeName) === norm(item.stop)
+>>  2057:         : (!passed && item === (
+    2058:             items.find(x => !(
+    2059:               liveIdx >= 0
+
+    2058:             items.find(x => !(
+    2059:               liveIdx >= 0
+>>  2060:                 ? (x.routeIndex >= 0 && x.routeIndex < liveIdx)
+    2061:                 : (new Date(x.planDate.getTime() + globalDelayMin * 60000).getTime() < now.getTime() - 5 * 60000)
+    2062:             )) || items[items.length - 1]
+
+    2069:         etaDate,
+    2070:         delayMin,
+>>  2071:         passed,
+    2072:         active,
+    2073:         km: NaN,
+
+    2079: 
+    2080:     // Asıl akıllı hesap: sıradaki saatli durağa kalan km + efektif hız.
+>>  2081:     const nextTimedForDistance = model.find(x => !x.passed) || model[model.length - 1];
+    2082: 
+    2083:     if(nextTimedForDistance && currentCoords && !nextTimedForDistance.passed){
+
+    2081:     const nextTimedForDistance = model.find(x => !x.passed) || model[model.length - 1];
+    2082: 
+>>  2083:     if(nextTimedForDistance && currentCoords && !nextTimedForDistance.passed){
+    2084:       const km = stopDistanceKmByName(nextTimedForDistance.stop);
+    2085: 
+
+    2103:     speedState.etaItems = model;
+    2104: 
+>>  2105:     const nextTimed = model.find(x => !x.passed) || model[model.length - 1];
+    2106: 
+    2107:     setText("#routeNextTimed", nextTimed?.stop || "—");
+
+    2164:     items.forEach(item => {
+    2165:       const row = document.createElement("div");
+>>  2166:       row.className = `eta-row ${item.active ? "active" : ""} ${item.passed ? "passed" : ""}`;
+    2167:       row.innerHTML = `
+    2168:         <div>
+
+    2206:     const totalOps = selectedSeatCount + selectedStanding + selectedParcel;
+    2207:     const live = speedState.liveStop || "—";
+>>  2208:     const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+    2209: 
+    2210:     setText("#aiMain", stop
+
+    2308:       if(!hasLiveStopOperation(canonical)) continue;
+    2309: 
+>>  2310:       const km = distKm(coords, {
+    2311:         lat:Number(stopObj.lat),
+    2312:         lng:Number(stopObj.lng)
+
+    2326:       if(speedState.liveStop && !hasLiveStopOperation(speedState.liveStop)){
+    2327:         speedState.liveStop = "";
+>>  2328:         speedState.passedStops = new Set();
+    2329: 
+    2330:         try{
+
+    2330:         try{
+    2331:           localStorage.removeItem("liveStop:" + TRIP_KEY);
+>>  2332:           localStorage.removeItem("passedStops:" + TRIP_KEY);
+    2333:         }catch(_){}
+    2334: 
+
+    2555: 
+    2556:     if("geolocation" in navigator){
+>>  2557:       speedWatchId = navigator.geolocation.watchPosition(async (pos) => {
+    2558:         const rawSpeed = pos.coords.speed;
+    2559:         const kmh = (typeof rawSpeed === "number" && !isNaN(rawSpeed)) ? rawSpeed * 3.6 : 0;
+
+    2604: 
+    2605:   document.addEventListener("click", (e) => {
+>>  2606:     const bagBadge = e.target.closest(".bag-badge");
+    2607:     if(bagBadge){
+    2608:       e.preventDefault();
+
+    2608:       e.preventDefault();
+    2609:       e.stopPropagation();
+>>  2610:       const seat = bagBadge.closest(".seat")?.dataset.seat;
+    2611:       if(!seat) return;
+    2612:       const next = location.pathname;
+
+    2616:     }
+    2617: 
+>>  2618:     const seatEl = e.target.closest(".seat");
+    2619:     if(seatEl && !multiMode){
+    2620:       openSeat(Number(seatEl.dataset.seat));
+
+    2666:   onClick("#standingCard", openStandingModal);
+    2667:   onClick("#openStandingModalBtn", openStandingModal);
+>>  2668:   onClick("#standingClose", closeStandingModal);
+    2669:   onClick("#standingBackdrop", closeStandingModal);
+    2670: 
+
+    2667:   onClick("#openStandingModalBtn", openStandingModal);
+    2668:   onClick("#standingClose", closeStandingModal);
+>>  2669:   onClick("#standingBackdrop", closeStandingModal);
+    2670: 
+    2671:   onClick("#standingBulkOff", async () => {
+
+    2744:       closeBulk();
+    2745:       closeCash();
+>>  2746:       closeStandingModal();
+    2747:       closeModal("#approachBackdrop", "#approachModal");
+    2748:     }
+
+    2750: 
+    2751: 
+>>  2752:   const livePill = $("#routeMiniLive")?.closest(".route-pill");
+    2753:   if(livePill){
+    2754:     livePill.addEventListener("click", () => {
+
+    2762:   }
+    2763: 
+>>  2764:   const nextPill = $("#routeMiniNext")?.closest(".route-pill");
+    2765:   if(nextPill){
+    2766:     nextPill.addEventListener("click", () => {
+
+    2865: 
+    2866:     const url =
+>>  2867:       `/api/live-runtime-state?write=1` +
+    2868:       `&trip_id=${encodeURIComponent(tripId)}` +
+    2869:       `&live_stop=${encodeURIComponent(liveStop)}` +
+
+    2867:       `/api/live-runtime-state?write=1` +
+    2868:       `&trip_id=${encodeURIComponent(tripId)}` +
+>>  2869:       `&live_stop=${encodeURIComponent(liveStop)}` +
+    2870:       `&speed=${encodeURIComponent(speed)}` +
+    2871:       `&gps_km=${encodeURIComponent(gpsKm)}` +
+
+
+--- static/seats/seats-time-prayer.js ---
+     183: 
+     184:   if("geolocation" in navigator){
+>>   185:     navigator.geolocation.getCurrentPosition(
+     186:       p => boot(p.coords.latitude, p.coords.longitude),
+     187:       _ => boot(FALLBACK.lat, FALLBACK.lng, FALLBACK.place),
+
+
+--- static/seats/voice-commands.js ---
+     130:   try{
+     131:     if(speedState && Array.isArray(speedState.etaItems)){
+>>   132:       const nextTimed = speedState.etaItems.find(x => !x.passed);
+     133:       if(nextTimed && nextTimed.stop) next = nextTimed.stop;
+     134:     }
+
+     509:   if(/(kac yolcu var|kaç yolcu var|toplam yolcu)/.test(t)) return { type:"ask_total" };
+     510:   if(/(ayakta kac|ayakta kaç)/.test(t)) return { type:"ask_standing" };
+>>   511:   if(/(hangi duraktayiz|hangi duraktayız|neredeyiz)/.test(t)) return { type:"ask_live_stop" };
+     512:   if(/(rotar kac|rötar kaç|gecikme kac|gecikme kaç)/.test(t)) return { type:"ask_delay" };
+     513:   if(/(bir sonraki durak|siradaki saatli|sıradaki saatli)/.test(t)) return { type:"ask_next_timed" };
+
+    1104:   }
+    1105: 
+>>  1106:   if(cmd.type === "ask_live_stop"){
+    1107:     const live = speedState.liveStop || getSelectedStopName() || "henüz belli değil";
+    1108:     const msg = `Şu an ${live} civarındasın.`;
+
+    1113: 
+    1114:   if(cmd.type === "ask_delay"){
+>>  1115:     const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+    1116:     if(!nextTimed){
+    1117:       const msg = "Saatli durak bilgisi yok.";
+
+    1128: 
+    1129:   if(cmd.type === "ask_next_timed"){
+>>  1130:     const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+    1131:     if(!nextTimed){
+    1132:       const msg = "Sıradaki saatli durak bulunamadı.";
+
+
+--- static/seats/standing.js ---
+     172: }
+     173: 
+>>   174: function closeStandingModal(){
+     175:   closeModal("#standingBackdrop", "#standingModal");
+     176: }
+
+     240:   renderStandingList,
+     241:   openStandingModal,
+>>   242:   closeStandingModal,
+     243:   removeStandingById,
+     244:   offloadStandingForStop
+
+
+--- static/seats/seats-final.css ---
+    1265: }
+    1266: 
+>>  1267: /* Geçildi kartlarında da çok sönük kalmasın */
+    1268: body:not(.drive-mode) .route-stop.done .name::before{
+    1269:   opacity:1 !important;
+
+    1322: }
+    1323: 
+>>  1324: /* Geçildi kartları tamamen solmasın */
+    1325: body:not(.drive-mode) .route-stop.done{
+    1326:   opacity:.92 !important;
+
+    1332: }
+    1333: 
+>>  1334: /* Geçildi kartındaki yazılar biraz daha okunaklı */
+    1335: body:not(.drive-mode) .route-stop.done .name{
+    1336:   color:rgba(248,251,255,.88) !important;
+
+
+--- static/live_map/muavin_live_map_extra.js ---
+     191: 
+     192:   function startWatch() {
+>>   193:     if (!navigator.geolocation) return;
+     194: 
+     195:     navigator.geolocation.watchPosition(
+
+     193:     if (!navigator.geolocation) return;
+     194: 
+>>   195:     navigator.geolocation.watchPosition(
+     196:       function (pos) {
+     197:         const c = pos.coords || {};
+
+     276:   function isExcluded(el) {
+     277:     return !!(
+>>   278:       el.closest(".muavin-bottom-dock-final-v5") ||
+     279:       el.closest(".muavin-bottom-dock-v2") ||
+     280:       el.closest(".muavin-bottom-minibar") ||
+
+     277:     return !!(
+     278:       el.closest(".muavin-bottom-dock-final-v5") ||
+>>   279:       el.closest(".muavin-bottom-dock-v2") ||
+     280:       el.closest(".muavin-bottom-minibar") ||
+     281:       el.closest(".muavin-tools-fab") ||
+
+     278:       el.closest(".muavin-bottom-dock-final-v5") ||
+     279:       el.closest(".muavin-bottom-dock-v2") ||
+>>   280:       el.closest(".muavin-bottom-minibar") ||
+     281:       el.closest(".muavin-tools-fab") ||
+     282:       el.closest(".muavin-tools-sheet") ||
+
+     279:       el.closest(".muavin-bottom-dock-v2") ||
+     280:       el.closest(".muavin-bottom-minibar") ||
+>>   281:       el.closest(".muavin-tools-fab") ||
+     282:       el.closest(".muavin-tools-sheet") ||
+     283:       el.closest(".muavin-summary-bubble") ||
+
+     280:       el.closest(".muavin-bottom-minibar") ||
+     281:       el.closest(".muavin-tools-fab") ||
+>>   282:       el.closest(".muavin-tools-sheet") ||
+     283:       el.closest(".muavin-summary-bubble") ||
+     284:       el.closest(".muavin-route-summary-card") ||
+
+     281:       el.closest(".muavin-tools-fab") ||
+     282:       el.closest(".muavin-tools-sheet") ||
+>>   283:       el.closest(".muavin-summary-bubble") ||
+     284:       el.closest(".muavin-route-summary-card") ||
+     285:       el.closest(".leaflet-control") ||
+
+     282:       el.closest(".muavin-tools-sheet") ||
+     283:       el.closest(".muavin-summary-bubble") ||
+>>   284:       el.closest(".muavin-route-summary-card") ||
+     285:       el.closest(".leaflet-control") ||
+     286:       el.closest(".leaflet-marker-icon")
+
+     283:       el.closest(".muavin-summary-bubble") ||
+     284:       el.closest(".muavin-route-summary-card") ||
+>>   285:       el.closest(".leaflet-control") ||
+     286:       el.closest(".leaflet-marker-icon")
+     287:     );
+
+     284:       el.closest(".muavin-route-summary-card") ||
+     285:       el.closest(".leaflet-control") ||
+>>   286:       el.closest(".leaflet-marker-icon")
+     287:     );
+     288:   }
+
+     333: 
+     334:     const clickable =
+>>   335:       (el.closest && el.closest("button,a,[role='button'],[onclick]")) ||
+     336:       (el.querySelector && el.querySelector("button,a,[role='button'],[onclick]")) ||
+     337:       el;
+
+     490: 
+     491:       function handle(e) {
+>>   492:         const btn = e.target.closest("[data-final-dock]");
+     493:         if (!btn || !dock.contains(btn)) return;
+     494: 
+
+     666:   }
+     667: 
+>>   668:   function nearestRouteIndex(points, latlng) {
+     669:     let bestI = 0;
+     670:     let bestD = Infinity;
+
+     716:           layer,
+     717:           latlng,
+>>   718:           order: routePoints ? nearestRouteIndex(routePoints, latlng) : markers.length
+     719:         });
+     720:       } catch (e) {}
+
+     762:       .sort(function (a, b) { return a.d - b.d; });
+     763: 
+>>   764:     const nearest = sorted[0];
+     765:     if (!nearest) return 0;
+     766: 
+
+     763: 
+     764:     const nearest = sorted[0];
+>>   765:     if (!nearest) return 0;
+     766: 
+     767:     let total = kmBetween(current, nearest.s.latlng);
+
+     765:     if (!nearest) return 0;
+     766: 
+>>   767:     let total = kmBetween(current, nearest.s.latlng);
+     768: 
+     769:     for (let i = nearest.i; i < stops.length - 1; i++) {
+
+     767:     let total = kmBetween(current, nearest.s.latlng);
+     768: 
+>>   769:     for (let i = nearest.i; i < stops.length - 1; i++) {
+     770:       total += kmBetween(stops[i].latlng, stops[i + 1].latlng);
+     771:     }
+
+     800:     }
+     801: 
+>>   802:     const currentOrder = routePoints ? nearestRouteIndex(routePoints, currentLatLng) : null;
+     803: 
+     804:     let nextStop = null;
+
+    1002: 
+    1003:     if (currentLatLng && stops.length) {
+>>  1004:       const currentOrder = routePoints ? nearestRouteIndex(routePoints, currentLatLng) : null;
+    1005:       let next = null;
+    1006: 
+
+    1080: 
+    1081:       toolsSheet.addEventListener("click", function (e) {
+>>  1082:         const btn = e.target.closest("[data-map-tool]");
+    1083:         if (!btn) return;
+    1084: 
+
+Çok fazla sonuç var, ilk 160 bağlam gösterildi.
