@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="/static/seats/patches/manual-ticket-system.css?v=1">
 <link rel="stylesheet" href="/static/seats/patches/top-sound-toggle.css?v=1">
 <link rel="stylesheet" href="/static/seats/patches/seat-simple-ui-pack.css?v=1">
+<link rel="stylesheet" href="/static/seats/patches/unified-seat-deck-report-style.css?v=seat-smaller-removed-2">
 <link rel="stylesheet" href="/static/seats/patches/mobile-performance-fix.css?v=2">
 <link rel="stylesheet" href="/static/seats/patches/fab-sheet-solid-fix.css?v=1">
 <link rel="stylesheet" href="/static/seats/patches/seat-label-ghost-clean.css?v=1">
@@ -341,7 +342,8 @@
     tripId: {{ trip['id'] | tojson | safe }},
     tripDate: {{ trip['date'] | tojson | safe }},
     departureTime: {{ trip['departure_time'] | tojson | safe }},
-    tripKey: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
+    tripKey: {{ ('trip:' ~ trip['id']) | tojson | safe }},
+    bagTrip: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
 
     seatPositions: {{ seat_positions | tojson | safe }},
     assigned: {{ assigned | tojson | safe }},
@@ -362,14 +364,14 @@
 <script src="/static/seats/bags.js?v=1"></script>
 <script src="/static/seats/voice-commands.js?v=voice-listen-guard-1"></script>
 <script src="/static/seats/standing.js?v=1"></script>
-<script src="/static/seats/seats.js?v=clear-ticket-on-offload-1"></script>
+<script src="/static/seats/seats.js?v=tripkey-by-id-1"></script>
 <script src="/static/seats/route-marquee.js?v=route-clean-ticker-single-1"></script>
 <script src="/static/seats/seats-time-prayer.js?v=time-prayer-apk-1"></script>
 <script src="/static/seats/voice-tts.js?v=voice-owner-fix-1"></script>
 <script src="/static/seats/drive-eta-chip.js?v=1"></script>
 <script src="/static/seats/drive-controls.js?v=drive-toggle-fix-1"></script>
 <script src="/static/seats/patches/stop-selected-toast.js?v=1"></script>
-<script src="/static/seats/patches/stop-flow-focus-patch.js?v=1"></script>
+<script src="/static/seats/patches/stop-flow-focus-patch.js?v=simple-scope-1"></script>
 <script src="/static/seats/patches/seat-layout-fab-pack.js?v=1"></script>
 <script src="/static/seats/patches/modal-bottom-nav-autohide.js?v=1"></script>
 <script src="/static/seats/patches/manual-ticket-system.js?v=1"></script>
@@ -842,7 +844,7 @@
 
   function driveKey(){
     const boot = window.SEATS_BOOT || {};
-    const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+    const tripKey = boot.tripKey || window.TRIP_KEY || window.BAG_TRIP || "default";
     return "driveMode:" + tripKey;
   }
 
@@ -985,7 +987,7 @@
   function setAdvanced(){
     try{
       const boot = window.SEATS_BOOT || {};
-      const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+      const tripKey = boot.tripKey || window.TRIP_KEY || window.BAG_TRIP || "default";
       localStorage.setItem("seatUiMode:" + tripKey, "advanced");
     }catch(_){}
 

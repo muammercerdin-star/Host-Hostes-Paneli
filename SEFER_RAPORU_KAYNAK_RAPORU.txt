@@ -1,0 +1,1877 @@
+
+
+==========================================================================================
+SEFER RAPORU KAYNAK RAPORU
+==========================================================================================
+
+Proje klasörü: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+
+==========================================================================================
+1) İLGİLİ DOSYALAR
+==========================================================================================
+
+- app.py  (136113 bayt)
+- modules/trip_report_builder.py  (11334 bayt)
+- modules/reports_panel.py  (5373 bayt)
+- templates/trip_report.html  (30326 bayt)
+- templates/report_archive.html  (10957 bayt)
+- templates/index.html  (43105 bayt)
+- templates/continue_trip.html  (133505 bayt)
+
+
+==========================================================================================
+2) ROUTE / ENDPOINT ARAMASI
+==========================================================================================
+
+
+--- app.py:4 ---
+    1: import shutil
+    2: import zipfile
+    3: import os
+    4: import csv
+    5: import json
+    6: import secrets
+    7: import sqlite3
+    8: import re
+    9: from io import StringIO
+   10: from pathlib import Path
+   11: from datetime import datetime, timedelta
+   12: from typing import Any, Optional, Tuple
+   13: 
+   14: from flask import (
+   15:     Flask,
+   16:     render_template,
+
+--- app.py:5 ---
+    1: import shutil
+    2: import zipfile
+    3: import os
+    4: import csv
+    5: import json
+    6: import secrets
+    7: import sqlite3
+    8: import re
+    9: from io import StringIO
+   10: from pathlib import Path
+   11: from datetime import datetime, timedelta
+   12: from typing import Any, Optional, Tuple
+   13: 
+   14: from flask import (
+   15:     Flask,
+   16:     render_template,
+   17:     request,
+
+--- app.py:20 ---
+   16:     render_template,
+   17:     request,
+   18:     redirect,
+   19:     url_for,
+   20:     jsonify,
+   21:     g,
+   22:     session,
+   23:     abort,
+   24:     send_from_directory,
+   25:     send_file,
+   26:     make_response,
+   27: )
+   28: from werkzeug.utils import secure_filename
+   29: from werkzeug.security import generate_password_hash, check_password_hash
+   30: 
+   31: from speedlimit import bp_speed
+   32: from modules.bags import bp as bags_bp
+
+--- app.py:25 ---
+   21:     g,
+   22:     session,
+   23:     abort,
+   24:     send_from_directory,
+   25:     send_file,
+   26:     make_response,
+   27: )
+   28: from werkzeug.utils import secure_filename
+   29: from werkzeug.security import generate_password_hash, check_password_hash
+   30: 
+   31: from speedlimit import bp_speed
+   32: from modules.bags import bp as bags_bp
+   33: from modules.bags import bag_root, safe, get_counts
+   34: 
+   35: 
+   36: # =========================================================
+   37: # Ayarlar
+
+--- app.py:224 ---
+  220: 
+  221: ALLOWED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
+  222: ALLOWED_IMAGE_MIMES = {"image/jpeg", "image/png", "image/webp"}
+  223: 
+  224: app.register_blueprint(bags_bp)
+  225: app.register_blueprint(bp_speed)
+  226: 
+  227: 
+  228: # =========================================================
+  229: # Sabitler
+  230: # =========================================================
+  231: 
+  232: SEAT_NUMBERS = [
+  233:     1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20, 21, 23, 24,
+  234:     25, 27, 28, 29, 31, 33, 34, 35, 37, 38, 39, 41, 42, 43, 45, 46,
+  235:     49, 50, 51, 52, 53, 54,
+  236: ]
+
+--- app.py:225 ---
+  221: ALLOWED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
+  222: ALLOWED_IMAGE_MIMES = {"image/jpeg", "image/png", "image/webp"}
+  223: 
+  224: app.register_blueprint(bags_bp)
+  225: app.register_blueprint(bp_speed)
+  226: 
+  227: 
+  228: # =========================================================
+  229: # Sabitler
+  230: # =========================================================
+  231: 
+  232: SEAT_NUMBERS = [
+  233:     1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20, 21, 23, 24,
+  234:     25, 27, 28, 29, 31, 33, 34, 35, 37, 38, 39, 41, 42, 43, 45, 46,
+  235:     49, 50, 51, 52, 53, 54,
+  236: ]
+  237: 
+
+--- app.py:525 ---
+  521:             stop_name TEXT NOT NULL,
+  522:             event TEXT NOT NULL,
+  523:             distance_km REAL,
+  524:             seats_for_stop INTEGER,
+  525:             meta_json TEXT,
+  526:             ts TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+  527:             FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE
+  528:         );
+  529: 
+  530:         CREATE INDEX IF NOT EXISTS idx_stoplogs_trip_ts ON stop_logs(trip_id, ts);
+  531: 
+  532:         CREATE TABLE IF NOT EXISTS consignments(
+  533:             id INTEGER PRIMARY KEY,
+  534:             trip_id INTEGER,
+  535:             code TEXT UNIQUE,
+  536:             item_name TEXT,
+  537:             item_type TEXT,
+
+--- app.py:700 ---
+  696:     if not row:
+  697:         return default
+  698:     raw = row["value"]
+  699:     try:
+  700:         return json.loads(raw)
+  701:     except Exception:
+  702:         return raw
+  703: 
+  704: 
+  705: def settings_set(key: str, value) -> None:
+  706:     raw = json.dumps(value, ensure_ascii=False) if not isinstance(value, str) else value
+  707:     db = get_db()
+  708:     db.execute("INSERT OR REPLACE INTO settings(key, value) VALUES(?, ?)", (key, raw))
+  709:     db.commit()
+  710: 
+  711: 
+  712: # =========================================================
+
+--- app.py:706 ---
+  702:         return raw
+  703: 
+  704: 
+  705: def settings_set(key: str, value) -> None:
+  706:     raw = json.dumps(value, ensure_ascii=False) if not isinstance(value, str) else value
+  707:     db = get_db()
+  708:     db.execute("INSERT OR REPLACE INTO settings(key, value) VALUES(?, ?)", (key, raw))
+  709:     db.commit()
+  710: 
+  711: 
+  712: # =========================================================
+  713: # Kurtarma Kodu Yönetimi
+  714: # =========================================================
+  715: def normalize_recovery_code(code: str) -> str:
+  716:     raw = (code or "").strip().upper()
+  717:     raw = raw.replace(" ", "").replace("_", "-")
+  718:     while "--" in raw:
+... sonuç sınırı doldu ...
+
+--- modules/trip_report_builder.py:1 ---
+    1: import json
+    2: from pathlib import Path
+    3: 
+    4: 
+    5: def register_trip_report_builder(app, deps):
+    6:     get_db = deps["get_db"]
+    7:     _row_dict = deps["_row_dict"]
+    8:     log_trip_stop_event = deps["log_trip_stop_event"]
+    9:     _seat_event_meta = deps["_seat_event_meta"]
+   10:     _walkon_event_meta = deps["_walkon_event_meta"]
+   11: 
+   12:     def _report_slug(v):
+   13:         raw = str(v or "").strip()
+
+--- modules/trip_report_builder.py:5 ---
+    1: import json
+    2: from pathlib import Path
+    3: 
+    4: 
+    5: def register_trip_report_builder(app, deps):
+    6:     get_db = deps["get_db"]
+    7:     _row_dict = deps["_row_dict"]
+    8:     log_trip_stop_event = deps["log_trip_stop_event"]
+    9:     _seat_event_meta = deps["_seat_event_meta"]
+   10:     _walkon_event_meta = deps["_walkon_event_meta"]
+   11: 
+   12:     def _report_slug(v):
+   13:         raw = str(v or "").strip()
+   14:         out = []
+   15:         for c in raw:
+   16:             if c.isalnum() or c in "-_":
+   17:                 out.append(c)
+
+--- modules/trip_report_builder.py:23 ---
+   19:                 out.append("_")
+   20:         return "".join(out).strip("_") or "rapor"
+   21: 
+   22: 
+   23:     def build_trip_report_payload_for_trip(db, tid):
+   24:         trip = db.execute(
+   25:             "SELECT * FROM trips WHERE id=?",
+   26:             (tid,),
+   27:         ).fetchone()
+   28: 
+   29:         rows = db.execute(
+   30:             """
+   31:             SELECT id, stop_name, event, seats_for_stop, meta_json, ts
+   32:             FROM stop_logs
+   33:             WHERE trip_id=?
+   34:             ORDER BY id ASC
+   35:             """,
+
+--- modules/trip_report_builder.py:31 ---
+   27:         ).fetchone()
+   28: 
+   29:         rows = db.execute(
+   30:             """
+   31:             SELECT id, stop_name, event, seats_for_stop, meta_json, ts
+   32:             FROM stop_logs
+   33:             WHERE trip_id=?
+   34:             ORDER BY id ASC
+   35:             """,
+   36:             (tid,),
+   37:         ).fetchall()
+   38: 
+   39:         groups = {}
+   40:         order = []
+   41: 
+   42:         def group_for(stop):
+   43:             if stop not in groups:
+
+--- modules/trip_report_builder.py:71 ---
+   67:             stop = r["stop_name"] or "—"
+   68:             event = r["event"] or "other"
+   69: 
+   70:             try:
+   71:                 meta = json.loads(r["meta_json"]) if r["meta_json"] else {}
+   72:             except Exception:
+   73:                 meta = {}
+   74: 
+   75:             item = {
+   76:                 "id": r["id"],
+   77:                 "event": event,
+   78:                 "ts": r["ts"],
+   79:                 "seats_for_stop": r["seats_for_stop"],
+   80:                 "meta": meta,
+   81:             }
+   82: 
+   83:             g = group_for(stop)
+
+--- modules/trip_report_builder.py:157 ---
+  153:                 _walkon_event_meta(r, {"action": "final_trip_standing_offload"}),
+  154:             )
+  155: 
+  156: 
+  157:     def trip_report_text(payload):
+  158:         trip = payload.get("trip") or {}
+  159:         lines = []
+  160: 
+  161:         lines.append("SEFER RAPORU")
+  162:         lines.append("=" * 34)
+  163:         lines.append(f"Hat: {trip.get('route') or '-'}")
+  164:         lines.append(f"Plaka: {trip.get('plate') or '-'}")
+  165:         lines.append(f"Tarih: {trip.get('date') or '-'}")
+  166:         lines.append(f"Çıkış: {trip.get('departure_time') or '-'}")
+  167:         lines.append("")
+  168: 
+  169:         total_board = 0
+
+--- modules/trip_report_builder.py:246 ---
+  242: 
+  243:         return "\n".join(lines)
+  244: 
+  245: 
+  246:     def trip_report_csv(payload):
+  247:         rows = [
+  248:             ["durak", "islem", "koltuk", "kisi", "nereden", "nereye", "cinsiyet", "odeme", "tutar", "zaman"]
+  249:         ]
+  250: 
+  251:         def add(stop_name, label, items):
+  252:             for it in items or []:
+  253:                 m = it.get("meta") or {}
+  254:                 rows.append([
+  255:                     stop_name,
+  256:                     label,
+  257:                     m.get("seat_no") or "",
+  258:                     m.get("pax") or "",
+
+--- modules/trip_report_builder.py:282 ---
+  278: 
+  279:         return "\ufeff" + "\n".join(out)
+  280: 
+  281: 
+  282:     def save_finished_trip_report(tid):
+  283:         db = get_db()
+  284: 
+  285:         trip = db.execute(
+  286:             "SELECT * FROM trips WHERE id=?",
+  287:             (tid,),
+  288:         ).fetchone()
+  289: 
+  290:         if not trip:
+  291:             return {}
+  292: 
+  293:         reports_dir = Path(app.root_path) / "storage" / "reports"
+  294:         reports_dir.mkdir(parents=True, exist_ok=True)
+
+--- modules/trip_report_builder.py:302 ---
+  298:             date=_report_slug(trip["date"]),
+  299:             plate=_report_slug(trip["plate"]),
+  300:         )
+  301: 
+  302:         payload = build_trip_report_payload_for_trip(db, tid)
+  303: 
+  304:         json_path = reports_dir / f"{base}.json"
+  305:         txt_path = reports_dir / f"{base}.txt"
+  306:         csv_path = reports_dir / f"{base}.csv"
+  307: 
+  308:         json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+  309:         txt_path.write_text(trip_report_text(payload), encoding="utf-8")
+  310:         csv_path.write_text(trip_report_csv(payload), encoding="utf-8-sig")
+  311: 
+  312:         return {
+  313:             "json": str(json_path),
+  314:             "txt": str(txt_path),
+
+--- modules/trip_report_builder.py:304 ---
+  300:         )
+  301: 
+  302:         payload = build_trip_report_payload_for_trip(db, tid)
+  303: 
+  304:         json_path = reports_dir / f"{base}.json"
+  305:         txt_path = reports_dir / f"{base}.txt"
+  306:         csv_path = reports_dir / f"{base}.csv"
+  307: 
+  308:         json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+  309:         txt_path.write_text(trip_report_text(payload), encoding="utf-8")
+  310:         csv_path.write_text(trip_report_csv(payload), encoding="utf-8-sig")
+  311: 
+  312:         return {
+  313:             "json": str(json_path),
+  314:             "txt": str(txt_path),
+  315:             "csv": str(csv_path),
+  316:             "base": base,
+... sonuç sınırı doldu ...
+
+--- modules/reports_panel.py:1 ---
+    1: import json
+    2: 
+    3: from flask import render_template, request, jsonify
+    4: 
+    5: 
+    6: def register_reports_routes(app, deps):
+    7:     get_db = deps["get_db"]
+    8:     all_route_names = deps["all_route_names"]
+    9:     SEAT_NUMBERS = deps["SEAT_NUMBERS"]
+   10: 
+   11:     def events_page():
+   12:         get_active_trip = deps.get("get_active_trip")
+   13:         tid = get_active_trip() if callable(get_active_trip) else None
+
+--- modules/reports_panel.py:3 ---
+    1: import json
+    2: 
+    3: from flask import render_template, request, jsonify
+    4: 
+    5: 
+    6: def register_reports_routes(app, deps):
+    7:     get_db = deps["get_db"]
+    8:     all_route_names = deps["all_route_names"]
+    9:     SEAT_NUMBERS = deps["SEAT_NUMBERS"]
+   10: 
+   11:     def events_page():
+   12:         get_active_trip = deps.get("get_active_trip")
+   13:         tid = get_active_trip() if callable(get_active_trip) else None
+   14: 
+   15:         sums = {"devir": 0, "giris": 0, "cikis": 0, "kalan": 0}
+
+--- modules/reports_panel.py:38 ---
+   34:         d2 = request.args.get("date_to")
+   35: 
+   36:         sql = """
+   37:         SELECT l.id, l.trip_id, t.date, t.route, l.stop_name, l.event, l.distance_km,
+   38:                l.seats_for_stop, l.meta_json, l.ts
+   39:         FROM stop_logs l
+   40:         JOIN trips t ON t.id = l.trip_id
+   41:         WHERE 1=1
+   42:         """
+   43:         args = []
+   44: 
+   45:         if route:
+   46:             sql += " AND t.route=?"
+   47:             args.append(route)
+   48:         if d1:
+   49:             sql += " AND t.date >= ?"
+   50:             args.append(d1)
+
+--- modules/reports_panel.py:61 ---
+   57: 
+   58:         items = []
+   59:         for r in rows:
+   60:             try:
+   61:                 meta = json.loads(r["meta_json"]) if r["meta_json"] else None
+   62:             except Exception:
+   63:                 meta = None
+   64: 
+   65:             items.append({
+   66:                 "id": r["id"],
+   67:                 "trip_id": r["trip_id"],
+   68:                 "date": r["date"],
+   69:                 "route": r["route"],
+   70:                 "stop_name": r["stop_name"],
+   71:                 "event": r["event"],
+   72:                 "distance_km": r["distance_km"],
+   73:                 "seats_for_stop": r["seats_for_stop"],
+
+--- modules/reports_panel.py:78 ---
+   74:                 "meta": meta,
+   75:                 "ts": r["ts"],
+   76:             })
+   77: 
+   78:         return jsonify({"ok": True, "items": items})
+   79: 
+   80:     def reports_page():
+   81:         return render_template("reports.html", all_routes=all_route_names())
+   82: 
+   83:     def api_report_seat_stats():
+   84:         route = (request.args.get("route") or "").strip()
+   85:         d1 = request.args.get("date_from")
+   86:         d2 = request.args.get("date_to")
+   87: 
+   88:         where = ["1=1"]
+   89:         args = []
+   90: 
+
+--- modules/reports_panel.py:147 ---
+  143:         ).fetchone()
+  144: 
+  145:         top_seat = max(per_seat, key=lambda x: (x["times"], x["revenue"])) if per_seat else None
+  146: 
+  147:         return jsonify({
+  148:             "ok": True,
+  149:             "filters": {"route": route or None, "date_from": d1, "date_to": d2},
+  150:             "totals": {
+  151:                 "seated_count": int(seat_tot["cnt"] or 0),
+  152:                 "seated_revenue": float(seat_tot["revenue"] or 0),
+  153:                 "walk_pax": int(walk_tot["pax"] or 0),
+  154:                 "walk_revenue": float(walk_tot["revenue"] or 0),
+  155:                 "overall_revenue": float(seat_tot["revenue"] or 0) + float(walk_tot["revenue"] or 0),
+  156:             },
+  157:             "per_seat": per_seat,
+  158:             "top_seat": top_seat,
+  159:             "never_sold": never_sold,
+
+--- templates/trip_report.html:479 ---
+  475:     }
+  476:     .corridor span{ font-size:12px; }
+  477:   }
+  478: 
+  479:   @media print{
+  480:     body{ background:white; color:black; }
+  481:     .actions,.seat-hint,.modal-backdrop,.seat-modal{ display:none !important; }
+  482:     .hero,.section-card,.stop-card,.sum-card,.box{
+  483:       box-shadow:none;
+  484:       background:white;
+  485:       color:black;
+  486:       border-color:#ddd;
+  487:     }
+  488:     .muted,.empty{ color:#555; }
+  489:     .corridor{ background:#ddd; color:#111; }
+  490:   }
+  491: </style>
+
+--- templates/trip_report.html:494 ---
+  490:   }
+  491: </style>
+  492: 
+  493: <script>
+  494:   window.REPORT_ARCHIVE_BASE = {{ archive_base|default('', true)|tojson }};
+  495: 
+  496:     function openPrintDialog(){
+  497:       try{
+  498:         if (window.PrintBridge && typeof window.PrintBridge.printPage === "function"){
+  499:           const title = document.title || "Muavin Asistanı";
+  500:           window.PrintBridge.printPage(title);
+  501:           return;
+  502:         } else {
+  503:           alert("PrintBridge bulunamadı. Tarayıcı yazdırma deneniyor.");
+  504:         }
+  505:       }catch(err){
+  506:         alert("PrintBridge hatası: " + err);
+
+--- templates/trip_report.html:496 ---
+  492: 
+  493: <script>
+  494:   window.REPORT_ARCHIVE_BASE = {{ archive_base|default('', true)|tojson }};
+  495: 
+  496:     function openPrintDialog(){
+  497:       try{
+  498:         if (window.PrintBridge && typeof window.PrintBridge.printPage === "function"){
+  499:           const title = document.title || "Muavin Asistanı";
+  500:           window.PrintBridge.printPage(title);
+  501:           return;
+  502:         } else {
+  503:           alert("PrintBridge bulunamadı. Tarayıcı yazdırma deneniyor.");
+  504:         }
+  505:       }catch(err){
+  506:         alert("PrintBridge hatası: " + err);
+  507:         console.log("PrintBridge error:", err);
+  508:       }
+
+--- templates/trip_report.html:498 ---
+  494:   window.REPORT_ARCHIVE_BASE = {{ archive_base|default('', true)|tojson }};
+  495: 
+  496:     function openPrintDialog(){
+  497:       try{
+  498:         if (window.PrintBridge && typeof window.PrintBridge.printPage === "function"){
+  499:           const title = document.title || "Muavin Asistanı";
+  500:           window.PrintBridge.printPage(title);
+  501:           return;
+  502:         } else {
+  503:           alert("PrintBridge bulunamadı. Tarayıcı yazdırma deneniyor.");
+  504:         }
+  505:       }catch(err){
+  506:         alert("PrintBridge hatası: " + err);
+  507:         console.log("PrintBridge error:", err);
+  508:       }
+  509: 
+  510:       try{
+
+--- templates/trip_report.html:500 ---
+  496:     function openPrintDialog(){
+  497:       try{
+  498:         if (window.PrintBridge && typeof window.PrintBridge.printPage === "function"){
+  499:           const title = document.title || "Muavin Asistanı";
+  500:           window.PrintBridge.printPage(title);
+  501:           return;
+  502:         } else {
+  503:           alert("PrintBridge bulunamadı. Tarayıcı yazdırma deneniyor.");
+  504:         }
+  505:       }catch(err){
+  506:         alert("PrintBridge hatası: " + err);
+  507:         console.log("PrintBridge error:", err);
+  508:       }
+  509: 
+  510:       try{
+  511:         window.print();
+  512:       }catch(err){
+
+--- templates/trip_report.html:503 ---
+  499:           const title = document.title || "Muavin Asistanı";
+  500:           window.PrintBridge.printPage(title);
+  501:           return;
+  502:         } else {
+  503:           alert("PrintBridge bulunamadı. Tarayıcı yazdırma deneniyor.");
+  504:         }
+  505:       }catch(err){
+  506:         alert("PrintBridge hatası: " + err);
+  507:         console.log("PrintBridge error:", err);
+  508:       }
+  509: 
+  510:       try{
+  511:         window.print();
+  512:       }catch(err){
+  513:         alert("Yazdırma ekranı açılamadı.");
+  514:       }
+  515:     }
+
+--- templates/trip_report.html:506 ---
+  502:         } else {
+  503:           alert("PrintBridge bulunamadı. Tarayıcı yazdırma deneniyor.");
+  504:         }
+  505:       }catch(err){
+  506:         alert("PrintBridge hatası: " + err);
+  507:         console.log("PrintBridge error:", err);
+  508:       }
+  509: 
+  510:       try{
+  511:         window.print();
+  512:       }catch(err){
+  513:         alert("Yazdırma ekranı açılamadı.");
+  514:       }
+  515:     }
+  516: 
+  517: 
+  518:   </script>
+
+--- templates/trip_report.html:507 ---
+  503:           alert("PrintBridge bulunamadı. Tarayıcı yazdırma deneniyor.");
+  504:         }
+  505:       }catch(err){
+  506:         alert("PrintBridge hatası: " + err);
+  507:         console.log("PrintBridge error:", err);
+  508:       }
+  509: 
+  510:       try{
+  511:         window.print();
+  512:       }catch(err){
+  513:         alert("Yazdırma ekranı açılamadı.");
+  514:       }
+  515:     }
+  516: 
+  517: 
+  518:   </script>
+  519: 
+
+--- templates/trip_report.html:511 ---
+  507:         console.log("PrintBridge error:", err);
+  508:       }
+  509: 
+  510:       try{
+  511:         window.print();
+  512:       }catch(err){
+  513:         alert("Yazdırma ekranı açılamadı.");
+  514:       }
+  515:     }
+  516: 
+  517: 
+  518:   </script>
+  519: 
+  520: <div class="report-wrap">
+  521:   <div class="hero">
+  522:     <h1>📄 Sefer Raporu</h1>
+  523:     <div class="muted" id="tripInfo">Rapor yükleniyor...</div>
+... sonuç sınırı doldu ...
+
+--- templates/report_archive.html:47 ---
+   43:   body::before{
+   44:     content:"";
+   45:     position:fixed;
+   46:     inset:0;
+   47:     background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+   48:     pointer-events:none;
+   49:     z-index:0;
+   50:   }
+   51: 
+   52:   .page{
+   53:     position:relative;
+   54:     z-index:1;
+   55:     max-width:480px;
+   56:     min-height:100vh;
+   57:     margin:0 auto;
+   58:     padding:0 0 40px;
+   59:   }
+
+--- templates/report_archive.html:313 ---
+  309:   .btn.ghost{
+  310:     color:var(--text-sub);
+  311:   }
+  312: 
+  313:   .btn.json{
+  314:     color:#ffd38a;
+  315:     background:rgba(245,166,35,.10);
+  316:     border-color:rgba(245,166,35,.22);
+  317:   }
+  318: 
+  319:   .empty{
+  320:     background:var(--bg-row);
+  321:     border:1px dashed rgba(59,139,255,.26);
+  322:     border-radius:var(--r-card);
+  323:     padding:24px 18px;
+  324:     text-align:center;
+  325:     opacity:0;
+
+--- templates/report_archive.html:455 ---
+  451:             <div class="report-head">
+  452:               <div class="report-icon">📁</div>
+  453:               <div>
+  454:                 <div class="report-title">{{ it.title }}</div>
+  455:                 <div class="report-sub">Raporu görüntüle, TXT / CSV / JSON olarak indir.</div>
+  456:               </div>
+  457:             </div>
+  458: 
+  459:             <div class="actions">
+  460:               <a class="btn primary" href="{{ it.view }}">📄 Aç</a>
+  461:               <a class="btn ghost" href="{{ it.txt }}">TXT</a>
+  462:               <a class="btn ghost" href="{{ it.csv }}">CSV</a>
+  463:               <a class="btn json" href="{{ it.json }}">JSON</a>
+  464:             </div>
+  465:           </article>
+  466:         {% endfor %}
+  467:       </section>
+
+--- templates/report_archive.html:461 ---
+  457:             </div>
+  458: 
+  459:             <div class="actions">
+  460:               <a class="btn primary" href="{{ it.view }}">📄 Aç</a>
+  461:               <a class="btn ghost" href="{{ it.txt }}">TXT</a>
+  462:               <a class="btn ghost" href="{{ it.csv }}">CSV</a>
+  463:               <a class="btn json" href="{{ it.json }}">JSON</a>
+  464:             </div>
+  465:           </article>
+  466:         {% endfor %}
+  467:       </section>
+  468:     {% else %}
+  469:       <section class="empty">
+  470:         <div class="empty-ico">📁</div>
+  471:         <div class="empty-title">Arşiv boş</div>
+  472:         <div class="empty-sub">Sefer bitirildiğinde oluşturulan raporlar burada görünecek.</div>
+  473:       </section>
+
+--- templates/report_archive.html:462 ---
+  458: 
+  459:             <div class="actions">
+  460:               <a class="btn primary" href="{{ it.view }}">📄 Aç</a>
+  461:               <a class="btn ghost" href="{{ it.txt }}">TXT</a>
+  462:               <a class="btn ghost" href="{{ it.csv }}">CSV</a>
+  463:               <a class="btn json" href="{{ it.json }}">JSON</a>
+  464:             </div>
+  465:           </article>
+  466:         {% endfor %}
+  467:       </section>
+  468:     {% else %}
+  469:       <section class="empty">
+  470:         <div class="empty-ico">📁</div>
+  471:         <div class="empty-title">Arşiv boş</div>
+  472:         <div class="empty-sub">Sefer bitirildiğinde oluşturulan raporlar burada görünecek.</div>
+  473:       </section>
+  474:     {% endif %}
+
+--- templates/report_archive.html:463 ---
+  459:             <div class="actions">
+  460:               <a class="btn primary" href="{{ it.view }}">📄 Aç</a>
+  461:               <a class="btn ghost" href="{{ it.txt }}">TXT</a>
+  462:               <a class="btn ghost" href="{{ it.csv }}">CSV</a>
+  463:               <a class="btn json" href="{{ it.json }}">JSON</a>
+  464:             </div>
+  465:           </article>
+  466:         {% endfor %}
+  467:       </section>
+  468:     {% else %}
+  469:       <section class="empty">
+  470:         <div class="empty-ico">📁</div>
+  471:         <div class="empty-title">Arşiv boş</div>
+  472:         <div class="empty-sub">Sefer bitirildiğinde oluşturulan raporlar burada görünecek.</div>
+  473:       </section>
+  474:     {% endif %}
+  475: 
+
+--- templates/index.html:1162 ---
+ 1158:         </span>
+ 1159:         <span class="arrow">›</span>
+ 1160:       </a>
+ 1161: 
+ 1162:       <a class="menu-item" href="/sefer-raporu-son">
+ 1163:         <span class="ico">📁</span>
+ 1164:         <span>
+ 1165:           <div class="menu-title">SEFER RAPORLARI</div>
+ 1166:           <div class="menu-desc">Biten sefer raporlarını aç</div>
+ 1167:         </span>
+ 1168:         <span class="arrow">›</span>
+ 1169:       </a>
+ 1170: 
+ 1171:       <a class="menu-item" href="{{ url_for('rehber_page') }}">
+ 1172:         <span class="ico">📘</span>
+ 1173:         <span>
+ 1174:           <div class="menu-title">KULLANICI REHBERİ</div>
+
+--- templates/index.html:1750 ---
+ 1746: 
+ 1747: <script id="active-trip-guard-script">
+ 1748: (function(){
+ 1749:   const HAS_ACTIVE_TRIP = {% if active_trip is defined and active_trip %}true{% else %}false{% endif %};
+ 1750:   const ACTIVE_TRIP_ROUTE = {% if active_trip is defined and active_trip %}{{ active_trip.route|tojson }}{% else %}""{% endif %};
+ 1751: 
+ 1752:   if(!HAS_ACTIVE_TRIP) return;
+ 1753: 
+ 1754:   const startLink =
+ 1755:     document.getElementById("homeTripStart") ||
+ 1756:     document.querySelector(".hero-link");
+ 1757: 
+ 1758:   const continueLink =
+ 1759:     Array.from(document.querySelectorAll(".hero-link"))[1] ||
+ 1760:     document.querySelector('a[href*="continue"]') ||
+ 1761:     document.querySelector('a[href*="seats"]');
+ 1762: 
+
+--- templates/continue_trip.html:3565 ---
+ 3561: 
+ 3562: 
+ 3563:       function clearTripLocalMemory(){
+ 3564:         try{
+ 3565:           const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
+ 3566: 
+ 3567:           const exactKeys = [
+ 3568:             "liveStop:" + tripKey,
+ 3569:             "passedStops:" + tripKey,
+ 3570:             "boardsMap:" + tripKey,
+ 3571:             "standingTotals:" + tripKey,
+ 3572:             "standingItems:" + tripKey,
+ 3573:             "continueTripStop:" + tripKey,
+ 3574:             "continueTripStop:last",
+ 3575:             "stopFlowSummary:" + tripKey,
+ 3576:             "stopFlowLiveEvents:" + tripKey
+ 3577:           ];
+
+--- templates/continue_trip.html:3646 ---
+ 3642: 
+ 3643: 
+ 3644: <script id="continue-trip-runtime-sync">
+ 3645: (function(){
+ 3646:   const tripId = {{ trip['id'] | tojson | safe }};
+ 3647:   const runtimeGpsKm = {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }};
+ 3648:   const runtimeSpeed = {{ (live_runtime.speed if live_runtime else 0) | tojson | safe }};
+ 3649:   const runtimeStop = {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }};
+ 3650:   const runtimeEta = {{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else "") | tojson | safe }};
+ 3651: 
+ 3652:   function parseKmAny(value){
+ 3653:     const raw = String(value ?? "").trim();
+ 3654:     if(!raw) return NaN;
+ 3655: 
+ 3656:     const cleaned = raw
+ 3657:       .replace(/km/gi, "")
+ 3658:       .replace(/m/gi, "")
+
+--- templates/continue_trip.html:3647 ---
+ 3643: 
+ 3644: <script id="continue-trip-runtime-sync">
+ 3645: (function(){
+ 3646:   const tripId = {{ trip['id'] | tojson | safe }};
+ 3647:   const runtimeGpsKm = {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }};
+ 3648:   const runtimeSpeed = {{ (live_runtime.speed if live_runtime else 0) | tojson | safe }};
+ 3649:   const runtimeStop = {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }};
+ 3650:   const runtimeEta = {{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else "") | tojson | safe }};
+ 3651: 
+ 3652:   function parseKmAny(value){
+ 3653:     const raw = String(value ?? "").trim();
+ 3654:     if(!raw) return NaN;
+ 3655: 
+ 3656:     const cleaned = raw
+ 3657:       .replace(/km/gi, "")
+ 3658:       .replace(/m/gi, "")
+ 3659:       .trim()
+
+--- templates/continue_trip.html:3648 ---
+ 3644: <script id="continue-trip-runtime-sync">
+ 3645: (function(){
+ 3646:   const tripId = {{ trip['id'] | tojson | safe }};
+ 3647:   const runtimeGpsKm = {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }};
+ 3648:   const runtimeSpeed = {{ (live_runtime.speed if live_runtime else 0) | tojson | safe }};
+ 3649:   const runtimeStop = {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }};
+ 3650:   const runtimeEta = {{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else "") | tojson | safe }};
+ 3651: 
+ 3652:   function parseKmAny(value){
+ 3653:     const raw = String(value ?? "").trim();
+ 3654:     if(!raw) return NaN;
+ 3655: 
+ 3656:     const cleaned = raw
+ 3657:       .replace(/km/gi, "")
+ 3658:       .replace(/m/gi, "")
+ 3659:       .trim()
+ 3660:       .replace(",", ".");
+
+--- templates/continue_trip.html:3649 ---
+ 3645: (function(){
+ 3646:   const tripId = {{ trip['id'] | tojson | safe }};
+ 3647:   const runtimeGpsKm = {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }};
+ 3648:   const runtimeSpeed = {{ (live_runtime.speed if live_runtime else 0) | tojson | safe }};
+ 3649:   const runtimeStop = {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }};
+ 3650:   const runtimeEta = {{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else "") | tojson | safe }};
+ 3651: 
+ 3652:   function parseKmAny(value){
+ 3653:     const raw = String(value ?? "").trim();
+ 3654:     if(!raw) return NaN;
+ 3655: 
+ 3656:     const cleaned = raw
+ 3657:       .replace(/km/gi, "")
+ 3658:       .replace(/m/gi, "")
+ 3659:       .trim()
+ 3660:       .replace(",", ".");
+ 3661: 
+
+--- templates/continue_trip.html:3650 ---
+ 3646:   const tripId = {{ trip['id'] | tojson | safe }};
+ 3647:   const runtimeGpsKm = {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }};
+ 3648:   const runtimeSpeed = {{ (live_runtime.speed if live_runtime else 0) | tojson | safe }};
+ 3649:   const runtimeStop = {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }};
+ 3650:   const runtimeEta = {{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else "") | tojson | safe }};
+ 3651: 
+ 3652:   function parseKmAny(value){
+ 3653:     const raw = String(value ?? "").trim();
+ 3654:     if(!raw) return NaN;
+ 3655: 
+ 3656:     const cleaned = raw
+ 3657:       .replace(/km/gi, "")
+ 3658:       .replace(/m/gi, "")
+ 3659:       .trim()
+ 3660:       .replace(",", ".");
+ 3661: 
+ 3662:     const n = Number(cleaned);
+
+--- templates/continue_trip.html:3708 ---
+ 3704:       method: "GET",
+ 3705:       credentials: "same-origin",
+ 3706:       cache: "no-store"
+ 3707:     })
+ 3708:     .then(r => r.json())
+ 3709:     .then(j => {
+ 3710:       const s = j && j.state ? j.state : null;
+ 3711:       if(!s) return;
+ 3712: 
+ 3713:       const speedEl = document.getElementById("liveSpeedText");
+ 3714:       const stopEl  = document.getElementById("liveCurrentStopName");
+ 3715:       const distEl  = document.getElementById("liveDistanceValue");
+ 3716:       const etaEl   = document.getElementById("liveEtaValue");
+ 3717: 
+ 3718:       if(speedEl){
+ 3719:         const n = parseInt(s.speed || 0, 10) || 0;
+ 3720:         speedEl.textContent = `${n} km/sa`;
+
+--- templates/continue_trip.html:3770 ---
+ 3766:   const subEl = document.getElementById("liveStopSheetSub");
+ 3767:   const bodyEl = document.getElementById("liveStopSheetBody");
+ 3768:   const kickerEl = document.getElementById("liveStopSheetKicker");
+ 3769: 
+ 3770:   const routeStops = {{ stops | tojson | safe }};
+ 3771:   const csrfToken = {{ (csrf_token if csrf_token is defined else "") | tojson | safe }};
+ 3772: 
+ 3773:   let lastDetailData = null;
+ 3774:   let lastKind = "offload";
+ 3775: 
+ 3776:   function text(v){
+ 3777:     return String(v == null ? "" : v);
+ 3778:   }
+ 3779: 
+ 3780:   function escapeHtml(v){
+ 3781:     return text(v)
+ 3782:       .replaceAll("&","&amp;")
+
+--- templates/continue_trip.html:3771 ---
+ 3767:   const bodyEl = document.getElementById("liveStopSheetBody");
+ 3768:   const kickerEl = document.getElementById("liveStopSheetKicker");
+ 3769: 
+ 3770:   const routeStops = {{ stops | tojson | safe }};
+ 3771:   const csrfToken = {{ (csrf_token if csrf_token is defined else "") | tojson | safe }};
+ 3772: 
+ 3773:   let lastDetailData = null;
+ 3774:   let lastKind = "offload";
+ 3775: 
+ 3776:   function text(v){
+ 3777:     return String(v == null ? "" : v);
+ 3778:   }
+ 3779: 
+ 3780:   function escapeHtml(v){
+ 3781:     return text(v)
+ 3782:       .replaceAll("&","&amp;")
+ 3783:       .replaceAll("<","&lt;")
+... sonuç sınırı doldu ...
+
+
+==========================================================================================
+3) APP.PY SEFER RAPORU BLOĞU
+==========================================================================================
+
+
+--- app.py:3980-4130 ---
+ 3980:     if not b or ".." in b:
+ 3981:         return ""
+ 3982:     return b
+ 3983: 
+ 3984: 
+ 3985: @app.route("/sefer-raporu/arsiv/<base>")
+ 3986: def archived_trip_report_page(base):
+ 3987:     base = safe_report_base(base)
+ 3988:     if not base:
+ 3989:         abort(404)
+ 3990: 
+ 3991:     json_path = reports_dir_path() / f"{base}.json"
+ 3992:     if not json_path.exists():
+ 3993:         abort(404)
+ 3994: 
+ 3995:     return render_template("trip_report.html", archive_base=base)
+ 3996: 
+ 3997: 
+ 3998: @app.route("/api/trip-report/archive/<base>")
+ 3999: def api_archived_trip_report(base):
+ 4000:     base = safe_report_base(base)
+ 4001:     if not base:
+ 4002:         return jsonify({"ok": False, "msg": "Geçersiz rapor"}), 400
+ 4003: 
+ 4004:     json_path = reports_dir_path() / f"{base}.json"
+ 4005:     if not json_path.exists():
+ 4006:         return jsonify({"ok": False, "msg": "Rapor dosyası bulunamadı"}), 404
+ 4007: 
+ 4008:     try:
+ 4009:         data = json.loads(json_path.read_text(encoding="utf-8"))
+ 4010:     except Exception as e:
+ 4011:         return jsonify({"ok": False, "msg": f"Rapor okunamadı: {e}"}), 500
+ 4012: 
+ 4013:     return jsonify(data)
+ 4014: 
+ 4015: 
+ 4016: 
+ 4017: 
+ 4018: @app.route("/api/report-archive")
+ 4019: def api_report_archive():
+ 4020:     items = []
+ 4021: 
+ 4022:     for f in sorted(reports_dir_path().glob("*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+ 4023:         base = f.stem
+ 4024:         title = base
+ 4025:         route = ""
+ 4026:         plate = ""
+ 4027:         date = ""
+ 4028: 
+ 4029:         try:
+ 4030:             data = json.loads(f.read_text(encoding="utf-8"))
+ 4031:             trip = data.get("trip") or {}
+ 4032:             date = trip.get("date") or ""
+ 4033:             route = trip.get("route") or ""
+ 4034:             plate = trip.get("plate") or ""
+ 4035:             title = f"{date or '-'} · {route or '-'} · {plate or '-'}"
+ 4036:         except Exception:
+ 4037:             pass
+ 4038: 
+ 4039:         items.append({
+ 4040:             "base": base,
+ 4041:             "title": title,
+ 4042:             "date": date,
+ 4043:             "route": route,
+ 4044:             "plate": plate,
+ 4045:             "view": f"/sefer-raporu/arsiv/{base}",
+ 4046:             "txt": f"/rapor-dosya/{base}/txt",
+ 4047:             "csv": f"/rapor-dosya/{base}/csv",
+ 4048:             "json": f"/api/trip-report/archive/{base}",
+ 4049:         })
+ 4050: 
+ 4051:     return jsonify({"ok": True, "items": items})
+ 4052: 
+ 4053: 
+ 4054: 
+ 4055: 
+ 4056: @app.route("/sefer-raporu-son")
+ 4057: def latest_trip_report_redirect():
+ 4058:     """
+ 4059:     Ana ekrandaki SEFER RAPORLARI kartı buraya gelir.
+ 4060:     Aktif sefer varsa canlı sefer raporunu açar.
+ 4061:     Aktif sefer yoksa en son arşivlenen raporu açar.
+ 4062:     """
+ 4063:     tid = get_active_trip()
+ 4064: 
+ 4065:     if tid:
+ 4066:         return redirect("/sefer-raporu")
+ 4067: 
+ 4068:     files = sorted(
+ 4069:         reports_dir_path().glob("*.json"),
+ 4070:         key=lambda x: x.stat().st_mtime,
+ 4071:         reverse=True
+ 4072:     )
+ 4073: 
+ 4074:     if files:
+ 4075:         return redirect(url_for("archived_trip_report_page", base=files[0].stem))
+ 4076: 
+ 4077:     return redirect("/rapor-arsiv")
+ 4078: 
+ 4079: 
+ 4080: @app.route("/rapor-arsiv")
+ 4081: def report_archive_page():
+ 4082:     items = []
+ 4083: 
+ 4084:     for f in sorted(reports_dir_path().glob("*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+ 4085:         base = f.stem
+ 4086:         title = base
+ 4087: 
+ 4088:         try:
+ 4089:             data = json.loads(f.read_text(encoding="utf-8"))
+ 4090:             trip = data.get("trip") or {}
+ 4091:             title = f"{trip.get('date') or '-'} · {trip.get('route') or '-'} · {trip.get('plate') or '-'}"
+ 4092:         except Exception:
+ 4093:             pass
+ 4094: 
+ 4095:         items.append({
+ 4096:             "base": base,
+ 4097:             "title": title,
+ 4098:             "json": f"/api/trip-report/archive/{base}",
+ 4099:             "view": f"/sefer-raporu/arsiv/{base}",
+ 4100:             "txt": f"/rapor-dosya/{base}/txt",
+ 4101:             "csv": f"/rapor-dosya/{base}/csv",
+ 4102:         })
+ 4103: 
+ 4104:     return render_template("report_archive.html", items=items)
+ 4105: 
+ 4106: 
+ 4107: @app.route("/rapor-dosya/<base>/<kind>")
+ 4108: def report_file_download(base, kind):
+ 4109:     base = safe_report_base(base)
+ 4110:     if not base:
+ 4111:         abort(404)
+ 4112: 
+ 4113:     ext_map = {
+ 4114:         "json": "json",
+ 4115:         "txt": "txt",
+ 4116:         "csv": "csv",
+ 4117:     }
+ 4118: 
+ 4119:     ext = ext_map.get(kind)
+ 4120:     if not ext:
+ 4121:         abort(404)
+ 4122: 
+ 4123:     path = reports_dir_path() / f"{base}.{ext}"
+ 4124:     if not path.exists():
+ 4125:         abort(404)
+ 4126: 
+ 4127:     return send_from_directory(str(reports_dir_path()), path.name, as_attachment=True)
+ 4128: 
+ 4129: 
+ 4130: 
+
+--- app.py:4130-4250 ---
+ 4130: 
+ 4131: # =========================================================
+ 4132: # Emanetler
+ 4133: # =========================================================
+ 4134: from modules.consignments_panel import register_consignments_routes
+ 4135: 
+ 4136: register_consignments_routes(app, {
+ 4137:     "get_active_trip": get_active_trip,
+ 4138:     "get_db": get_db,
+ 4139:     "get_stops": get_stops,
+ 4140:     "validate_stop_for_active_trip": validate_stop_for_active_trip,
+ 4141:     "norm_payment": norm_payment,
+ 4142:     "parse_float": parse_float,
+ 4143:     "allowed_file": allowed_file,
+ 4144:     "ensure_upload_dir": ensure_upload_dir,
+ 4145:     "UPLOAD_DIR": UPLOAD_DIR,
+ 4146:     "ALLOWED_IMAGE_MIMES": ALLOWED_IMAGE_MIMES,
+ 4147: })
+ 4148: 
+ 4149: 
+ 4150: # =========================================================
+ 4151: # Bagaj meta + clear
+ 4152: # =========================================================
+ 4153: 
+ 4154: @app.get("/api/bags/meta")
+ 4155: def api_bags_meta():
+ 4156:     trip_code = (request.args.get("trip") or request.args.get("trip_code") or "").strip()
+ 4157:     seat_no = (request.args.get("seat") or "").strip()
+ 4158: 
+ 4159:     if not trip_code or not seat_no:
+ 4160:         return jsonify({
+ 4161:             "ok": False,
+ 4162:             "msg": "trip ve seat gerekli",
+ 4163:             "count": 0,
+ 4164:             "right": 0,
+ 4165:             "left_front": 0,
+ 4166:             "left_back": 0,
+ 4167:             "eyes": [],
+ 4168:         }), 400
+ 4169: 
+ 4170:     # modules/bags içindeki asıl doğru okuyucuyu kullanıyoruz.
+ 4171:     # Bu fonksiyon meta.json varsa onu okur,
+ 4172:     # yoksa R1_, LF2_, LB3_ gibi dosya adlarını doğru çözer.
+ 4173:     from modules.bags import get_counts
+ 4174: 
+ 4175:     right, left_front, left_back = get_counts(trip_code, seat_no)
+ 4176: 
+ 4177:     right = int(right or 0)
+ 4178:     left_front = int(left_front or 0)
+ 4179:     left_back = int(left_back or 0)
+ 4180: 
+ 4181:     total = right + left_front + left_back
+ 4182: 
+ 4183:     eyes = []
+ 4184:     if right > 0:
+ 4185:         eyes.append("R")
+ 4186:     if left_front > 0:
+ 4187:         eyes.append("LF")
+ 4188:     if left_back > 0:
+ 4189:         eyes.append("LB")
+ 4190: 
+ 4191:     return jsonify({
+ 4192:         "ok": True,
+ 4193:         "count": total,
+ 4194:         "right": right,
+ 4195:         "left_front": left_front,
+ 4196:         "left_back": left_back,
+ 4197:         "eyes": eyes,
+ 4198:     })
+ 4199: 
+ 4200: 
+ 4201: @app.route("/bags/clear", methods=["DELETE"])
+ 4202: def bags_clear_alias():
+ 4203:     trip = (request.args.get("trip") or request.args.get("trip_code") or "").strip()
+ 4204:     seat = (request.args.get("seat") or "").strip()
+ 4205: 
+ 4206:     if not trip or not seat:
+ 4207:         return jsonify({"ok": False, "msg": "trip ve seat gerekli"}), 400
+ 4208: 
+ 4209:     d = bag_root() / safe(trip) / safe(seat)
+ 4210:     deleted = 0
+ 4211: 
+ 4212:     if d.exists() and d.is_dir():
+ 4213:         for p in d.iterdir():
+ 4214:             try:
+ 4215:                 if p.is_file():
+ 4216:                     p.unlink(missing_ok=True)
+ 4217:                     deleted += 1
+ 4218:             except Exception:
+ 4219:                 pass
+ 4220: 
+ 4221:         try:
+ 4222:             d.rmdir()
+ 4223:         except Exception:
+ 4224:             pass
+ 4225: 
+ 4226:     return jsonify({
+ 4227:         "ok": True,
+ 4228:         "deleted": deleted,
+ 4229:     })
+ 4230: 
+ 4231: # =========================================================
+ 4232: # Sefer bitir / health
+ 4233: # =========================================================
+ 4234: 
+ 4235: # =========================================================
+ 4236: # Sefer bitişinde rapor dosyası oluşturma
+ 4237: # =========================================================
+ 4238: 
+ 4239: # =========================================================
+ 4240: # Sefer bitişinde rapor dosyası oluşturma
+ 4241: # =========================================================
+ 4242: from modules.trip_report_builder import register_trip_report_builder
+ 4243: 
+ 4244: _trip_report_exports = register_trip_report_builder(app, {
+ 4245:     "get_db": get_db,
+ 4246:     "_row_dict": _row_dict,
+ 4247:     "log_trip_stop_event": log_trip_stop_event,
+ 4248:     "_seat_event_meta": _seat_event_meta,
+ 4249:     "_walkon_event_meta": _walkon_event_meta,
+ 4250: })
+
+
+==========================================================================================
+4) TRIP_REPORT_BUILDER İÇERİĞİ
+==========================================================================================
+
+    1: import json
+    2: from pathlib import Path
+    3: 
+    4: 
+    5: def register_trip_report_builder(app, deps):
+    6:     get_db = deps["get_db"]
+    7:     _row_dict = deps["_row_dict"]
+    8:     log_trip_stop_event = deps["log_trip_stop_event"]
+    9:     _seat_event_meta = deps["_seat_event_meta"]
+   10:     _walkon_event_meta = deps["_walkon_event_meta"]
+   11: 
+   12:     def _report_slug(v):
+   13:         raw = str(v or "").strip()
+   14:         out = []
+   15:         for c in raw:
+   16:             if c.isalnum() or c in "-_":
+   17:                 out.append(c)
+   18:             else:
+   19:                 out.append("_")
+   20:         return "".join(out).strip("_") or "rapor"
+   21: 
+   22: 
+   23:     def build_trip_report_payload_for_trip(db, tid):
+   24:         trip = db.execute(
+   25:             "SELECT * FROM trips WHERE id=?",
+   26:             (tid,),
+   27:         ).fetchone()
+   28: 
+   29:         rows = db.execute(
+   30:             """
+   31:             SELECT id, stop_name, event, seats_for_stop, meta_json, ts
+   32:             FROM stop_logs
+   33:             WHERE trip_id=?
+   34:             ORDER BY id ASC
+   35:             """,
+   36:             (tid,),
+   37:         ).fetchall()
+   38: 
+   39:         groups = {}
+   40:         order = []
+   41: 
+   42:         def group_for(stop):
+   43:             if stop not in groups:
+   44:                 groups[stop] = {
+   45:                     "stop_name": stop,
+   46:                     "board": [],
+   47:                     "offload": [],
+   48:                     "standing_add": [],
+   49:                     "standing_off": [],
+   50:                     "parcel_deliver": [],
+   51:                     "pass_stop": [],
+   52:                     "seat_destination_change": [],
+   53:                     "other": [],
+   54:                     "summary": {
+   55:                         "board_count": 0,
+   56:                         "offload_count": 0,
+   57:                         "standing_board_count": 0,
+   58:                         "standing_off_count": 0,
+   59:                         "parcel_count": 0,
+   60:                         "destination_change_count": 0,
+   61:                     },
+   62:                 }
+   63:                 order.append(stop)
+   64:             return groups[stop]
+   65: 
+   66:         for r in rows:
+   67:             stop = r["stop_name"] or "—"
+   68:             event = r["event"] or "other"
+   69: 
+   70:             try:
+   71:                 meta = json.loads(r["meta_json"]) if r["meta_json"] else {}
+   72:             except Exception:
+   73:                 meta = {}
+   74: 
+   75:             item = {
+   76:                 "id": r["id"],
+   77:                 "event": event,
+   78:                 "ts": r["ts"],
+   79:                 "seats_for_stop": r["seats_for_stop"],
+   80:                 "meta": meta,
+   81:             }
+   82: 
+   83:             g = group_for(stop)
+   84: 
+   85:             if event == "board":
+   86:                 g["board"].append(item)
+   87:                 g["summary"]["board_count"] += 1
+   88:             elif event == "offload":
+   89:                 g["offload"].append(item)
+   90:                 g["summary"]["offload_count"] += 1
+   91:             elif event == "standing_add":
+   92:                 g["standing_add"].append(item)
+   93:                 g["summary"]["standing_board_count"] += int(meta.get("pax") or 0)
+   94:             elif event == "standing_off":
+   95:                 g["standing_off"].append(item)
+   96:                 g["summary"]["standing_off_count"] += int(meta.get("pax") or 0)
+   97:             elif event == "parcel_deliver":
+   98:                 g["parcel_deliver"].append(item)
+   99:                 g["summary"]["parcel_count"] += int(meta.get("count") or 1)
+  100:             elif event == "pass_stop":
+  101:                 g["pass_stop"].append(item)
+  102:             elif event == "seat_destination_change":
+  103:                 g["seat_destination_change"].append(item)
+  104:                 g["summary"]["destination_change_count"] += 1
+  105:             else:
+  106:                 g["other"].append(item)
+  107: 
+  108:         return {
+  109:             "ok": True,
+  110:             "trip": _row_dict(trip),
+  111:             "stops": [groups[x] for x in order],
+  112:         }
+  113: 
+  114: 
+  115:     def finalize_remaining_trip_events(db, tid):
+  116:         """
+  117:         Sefer bitirilirken hâlâ koltukta görünen yolcu varsa,
+  118:         rapor eksik kalmasın diye final iniş kaydı atar.
+  119:         """
+  120:         seat_rows = db.execute(
+  121:             "SELECT * FROM seats WHERE trip_id=? ORDER BY seat_no",
+  122:             (tid,),
+  123:         ).fetchall()
+  124: 
+  125:         for r in seat_rows:
+  126:             to_stop = (r["to_stop"] or "").strip()
+  127:             if not to_stop:
+  128:                 continue
+  129: 
+  130:             log_trip_stop_event(
+  131:                 db,
+  132:                 tid,
+  133:                 to_stop,
+  134:                 "offload",
+  135:                 _seat_event_meta(r, {"action": "final_trip_offload"}),
+  136:             )
+  137: 
+  138:         walk_rows = db.execute(
+  139:             "SELECT * FROM walk_on_sales WHERE trip_id=? ORDER BY id",
+  140:             (tid,),
+  141:         ).fetchall()
+  142: 
+  143:         for r in walk_rows:
+  144:             to_stop = (r["to_stop"] or "").strip()
+  145:             if not to_stop:
+  146:                 continue
+  147: 
+  148:             log_trip_stop_event(
+  149:                 db,
+  150:                 tid,
+  151:                 to_stop,
+  152:                 "standing_off",
+  153:                 _walkon_event_meta(r, {"action": "final_trip_standing_offload"}),
+  154:             )
+  155: 
+  156: 
+  157:     def trip_report_text(payload):
+  158:         trip = payload.get("trip") or {}
+  159:         lines = []
+  160: 
+  161:         lines.append("SEFER RAPORU")
+  162:         lines.append("=" * 34)
+  163:         lines.append(f"Hat: {trip.get('route') or '-'}")
+  164:         lines.append(f"Plaka: {trip.get('plate') or '-'}")
+  165:         lines.append(f"Tarih: {trip.get('date') or '-'}")
+  166:         lines.append(f"Çıkış: {trip.get('departure_time') or '-'}")
+  167:         lines.append("")
+  168: 
+  169:         total_board = 0
+  170:         total_off = 0
+  171:         total_stand_board = 0
+  172:         total_stand_off = 0
+  173: 
+  174:         for stop in payload.get("stops") or []:
+  175:             sm = stop.get("summary") or {}
+  176:             total_board += int(sm.get("board_count") or 0)
+  177:             total_off += int(sm.get("offload_count") or 0)
+  178:             total_stand_board += int(sm.get("standing_board_count") or 0)
+  179:             total_stand_off += int(sm.get("standing_off_count") or 0)
+  180: 
+  181:         lines.append(f"Toplam Binen: {total_board}")
+  182:         lines.append(f"Toplam İnen: {total_off}")
+  183:         lines.append(f"Ayakta Binen: {total_stand_board}")
+  184:         lines.append(f"Ayakta İnen: {total_stand_off}")
+  185:         lines.append("")
+  186: 
+  187:         for stop in payload.get("stops") or []:
+  188:             sm = stop.get("summary") or {}
+  189: 
+  190:             lines.append(f"Durak: {stop.get('stop_name')}")
+  191:             lines.append("-" * 34)
+  192:             lines.append(
+  193:                 f"Binen {sm.get('board_count') or 0} | "
+  194:                 f"İnen {sm.get('offload_count') or 0} | "
+  195:                 f"Ayakta binen {sm.get('standing_board_count') or 0} | "
+  196:                 f"Ayakta inen {sm.get('standing_off_count') or 0}"
+  197:             )
+  198: 
+  199:             if stop.get("board"):
+  200:                 lines.append("Binenler:")
+  201:                 for it in stop.get("board") or []:
+  202:                     m = it.get("meta") or {}
+  203:                     lines.append(
+  204:                         f"  + Koltuk {m.get('seat_no') or '-'} | "
+  205:                         f"{m.get('from_stop') or '-'} -> {m.get('to_stop') or '-'} | "
+  206:                         f"{m.get('gender') or '-'} | {m.get('payment') or '-'} | "
+  207:                         f"{it.get('ts') or '-'}"
+  208:                     )
+  209: 
+  210:             if stop.get("offload"):
+  211:                 lines.append("İnenler:")
+  212:                 for it in stop.get("offload") or []:
+  213:                     m = it.get("meta") or {}
+  214:                     lines.append(
+  215:                         f"  - Koltuk {m.get('seat_no') or '-'} | "
+  216:                         f"{m.get('from_stop') or '-'} -> {m.get('to_stop') or '-'} | "
+  217:                         f"{m.get('gender') or '-'} | {m.get('payment') or '-'} | "
+  218:                         f"{it.get('ts') or '-'}"
+  219:                     )
+  220: 
+  221:             if stop.get("standing_add"):
+  222:                 lines.append("Ayakta Binen:")
+  223:                 for it in stop.get("standing_add") or []:
+  224:                     m = it.get("meta") or {}
+  225:                     lines.append(
+  226:                         f"  + {m.get('pax') or 0} kişi | "
+  227:                         f"{m.get('from_stop') or '-'} -> {m.get('to_stop') or '-'} | "
+  228:                         f"{m.get('payment') or '-'} | {it.get('ts') or '-'}"
+  229:                     )
+  230: 
+  231:             if stop.get("standing_off"):
+  232:                 lines.append("Ayakta İnen:")
+  233:                 for it in stop.get("standing_off") or []:
+  234:                     m = it.get("meta") or {}
+  235:                     lines.append(
+  236:                         f"  - {m.get('pax') or 0} kişi | "
+  237:                         f"{m.get('from_stop') or '-'} -> {m.get('to_stop') or '-'} | "
+  238:                         f"{m.get('payment') or '-'} | {it.get('ts') or '-'}"
+  239:                     )
+  240: 
+  241:             lines.append("")
+  242: 
+  243:         return "\n".join(lines)
+  244: 
+  245: 
+  246:     def trip_report_csv(payload):
+  247:         rows = [
+  248:             ["durak", "islem", "koltuk", "kisi", "nereden", "nereye", "cinsiyet", "odeme", "tutar", "zaman"]
+  249:         ]
+  250: 
+  251:         def add(stop_name, label, items):
+  252:             for it in items or []:
+  253:                 m = it.get("meta") or {}
+  254:                 rows.append([
+  255:                     stop_name,
+  256:                     label,
+  257:                     m.get("seat_no") or "",
+  258:                     m.get("pax") or "",
+  259:                     m.get("from_stop") or "",
+  260:                     m.get("to_stop") or "",
+  261:                     m.get("gender") or "",
+  262:                     m.get("payment") or "",
+  263:                     m.get("amount") or m.get("total_amount") or "",
+  264:                     it.get("ts") or "",
+  265:                 ])
+  266: 
+  267:         for stop in payload.get("stops") or []:
+  268:             name = stop.get("stop_name") or ""
+  269:             add(name, "bindi", stop.get("board"))
+  270:             add(name, "indi", stop.get("offload"))
+  271:             add(name, "inis_duragi_degisti", stop.get("seat_destination_change"))
+  272:             add(name, "ayakta_bindi", stop.get("standing_add"))
+  273:             add(name, "ayakta_indi", stop.get("standing_off"))
+  274: 
+  275:         out = []
+  276:         for r in rows:
+  277:             out.append(",".join('"' + str(v).replace('"', '""') + '"' for v in r))
+  278: 
+  279:         return "\ufeff" + "\n".join(out)
+  280: 
+  281: 
+  282:     def save_finished_trip_report(tid):
+  283:         db = get_db()
+  284: 
+  285:         trip = db.execute(
+  286:             "SELECT * FROM trips WHERE id=?",
+  287:             (tid,),
+  288:         ).fetchone()
+  289: 
+  290:         if not trip:
+  291:             return {}
+  292: 
+  293:         reports_dir = Path(app.root_path) / "storage" / "reports"
+  294:         reports_dir.mkdir(parents=True, exist_ok=True)
+  295: 
+  296:         base = "sefer_{id}_{date}_{plate}".format(
+  297:             id=trip["id"],
+  298:             date=_report_slug(trip["date"]),
+  299:             plate=_report_slug(trip["plate"]),
+  300:         )
+  301: 
+  302:         payload = build_trip_report_payload_for_trip(db, tid)
+  303: 
+  304:         json_path = reports_dir / f"{base}.json"
+  305:         txt_path = reports_dir / f"{base}.txt"
+  306:         csv_path = reports_dir / f"{base}.csv"
+  307: 
+  308:         json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+  309:         txt_path.write_text(trip_report_text(payload), encoding="utf-8")
+  310:         csv_path.write_text(trip_report_csv(payload), encoding="utf-8-sig")
+  311: 
+  312:         return {
+  313:             "json": str(json_path),
+  314:             "txt": str(txt_path),
+  315:             "csv": str(csv_path),
+  316:             "base": base,
+  317:         }
+  318: 
+  319:     return {
+  320:         "_report_slug": _report_slug,
+  321:         "build_trip_report_payload_for_trip": build_trip_report_payload_for_trip,
+  322:         "finalize_remaining_trip_events": finalize_remaining_trip_events,
+  323:         "trip_report_text": trip_report_text,
+  324:         "trip_report_csv": trip_report_csv,
+  325:         "save_finished_trip_report": save_finished_trip_report,
+  326:     }
+
+
+==========================================================================================
+5) TRIP_REPORT TEMPLATE BAŞLIKLAR / CSS / JS / BUTONLAR
+==========================================================================================
+
+
+--- templates/trip_report.html:4 ---
+    3: 
+    4: <style>
+    5:   body{
+    6:     background:#06101c;
+    7:     color:#eaf2ff;
+    8:     font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+
+--- templates/trip_report.html:187 ---
+  186: 
+  187:   .seat-tile{
+  188:     position:relative;
+  189:     border:none;
+  190:     min-height:58px;
+  191:     border-radius:22px;
+
+--- templates/trip_report.html:204 ---
+  203: 
+  204:   .seat-tile.sold-0{ background:linear-gradient(180deg,#22c55e,#15803d); }
+  205:   .seat-tile.sold-1{ background:linear-gradient(180deg,#3b82f6,#1d4ed8); }
+  206:   .seat-tile.sold-2{ background:linear-gradient(180deg,#d946ef,#9333ea); }
+  207:   .seat-tile.sold-3{ background:linear-gradient(180deg,#f59e0b,#b45309); }
+  208: 
+
+--- templates/trip_report.html:205 ---
+  204:   .seat-tile.sold-0{ background:linear-gradient(180deg,#22c55e,#15803d); }
+  205:   .seat-tile.sold-1{ background:linear-gradient(180deg,#3b82f6,#1d4ed8); }
+  206:   .seat-tile.sold-2{ background:linear-gradient(180deg,#d946ef,#9333ea); }
+  207:   .seat-tile.sold-3{ background:linear-gradient(180deg,#f59e0b,#b45309); }
+  208: 
+  209:   .seat-tile.active-now{
+
+--- templates/trip_report.html:206 ---
+  205:   .seat-tile.sold-1{ background:linear-gradient(180deg,#3b82f6,#1d4ed8); }
+  206:   .seat-tile.sold-2{ background:linear-gradient(180deg,#d946ef,#9333ea); }
+  207:   .seat-tile.sold-3{ background:linear-gradient(180deg,#f59e0b,#b45309); }
+  208: 
+  209:   .seat-tile.active-now{
+  210:     outline:4px solid rgba(34,197,94,.42);
+
+--- templates/trip_report.html:207 ---
+  206:   .seat-tile.sold-2{ background:linear-gradient(180deg,#d946ef,#9333ea); }
+  207:   .seat-tile.sold-3{ background:linear-gradient(180deg,#f59e0b,#b45309); }
+  208: 
+  209:   .seat-tile.active-now{
+  210:     outline:4px solid rgba(34,197,94,.42);
+  211:     box-shadow:
+
+--- templates/trip_report.html:209 ---
+  208: 
+  209:   .seat-tile.active-now{
+  210:     outline:4px solid rgba(34,197,94,.42);
+  211:     box-shadow:
+  212:       0 0 0 7px rgba(34,197,94,.12),
+  213:       inset 0 2px 0 rgba(255,255,255,.20),
+
+--- templates/trip_report.html:251 ---
+  250: 
+  251:   .seat-hint{
+  252:     margin-top:10px;
+  253:     font-size:13px;
+  254:     color:rgba(226,232,240,.64);
+  255:   }
+
+--- templates/trip_report.html:337 ---
+  336: 
+  337:   .seat-modal{
+  338:     position:fixed;
+  339:     left:50%;
+  340:     top:50%;
+  341:     transform:translate(-50%,-50%);
+
+--- templates/trip_report.html:387 ---
+  386: 
+  387:   .seat-stats{
+  388:     display:grid;
+  389:     grid-template-columns:repeat(3,1fr);
+  390:     gap:8px;
+  391:     margin-bottom:12px;
+
+--- templates/trip_report.html:394 ---
+  393: 
+  394:   .seat-stat{
+  395:     background:rgba(15,23,42,.72);
+  396:     border:1px solid rgba(148,163,184,.14);
+  397:     border-radius:16px;
+  398:     padding:10px;
+
+--- templates/trip_report.html:401 ---
+  400: 
+  401:   .seat-stat .k{
+  402:     color:rgba(226,232,240,.58);
+  403:     font-size:12px;
+  404:     font-weight:850;
+  405:   }
+
+--- templates/trip_report.html:407 ---
+  406: 
+  407:   .seat-stat .v{
+  408:     font-size:22px;
+  409:     font-weight:1000;
+  410:     margin-top:3px;
+  411:   }
+
+--- templates/trip_report.html:457 ---
+  456:     }
+  457:     .seat-tile{
+  458:       min-height:52px;
+  459:       font-size:25px;
+  460:       border-radius:20px;
+  461:     }
+
+--- templates/trip_report.html:472 ---
+  471:     }
+  472:     .seat-tile{
+  473:       min-height:49px;
+  474:       font-size:23px;
+  475:     }
+  476:     .corridor span{ font-size:12px; }
+
+--- templates/trip_report.html:479 ---
+  478: 
+  479:   @media print{
+  480:     body{ background:white; color:black; }
+  481:     .actions,.seat-hint,.modal-backdrop,.seat-modal{ display:none !important; }
+  482:     .hero,.section-card,.stop-card,.sum-card,.box{
+  483:       box-shadow:none;
+
+--- templates/trip_report.html:481 ---
+  480:     body{ background:white; color:black; }
+  481:     .actions,.seat-hint,.modal-backdrop,.seat-modal{ display:none !important; }
+  482:     .hero,.section-card,.stop-card,.sum-card,.box{
+  483:       box-shadow:none;
+  484:       background:white;
+  485:       color:black;
+
+--- templates/trip_report.html:491 ---
+  490:   }
+  491: </style>
+  492: 
+  493: <script>
+  494:   window.REPORT_ARCHIVE_BASE = {{ archive_base|default('', true)|tojson }};
+  495: 
+
+--- templates/trip_report.html:493 ---
+  492: 
+  493: <script>
+  494:   window.REPORT_ARCHIVE_BASE = {{ archive_base|default('', true)|tojson }};
+  495: 
+  496:     function openPrintDialog(){
+  497:       try{
+
+--- templates/trip_report.html:494 ---
+  493: <script>
+  494:   window.REPORT_ARCHIVE_BASE = {{ archive_base|default('', true)|tojson }};
+  495: 
+  496:     function openPrintDialog(){
+  497:       try{
+  498:         if (window.PrintBridge && typeof window.PrintBridge.printPage === "function"){
+
+--- templates/trip_report.html:496 ---
+  495: 
+  496:     function openPrintDialog(){
+  497:       try{
+  498:         if (window.PrintBridge && typeof window.PrintBridge.printPage === "function"){
+  499:           const title = document.title || "Muavin Asistanı";
+  500:           window.PrintBridge.printPage(title);
+
+--- templates/trip_report.html:498 ---
+  497:       try{
+  498:         if (window.PrintBridge && typeof window.PrintBridge.printPage === "function"){
+  499:           const title = document.title || "Muavin Asistanı";
+  500:           window.PrintBridge.printPage(title);
+  501:           return;
+  502:         } else {
+
+--- templates/trip_report.html:500 ---
+  499:           const title = document.title || "Muavin Asistanı";
+  500:           window.PrintBridge.printPage(title);
+  501:           return;
+  502:         } else {
+  503:           alert("PrintBridge bulunamadı. Tarayıcı yazdırma deneniyor.");
+  504:         }
+
+--- templates/trip_report.html:503 ---
+  502:         } else {
+  503:           alert("PrintBridge bulunamadı. Tarayıcı yazdırma deneniyor.");
+  504:         }
+  505:       }catch(err){
+  506:         alert("PrintBridge hatası: " + err);
+  507:         console.log("PrintBridge error:", err);
+
+--- templates/trip_report.html:506 ---
+  505:       }catch(err){
+  506:         alert("PrintBridge hatası: " + err);
+  507:         console.log("PrintBridge error:", err);
+  508:       }
+  509: 
+  510:       try{
+
+--- templates/trip_report.html:507 ---
+  506:         alert("PrintBridge hatası: " + err);
+  507:         console.log("PrintBridge error:", err);
+  508:       }
+  509: 
+  510:       try{
+  511:         window.print();
+
+--- templates/trip_report.html:511 ---
+  510:       try{
+  511:         window.print();
+  512:       }catch(err){
+  513:         alert("Yazdırma ekranı açılamadı.");
+  514:       }
+  515:     }
+
+--- templates/trip_report.html:518 ---
+  517: 
+  518:   </script>
+  519: 
+  520: <div class="report-wrap">
+  521:   <div class="hero">
+  522:     <h1>📄 Sefer Raporu</h1>
+
+--- templates/trip_report.html:520 ---
+  519: 
+  520: <div class="report-wrap">
+  521:   <div class="hero">
+  522:     <h1>📄 Sefer Raporu</h1>
+  523:     <div class="muted" id="tripInfo">Rapor yükleniyor...</div>
+  524: 
+
+--- templates/trip_report.html:521 ---
+  520: <div class="report-wrap">
+  521:   <div class="hero">
+  522:     <h1>📄 Sefer Raporu</h1>
+  523:     <div class="muted" id="tripInfo">Rapor yükleniyor...</div>
+  524: 
+  525:     <div class="actions">
+
+--- templates/trip_report.html:522 ---
+  521:   <div class="hero">
+  522:     <h1>📄 Sefer Raporu</h1>
+  523:     <div class="muted" id="tripInfo">Rapor yükleniyor...</div>
+  524: 
+  525:     <div class="actions">
+  526:       <a class="btn" href="/seats">← Koltuk ekranı</a>
+
+--- templates/trip_report.html:523 ---
+  522:     <h1>📄 Sefer Raporu</h1>
+  523:     <div class="muted" id="tripInfo">Rapor yükleniyor...</div>
+  524: 
+  525:     <div class="actions">
+  526:       <a class="btn" href="/seats">← Koltuk ekranı</a>
+  527:       <button class="btn blue" type="button" onclick="openPrintDialog()">🖨 Yazdır</button>
+... sonuç sınırı doldu ...
+
+
+==========================================================================================
+6) TEMPLATE İÇİNDE KULLANILAN JINJA DEĞİŞKENLERİ
+==========================================================================================
+
+- { { archive_base|default('', true)|tojson } }
+
+
+==========================================================================================
+7) TEMPLATE İÇİNDEKİ FOR / IF BLOKLARI
+==========================================================================================

@@ -3289,7 +3289,23 @@
   font-weight:1000;
 }
 </style>
-\n</head>
+
+<style id="continue-clean-top-no-announcement">
+/* Sağ üst anons / megafon ikonunu kaldırır */
+.top-brand > :last-child:not(.brand-left){
+  display:none !important;
+}
+
+/* Eğer megafon özel buton sınıfıyla geldiyse onu da kapat */
+.announce-btn,
+.anons-btn,
+.brand-announce,
+.top-announce,
+.megaphone-btn{
+  display:none !important;
+}
+</style>
+</head>
 
 <body>
   <main class="shell">
@@ -3384,6 +3400,7 @@
             <button class="metric metric-action" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
               <small>Bagaj</small>
               <b id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</b>
+              <span id="liveEmanetCount" hidden></span>
               <span class="metric-hint">Detay</span>
             </button>
           </div>
@@ -3394,7 +3411,7 @@
       <article class="journey-card">
         <div class="node {{ stop.kind }}"></div>
 
-        <div class="card regular">
+        <div class="card regular {% if stop.kind == "next" %}next-card{% endif %}">
           <div class="card-head">
             <div>
               <h3 class="card-title">{{ stop.name }}</h3>
@@ -3611,6 +3628,93 @@
 
 
 
+
+
+<style id="next-stop-glow-style">
+@keyframes nextStopGlowPulse{
+  0%{
+    box-shadow:
+      0 0 0 1px rgba(250,204,21,.10) inset,
+      0 0 0 rgba(250,204,21,0),
+      0 16px 36px rgba(0,0,0,.28);
+  }
+  50%{
+    box-shadow:
+      0 0 0 1px rgba(250,204,21,.22) inset,
+      0 0 24px rgba(250,204,21,.18),
+      0 18px 38px rgba(0,0,0,.30);
+  }
+  100%{
+    box-shadow:
+      0 0 0 1px rgba(250,204,21,.10) inset,
+      0 0 0 rgba(250,204,21,0),
+      0 16px 36px rgba(0,0,0,.28);
+  }
+}
+
+.card.regular.next-card{
+  position:relative !important;
+  overflow:hidden !important;
+  isolation:isolate !important;
+  border:1px solid rgba(250,204,21,.26) !important;
+  border-radius:28px !important;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(250,204,21,.13), transparent 32%),
+    radial-gradient(circle at 92% 0%, rgba(245,158,11,.10), transparent 28%),
+    linear-gradient(180deg, rgba(255,215,64,.035), rgba(255,255,255,.02)),
+    rgba(10,16,30,.88) !important;
+  animation:nextStopGlowPulse 2.5s ease-in-out infinite !important;
+}
+
+/* Kartın tamamını canlı durak gibi çevreleyen sarı hat */
+.card.regular.next-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:28px;
+  pointer-events:none;
+  border:1px solid rgba(250,204,21,.22);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,220,90,.05),
+    0 0 0 1px rgba(250,204,21,.06),
+    0 0 18px rgba(250,204,21,.10);
+  z-index:0;
+}
+
+/* Soldaki sarı canlı çizgi kalsın */
+.card.regular.next-card::after{
+  content:"";
+  position:absolute;
+  left:0;
+  top:18px;
+  bottom:18px;
+  width:6px;
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(250,204,21,.98), rgba(245,158,11,.52));
+  box-shadow:
+    0 0 10px rgba(250,204,21,.72),
+    0 0 22px rgba(250,204,21,.30);
+  z-index:1;
+}
+
+.card.regular.next-card > *{
+  position:relative;
+  z-index:2;
+}
+
+.card.regular.next-card .status-pill.next{
+  border-color:rgba(250,204,21,.34) !important;
+  box-shadow:
+    0 0 0 1px rgba(250,204,21,.22) inset,
+    0 0 18px rgba(250,204,21,.16) !important;
+}
+
+.card.regular.next-card .metric{
+  border-color:rgba(250,204,21,.12) !important;
+}
+</style>
+
+
 <script id="live-clock-script">
 (function(){
   const el = document.getElementById("liveClockText");
@@ -3752,6 +3856,11 @@
 
 
 
+
+
+<!-- CONTINUE_TTS_BRIDGE_START -->
+<script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+<!-- CONTINUE_TTS_BRIDGE_END -->
 
 <script id="live-stop-sheet-script">
 (function(){
@@ -4830,20 +4939,78 @@
   function speakStopSummary(data){
     const msg = buildStopSummarySentence(data);
 
+    function setSpeakState(text){
+      try{
+        const btn = document.getElementById("sheetSummarySpeak");
+        if(!btn) return;
+
+        if(!btn.dataset.originalText){
+          btn.dataset.originalText = btn.textContent || "Sesli Oku";
+        }
+
+        btn.textContent = text || btn.dataset.originalText || "Sesli Oku";
+
+        setTimeout(function(){
+          btn.textContent = btn.dataset.originalText || "Sesli Oku";
+        }, 900);
+      }catch(_){}
+    }
+
+    if(!msg){
+      setSpeakState("Metin yok");
+      return;
+    }
+
+    // 1) Ortak ses köprüsü: APK'da AndroidTTS, tarayıcıda speechSynthesis kullanır.
     try{
-      if(window.speechSynthesis){
+      if(window.SeatsSpeak && typeof window.SeatsSpeak === "function"){
+        window.SeatsSpeak(msg, { force:true });
+        setSpeakState("Okunuyor...");
+        return;
+      }
+    }catch(err){
+      console.warn("SeatsSpeak summary error", err);
+    }
+
+    // 2) APK native TTS köprüsü
+    try{
+      if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
+        if(typeof window.AndroidTTS.stop === "function"){
+          try{ window.AndroidTTS.stop(); }catch(_){}
+        }
+
+        window.AndroidTTS.speak(msg);
+        setSpeakState("Okunuyor...");
+        return;
+      }
+    }catch(err){
+      console.warn("AndroidTTS summary error", err);
+    }
+
+    // 3) Tarayıcı fallback
+    try{
+      if(window.speechSynthesis && window.SpeechSynthesisUtterance){
         window.speechSynthesis.cancel();
+
         const u = new SpeechSynthesisUtterance(msg);
         u.lang = "tr-TR";
         u.rate = 0.95;
         u.pitch = 1;
+
+        const voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+        const trVoice = voices.find(v => String(v.lang || "").toLowerCase().startsWith("tr"));
+        if(trVoice) u.voice = trVoice;
+
         window.speechSynthesis.speak(u);
+        setSpeakState("Okunuyor...");
+        return;
       }
     }catch(err){
       console.error("summary speak error", err);
     }
-  }
 
+    setSpeakState("Ses yok");
+  }
 
   async function completeStopFromSummary(data){
     const stop = (data && data.stop) || currentStopName();
@@ -5423,5 +5590,82 @@
 })();
 </script>
 
+
+<style id="live-bag-emanet-hard-fix-style">
+#liveBagajMetric{
+  position:relative !important;
+}
+
+#liveEmanetMini{
+  position:absolute !important;
+  top:22px !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+  z-index:6 !important;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+  pointer-events:none;
+  color:#fde047 !important;
+  font-size:14px !important;
+  line-height:1 !important;
+  font-weight:1000 !important;
+  letter-spacing:.01em !important;
+  text-shadow:
+    0 0 12px rgba(250,204,21,.36),
+    0 2px 6px rgba(0,0,0,.55);
+}
+
+@media(max-width:430px){
+  #liveEmanetMini{
+    font-size:13px !important;
+    top:21px !important;
+  }
+}
+</style>
+
+<script id="live-bag-emanet-hard-fix-script">
+(function(){
+  const REAL_BAG_COUNT = Number({{ (live_current.bagaj_count if live_current and live_current.bagaj_count is defined else 0) | tojson | safe }}) || 0;
+  const EMANET_COUNT = Number({{ (live_current.emanet_count if live_current and live_current.emanet_count is defined else (live_current.consignment_count if live_current and live_current.consignment_count is defined else 0)) | tojson | safe }}) || 0;
+
+  function applyBagEmanetFix(){
+    const metric = document.getElementById("liveBagajMetric");
+    const bagEl = document.getElementById("liveBagajCount");
+
+    if(bagEl){
+      bagEl.textContent = String(Math.max(0, REAL_BAG_COUNT));
+    }
+
+    if(!metric) return;
+
+    Array.from(metric.querySelectorAll("*")).forEach(el => {
+      const txt = (el.textContent || "").trim();
+      if(el.id !== "liveEmanetMini" && /^\+\s*\d+\s*emanet$/i.test(txt)){
+        el.remove();
+      }
+    });
+
+    let mini = document.getElementById("liveEmanetMini");
+    if(!mini){
+      mini = document.createElement("span");
+      mini.id = "liveEmanetMini";
+      metric.appendChild(mini);
+    }
+
+    if(EMANET_COUNT > 0){
+      mini.textContent = "+" + EMANET_COUNT + " emanet";
+      mini.style.display = "inline-flex";
+    }else{
+      mini.textContent = "";
+      mini.style.display = "none";
+    }
+  }
+
+  applyBagEmanetFix();
+  setInterval(applyBagEmanetFix, 500);
+})();
+</script>
 </body>
 </html>

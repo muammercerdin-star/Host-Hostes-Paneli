@@ -1,0 +1,722 @@
+# Muavin Asistanı Canlı Patch Audit Raporu
+
+Bu rapor sadece canlı çalışan proje alanını tarar: `templates/`, `static/`, `app.py`, `modules/`.
+
+## 1) Özet
+
+- Canlı template sayısı: **47**
+- Canlı CSS dosyası: **23**
+- Canlı JS dosyası: **19**
+- Patch/yama adayı CSS/JS: **30**
+- Aktif/çağrılan yama adayı: **26**
+- Yetim/çağrılmayan yama adayı: **4**
+- Ön-stabil görünen aktif yama: **17**
+- Riskli/eziliyor olabilir: **9**
+- Eksik static referansı: **7**
+- Inline duplicate id: **0**
+- JS syntax sonucu: **node yok, kontrol edilmedi**
+- Python compile: **OK**
+
+## 2) Ön-stabil görünen aktif yamalar
+
+- `static/live_map/muavin_live_map_extra.css`
+- `static/live_map/muavin_live_map_extra.js`
+- `static/seats/patches/bottom-voice-command.css`
+- `static/seats/patches/fab-sheet-solid-fix.css`
+- `static/seats/patches/manual-ticket-system.js`
+- `static/seats/patches/modal-bottom-nav-autohide.css`
+- `static/seats/patches/modal-bottom-nav-autohide.js`
+- `static/seats/patches/seat-label-ghost-clean.css`
+- `static/seats/patches/seat-layout-fab-pack.js`
+- `static/seats/patches/seat-simple-ui-pack.js`
+- `static/seats/patches/stop-flow-focus-patch.js`
+- `static/seats/patches/stop-selected-toast.css`
+- `static/seats/patches/stop-selected-toast.js`
+- `static/seats/patches/top-sound-toggle.js`
+- `static/seats/route-marquee.js`
+- `static/seats/voice-commands.js`
+- `static/seats/voice-tts.js`
+
+## 3) Riskli / eziliyor olabilir
+
+- `static/seats/patches/manual-ticket-system.css` — 5 CSS kuralı daha sonra eziliyor
+- `static/seats/patches/mobile-performance-fix.css` — 4 CSS kuralı daha sonra eziliyor
+- `static/seats/patches/seat-layout-fab-pack.css` — 91 CSS kuralı daha sonra eziliyor
+- `static/seats/patches/seat-simple-ui-pack.css` — 26 CSS kuralı daha sonra eziliyor
+- `static/seats/patches/stop-flow-compact-mobile.css` — 5 CSS kuralı daha sonra eziliyor
+- `static/seats/patches/stop-flow-focus-patch.css` — 2 CSS kuralı daha sonra eziliyor
+- `static/seats/patches/top-sound-toggle.css` — 6 CSS kuralı daha sonra eziliyor
+- `static/seats/patches/unified-seat-deck-report-style.css` — 108 CSS kuralı daha sonra eziliyor
+- `static/seats/seats-final.css` — 284 CSS kuralı daha sonra eziliyor
+
+## 4) Yetim / çağrılmayan yama adayları
+
+- `static/seats/_archive_theme_trials/seats-dashboard-final.css`
+- `static/seats/patches/bottom-row-51-54-equal-spacing.css`
+- `static/seats/patches/only-54-reapply-right-shift.css`
+- `static/seats/patches/right-seat-column-spacing-fix.css`
+
+## 5) Eksik static referansları
+
+- `static/css/style.css` çağrılıyor ama dosya yok. Kaynak: templates/base.html
+- `static/img/rehber-durak-akisi.png` çağrılıyor ama dosya yok. Kaynak: templates/rehber.html
+- `static/img/rehber-koltuk-yonetimi-card.png` çağrılıyor ama dosya yok. Kaynak: templates/rehber.html
+- `static/img/rehber-voice-command.png` çağrılıyor ama dosya yok. Kaynak: templates/rehber.html
+- `static/profile/{new_name}` çağrılıyor ama dosya yok. Kaynak: app.py
+- `static/vendor/icons.css` çağrılıyor ama dosya yok. Kaynak: templates/base.html
+- `static/vendor/jquery.min.js` çağrılıyor ama dosya yok. Kaynak: templates/base.html
+
+## 6) Inline duplicate style/script id
+
+- Yok
+
+## 7) Ezilen CSS detayları — ilk 120
+
+### `INLINE:templates/ai_console.html#intent-legend-mobile-fix`
+- `templates/ai_console.html` → `#intentLegend .legend-item` / `gap`
+  - Eski: `5px !important`
+  - Daha sonra ezen: `INLINE:templates/ai_console.html#intent-legend-mobile-fix` → `4px !important`
+- `templates/ai_console.html` → `#intentLegend .legend-item` / `padding`
+  - Eski: `12px 13px !important`
+  - Daha sonra ezen: `INLINE:templates/ai_console.html#intent-legend-mobile-fix` → `11px 12px !important`
+- `templates/ai_console.html` → `#intentLegend .legend-item b` / `font-size`
+  - Eski: `14.5px !important`
+  - Daha sonra ezen: `INLINE:templates/ai_console.html#intent-legend-mobile-fix` → `14px !important`
+- `templates/ai_console.html` → `#intentLegend .legend-item span` / `font-size`
+  - Eski: `12px !important`
+  - Daha sonra ezen: `INLINE:templates/ai_console.html#intent-legend-mobile-fix` → `11.5px !important`
+
+### `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix`
+- `templates/continue_trip.html` → `.shell` / `width`
+  - Eski: `min(94vw, 430px) !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `calc(100vw - 14px) !important`
+- `templates/continue_trip.html` → `.shell` / `padding`
+  - Eski: `12px 10px 18px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `10px 8px 16px !important`
+- `templates/continue_trip.html` → `.brand-logo` / `width`
+  - Eski: `58px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `54px !important`
+- `templates/continue_trip.html` → `.brand-logo` / `height`
+  - Eski: `58px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `54px !important`
+- `templates/continue_trip.html` → `.brand-logo` / `font-size`
+  - Eski: `29px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `27px !important`
+- `templates/continue_trip.html` → `.brand-title` / `font-size`
+  - Eski: `22px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `20px !important`
+- `templates/continue_trip.html` → `.brand-sub` / `font-size`
+  - Eski: `13px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `12px !important`
+- `templates/continue_trip.html` → `.brand-action` / `width`
+  - Eski: `54px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `50px !important`
+- `templates/continue_trip.html` → `.brand-action` / `height`
+  - Eski: `54px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `50px !important`
+- `templates/continue_trip.html` → `.brand-action` / `font-size`
+  - Eski: `25px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `24px !important`
+- `templates/continue_trip.html` → `.hero` / `min-height`
+  - Eski: `148px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `138px !important`
+- `templates/continue_trip.html` → `.hero` / `padding`
+  - Eski: `18px 16px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `16px 15px !important`
+- `templates/continue_trip.html` → `.hero h1` / `font-size`
+  - Eski: `clamp(28px, 8vw, 42px) !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `clamp(22px, 6.4vw, 32px) !important`
+- `templates/continue_trip.html` → `.hero h1` / `font-size`
+  - Eski: `31px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `clamp(22px, 6.4vw, 32px) !important`
+- `templates/continue_trip.html` → `.hero h1` / `max-width`
+  - Eski: `260px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `220px !important`
+- `templates/continue_trip.html` → `.hero-meta-line` / `font-size`
+  - Eski: `14px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `13.5px !important`
+- `templates/continue_trip.html` → `.stats-row` / `border-radius`
+  - Eski: `24px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-status-four-col-polish` → `22px !important`
+- `templates/continue_trip.html` → `.stat-box` / `min-height`
+  - Eski: `62px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-status-four-col-polish` → `54px !important`
+- `templates/continue_trip.html` → `.stat-box` / `min-height`
+  - Eski: `58px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-status-four-col-polish` → `54px !important`
+- `templates/continue_trip.html` → `.stat-box` / `padding`
+  - Eski: `10px 11px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-status-four-col-polish` → `8px 6px !important`
+
+### `INLINE:templates/continue_trip.html#live-hero-bus-brightness-fix`
+- `templates/continue_trip.html` → `.hero-bus-img` / `width`
+  - Eski: `62% !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-hero-bus-brightness-fix` → `66% !important`
+- `templates/continue_trip.html` → `.hero-bus-shade` / `background`
+  - Eski: `linear-gradient(90deg, rgba(5,10,22,.96) 0%, rgba(5,10,22,.72) 42%, rgba(5,10,22,.08) 100%), radial-gradient(circle at 82% 50%, rgba(37,99,235,.20), transparent 38%) !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-hero-bus-brightness-fix` → `linear-gradient(90deg, rgba(5,10,22,.98) 0%, rgba(5,10,22,.78) 48%, rgba(5,10,22,.12) 100%), radial-gradient(circle at 82% 50%, rgba(37,99,235,.18), transparent 38%) !important`
+
+### `INLINE:templates/continue_trip.html#live-hero-title-size-fix`
+- `templates/continue_trip.html` → `.hero h1` / `font-size`
+  - Eski: `clamp(20px, 4.8vw, 32px) !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `clamp(22px, 6.4vw, 32px) !important`
+- `templates/continue_trip.html` → `.hero h1` / `line-height`
+  - Eski: `1.04 !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `1.05 !important`
+- `templates/continue_trip.html` → `.hero h1` / `max-width`
+  - Eski: `280px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `220px !important`
+- `templates/continue_trip.html` → `.hero-title` / `font-size`
+  - Eski: `clamp(20px, 4.8vw, 32px) !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `clamp(22px, 6.4vw, 32px) !important`
+- `templates/continue_trip.html` → `.hero-title` / `line-height`
+  - Eski: `1.04 !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `1.05 !important`
+- `templates/continue_trip.html` → `.hero-title` / `max-width`
+  - Eski: `280px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `220px !important`
+
+### `INLINE:templates/continue_trip.html#live-timeline-balance-final`
+- `templates/continue_trip.html` → `.timeline` / `padding-left`
+  - Eski: `76px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `70px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `left`
+  - Eski: `31px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `29px !important`
+- `templates/continue_trip.html` → `.node.next` / `width`
+  - Eski: `24px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+- `templates/continue_trip.html` → `.node.next` / `height`
+  - Eski: `24px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+- `templates/continue_trip.html` → `.node.next` / `left`
+  - Eski: `-56px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `-53px !important`
+- `templates/continue_trip.html` → `.node.next` / `top`
+  - Eski: `24px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+- `templates/continue_trip.html` → `.node.upcoming` / `width`
+  - Eski: `24px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+- `templates/continue_trip.html` → `.node.upcoming` / `height`
+  - Eski: `24px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+- `templates/continue_trip.html` → `.node.upcoming` / `left`
+  - Eski: `-56px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `-53px !important`
+- `templates/continue_trip.html` → `.node.upcoming` / `top`
+  - Eski: `24px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+- `templates/continue_trip.html` → `.node.passed` / `width`
+  - Eski: `20px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `19px !important`
+- `templates/continue_trip.html` → `.node.passed` / `height`
+  - Eski: `20px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `19px !important`
+- `templates/continue_trip.html` → `.node.passed` / `left`
+  - Eski: `-54px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `-51px !important`
+- `templates/continue_trip.html` → `.node.live` / `left`
+  - Eski: `-62px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `-58px !important`
+- `templates/continue_trip.html` → `.node.live` / `width`
+  - Eski: `36px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `34px !important`
+- `templates/continue_trip.html` → `.node.live` / `height`
+  - Eski: `36px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `34px !important`
+- `templates/continue_trip.html` → `.node.live` / `top`
+  - Eski: `18px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `17px !important`
+
+### `INLINE:templates/continue_trip.html#live-timeline-neon-final`
+- `templates/continue_trip.html` → `.timeline` / `padding-left`
+  - Eski: `82px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `70px !important`
+- `templates/continue_trip.html` → `.timeline` / `padding-left`
+  - Eski: `74px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `70px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `left`
+  - Eski: `34px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `29px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `left`
+  - Eski: `31px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `29px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `width`
+  - Eski: `8px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `5px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `width`
+  - Eski: `7px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `5px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `box-shadow`
+  - Eski: `0 0 10px rgba(255,59,59,.20), 0 0 18px rgba(255,59,59,.14), 0 0 30px rgba(59,130,246,.10) !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `0 0 8px rgba(255,59,59,.16), 0 0 14px rgba(255,59,59,.10), 0 0 22px rgba(59,130,246,.08) !important`
+- `templates/continue_trip.html` → `.node.live` / `background`
+  - Eski: `radial-gradient( circle at 50% 50%, #ffffff 0 20%, #ffd7d7 21%, #ff6868 38%, #ff3030 60%, #d40000 78%, rgba(255,0,0,0) 79% ) !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `radial-gradient( circle at 50% 50%, #ffffff 0 20%, #ffe2e2 21%, #ff7777 38%, #ff3636 60%, #d90000 78%, rgba(255,0,0,0) 79% ) !important`
+- `templates/continue_trip.html` → `.node.live` / `box-shadow`
+  - Eski: `0 0 0 10px rgba(255,60,60,.10), 0 0 0 18px rgba(255,60,60,.06), 0 0 18px rgba(255,70,70,.95), 0 0 42px rgba(255,40,40,.75), 0 0 70px rgba(255,0,0,.35) !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `0 0 0 8px rgba(255,60,60,.10), 0 0 0 14px rgba(255,60,60,.045), 0 0 16px rgba(255,70,70,.72), 0 0 30px rgba(255,40,40,.48), 0 0 48px rgba(255,0,0,.20) !important`
+- `templates/continue_trip.html` → `.node.next` / `box-shadow`
+  - Eski: `0 0 0 8px rgba(245,158,11,.10), 0 0 16px rgba(245,158,11,.70), 0 0 28px rgba(245,158,11,.30) !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `0 0 0 6px rgba(245,158,11,.08), 0 0 12px rgba(245,158,11,.50), 0 0 20px rgba(245,158,11,.20) !important`
+- `templates/continue_trip.html` → `.node.next` / `width`
+  - Eski: `30px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+- `templates/continue_trip.html` → `.node.next` / `width`
+  - Eski: `28px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+- `templates/continue_trip.html` → `.node.next` / `height`
+  - Eski: `30px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+- `templates/continue_trip.html` → `.node.next` / `height`
+  - Eski: `28px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+- `templates/continue_trip.html` → `.node.next` / `left`
+  - Eski: `-63px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `-53px !important`
+- `templates/continue_trip.html` → `.node.next` / `left`
+  - Eski: `-58px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `-53px !important`
+- `templates/continue_trip.html` → `.node.next` / `top`
+  - Eski: `22px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+- `templates/continue_trip.html` → `.node.upcoming` / `box-shadow`
+  - Eski: `0 0 0 8px rgba(59,130,246,.10), 0 0 16px rgba(59,130,246,.65), 0 0 28px rgba(59,130,246,.28) !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `0 0 0 6px rgba(59,130,246,.08), 0 0 12px rgba(59,130,246,.48), 0 0 20px rgba(59,130,246,.20) !important`
+- `templates/continue_trip.html` → `.node.upcoming` / `width`
+  - Eski: `30px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+- `templates/continue_trip.html` → `.node.upcoming` / `width`
+  - Eski: `28px !important`
+  - Daha sonra ezen: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `23px !important`
+
+### `INLINE:templates/index.html#home-dark-premium-final`
+- `templates/index.html` → `.home-shell` / `width`
+  - Eski: `min(94vw,720px) !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `calc(100vw - 18px) !important`
+- `templates/index.html` → `.home-shell` / `width`
+  - Eski: `calc(100vw - 24px) !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `calc(100vw - 18px) !important`
+- `templates/index.html` → `.home-shell` / `margin`
+  - Eski: `16px auto 28px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `8px auto 12px !important`
+- `templates/index.html` → `.home-shell` / `margin`
+  - Eski: `14px auto 24px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `8px auto 12px !important`
+- `templates/index.html` → `.hero-link` / `height`
+  - Eski: `136px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `92px !important`
+- `templates/index.html` → `.hero-link` / `height`
+  - Eski: `124px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `92px !important`
+- `templates/index.html` → `.hero-link` / `border-radius`
+  - Eski: `26px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `19px !important`
+- `templates/index.html` → `.hero-link` / `border-radius`
+  - Eski: `24px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `19px !important`
+- `templates/index.html` → `.menu-list` / `margin-top`
+  - Eski: `18px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `10px !important`
+- `templates/index.html` → `.menu-list` / `border-radius`
+  - Eski: `28px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `22px !important`
+- `templates/index.html` → `.menu-item` / `min-height`
+  - Eski: `74px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `48px !important`
+- `templates/index.html` → `.menu-item` / `min-height`
+  - Eski: `68px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `48px !important`
+- `templates/index.html` → `.menu-item` / `grid-template-columns`
+  - Eski: `56px 1fr 32px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `42px 1fr 22px !important`
+- `templates/index.html` → `.menu-item` / `grid-template-columns`
+  - Eski: `54px 1fr 30px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `42px 1fr 22px !important`
+- `templates/index.html` → `.menu-item` / `padding`
+  - Eski: `12px 16px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `6px 9px 6px 11px !important`
+- `templates/index.html` → `.menu-item` / `padding`
+  - Eski: `11px 14px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `6px 9px 6px 11px !important`
+- `templates/index.html` → `.ico` / `width`
+  - Eski: `44px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `32px !important`
+- `templates/index.html` → `.ico` / `width`
+  - Eski: `42px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `32px !important`
+- `templates/index.html` → `.ico` / `height`
+  - Eski: `44px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `32px !important`
+- `templates/index.html` → `.ico` / `height`
+  - Eski: `42px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `32px !important`
+
+### `INLINE:templates/index.html#home-one-screen-compact`
+- `templates/index.html` → `.home-shell` / `width`
+  - Eski: `calc(100vw - 20px) !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `calc(100vw - 18px) !important`
+- `templates/index.html` → `.home-shell` / `margin`
+  - Eski: `10px auto 14px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `8px auto 12px !important`
+- `templates/index.html` → `.hero-link` / `height`
+  - Eski: `96px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `92px !important`
+- `templates/index.html` → `.hero-link` / `margin-bottom`
+  - Eski: `9px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `8px !important`
+- `templates/index.html` → `.hero-link` / `border-radius`
+  - Eski: `20px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `19px !important`
+- `templates/index.html` → `.menu-item` / `min-height`
+  - Eski: `50px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `48px !important`
+- `templates/index.html` → `.menu-item` / `grid-template-columns`
+  - Eski: `44px 1fr 24px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `42px 1fr 22px !important`
+- `templates/index.html` → `.menu-item` / `padding`
+  - Eski: `7px 10px 7px 12px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `6px 9px 6px 11px !important`
+- `templates/index.html` → `.ico` / `width`
+  - Eski: `34px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `32px !important`
+- `templates/index.html` → `.ico` / `height`
+  - Eski: `34px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `32px !important`
+- `templates/index.html` → `.ico` / `font-size`
+  - Eski: `19px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `18px !important`
+- `templates/index.html` → `.menu-title` / `font-size`
+  - Eski: `15px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `14.5px !important`
+- `templates/index.html` → `.menu-desc` / `font-size`
+  - Eski: `12px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `11.7px !important`
+- `templates/index.html` → `.arrow` / `font-size`
+  - Eski: `26px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `24px !important`
+- `templates/index.html` → `.route-picker-premium` / `min-height`
+  - Eski: `54px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#home-one-screen-compact` → `52px !important`
+- `templates/index.html` → `.route-picker-premium` / `border-radius`
+  - Eski: `20px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#premium-route-picker-style` → `22px`
+- `templates/index.html` → `.route-picker-premium` / `padding`
+  - Eski: `0 12px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#premium-route-picker-style` → `0 16px`
+- `templates/index.html` → `.route-pin` / `width`
+  - Eski: `38px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#premium-route-picker-style` → `36px`
+- `templates/index.html` → `.route-pin` / `height`
+  - Eski: `38px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#premium-route-picker-style` → `36px`
+- `templates/index.html` → `.route-pin` / `border-radius`
+  - Eski: `14px !important`
+  - Daha sonra ezen: `INLINE:templates/index.html#premium-route-picker-style` → `14px`
+
+### `INLINE:templates/live_map.html#approach-alert-banner-compact-style`
+- `templates/live_map.html` → `.approach-alert` / `left`
+  - Eski: `12px !important`
+  - Daha sonra ezen: `INLINE:templates/live_map.html#approach-alert-banner-compact-style` → `10px !important`
+- `templates/live_map.html` → `.approach-alert` / `right`
+  - Eski: `12px !important`
+  - Daha sonra ezen: `INLINE:templates/live_map.html#approach-alert-banner-compact-style` → `10px !important`
+- `templates/live_map.html` → `.approach-alert` / `top`
+  - Eski: `12px !important`
+  - Daha sonra ezen: `INLINE:templates/live_map.html#approach-alert-banner-compact-style` → `10px !important`
+- `templates/live_map.html` → `.approach-alert` / `padding`
+  - Eski: `10px 11px !important`
+  - Daha sonra ezen: `INLINE:templates/live_map.html#approach-alert-banner-compact-style` → `9px 10px !important`
+- `templates/live_map.html` → `.approach-alert-title` / `font-size`
+  - Eski: `17px !important`
+  - Daha sonra ezen: `INLINE:templates/live_map.html#approach-alert-banner-compact-style` → `16px !important`
+- `templates/live_map.html` → `body.map-fullscreen-mode .approach-alert` / `right`
+  - Eski: `136px !important`
+  - Daha sonra ezen: `INLINE:templates/live_map.html#approach-alert-banner-compact-style` → `112px !important`
+
+### `INLINE:templates/live_map.html#live-map-compact-popup-style`
+- `templates/live_map.html` → `.map-popup-title` / `font-size`
+  - Eski: `20px !important`
+  - Daha sonra ezen: `INLINE:templates/live_map.html#live-map-compact-popup-style` → `18px !important`
+- `templates/live_map.html` → `.map-popup-grid` / `gap`
+  - Eski: `6px !important`
+  - Daha sonra ezen: `INLINE:templates/live_map.html#live-map-compact-popup-style` → `5px !important`
+- `templates/live_map.html` → `.map-popup-actions` / `gap`
+  - Eski: `6px !important`
+  - Daha sonra ezen: `INLINE:templates/live_map.html#live-map-compact-popup-style` → `5px !important`
+- `templates/live_map.html` → `.map-popup-actions a` / `padding`
+  - Eski: `8px 4px !important`
+  - Daha sonra ezen: `INLINE:templates/live_map.html#live-map-compact-popup-style` → `8px 3px !important`
+- `templates/live_map.html` → `.map-popup-actions a` / `font-size`
+  - Eski: `11px !important`
+  - Daha sonra ezen: `INLINE:templates/live_map.html#live-map-compact-popup-style` → `10.5px !important`
+
+
+## 8) Başka kuralları ezen yamalar — ilk 80
+
+### `INLINE:templates/ai_console.html#intent-legend-mobile-fix`
+- `templates/ai_console.html` → `#intentLegend .legend-item` / `gap`
+  - Önceki: `INLINE:templates/ai_console.html#intent-legend-mobile-fix` → `5px !important`
+  - Bu yama: `4px !important`
+- `templates/ai_console.html` → `#intentLegend .legend-item` / `padding`
+  - Önceki: `INLINE:templates/ai_console.html#intent-legend-mobile-fix` → `12px 13px !important`
+  - Bu yama: `11px 12px !important`
+- `templates/ai_console.html` → `#intentLegend .legend-item b` / `font-size`
+  - Önceki: `INLINE:templates/ai_console.html#intent-legend-mobile-fix` → `14.5px !important`
+  - Bu yama: `14px !important`
+- `templates/ai_console.html` → `#intentLegend .legend-item span` / `font-size`
+  - Önceki: `INLINE:templates/ai_console.html#intent-legend-mobile-fix` → `12px !important`
+  - Bu yama: `11.5px !important`
+
+### `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix`
+- `templates/continue_trip.html` → `.shell` / `width`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `min(100%, 460px)`
+  - Bu yama: `calc(100vw - 14px) !important`
+- `templates/continue_trip.html` → `.shell` / `width`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `min(94vw, 430px) !important`
+  - Bu yama: `calc(100vw - 14px) !important`
+- `templates/continue_trip.html` → `.shell` / `padding`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `18px 14px 24px`
+  - Bu yama: `10px 8px 16px !important`
+- `templates/continue_trip.html` → `.shell` / `padding`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `16px 12px 22px`
+  - Bu yama: `10px 8px 16px !important`
+- `templates/continue_trip.html` → `.shell` / `padding`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `12px 10px 18px !important`
+  - Bu yama: `10px 8px 16px !important`
+- `templates/continue_trip.html` → `.top-brand` / `margin-bottom`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `14px`
+  - Bu yama: `10px !important`
+- `templates/continue_trip.html` → `.brand-logo` / `width`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `78px`
+  - Bu yama: `54px !important`
+- `templates/continue_trip.html` → `.brand-logo` / `width`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `74px`
+  - Bu yama: `54px !important`
+- `templates/continue_trip.html` → `.brand-logo` / `width`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `58px !important`
+  - Bu yama: `54px !important`
+- `templates/continue_trip.html` → `.brand-logo` / `height`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `78px`
+  - Bu yama: `54px !important`
+- `templates/continue_trip.html` → `.brand-logo` / `height`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `74px`
+  - Bu yama: `54px !important`
+- `templates/continue_trip.html` → `.brand-logo` / `height`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `58px !important`
+  - Bu yama: `54px !important`
+- `templates/continue_trip.html` → `.brand-logo` / `border-radius`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `24px`
+  - Bu yama: `19px !important`
+- `templates/continue_trip.html` → `.brand-logo` / `font-size`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `38px`
+  - Bu yama: `27px !important`
+- `templates/continue_trip.html` → `.brand-logo` / `font-size`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `36px`
+  - Bu yama: `27px !important`
+
+### `INLINE:templates/continue_trip.html#live-hero-bus-brightness-fix`
+- `templates/continue_trip.html` → `.hero-bus-img` / `width`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `58%`
+  - Bu yama: `66% !important`
+- `templates/continue_trip.html` → `.hero-bus-img` / `width`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `64%`
+  - Bu yama: `66% !important`
+- `templates/continue_trip.html` → `.hero-bus-img` / `width`
+  - Önceki: `INLINE:templates/continue_trip.html#live-hero-bus-brightness-fix` → `62% !important`
+  - Bu yama: `66% !important`
+- `templates/continue_trip.html` → `.hero-bus-img` / `object-position`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `center`
+  - Bu yama: `center right !important`
+- `templates/continue_trip.html` → `.hero-bus-img` / `object-position`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `center right`
+  - Bu yama: `center right !important`
+- `templates/continue_trip.html` → `.hero-bus-img` / `opacity`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `.92`
+  - Bu yama: `1 !important`
+- `templates/continue_trip.html` → `.hero-bus-img` / `opacity`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `.88`
+  - Bu yama: `1 !important`
+- `templates/continue_trip.html` → `.hero-bus-img` / `filter`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `saturate(1.08) contrast(1.06) brightness(.92)`
+  - Bu yama: `saturate(1.15) contrast(1.08) brightness(1.12) !important`
+- `templates/continue_trip.html` → `.hero-bus-img` / `-webkit-mask-image`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `linear-gradient(90deg, transparent 0%, rgba(0,0,0,.28) 16%, #000 44%)`
+  - Bu yama: `linear-gradient(90deg, transparent 0%, rgba(0,0,0,.40) 12%, #000 34%) !important`
+- `templates/continue_trip.html` → `.hero-bus-img` / `mask-image`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `linear-gradient(90deg, transparent 0%, rgba(0,0,0,.28) 16%, #000 44%)`
+  - Bu yama: `linear-gradient(90deg, transparent 0%, rgba(0,0,0,.40) 12%, #000 34%) !important`
+- `templates/continue_trip.html` → `.hero-bus-shade` / `background`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `linear-gradient(90deg, rgba(5,10,22,.98) 0%, rgba(5,10,22,.82) 45%, rgba(5,10,22,.24) 100%), radial-gradient(circle at 82% 50%, rgba(37,99,235,.18), transparent 38%)`
+  - Bu yama: `linear-gradient(90deg, rgba(5,10,22,.98) 0%, rgba(5,10,22,.78) 48%, rgba(5,10,22,.12) 100%), radial-gradient(circle at 82% 50%, rgba(37,99,235,.18), transparent 38%) !important`
+- `templates/continue_trip.html` → `.hero-bus-shade` / `background`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `linear-gradient(90deg, rgba(5,10,22,.99) 0%, rgba(5,10,22,.88) 52%, rgba(5,10,22,.30) 100%), radial-gradient(circle at 82% 50%, rgba(37,99,235,.14), transparent 38%)`
+  - Bu yama: `linear-gradient(90deg, rgba(5,10,22,.98) 0%, rgba(5,10,22,.78) 48%, rgba(5,10,22,.12) 100%), radial-gradient(circle at 82% 50%, rgba(37,99,235,.18), transparent 38%) !important`
+- `templates/continue_trip.html` → `.hero-bus-shade` / `background`
+  - Önceki: `INLINE:templates/continue_trip.html#live-hero-bus-brightness-fix` → `linear-gradient(90deg, rgba(5,10,22,.96) 0%, rgba(5,10,22,.72) 42%, rgba(5,10,22,.08) 100%), radial-gradient(circle at 82% 50%, rgba(37,99,235,.20), transparent 38%) !important`
+  - Bu yama: `linear-gradient(90deg, rgba(5,10,22,.98) 0%, rgba(5,10,22,.78) 48%, rgba(5,10,22,.12) 100%), radial-gradient(circle at 82% 50%, rgba(37,99,235,.18), transparent 38%) !important`
+
+### `INLINE:templates/continue_trip.html#live-hero-title-size-fix`
+- `templates/continue_trip.html` → `.hero h1` / `font-size`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `clamp(24px, 6.6vw, 40px)`
+  - Bu yama: `clamp(22px, 6.4vw, 32px) !important`
+- `templates/continue_trip.html` → `.hero h1` / `font-size`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `clamp(28px, 8vw, 42px) !important`
+  - Bu yama: `clamp(22px, 6.4vw, 32px) !important`
+- `templates/continue_trip.html` → `.hero h1` / `font-size`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `31px !important`
+  - Bu yama: `clamp(22px, 6.4vw, 32px) !important`
+- `templates/continue_trip.html` → `.hero h1` / `font-size`
+  - Önceki: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `clamp(20px, 4.8vw, 32px) !important`
+  - Bu yama: `clamp(22px, 6.4vw, 32px) !important`
+- `templates/continue_trip.html` → `.hero h1` / `line-height`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `.94`
+  - Bu yama: `1.05 !important`
+- `templates/continue_trip.html` → `.hero h1` / `line-height`
+  - Önceki: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `1.04 !important`
+  - Bu yama: `1.05 !important`
+- `templates/continue_trip.html` → `.hero h1` / `letter-spacing`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `-.06em`
+  - Bu yama: `-.035em !important`
+- `templates/continue_trip.html` → `.hero h1` / `max-width`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `310px`
+  - Bu yama: `220px !important`
+- `templates/continue_trip.html` → `.hero h1` / `max-width`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `280px`
+  - Bu yama: `220px !important`
+- `templates/continue_trip.html` → `.hero h1` / `max-width`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `260px !important`
+  - Bu yama: `220px !important`
+- `templates/continue_trip.html` → `.hero h1` / `max-width`
+  - Önceki: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `280px !important`
+  - Bu yama: `220px !important`
+- `templates/continue_trip.html` → `.hero-title` / `font-size`
+  - Önceki: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `clamp(20px, 4.8vw, 32px) !important`
+  - Bu yama: `clamp(22px, 6.4vw, 32px) !important`
+- `templates/continue_trip.html` → `.hero-title` / `line-height`
+  - Önceki: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `1.04 !important`
+  - Bu yama: `1.05 !important`
+- `templates/continue_trip.html` → `.hero-title` / `max-width`
+  - Önceki: `INLINE:templates/continue_trip.html#live-hero-title-size-fix` → `280px !important`
+  - Bu yama: `220px !important`
+
+### `INLINE:templates/continue_trip.html#live-metric-hint-compact-fix`
+- `templates/continue_trip.html` → `.metric-hint` / `margin-top`
+  - Önceki: `INLINE:templates/continue_trip.html#live-stop-sheet-style` → `5px`
+  - Bu yama: `5px !important`
+- `templates/continue_trip.html` → `.metric-hint` / `margin-top`
+  - Önceki: `INLINE:templates/continue_trip.html#live-metric-hint-polish` → `6px !important`
+  - Bu yama: `5px !important`
+- `templates/continue_trip.html` → `.metric-hint` / `font-size`
+  - Önceki: `INLINE:templates/continue_trip.html#live-stop-sheet-style` → `10px`
+  - Bu yama: `10px !important`
+- `templates/continue_trip.html` → `.metric-hint` / `font-size`
+  - Önceki: `INLINE:templates/continue_trip.html#live-metric-hint-polish` → `10.5px !important`
+  - Bu yama: `10px !important`
+- `templates/continue_trip.html` → `.metric-hint` / `line-height`
+  - Önceki: `INLINE:templates/continue_trip.html#live-stop-sheet-style` → `1`
+  - Bu yama: `1 !important`
+- `templates/continue_trip.html` → `.metric-hint` / `line-height`
+  - Önceki: `INLINE:templates/continue_trip.html#live-metric-hint-polish` → `1.05 !important`
+  - Bu yama: `1 !important`
+- `templates/continue_trip.html` → `.metric-hint` / `letter-spacing`
+  - Önceki: `INLINE:templates/continue_trip.html#live-stop-sheet-style` → `.02em`
+  - Bu yama: `.02em !important`
+- `templates/continue_trip.html` → `.metric-hint` / `letter-spacing`
+  - Önceki: `INLINE:templates/continue_trip.html#live-metric-hint-polish` → `.035em !important`
+  - Bu yama: `.02em !important`
+- `templates/continue_trip.html` → `.metric-hint` / `font-weight`
+  - Önceki: `INLINE:templates/continue_trip.html#live-metric-hint-polish` → `900 !important`
+  - Bu yama: `950 !important`
+
+### `INLINE:templates/continue_trip.html#live-timeline-balance-final`
+- `templates/continue_trip.html` → `.timeline` / `padding-left`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `86px`
+  - Bu yama: `70px !important`
+- `templates/continue_trip.html` → `.timeline` / `padding-left`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `84px`
+  - Bu yama: `70px !important`
+- `templates/continue_trip.html` → `.timeline` / `padding-left`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `58px !important`
+  - Bu yama: `70px !important`
+- `templates/continue_trip.html` → `.timeline` / `padding-left`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `52px !important`
+  - Bu yama: `70px !important`
+- `templates/continue_trip.html` → `.timeline` / `padding-left`
+  - Önceki: `INLINE:templates/continue_trip.html#live-timeline-neon-final` → `82px !important`
+  - Bu yama: `70px !important`
+- `templates/continue_trip.html` → `.timeline` / `padding-left`
+  - Önceki: `INLINE:templates/continue_trip.html#live-timeline-neon-final` → `74px !important`
+  - Bu yama: `70px !important`
+- `templates/continue_trip.html` → `.timeline` / `padding-left`
+  - Önceki: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `76px !important`
+  - Bu yama: `70px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `left`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `36px`
+  - Bu yama: `29px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `left`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `34px`
+  - Bu yama: `29px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `left`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `25px !important`
+  - Bu yama: `29px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `left`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `23px !important`
+  - Bu yama: `29px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `left`
+  - Önceki: `INLINE:templates/continue_trip.html#live-timeline-neon-final` → `34px !important`
+  - Bu yama: `29px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `left`
+  - Önceki: `INLINE:templates/continue_trip.html#live-timeline-neon-final` → `31px !important`
+  - Bu yama: `29px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `left`
+  - Önceki: `INLINE:templates/continue_trip.html#live-timeline-balance-final` → `31px !important`
+  - Bu yama: `29px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `width`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `6px`
+  - Bu yama: `5px !important`
+
+### `INLINE:templates/continue_trip.html#live-timeline-neon-final`
+- `templates/continue_trip.html` → `.timeline` / `position`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `relative`
+  - Bu yama: `relative !important`
+- `templates/continue_trip.html` → `.timeline` / `margin-bottom`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `18px`
+  - Bu yama: `18px !important`
+- `templates/continue_trip.html` → `.timeline` / `margin-bottom`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `12px !important`
+  - Bu yama: `18px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `position`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `absolute`
+  - Bu yama: `absolute !important`
+- `templates/continue_trip.html` → `.timeline-line` / `top`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `30px`
+  - Bu yama: `8px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `top`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `22px !important`
+  - Bu yama: `8px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `bottom`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `22px`
+  - Bu yama: `22px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `bottom`
+  - Önceki: `INLINE:templates/continue_trip.html#continue-trip-compact-final-fix` → `12px !important`
+  - Bu yama: `22px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `border-radius`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `999px`
+  - Bu yama: `999px !important`
+- `templates/continue_trip.html` → `.timeline-line` / `background`
+  - Önceki: `INLINE:templates/continue_trip.html#inline-1` → `linear-gradient(180deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.12) 10%, rgba(255,71,71,1) 22%, rgba(255,71,71,1) 46%, rgba(246,164,0,1) 67%, rgba(59,130,246,1) 100%)`
+  - Bu yama: `linear-gradient( 180deg, rgba(255,255,255,.22) 0%, rgba(180,190,210,.18) 10%, rgba(255,255,255,.10) 16%, #ff3b3b 24%, #ff2a2a 42%, #ff6a3d 56%, #f6a400 68%, #6aa8ff 84%, #3b82f6 100% ) !important`
+
+
+## 9) JS syntax kontrolü
+
+### `NODE_YOK`
+```
+node kurulu değil; JS syntax kontrolü atlandı.
+```
+
+## 10) Python compile kontrolü
+
+- `app.py` compile OK

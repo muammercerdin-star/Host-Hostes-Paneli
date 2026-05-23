@@ -1,0 +1,1738 @@
+
+===== 1) HATALI YAMA KALINTISI VAR MI? =====
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:346:/* STOP_FLOW_LIVE_RUNTIME_SYNC_FINAL */
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:348:  if(window.__stopFlowLiveRuntimeSyncFinal) return;
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:349:  window.__stopFlowLiveRuntimeSyncFinal = true;
+
+===== 2) seats.html YÜKLENEN CSS/JS SIRASI =====
+4:<link rel="stylesheet" href="/static/style.css">
+5:<link rel="stylesheet" href="/static/seats/seats.css?v=41">
+6:<link rel="stylesheet" href="/static/seats/seats-final.css?v=drive-voice-real-width-test-1">
+7:<link rel="stylesheet" href="/static/seats/patches/stop-selected-toast.css?v=1">
+8:<link rel="stylesheet" href="/static/seats/patches/stop-flow-focus-patch.css?v=1">
+9:<link rel="stylesheet" href="/static/seats/patches/stop-flow-compact-mobile.css?v=1">
+10:<link rel="stylesheet" href="/static/seats/patches/seat-layout-fab-pack.css?v=1">
+11:<link rel="stylesheet" href="/static/seats/patches/bottom-voice-command.css?v=1">
+12:<link rel="stylesheet" href="/static/seats/patches/modal-bottom-nav-autohide.css?v=1">
+13:<link rel="stylesheet" href="/static/seats/patches/manual-ticket-system.css?v=1">
+14:<link rel="stylesheet" href="/static/seats/patches/top-sound-toggle.css?v=1">
+15:<link rel="stylesheet" href="/static/seats/patches/seat-simple-ui-pack.css?v=1">
+16:<link rel="stylesheet" href="/static/seats/patches/fab-sheet-solid-fix.css?v=1">
+17:<link rel="stylesheet" href="/static/seats/patches/seat-label-ghost-clean.css?v=1">
+361:<script src="/static/seats/bags.js?v=1"></script>
+362:<script src="/static/seats/voice-commands.js?v=voice-listen-guard-1"></script>
+363:<script src="/static/seats/standing.js?v=1"></script>
+364:<script src="/static/seats/seats.js?v=clear-ticket-on-offload-1"></script>
+365:<script src="/static/seats/route-marquee.js?v=route-clean-ticker-single-1"></script>
+366:<script src="/static/seats/seats-time-prayer.js?v=time-prayer-apk-1"></script>
+367:<script src="/static/seats/voice-tts.js?v=voice-owner-fix-1"></script>
+368:<script src="/static/seats/drive-eta-chip.js?v=1"></script>
+369:<script src="/static/seats/drive-controls.js?v=drive-toggle-fix-1"></script>
+370:<script src="/static/seats/patches/stop-selected-toast.js?v=1"></script>
+371:<script src="/static/seats/patches/stop-flow-focus-patch.js?v=1"></script>
+372:<script src="/static/seats/patches/seat-layout-fab-pack.js?v=1"></script>
+373:<script src="/static/seats/patches/modal-bottom-nav-autohide.js?v=1"></script>
+374:<script src="/static/seats/patches/manual-ticket-system.js?v=1"></script>
+375:<script src="/static/seats/patches/top-sound-toggle.js?v=1"></script>
+376:<script src="/static/seats/patches/seat-simple-ui-pack.js?v=1"></script>
+975:<script id="seat-simple-bottom-bar-script">
+991:    document.documentElement.classList.remove("seat-simple-mode");
+992:    document.body.classList.remove("seat-simple-mode");
+1020:    bar.className = "seat-simple-bottom-bar";
+1022:      <button type="button" class="seat-simple-bottom-item primary" id="seatSimpleOpenDurak">
+1027:      <a class="seat-simple-bottom-item" href="{{ url_for('hesap_page') }}">
+1032:      <a class="seat-simple-bottom-item" href="{{ url_for('consignments_page') }}">
+1037:      <a class="seat-simple-bottom-item" href="{{ url_for('live_map_page') }}">
+1042:      <button type="button" class="seat-simple-bottom-item warn" id="seatSimpleVoiceBtn" title="Sesli Komut" aria-label="Sesli Komut">
+
+===== 3) 'Sadece Durak Akışı' KİMDE VAR? =====
+static/seats/seats.js.bak_before_voice_tts_split:2561:   APK/WebView için Durak Akışı tıklamalarında doğrudan ses verir.
+static/seats/seats.js.bak_before_voice_tts_split:2671:   Durak Akışı ses butonunu güvenli şekilde bağlar.
+static/seats/voice-tts.js.bak_unified_voice:116:   Durak Akışı ses butonunu güvenli şekilde bağlar.
+static/seats/voice-tts.js.bak_tts_sync_event:114:  // Durak Akışı kartlarına doğrudan ses desteği
+static/seats/voice-tts.js.bak_remove_direct_route_listener:121:  // Durak Akışı kartlarına doğrudan ses desteği
+static/seats/patches/stop-flow-focus-patch.css:7:  #stopFlowFocusOverlay{
+static/seats/patches/stop-flow-focus-patch.css:20:  #stopFlowFocusOverlay[hidden]{
+static/seats/patches/stop-flow-focus-patch.css:24:  .stop-focus-panel{
+static/seats/patches/stop-flow-focus-patch.css:38:  .stop-focus-head{
+static/seats/patches/stop-flow-focus-patch.css:44:  .stop-focus-topline{
+static/seats/patches/stop-flow-focus-patch.css:52:  .stop-focus-back{
+static/seats/patches/stop-flow-focus-patch.css:63:  .stop-focus-badge{
+static/seats/patches/stop-flow-focus-patch.css:74:  .stop-focus-title{
+static/seats/patches/stop-flow-focus-patch.css:82:  .stop-focus-sub{
+static/seats/patches/stop-flow-focus-patch.css:89:  .stop-focus-sub b{
+static/seats/patches/stop-flow-focus-patch.css:94:  .stop-focus-list{
+static/seats/patches/stop-flow-focus-patch.css:103:  .stop-focus-card{
+static/seats/patches/stop-flow-focus-patch.css:118:  .stop-focus-card:active{
+static/seats/patches/stop-flow-focus-patch.css:122:  .stop-focus-card.is-active{
+static/seats/patches/stop-flow-focus-patch.css:128:  .stop-focus-pin{
+static/seats/patches/stop-flow-focus-patch.css:140:  .stop-focus-main{
+static/seats/patches/stop-flow-focus-patch.css:145:  .stop-focus-name{
+static/seats/patches/stop-flow-focus-patch.css:155:  .stop-focus-meta{
+static/seats/patches/stop-flow-focus-patch.css:163:  .stop-focus-select{
+static/seats/patches/stop-flow-focus-patch.css:174:  .stop-focus-card.is-active .stop-focus-select{
+static/seats/patches/stop-flow-focus-patch.js:5:  var overlayId = "stopFlowFocusOverlay";
+static/seats/patches/stop-flow-focus-patch.js:160:      '<div class="stop-focus-panel" role="dialog" aria-modal="true" aria-label="Durak Akışı">' +
+static/seats/patches/stop-flow-focus-patch.js:161:        '<div class="stop-focus-head">' +
+static/seats/patches/stop-flow-focus-patch.js:162:          '<div class="stop-focus-topline">' +
+static/seats/patches/stop-flow-focus-patch.js:163:            '<button type="button" class="stop-focus-back" data-stop-focus-close>← Koltuk Planı</button>' +
+static/seats/patches/stop-flow-focus-patch.js:164:            '<div class="stop-focus-badge">Sadece Durak Akışı</div>' +
+static/seats/patches/stop-flow-focus-patch.js:166:          '<h2 class="stop-focus-title">Durak Akışı</h2>' +
+static/seats/patches/stop-flow-focus-patch.js:167:          '<p class="stop-focus-sub">Seçili durak: <b data-current-stop>—</b></p>' +
+static/seats/patches/stop-flow-focus-patch.js:169:        '<div class="stop-focus-list" data-stop-focus-list></div>' +
+static/seats/patches/stop-flow-focus-patch.js:175:      var closeBtn = e.target.closest("[data-stop-focus-close]");
+static/seats/patches/stop-flow-focus-patch.js:182:      var card = e.target.closest("[data-stop-choice]");
+static/seats/patches/stop-flow-focus-patch.js:185:        var name = card.getAttribute("data-stop-choice") || "";
+static/seats/patches/stop-flow-focus-patch.js:196:    var list = qs("[data-stop-focus-list]", ov);
+static/seats/patches/stop-flow-focus-patch.js:206:      card.className = "stop-focus-card" + (sameStop(stop, current) ? " is-active" : "");
+static/seats/patches/stop-flow-focus-patch.js:207:      card.setAttribute("data-stop-choice", stop);
+static/seats/patches/stop-flow-focus-patch.js:210:      pin.className = "stop-focus-pin";
+static/seats/patches/stop-flow-focus-patch.js:214:      main.className = "stop-focus-main";
+static/seats/patches/stop-flow-focus-patch.js:217:      name.className = "stop-focus-name";
+static/seats/patches/stop-flow-focus-patch.js:221:      meta.className = "stop-focus-meta";
+static/seats/patches/stop-flow-focus-patch.js:225:      select.className = "stop-focus-select";
+static/seats/patches/stop-flow-focus-patch.js:237:      var active = qs(".stop-focus-card.is-active", ov);
+static/seats/patches/mobile-performance-fix.css:61:  .stop-focus-panel{
+static/seats/patches/mobile-performance-fix.css.bak_modal_readability_20260518_181100:61:  .stop-focus-panel{
+static/seats/patches/stop-flow-compact-mobile.css:1:/* Durak Akışı mobil kompakt görünüm */
+static/seats/patches/stop-flow-compact-mobile.css:5:  #stopFlowFocusOverlay{
+static/seats/patches/stop-flow-compact-mobile.css:9:  #stopFlowFocusOverlay .stop-focus-panel{
+static/seats/patches/stop-flow-compact-mobile.css:14:  #stopFlowFocusOverlay .stop-focus-head{
+static/seats/patches/stop-flow-compact-mobile.css:18:  #stopFlowFocusOverlay .stop-focus-topline{
+static/seats/patches/stop-flow-compact-mobile.css:23:  #stopFlowFocusOverlay .stop-focus-back{
+static/seats/patches/stop-flow-compact-mobile.css:29:  #stopFlowFocusOverlay .stop-focus-badge{
+static/seats/patches/stop-flow-compact-mobile.css:37:  #stopFlowFocusOverlay .stop-focus-title{
+static/seats/patches/stop-flow-compact-mobile.css:43:  #stopFlowFocusOverlay .stop-focus-sub{
+static/seats/patches/stop-flow-compact-mobile.css:49:  #stopFlowFocusOverlay .stop-focus-list{
+static/seats/patches/stop-flow-compact-mobile.css:54:  #stopFlowFocusOverlay .stop-focus-card{
+static/seats/patches/stop-flow-compact-mobile.css:61:  #stopFlowFocusOverlay .stop-focus-pin{
+static/seats/patches/stop-flow-compact-mobile.css:69:  #stopFlowFocusOverlay .stop-focus-name{
+static/seats/patches/stop-flow-compact-mobile.css:74:  #stopFlowFocusOverlay .stop-focus-meta{
+static/seats/patches/stop-flow-compact-mobile.css:80:  #stopFlowFocusOverlay .stop-focus-select{
+static/seats/patches/stop-flow-compact-mobile.css:90:  #stopFlowFocusOverlay .stop-focus-title{
+static/seats/patches/stop-flow-compact-mobile.css:94:  #stopFlowFocusOverlay .stop-focus-card{
+static/seats/patches/stop-flow-compact-mobile.css:99:  #stopFlowFocusOverlay .stop-focus-name{
+static/seats/patches/stop-flow-compact-mobile.css:103:  #stopFlowFocusOverlay .stop-focus-meta{
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:5:  var overlayId = "stopFlowFocusOverlay";
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:160:      '<div class="stop-focus-panel" role="dialog" aria-modal="true" aria-label="Durak Akışı">' +
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:161:        '<div class="stop-focus-head">' +
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:162:          '<div class="stop-focus-topline">' +
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:163:            '<button type="button" class="stop-focus-back" data-stop-focus-close>← Koltuk Planı</button>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:164:            '<div class="stop-focus-badge">Sadece Durak Akışı</div>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:166:          '<h2 class="stop-focus-title">Durak Akışı</h2>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:167:          '<p class="stop-focus-sub">Seçili durak: <b data-current-stop>—</b></p>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:169:        '<div class="stop-focus-list" data-stop-focus-list></div>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:175:      var closeBtn = e.target.closest("[data-stop-focus-close]");
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:182:      var card = e.target.closest("[data-stop-choice]");
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:185:        var name = card.getAttribute("data-stop-choice") || "";
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:196:    var list = qs("[data-stop-focus-list]", ov);
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:206:      card.className = "stop-focus-card" + (sameStop(stop, current) ? " is-active" : "");
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:207:      card.setAttribute("data-stop-choice", stop);
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:210:      pin.className = "stop-focus-pin";
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:214:      main.className = "stop-focus-main";
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:217:      name.className = "stop-focus-name";
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:221:      meta.className = "stop-focus-meta";
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:225:      select.className = "stop-focus-select";
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:237:      var active = qs(".stop-focus-card.is-active", ov);
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:5:  var overlayId = "stopFlowFocusOverlay";
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:160:      '<div class="stop-focus-panel" role="dialog" aria-modal="true" aria-label="Durak Akışı">' +
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:161:        '<div class="stop-focus-head">' +
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:162:          '<div class="stop-focus-topline">' +
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:163:            '<button type="button" class="stop-focus-back" data-stop-focus-close>← Koltuk Planı</button>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:164:            '<div class="stop-focus-badge">Sadece Durak Akışı</div>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:166:          '<h2 class="stop-focus-title">Durak Akışı</h2>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:167:          '<p class="stop-focus-sub">Seçili durak: <b data-current-stop>—</b></p>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:169:        '<div class="stop-focus-list" data-stop-focus-list></div>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:175:      var closeBtn = e.target.closest("[data-stop-focus-close]");
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:182:      var card = e.target.closest("[data-stop-choice]");
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:185:        var name = card.getAttribute("data-stop-choice") || "";
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:196:    var list = qs("[data-stop-focus-list]", ov);
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:206:      card.className = "stop-focus-card" + (sameStop(stop, current) ? " is-active" : "");
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:207:      card.setAttribute("data-stop-choice", stop);
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:210:      pin.className = "stop-focus-pin";
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:214:      main.className = "stop-focus-main";
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:217:      name.className = "stop-focus-name";
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:221:      meta.className = "stop-focus-meta";
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:225:      select.className = "stop-focus-select";
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:237:      var active = qs(".stop-focus-card.is-active", ov);
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:467:      "data-stop-choice",
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:478:    var named = el.querySelector("[data-stop-choice], [data-stop-name], [data-stop], .stop-name, .name, strong, b");
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:481:        named.getAttribute("data-stop-choice") ||
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:5:  var overlayId = "stopFlowFocusOverlay";
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:160:      '<div class="stop-focus-panel" role="dialog" aria-modal="true" aria-label="Durak Akışı">' +
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:161:        '<div class="stop-focus-head">' +
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:162:          '<div class="stop-focus-topline">' +
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:163:            '<button type="button" class="stop-focus-back" data-stop-focus-close>← Koltuk Planı</button>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:164:            '<div class="stop-focus-badge">Sadece Durak Akışı</div>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:166:          '<h2 class="stop-focus-title">Durak Akışı</h2>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:167:          '<p class="stop-focus-sub">Seçili durak: <b data-current-stop>—</b></p>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:169:        '<div class="stop-focus-list" data-stop-focus-list></div>' +
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:175:      var closeBtn = e.target.closest("[data-stop-focus-close]");
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:182:      var card = e.target.closest("[data-stop-choice]");
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:185:        var name = card.getAttribute("data-stop-choice") || "";
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:196:    var list = qs("[data-stop-focus-list]", ov);
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:206:      card.className = "stop-focus-card" + (sameStop(stop, current) ? " is-active" : "");
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:207:      card.setAttribute("data-stop-choice", stop);
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:210:      pin.className = "stop-focus-pin";
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:214:      main.className = "stop-focus-main";
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:217:      name.className = "stop-focus-name";
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:221:      meta.className = "stop-focus-meta";
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:225:      select.className = "stop-focus-select";
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:237:      var active = qs(".stop-focus-card.is-active", ov);
+static/seats/seats-final.css.bak_ticker_fix:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_ticker_fix:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_ticker_fix:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_ticker_fix:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_ticker_fix:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_ticker_fix:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_ticker_fix:1621:   Durak Akışı içindeki Canlı pill başına yeşil nokta ekler.
+static/seats/seats-final.css.bak_force_always:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_force_always:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_force_always:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_force_always:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_force_always:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_force_always:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_route_pin_blue_icon:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_route_card_color_boost:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css:964:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css:1076:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css:1197:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css:1245:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css:1309:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css:1358:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css:1853:/* Üstte menü olduğu için Durak Akışı çok yapışmasın */
+static/seats/seats-final.css:1885:   Durak Akışı üstünde geniş ve sabit akışta görünür.
+static/seats/seats-final.css:1893:/* Sürüş modunda Durak Akışı üstünde normal akışta */
+static/seats/seats-final.css:1973:/* Durak Akışı menünün hemen altında başlasın */
+static/seats/seats-final.css.bak_live_danger_restore:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_live_danger_restore:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_normal_route_pin:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_normal_route_pin:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_normal_pin_bright:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_normal_pin_bright:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_normal_pin_bright:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_route_card_bg_boost:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_route_card_bg_boost:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_route_card_bg_boost:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_route_card_bg_boost:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_route_warning_colors_restore:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_route_warning_colors_restore:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_route_warning_colors_restore:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_route_warning_colors_restore:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_route_warning_colors_restore:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_live_pill_dot:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_live_pill_dot:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_live_pill_dot:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_live_pill_dot:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_live_pill_dot:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_live_pill_dot:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_live_dot_position_fix:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_live_dot_position_fix:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_live_dot_position_fix:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_live_dot_position_fix:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_live_dot_position_fix:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_live_dot_position_fix:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_live_dot_position_fix:1621:   Durak Akışı içindeki Canlı pill başına yeşil nokta ekler.
+static/seats/seats-final.css.bak_route_pill_bg_boost:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_route_pill_bg_boost:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_route_pill_bg_boost:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_route_pill_bg_boost:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_route_pill_bg_boost:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_route_pill_bg_boost:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_route_pill_bg_boost:1621:   Durak Akışı içindeki Canlı pill başına yeşil nokta ekler.
+static/seats/seats-final.css.bak_route_marquee:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_route_marquee:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_route_marquee:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_route_marquee:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_route_marquee:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_route_marquee:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_route_marquee:1621:   Durak Akışı içindeki Canlı pill başına yeşil nokta ekler.
+static/seats/seats-final.css.bak_tv_marquee_fix:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_tv_marquee_fix:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_tv_marquee_fix:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_tv_marquee_fix:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_tv_marquee_fix:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_tv_marquee_fix:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_tv_marquee_fix:1621:   Durak Akışı içindeki Canlı pill başına yeşil nokta ekler.
+static/seats/seats.js.bak_route_direct_tts_summary_fix:2561:   APK/WebView için Durak Akışı tıklamalarında doğrudan ses verir.
+static/seats/seats.js.bak_night_voice_toggle_bind:2561:   APK/WebView için Durak Akışı tıklamalarında doğrudan ses verir.
+static/seats/seats.js.bak_night_voice_rollback:2561:   APK/WebView için Durak Akışı tıklamalarında doğrudan ses verir.
+static/seats/seats.js.bak_night_voice_rollback:2669:   Durak Akışı içindeki Ses Açık/Sessiz butonunu
+static/seats/seats.js.bak_night_voice_safe_bind:2561:   APK/WebView için Durak Akışı tıklamalarında doğrudan ses verir.
+static/seats/seats-final.css.bak_tv_marquee_real:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_tv_marquee_real:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_tv_marquee_real:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_tv_marquee_real:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_tv_marquee_real:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_tv_marquee_real:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_tv_marquee_real:1621:   Durak Akışı içindeki Canlı pill başına yeşil nokta ekler.
+static/seats/seats-final.css.bak_marquee_final:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_marquee_final:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_marquee_final:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_marquee_final:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_marquee_final:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_marquee_final:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_marquee_final:1621:   Durak Akışı içindeki Canlı pill başına yeşil nokta ekler.
+static/seats/seats-final.css.bak_marquee_clean_final:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_marquee_clean_final:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_marquee_clean_final:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_marquee_clean_final:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_marquee_clean_final:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_marquee_clean_final:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_marquee_clean_final:1621:   Durak Akışı içindeki Canlı pill başına yeşil nokta ekler.
+static/seats/seats-final.css.bak_marquee_cleanup:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_marquee_cleanup:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_marquee_cleanup:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_marquee_cleanup:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_marquee_cleanup:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_marquee_cleanup:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_marquee_cleanup:1621:   Durak Akışı içindeki Canlı pill başına yeşil nokta ekler.
+static/seats/seats-final.css.bak_clean_marquee_final:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_clean_marquee_final:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_clean_marquee_final:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_clean_marquee_final:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_clean_marquee_final:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_clean_marquee_final:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_clean_marquee_final:1621:   Durak Akışı içindeki Canlı pill başına yeşil nokta ekler.
+static/seats/seats-final.css.bak_marquee_readable:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_marquee_readable:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_marquee_readable:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_marquee_readable:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_marquee_readable:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_marquee_readable:1539:   Durak Akışı: kırmızı / turuncu / yeşil akış renklerini geri getirir.
+static/seats/seats-final.css.bak_marquee_readable:1621:   Durak Akışı içindeki Canlı pill başına yeşil nokta ekler.
+static/seats/seats-final.css.bak_marquee_total_cleanup:1145:   Sürüş modunda Durak Akışı kartlarında durak başına konum işareti
+static/seats/seats-final.css.bak_marquee_total_cleanup:1257:   Sürüş modunda Durak Akışı kartlarını daha canlı yapar.
+static/seats/seats-final.css.bak_marquee_total_cleanup:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_marquee_total_cleanup:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_marquee_total_cleanup:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+
+===== 4) Normal/Sade mod anahtarları =====
+templates/seats.html:15:<link rel="stylesheet" href="/static/seats/patches/seat-simple-ui-pack.css?v=1">
+templates/seats.html:376:<script src="/static/seats/patches/seat-simple-ui-pack.js?v=1"></script>
+templates/seats.html:468:    // Sürüş modunda buton "Normal" oluyor
+templates/seats.html:565:       Normal HTML akışındaki yerinde sabit duracak. */
+templates/seats.html:866:      btn.innerHTML = on ? "↩ Normal" : "🚘 Sürüş";
+templates/seats.html:867:      btn.title = on ? "Normal moda geç" : "Sürüş moduna geç";
+templates/seats.html:975:<script id="seat-simple-bottom-bar-script">
+templates/seats.html:984:  function setAdvanced(){
+templates/seats.html:988:      localStorage.setItem("seatUiMode:" + tripKey, "advanced");
+templates/seats.html:991:    document.documentElement.classList.remove("seat-simple-mode");
+templates/seats.html:992:    document.body.classList.remove("seat-simple-mode");
+templates/seats.html:996:      if(btn) btn.innerHTML = "💺 Sade koltuk moduna dön";
+templates/seats.html:1020:    bar.className = "seat-simple-bottom-bar";
+templates/seats.html:1022:      <button type="button" class="seat-simple-bottom-item primary" id="seatSimpleOpenDurak">
+templates/seats.html:1027:      <a class="seat-simple-bottom-item" href="{{ url_for('hesap_page') }}">
+templates/seats.html:1032:      <a class="seat-simple-bottom-item" href="{{ url_for('consignments_page') }}">
+templates/seats.html:1037:      <a class="seat-simple-bottom-item" href="{{ url_for('live_map_page') }}">
+templates/seats.html:1042:      <button type="button" class="seat-simple-bottom-item warn" id="seatSimpleVoiceBtn" title="Sesli Komut" aria-label="Sesli Komut">
+templates/seats.html:1050:    const durak = q("#seatSimpleOpenDurak");
+templates/seats.html:1053:        setAdvanced();
+static/seats/seats.css:2064:/* Normal butonu tarayıcı üst çubuğuna çok yapışmasın */
+static/seats/seats.css:2556:/* Normal modda da aynı düzgünlük istenirse */
+static/seats/seats.css:2760:   Normal butonunun altında gösterilir
+static/seats/seats.css:2887:   Normal butonunun altına kilitler, küçültür
+static/seats/seats.css:2890:/* Normal butonu da sağ üste sabit kalsın */
+static/seats/seats.css:2907:/* Hız kutusu Normal butonunun hemen altına sabitlenir */
+static/seats/seats.css:2988:   Sayfa kaydırılsa bile Normal + Hız kutusu oynamaz
+static/seats/seats.css:3012:/* Normal butonu artık dock içinde */
+static/seats/seats.css:3112:   Normal + hız kutusu artık ekranı takip etmez
+static/seats/seats.css:3145:/* Normal butonu kart içinde */
+static/seats/seats.css:3242:   Normal + hız kutusunu küçültüp sağ üst köşeye toplar
+static/seats/seats.css:3253:/* Normal butonu mini */
+static/seats/seats.css:3362:   Normal mod: sadece Sürüş butonu görünür
+static/seats/seats.css:3363:   Sürüş modu: Normal + hız kutusu görünür
+static/seats/seats.css:3366:/* Normal modda dock gizlenmesin */
+static/seats/seats.css:3380:/* Normal modda hız kutusu görünmesin */
+static/seats/seats.css:3385:/* Normal modda Sürüş butonu görünsün */
+static/seats/seats.css:3416:/* Normal modda sağ üstte butona yer aç */
+static/seats/seats.css:3472:/* Normal modda hız kutusu yok */
+static/seats/seats.css:3514:/* Normal modda başlık ve içerik kendi doğal düzeninde kalsın */
+static/seats/seats.css:3766:/* Normal görünümde sesli komut butonunu kısalt */
+static/seats/drive-controls.js.bak_voice_owner_fix:99:      btn.textContent = on ? "↩ Normal" : "🚘 Sürüş";
+static/seats/drive-controls.js.bak_voice_owner_fix:100:      btn.title = on ? "Normal moda geç" : "Sürüş moduna geç";
+static/seats/drive-controls.js.bak_drive_toggle_fix:104:      btn.textContent = on ? "↩ Normal" : "🚘 Sürüş";
+static/seats/drive-controls.js.bak_drive_toggle_fix:105:      btn.title = on ? "Normal moda geç" : "Sürüş moduna geç";
+static/seats/seats-final.css.bak_drive_top_clean_final:1234:/* Normal modda fazla müdahale etme */
+static/seats/seats-final.css.bak_rollback_drive_fab_top:1237:/* Normal mod eski davranışta kalsın */
+static/seats/patches/stop-flow-focus-patch.js:45:    var simpleStop = qs("#seatSimpleStop");
+static/seats/patches/stop-flow-focus-patch.js:46:    if(simpleStop && cleanStopName(simpleStop.textContent)) return cleanStopName(simpleStop.textContent);
+static/seats/patches/seat-simple-ui-pack.css:1:/* ===== seat-simple-open-mode-style ===== */
+static/seats/patches/seat-simple-ui-pack.css:7:.seat-simple-toggle{
+static/seats/patches/seat-simple-ui-pack.css:28:html.seat-simple-mode .seats-shell{
+static/seats/patches/seat-simple-ui-pack.css:34:html.seat-simple-mode .seats-shell > :not(.layout){
+static/seats/patches/seat-simple-ui-pack.css:38:html.seat-simple-mode .layout{
+static/seats/patches/seat-simple-ui-pack.css:43:html.seat-simple-mode .panel-card{
+static/seats/patches/seat-simple-ui-pack.css:47:html.seat-simple-mode .board-card{
+static/seats/patches/seat-simple-ui-pack.css:53:html.seat-simple-mode .board-inner{
+static/seats/patches/seat-simple-ui-pack.css:58:html.seat-simple-mode #driveInlineDock,
+static/seats/patches/seat-simple-ui-pack.css:59:html.seat-simple-mode #driveModeActionsDock{
+static/seats/patches/seat-simple-ui-pack.css:64:html.seat-simple-mode .board-head-right,
+static/seats/patches/seat-simple-ui-pack.css:65:html.seat-simple-mode .voice-row,
+static/seats/patches/seat-simple-ui-pack.css:66:html.seat-simple-mode .drive-voice-row,
+static/seats/patches/seat-simple-ui-pack.css:67:html.seat-simple-mode .legend{
+static/seats/patches/seat-simple-ui-pack.css:72:html.seat-simple-mode .board-head{
+static/seats/patches/seat-simple-ui-pack.css:77:html.seat-simple-mode .board-title{
+static/seats/patches/seat-simple-ui-pack.css:81:html.seat-simple-mode .board-kicker,
+static/seats/patches/seat-simple-ui-pack.css:82:html.seat-simple-mode .board-title small{
+static/seats/patches/seat-simple-ui-pack.css:86:html.seat-simple-mode .board-title h2{
+static/seats/patches/seat-simple-ui-pack.css:93:html.seat-simple-mode .selected-stop-chip{
+static/seats/patches/seat-simple-ui-pack.css:104:html.seat-simple-mode .route-strip-shell,
+static/seats/patches/seat-simple-ui-pack.css:105:html.seat-simple-mode .route-flow-shell,
+static/seats/patches/seat-simple-ui-pack.css:106:html.seat-simple-mode .route-flow,
+static/seats/patches/seat-simple-ui-pack.css:107:html.seat-simple-mode #routeStrip,
+static/seats/patches/seat-simple-ui-pack.css:108:html.seat-simple-mode .route-mini,
+static/seats/patches/seat-simple-ui-pack.css:109:html.seat-simple-mode .route-pill{
+static/seats/patches/seat-simple-ui-pack.css:114:html.seat-simple-mode .deck-card,
+static/seats/patches/seat-simple-ui-pack.css:115:html.seat-simple-mode .seat-deck,
+static/seats/patches/seat-simple-ui-pack.css:116:html.seat-simple-mode .deck-shell{
+static/seats/patches/seat-simple-ui-pack.css:122:  .seat-simple-toggle{
+static/seats/patches/seat-simple-ui-pack.css:129:  html.seat-simple-mode .board-inner{
+static/seats/patches/seat-simple-ui-pack.css:133:  html.seat-simple-mode .board-title h2{
+static/seats/patches/seat-simple-ui-pack.css:138:/* ===== seat-simple-summary-polish-style ===== */
+static/seats/patches/seat-simple-ui-pack.css:144:.seat-simple-summary{
+static/seats/patches/seat-simple-ui-pack.css:159:html.seat-simple-mode .seat-simple-summary{
+static/seats/patches/seat-simple-ui-pack.css:163:.seat-simple-summary-top{
+static/seats/patches/seat-simple-ui-pack.css:171:.seat-simple-route{
+static/seats/patches/seat-simple-ui-pack.css:183:.seat-simple-status{
+static/seats/patches/seat-simple-ui-pack.css:200:.seat-simple-summary-grid{
+static/seats/patches/seat-simple-ui-pack.css:206:.seat-simple-mini{
+static/seats/patches/seat-simple-ui-pack.css:216:.seat-simple-mini small{
+static/seats/patches/seat-simple-ui-pack.css:227:.seat-simple-mini b{
+static/seats/patches/seat-simple-ui-pack.css:238:.seat-simple-mini .ok{
+static/seats/patches/seat-simple-ui-pack.css:242:.seat-simple-mini .speed{
+static/seats/patches/seat-simple-ui-pack.css:246:html.seat-simple-mode .seat-simple-toggle{
+static/seats/patches/seat-simple-ui-pack.css:251:  .seat-simple-summary{
+static/seats/patches/seat-simple-ui-pack.css:257:  .seat-simple-route{
+static/seats/patches/seat-simple-ui-pack.css:261:  .seat-simple-summary-grid{
+static/seats/patches/seat-simple-ui-pack.css:266:  .seat-simple-mini{
+static/seats/patches/seat-simple-ui-pack.css:272:  .seat-simple-mini small{
+static/seats/patches/seat-simple-ui-pack.css:276:  .seat-simple-mini b{
+static/seats/patches/seat-simple-ui-pack.css:281:/* ===== seat-simple-bottom-bar-style ===== */
+static/seats/patches/seat-simple-ui-pack.css:287:.seat-simple-bottom-bar{
+static/seats/patches/seat-simple-ui-pack.css:308:html.seat-simple-mode .seat-simple-bottom-bar{
+static/seats/patches/seat-simple-ui-pack.css:312:html.seat-simple-mode body{
+static/seats/patches/seat-simple-ui-pack.css:316:.seat-simple-bottom-item{
+static/seats/patches/seat-simple-ui-pack.css:339:.seat-simple-bottom-item .ico{
+static/seats/patches/seat-simple-ui-pack.css:344:.seat-simple-bottom-item.primary{
+static/seats/patches/seat-simple-ui-pack.css:351:.seat-simple-bottom-item.warn{
+static/seats/patches/seat-simple-ui-pack.css:357:.seat-simple-bottom-item.danger{
+static/seats/patches/seat-simple-ui-pack.css:363:.seat-simple-bottom-item:active{
+static/seats/patches/seat-simple-ui-pack.css:368:  .seat-simple-bottom-bar{
+static/seats/patches/seat-simple-ui-pack.css:377:  .seat-simple-bottom-item{
+static/seats/patches/seat-simple-ui-pack.css:383:  .seat-simple-bottom-item .ico{
+static/seats/patches/seat-simple-ui-pack.css:394:html.seat-modal-open .seat-simple-bottom-bar,
+static/seats/patches/seat-simple-ui-pack.css:395:body.seat-modal-open .seat-simple-bottom-bar{
+static/seats/patches/seat-simple-ui-pack.js:1:/* ===== seat-simple-open-mode-script ===== */
+static/seats/patches/seat-simple-ui-pack.js:15:    return "seatUiMode:" + getTripKey();
+static/seats/patches/seat-simple-ui-pack.js:20:      return localStorage.getItem(key()) || "simple";
+static/seats/patches/seat-simple-ui-pack.js:22:      return "simple";
+static/seats/patches/seat-simple-ui-pack.js:33:    const simple = mode !== "advanced";
+static/seats/patches/seat-simple-ui-pack.js:34:    document.documentElement.classList.toggle("seat-simple-mode", simple);
+static/seats/patches/seat-simple-ui-pack.js:35:    document.body.classList.toggle("seat-simple-mode", simple);
+static/seats/patches/seat-simple-ui-pack.js:39:      btn.innerHTML = simple
+static/seats/patches/seat-simple-ui-pack.js:41:        : "💺 Sade koltuk moduna dön";
+static/seats/patches/seat-simple-ui-pack.js:42:      btn.setAttribute("aria-pressed", simple ? "true" : "false");
+static/seats/patches/seat-simple-ui-pack.js:60:    btn.className = "seat-simple-toggle";
+static/seats/patches/seat-simple-ui-pack.js:63:      const next = current === "advanced" ? "simple" : "advanced";
+static/seats/patches/seat-simple-ui-pack.js:86:/* ===== seat-simple-summary-polish-script ===== */
+static/seats/patches/seat-simple-ui-pack.js:103:      box.className = "seat-simple-summary";
+static/seats/patches/seat-simple-ui-pack.js:105:        <div class="seat-simple-summary-top">
+static/seats/patches/seat-simple-ui-pack.js:106:          <div class="seat-simple-route" id="seatSimpleRoute">—</div>
+static/seats/patches/seat-simple-ui-pack.js:107:          <div class="seat-simple-status"><span>●</span><span>Sade Mod</span></div>
+static/seats/patches/seat-simple-ui-pack.js:110:        <div class="seat-simple-summary-grid">
+static/seats/patches/seat-simple-ui-pack.js:111:          <div class="seat-simple-mini">
+static/seats/patches/seat-simple-ui-pack.js:115:          <div class="seat-simple-mini">
+static/seats/patches/seat-simple-ui-pack.js:119:          <div class="seat-simple-mini">
+static/seats/patches/mobile-performance-fix.css:56:  .seat-simple-bottom-bar,
+static/seats/patches/mobile-performance-fix.css:74:  .seat-simple-bottom-item,
+static/seats/patches/mobile-performance-fix.css:105:  .seat-simple-bottom-item,
+static/seats/patches/mobile-performance-fix.css:116:  .seat-simple-bottom-bar,
+static/seats/patches/mobile-performance-fix.css.bak_modal_readability_20260518_181100:56:  .seat-simple-bottom-bar,
+static/seats/patches/mobile-performance-fix.css.bak_modal_readability_20260518_181100:74:  .seat-simple-bottom-item,
+static/seats/patches/mobile-performance-fix.css.bak_modal_readability_20260518_181100:105:  .seat-simple-bottom-item,
+static/seats/patches/mobile-performance-fix.css.bak_modal_readability_20260518_181100:116:  .seat-simple-bottom-bar,
+static/seats/patches/seat-label-ghost-clean.css:10:  html.seat-simple-mode .deck .cell .label:empty,
+static/seats/patches/seat-label-ghost-clean.css:11:  body.seat-simple-mode .deck .cell .label:empty,
+static/seats/patches/seat-label-ghost-clean.css:27:  html.seat-simple-mode .deck .cell .label,
+static/seats/patches/seat-label-ghost-clean.css:28:  body.seat-simple-mode .deck .cell .label{
+static/seats/patches/seat-label-ghost-clean.css:37:  html.seat-simple-mode .deck .cell .label:not(:empty),
+static/seats/patches/seat-label-ghost-clean.css:38:  body.seat-simple-mode .deck .cell .label:not(:empty){
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:45:    var simpleStop = qs("#seatSimpleStop");
+static/seats/patches/stop-flow-focus-patch.js.bak_live_runtime_sync_20260520_103326:46:    if(simpleStop && cleanStopName(simpleStop.textContent)) return cleanStopName(simpleStop.textContent);
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:45:    var simpleStop = qs("#seatSimpleStop");
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:46:    if(simpleStop && cleanStopName(simpleStop.textContent)) return cleanStopName(simpleStop.textContent);
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:45:    var simpleStop = qs("#seatSimpleStop");
+static/seats/patches/stop-flow-focus-patch.js.bak_scope_simple_only_20260520_105358:46:    if(simpleStop && cleanStopName(simpleStop.textContent)) return cleanStopName(simpleStop.textContent);
+static/seats/drive-controls.js:103:      btn.innerHTML = on ? "↩ Normal" : "🚘 Sürüş";
+static/seats/drive-controls.js:104:      btn.title = on ? "Normal moda geç" : "Sürüş moduna geç";
+static/seats/seats-final.css.bak_ticker_fix:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_ticker_fix:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_ticker_fix:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_ticker_fix:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_ticker_fix:1833:/* Normalde sabit dursun */
+static/seats/voice-commands.js:637:      const simpleStop = document.querySelector("#seatSimpleStop");
+static/seats/voice-commands.js:638:      if(simpleStop) stop = voiceCleanStopValue(simpleStop.textContent);
+static/seats/seats-final.css.bak_force_always:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_force_always:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_force_always:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_force_always:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css:1129:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css:1197:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css:1245:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css:1309:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css:1661:/* Normal modda legend gizli */
+static/seats/seats-final.css:1774:/* Normal modda gizli kalsın */
+static/seats/seats-final.css:1888:/* Normal modda gizli */
+static/seats/seats-final.css.bak_live_danger_restore:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_normal_route_pin:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_normal_pin_bright:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_normal_pin_bright:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_route_card_bg_boost:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_route_card_bg_boost:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_route_card_bg_boost:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_route_warning_colors_restore:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_route_warning_colors_restore:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_route_warning_colors_restore:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_route_warning_colors_restore:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_live_pill_dot:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_live_pill_dot:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_live_pill_dot:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_live_pill_dot:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_live_dot_position_fix:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_live_dot_position_fix:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_live_dot_position_fix:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_live_dot_position_fix:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_route_pill_bg_boost:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_route_pill_bg_boost:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_route_pill_bg_boost:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_route_pill_bg_boost:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_route_marquee:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_route_marquee:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_route_marquee:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_route_marquee:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_tv_marquee_fix:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_tv_marquee_fix:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_tv_marquee_fix:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_tv_marquee_fix:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats.css.bak_before_seats_final:2248:/* Normal butonu tarayıcı üst çubuğuna çok yapışmasın */
+static/seats/seats.css.bak_before_seats_final:2740:/* Normal modda da aynı düzgünlük istenirse */
+static/seats/seats.css.bak_before_seats_final:2950:   Normal butonunun altında gösterilir
+static/seats/seats.css.bak_before_seats_final:3077:   Normal butonunun altına kilitler, küçültür
+static/seats/seats.css.bak_before_seats_final:3080:/* Normal butonu da sağ üste sabit kalsın */
+static/seats/seats.css.bak_before_seats_final:3097:/* Hız kutusu Normal butonunun hemen altına sabitlenir */
+static/seats/seats.css.bak_before_seats_final:3178:   Sayfa kaydırılsa bile Normal + Hız kutusu oynamaz
+static/seats/seats.css.bak_before_seats_final:3202:/* Normal butonu artık dock içinde */
+static/seats/seats.css.bak_before_seats_final:3302:   Normal + hız kutusu artık ekranı takip etmez
+static/seats/seats.css.bak_before_seats_final:3335:/* Normal butonu kart içinde */
+static/seats/seats.css.bak_before_seats_final:3432:   Normal + hız kutusunu küçültüp sağ üst köşeye toplar
+static/seats/seats.css.bak_before_seats_final:3443:/* Normal butonu mini */
+static/seats/seats.css.bak_before_seats_final:3552:   Normal mod: sadece Sürüş butonu görünür
+static/seats/seats.css.bak_before_seats_final:3553:   Sürüş modu: Normal + hız kutusu görünür
+static/seats/seats.css.bak_before_seats_final:3556:/* Normal modda dock gizlenmesin */
+static/seats/seats.css.bak_before_seats_final:3570:/* Normal modda hız kutusu görünmesin */
+static/seats/seats.css.bak_before_seats_final:3575:/* Normal modda Sürüş butonu görünsün */
+static/seats/seats.css.bak_before_seats_final:3606:/* Normal modda sağ üstte butona yer aç */
+static/seats/seats.css.bak_before_seats_final:3662:/* Normal modda hız kutusu yok */
+static/seats/seats.css.bak_before_seats_final:3704:/* Normal modda başlık ve içerik kendi doğal düzeninde kalsın */
+static/seats/seats.css.bak_before_seats_final:3956:/* Normal görünümde sesli komut butonunu kısalt */
+static/seats/seats-final.css.bak_tv_marquee_real:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_tv_marquee_real:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_tv_marquee_real:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_tv_marquee_real:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_tv_marquee_real:1833:/* Normalde sabit dursun */
+static/seats/seats-final.css.bak_marquee_final:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_marquee_final:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_marquee_final:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_marquee_final:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_marquee_final:1833:/* Normalde sabit dursun */
+static/seats/seats-final.css.bak_marquee_clean_final:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_marquee_clean_final:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_marquee_clean_final:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_marquee_clean_final:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_marquee_clean_final:1833:/* Normalde sabit dursun */
+static/seats/seats-final.css.bak_marquee_cleanup:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_marquee_cleanup:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_marquee_cleanup:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_marquee_cleanup:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_marquee_cleanup:1833:/* Normalde sabit dursun */
+static/seats/seats-final.css.bak_clean_marquee_final:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_clean_marquee_final:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_clean_marquee_final:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_clean_marquee_final:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_marquee_readable:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_marquee_readable:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_marquee_readable:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_marquee_readable:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_marquee_total_cleanup:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_marquee_total_cleanup:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_marquee_total_cleanup:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_marquee_total_cleanup:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_full_scroll_fix:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_full_scroll_fix:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_full_scroll_fix:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_full_scroll_fix:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_marquee_single_clean:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_marquee_single_clean:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_marquee_single_clean:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_marquee_single_clean:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_marquee_conflict_cleanup:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_marquee_conflict_cleanup:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_marquee_conflict_cleanup:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_marquee_conflict_cleanup:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_voice_row_equal_counter:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_voice_row_equal_counter:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_voice_row_equal_counter:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_voice_row_equal_counter:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_voice_row_equal_rollback:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_voice_row_equal_rollback:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_voice_row_equal_rollback:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_voice_row_equal_rollback:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_voice_row_equal_rollback:1837:/* Normal modda Sesli Komut ve Koltuk sayaç yan yana dengeli */
+static/seats/seats-final.css.bak_voice_row_equal_rollback:1846:/* Normal modda Hazır kutusunu gizle, alanı sayaç kullansın */
+static/seats/seats-final.css.bak_voice_row_clean_final:1310:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_voice_row_clean_final:1378:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_voice_row_clean_final:1426:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_voice_row_clean_final:1490:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_voice_row_clean_final:1966:/* Normal modda da aynı düzen */
+static/seats/seats-final.css.bak_voice_row_fix_rollback:1129:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_voice_row_fix_rollback:1197:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_voice_row_fix_rollback:1245:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_voice_row_fix_rollback:1309:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_voice_seat_icon_match:1129:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_voice_seat_icon_match:1197:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_voice_seat_icon_match:1245:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_voice_seat_icon_match:1309:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_hide_legend_row:1129:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_hide_legend_row:1197:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_hide_legend_row:1245:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_hide_legend_row:1309:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_fixed_bottom_legend:1129:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_fixed_bottom_legend:1197:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_fixed_bottom_legend:1245:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_fixed_bottom_legend:1309:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_legend_lift_fix:1129:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_legend_lift_fix:1197:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_legend_lift_fix:1245:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_legend_lift_fix:1309:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_legend_lift_fix:2078:/* Normal modda legend gizli */
+static/seats/seats-final.css.bak_voice_row_spacing_final:1129:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_voice_row_spacing_final:1197:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_voice_row_spacing_final:1245:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_voice_row_spacing_final:1309:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_voice_row_spacing_final:2078:/* Normal modda legend gizli */
+static/seats/seats-final.css.bak_voice_row_spacing_final:2191:/* Normal modda gizli kalsın */
+static/seats/seats-final.css.bak_voice_row_spacing_final:2305:/* Normal modda gizli */
+static/seats/seats-final.css.bak_drive_voice_width_only:1129:/* Normal bekleyen kartlar da çok sönük kalmasın */
+static/seats/seats-final.css.bak_drive_voice_width_only:1197:   Normal modda Durak Akışı kartlarının başına mavi konum ikonu ekler.
+static/seats/seats-final.css.bak_drive_voice_width_only:1245:   Normal mod Durak Akışı konum ikonlarını daha canlı/parlak yapar.
+static/seats/seats-final.css.bak_drive_voice_width_only:1309:   Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+static/seats/seats-final.css.bak_drive_voice_width_only:1661:/* Normal modda legend gizli */
+
+===== 5) Durak butonları / tab geçişleri =====
+templates/seats.html:107:        <button class="tab-btn" type="button" data-tab="route">Durak</button>
+templates/seats.html:196:                <span>Sıradaki Durak</span>
+templates/seats.html:236:                <span>Seçili Durak</span>
+templates/seats.html:1022:      <button type="button" class="seat-simple-bottom-item primary" id="seatSimpleOpenDurak">
+templates/seats.html:1024:        <span>Durak</span>
+templates/seats.html:1050:    const durak = q("#seatSimpleOpenDurak");
+templates/seats.html:1055:          const routeTab = document.querySelector(".tab-btn[data-tab='route']");
+templates/seats.html:1056:          if(routeTab) routeTab.click();
+templates/seats.html:1058:          const flow = q("#routeStrip") || q(".route-strip-shell") || q(".route-flow-shell");
+static/seats/seats.js:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_voice_tts_split:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_voice_tts_split:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_voice_tts_split:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_time_prayer_split:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_time_prayer_split:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_time_prayer_split:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_unified_voice:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_unified_voice:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_unified_voice:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_time_prayer_remove_final:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_time_prayer_remove_final:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_time_prayer_remove_final:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_drive_eta_split:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_drive_eta_split:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_drive_eta_split:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_speed_render_throttle:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_speed_render_throttle:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_speed_render_throttle:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_tts_button_sync_fix:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_tts_button_sync_fix:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_tts_button_sync_fix:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_runtime_bridge:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_runtime_bridge:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_runtime_bridge:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_tts_sync_fix:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_tts_sync_fix:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_tts_sync_fix:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_pickup_live_default:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_pickup_live_default:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_pickup_live_default:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_pickup_live_full_fix:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_pickup_live_full_fix:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_pickup_live_full_fix:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_boarding_stop_logic:795:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_boarding_stop_logic:824:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_boarding_stop_logic:842:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_boarding_stop_fix_final:831:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_boarding_stop_fix_final:860:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_boarding_stop_fix_final:878:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_voice_seat_mini:831:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_voice_seat_mini:860:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_voice_seat_mini:878:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_voice_mini_counter_final:831:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_voice_mini_counter_final:860:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_voice_mini_counter_final:878:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_voice_mini_drive_fix:835:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_voice_mini_drive_fix:864:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_voice_mini_drive_fix:882:  const wrap = $("#routeStrip");
+static/seats/patches/seat-simple-ui-pack.css:107:html.seat-simple-mode #routeStrip,
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:525:      "#routeStrip .is-live",
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:526:      "#routeStrip .live",
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:527:      "#routeStrip .active",
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:528:      "#routeStrip .is-active",
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:529:      "#routeStrip .selected",
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:530:      "#routeStrip .current",
+static/seats/patches/stop-flow-focus-patch.js.bak_before_rollback_20260520_103515:598:      document.getElementById("routeStrip"),
+static/seats/seats.js.bak_live_stop_pro_20260512_2248:775:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stop_pro_20260512_2248:804:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stop_pro_20260512_2248:822:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_offload_modal_clean:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_offload_modal_clean:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_offload_modal_clean:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_confirm_offload_disable:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_confirm_offload_disable:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_confirm_offload_disable:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_android_tts:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_android_tts:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_android_tts:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_voice_fix:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_voice_fix:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_voice_fix:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_direct_tts:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_direct_tts:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_direct_tts:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_direct_tts_summary_fix:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_direct_tts_summary_fix:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_direct_tts_summary_fix:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_night_voice_toggle_bind:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_night_voice_toggle_bind:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_night_voice_toggle_bind:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_night_voice_rollback:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_night_voice_rollback:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_night_voice_rollback:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_night_voice_safe_bind:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_night_voice_safe_bind:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_night_voice_safe_bind:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_add_continue_trip_coords_helper_final:836:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_add_continue_trip_coords_helper_final:865:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_add_continue_trip_coords_helper_final:883:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_append_missing_coords_helper:836:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_append_missing_coords_helper:865:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_append_missing_coords_helper:883:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_insert_coords_helper_after_currentCoords:836:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_insert_coords_helper_after_currentCoords:865:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_insert_coords_helper_after_currentCoords:883:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_object_object_route_strip:852:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_object_object_route_strip:881:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_object_object_route_strip:899:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_object_object_route_strip_v2:852:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_object_object_route_strip_v2:881:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_object_object_route_strip_v2:899:  const wrap = $("#routeStrip");
+static/seats/seats.js.before_revert_route_strip_bug:918:  const wrap = $("#routeStrip");
+static/seats/seats.js.before_revert_route_strip_bug:947:      const wrap = $("#routeStrip");
+static/seats/seats.js.before_revert_route_strip_bug:965:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_restore_runtime_bridge_final:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_restore_runtime_bridge_final:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_restore_runtime_bridge_final:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_apk_voice_counts:775:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_apk_voice_counts:804:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_apk_voice_counts:822:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_stop_flow_cleanup_20260512_2304:775:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_stop_flow_cleanup_20260512_2304:804:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_stop_flow_cleanup_20260512_2304:822:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_trip_id_memory_guard_20260512_2312:812:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_trip_id_memory_guard_20260512_2312:841:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_trip_id_memory_guard_20260512_2312:859:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_memory_schema_reset_20260512_2317:867:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_memory_schema_reset_20260512_2317:896:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_memory_schema_reset_20260512_2317:914:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stop_flow_events_20260512_2324:903:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stop_flow_events_20260512_2324:932:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stop_flow_events_20260512_2324:950:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stop_fix_final_20260512_2349:1002:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stop_fix_final_20260512_2349:1031:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stop_fix_final_20260512_2349:1049:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_order_live_final_20260513_0023:1011:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_order_live_final_20260513_0023:1040:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_order_live_final_20260513_0023:1058:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_label_title_regex_20260516_062350:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_label_title_regex_20260516_062350:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_label_title_regex_20260516_062350:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_rollback_general_label_fix_20260516_062504:1028:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_rollback_general_label_fix_20260516_062504:1057:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_rollback_general_label_fix_20260516_062504:1075:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_clean_speed_voice_split_20260516_114304:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_clean_speed_voice_split_20260516_114304:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_clean_speed_voice_split_20260516_114304:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_final_voice_split_20260516_133629:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_final_voice_split_20260516_133629:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_final_voice_split_20260516_133629:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_speed_voice_click_final_20260516_145945:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_speed_voice_click_final_20260516_145945:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_speed_voice_click_final_20260516_145945:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_voice_mass_rollback_20260516_150355:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_voice_mass_rollback_20260516_150355:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_voice_mass_rollback_20260516_150355:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_restore_from_20260516_145319_20260516_151331:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_restore_from_20260516_145319_20260516_151331:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_restore_from_20260516_145319_20260516_151331:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_corrective_restore_20260516_151536:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_corrective_restore_20260516_151536:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_corrective_restore_20260516_151536:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_clean_speed_split_leftover_20260516_151647:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_clean_speed_split_leftover_20260516_151647:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_clean_speed_split_leftover_20260516_151647:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_restore_natural_total_checkpoint_20260516_152438:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_restore_natural_total_checkpoint_20260516_152438:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_restore_natural_total_checkpoint_20260516_152438:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_continue_trip_bridge:835:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_continue_trip_bridge:864:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_continue_trip_bridge:882:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_runtime_sync:835:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_runtime_sync:864:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_runtime_sync:882:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_raw_gpskm_format_fix:835:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_raw_gpskm_format_fix:864:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_raw_gpskm_format_fix:882:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_gpskm_raw_write_fix:835:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_gpskm_raw_write_fix:864:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_gpskm_raw_write_fix:882:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_last_coords_cache:835:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_last_coords_cache:864:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_last_coords_cache:882:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_add_missing_coords_helper_fix:836:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_add_missing_coords_helper_fix:865:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_add_missing_coords_helper_fix:883:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_cachedStops_object_usage_final:898:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_cachedStops_object_usage_final:927:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_cachedStops_object_usage_final:945:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_final_stop_normalize_cleanup:918:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_final_stop_normalize_cleanup:947:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_final_stop_normalize_cleanup:965:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_stop_flow_after_api_stops_object:918:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_stop_flow_after_api_stops_object:947:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_stop_flow_after_api_stops_object:965:  const wrap = $("#routeStrip");
+static/seats/seats.js.before_next_revert_test:835:  const wrap = $("#routeStrip");
+static/seats/seats.js.before_next_revert_test:864:      const wrap = $("#routeStrip");
+static/seats/seats.js.before_next_revert_test:882:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_voice_seat_counts:771:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_voice_seat_counts:800:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_fix_voice_seat_counts:818:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_event_memory_20260512_2330:937:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_event_memory_20260512_2330:966:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_event_memory_20260512_2330:984:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_display_no_fallback_20260512_2341:990:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_display_no_fallback_20260512_2341:1019:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_display_no_fallback_20260512_2341:1037:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_candidate_selected_fix_20260512_2346:1002:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_candidate_selected_fix_20260512_2346:1031:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_candidate_selected_fix_20260512_2346:1049:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stale_fix_20260512_2354:1002:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stale_fix_20260512_2354:1031:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stale_fix_20260512_2354:1049:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_order_live_stop_20260513_0020:1011:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_order_live_stop_20260513_0020:1040:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_route_order_live_stop_20260513_0020:1058:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_only_operation_stops_20260513_0027:1011:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_only_operation_stops_20260513_0027:1040:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_only_operation_stops_20260513_0027:1058:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_general_seat_label_fix_20260516_062235:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_general_seat_label_fix_20260516_062235:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_general_seat_label_fix_20260516_062235:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_split_assistant_speed_voice_20260516_113619:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_split_assistant_speed_voice_20260516_113619:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_split_assistant_speed_voice_20260516_113619:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_voice_split_final2_20260516_145734:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_voice_split_final2_20260516_145734:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_voice_split_final2_20260516_145734:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_restore_previous_20260516_150549:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_restore_previous_20260516_150549:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_restore_previous_20260516_150549:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_fix_bad_voice_rollback_20260516_150609:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_fix_bad_voice_rollback_20260516_150609:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_fix_bad_voice_rollback_20260516_150609:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_restore_12_checkpoint_20260516_153518:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_restore_12_checkpoint_20260516_153518:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_restore_12_checkpoint_20260516_153518:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_exact_113619_restore_20260516_153946:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_exact_113619_restore_20260516_153946:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_exact_113619_restore_20260516_153946:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_clear_ticket_on_offload_20260518_145103:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_clear_ticket_on_offload_20260518_145103:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_clear_ticket_on_offload_20260518_145103:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_selected_stop_memory_fix_20260518_153404:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_selected_stop_memory_fix_20260518_153404:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_selected_stop_memory_fix_20260518_153404:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_rollback_selected_stop_memory_20260518_153528:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_rollback_selected_stop_memory_20260518_153528:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_rollback_selected_stop_memory_20260518_153528:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_rollback_live_stop_core_20260520_104314:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_rollback_live_stop_core_20260520_104314:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_rollback_live_stop_core_20260520_104314:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_rollback_exact_113619_20260516_154139:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_rollback_exact_113619_20260516_154139:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_rollback_exact_113619_20260516_154139:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stop_core_fix_20260520_104112:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stop_core_fix_20260520_104112:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_live_stop_core_fix_20260520_104112:1072:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_rollback_live_stop_core_20260520_104302:1025:  const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_rollback_live_stop_core_20260520_104302:1054:      const wrap = $("#routeStrip");
+static/seats/seats.js.bak_before_rollback_live_stop_core_20260520_104302:1072:  const wrap = $("#routeStrip");
+
+===== 6) seats.js: routeStrip / Durak Akışı çizim bölgesi =====
+  1020	      box.appendChild(d);
+  1021	    });
+  1022	  }
+  1023	
+  1024	function centerRouteStripItem(item, behavior = "smooth"){
+  1025	  const wrap = $("#routeStrip");
+  1026	  if(!wrap || !item) return;
+  1027	
+  1028	  const left = item.offsetLeft - (wrap.clientWidth / 2) + (item.clientWidth / 2);
+  1029	
+  1030	  wrap.scrollTo({
+  1031	    left: Math.max(0, left),
+  1032	    behavior
+  1033	  });
+  1034	}
+  1035	
+  1036	
+  1037	function focusRouteStripStop(stopName, { select=false, voice=false } = {}){
+  1038	  const name = (stopName || "").trim();
+  1039	  if(!name){
+  1040	    toast("Durak bulunamadı");
+  1041	    return false;
+  1042	  }
+  1043	
+  1044	  const canonical = findCanonicalStopName(name) || name;
+  1045	
+  1046	  if(select){
+  1047	    setSelectedStop(canonical, { silent:!voice, voiceReply:voice });
+  1048	  }else{
+  1049	    renderRouteStrip();
+  1050	  }
+  1051	
+  1052	  requestAnimationFrame(() => {
+  1053	    setTimeout(() => {
+  1054	      const wrap = $("#routeStrip");
+  1055	      if(!wrap) return;
+  1056	
+  1057	      const target = Array.from(wrap.querySelectorAll(".route-stop"))
+  1058	        .find(el => norm(el.dataset.stop || el.querySelector(".name")?.textContent || "") === norm(canonical));
+  1059	
+  1060	      if(target){
+  1061	        centerRouteStripItem(target, "smooth");
+  1062	        target.classList.add("route-focus-flash");
+  1063	        setTimeout(() => target.classList.remove("route-focus-flash"), 1200);
+  1064	      }
+  1065	    }, 80);
+  1066	  });
+  1067	
+  1068	  return true;
+  1069	}
+  1070	
+  1071	function renderRouteStrip(){
+  1072	  const wrap = $("#routeStrip");
+  1073	  if(!wrap) return;
+  1074	
+  1075	  const list = allStopsList();
+  1076	  wrap.innerHTML = "";
+  1077	
+  1078	  if(!list.length){
+  1079	    wrap.innerHTML = `
+  1080	      <div class="route-stop active">
+  1081	        <div class="name">Rota hazırlanıyor</div>
+  1082	        <div class="meta">Duraklar yüklenecek</div>
+  1083	      </div>
+  1084	    `;
+  1085	    return;
+  1086	  }
+  1087	
+  1088	  const selected = getSelectedStopName();
+  1089	  const live = getDisplayLiveStop();
+  1090	  const selectedNorm = norm(selected);
+  1091	  const liveNorm = norm(live);
+  1092	  let routeFocusItem = null;
+  1093	  const liveKm = stopDistanceKmByName(live);
+  1094	  const liveDangerOn = Number.isFinite(liveKm) && liveKm <= 5;
+  1095	  // if(liveDangerOn){maybeSpeakApproachStop(live, liveKm);}
+  1096	  const nextWarnStop = liveDangerOn? computeNextStopName(live || selected || "", "nextWithSeats"): "";
+  1097	  const greenStop = liveDangerOn && nextWarnStop? computeNextStopName(nextWarnStop, "nextWithSeats"): "";
+  1098	
+  1099	  const nextWarnNorm = norm(nextWarnStop);
+  1100	  const greenNorm = norm(greenStop);
+  1101	  const seatCounts = computeSeatCountsByStop();
+  1102	  const standingCounts = computeStandingCountsByStop();
+  1103	  const parcelCounts = computeParcelCountsByStop();
+  1104	
+  1105	  const actualSchedule = buildActualSchedule();
+  1106	  const planMap = new Map(
+  1107	    actualSchedule.map(x => [norm(x.stop), x.plan || ""])
+  1108	  );
+  1109	
+  1110	  const etaMap = new Map(
+  1111	    (speedState.etaItems || []).map(x => [norm(x.stop), x])
+  1112	  );
+  1113	
+  1114	  list.forEach(stop => {
+  1115	    const seatCt = seatCounts[stop] || 0;
+  1116	    const standingCt = standingCounts[stop] || 0;
+  1117	    const parcelCt = parcelCounts[stop] || 0;
+  1118	
+  1119	    const isActive = !!selectedNorm && norm(stop) === selectedNorm;
+  1120	    const isLive = !!liveNorm && norm(stop) === liveNorm;
+  1121	    const isDone = speedState.passedStops.has(stop) && !isActive && !isLive;
+  1122	    const isNextWarn = liveDangerOn && !!nextWarnNorm && norm(stop) === nextWarnNorm;
+  1123	    const isFlowGreen = liveDangerOn && !!greenNorm && norm(stop) === greenNorm;
+  1124	
+  1125	    const stopObj = findStopByName(stop);
+  1126	    const plan = planMap.get(norm(stop)) || "";
+  1127	    let kmText = "";
+  1128	
+  1129	    if(currentCoords && stopObj && hasCoord(stopObj)){
+  1130	      const km = distKm(currentCoords, {
+  1131	        lat: Number(stopObj.lat),
+  1132	        lng: Number(stopObj.lng)
+  1133	      });
+  1134	      kmText = `${km.toFixed(1)} km`;
+  1135	    }
+  1136	
+  1137	    let metaLine1 = "";
+  1138	    if(isLive) metaLine1 = "Canlı";
+  1139	    else if(isActive) metaLine1 = "Seçili";
+  1140	    else if(isDone) metaLine1 = "Geçildi";
+  1141	    else metaLine1 = "Bekliyor";
+  1142	
+  1143	    let metaLine2 = "";
+  1144	    const flowLine = stopFlowSummaryLine(stop);
+  1145	
+  1146	    if(flowLine && flowLine !== "İşlem yok"){
+  1147	      metaLine2 = flowLine;
+  1148	    }else if(seatCt || standingCt || parcelCt){
+  1149	      metaLine2 = `${seatCt}K ${standingCt}A ${parcelCt}E`;
+  1150	    }else if(isDone){
+  1151	      metaLine2 = "İşlem bitti";
+  1152	    }else{
+  1153	      metaLine2 = "İşlem yok";
+  1154	    }
+  1155	
+  1156	    const extraBits = [];
+  1157	    if(plan) extraBits.push(`Plan ${plan}`);
+  1158	    if(kmText) extraBits.push(kmText);
+  1159	    const item = document.createElement("button");
+  1160	    item.type = "button";
+  1161	    item.dataset.stop = stop;
+  1162	    item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done has-flow-summary" : ""} ${liveDangerOn && isLive ? "live-danger" : ""} ${isNextWarn ? "next-warning" : ""} ${isFlowGreen ? "flow-green" : ""}`;
+  1163	    if(isLive){routeFocusItem = item;}   
+  1164	
+  1165	    const etaItem = etaMap.get(norm(stop));
+  1166	    const planText = plan || "—";
+  1167	    const etaText = etaItem && plan ? fmtHour(etaItem.etaDate) : "";
+  1168	    const delayText = etaItem && plan ? etaItem.badgeText : "";
+  1169	    const kmValue = kmText || (etaItem && Number.isFinite(etaItem.km) ? `${etaItem.km.toFixed(1)} km` : "—");
+  1170	
+  1171	    const timeText = etaText ? `${planText} → ${etaText}` : planText;
+  1172	    const statusText = delayText ? `${kmValue} · ${delayText}` : kmValue;
+  1173	
+  1174	    item.innerHTML = `
+  1175	  <div class="name">${stop}</div>
+  1176	  <div class="meta ${isDone ? "done-summary" : ""}">${metaLine1} · ${metaLine2}</div>
+  1177	  <div class="extra">
+  1178	    <div class="extra-line">
+  1179	      <span class="extra-k">Plan/ETA</span>
+  1180	      <span class="extra-v">${timeText}</span>
+  1181	    </div>
+  1182	    <div class="extra-line">
+  1183	      <span class="extra-k">Durum</span>
+  1184	      <span class="extra-v">${statusText}</span>
+  1185	    </div>
+  1186	  </div>
+  1187	   `;
+  1188	
+  1189	item.addEventListener("click", () => {
+  1190	  setSelectedStop(stop, { silent:false, voiceReply:true });
+  1191	
+  1192	  // APK/WebView için ek garanti: durak kartı tıklamasında doğrudan TTS tetikle
+  1193	  try{
+  1194	    const msg = stopHumanVoiceSummary(stop);
+  1195	    if(typeof speakOnce === "function") speakOnce(msg);
+  1196	  }catch(_){}
+  1197	});
+  1198	
+  1199	wrap.appendChild(item);
+  1200	});
+  1201	
+  1202	if(routeFocusItem && live){
+  1203	  const focusKey = norm(live);
+  1204	
+  1205	  if(lastRouteStripCenteredStop !== focusKey){
+  1206	    lastRouteStripCenteredStop = focusKey;
+  1207	
+  1208	    requestAnimationFrame(() => {
+  1209	      setTimeout(() => {
+  1210	        centerRouteStripItem(routeFocusItem, "smooth");
+  1211	      }, 80);
+  1212	    });
+  1213	  }
+  1214	}
+  1215	}
+  1216	  function updateCompactHeader(){
+  1217	    const selected = getSelectedStopName();
+  1218	    const live = getDisplayLiveStop();
+  1219	    const next = computeNextStopName(live || selected || "", "nextWithSeats");
+  1220	
+  1221	    setText("#topLiveStop", live || selected || "—");
+  1222	    setText("#topSpeed", `${Math.round(Number(speedState.current || 0))} km/h`);
+  1223	    setText("#selectedStopBadge", selected || "—");
+  1224	    setText("#miniStop", selected || live || "—");
+  1225	    setText("#routeLiveStop", live || "—");
+  1226	    setText("#routeLiveStopCard", live || "—");
+  1227	    setValue("#coordStopName", selected || "");
+  1228	    setText("#routeMiniLive", live || "—");
+  1229	    setText("#routeMiniNext", next || "—");
+  1230	
+  1231	    const liveState = $("#miniLiveState");
+  1232	    if(liveState){
+  1233	      const seatCt = selected ? seatsForStop(selected).length : 0;
+  1234	      const standingCt = selected ? (computeStandingCountsByStop()[selected] || 0) : 0;
+  1235	      const parcelCt = selected ? (computeParcelCountsByStop()[selected] || 0) : 0;
+
+===== 7) seats.js: selected/live stop bölgesi =====
+  1210	        centerRouteStripItem(routeFocusItem, "smooth");
+  1211	      }, 80);
+  1212	    });
+  1213	  }
+  1214	}
+  1215	}
+  1216	  function updateCompactHeader(){
+  1217	    const selected = getSelectedStopName();
+  1218	    const live = getDisplayLiveStop();
+  1219	    const next = computeNextStopName(live || selected || "", "nextWithSeats");
+  1220	
+  1221	    setText("#topLiveStop", live || selected || "—");
+  1222	    setText("#topSpeed", `${Math.round(Number(speedState.current || 0))} km/h`);
+  1223	    setText("#selectedStopBadge", selected || "—");
+  1224	    setText("#miniStop", selected || live || "—");
+  1225	    setText("#routeLiveStop", live || "—");
+  1226	    setText("#routeLiveStopCard", live || "—");
+  1227	    setValue("#coordStopName", selected || "");
+  1228	    setText("#routeMiniLive", live || "—");
+  1229	    setText("#routeMiniNext", next || "—");
+  1230	
+  1231	    const liveState = $("#miniLiveState");
+  1232	    if(liveState){
+  1233	      const seatCt = selected ? seatsForStop(selected).length : 0;
+  1234	      const standingCt = selected ? (computeStandingCountsByStop()[selected] || 0) : 0;
+  1235	      const parcelCt = selected ? (computeParcelCountsByStop()[selected] || 0) : 0;
+  1236	      const totalOps = seatCt + standingCt + parcelCt;
+  1237	
+  1238	      liveState.textContent = selected
+  1239	        ? (totalOps > 0 ? "İşlem var" : "Sakin")
+  1240	        : (live ? "Yolda" : "Hazır");
+  1241	    }
+  1242	
+  1243	    renderRouteStrip();
+  1244	  }
+  1245	
+  1246	  function computeNextStopName(currentName, mode="nextWithSeats"){
+  1247	    const list = allStopsList();
+  1248	    if(!list.length) return "";
+  1249	
+  1250	    const curIdx = indexOfStopByName(currentName);
+  1251	    let i = curIdx >= 0 ? curIdx + 1 : 0;
+  1252	
+  1253	    if(mode === "strictNext") return list[i] || "";
+  1254	
+  1255	    for(; i < list.length; i++){
+  1256	      const nm = list[i];
+  1257	      if(!nm) continue;
+  1258	      if(mode === "nextWithSeats"){
+  1259	        if(
+  1260	          hasPassengersFor(nm) ||
+  1261	          computeStandingCountsByStop()[nm] ||
+  1262	          computeParcelCountsByStop()[nm] ||
+  1263	          isTimedStop(nm)
+  1264	        ){
+  1265	          return nm;
+  1266	        }
+  1267	      }
+  1268	    }
+  1269	
+  1270	    return "";
+  1271	  }
+  1272	
+  1273	  function setSelectedStop(name, { silent=false, voiceReply=true } = {}){
+  1274	    const sel = $("#alertStop");
+  1275	    if(!sel) return false;
+  1276	
+  1277	    if(!name){
+  1278	      sel.value = "";
+  1279	      refreshStopBadges();
+  1280	      updateStopSeatBadges();
+  1281	      updateGeoHint();
+  1282	      renderAI();
+  1283	      renderTimeline();
+  1284	      updateCompactHeader();
+  1285	      return true;
+  1286	    }
+  1287	
+  1288	    const canonical = findCanonicalStopName(name);
+  1289	    if(!canonical) return false;
+  1290	
+  1291	    const ok = [...sel.options].some(o => norm(o.value) === norm(canonical));
+  1292	    if(!ok) return false;
+  1293	
+  1294	    sel.value = canonical;
+  1295	    refreshStopBadges();
+  1296	    updateStopSeatBadges();
+  1297	    updateGeoHint();
+  1298	    renderAI();
+  1299	    renderTimeline();
+  1300	    updateCompactHeader();
+  1301	
+  1302	    if(!silent && voiceReply){
+  1303	      const msg = stopHumanVoiceSummary(canonical);
+  1304	      if(window.SeatsSpeak){
+  1305	        window.SeatsSpeak(msg);
+  1306	      }else if(typeof speakOnce === "function"){
+  1307	        speakOnce(msg);
+  1308	      }else if(typeof speak === "function"){
+  1309	        speak(msg);
+  1310	      }
+  1311	    }
+  1312	
+  1313	    return true;
+  1314	  }
+  1315	
+  1316	  function markPassedStopsUntil(stopName){
+  1317	    const idx = indexOfStopByName(stopName);
+  1318	    const list = allStopsList();
+  1319	    if(idx < 0 || !list.length) return;
+  1320	
+  1321	    for(let i = 0; i <= idx; i++){
+  1322	      snapshotStopFlowSummary(list[i]);
+  1323	      speedState.passedStops.add(list[i]);
+  1324	    }
+  1325	    persistVoiceState();
+  1326	  }
+  1327	
+  1328	  function setLiveStop(name){
+  1329	    const canonical = findCanonicalStopName(name);
+  1330	    if(!canonical) return false;
+  1331	
+  1332	    speedState.liveStop = canonical;
+  1333	    markPassedStopsUntil(canonical);
+  1334	    persistVoiceState();
+  1335	    updateCompactHeader();
+  1336	    renderTimeline();
+  1337	    renderAI();
+  1338	    return true;
+  1339	  }
+  1340	
+  1341	  function advanceToNextStop({ mode="nextWithSeats", silent=false, ignoreToggle=false } = {}){
+  1342	    const autoOn = $("#autoAdvanceToggle")?.checked;
+  1343	    if(autoOn === false && !ignoreToggle) return;
+  1344	
+  1345	    const cur = getSelectedStopName();
+  1346	    const next = computeNextStopName(cur, mode);
+  1347	
+  1348	    if(!next){
+  1349	      toast("Rota bitti ya da ileride işlem yok.");
+  1350	      setSelectedStop("", { silent:true, voiceReply:false });
+  1351	      return;
+  1352	    }
+  1353	
+  1354	    setSelectedStop(next, { silent, voiceReply: !silent });
+  1355	  }
+  1356	
+  1357	  function updateGeoHint(){
+  1358	    const h = $("#geoHint");
+  1359	    if(!h) return;
+  1360	
+  1361	    const stopName = getSelectedStopName();
+  1362	
+  1363	    if(geoWatchId){
+  1364	      return;
+  1365	    }
+
+===== 8) seats.js: runtime bridge bölgesi =====
+  2820	      toast(e.message || "Başlangıç yükleme hatası");
+  2821	    }
+  2822	  })();
+  2823	
+  2824	
+  2825	/* =========================================================
+  2826	   LIVE RUNTIME STATE BRIDGE
+  2827	   Seats ekranındaki canlı veriyi backend'e yazar
+  2828	========================================================= */
+  2829	async function persistLiveRuntimeStateToServer(){
+  2830	  try{
+  2831	    const tripId = window.SEATS_BOOT?.tripId;
+  2832	    if(!tripId) return;
+  2833	
+  2834	    // Backend'e sadece gerçekten set edilmiş canlı durağı yaz.
+  2835	    // getDisplayLiveStop() içindeki 15 km fallback burada kullanılmaz.
+  2836	    let liveStop =
+  2837	      (speedState && speedState.liveStop) ||
+  2838	      "";
+  2839	
+  2840	    // Uzakta kalmış eski canlı durak backend'e yazılmasın.
+  2841	    try{
+  2842	      if(liveStop && typeof stopDistanceKmByName === "function"){
+  2843	        const liveKmCheck = stopDistanceKmByName(liveStop);
+  2844	        if(Number.isFinite(liveKmCheck) && liveKmCheck > 5.5){
+  2845	          liveStop = "";
+  2846	        }
+  2847	      }
+  2848	    }catch(_){}
+  2849	
+  2850	    const speed = Math.round(Number((speedState && speedState.current) || 0)) || 0;
+  2851	
+  2852	    let gpsKm = "";
+  2853	    try{
+  2854	      if(liveStop && typeof stopDistanceKmByName === "function"){
+  2855	        const km = stopDistanceKmByName(liveStop);
+  2856	        if(Number.isFinite(km)){
+  2857	          gpsKm = String(km);
+  2858	        }
+  2859	      }
+  2860	    }catch(_){}
+  2861	
+  2862	    const etaMain = (document.getElementById("delayMain")?.textContent || "").trim();
+  2863	    const etaSub  = (document.getElementById("delaySub")?.textContent || "").trim();
+  2864	
+  2865	    const url =
+  2866	      `/api/live-runtime-state?write=1` +
+  2867	      `&trip_id=${encodeURIComponent(tripId)}` +
+  2868	      `&live_stop=${encodeURIComponent(liveStop)}` +
+  2869	      `&speed=${encodeURIComponent(speed)}` +
+  2870	      `&gps_km=${encodeURIComponent(gpsKm)}` +
+  2871	      `&eta_main=${encodeURIComponent(etaMain)}` +
+  2872	      `&eta_sub=${encodeURIComponent(etaSub)}`;
+  2873	
+  2874	    fetch(url, {
+  2875	      method: "GET",
+  2876	      credentials: "same-origin",
+  2877	      cache: "no-store"
+  2878	    }).catch(() => {});
+  2879	  }catch(_){}
+  2880	}
+  2881	
+  2882	if(!window.__liveRuntimeBridgeInterval){
+  2883	  window.__liveRuntimeBridgeInterval = setInterval(function(){
+  2884	    try{ persistLiveRuntimeStateToServer(); }catch(_){}
+  2885	  }, 1500);
+  2886	
+  2887	  window.addEventListener("beforeunload", function(){
+  2888	    try{ persistLiveRuntimeStateToServer(); }catch(_){}
+  2889	  });
+  2890	}
+  2891	
+
+===== 9) stop-flow-focus-patch.js TAM DOSYA =====
+     1	(function(){
+     2	  if(window.__stopFlowFocusPatchLoaded) return;
+     3	  window.__stopFlowFocusPatchLoaded = true;
+     4	
+     5	  var overlayId = "stopFlowFocusOverlay";
+     6	  var memoryKey = "muavin:selectedStop:" + String(window.TRIP_KEY || window.BAG_TRIP || location.pathname);
+     7	
+     8	  function qs(s, root){ return (root || document).querySelector(s); }
+     9	  function qsa(s, root){ return Array.prototype.slice.call((root || document).querySelectorAll(s)); }
+    10	
+    11	  function cleanStopName(v){
+    12	    v = String(v || "").replace(/\s+/g, " ").trim();
+    13	    v = v.replace(/^🎯\s*/g, "");
+    14	    v = v.replace(/^Seçili\s+durak\s*:\s*/i, "");
+    15	    v = v.replace(/^Sıradaki\s*:\s*/i, "");
+    16	    if(!v || v === "-" || v === "—" || v.toLowerCase() === "seçiniz") return "";
+    17	    return v;
+    18	  }
+    19	
+    20	  function sameStop(a, b){
+    21	    return cleanStopName(a).toLocaleLowerCase("tr-TR") === cleanStopName(b).toLocaleLowerCase("tr-TR");
+    22	  }
+    23	
+    24	  function ensureOption(select, value){
+    25	    if(!select || !value) return;
+    26	    var found = false;
+    27	    qsa("option", select).forEach(function(o){
+    28	      if(sameStop(o.value || o.textContent, value)) found = true;
+    29	    });
+    30	    if(!found){
+    31	      var opt = document.createElement("option");
+    32	      opt.value = value;
+    33	      opt.textContent = value;
+    34	      select.appendChild(opt);
+    35	    }
+    36	  }
+    37	
+    38	  function getCurrentStop(){
+    39	    var fromWindow = cleanStopName(window.__muavinSelectedStop || "");
+    40	    if(fromWindow) return fromWindow;
+    41	
+    42	    var alertStop = qs("#alertStop");
+    43	    if(alertStop && cleanStopName(alertStop.value)) return cleanStopName(alertStop.value);
+    44	
+    45	    var simpleStop = qs("#seatSimpleStop");
+    46	    if(simpleStop && cleanStopName(simpleStop.textContent)) return cleanStopName(simpleStop.textContent);
+    47	
+    48	    var badge = qs("#selectedStopBadge");
+    49	    if(badge && cleanStopName(badge.textContent)) return cleanStopName(badge.textContent);
+    50	
+    51	    return cleanStopName(localStorage.getItem(memoryKey) || "");
+    52	  }
+    53	
+    54	  function rememberStop(name){
+    55	    name = cleanStopName(name);
+    56	    if(!name) return;
+    57	    window.__muavinSelectedStop = name;
+    58	    try{ localStorage.setItem(memoryKey, name); }catch(e){}
+    59	  }
+    60	
+    61	  function collectStops(){
+    62	    var arr = [];
+    63	    var seen = Object.create(null);
+    64	
+    65	    function add(v){
+    66	      v = cleanStopName(v);
+    67	      if(!v) return;
+    68	      var k = v.toLocaleLowerCase("tr-TR");
+    69	      if(seen[k]) return;
+    70	      seen[k] = true;
+    71	      arr.push(v);
+    72	    }
+    73	
+    74	    if(Array.isArray(window.STOPS)) window.STOPS.forEach(add);
+    75	    if(window.SEATS_BOOT && Array.isArray(window.SEATS_BOOT.stops)) window.SEATS_BOOT.stops.forEach(add);
+    76	
+    77	    qsa("#alertStop option, #pickup option, #dropoff option").forEach(function(o){
+    78	      add(o.value || o.textContent);
+    79	    });
+    80	
+    81	    qsa(".route-stop, [data-stop-name], [data-stop]").forEach(function(el){
+    82	      add(el.getAttribute("data-stop-name") || el.getAttribute("data-stop") || (el.querySelector(".stop-name, .name, strong") || el).textContent);
+    83	    });
+    84	
+    85	    return arr;
+    86	  }
+    87	
+    88	  function setPickupToSelected(name, force){
+    89	    name = cleanStopName(name);
+    90	    if(!name) return;
+    91	
+    92	    var pickup = qs("#pickup");
+    93	    if(!pickup) return;
+    94	
+    95	    var current = cleanStopName(pickup.value || "");
+    96	    if(!force && current) return;
+    97	
+    98	    ensureOption(pickup, name);
+    99	    pickup.value = name;
+   100	    pickup.dispatchEvent(new Event("change", {bubbles:true}));
+   101	  }
+   102	
+   103	  function paintSelectedTexts(name){
+   104	    name = cleanStopName(name);
+   105	    if(!name) return;
+   106	
+   107	    ["#seatSimpleStop", "#topLiveStop"].forEach(function(sel){
+   108	      var el = qs(sel);
+   109	      if(el) el.textContent = name;
+   110	    });
+   111	
+   112	    var badge = qs("#selectedStopBadge");
+   113	    if(badge){
+   114	      if((badge.textContent || "").toLocaleLowerCase("tr-TR").includes("seçili durak")){
+   115	        badge.textContent = "🎯 Seçili durak: " + name;
+   116	      }else{
+   117	        badge.textContent = name;
+   118	      }
+   119	    }
+   120	  }
+   121	
+   122	  function applySelectedStop(name){
+   123	    name = cleanStopName(name);
+   124	    if(!name) return;
+   125	
+   126	    rememberStop(name);
+   127	
+   128	    var alertStop = qs("#alertStop");
+   129	    if(alertStop){
+   130	      ensureOption(alertStop, name);
+   131	      alertStop.value = name;
+   132	      alertStop.dispatchEvent(new Event("change", {bubbles:true}));
+   133	    }
+   134	
+   135	    if(typeof window.setSelectedStop === "function" && !window.__stopFocusCallingSetSelected){
+   136	      try{
+   137	        window.__stopFocusCallingSetSelected = true;
+   138	        window.setSelectedStop(name, true);
+   139	      }catch(e){
+   140	        console.warn("setSelectedStop çağrısı geçildi:", e);
+   141	      }finally{
+   142	        window.__stopFocusCallingSetSelected = false;
+   143	      }
+   144	    }
+   145	
+   146	    setPickupToSelected(name, true);
+   147	    paintSelectedTexts(name);
+   148	
+   149	    document.dispatchEvent(new CustomEvent("muavin:selected-stop-change", {detail:{stop:name}}));
+   150	  }
+   151	
+   152	  function buildOverlay(){
+   153	    var old = qs("#" + overlayId);
+   154	    if(old) return old;
+   155	
+   156	    var ov = document.createElement("div");
+   157	    ov.id = overlayId;
+   158	    ov.hidden = true;
+   159	    ov.innerHTML =
+   160	      '<div class="stop-focus-panel" role="dialog" aria-modal="true" aria-label="Durak Akışı">' +
+   161	        '<div class="stop-focus-head">' +
+   162	          '<div class="stop-focus-topline">' +
+   163	            '<button type="button" class="stop-focus-back" data-stop-focus-close>← Koltuk Planı</button>' +
+   164	            '<div class="stop-focus-badge">Sadece Durak Akışı</div>' +
+   165	          '</div>' +
+   166	          '<h2 class="stop-focus-title">Durak Akışı</h2>' +
+   167	          '<p class="stop-focus-sub">Seçili durak: <b data-current-stop>—</b></p>' +
+   168	        '</div>' +
+   169	        '<div class="stop-focus-list" data-stop-focus-list></div>' +
+   170	      '</div>';
+   171	
+   172	    document.body.appendChild(ov);
+   173	
+   174	    ov.addEventListener("click", function(e){
+   175	      var closeBtn = e.target.closest("[data-stop-focus-close]");
+   176	      if(closeBtn){
+   177	        e.preventDefault();
+   178	        closeStopFocus(true);
+   179	        return;
+   180	      }
+   181	
+   182	      var card = e.target.closest("[data-stop-choice]");
+   183	      if(card){
+   184	        e.preventDefault();
+   185	        var name = card.getAttribute("data-stop-choice") || "";
+   186	        applySelectedStop(name);
+   187	        closeStopFocus(true);
+   188	      }
+   189	    });
+   190	
+   191	    return ov;
+   192	  }
+   193	
+   194	  function renderOverlay(){
+   195	    var ov = buildOverlay();
+   196	    var list = qs("[data-stop-focus-list]", ov);
+   197	    var current = getCurrentStop();
+   198	    var stops = collectStops();
+   199	
+   200	    qs("[data-current-stop]", ov).textContent = current || "—";
+   201	    list.innerHTML = "";
+   202	
+   203	    stops.forEach(function(stop, idx){
+   204	      var card = document.createElement("button");
+   205	      card.type = "button";
+   206	      card.className = "stop-focus-card" + (sameStop(stop, current) ? " is-active" : "");
+   207	      card.setAttribute("data-stop-choice", stop);
+   208	
+   209	      var pin = document.createElement("span");
+   210	      pin.className = "stop-focus-pin";
+   211	      pin.textContent = "📍";
+   212	
+   213	      var main = document.createElement("span");
+   214	      main.className = "stop-focus-main";
+   215	
+   216	      var name = document.createElement("span");
+   217	      name.className = "stop-focus-name";
+   218	      name.textContent = stop;
+   219	
+   220	      var meta = document.createElement("span");
+   221	      meta.className = "stop-focus-meta";
+   222	      meta.textContent = sameStop(stop, current) ? "Şu an seçili durak" : "Dokun, seç ve koltuk planına dön";
+   223	
+   224	      var select = document.createElement("span");
+   225	      select.className = "stop-focus-select";
+   226	      select.textContent = sameStop(stop, current) ? "Seçili" : "Seç";
+   227	
+   228	      main.appendChild(name);
+   229	      main.appendChild(meta);
+   230	      card.appendChild(pin);
+   231	      card.appendChild(main);
+   232	      card.appendChild(select);
+   233	      list.appendChild(card);
+   234	    });
+   235	
+   236	    setTimeout(function(){
+   237	      var active = qs(".stop-focus-card.is-active", ov);
+   238	      if(active) active.scrollIntoView({block:"center"});
+   239	    }, 60);
+   240	  }
+   241	
+   242	  function openStopFocus(){
+   243	    renderOverlay();
+   244	    var ov = buildOverlay();
+   245	    ov.hidden = false;
+   246	    document.documentElement.classList.add("stop-flow-focus-lock");
+   247	    document.body.classList.add("stop-flow-focus-lock");
+   248	  }
+   249	
+   250	  function closeStopFocus(goSeatPlan){
+   251	    var ov = qs("#" + overlayId);
+   252	    if(ov) ov.hidden = true;
+   253	
+   254	    document.documentElement.classList.remove("stop-flow-focus-lock");
+   255	    document.body.classList.remove("stop-flow-focus-lock");
+   256	
+   257	    if(goSeatPlan){
+   258	      setTimeout(function(){
+   259	        var target = qs("#deck") || qs(".deck") || qs(".board-card") || qs(".seats-shell");
+   260	        if(target) target.scrollIntoView({behavior:"smooth", block:"start"});
+   261	      }, 40);
+   262	    }
+   263	  }
+   264	
+   265	  window.openStopFlowFocus = openStopFocus;
+   266	  window.closeStopFlowFocus = closeStopFocus;
+   267	
+   268	  function isBottomDurakButton(el){
+   269	    var btn = el.closest("button, a, [role='button'], .tab-btn, .nav-item, .dock-item, .bottom-nav-item");
+   270	    if(!btn || btn.closest("#" + overlayId)) return null;
+   271	
+   272	    var text = (btn.innerText || btn.textContent || btn.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim();
+   273	    var low = text.toLocaleLowerCase("tr-TR");
+   274	
+   275	    if(!low.includes("durak")) return null;
+   276	    if(low.includes("seçili durak")) return null;
+   277	
+   278	    var rect = btn.getBoundingClientRect();
+   279	    var classHint = String(btn.className || "").toLocaleLowerCase("tr-TR");
+   280	    var parentHint = btn.closest(".bottom-nav, .bottom-bar, .dock, .mobile-nav, [class*='bottom'], [class*='dock']");
+   281	    var isBottom = !!parentHint || rect.top > window.innerHeight * 0.58;
+   282	
+   283	    return isBottom ? btn : null;
+   284	  }
+   285	
+   286	  document.addEventListener("click", function(e){
+   287	    var btn = isBottomDurakButton(e.target);
+   288	    if(!btn) return;
+   289	
+   290	    e.preventDefault();
+   291	    e.stopPropagation();
+   292	    e.stopImmediatePropagation();
+   293	    openStopFocus();
+   294	  }, true);
+   295	
+   296	  function hookSetSelectedStop(){
+   297	    if(typeof window.setSelectedStop !== "function") return;
+   298	    if(window.setSelectedStop.__stopFlowFocusHooked) return;
+   299	
+   300	    var old = window.setSelectedStop;
+   301	    var wrapped = function(name){
+   302	      var ret = old.apply(this, arguments);
+   303	      name = cleanStopName(name);
+   304	      if(name){
+   305	        rememberStop(name);
+   306	        setPickupToSelected(name, true);
+   307	        paintSelectedTexts(name);
+   308	      }
+   309	      return ret;
+   310	    };
+   311	    wrapped.__stopFlowFocusHooked = true;
+   312	    window.setSelectedStop = wrapped;
+   313	  }
+   314	
+   315	  function hookSeatOpeners(){
+   316	    ["openSeat", "openFormWithSeat"].forEach(function(fn){
+   317	      if(typeof window[fn] !== "function") return;
+   318	      if(window[fn].__stopFlowFocusHooked) return;
+   319	
+   320	      var old = window[fn];
+   321	      var wrapped = function(){
+   322	        var ret = old.apply(this, arguments);
+   323	        setTimeout(function(){
+   324	          setPickupToSelected(getCurrentStop(), false);
+   325	        }, 80);
+   326	        return ret;
+   327	      };
+   328	      wrapped.__stopFlowFocusHooked = true;
+   329	      window[fn] = wrapped;
+   330	    });
+   331	  }
+   332	
+   333	  function installHooks(){
+   334	    hookSetSelectedStop();
+   335	    hookSeatOpeners();
+   336	  }
+   337	
+   338	  installHooks();
+   339	  document.addEventListener("DOMContentLoaded", installHooks);
+   340	  setTimeout(installHooks, 300);
+   341	  setTimeout(installHooks, 1000);
+   342	})();
+
+===== 10) seat-simple-ui-pack.js ilgili bölgeler =====
+1:/* ===== seat-simple-open-mode-script ===== */
+15:    return "seatUiMode:" + getTripKey();
+20:      return localStorage.getItem(key()) || "simple";
+22:      return "simple";
+28:      localStorage.setItem(key(), mode);
+33:    const simple = mode !== "advanced";
+34:    document.documentElement.classList.toggle("seat-simple-mode", simple);
+35:    document.body.classList.toggle("seat-simple-mode", simple);
+39:      btn.innerHTML = simple
+42:      btn.setAttribute("aria-pressed", simple ? "true" : "false");
+60:    btn.className = "seat-simple-toggle";
+61:    btn.addEventListener("click", function(){
+63:      const next = current === "advanced" ? "simple" : "advanced";
+86:/* ===== seat-simple-summary-polish-script ===== */
+103:      box.className = "seat-simple-summary";
+104:      box.innerHTML = `
+105:        <div class="seat-simple-summary-top">
+106:          <div class="seat-simple-route" id="seatSimpleRoute">—</div>
+107:          <div class="seat-simple-status"><span>●</span><span>Sade Mod</span></div>
+110:        <div class="seat-simple-summary-grid">
+111:          <div class="seat-simple-mini">
+112:            <small>Durak</small>
+115:          <div class="seat-simple-mini">
+119:          <div class="seat-simple-mini">
+146:    const route = bootData.routeName || "—";
+147:    const routeEl = q("#seatSimpleRoute");
+148:    if(routeEl) routeEl.textContent = route;
+150:    let stop = readText("#selectedStopBadge") || "—";
+151:    if(!stop || stop === "-") stop = "—";
+153:    const stopEl = q("#seatSimpleStop");
+154:    if(stopEl) stopEl.textContent = stop;
+259:    document.addEventListener("click", function(){
+
+===== 11) DB canlı durak ve aktif sefer =====
+Aktif sefer: 292 Antalya – İstanbul 10:26
+live_runtime_state:
+  trip_id = 292
+  live_stop = Ortahan
+  speed = 0.0
+  gps_km = 
+  eta_main = 668 dk erken
+  eta_sub = Ortahan · plan 22:10 · ETA 11:02 · Saat kaydırma
+  updated_at = 2026-05-20 10:52:02
+route id: 19
+durak sayısı: 42
+ilk 5: ['Antalya Otogar', 'Korkuteli', 'Korkuteli Elmalı Kavşağı', 'Çavdır', 'Acıpayam Kavşağı']
+son 5: ['Harem', 'Arabalı Vapur / Harem İskele', 'Sirkeci', 'Alibeyköy', 'Esenler Otogar']

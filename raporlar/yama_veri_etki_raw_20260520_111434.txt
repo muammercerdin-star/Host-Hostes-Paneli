@@ -1,0 +1,1429 @@
+
+
+===== JS RİSK: static/seats/bags.js | ORTA =====
+
+--- koordinat/km/ETA ---
+7: // Örnek: bagMetaCache["3"] = {count:1, right:0, left_front:1, left_back:0, eyes:["LF"]}
+8: const bagMetaCache = {};
+41:   const meta = bagMetaCache[String(seatNo)] || {};
+44:   const right = Number(meta.right || 0);
+45:   const leftFront = Number(meta.left_front || 0);
+46:   const leftBack = Number(meta.left_back || 0);
+58:   if(!parts.length && Array.isArray(meta.eyes)){
+59:     if(meta.eyes.includes("R")) parts.push("sağ gözde bagaj");
+60:     if(meta.eyes.includes("LF")) parts.push("sol ön gözde bagaj");
+61:     if(meta.eyes.includes("LB")) parts.push("sol arka gözde bagaj");
+84: async function fetchBagMeta(seatNo){
+88:     const u = `/api/bags/meta?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seatNo)}`;
+101:     const meta = {
+109:     bagMetaCache[key] = meta;
+110:     return meta;
+112:     return bagMetaCache[key] || { count:0, right:0, left_front:0, left_back:0, eyes:[] };
+133:   const meta = await fetchBagMeta(seatNo);
+134:   const cnt = meta.count;
+135:   const eyes = meta.eyes || [];
+177:   bagMetaCache,
+182:   fetchBagMeta,
+
+--- runtime/localStorage/fetch ---
+89:     const j = await safeJsonFetch(u);
+158:     await safeJsonFetch(u, {
+
+--- DOM/click/observer ---
+18:     const cntText = el.querySelector(".bag-count")?.textContent || "0";
+143:   if(bagCount) bagCount.textContent = String(cnt || 0);
+144:   if(bagDir) bagDir.textContent = eyesToIcons(eyes) || "";
+171:     if(cnt) cnt.textContent = "0";
+172:     if(dir) dir.textContent = "";
+176: window.SeatsBags = {
+
+
+===== JS RİSK: static/seats/voice-commands.js | YÜKSEK =====
+
+--- canlı/seçili/durak ---
+61:     if(typeof getSelectedStopName === "function"){
+62:       selected = getSelectedStopName() || "";
+67:     if(!selected && speedState && speedState.liveStop){
+68:       selected = speedState.liveStop || "";
+297: async function offloadSelectedStopByVoice(){
+298:   const stop = getSelectedStopName() || speedState.liveStop || "";
+511:   if(/(hangi duraktayiz|hangi duraktayız|neredeyiz)/.test(t)) return { type:"ask_live_stop" };
+612:     Çünkü liveStop localStorage'dan eski Sarıgöl gibi bir değeri geri getirebilir.
+623:     if(!stop && typeof getSelectedStopName === "function"){
+624:       stop = voiceCleanStopValue(getSelectedStopName());
+630:       const badge = document.querySelector("#selectedStopBadge");
+644:     Böylece eski liveStop hafızası seçili durağı ezmez.
+647:     if(!stop && typeof getDisplayLiveStop === "function"){
+648:       stop = voiceCleanStopValue(getDisplayLiveStop());
+653:     if(!stop && speedState && speedState.liveStop){
+654:       stop = voiceCleanStopValue(speedState.liveStop);
+821:   const selectedStop = getSelectedStopName() || "";
+822:   if(selectedStop && $("#pickup")) $("#pickup").value = selectedStop;
+833:   const selectedStop = getSelectedStopName() || "";
+834:   if(selectedStop && $("#bulkTo")) $("#bulkTo").value = selectedStop;
+857:   const selectedStop = getSelectedStopName() || "";
+858:   if(selectedStop && $("#cashTo")) $("#cashTo").value = selectedStop;
+1067:     const stop = getSelectedStopName() || speedState.liveStop || "";
+1076:     const stop = getSelectedStopName() || speedState.liveStop || "";
+1085:     const stop = cmd.stop || getSelectedStopName() || speedState.liveStop || "";
+1094:     return await offloadSelectedStopByVoice();
+1106:   if(cmd.type === "ask_live_stop"){
+1107:     const live = speedState.liveStop || getSelectedStopName() || "henüz belli değil";
+1145:     const ok = setSelectedStop(cmd.stop, { silent:true, voiceReply:false });
+1152:     const stop = getSelectedStopName();
+
+--- koordinat/km/ETA ---
+20:   "rötar kaç",
+131:     if(speedState && Array.isArray(speedState.etaItems)){
+132:       const nextTimed = speedState.etaItems.find(x => !x.passed);
+341:   speak("İndirme işlemi başlatılamadı.");
+346: function maybeSpeakApproachStop(stopName, km){
+348:   if(!Number.isFinite(km)) return;
+349:   if(km > 5) return;
+512:   if(/(rotar kac|rötar kaç|gecikme kac|gecikme kaç)/.test(t)) return { type:"ask_delay" };
+818:   await populateStops();
+829:   await populateStops();
+831:   openModal("#bulkBackdrop", "#bulkModal");
+853:   await populateStops();
+1059:     const msg = `Ayakta ${standingCount || 0} kişi var. Tahsilat ${fmtTL(standingRevenue || 0)}.`;
+1114:   if(cmd.type === "ask_delay"){
+1115:     const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+1123:     const msg = `${nextTimed.stop} için ${fmtSignedMin(nextTimed.delayMin)}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
+1130:     const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+1138:     const msg = `Sıradaki saatli nokta ${nextTimed.stop}. Plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
+1196:         const msg = `Ayakta ${standingCount || 0} kişi var. Tahsilat ${fmtTL(standingRevenue || 0)}.`;
+1233:       btn.setAttribute("title", on ? "Dinliyor" : "Sesli Komut");
+1234:       btn.setAttribute("aria-label", on ? "Dinliyor" : "Sesli Komut");
+1306:     setVoiceBadge("Başlatılamadı");
+1307:     toast("Mikrofon başlatılamadı");
+
+--- runtime/localStorage/fetch ---
+465:   const j = await safeJsonFetch("/api/seats/gender", {
+578:   const j = await safeJsonFetch("/api/ai/resolve", {
+612:     Çünkü liveStop localStorage'dan eski Sarıgöl gibi bir değeri geri getirebilir.
+740:       return await safeJsonFetch("/api/seat", opts);
+743:     const r = await fetch("/api/seat", opts);
+880:   const j = await safeJsonFetch("/api/seats/service", {
+
+--- DOM/click/observer ---
+367:     if(typeof window.SeatsSpeak === "function"){
+368:       window.SeatsSpeak(msg);
+370:       window.SeatsVoice &&
+371:       typeof window.SeatsVoice.speak === "function" &&
+372:       window.SeatsVoice.speak !== speak
+374:       window.SeatsVoice.speak(msg);
+631:       if(badge) stop = voiceCleanStopValue(badge.textContent);
+638:       if(simpleStop) stop = voiceCleanStopValue(simpleStop.textContent);
+726:     (window.SEATS_BOOT && window.SEATS_BOOT.csrf) ||
+1023:     if(typeof window.markBiletsizSeatBadges !== "function"){
+1029:     const res = window.markBiletsizSeatBadges(cmd.seats || []);
+1230:       btn.innerHTML = on
+1238:     btn.innerHTML = on
+1245:   if(window.__deckAIListening){
+1251:   window.__deckAIListening = true;
+1254:   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+1257:     window.__deckAIListening = false;
+1288:     window.__deckAIListening = false;
+1294:     window.__deckAIListening = false;
+1303:     window.__deckAIListening = false;
+1311: window.SeatsVoice = {
+
+
+===== JS RİSK: static/seats/standing.js | YÜKSEK =====
+
+--- canlı/seçili/durak ---
+8:     const selected = getSelectedStopName() || "";
+9:     const live = getDisplayLiveStop();
+27:   const from = $("#cashFrom")?.value || speedState.liveStop || getSelectedStopName() || serverStops?.[0] || "";
+
+--- koordinat/km/ETA ---
+3:    Ayakta yolcu + hızlı tahsilat + ayakta liste
+7:   populateStops().then(() => {
+63:     toast(e.message || "Tahsilat hatası");
+
+--- runtime/localStorage/fetch ---
+37:     const j = await safeJsonFetch("/api/standing", {
+69:     const j = await safeJsonFetch("/api/standing");
+79:     const x = JSON.parse(localStorage.getItem("standingTotals:" + TRIP_KEY) || "null");
+90:     const j = await safeJsonFetch("/api/standing/list");
+99:     const x = JSON.parse(localStorage.getItem("standingItems:" + TRIP_KEY) || "[]");
+108:     const j = await safeJsonFetch("/api/parcels?status=bekliyor");
+182:     const j = await safeJsonFetch(`/api/standing?id=${encodeURIComponent(itemId)}`, {
+208:     const j = await safeJsonFetch("/api/standing?to=" + encodeURIComponent(stopName), {
+
+--- DOM/click/observer ---
+126:   list.innerHTML = "";
+129:     sum.textContent = "Kayıt yok";
+143:   sum.textContent = `${totalPeople} ayakta · ${fmtTL(totalPrice)}`;
+153:     d.innerHTML = `
+165:     btn.addEventListener("click", () => removeStandingById(parseInt(btn.dataset.id, 10)));
+233: window.SeatsStanding = {
+
+
+===== JS RİSK: static/seats/seats.js | YÜKSEK =====
+
+--- canlı/seçili/durak ---
+36:       "liveStop:" + TRIP_KEY,
+124:    geçildi bilgisi ve durak akışı özeti taşınmasın.
+143:     // Hem trip_id değişince hem de hafıza şeması değişince eski durak akışı silinsin.
+154:       "liveStop:",
+204:   let lastRouteStripCenteredStop = "";
+217:     liveStop: "",
+277:     localStorage.setItem("liveStop:" + TRIP_KEY, speedState.liveStop || "");
+282:     speedState.liveStop = localStorage.getItem("liveStop:" + TRIP_KEY) || "";
+381: function getDisplayLiveStop(){
+382:   const live = speedState.liveStop || "";
+387:     if(typeof hasLiveStopOperation === "function" && !hasLiveStopOperation(live)){
+388:       speedState.liveStop = "";
+392:         localStorage.removeItem("liveStop:" + TRIP_KEY);
+405:       speedState.liveStop = "";
+409:         localStorage.removeItem("liveStop:" + TRIP_KEY);
+544:   function getSelectedStopName(){
+680:       // Yeni sefer açılmış ve koltuk yoksa eski durak akışı özetini taşıma.
+685:         "liveStop:" + TRIP_KEY,
+699:         speedState.liveStop = "";
+803:       if(typeof renderRouteStrip === "function") renderRouteStrip();
+931:     const stop = getSelectedStopName();
+1024: function centerRouteStripItem(item, behavior = "smooth"){
+1025:   const wrap = $("#routeStrip");
+1037: function focusRouteStripStop(stopName, { select=false, voice=false } = {}){
+1047:     setSelectedStop(canonical, { silent:!voice, voiceReply:voice });
+1049:     renderRouteStrip();
+1054:       const wrap = $("#routeStrip");
+1061:         centerRouteStripItem(target, "smooth");
+1071: function renderRouteStrip(){
+1072:   const wrap = $("#routeStrip");
+1088:   const selected = getSelectedStopName();
+1089:   const live = getDisplayLiveStop();
+1190:   setSelectedStop(stop, { silent:false, voiceReply:true });
+1205:   if(lastRouteStripCenteredStop !== focusKey){
+1206:     lastRouteStripCenteredStop = focusKey;
+1210:         centerRouteStripItem(routeFocusItem, "smooth");
+1217:     const selected = getSelectedStopName();
+1218:     const live = getDisplayLiveStop();
+1221:     setText("#topLiveStop", live || selected || "—");
+1223:     setText("#selectedStopBadge", selected || "—");
+1225:     setText("#routeLiveStop", live || "—");
+1226:     setText("#routeLiveStopCard", live || "—");
+1243:     renderRouteStrip();
+1273:   function setSelectedStop(name, { silent=false, voiceReply=true } = {}){
+1328:   function setLiveStop(name){
+1332:     speedState.liveStop = canonical;
+1345:     const cur = getSelectedStopName();
+1350:       setSelectedStop("", { silent:true, voiceReply:false });
+1354:     setSelectedStop(next, { silent, voiceReply: !silent });
+1361:     const stopName = getSelectedStopName();
+1394:     setValue("#pickup", boardsMap[String(seatNo)] || getSelectedStopName() || "");
+1429:     const from = $("#pickup")?.value || getSelectedStopName() || "";
+1515:     const offStop = stopsMap[String(currentSeat)] || getSelectedStopName() || "";
+1578:       const selected = getSelectedStopName() || "";
+1579:       const live = getDisplayLiveStop();
+1593:     const from = $("#bulkFrom")?.value || speedState.liveStop || getSelectedStopName() || "";
+1773:       const st = stopsMap[String(n)] || getSelectedStopName() || "";
+1825:     const stop = getSelectedStopName();
+1842:   async function offloadSelectedStop(){
+1843:     const stop = getSelectedStopName();
+1873:     setLiveStop(stop);
+1893:     const stopName = getSelectedStopName();
+1914:       autoDetectLiveStop(p);
+1939:       const stop = (getSelectedStopName() || $("#coordStopName")?.value || "").trim();
+1991:     const liveName = getDisplayLiveStop();
+1993:     const selectedIdx = indexOfStopByName(getSelectedStopName());
+2053:       const activeName = getSelectedStopName() || liveName;
+2176:       row.addEventListener("click", () => setSelectedStop(item.stop, { silent:true, voiceReply:false }));
+2182:     const stop = getSelectedStopName();
+2206:     const live = speedState.liveStop || "—";
+2228:     setText("#aiLiveStop", live);
+2256:   function liveStopOperationCount(stopName){
+2286:   function hasLiveStopOperation(stopName){
+2287:     return liveStopOperationCount(stopName) > 0;
+2291:     function autoDetectLiveStop(coords){
+2307:       if(!hasLiveStopOperation(canonical)) continue;
+2325:       if(speedState.liveStop && !hasLiveStopOperation(speedState.liveStop)){
+2326:         speedState.liveStop = "";
+2330:           localStorage.removeItem("liveStop:" + TRIP_KEY);
+2334:         renderRouteStrip();
+2352:     const currentLive = speedState.liveStop || "";
+2364:     setLiveStop(best.stop);
+2566:         autoDetectLiveStop(currentCoords);
+2587:           renderRouteStrip();
+2697:   onClick("#btnOffloadNow", offloadSelectedStop);
+2698:   onClick("#btnOffloadNowPane", offloadSelectedStop);
+2720:     setLiveStop(stop);
+2735:     const a = getSelectedStopName() || "";
+2754:       const live = getDisplayLiveStop();
+2759:       focusRouteStripStop(live, { select:true, voice:true });
+2766:       const live = getDisplayLiveStop();
+2767:       const selected = getSelectedStopName();
+2773:       focusRouteStripStop(next, { select:true, voice:true });
+2805:       renderRouteStrip();
+2807:       if(speedState.liveStop){
+2811:       const next = computeNextStopName(speedState.liveStop || "", "nextWithSeats");
+2812:       if(next) setSelectedStop(next, { silent:true, voiceReply:false });
+2813:       else if(serverStops?.length) setSelectedStop(serverStops[0], { silent:true, voiceReply:false });
+2816:       renderRouteStrip();
+2835:     // getDisplayLiveStop() içindeki 15 km fallback burada kullanılmaz.
+2836:     let liveStop =
+2837:       (speedState && speedState.liveStop) ||
+2842:       if(liveStop && typeof stopDistanceKmByName === "function"){
+2843:         const liveKmCheck = stopDistanceKmByName(liveStop);
+2845:           liveStop = "";
+2854:       if(liveStop && typeof stopDistanceKmByName === "function"){
+2855:         const km = stopDistanceKmByName(liveStop);
+2868:       `&live_stop=${encodeURIComponent(liveStop)}` +
+
+--- koordinat/km/ETA ---
+22:    Eski sürümden kalan geçildi / işlem bitti izlerini temizler.
+49:   let ROUTE_SCHEDULES = {
+124:    geçildi bilgisi ve durak akışı özeti taşınmasın.
+202:   let currentCoords = null;
+219:     etaItems: []
+325:       : (Array.isArray(serverStops) ? serverStops.map(s => ({ name:s, lat:null, lng:null })) : []);
+334:   function hasCoord(stop){
+336:     const lat = parseFloat(stop.lat);
+337:     const lng = parseFloat(stop.lng);
+338:     return Number.isFinite(lat) && Number.isFinite(lng);
+341:   function distKm(a, b){
+344:     const dLat = toRad(b.lat - a.lat);
+345:     const dLng = toRad(b.lng - a.lng);
+346:     const la1 = toRad(a.lat);
+347:     const la2 = toRad(b.lat);
+348:     const h = Math.sin(dLat/2)**2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLng/2)**2;
+352: function nearestStopByGps(maxKm = 15){
+353:   if(!currentCoords || !Array.isArray(cachedStops)) return "";
+358:     if(!s || !hasCoord(s)) continue;
+360:     const km = distKm(currentCoords, {
+361:       lat: Number(s.lat),
+362:       lng: Number(s.lng)
+365:     if(!best || km < best.km){
+368:         km
+376:   if(best.km > maxKm) return "";
+402:     const km = stopDistanceKmByName(live);
+404:     if(Number.isFinite(km) && km > 5.5){
+420: function stopDistanceKmByName(name){
+421:   if(!name || !currentCoords) return NaN;
+424:   if(!stopObj || !hasCoord(stopObj)) return NaN;
+426:   return distKm(currentCoords, {
+427:     lat: Number(stopObj.lat),
+428:     lng: Number(stopObj.lng)
+436:   const routeSchedule = getRouteSchedule();
+437:   const firstTimedStop = Array.isArray(routeSchedule)
+438:     ? routeSchedule.find(x => x && String(x.time || "").trim())
+448:   function getRouteSchedule(){
+449:     return ROUTE_SCHEDULES[ROUTE_NAME] || [];
+452: async function loadRouteScheduleFromApi(){
+454:     const url = `/api/route-schedule?route=${encodeURIComponent(ROUTE_NAME)}&direction=gidis&_=${Date.now()}`;
+462:     const apiSchedule = j.items
+463:       .filter(x => Number(x.is_timed) === 1 && String(x.planned_time || "").trim())
+466:         time: String(x.planned_time || "").trim(),
+467:         segment_km: x.segment_km,
+471:     if(apiSchedule.length){
+472:       ROUTE_SCHEDULES[ROUTE_NAME] = apiSchedule;
+473:       console.log("Saat profili API'den yüklendi:", apiSchedule);
+484:   function scheduleOffsetsForRoute(){
+485:     const sample = getRouteSchedule();
+514:   function buildActualSchedule(){
+516:     const offsets = scheduleOffsetsForRoute();
+520:       plan: x.sampleTime,
+521:       planDate: new Date(start.getTime() + x.offsetMin * 60000),
+538:     if(Math.abs(mins) > 720) return "Plan dışı";
+540:     if(mins < 0) return `${Math.abs(mins)} dk erken`;
+541:     return `${mins} dk rötar`;
+549:     return getRouteSchedule().some(x => norm(x.stop) === norm(name));
+566:     let stops = (j.stops || []).map(name => ({ name, lat:null, lng:null }));
+569:       const c = await safeJsonFetch("/api/coords");
+571:         const coordMap = new Map((c.items || []).map(i => [i.stop, { lat:i.lat, lng:i.lng }]));
+572:         stops = stops.map(s => coordMap.has(s.name) ? { ...s, ...coordMap.get(s.name) } : s);
+580:   async function populateStops(){
+600:         o.textContent = s.name + (hasCoord(s) ? " •" : "");
+921:       const dot = hasCoord(stop) ? " •" : "";
+993:     setText("#quickStandingMeta", `${standingCount} kişi · ${fmtTL(standingRevenue)}`);
+1082:         <div class="meta">Duraklar yüklenecek</div>
+1093:   const liveKm = stopDistanceKmByName(live);
+1094:   const liveDangerOn = Number.isFinite(liveKm) && liveKm <= 5;
+1095:   // if(liveDangerOn){maybeSpeakApproachStop(live, liveKm);}
+1105:   const actualSchedule = buildActualSchedule();
+1106:   const planMap = new Map(
+1107:     actualSchedule.map(x => [norm(x.stop), x.plan || ""])
+1110:   const etaMap = new Map(
+1111:     (speedState.etaItems || []).map(x => [norm(x.stop), x])
+1126:     const plan = planMap.get(norm(stop)) || "";
+1127:     let kmText = "";
+1129:     if(currentCoords && stopObj && hasCoord(stopObj)){
+1130:       const km = distKm(currentCoords, {
+1131:         lat: Number(stopObj.lat),
+1132:         lng: Number(stopObj.lng)
+1134:       kmText = `${km.toFixed(1)} km`;
+1137:     let metaLine1 = "";
+1138:     if(isLive) metaLine1 = "Canlı";
+1139:     else if(isActive) metaLine1 = "Seçili";
+1140:     else if(isDone) metaLine1 = "Geçildi";
+1141:     else metaLine1 = "Bekliyor";
+1143:     let metaLine2 = "";
+1147:       metaLine2 = flowLine;
+1149:       metaLine2 = `${seatCt}K ${standingCt}A ${parcelCt}E`;
+1151:       metaLine2 = "İşlem bitti";
+1153:       metaLine2 = "İşlem yok";
+1157:     if(plan) extraBits.push(`Plan ${plan}`);
+1158:     if(kmText) extraBits.push(kmText);
+1165:     const etaItem = etaMap.get(norm(stop));
+1166:     const planText = plan || "—";
+1167:     const etaText = etaItem && plan ? fmtHour(etaItem.etaDate) : "";
+1168:     const delayText = etaItem && plan ? etaItem.badgeText : "";
+1169:     const kmValue = kmText || (etaItem && Number.isFinite(etaItem.km) ? `${etaItem.km.toFixed(1)} km` : "—");
+1171:     const timeText = etaText ? `${planText} → ${etaText}` : planText;
+1172:     const statusText = delayText ? `${kmValue} · ${delayText}` : kmValue;
+1176:   <div class="meta ${isDone ? "done-summary" : ""}">${metaLine1} · ${metaLine2}</div>
+1179:       <span class="extra-k">Plan/ETA</span>
+1222:     setText("#topSpeed", `${Math.round(Number(speedState.current || 0))} km/h`);
+1227:     setValue("#coordStopName", selected || "");
+1373:     h.textContent = hasCoord(s) ? "Koordinat hazır." : "Koordinat yok. Aşağıdan ekleyin.";
+1577:     populateStops().then(() => {
+1584:       openModal("#bulkBackdrop", "#bulkModal");
+1589:     closeModal("#bulkBackdrop", "#bulkModal");
+1900:     if(!s || !hasCoord(s)){
+1905:     const radiusKm = parseFloat($("#alertRadius")?.value || "3");
+1908:       const p = { lat:pos.coords.latitude, lng:pos.coords.longitude };
+1909:       currentCoords = p;
+1911:       const d = distKm(p, { lat:Number(s.lat), lng:Number(s.lng) });
+1912:       setText("#geoHint", `Mesafe: ${d.toFixed(2)} km (eşik ${radiusKm} km)`);
+1917:       if(d <= radiusKm){
+1937:   async function saveCoord(){
+1939:       const stop = (getSelectedStopName() || $("#coordStopName")?.value || "").trim();
+1945:       const lat = numTR($("#coordLat")?.value);
+1946:       const lng = numTR($("#coordLng")?.value);
+1948:       if(!Number.isFinite(lat) || !Number.isFinite(lng)){
+... 131 satır daha var
+
+--- runtime/localStorage/fetch ---
+31:     if(localStorage.getItem(key) === version) return;
+39:     ].forEach(k => localStorage.removeItem(k));
+41:     localStorage.setItem(key, version);
+140:     const oldTripId = localStorage.getItem(activeTripMemoryKey) || "";
+141:     const oldSchema = localStorage.getItem(memorySchemaKey) || "";
+164:       localStorage.removeItem(prefix + TRIP_KEY);
+167:     localStorage.removeItem("continueTripStop:last");
+169:     Object.keys(localStorage).forEach(k => {
+174:         localStorage.removeItem(k);
+178:     localStorage.setItem(activeTripMemoryKey, currentTripId);
+179:     localStorage.setItem(memorySchemaKey, memorySchemaVersion);
+187:     JSON.parse(localStorage.getItem("boardsMap:" + TRIP_KEY) || "{}")
+262:   async function safeJsonFetch(url, opt){
+263:     const res = await fetch(url, opt || {});
+273:     localStorage.setItem("boardsMap:" + TRIP_KEY, JSON.stringify(boardsMap || {}));
+277:     localStorage.setItem("liveStop:" + TRIP_KEY, speedState.liveStop || "");
+278:     localStorage.setItem("passedStops:" + TRIP_KEY, JSON.stringify([...speedState.passedStops]));
+282:     speedState.liveStop = localStorage.getItem("liveStop:" + TRIP_KEY) || "";
+284:       speedState.passedStops = new Set(JSON.parse(localStorage.getItem("passedStops:" + TRIP_KEY) || "[]"));
+291:     localStorage.setItem("standingTotals:" + TRIP_KEY, JSON.stringify({
+298:     localStorage.setItem("standingItems:" + TRIP_KEY, JSON.stringify(standingItems || []));
+392:         localStorage.removeItem("liveStop:" + TRIP_KEY);
+393:         localStorage.removeItem("passedStops:" + TRIP_KEY);
+409:         localStorage.removeItem("liveStop:" + TRIP_KEY);
+410:         localStorage.removeItem("passedStops:" + TRIP_KEY);
+455:     const j = await safeJsonFetch(url);
+563:     const j = await safeJsonFetch("/api/stops");
+569:       const c = await safeJsonFetch("/api/coords");
+651:       const raw = localStorage.getItem(STOP_FLOW_EVENT_KEY) || "{}";
+661:       localStorage.setItem(STOP_FLOW_EVENT_KEY, JSON.stringify(obj || {}));
+667:       const raw = localStorage.getItem(STOP_FLOW_SUMMARY_KEY) || "{}";
+694:       keys.forEach(k => localStorage.removeItem(k));
+714:       localStorage.setItem(STOP_FLOW_SUMMARY_KEY, JSON.stringify(stopFlowSummary || {}));
+1440:       const j = await safeJsonFetch("/api/seat", {
+1518:       const j = await safeJsonFetch("/api/seat?seat_no=" + currentSeat, {
+1632:         const j = await safeJsonFetch("/api/seats/bulk", {
+1648:           await safeJsonFetch("/api/seat", {
+1783:         const j = await safeJsonFetch("/api/seats/offload", {
+1793:           const j = await safeJsonFetch("/api/seat?seat_no=" + n, {
+1953:       const j = await safeJsonFetch("/api/coords", {
+2330:           localStorage.removeItem("liveStop:" + TRIP_KEY);
+2331:           localStorage.removeItem("passedStops:" + TRIP_KEY);
+2401:         return (localStorage.getItem(TTS_KEY) ?? "1") === "1";
+2428:         localStorage.setItem(TTS_KEY, next ? "1" : "0");
+2518:         const r = await fetch(`/api/speedlimit?lat=${lat}&lng=${lng}`);
+2672:       const j = await safeJsonFetch("/api/standing?all=1", {
+2826:    LIVE RUNTIME STATE BRIDGE
+2829: async function persistLiveRuntimeStateToServer(){
+2866:       `/api/live-runtime-state?write=1` +
+2874:     fetch(url, {
+2882: if(!window.__liveRuntimeBridgeInterval){
+2883:   window.__liveRuntimeBridgeInterval = setInterval(function(){
+2884:     try{ persistLiveRuntimeStateToServer(); }catch(_){}
+2888:     try{ persistLiveRuntimeStateToServer(); }catch(_){}
+
+--- DOM/click/observer ---
+1: const BOOT = window.SEATS_BOOT || {};
+47:   window.BAG_TRIP = BAG_TRIP;
+94:     if(el) el.addEventListener("click", fn);
+99:     if(el) el.addEventListener("change", fn);
+104:     if(el) el.textContent = val;
+129:       (window.SEATS_BOOT && window.SEATS_BOOT.tripId) ||
+225:     t.textContent = msg;
+589:       el.innerHTML = "";
+593:       o0.textContent = "—";
+600:         o.textContent = s.name + (hasCoord(s) ? " •" : "");
+915:         opt.textContent = "—";
+926:       opt.textContent = base + dot + seatTxt + standTxt + parcelTxt;
+960:         label.textContent = isAssigned ? (from ? `${from} → ${to}` : to) : "";
+999:     box.innerHTML = "";
+1002:       box.innerHTML = `<div class="muted">Ayakta kayıt yok.</div>`;
+1013:       d.innerHTML = `
+1058:         .find(el => norm(el.dataset.stop || el.querySelector(".name")?.textContent || "") === norm(canonical));
+1076:   wrap.innerHTML = "";
+1079:     wrap.innerHTML = `
+1174:     item.innerHTML = `
+1189: item.addEventListener("click", () => {
+1238:       liveState.textContent = selected
+1304:       if(window.SeatsSpeak){
+1305:         window.SeatsSpeak(msg);
+1368:       h.textContent = "Durak seç.";
+1373:     h.textContent = hasCoord(s) ? "Koordinat hazır." : "Koordinat yok. Aşağıdan ekleyin.";
+1487:       if(typeof window.clearBiletsizSeatBadges === "function"){
+1488:         window.clearBiletsizSeatBadges([seatNo]);
+1507:       if(cnt) cnt.textContent = "0";
+1508:       if(dir) dir.textContent = "";
+1726:     list.innerHTML = "";
+1729:       list.innerHTML = `<div class="approach-row">Bu durakta işlem görünmüyor.</div>`;
+1735:       row.innerHTML = `<b>Koltuk ${n}</b><span>${boardsMap[String(n)] || "—"} → ${stopsMap[String(n)] || "—"}</span>`;
+1742:       row.innerHTML = `<b>Ayakta</b><span>${standingMap[stop]} kişi inecek</span>`;
+1749:       row.innerHTML = `<b>Emanet</b><span>${parcelMap[stop]} teslim var</span>`;
+1759:       if(window.SeatsSpeak){
+1760:         window.SeatsSpeak(msg);
+1855:     const ok = window.askOffloadConfirm
+1856:       ? await window.askOffloadConfirm(stop, {
+1885:       if(btn) btn.textContent = "KAPALI";
+1934:     if(btn) btn.textContent = "AÇIK";
+2128:       delayEl.textContent = fmtSignedMin(diff);
+2149:     list.innerHTML = "";
+2152:       list.innerHTML = `
+2166:       row.innerHTML = `
+2176:       row.addEventListener("click", () => setSelectedStop(item.stop, { silent:true, voiceReply:false }));
+2375:       btn.addEventListener("click", () => {
+2415:       if(window.SeatsVoice && typeof window.SeatsVoice.syncButtons === "function"){
+2416:         window.SeatsVoice.syncButtons();
+2422:     ttsBtn.addEventListener("click", () => {
+2425:       if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+2426:         window.SeatsVoice.setEnabled(next);
+2435:         if(window.SeatsSpeak){
+2436:           window.SeatsSpeak("Sesli uyarı açık.", { force:true });
+2441:         if(window.SeatsStopVoice){
+2442:           window.SeatsStopVoice();
+2464:       if(window.SeatsSpeak){
+2465:         window.SeatsSpeak(msg);
+2565:         spVal.textContent = Math.round(kmh);
+2571:           spLimit.textContent = `Limit: ${lim.limit} km/h${lim.highway ? " · " + trHighway(lim.highway) : ""}`;
+2577:           spLimit.textContent = "Limit: —";
+2584:         if(!window.__seatsLastSpeedRenderAt || nowRender - window.__seatsLastSpeedRenderAt > 2500){
+2585:           window.__seatsLastSpeedRenderAt = nowRender;
+2591:         spVal.textContent = "0";
+2592:         spLimit.textContent = "GPS kapalı";
+2600:       spLimit.textContent = "GPS yok";
+2604:   document.addEventListener("click", (e) => {
+2607:       e.preventDefault();
+2608:       e.stopPropagation();
+2623:       e.preventDefault();
+2624:       e.stopPropagation();
+2639:     const next = window.location.pathname;
+2641:     window.location.href = url;
+2647:     const next = window.location.pathname;
+2649:     window.location.href = url;
+2740:   window.addEventListener("keydown", (e) => {
+2753:     livePill.addEventListener("click", () => {
+2765:     nextPill.addEventListener("click", () => {
+2831:     const tripId = window.SEATS_BOOT?.tripId;
+2862:     const etaMain = (document.getElementById("delayMain")?.textContent || "").trim();
+2863:     const etaSub  = (document.getElementById("delaySub")?.textContent || "").trim();
+2882: if(!window.__liveRuntimeBridgeInterval){
+2883:   window.__liveRuntimeBridgeInterval = setInterval(function(){
+2887:   window.addEventListener("beforeunload", function(){
+
+
+===== JS RİSK: static/seats/route-marquee.js | ORTA =====
+
+--- koordinat/km/ETA ---
+12:     el.setAttribute("data-marquee-text", text);
+
+--- DOM/click/observer ---
+11:     const text = String(el.textContent || "").trim();
+20:   window.refreshRouteMarquee = refresh;
+29:       new MutationObserver(refresh).observe(el, {
+41:     document.addEventListener("DOMContentLoaded", boot);
+
+
+===== JS RİSK: static/seats/seats-time-prayer.js | ORTA =====
+
+--- koordinat/km/ETA ---
+10:   const main = $("#clockMain");
+64:   const FALLBACK = { lat:38.5190, lng:28.5192, place:"Alaşehir" };
+92:   async function reverseGeocode(lat, lng){
+94:       const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+106:   async function fetchTimings(lat, lng){
+107:     const url = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=${METHOD}&school=${SCHOOL}&iso8601=true`;
+159:   async function boot(lat, lng, placeHint=""){
+161:       const timings = await fetchTimings(lat, lng);
+162:       const place = (await reverseGeocode(lat, lng)) || placeHint;
+173:           render(place, await fetchTimings(lat, lng));
+186:       p => boot(p.coords.latitude, p.coords.longitude),
+187:       _ => boot(FALLBACK.lat, FALLBACK.lng, FALLBACK.place),
+191:     boot(FALLBACK.lat, FALLBACK.lng, FALLBACK.place);
+
+--- runtime/localStorage/fetch ---
+94:       const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+108:     const j = await (await fetch(url)).json();
+
+--- DOM/click/observer ---
+38:     topClock.textContent = sf.format(n);
+39:     main.textContent = tf.format(n);
+40:     date.textContent = df.format(n);
+41:     sub.textContent = df.format(n);
+45:   setInterval(tick, 1000);
+154:     lineEl.innerHTML =
+168:       setInterval(async () => {
+180:       lineEl.textContent = "Vakitler alınamadı";
+
+
+===== JS RİSK: static/seats/voice-tts.js | YÜKSEK =====
+
+--- canlı/seçili/durak ---
+91:       nightBtn.title = on ? "Durak akışı sesi açık" : "Durak akışı sesi kapalı";
+137:       speak("Durak akışı sesi açık.", { force:true });
+
+--- koordinat/km/ETA ---
+30:         detail:{ enabled: !!value }
+
+--- runtime/localStorage/fetch ---
+15:       return (localStorage.getItem(KEY) ?? "1") === "1";
+23:       localStorage.setItem(KEY, value ? "1" : "0");
+
+--- DOM/click/observer ---
+8:   if(window.__SeatsVoiceUnifiedReady) return;
+9:   window.__SeatsVoiceUnifiedReady = true;
+29:       window.dispatchEvent(new CustomEvent("ttsEnabledChanged", {
+36:     if(window.AndroidTTS && typeof window.AndroidTTS.stop === "function"){
+37:       try{ window.AndroidTTS.stop(); }catch(e){}
+51:     if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
+53:         window.AndroidTTS.speak(msg);
+92:       nightBtn.innerHTML = on
+111:   window.SeatsSpeak = speak;
+112:   window.SeatsStopVoice = stop;
+114:   // voice-commands.js daha önce window.SeatsVoice içine komut fonksiyonları koymuş olabilir.
+116:   window.SeatsVoice = Object.assign(window.SeatsVoice || {}, {
+126:   document.addEventListener("click", function(e){
+130:     e.preventDefault();
+131:     e.stopPropagation();
+147:     const timer = setInterval(function(){
+155:     document.addEventListener("DOMContentLoaded", boot);
+
+
+===== JS RİSK: static/seats/drive-eta-chip.js | ORTA =====
+
+--- koordinat/km/ETA ---
+2:    DRIVE ETA CHIP MODULE
+3:    Paneldeki Rötar / ETA bilgisini üst sürüş kutusuna taşır.
+9:   function etaClassFromText(text){
+12:     if(t.includes("erken") || t.includes("zamanında") || t.includes("zamaninda")){
+16:     if(t.includes("rötar") || t.includes("rotar") || t.includes("gecik")){
+27:   function syncDriveEtaChip(){
+28:     const chip = q("#driveEtaChip");
+29:     const main = q("#driveEtaMain");
+30:     const sub = q("#driveEtaSub");
+34:     const delayMain = q("#delayMain")?.textContent?.trim() || "";
+35:     const delaySub = q("#delaySub")?.textContent?.trim() || "";
+38:     let mainText = delayMain && delayMain !== "—" ? delayMain : "Rötar";
+39:     let subText = delaySub && delaySub !== "—" ? delaySub : "ETA bekleniyor";
+49:     chip.classList.add(etaClassFromText(mainText + " " + subText));
+52:   window.syncDriveEtaChip = syncDriveEtaChip;
+55:     syncDriveEtaChip();
+56:     setInterval(syncDriveEtaChip, 1500);
+
+--- DOM/click/observer ---
+34:     const delayMain = q("#delayMain")?.textContent?.trim() || "";
+35:     const delaySub = q("#delaySub")?.textContent?.trim() || "";
+36:     const target = q("#routeNextTimed")?.textContent?.trim() || "";
+45:     main.textContent = mainText;
+46:     sub.textContent = subText;
+52:   window.syncDriveEtaChip = syncDriveEtaChip;
+56:     setInterval(syncDriveEtaChip, 1500);
+60:     document.addEventListener("DOMContentLoaded", boot);
+
+
+===== JS RİSK: static/seats/drive-controls.js | YÜKSEK =====
+
+--- canlı/seçili/durak ---
+22:         if(typeof renderRouteStrip === "function") renderRouteStrip();
+65:   function getLiveStop(){
+67:       if(typeof getDisplayLiveStop === "function"){
+68:         return getDisplayLiveStop() || "";
+73:       return speedState?.liveStop || "";
+109:       if(typeof renderRouteStrip === "function") renderRouteStrip();
+152:     const liveStop = getLiveStop();
+164:     const stopText = liveStop ? ` · ${liveStop}` : "";
+
+--- koordinat/km/ETA ---
+104:       btn.title = on ? "Normal moda geç" : "Sürüş moduna geç";
+105:       btn.setAttribute("aria-pressed", on ? "true" : "false");
+111:       if(typeof syncDriveEtaChip === "function") syncDriveEtaChip();
+116:         detail:{ on }
+170:         <span>km/h</span>
+
+--- runtime/localStorage/fetch ---
+17:     localStorage.setItem(key, "1");
+92:     return localStorage.getItem(DRIVE_MODE_KEY) === "1";
+136:       localStorage.setItem(DRIVE_MODE_KEY, next ? "1" : "0");
+183:     const saved = localStorage.getItem("ttsEnabled");
+221:           localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+225:           localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+
+--- DOM/click/observer ---
+8:     const params = new URLSearchParams(window.location.search);
+13:     const boot = window.SEATS_BOOT || {};
+14:     const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+28:     if(window.history && window.history.replaceState){
+29:       const cleanUrl = window.location.pathname;
+30:       window.history.replaceState({}, document.title, cleanUrl);
+44:   const boot = window.SEATS_BOOT || {};
+45:   const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+56:       if(window.SeatsSpeak){
+57:         window.SeatsSpeak(msg, { force:true });
+103:       btn.innerHTML = on ? "↩ Normal" : "🚘 Sürüş";
+115:       window.dispatchEvent(new CustomEvent("driveModeChanged", {
+132:     btn.addEventListener("click", (e) => {
+133:       e.preventDefault();
+166:     el.innerHTML = `
+178:       if(window.SeatsVoice && typeof window.SeatsVoice.isEnabled === "function"){
+179:         return window.SeatsVoice.isEnabled();
+194:       if(window.SeatsVoice && typeof window.SeatsVoice.syncButtons === "function"){
+195:         window.SeatsVoice.syncButtons();
+206:     btn.innerHTML = on
+218:         if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+219:           window.SeatsVoice.setEnabled(enabled);
+252:         cb.addEventListener("change", () => {
+273:   window.addEventListener("load", bootDriveControls);
+274:   window.addEventListener("resize", bootDriveControls);
+279:   setInterval(updateDriveSpeedChip, 1000);
+281:   window.DriveControls = {
+
+
+===== JS RİSK: static/seats/patches/stop-selected-toast.js | ORTA =====
+
+--- koordinat/km/ETA ---
+60:     var stopName = e && e.detail ? e.detail.stop : "";
+
+--- DOM/click/observer ---
+2:   if(window.__stopSelectedToastPatchLoaded) return;
+3:   window.__stopSelectedToastPatchLoaded = true;
+21:     el.innerHTML =
+40:     if(title) title.textContent = stopName + " seçildi";
+57:   window.showStopSelectedToast = showStopToast;
+59:   document.addEventListener("muavin:selected-stop-change", function(e){
+
+
+===== JS RİSK: static/seats/patches/stop-flow-focus-patch.js | YÜKSEK =====
+
+--- canlı/seçili/durak ---
+6:   var memoryKey = "muavin:selectedStop:" + String(window.TRIP_KEY || window.BAG_TRIP || location.pathname);
+39:     var fromWindow = cleanStopName(window.__muavinSelectedStop || "");
+48:     var badge = qs("#selectedStopBadge");
+57:     window.__muavinSelectedStop = name;
+107:     ["#seatSimpleStop", "#topLiveStop"].forEach(function(sel){
+112:     var badge = qs("#selectedStopBadge");
+122:   function applySelectedStop(name){
+135:     if(typeof window.setSelectedStop === "function" && !window.__stopFocusCallingSetSelected){
+138:         window.setSelectedStop(name, true);
+140:         console.warn("setSelectedStop çağrısı geçildi:", e);
+160:       '<div class="stop-focus-panel" role="dialog" aria-modal="true" aria-label="Durak Akışı">' +
+164:             '<div class="stop-focus-badge">Sadece Durak Akışı</div>' +
+166:           '<h2 class="stop-focus-title">Durak Akışı</h2>' +
+186:         applySelectedStop(name);
+330:     // Sadece Sade Koltuk modundaki Durak butonu özel "Sadece Durak Akışı" ekranını açsın.
+341:   function hookSetSelectedStop(){
+342:     if(typeof window.setSelectedStop !== "function") return;
+343:     if(window.setSelectedStop.__stopFlowFocusHooked) return;
+345:     var old = window.setSelectedStop;
+357:     window.setSelectedStop = wrapped;
+379:     hookSetSelectedStop();
+
+--- koordinat/km/ETA ---
+82:       add(el.getAttribute("data-stop-name") || el.getAttribute("data-stop") || (el.querySelector(".stop-name, .name, strong") || el).textContent);
+140:         console.warn("setSelectedStop çağrısı geçildi:", e);
+149:     document.dispatchEvent(new CustomEvent("muavin:selected-stop-change", {detail:{stop:name}}));
+163:             '<button type="button" class="stop-focus-back" data-stop-focus-close>← Koltuk Planı</button>' +
+185:         var name = card.getAttribute("data-stop-choice") || "";
+207:       card.setAttribute("data-stop-choice", stop);
+220:       var meta = document.createElement("span");
+221:       meta.className = "stop-focus-meta";
+222:       meta.textContent = sameStop(stop, current) ? "Şu an seçili durak" : "Dokun, seç ve koltuk planına dön";
+229:       main.appendChild(meta);
+250:   function closeStopFocus(goSeatPlan){
+257:     if(goSeatPlan){
+310:     var text = (btn.innerText || btn.textContent || btn.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim();
+
+--- runtime/localStorage/fetch ---
+51:     return cleanStopName(localStorage.getItem(memoryKey) || "");
+58:     try{ localStorage.setItem(memoryKey, name); }catch(e){}
+278:       var v = localStorage.getItem("seatUiMode:" + tripKey);
+
+--- DOM/click/observer ---
+2:   if(window.__stopFlowFocusPatchLoaded) return;
+3:   window.__stopFlowFocusPatchLoaded = true;
+6:   var memoryKey = "muavin:selectedStop:" + String(window.TRIP_KEY || window.BAG_TRIP || location.pathname);
+28:       if(sameStop(o.value || o.textContent, value)) found = true;
+33:       opt.textContent = value;
+39:     var fromWindow = cleanStopName(window.__muavinSelectedStop || "");
+46:     if(simpleStop && cleanStopName(simpleStop.textContent)) return cleanStopName(simpleStop.textContent);
+49:     if(badge && cleanStopName(badge.textContent)) return cleanStopName(badge.textContent);
+57:     window.__muavinSelectedStop = name;
+74:     if(Array.isArray(window.STOPS)) window.STOPS.forEach(add);
+75:     if(window.SEATS_BOOT && Array.isArray(window.SEATS_BOOT.stops)) window.SEATS_BOOT.stops.forEach(add);
+78:       add(o.value || o.textContent);
+82:       add(el.getAttribute("data-stop-name") || el.getAttribute("data-stop") || (el.querySelector(".stop-name, .name, strong") || el).textContent);
+109:       if(el) el.textContent = name;
+114:       if((badge.textContent || "").toLocaleLowerCase("tr-TR").includes("seçili durak")){
+115:         badge.textContent = "🎯 Seçili durak: " + name;
+117:         badge.textContent = name;
+135:     if(typeof window.setSelectedStop === "function" && !window.__stopFocusCallingSetSelected){
+137:         window.__stopFocusCallingSetSelected = true;
+138:         window.setSelectedStop(name, true);
+142:         window.__stopFocusCallingSetSelected = false;
+159:     ov.innerHTML =
+174:     ov.addEventListener("click", function(e){
+177:         e.preventDefault();
+184:         e.preventDefault();
+200:     qs("[data-current-stop]", ov).textContent = current || "—";
+201:     list.innerHTML = "";
+211:       pin.textContent = "📍";
+218:       name.textContent = stop;
+222:       meta.textContent = sameStop(stop, current) ? "Şu an seçili durak" : "Dokun, seç ve koltuk planına dön";
+226:       select.textContent = sameStop(stop, current) ? "Seçili" : "Seç";
+265:   window.openStopFlowFocus = openStopFocus;
+266:   window.closeStopFlowFocus = closeStopFocus;
+277:       var tripKey = String((window.SEATS_BOOT && window.SEATS_BOOT.tripKey) || window.BAG_TRIP || "default");
+292:         var txt = (btn.innerText || btn.textContent || "").replace(/\s+/g, " ").trim().toLocaleLowerCase("tr-TR");
+298:         var t = (btn.innerText || btn.textContent || "").replace(/\s+/g, " ").trim().toLocaleLowerCase("tr-TR");
+310:     var text = (btn.innerText || btn.textContent || btn.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim();
+319:     var isBottom = !!parentHint || rect.top > window.innerHeight * 0.58;
+324:   document.addEventListener("click", function(e){
+335:     e.preventDefault();
+336:     e.stopPropagation();
+342:     if(typeof window.setSelectedStop !== "function") return;
+343:     if(window.setSelectedStop.__stopFlowFocusHooked) return;
+345:     var old = window.setSelectedStop;
+357:     window.setSelectedStop = wrapped;
+384:   document.addEventListener("DOMContentLoaded", installHooks);
+
+
+===== JS RİSK: static/seats/patches/seat-layout-fab-pack.js | ORTA =====
+
+--- koordinat/km/ETA ---
+50:   function schedule(){
+56:     document.addEventListener("DOMContentLoaded", schedule);
+58:     schedule();
+61:   window.addEventListener("load", schedule);
+62:   window.addEventListener("resize", schedule);
+63:   window.addEventListener("orientationchange", schedule);
+64:   window.addEventListener("scroll", schedule, true);
+66:   var obs = new MutationObserver(schedule);
+147:   function schedule(){
+153:     document.addEventListener("DOMContentLoaded", schedule);
+155:     schedule();
+158:   window.addEventListener("load", schedule);
+159:   window.addEventListener("resize", schedule);
+160:   window.addEventListener("orientationchange", schedule);
+161:   window.addEventListener("scroll", schedule, true);
+162:   window.addEventListener("driveModeChanged", schedule);
+
+--- DOM/click/observer ---
+3:   if(window.__fabLeftGapMoveLoaded) return;
+4:   window.__fabLeftGapMoveLoaded = true;
+56:     document.addEventListener("DOMContentLoaded", schedule);
+61:   window.addEventListener("load", schedule);
+62:   window.addEventListener("resize", schedule);
+63:   window.addEventListener("orientationchange", schedule);
+64:   window.addEventListener("scroll", schedule, true);
+66:   var obs = new MutationObserver(schedule);
+83:       window.dispatchEvent(new Event("resize"));
+88:     document.addEventListener("DOMContentLoaded", function(){
+102:   if(window.__fabDriveModeOverrideFixReady) return;
+103:   window.__fabDriveModeOverrideFixReady = true;
+153:     document.addEventListener("DOMContentLoaded", schedule);
+158:   window.addEventListener("load", schedule);
+159:   window.addEventListener("resize", schedule);
+160:   window.addEventListener("orientationchange", schedule);
+161:   window.addEventListener("scroll", schedule, true);
+162:   window.addEventListener("driveModeChanged", schedule);
+
+
+===== JS RİSK: static/seats/patches/modal-bottom-nav-autohide.js | YÜKSEK =====
+
+--- koordinat/km/ETA ---
+24:   function isWorkModalText(t){
+33:       (t.includes("hızlı tahsilat") || t.includes("hizli tahsilat")) &&
+43:   function workModalIsOpen(){
+58:       return isWorkModalText(textOf(el));
+98:     var open = workModalIsOpen();
+116:   var scheduled = false;
+118:   function scheduleApply(){
+119:     if(scheduled) return;
+120:     scheduled = true;
+123:       scheduled = false;
+129:     setTimeout(scheduleApply, 30);
+130:     setTimeout(scheduleApply, 160);
+131:     setTimeout(scheduleApply, 420);
+134:   document.addEventListener("input", scheduleApply, true);
+135:   document.addEventListener("change", scheduleApply, true);
+136:   window.addEventListener("resize", scheduleApply);
+137:   window.addEventListener("scroll", scheduleApply, true);
+139:   var obs = new MutationObserver(scheduleApply);
+148:   scheduleApply();
+
+--- DOM/click/observer ---
+2:   if(window.__muavinModalBottomNavAutohideV3) return;
+3:   window.__muavinModalBottomNavAutohideV3 = true;
+9:     return String((el && (el.innerText || el.textContent)) || "")
+21:     return r.width > 20 && r.height > 20 && r.bottom > 0 && r.top < window.innerHeight;
+55:       if(r.width < window.innerWidth * 0.62) return false;
+83:       if(r.top < window.innerHeight * 0.55) return;
+84:       if(r.width < window.innerWidth * 0.60) return;
+128:   document.addEventListener("click", function(){
+134:   document.addEventListener("input", scheduleApply, true);
+135:   document.addEventListener("change", scheduleApply, true);
+136:   window.addEventListener("resize", scheduleApply);
+137:   window.addEventListener("scroll", scheduleApply, true);
+139:   var obs = new MutationObserver(scheduleApply);
+147:   setInterval(applyState, 700);
+
+
+===== JS RİSK: static/seats/patches/manual-ticket-system.js | ORTA =====
+
+--- koordinat/km/ETA ---
+196:   function schedule(){
+202:     document.addEventListener("DOMContentLoaded", schedule);
+204:     schedule();
+207:   window.addEventListener("load", schedule);
+210:     setTimeout(schedule, 250);
+211:     setTimeout(schedule, 900);
+212:     setTimeout(schedule, 1600);
+215:   document.addEventListener("change", schedule, true);
+217:   const obs = new MutationObserver(schedule);
+
+--- runtime/localStorage/fetch ---
+27:       const raw = localStorage.getItem(sigKey()) || "{}";
+37:       localStorage.setItem(sigKey(), JSON.stringify(obj || {}));
+43:       localStorage.setItem(legacyKey(), "[]");
+
+--- DOM/click/observer ---
+2:   if(window.__manualTicketSystemCleanReady) return;
+3:   window.__manualTicketSystemCleanReady = true;
+8:         window.BAG_TRIP ||
+9:         (window.SEATS_BOOT && window.SEATS_BOOT.tripKey) ||
+58:       b.textContent = "🎫";
+77:     const text = label ? String(label.textContent || "").replace(/\s+/g, " ").trim() : "";
+126:   window.markBiletsizSeatBadges = function(seats){
+168:   window.clearBiletsizSeatBadges = function(seats){
+192:   window.refreshManualTicketBadges = applyBadges;
+202:     document.addEventListener("DOMContentLoaded", schedule);
+207:   window.addEventListener("load", schedule);
+209:   document.addEventListener("click", function(){
+215:   document.addEventListener("change", schedule, true);
+217:   const obs = new MutationObserver(schedule);
+
+
+===== JS RİSK: static/seats/patches/top-sound-toggle.js | ORTA =====
+
+--- koordinat/km/ETA ---
+66:       window.dispatchEvent(new CustomEvent("ttsEnabledChanged", {detail:{enabled:on}}));
+79:     btn.setAttribute("aria-pressed", on ? "true" : "false");
+129:   function schedule(){
+135:     document.addEventListener("DOMContentLoaded", schedule);
+137:     schedule();
+140:   window.addEventListener("load", schedule);
+141:   window.addEventListener("resize", schedule);
+150:   var obs = new MutationObserver(schedule);
+
+--- runtime/localStorage/fetch ---
+13:       return (localStorage.getItem(KEY) ?? "1") === "1";
+35:         localStorage.setItem(KEY, on ? "1" : "0");
+38:       try{ localStorage.setItem(KEY, on ? "1" : "0"); }catch(e){}
+
+--- DOM/click/observer ---
+2:   if(window.__topSoundToggleLoaded) return;
+3:   window.__topSoundToggleLoaded = true;
+21:       if(window.SeatsVoice && typeof window.SeatsVoice.isEnabled === "function"){
+22:         return !!window.SeatsVoice.isEnabled();
+32:       if(window.SeatsVoice && typeof window.SeatsVoice.setEnabled === "function"){
+33:         window.SeatsVoice.setEnabled(on);
+55:         if(window.SeatsVoice && typeof window.SeatsVoice.stop === "function"){
+56:           window.SeatsVoice.stop();
+57:         }else if(window.SeatsStopVoice){
+58:           window.SeatsStopVoice();
+66:       window.dispatchEvent(new CustomEvent("ttsEnabledChanged", {detail:{enabled:on}}));
+81:     btn.innerHTML = on
+109:       btn.addEventListener("click", function(e){
+110:         e.preventDefault();
+111:         e.stopPropagation();
+116:         if(next && window.SeatsSpeak){
+117:           try{ window.SeatsSpeak("Sesli asistan açık.", {force:true}); }catch(_){}
+135:     document.addEventListener("DOMContentLoaded", schedule);
+140:   window.addEventListener("load", schedule);
+141:   window.addEventListener("resize", schedule);
+142:   window.addEventListener("ttsEnabledChanged", syncButton);
+144:   document.addEventListener("change", function(e){
+150:   var obs = new MutationObserver(schedule);
+
+
+===== JS RİSK: static/seats/patches/seat-simple-ui-pack.js | YÜKSEK =====
+
+--- canlı/seçili/durak ---
+46:       if(typeof renderRouteStrip === "function") renderRouteStrip();
+150:     let stop = readText("#selectedStopBadge") || "—";
+
+--- koordinat/km/ETA ---
+42:       btn.setAttribute("aria-pressed", simple ? "true" : "false");
+121:             <b class="speed" id="seatSimpleSpeed">0 km/h</b>
+183:       speed = `${spVal.textContent.trim()} km/h`;
+185:       speed = readText("#topSpeed") || "0 km/h";
+189:     if(speedEl) speedEl.textContent = speed || "0 km/h";
+
+--- runtime/localStorage/fetch ---
+20:       return localStorage.getItem(key()) || "simple";
+28:       localStorage.setItem(key(), mode);
+
+--- DOM/click/observer ---
+3:   if(window.__seatSimpleOpenModeReady) return;
+4:   window.__seatSimpleOpenModeReady = true;
+8:       return (window.SEATS_BOOT && window.SEATS_BOOT.tripKey) || window.BAG_TRIP || "default";
+39:       btn.innerHTML = simple
+61:     btn.addEventListener("click", function(){
+80:     document.addEventListener("DOMContentLoaded", boot);
+88:   if(window.__seatSimpleSummaryPolishReady) return;
+89:   window.__seatSimpleSummaryPolishReady = true;
+104:       box.innerHTML = `
+135:     setInterval(update, 1000);
+140:     return (el && el.textContent ? el.textContent.trim() : "");
+144:     const bootData = window.SEATS_BOOT || {};
+148:     if(routeEl) routeEl.textContent = route;
+154:     if(stopEl) stopEl.textContent = stop;
+178:     if(occEl) occEl.textContent = `${filled}/${total || 0}`;
+182:     if(spVal && spVal.textContent.trim()){
+183:       speed = `${spVal.textContent.trim()} km/h`;
+189:     if(speedEl) speedEl.textContent = speed || "0 km/h";
+193:     document.addEventListener("DOMContentLoaded", boot);
+204:   if(window.__seatHideBottomMenuOnModalReady) return;
+205:   window.__seatHideBottomMenuOnModalReady = true;
+214:     const cs = window.getComputedStyle(el);
+245:     const observer = new MutationObserver(sync);
+259:     document.addEventListener("click", function(){
+265:     window.addEventListener("resize", sync);
+266:     window.addEventListener("orientationchange", function(){
+270:     setInterval(sync, 500);
+274:     document.addEventListener("DOMContentLoaded", boot);
+
+
+===== CSS RİSK: static/style.css | ORTA GÖRÜNÜM RİSKİ =====
+14: .stats-fab-wrap{ position:fixed; right:16px; bottom:16px; z-index:9999; }
+21:   position:absolute; right:0; bottom:54px; background:#2b3036; color:#e6edf3;
+24:   transform: translateY(8px) scale(.98); opacity:0; visibility:hidden; pointer-events:none;
+27:   content:""; position:absolute; right:18px; bottom:-8px; width:14px; height:14px;
+29:   transform: rotate(45deg);
+36:   .stats-panel{ transition: transform .18s ease, opacity .18s ease, visibility 0s linear .18s; }
+38:     transform: translateY(0) scale(1); opacity:1; visibility:visible; pointer-events:auto;
+39:     transition: transform .18s ease, opacity .18s ease;
+
+
+===== CSS RİSK: static/seats/seats.css | YÜKSEK GÖRÜNÜM RİSKİ =====
+68:     position:sticky;
+70:     z-index:1200;
+146:     white-space:nowrap;
+183:     transform:translateY(-1px);
+218:     overflow:hidden;
+233:     white-space:nowrap;
+248:     0%,100%{ transform:scale(1); }
+249:     50%{ transform:scale(1.012); }
+266:     position:relative;
+268:     overflow:hidden;
+273:     position:absolute;
+278:     pointer-events:none;
+282:     position:relative;
+283:     z-index:1;
+314:     text-transform:uppercase;
+361:     white-space:nowrap;
+419:   .route-strip-shell{
+428:   .route-strip-head{
+437:   .route-strip-title{
+443:   .route-strip-meta{
+464:   .route-strip{
+467:     overflow:auto;
+472:   .route-strip::-webkit-scrollbar{ display:none; }
+521:     white-space:nowrap;
+528:     white-space:nowrap;
+544:     position:relative;
+551:     overflow:auto;
+552:     overflow-x:auto;
+553:     overflow-y:visible;
+558:     position:relative;
+565:     position:relative;
+613:     position:relative;
+614:     z-index:1;
+622:     position:relative;
+623:     z-index:1;
+687:     position:absolute;
+688:     display:none;
+731:     position:absolute;
+734:     z-index:40;
+772:     position:relative;
+774:     overflow:hidden;
+778:     display:none;
+814:   .tab-pane{ display:none; }
+1139:     overflow:auto;
+1221:     display:none;
+1222:     position:fixed;
+1225:     z-index:3000;
+1230:     display:none;
+1231:     position:fixed;
+1234:     transform:translate(-50%,-50%);
+1237:     overflow:auto;
+1238:     z-index:3010;
+1245:     transform:translateX(-50%);
+1300:     display:none;
+1301:     position:fixed;
+1304:     z-index:5000;
+1321:       position:sticky;
+1332:       position:relative;
+1334:       z-index:20;
+1378:       position:fixed;
+1381:       z-index:1300;
+1445:       overflow:auto;
+1450:     .status-row::-webkit-scrollbar{ display:none; }
+1498:     .route-strip-shell{
+1615:     transform:scale(1);
+1619:     transform:scale(1.025);
+1720:     overflow:visible;
+1742:     display:none;
+1758:     display:none;
+1766:     display:none;
+1805:   .route-strip-shell{
+1812:   .route-strip-head{
+1816:   .route-strip-title{
+1876:   position:fixed;
+1879:   z-index:7000;
+1899:   display:none !important;
+1930:   display:none !important;
+1958:   display:none !important;
+1961: body.drive-mode .route-strip-shell{
+1968: body.drive-mode .route-strip-head{
+1972: body.drive-mode .route-strip-title{
+2038:   body.drive-mode .route-strip-shell{
+2083:   overflow:hidden;
+2101:   white-space:nowrap;
+2102:   overflow:hidden;
+2103:   text-overflow:ellipsis;
+2124: body.drive-mode .route-strip-shell{
+2134: body.drive-mode .route-strip-head{
+2142: body.drive-mode .route-strip-title{
+2148: body.drive-mode .route-strip-meta{
+2150:   overflow:hidden;
+2157:   white-space:nowrap;
+2161: body.drive-mode .route-strip{
+2166:   -webkit-overflow-scrolling:touch;
+2181:   white-space:nowrap;
+2182:   overflow:hidden;
+2183:   text-overflow:ellipsis;
+2189:   white-space:nowrap;
+2190:   overflow:hidden;
+2191:   text-overflow:ellipsis;
+2199:   transform:translateY(-1px);
+2222:   overflow:hidden;
+2292:   body.drive-mode .route-strip-title{
+2375:   z-index:8;
+2383:   position:absolute;
+2389:   transform:rotate(45deg);
+2400:   overflow:hidden;
+2401:   white-space:nowrap;
+2479:   overflow-x:hidden !important;
+2504:   overflow:hidden;
+2519:   transform:scale(.96);
+2573:   position:absolute !important;
+2577:   transform:translateX(-50%) !important;
+2595:   z-index:80 !important;
+2730:   transform:translateY(-1px);
+2735:   transform:scale(.98);
+2764:   display:none;
+2770:   position:fixed;
+2773:   z-index:1600;
+2792:   pointer-events:none;
+2825:   white-space:nowrap;
+2826:   overflow:hidden;
+2827:   text-overflow:ellipsis;
+2892:   position:fixed !important;
+2895:   z-index:1900 !important;
+2909:   position:fixed !important;
+2912:   z-index:1890 !important;
+2924:   transform:none !important;
+2925:   pointer-events:none !important;
+2950:   white-space:nowrap !important;
+2951:   overflow:hidden !important;
+2952:   text-overflow:ellipsis !important;
+2992:   display:none;
+2998:   position:fixed !important;
+3001:   z-index:99999 !important;
+3008:   transform:translate3d(0,0,0) !important;
+3009:   pointer-events:none !important;
+3014:   position:relative !important;
+3019:   transform:none !important;
+3029:   pointer-events:auto !important;
+3034:   position:relative !important;
+3039:   transform:none !important;
+3047:   pointer-events:none !important;
+3077:   white-space:nowrap !important;
+3078:   overflow:hidden !important;
+3079:   text-overflow:ellipsis !important;
+3118:   display:none !important;
+3123:   display:none;
+3128:   position:absolute !important;
+3131:   z-index:90 !important;
+3142:   position:relative !important;
+3147:   position:relative !important;
+3152:   transform:none !important;
+3162:   pointer-events:auto !important;
+3168:   position:relative !important;
+3173:   transform:none !important;
+3180:   pointer-events:none !important;
+3201:   white-space:nowrap !important;
+3202:   overflow:hidden !important;
+3203:   text-overflow:ellipsis !important;
+
+
+===== CSS RİSK: static/seats/seats-final.css | YÜKSEK GÖRÜNÜM RİSKİ =====
+43:   position:relative !important;
+45:   z-index:20 !important;
+119:   overflow:hidden !important;
+120:   white-space:nowrap !important;
+121:   text-overflow:ellipsis !important;
+131:   overflow:hidden !important;
+132:   text-overflow:ellipsis !important;
+167:   overflow:visible !important;
+198:   display:none !important;
+237:   overflow:hidden !important;
+241:   position:relative !important;
+252:   position:static !important;
+258:   transform:none !important;
+271:   z-index:1 !important;
+272:   overflow:hidden !important;
+273:   pointer-events:auto !important;
+281:   position:relative !important;
+287:   transform:none !important;
+299:   overflow:hidden !important;
+310:   white-space:nowrap !important;
+327:   white-space:nowrap !important;
+328:   overflow:hidden !important;
+329:   text-overflow:ellipsis !important;
+339:   overflow:hidden !important;
+340:   text-overflow:ellipsis !important;
+341:   white-space:nowrap !important;
+350:   white-space:nowrap !important;
+351:   overflow:hidden !important;
+352:   text-overflow:ellipsis !important;
+396:   display:none !important;
+449:   display:none !important;
+454:   overflow:hidden !important;
+455:   text-overflow:ellipsis !important;
+456:   white-space:nowrap !important;
+488:   overflow:hidden !important;
+489:   white-space:nowrap !important;
+490:   text-overflow:ellipsis !important;
+497: .route-strip-shell{
+506: .route-strip-head{
+512: .route-strip-title{
+518: .route-strip-meta{
+539:   overflow:hidden !important;
+540:   white-space:nowrap !important;
+541:   text-overflow:ellipsis !important;
+546:   overflow:hidden !important;
+547:   text-overflow:ellipsis !important;
+548:   white-space:nowrap !important;
+566: .route-strip{
+569:   overflow-x:auto !important;
+574: .route-strip::-webkit-scrollbar{
+575:   display:none !important;
+604:   overflow-x:auto !important;
+605:   overflow-y:visible !important;
+651:   position:relative !important;
+654:   overflow:visible !important;
+660:   overflow-x:auto !important;
+666:   display:none !important;
+798:   .route-strip-meta{
+911:   display:none !important;
+1021:     center / contain no-repeat !important;
+1025:     center / contain no-repeat !important;
+1217:     center / contain no-repeat !important;
+1221:     center / contain no-repeat !important;
+1490: .route-strip-meta{
+1496:   overflow:hidden !important;
+1504:   overflow:hidden !important;
+1531:   white-space:nowrap !important;
+1537:   position:relative !important;
+1540:   overflow:hidden !important;
+1541:   white-space:nowrap !important;
+1547: .route-strip-meta .route-pill b{
+1552:   overflow:visible !important;
+1553:   text-overflow:clip !important;
+1554:   white-space:nowrap !important;
+1558:   will-change:transform !important;
+1571:     transform:translateX(0);
+1574:     transform:translateX(-50%);
+1583:   display:none !important;
+1594: body.drive-mode .route-strip:has(.route-stop.live-danger) ~ *,
+1595: body:not(.drive-mode) .route-strip:has(.route-stop.live-danger) ~ *{
+1599: .route-strip-shell:has(.route-stop.live-danger) .route-pill-live{
+1610: .route-strip-shell:has(.route-stop.live-danger) .route-pill-live .route-mini-label,
+1611: .route-strip-shell:has(.route-stop.live-danger) .route-pill-live #routeMiniLive{
+1618: .route-strip-shell:has(.route-stop.live-danger) .route-mini-dot{
+1631: .route-strip-shell:has(.route-stop.next-warning) .route-pill-next{
+1642: .route-strip-shell:has(.route-stop.next-warning) .route-pill-next .route-mini-label,
+1643: .route-strip-shell:has(.route-stop.next-warning) .route-pill-next #routeMiniNext{
+1663:   display:none !important;
+1668:   position:fixed !important;
+1673:   transform:translateX(-50%) !important;
+1679:   z-index:99999 !important;
+1724:   white-space:nowrap !important;
+1725:   overflow:hidden !important;
+1726:   text-overflow:ellipsis !important;
+1776:   display:none !important;
+1781:   position:fixed !important;
+1786:   transform:translateX(-50%) !important;
+1788:   z-index:99998 !important;
+1854: body.drive-mode .route-strip-shell{
+1876:   body.drive-mode .route-strip-shell{
+1890:   display:none !important;
+1895:   position:relative !important;
+1900:   transform:none !important;
+1929:   z-index:20 !important;
+1970:   transform:scale(.96) !important;
+1974: body.drive-mode .route-strip-shell{
+2013:   display:none !important;
+2041:   overflow:hidden !important;
+2046:   display:none !important;
+2053:   overflow:hidden !important;
+2054:   text-overflow:ellipsis !important;
+2055:   white-space:nowrap !important;
+2110:   display:none !important;
+2223:   display:none !important;
+2268:   overflow:hidden !important;
+2269:   text-overflow:ellipsis !important;
+2270:   white-space:nowrap !important;
+2373:   display:none !important;
+2389:   display:none !important;
+2430:   overflow:hidden !important;
+2435:   overflow:hidden !important;
+2436:   text-overflow:ellipsis !important;
+2437:   white-space:nowrap !important;
+
+
+===== CSS RİSK: static/seats/patches/stop-selected-toast.css | ORTA GÖRÜNÜM RİSKİ =====
+2:     position:fixed;
+5:     transform:translateX(-50%) translateY(22px) scale(.96);
+6:     z-index:2147483600;
+10:     pointer-events:none;
+11:     transition:opacity .22s ease, transform .22s ease;
+16:     transform:translateX(-50%) translateY(0) scale(1);
+57:     white-space:nowrap;
+58:     overflow:hidden;
+59:     text-overflow:ellipsis;
+
+
+===== CSS RİSK: static/seats/patches/stop-flow-focus-patch.css | YÜKSEK GÖRÜNÜM RİSKİ =====
+1: html.stop-flow-focus-lock,
+2:   body.stop-flow-focus-lock{
+3:     overflow:hidden !important;
+8:     position:fixed;
+10:     z-index:2147483000;
+21:     display:none !important;
+33:     overflow:hidden;
+71:     white-space:nowrap;
+96:     overflow:auto;
+100:     -webkit-overflow-scrolling:touch;
+119:     transform:scale(.985);
+150:     overflow:hidden;
+151:     text-overflow:ellipsis;
+152:     white-space:nowrap;
+
+
+===== CSS RİSK: static/seats/patches/seat-layout-fab-pack.css | ORTA GÖRÜNÜM RİSKİ =====
+18:     transform:translateX(var(--right-seat-column-shift)) !important;
+26:     transform:translateX(calc(var(--right-seat-column-shift) * .35)) !important;
+62:     transform:none !important;
+67:     transform:none !important;
+73:     BOTTOM_ROW_51_54_EQUAL_SPACING yaması 14. satırın transformunu sıfırladığı için
+82:     transform:translateX(var(--right-seat-column-shift, 16px)) !important;
+89:     transform:translateX(var(--right-seat-column-shift, 18px)) !important;
+100:     position:absolute !important;
+103:     z-index:45 !important;
+109:     pointer-events:auto !important;
+167:     position:absolute;
+170:     transform:translateX(-50%);
+177:     pointer-events:none;
+181:     position:relative !important;
+198:     position:absolute;
+202:     pointer-events:none;
+224:     transform:scale(.94) !important;
+305:     position:absolute !important;
+311:     transform:none !important;
+340:     overflow:visible !important;
+341:     z-index:90 !important;
+347:     position:absolute !important;
+350:     transform:translateX(-50%) !important;
+358:     pointer-events:none !important;
+
+
+===== CSS RİSK: static/seats/patches/modal-bottom-nav-autohide.css | ORTA GÖRÜNÜM RİSKİ =====
+2:     display:none !important;
+4:     visibility:hidden !important;
+5:     pointer-events:none !important;
+
+
+===== CSS RİSK: static/seats/patches/manual-ticket-system.css | ORTA GÖRÜNÜM RİSKİ =====
+8:     position:relative !important;
+12:     position:absolute;
+19:     display:none;
+31:     z-index:12;
+32:     pointer-events:none;
+
+
+===== CSS RİSK: static/seats/patches/seat-simple-ui-pack.css | YÜKSEK GÖRÜNÜM RİSKİ =====
+8:   position:sticky;
+10:   z-index:9999;
+35:   display:none !important;
+44:   display:none !important;
+60:   display:none !important;
+68:   display:none !important;
+83:   display:none !important;
+104: html.seat-simple-mode .route-strip-shell,
+105: html.seat-simple-mode .route-flow-shell,
+106: html.seat-simple-mode .route-flow,
+107: html.seat-simple-mode #routeStrip,
+110:   display:none !important;
+145:   display:none;
+178:   overflow:hidden;
+179:   text-overflow:ellipsis;
+180:   white-space:nowrap;
+197:   white-space:nowrap;
+213:   overflow:hidden;
+222:   text-transform:uppercase;
+224:   white-space:nowrap;
+233:   overflow:hidden;
+234:   text-overflow:ellipsis;
+235:   white-space:nowrap;
+288:   display:none;
+289:   position:fixed;
+293:   z-index:99999;
+364:   transform:scale(.96);
+396:   display:none !important;
+
+
+===== CSS RİSK: static/seats/patches/fab-sheet-solid-fix.css | ORTA GÖRÜNÜM RİSKİ =====
+61:     pointer-events:none !important;
+
+
+===== CSS RİSK: static/seats/patches/seat-label-ghost-clean.css | ORTA GÖRÜNÜM RİSKİ =====
+13:     display:none !important;
+23:     overflow:hidden !important;

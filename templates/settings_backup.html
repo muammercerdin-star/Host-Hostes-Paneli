@@ -1,344 +1,798 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Yedekleme</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Yedekleme</title>
 
-  <style>
-    *{ box-sizing:border-box; }
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    body{
-      margin:0;
-      min-height:100vh;
-      background:
-        radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 34%),
-        linear-gradient(180deg,#f8fbff,#eaf3ff);
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      color:#0f172a;
-    }
+<style>
+  :root{
+    --bg:#0d0f14;
+    --bg-row:#181c27;
+    --bg-hover:#1e2333;
+    --border:rgba(255,255,255,.07);
+    --border-act:rgba(255,255,255,.14);
+    --text:#e8edf5;
+    --text-sub:rgba(232,237,245,.54);
+    --text-dim:rgba(232,237,245,.32);
+    --accent:#3b8bff;
+    --amber:#f5a623;
+    --green:#30d988;
+    --red:#ff4f4f;
+    --font-display:'Barlow Condensed',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    --font-body:'Barlow',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    --r-card:20px;
+  }
 
-    .shell{
-      width:min(94vw,720px);
-      margin:18px auto 28px;
-      padding:16px;
-      border-radius:30px;
-      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
-      border:1px solid rgba(255,255,255,.82);
-      box-shadow:0 28px 80px rgba(15,23,42,.18);
-    }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-    .hero{
-      padding:24px 20px;
-      border-radius:26px;
-      background:linear-gradient(145deg,#2563eb,#06b6d4);
-      color:#fff;
-      box-shadow:0 18px 38px rgba(37,99,235,.22);
-      margin-bottom:14px;
-    }
+  html,body{
+    min-height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
 
-    .hero h1{
-      margin:0;
-      font-size:34px;
-      line-height:1;
-      font-weight:950;
-    }
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;
+    z-index:0;
+  }
 
-    .hero p{
-      margin:8px 0 0;
-      font-size:15px;
-      font-weight:700;
-      color:rgba(255,255,255,.88);
-    }
+  .page{
+    position:relative;
+    z-index:1;
+    max-width:480px;
+    min-height:100vh;
+    margin:0 auto;
+    padding:0 0 40px;
+  }
 
-    .card{
-      border-radius:26px;
-      background:#fff;
-      border:1px solid #e5edf6;
-      box-shadow:0 14px 34px rgba(15,23,42,.10);
-      padding:18px;
-      margin-bottom:14px;
-    }
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:52px 24px 32px;
+    background:linear-gradient(160deg,#0e1624 0%,#0d0f14 62%);
+    border-bottom:1px solid var(--border);
+  }
 
-    .alert{
-      padding:13px 14px;
-      border-radius:18px;
-      margin-bottom:14px;
-      font-size:15px;
-      font-weight:850;
-      line-height:1.3;
-    }
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:-60px;
+    right:-40px;
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(59,139,255,.18) 0%,transparent 70%);
+    pointer-events:none;
+  }
 
-    .ok{
-      background:#ecfdf5;
-      color:#047857;
-      border:1px solid #a7f3d0;
-    }
+  .hero::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+    opacity:.45;
+  }
 
-    .info{
-      background:#eff6ff;
-      color:#1d4ed8;
-      border:1px solid #bfdbfe;
-    }
+  .hero-tag{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-family:var(--font-display);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:10px;
+    opacity:0;
+    animation:fadeUp .5s .05s forwards;
+  }
 
-    .create-btn{
-      width:100%;
-      min-height:62px;
-      border:0;
-      border-radius:23px;
-      background:linear-gradient(145deg,#38bdf8,#2563eb);
-      color:#fff;
-      font-size:19px;
-      font-weight:950;
-      box-shadow:0 16px 34px rgba(37,99,235,.26);
-      font-family:inherit;
-    }
+  .hero-tag::before{
+    content:"";
+    width:24px;
+    height:1px;
+    background:var(--accent);
+    display:block;
+  }
 
-    .backup-list{
-      overflow:hidden;
-      border-radius:24px;
-      background:#fff;
-      border:1px solid #e5edf6;
-      box-shadow:0 14px 34px rgba(15,23,42,.10);
-    }
+  .hero h1{
+    position:relative;
+    font-family:var(--font-display);
+    font-size:54px;
+    font-weight:800;
+    letter-spacing:-.02em;
+    line-height:.95;
+    color:var(--text);
+    opacity:0;
+    animation:fadeUp .5s .12s forwards;
+  }
 
-    .backup-item{
-      padding:16px;
-      border-bottom:1px solid #e5edf6;
-    }
+  .hero h1 span{
+    display:block;
+    max-width:370px;
+    font-size:20px;
+    font-weight:600;
+    color:var(--text-sub);
+    margin-top:8px;
+    line-height:1.32;
+  }
 
-    .backup-item:last-child{
-      border-bottom:none;
-    }
+  .content{
+    padding:24px 16px 0;
+    display:grid;
+    gap:12px;
+  }
 
-    .backup-title{
-      font-size:16px;
-      font-weight:950;
-      color:#0f172a;
-      word-break:break-word;
-    }
+  .card{
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.22);
+    opacity:0;
+    animation:fadeUp .4s .16s forwards;
+  }
 
-    .backup-meta{
-      margin-top:5px;
-      color:#64748b;
-      font-size:13px;
-      font-weight:750;
-    }
+  .card-pad{padding:18px}
 
-    .backup-actions{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:9px;
-      margin-top:12px;
-    }
+  .status-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:18px;
+    border-bottom:1px solid var(--border);
+  }
 
-    .btn{
-      min-height:48px;
-      border-radius:18px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-decoration:none;
-      border:0;
-      font-size:15px;
-      font-weight:950;
-      font-family:inherit;
-    }
+  .status-icon{
+    width:48px;
+    height:48px;
+    border-radius:14px;
+    display:grid;
+    place-items:center;
+    font-size:24px;
+    background:rgba(59,139,255,.14);
+    flex-shrink:0;
+  }
 
-    .download{
-      background:#eff6ff;
-      color:#2563eb;
-      border:1px solid #bfdbfe;
-    }
+  .status-title{
+    font-family:var(--font-display);
+    font-size:27px;
+    font-weight:800;
+    line-height:1;
+  }
 
-    .delete{
-      background:#fef2f2;
-      color:#dc2626;
-      border:1px solid #fecaca;
-    }
+  .status-sub{
+    margin-top:4px;
+    color:var(--text-sub);
+    font-size:14px;
+    font-weight:600;
+    line-height:1.3;
+  }
 
-    .back-btn{
-      margin-top:14px;
-      min-height:56px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:21px;
-      background:#fff;
-      color:#2563eb;
-      border:1px solid #e5edf6;
-      box-shadow:0 12px 28px rgba(15,23,42,.10);
-      text-decoration:none;
-      font-size:17px;
-      font-weight:950;
-    }
+  .alert{
+    margin-bottom:12px;
+    padding:14px 15px;
+    border-radius:16px;
+    font-size:15px;
+    font-weight:750;
+    line-height:1.35;
+  }
 
-    .empty{
-      padding:18px;
-      color:#64748b;
-      font-size:15px;
-      font-weight:750;
-      line-height:1.35;
-      text-align:center;
-    }
+  .alert.ok{
+    background:rgba(48,217,136,.12);
+    color:#9af2c8;
+    border:1px solid rgba(48,217,136,.24);
+  }
 
-    @media(max-width:420px){
-      .shell{
-        width:calc(100vw - 24px);
-        margin:14px auto 24px;
-        padding:14px;
-      }
+  .alert.info{
+    background:rgba(59,139,255,.10);
+    color:#a9ccff;
+    border:1px solid rgba(59,139,255,.22);
+  }
 
-      .hero h1{
-        font-size:31px;
-      }
-    }
-  
-    .err{
-      background:#fef2f2;
-      color:#b91c1c;
-      border:1px solid #fecaca;
-    }
+  .alert.err{
+    background:rgba(255,79,79,.12);
+    color:#ffb1b1;
+    border:1px solid rgba(255,79,79,.24);
+  }
 
-    .restore-file{
-      width:100%;
-      min-height:58px;
-      border-radius:20px;
-      border:1px solid rgba(148,163,184,.26);
-      background:#f8fbff;
-      color:#0f172a;
-      padding:15px;
-      outline:none;
-      font-size:15px;
-      font-weight:750;
-      margin-bottom:12px;
-    }
+  .alert.warn{
+    background:rgba(245,166,35,.12);
+    color:#ffd38a;
+    border:1px solid rgba(245,166,35,.24);
+  }
 
-    .restore-btn{
-      width:100%;
-      min-height:58px;
-      border:0;
-      border-radius:21px;
-      background:linear-gradient(145deg,#fb923c,#ef4444);
-      color:#fff;
-      font-size:18px;
-      font-weight:950;
-      box-shadow:0 16px 34px rgba(239,68,68,.18);
-      font-family:inherit;
-    }
+  .section-title{
+    font-family:var(--font-display);
+    font-size:28px;
+    font-weight:800;
+    line-height:1;
+    margin-bottom:6px;
+  }
 
-  
-    .restart-warning{
-      margin-top:12px;
-      padding:16px 15px;
-      border-radius:20px;
-      background:linear-gradient(145deg,#fff7ed,#ffedd5);
-      color:#9a3412;
-      border:1px solid #fed7aa;
-      font-size:16px;
-      font-weight:900;
-      line-height:1.35;
-      box-shadow:0 12px 28px rgba(251,146,60,.10);
-    }
+  .section-sub{
+    color:var(--text-sub);
+    font-size:14px;
+    font-weight:600;
+    line-height:1.35;
+    margin-bottom:14px;
+  }
 
-    .restart-warning b{
-      display:block;
-      color:#7c2d12;
-      font-size:18px;
-      margin-bottom:5px;
-    }
+  .info-line{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:14px;
+    border-radius:17px;
+    background:rgba(59,139,255,.08);
+    border:1px solid rgba(59,139,255,.18);
+    margin-bottom:14px;
+  }
 
-  </style>
+  .info-ico{
+    width:38px;
+    height:38px;
+    border-radius:13px;
+    display:grid;
+    place-items:center;
+    background:rgba(59,139,255,.14);
+    flex-shrink:0;
+    font-size:20px;
+  }
+
+  .info-title{
+    font-family:var(--font-display);
+    font-size:21px;
+    font-weight:800;
+    line-height:1;
+  }
+
+  .info-sub{
+    margin-top:5px;
+    color:var(--text-sub);
+    font-size:14px;
+    font-weight:600;
+    line-height:1.35;
+  }
+
+  .btn{
+    min-height:58px;
+    border:0;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    cursor:pointer;
+    font-family:var(--font-display);
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:.02em;
+    color:var(--text);
+    width:100%;
+  }
+
+  .btn.primary{
+    background:linear-gradient(145deg,#38bdf8,#2563eb);
+    box-shadow:0 16px 34px rgba(37,99,235,.24);
+  }
+
+  .btn.danger{
+    background:linear-gradient(145deg,#fb923c,#ef4444);
+    box-shadow:0 16px 34px rgba(239,68,68,.18);
+  }
+
+  .btn.secondary{
+    background:rgba(255,255,255,.035);
+    color:var(--accent);
+    border:1px solid var(--border);
+  }
+
+  .btn.ghost{
+    background:rgba(255,255,255,.03);
+    color:var(--text-sub);
+    border:1px solid var(--border);
+  }
+
+  .file-wrap{
+    display:grid;
+    gap:9px;
+    margin:10px 0 12px;
+  }
+
+  input[type="file"]{
+    display:none;
+  }
+
+  .file-btn{
+    min-height:60px;
+    border-radius:18px;
+    border:1px dashed rgba(245,166,35,.32);
+    background:linear-gradient(160deg,rgba(245,166,35,.10),rgba(255,255,255,.025));
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:0 15px;
+    cursor:pointer;
+  }
+
+  .file-main{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+
+  .file-ico{
+    width:38px;
+    height:38px;
+    border-radius:13px;
+    display:grid;
+    place-items:center;
+    background:rgba(245,166,35,.14);
+    flex-shrink:0;
+  }
+
+  .file-title{
+    font-family:var(--font-display);
+    font-size:20px;
+    font-weight:800;
+    line-height:1;
+  }
+
+  .file-name{
+    display:block;
+    margin-top:3px;
+    color:var(--text-sub);
+    font-size:13px;
+    font-weight:650;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:250px;
+  }
+
+  .file-arrow{
+    color:#ffd38a;
+    font-family:var(--font-display);
+    font-size:17px;
+    font-weight:800;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+
+  .backup-list{
+    display:grid;
+    gap:12px;
+  }
+
+  .backup-item{
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.18);
+    opacity:0;
+    animation:fadeUp .4s .22s forwards;
+  }
+
+  .backup-head{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    padding:18px;
+    border-bottom:1px solid var(--border);
+  }
+
+  .backup-ico{
+    width:48px;
+    height:48px;
+    border-radius:14px;
+    display:grid;
+    place-items:center;
+    background:rgba(245,166,35,.13);
+    font-size:23px;
+    flex-shrink:0;
+  }
+
+  .backup-title{
+    font-family:var(--font-display);
+    font-size:26px;
+    font-weight:800;
+    line-height:1.05;
+    word-break:break-word;
+  }
+
+  .backup-meta{
+    margin-top:6px;
+    color:var(--text-sub);
+    font-size:14px;
+    font-weight:650;
+    line-height:1.35;
+  }
+
+  .backup-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    padding:14px;
+  }
+
+  .empty{
+    background:var(--bg-row);
+    border:1px dashed rgba(59,139,255,.26);
+    border-radius:var(--r-card);
+    padding:24px 18px;
+    text-align:center;
+    opacity:0;
+    animation:fadeUp .4s .22s forwards;
+  }
+
+  .empty-ico{
+    width:62px;
+    height:62px;
+    border-radius:20px;
+    display:grid;
+    place-items:center;
+    margin:0 auto 14px;
+    background:rgba(59,139,255,.12);
+    font-size:30px;
+  }
+
+  .empty-title{
+    font-family:var(--font-display);
+    font-size:28px;
+    font-weight:800;
+    line-height:1;
+  }
+
+  .empty-sub{
+    margin-top:8px;
+    color:var(--text-sub);
+    font-size:15px;
+    font-weight:650;
+    line-height:1.35;
+  }
+
+  .back-btn{
+    min-height:58px;
+    margin:10px 16px 0;
+    border-radius:var(--r-card);
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    font-family:var(--font-display);
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:.04em;
+    opacity:0;
+    animation:fadeUp .4s .34s forwards;
+  }
+
+  .modal{
+    position:fixed;
+    inset:0;
+    z-index:40;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    background:rgba(0,0,0,.54);
+    padding:16px;
+  }
+
+  .modal.show{display:flex}
+
+  .modal-card{
+    width:100%;
+    max-width:448px;
+    border-radius:24px;
+    background:#181c27;
+    border:1px solid var(--border-act);
+    box-shadow:0 24px 80px rgba(0,0,0,.55);
+    padding:18px;
+    animation:modalUp .18s ease-out;
+  }
+
+  .modal-title{
+    font-family:var(--font-display);
+    font-size:28px;
+    font-weight:800;
+    line-height:1;
+    margin-bottom:8px;
+  }
+
+  .modal-text{
+    color:var(--text-sub);
+    font-size:15px;
+    font-weight:650;
+    line-height:1.4;
+    margin-bottom:14px;
+  }
+
+  .modal-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+
+  @keyframes modalUp{
+    from{transform:translateY(20px);opacity:0}
+    to{transform:translateY(0);opacity:1}
+  }
+
+  @media(max-width:390px){
+    .hero{padding:46px 20px 28px}
+    .hero h1{font-size:48px}
+    .hero h1 span{font-size:18px}
+    .content{padding-left:12px;padding-right:12px}
+    .backup-actions,.modal-actions{grid-template-columns:1fr}
+    .file-name{max-width:180px}
+  }
+</style>
 </head>
 
 <body>
-  <main class="shell">
-    <section class="hero">
-      <h1>💾 Yedekleme</h1>
-      <p>Veritabanı, raporlar ve yüklenen dosyaları tek zip dosyasına al.</p>
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-tag">Sistem</div>
+    <h1>Yedekleme
+      <span>Veritabanı, raporlar ve yüklenen dosyaları tek zip dosyasına al</span>
+    </h1>
+  </div>
+
+  <div class="content">
+
+    <section class="card">
+      <div class="status-head">
+        <div class="status-icon">💾</div>
+        <div>
+          <div class="status-title">Yeni Yedek Oluştur</div>
+          <div class="status-sub">Sefer kayıtları, raporlar, profil fotoğrafları ve yüklenen dosyalar alınır.</div>
+        </div>
+      </div>
+
+      <div class="card-pad">
+        {% if created %}
+          <div class="alert ok">Yeni yedek oluşturuldu: <b>{{ created }}</b></div>
+        {% endif %}
+
+        {% if deleted %}
+          <div class="alert info">Yedek silindi: <b>{{ deleted }}</b></div>
+        {% endif %}
+
+        {% if restored %}
+          <div class="alert ok">Yedek geri yüklendi: <b>{{ restored }}</b></div>
+        {% endif %}
+
+        {% if emergency %}
+          <div class="alert warn">Geri yükleme öncesi mevcut sistemin acil yedeği alındı: <b>{{ emergency }}</b></div>
+        {% endif %}
+
+        {% if restore_error %}
+          <div class="alert err">{{ restore_error }}</div>
+        {% endif %}
+
+        <div class="info-line">
+          <div class="info-ico">📦</div>
+          <div>
+            <div class="info-title">Tam sistem yedeği</div>
+            <div class="info-sub">Yedek dosyası; veritabanı, rapor arşivi, profil fotoğrafları ve yüklenen dosyaları içerir.</div>
+          </div>
+        </div>
+
+        <form method="post" action="/ayarlar/yedekleme/olustur">
+          {% if csrf_token is defined %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          {% endif %}
+          <button class="btn primary" type="submit">+ Yeni Yedek Oluştur</button>
+        </form>
+      </div>
     </section>
 
     <section class="card">
-      {% if created %}
-        <div class="alert ok">Yedek oluşturuldu: {{ created }}</div>
-      {% endif %}
-
-      {% if deleted %}
-        <div class="alert ok">Yedek silindi: {{ deleted }}</div>
-      {% endif %}
-
-      <div class="alert info">
-        Yedek dosyası; sefer kayıtlarını, raporları, profil fotoğraflarını ve yüklenen dosyaları içerir.
+      <div class="status-head">
+        <div class="status-icon">↩️</div>
+        <div>
+          <div class="status-title">Yedekten Geri Yükle</div>
+          <div class="status-sub">Geri yüklemeden önce sistem otomatik olarak acil yedek alır.</div>
+        </div>
       </div>
 
-      <form method="post" action="/ayarlar/yedekleme/olustur">
-        {% if csrf_token is defined %}
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        {% endif %}
-        <button class="create-btn" type="submit">＋ Yeni Yedek Oluştur</button>
-      </form>
-    </section>
-
-
-    <section class="card" id="restoreBackupCard">
-      {% if restored %}
-        <div class="alert ok">
-          Yedek geri yüklendi: {{ restored }}<br>
-          Geri yüklemeden önce acil yedek oluşturuldu: {{ emergency }}
+      <div class="card-pad">
+        <div class="info-line">
+          <div class="info-ico">⚠️</div>
+          <div>
+            <div class="info-title">Dikkatli kullan</div>
+            <div class="info-sub">Seçilen yedek mevcut veritabanı ve dosyaların üzerine yazabilir.</div>
+          </div>
         </div>
 
-        <div class="restart-warning">
-          <b>⚠️ Uygulamayı yeniden başlatın</b>
-          Geri yükleme sonrası veritabanı değiştiği için uygulamayı kapatıp Termux’tan tekrar başlatmanız önerilir.
-        </div>
-      {% endif %}
+        <form method="post" action="/ayarlar/yedekleme/geri-yukle" enctype="multipart/form-data" id="restoreForm">
+          {% if csrf_token is defined %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          {% endif %}
 
-      {% if restore_error %}
-        <div class="alert err">{{ restore_error }}</div>
-      {% endif %}
+          <div class="file-wrap">
+            <input id="backupFileInput" name="backup_file" type="file" accept=".zip">
+            <label class="file-btn" for="backupFileInput">
+              <span class="file-main">
+                <span class="file-ico">🗂️</span>
+                <span>
+                  <span class="file-title">Yedek Dosyası Seç</span>
+                  <span class="file-name" id="backupFileName">Dosya seçilmedi</span>
+                </span>
+              </span>
+              <span class="file-arrow">ZIP</span>
+            </label>
+          </div>
 
-      <div class="alert info">
-        Geri yükleme yapmadan önce sistem otomatik olarak mevcut halin acil yedeğini alır.
+          <button class="btn danger" type="button" onclick="openRestoreConfirm()">↩ Yedekten Geri Yükle</button>
+        </form>
       </div>
-
-      <form method="post" action="/ayarlar/yedekleme/geri-yukle" enctype="multipart/form-data"
-            onsubmit="return confirm('Bu yedek geri yüklenecek. Mevcut veriler seçilen yedekle değiştirilecek. Devam edilsin mi?');">
-        {% if csrf_token is defined %}
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        {% endif %}
-
-        <input class="restore-file" type="file" name="backup_file" accept=".zip" required>
-        <button class="restore-btn" type="submit">↩ Yedekten Geri Yükle</button>
-      </form>
     </section>
 
-    <section class="backup-list">
-      {% if items %}
-        {% for item in items %}
-          <div class="backup-item">
-            <div class="backup-title">📦 {{ item.name }}</div>
-            <div class="backup-meta">{{ item.size }} · {{ item.mtime }}</div>
+    {% if items %}
+      <section class="backup-list">
+        {% for it in items %}
+          <article class="backup-item">
+            <div class="backup-head">
+              <div class="backup-ico">📦</div>
+              <div>
+                <div class="backup-title">{{ it.name }}</div>
+                <div class="backup-meta">{{ it.size }} · {{ it.mtime }}</div>
+              </div>
+            </div>
 
             <div class="backup-actions">
-              <a class="btn download" href="/ayarlar/yedekleme/indir/{{ item.name }}">İndir</a>
+              <a class="btn secondary" href="/ayarlar/yedekleme/indir/{{ it.name }}">İndir</a>
 
-              <form method="post" action="/ayarlar/yedekleme/sil/{{ item.name }}" onsubmit="return confirm('Bu yedek silinsin mi?');">
+              <form method="post" action="/ayarlar/yedekleme/sil/{{ it.name }}" id="deleteForm{{ loop.index }}">
                 {% if csrf_token is defined %}
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 {% endif %}
-                <button class="btn delete" type="submit" style="width:100%;">Sil</button>
+                <button class="btn ghost" type="button" data-form="deleteForm{{ loop.index }}" data-name="{{ it.name }}" onclick="openDeleteConfirm(this)">Sil</button>
               </form>
             </div>
-          </div>
+          </article>
         {% endfor %}
-      {% else %}
-        <div class="empty">
-          Henüz yedek yok. İlk yedeği oluşturmak için yukarıdaki butona bas.
-        </div>
-      {% endif %}
-    </section>
+      </section>
+    {% else %}
+      <section class="empty">
+        <div class="empty-ico">💾</div>
+        <div class="empty-title">Henüz yedek yok</div>
+        <div class="empty-sub">Yeni yedek oluşturduğunda burada listelenecek.</div>
+      </section>
+    {% endif %}
 
-    <a class="back-btn" href="/ayarlar">← Ayarlara dön</a>
-  </main>
+  </div>
+
+  <a class="back-btn" href="/ayarlar">← Ayarlara dön</a>
+
+</div>
+
+<div class="modal" id="restoreModal" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-title">Yedek geri yüklensin mi?</div>
+    <div class="modal-text">
+      Bu işlem mevcut verilerin üzerine yazabilir. Sistem önce otomatik acil yedek alacak.
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" type="button" onclick="closeRestoreConfirm()">Vazgeç</button>
+      <button class="btn danger" type="button" onclick="submitRestore()">Evet, geri yükle</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="deleteModal" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-title">Yedek silinsin mi?</div>
+    <div class="modal-text" id="deleteText">
+      Bu yedek dosyası silinecek.
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" type="button" onclick="closeDeleteConfirm()">Vazgeç</button>
+      <button class="btn danger" type="button" onclick="submitDelete()">Evet, sil</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const backupFileInput = document.getElementById("backupFileInput");
+  const backupFileName = document.getElementById("backupFileName");
+
+  backupFileInput?.addEventListener("change", function(){
+    const file = this.files && this.files[0];
+    backupFileName.textContent = file ? file.name : "Dosya seçilmedi";
+  });
+
+  function openRestoreConfirm(){
+    const input = document.getElementById("backupFileInput");
+
+    if(!input || !input.files || !input.files[0]){
+      alert("Önce bir .zip yedek dosyası seç.");
+      return;
+    }
+
+    const modal = document.getElementById("restoreModal");
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeRestoreConfirm(){
+    const modal = document.getElementById("restoreModal");
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  function submitRestore(){
+    document.getElementById("restoreForm")?.submit();
+  }
+
+  let pendingDeleteFormId = "";
+
+  function openDeleteConfirm(btn){
+    pendingDeleteFormId = btn.getAttribute("data-form") || "";
+    const name = btn.getAttribute("data-name") || "Bu yedek";
+    const text = document.getElementById("deleteText");
+    if(text) text.textContent = name + " silinecek. Bu işlem geri alınamaz.";
+
+    const modal = document.getElementById("deleteModal");
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeDeleteConfirm(){
+    pendingDeleteFormId = "";
+    const modal = document.getElementById("deleteModal");
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  function submitDelete(){
+    if(!pendingDeleteFormId) return;
+    document.getElementById(pendingDeleteFormId)?.submit();
+  }
+
+  document.addEventListener("keydown", function(ev){
+    if(ev.key === "Escape"){
+      closeRestoreConfirm();
+      closeDeleteConfirm();
+    }
+  });
+
+  document.getElementById("restoreModal")?.addEventListener("click", function(ev){
+    if(ev.target === this) closeRestoreConfirm();
+  });
+
+  document.getElementById("deleteModal")?.addEventListener("click", function(ev){
+    if(ev.target === this) closeDeleteConfirm();
+  });
+</script>
 </body>
 </html>

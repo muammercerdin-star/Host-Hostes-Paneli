@@ -265,6 +265,44 @@
   window.openStopFlowFocus = openStopFocus;
   window.closeStopFlowFocus = closeStopFocus;
 
+
+  // STOP_FLOW_SIMPLE_ONLY_SCOPE_FINAL
+  function isSeatSimpleModeActive(){
+    try{
+      if(document.documentElement.classList.contains("seat-simple-mode")) return true;
+      if(document.body.classList.contains("seat-simple-mode")) return true;
+    }catch(_){}
+
+    try{
+      var tripKey = String((window.SEATS_BOOT && window.SEATS_BOOT.tripKey) || window.BAG_TRIP || "default");
+      var v = localStorage.getItem("seatUiMode:" + tripKey);
+      if(v === "simple") return true;
+      if(v === "advanced") return false;
+    }catch(_){}
+
+    return false;
+  }
+
+  function isSeatSimpleDurakButton(btn){
+    if(!btn) return false;
+
+    try{
+      if(btn.id === "seatSimpleOpenDurak") return true;
+      if(btn.classList && btn.classList.contains("seat-simple-bottom-item")){
+        var txt = (btn.innerText || btn.textContent || "").replace(/\s+/g, " ").trim().toLocaleLowerCase("tr-TR");
+        return txt.includes("durak");
+      }
+
+      var parent = btn.closest(".seat-simple-bottom-bar, .seat-simple-dock, .seat-simple-nav");
+      if(parent){
+        var t = (btn.innerText || btn.textContent || "").replace(/\s+/g, " ").trim().toLocaleLowerCase("tr-TR");
+        return t.includes("durak");
+      }
+    }catch(_){}
+
+    return false;
+  }
+
   function isBottomDurakButton(el){
     var btn = el.closest("button, a, [role='button'], .tab-btn, .nav-item, .dock-item, .bottom-nav-item");
     if(!btn || btn.closest("#" + overlayId)) return null;
@@ -286,6 +324,13 @@
   document.addEventListener("click", function(e){
     var btn = isBottomDurakButton(e.target);
     if(!btn) return;
+
+    // STOP_FLOW_SIMPLE_ONLY_SCOPE_FINAL
+    // Normal moddaki alt Durak butonunu engelleme.
+    // Sadece Sade Koltuk modundaki Durak butonu özel "Sadece Durak Akışı" ekranını açsın.
+    if(!isSeatSimpleModeActive() || !isSeatSimpleDurakButton(btn)){
+      return;
+    }
 
     e.preventDefault();
     e.stopPropagation();

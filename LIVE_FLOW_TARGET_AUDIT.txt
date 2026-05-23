@@ -1,0 +1,4635 @@
+
+==========================================================================================
+1) route_flow.html tam kaynak
+==========================================================================================
+
+--- templates/seats_parts/route_flow.html | satır 1-31 ---
+    1: <div class="route-strip-shell">
+    2:   <div class="route-strip-head">
+    3:     <div class="route-strip-title">Durak Akışı</div>
+    4: 
+    5:     <div class="route-strip-meta">
+    6:       <div class="route-pill route-pill-live">
+    7:         <span class="route-mini-dot"></span>
+    8:         <span class="route-mini-label">Canlı:</span>
+    9:         <span class="route-name-window">
+   10:           <b id="routeMiniLive">—</b>
+   11:         </span>
+   12:       </div>
+   13: 
+   14:       <div class="route-pill route-pill-next">
+   15:         <span class="route-mini-label">Sıradaki:</span>
+   16:         <span class="route-name-window">
+   17:           <b id="routeMiniNext">—</b>
+   18:         </span>
+   19:       </div>
+   20: 
+   21:       <button id="nightVoiceToggle" class="night-voice-toggle" type="button" title="Sesli robot">🔊 Ses Açık</button>
+   22:     </div>
+   23:   </div>
+   24: 
+   25:   <div class="route-strip" id="routeStrip">
+   26:     <div class="route-stop active">
+   27:       <div class="name">Rota hazırlanıyor</div>
+   28:       <div class="meta">Duraklar yüklenecek</div>
+   29:     </div>
+   30:   </div>
+   31: </div>
+
+==========================================================================================
+2) route_flow.html ID ve CLASS listesi
+==========================================================================================
+ID'ler:
+  #nightVoiceToggle
+  #routeMiniLive
+  #routeMiniNext
+  #routeStrip
+
+Class'lar:
+  .active
+  .meta
+  .name
+  .night-voice-toggle
+  .route-mini-dot
+  .route-mini-label
+  .route-name-window
+  .route-pill
+  .route-pill-live
+  .route-pill-next
+  .route-stop
+  .route-strip
+  .route-strip-head
+  .route-strip-meta
+  .route-strip-shell
+  .route-strip-title
+
+==========================================================================================
+3) CSS içinde route_flow seçicilerini kim eziyor?
+==========================================================================================
+
+--- static/seats/seats.css | eşleşme: 270 ---
+
+[Satır 80 civarı]
+   78:   }
+   79: 
+   80:   .route-meta{
+   81:     min-width:0;
+   82:     display:flex;
+   83:     flex-direction:column;
+   84:     gap:8px;
+   85:   }
+
+[Satır 127 civarı]
+  125:   }
+  126: 
+  127:   .route-live-row{
+  128:     display:flex;
+  129:     flex-wrap:wrap;
+  130:     gap:8px;
+  131:   }
+  132: 
+
+[Satır 218 civarı]
+  216:     border:1px solid var(--line);
+  217:     box-shadow:var(--shadow-soft);
+  218:     overflow:hidden;
+  219:   }
+  220: 
+  221:   .status-pill .k{
+  222:     color:var(--muted);
+  223:     font-size:12px;
+
+[Satır 268 civarı]
+  266:     position:relative;
+  267:     padding:16px;
+  268:     overflow:hidden;
+  269:   }
+  270: 
+  271:   .board-card::before{
+  272:     content:"";
+  273:     position:absolute;
+
+[Satır 402 civarı]
+  400:   }
+  401: 
+  402:   .selected-stop-chip{
+  403:     display:inline-flex;
+  404:     align-items:center;
+  405:     gap:8px;
+  406:     min-height:40px;
+  407:     padding:9px 13px;
+
+[Satır 419 civarı]
+  417:   }
+  418: 
+  419:   .route-strip-shell{
+  420:     margin-bottom:12px;
+  421:     padding:12px;
+  422:     border-radius:22px;
+  423:     background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  424:     border:1px solid var(--line);
+
+[Satır 428 civarı]
+  426:   }
+  427: 
+  428:   .route-strip-head{
+  429:     display:flex;
+  430:     align-items:center;
+  431:     justify-content:space-between;
+  432:     gap:10px;
+  433:     flex-wrap:wrap;
+
+[Satır 437 civarı]
+  435:   }
+  436: 
+  437:   .route-strip-title{
+  438:     font-size:13px;
+  439:     font-weight:900;
+  440:     color:#dce6f0;
+  441:   }
+  442: 
+
+[Satır 443 civarı]
+  441:   }
+  442: 
+  443:   .route-strip-meta{
+  444:     display:flex;
+  445:     align-items:center;
+  446:     gap:8px;
+  447:     flex-wrap:wrap;
+  448:   }
+
+[Satır 450 civarı]
+  448:   }
+  449: 
+  450:   .route-pill{
+  451:     display:inline-flex;
+  452:     align-items:center;
+  453:     gap:6px;
+  454:     min-height:30px;
+  455:     padding:6px 10px;
+
+[Satır 464 civarı]
+  462:   }
+  463: 
+  464:   .route-strip{
+  465:     display:flex;
+  466:     gap:8px;
+  467:     overflow:auto;
+  468:     padding-bottom:2px;
+  469:     scrollbar-width:none;
+
+[Satır 467 civarı]
+  465:     display:flex;
+  466:     gap:8px;
+  467:     overflow:auto;
+  468:     padding-bottom:2px;
+  469:     scrollbar-width:none;
+  470:   }
+  471: 
+  472:   .route-strip::-webkit-scrollbar{ display:none; }
+
+[Satır 472 civarı]
+  470:   }
+  471: 
+  472:   .route-strip::-webkit-scrollbar{ display:none; }
+  473: 
+  474:   .route-stop{
+  475:     flex:0 0 auto;
+  476:     min-width:138px;
+  477:     min-height:84px;
+
+[Satır 474 civarı]
+  472:   .route-strip::-webkit-scrollbar{ display:none; }
+  473: 
+  474:   .route-stop{
+  475:     flex:0 0 auto;
+  476:     min-width:138px;
+  477:     min-height:84px;
+  478:     padding:10px 12px;
+  479:     border-radius:18px;
+
+[Satır 490 civarı]
+  488:   }
+  489: 
+  490:   .route-stop .name{
+  491:     font-size:12px;
+  492:     font-weight:900;
+  493:     color:#ecf3fb;
+  494:     line-height:1.25;
+  495:   }
+
+[Satır 497 civarı]
+  495:   }
+  496: 
+  497:   .route-stop .meta{
+  498:     font-size:10px;
+  499:     color:var(--muted);
+  500:     line-height:1.2;
+  501:   }
+  502: 
+
+[Satır 503 civarı]
+  501:   }
+  502: 
+  503:   .route-stop .extra{
+  504:     display:grid;
+  505:     gap:4px;
+  506:     margin-top:2px;
+  507:   }
+  508: 
+
+[Satır 509 civarı]
+  507:   }
+  508: 
+  509:   .route-stop .extra-line{
+  510:     display:flex;
+  511:     align-items:center;
+  512:     justify-content:space-between;
+  513:     gap:8px;
+  514:     font-size:10px;
+
+[Satır 518 civarı]
+  516:   }
+  517: 
+  518:   .route-stop .extra-k{
+  519:     color:var(--muted);
+  520:     font-weight:700;
+  521:     white-space:nowrap;
+  522:   }
+  523: 
+
+[Satır 524 civarı]
+  522:   }
+  523: 
+  524:   .route-stop .extra-v{
+  525:     color:#dfe9f5;
+  526:     font-weight:900;
+  527:     text-align:right;
+  528:     white-space:nowrap;
+  529:   }
+
+[Satır 531 civarı]
+  529:   }
+  530: 
+  531:   .route-stop.active{
+  532:     background:linear-gradient(180deg, rgba(37,99,235,.22), rgba(37,99,235,.10));
+  533:     border-color:rgba(96,165,250,.35);
+  534:     box-shadow:
+  535:     0 12px 24px rgba(0,0,0,.18),
+  536:     0 0 0 1px rgba(96,165,250,.16) inset;
+
+[Satır 539 civarı]
+  537:   }
+  538: 
+  539:   .route-stop.done{
+  540:     opacity:.58;
+  541:   }
+  542: 
+  543:   .board-stage{
+  544:     position:relative;
+
+[Satır 551 civarı]
+  549:       radial-gradient(circle at center, rgba(37,99,235,.04), transparent 60%);
+  550:     border:1px solid var(--line-2);
+  551:     overflow:auto;
+  552:     overflow-x:auto;
+  553:     overflow-y:visible;
+  554:     scroll-margin-top:12px;
+  555:   }
+  556: 
+
+[Satır 552 civarı]
+  550:     border:1px solid var(--line-2);
+  551:     overflow:auto;
+  552:     overflow-x:auto;
+  553:     overflow-y:visible;
+  554:     scroll-margin-top:12px;
+  555:   }
+  556: 
+  557:   .deck-wrap{
+
+[Satır 553 civarı]
+  551:     overflow:auto;
+  552:     overflow-x:auto;
+  553:     overflow-y:visible;
+  554:     scroll-margin-top:12px;
+  555:   }
+  556: 
+  557:   .deck-wrap{
+  558:     position:relative;
+
+[Satır 643 civarı]
+  641:   }
+  642: 
+  643:   .seat.selected{ outline:3px solid #7fc7ff; }
+  644:   .seat.isAssigned{ background:linear-gradient(180deg, #465b70, #304455); }
+  645:   .seat.male{ background:linear-gradient(180deg, #2970e0, #1c4ca8); }
+  646:   .seat.female{ background:linear-gradient(180deg, #eb5aa6, #c82773); }
+  647:   .seat.multi-picked{ outline:3px dashed #92b7ff; }
+  648:   .seat.has-stop{
+
+[Satır 685 civarı]
+  683: 
+  684:   .svc-badge,
+  685:   .bag-badge,
+  686:   .stop-badge{
+  687:     position:absolute;
+  688:     display:none;
+  689:     align-items:center;
+  690:     justify-content:center;
+
+[Satır 707 civarı]
+  705:   }
+  706: 
+  707:   .bag-badge{
+  708:     right:-9px;
+  709:     top:-8px;
+  710:     min-height:23px;
+  711:     min-width:23px;
+  712:     padding:3px 7px;
+
+[Satır 727 civarı]
+  725: 
+  726:   .seat.has-service .svc-badge{ display:flex; }
+  727:   .seat.has-bag .bag-badge{ display:inline-flex; }
+  728:   .seat.has-stop .stop-badge{ display:flex; }
+  729: 
+  730:   .fab-column{
+  731:     position:absolute;
+  732:     right:14px;
+
+[Satır 774 civarı]
+  772:     position:relative;
+  773:     padding:14px;
+  774:     overflow:hidden;
+  775:   }
+  776: 
+  777:   .panel-handle{
+  778:     display:none;
+  779:     width:54px;
+
+[Satır 807 civarı]
+  805:   }
+  806: 
+  807:   .tab-btn.active{
+  808:     background:linear-gradient(180deg, rgba(37,99,235,.28), rgba(37,99,235,.14));
+  809:     border-color:rgba(96,165,250,.42);
+  810:     color:#fff;
+  811:     box-shadow:0 10px 20px rgba(0,0,0,.14);
+  812:   }
+
+[Satır 815 civarı]
+  813: 
+  814:   .tab-pane{ display:none; }
+  815:   .tab-pane.active{ display:block; }
+  816: 
+  817:   .pane-grid{
+  818:     display:grid;
+  819:     gap:12px;
+  820:   }
+
+[Satır 851 civarı]
+  849:   }
+  850: 
+  851:   .metrics-grid{
+  852:     display:grid;
+  853:     grid-template-columns:1fr 1fr;
+  854:     gap:10px;
+  855:   }
+  856: 
+
+[Satır 857 civarı]
+  855:   }
+  856: 
+  857:   .metric-card{
+  858:     min-height:92px;
+  859:     border-radius:18px;
+  860:     padding:12px;
+  861:     background:rgba(255,255,255,.03);
+  862:     border:1px solid var(--line);
+
+[Satır 865 civarı]
+  863:   }
+  864: 
+  865:   .metric-card .k{
+  866:     color:var(--muted);
+  867:     font-size:12px;
+  868:     font-weight:700;
+  869:     margin-bottom:6px;
+  870:   }
+
+[Satır 872 civarı]
+  870:   }
+  871: 
+  872:   .metric-card .v{
+  873:     font-size:17px;
+  874:     font-weight:900;
+  875:     line-height:1.15;
+  876:   }
+  877: 
+
+[Satır 878 civarı]
+  876:   }
+  877: 
+  878:   .metric-card .s{
+  879:     color:var(--muted);
+  880:     font-size:12px;
+  881:     margin-top:8px;
+  882:     line-height:1.35;
+  883:   }
+
+[Satır 945 civarı]
+  943:   }
+  944: 
+  945:   .speed-meta{
+  946:     margin-top:6px;
+  947:     color:var(--muted);
+  948:     font-size:13px;
+  949:   }
+  950: 
+
+[Satır 1135 civarı]
+ 1133:   }
+ 1134: 
+ 1135:   .timeline-list{
+ 1136:     display:grid;
+ 1137:     gap:8px;
+ 1138:     max-height:440px;
+ 1139:     overflow:auto;
+ 1140:     padding-right:4px;
+
+[Satır 1139 civarı]
+ 1137:     gap:8px;
+ 1138:     max-height:440px;
+ 1139:     overflow:auto;
+ 1140:     padding-right:4px;
+ 1141:   }
+ 1142: 
+ 1143:   .eta-row{
+ 1144:     display:grid;
+
+[Satır 1143 civarı]
+ 1141:   }
+ 1142: 
+ 1143:   .eta-row{
+ 1144:     display:grid;
+ 1145:     grid-template-columns:1fr auto;
+ 1146:     gap:12px;
+ 1147:     align-items:center;
+ 1148:     padding:12px;
+
+[Satır 1155 civarı]
+ 1153:   }
+ 1154: 
+ 1155:   .eta-row.active{
+ 1156:     box-shadow:0 0 0 2px rgba(59,130,246,.32) inset;
+ 1157:     border-color:rgba(96,165,250,.45);
+ 1158:   }
+ 1159: 
+ 1160:   .eta-row.passed{ opacity:.58; }
+
+[Satır 1160 civarı]
+ 1158:   }
+ 1159: 
+ 1160:   .eta-row.passed{ opacity:.58; }
+ 1161: 
+ 1162:   .eta-name{
+ 1163:     font-size:15px;
+ 1164:     font-weight:900;
+ 1165:   }
+
+[Satır 1162 civarı]
+ 1160:   .eta-row.passed{ opacity:.58; }
+ 1161: 
+ 1162:   .eta-name{
+ 1163:     font-size:15px;
+ 1164:     font-weight:900;
+ 1165:   }
+ 1166: 
+ 1167:   .eta-meta{
+
+[Satır 1167 civarı]
+ 1165:   }
+ 1166: 
+ 1167:   .eta-meta{
+ 1168:     margin-top:5px;
+ 1169:     color:var(--muted);
+ 1170:     font-size:12px;
+ 1171:   }
+ 1172: 
+
+[Satır 1173 civarı]
+ 1171:   }
+ 1172: 
+ 1173:   .eta-right{ text-align:right; }
+ 1174: 
+ 1175:   .eta-main{
+ 1176:     font-size:14px;
+ 1177:     font-weight:900;
+ 1178:   }
+
+[Satır 1175 civarı]
+ 1173:   .eta-right{ text-align:right; }
+ 1174: 
+ 1175:   .eta-main{
+ 1176:     font-size:14px;
+ 1177:     font-weight:900;
+ 1178:   }
+ 1179: 
+ 1180:   .eta-badge{
+
+[Satır 1180 civarı]
+ 1178:   }
+ 1179: 
+ 1180:   .eta-badge{
+ 1181:     display:inline-flex;
+ 1182:     align-items:center;
+ 1183:     gap:6px;
+ 1184:     padding:5px 9px;
+ 1185:     margin-top:6px;
+
+[Satır 1192 civarı]
+ 1190:   }
+ 1191: 
+ 1192:   .eta-badge.good{ background:rgba(34,197,94,.16); border-color:rgba(34,197,94,.3); color:#bbf7d0; }
+ 1193:   .eta-badge.warn{ background:rgba(245,158,11,.16); border-color:rgba(245,158,11,.3); color:#fde68a; }
+ 1194:   .eta-badge.bad{ background:rgba(239,68,68,.16); border-color:rgba(239,68,68,.3); color:#fecaca; }
+ 1195:   .eta-badge.info{ background:rgba(14,165,233,.16); border-color:rgba(14,165,233,.3); color:#bae6fd; }
+ 1196: 
+ 1197:   .standing-list{
+
+[Satır 1193 civarı]
+ 1191: 
+ 1192:   .eta-badge.good{ background:rgba(34,197,94,.16); border-color:rgba(34,197,94,.3); color:#bbf7d0; }
+ 1193:   .eta-badge.warn{ background:rgba(245,158,11,.16); border-color:rgba(245,158,11,.3); color:#fde68a; }
+ 1194:   .eta-badge.bad{ background:rgba(239,68,68,.16); border-color:rgba(239,68,68,.3); color:#fecaca; }
+ 1195:   .eta-badge.info{ background:rgba(14,165,233,.16); border-color:rgba(14,165,233,.3); color:#bae6fd; }
+ 1196: 
+ 1197:   .standing-list{
+ 1198:     display:grid;
+
+[Satır 1194 civarı]
+ 1192:   .eta-badge.good{ background:rgba(34,197,94,.16); border-color:rgba(34,197,94,.3); color:#bbf7d0; }
+ 1193:   .eta-badge.warn{ background:rgba(245,158,11,.16); border-color:rgba(245,158,11,.3); color:#fde68a; }
+ 1194:   .eta-badge.bad{ background:rgba(239,68,68,.16); border-color:rgba(239,68,68,.3); color:#fecaca; }
+ 1195:   .eta-badge.info{ background:rgba(14,165,233,.16); border-color:rgba(14,165,233,.3); color:#bae6fd; }
+ 1196: 
+ 1197:   .standing-list{
+ 1198:     display:grid;
+ 1199:     gap:8px;
+
+[Satır 1195 civarı]
+ 1193:   .eta-badge.warn{ background:rgba(245,158,11,.16); border-color:rgba(245,158,11,.3); color:#fde68a; }
+ 1194:   .eta-badge.bad{ background:rgba(239,68,68,.16); border-color:rgba(239,68,68,.3); color:#fecaca; }
+ 1195:   .eta-badge.info{ background:rgba(14,165,233,.16); border-color:rgba(14,165,233,.3); color:#bae6fd; }
+ 1196: 
+ 1197:   .standing-list{
+ 1198:     display:grid;
+ 1199:     gap:8px;
+ 1200:   }
+
+[Satır 1237 civarı]
+ 1235:     width:min(680px, 95vw);
+ 1236:     max-height:92vh;
+ 1237:     overflow:auto;
+ 1238:     z-index:3010;
+ 1239:     padding:18px;
+ 1240:   }
+ 1241: 
+ 1242:   .sheet-modal{
+
+[Satır 1363 civarı]
+ 1361: 
+ 1362:     .field-row,
+ 1363:     .metrics-grid,
+ 1364:     .action-grid{
+ 1365:       grid-template-columns:1fr;
+ 1366:     }
+ 1367: 
+ 1368:     .board-stage{
+
+[Satır 1442 civarı]
+ 1440: 
+ 1441:     .status-row{
+ 1442:       grid-auto-flow:column;
+ 1443:       grid-auto-columns:minmax(170px, 1fr);
+ 1444:       grid-template-columns:unset;
+ 1445:       overflow:auto;
+ 1446:       padding-bottom:4px;
+ 1447:       margin-top:12px;
+
+[Satır 1445 civarı]
+ 1443:       grid-auto-columns:minmax(170px, 1fr);
+ 1444:       grid-template-columns:unset;
+ 1445:       overflow:auto;
+ 1446:       padding-bottom:4px;
+ 1447:       margin-top:12px;
+ 1448:     }
+ 1449: 
+ 1450:     .status-row::-webkit-scrollbar{ display:none; }
+
+[Satır 1498 civarı]
+ 1496:     }
+ 1497: 
+ 1498:     .route-strip-shell{
+ 1499:       padding:10px;
+ 1500:       border-radius:20px;
+ 1501:     }
+ 1502: 
+ 1503:     .route-stop{
+
+[Satır 1503 civarı]
+ 1501:     }
+ 1502: 
+ 1503:     .route-stop{
+ 1504:       min-width:100px;
+ 1505:       min-height:52px;
+ 1506:       padding:9px 10px;
+ 1507:     }
+ 1508: 
+
+[Satır 1586 civarı]
+ 1584:     }
+ 1585: 
+ 1586:     .route-stop{
+ 1587:       min-width:92px;
+ 1588:     }
+ 1589:   }
+ 1590: 
+ 1591: /* =========================================================
+
+[Satır 1595 civarı]
+ 1593: ========================================================= */
+ 1594: 
+ 1595: .route-stop.live-danger{
+ 1596:   background:linear-gradient(135deg, rgba(127,29,29,.98), rgba(239,68,68,.55)) !important;
+ 1597:   border-color:rgba(248,113,113,.95) !important;
+ 1598:   box-shadow:
+ 1599:     0 0 0 1px rgba(248,113,113,.55),
+ 1600:     0 0 22px rgba(239,68,68,.55),
+
+[Satır 1602 civarı]
+ 1600:     0 0 22px rgba(239,68,68,.55),
+ 1601:     inset 0 1px 0 rgba(255,255,255,.14) !important;
+ 1602:   animation:liveStopBlink .85s linear infinite;
+ 1603: }
+ 1604: 
+ 1605: .route-stop.live-danger .name,
+ 1606: .route-stop.live-danger .meta,
+ 1607: .route-stop.live-danger .extra-k,
+
+[Satır 1605 civarı]
+ 1603: }
+ 1604: 
+ 1605: .route-stop.live-danger .name,
+ 1606: .route-stop.live-danger .meta,
+ 1607: .route-stop.live-danger .extra-k,
+ 1608: .route-stop.live-danger .extra-v{
+ 1609:   color:#fff !important;
+ 1610: }
+
+[Satır 1606 civarı]
+ 1604: 
+ 1605: .route-stop.live-danger .name,
+ 1606: .route-stop.live-danger .meta,
+ 1607: .route-stop.live-danger .extra-k,
+ 1608: .route-stop.live-danger .extra-v{
+ 1609:   color:#fff !important;
+ 1610: }
+ 1611: 
+
+[Satır 1607 civarı]
+ 1605: .route-stop.live-danger .name,
+ 1606: .route-stop.live-danger .meta,
+ 1607: .route-stop.live-danger .extra-k,
+ 1608: .route-stop.live-danger .extra-v{
+ 1609:   color:#fff !important;
+ 1610: }
+ 1611: 
+ 1612: @keyframes liveStopBlink{
+
+[Satır 1608 civarı]
+ 1606: .route-stop.live-danger .meta,
+ 1607: .route-stop.live-danger .extra-k,
+ 1608: .route-stop.live-danger .extra-v{
+ 1609:   color:#fff !important;
+ 1610: }
+ 1611: 
+ 1612: @keyframes liveStopBlink{
+ 1613:   0%,100%{
+
+[Satır 1612 civarı]
+ 1610: }
+ 1611: 
+ 1612: @keyframes liveStopBlink{
+ 1613:   0%,100%{
+ 1614:     filter:brightness(1);
+ 1615:     transform:scale(1);
+ 1616:   }
+ 1617:   50%{
+
+[Satır 1623 civarı]
+ 1621: }
+ 1622: 
+ 1623: .route-stop.next-warning{
+ 1624:   background:linear-gradient(135deg, rgba(120,75,0,.96), rgba(245,158,11,.55)) !important;
+ 1625:   border-color:rgba(251,191,36,.9) !important;
+ 1626:   box-shadow:
+ 1627:     0 0 0 1px rgba(251,191,36,.42),
+ 1628:     0 0 18px rgba(245,158,11,.35),
+
+[Satır 1632 civarı]
+ 1630: }
+ 1631: 
+ 1632: .route-stop.next-warning .name,
+ 1633: .route-stop.next-warning .meta,
+ 1634: .route-stop.next-warning .extra-k,
+ 1635: .route-stop.next-warning .extra-v{
+ 1636:   color:#fff !important;
+ 1637: }
+
+[Satır 1633 civarı]
+ 1631: 
+ 1632: .route-stop.next-warning .name,
+ 1633: .route-stop.next-warning .meta,
+ 1634: .route-stop.next-warning .extra-k,
+ 1635: .route-stop.next-warning .extra-v{
+ 1636:   color:#fff !important;
+ 1637: }
+ 1638: 
+
+[Satır 1634 civarı]
+ 1632: .route-stop.next-warning .name,
+ 1633: .route-stop.next-warning .meta,
+ 1634: .route-stop.next-warning .extra-k,
+ 1635: .route-stop.next-warning .extra-v{
+ 1636:   color:#fff !important;
+ 1637: }
+ 1638: 
+ 1639: .route-stop.flow-green{
+
+[Satır 1635 civarı]
+ 1633: .route-stop.next-warning .meta,
+ 1634: .route-stop.next-warning .extra-k,
+ 1635: .route-stop.next-warning .extra-v{
+ 1636:   color:#fff !important;
+ 1637: }
+ 1638: 
+ 1639: .route-stop.flow-green{
+ 1640:   background:linear-gradient(135deg, rgba(20,83,45,.94), rgba(34,197,94,.44)) !important;
+
+[Satır 1639 civarı]
+ 1637: }
+ 1638: 
+ 1639: .route-stop.flow-green{
+ 1640:   background:linear-gradient(135deg, rgba(20,83,45,.94), rgba(34,197,94,.44)) !important;
+ 1641:   border-color:rgba(74,222,128,.75) !important;
+ 1642:   box-shadow:
+ 1643:     0 0 0 1px rgba(74,222,128,.32),
+ 1644:     0 0 14px rgba(34,197,94,.22),
+
+[Satır 1649 civarı]
+ 1647: 
+ 1648: /* =========================================================
+ 1649:    MOBİL OPERASYON MODU - KOLTUK PLANI YUKARI ÇEK
+ 1650: ========================================================= */
+ 1651: @media (max-width: 760px){
+ 1652: 
+ 1653:   .seats-shell{
+ 1654:     padding-top:6px;
+
+[Satır 1688 civarı]
+ 1686: 
+ 1687:   /* Üst canlı bilgiler 2 sütun küçük chip */
+ 1688:   .route-live-row{
+ 1689:     display:grid;
+ 1690:     grid-template-columns:1fr 1fr;
+ 1691:     gap:8px;
+ 1692:   }
+ 1693: 
+
+[Satır 1694 civarı]
+ 1692:   }
+ 1693: 
+ 1694:   .route-live-row .mini-chip{
+ 1695:     min-height:38px;
+ 1696:     padding:8px 10px;
+ 1697:     justify-content:center;
+ 1698:     font-size:13px;
+ 1699:   }
+
+[Satır 1720 civarı]
+ 1718:     gap:8px;
+ 1719:     margin:8px 0 10px;
+ 1720:     overflow:visible;
+ 1721:   }
+ 1722: 
+ 1723:   .status-pill{
+ 1724:     min-height:54px;
+ 1725:     padding:10px 12px;
+
+[Satır 1737 civarı]
+ 1735:   }
+ 1736: 
+ 1737:   /* Mobilde ikinci derece kartları gizle: koltuk planı yukarı gelsin */
+ 1738:   .status-pill.standing,
+ 1739:   .status-pill.cash,
+ 1740:   .status-pill.service,
+ 1741:   .status-pill.parcel{
+ 1742:     display:none;
+
+[Satır 1756 civarı]
+ 1754:   }
+ 1755: 
+ 1756:   /* Büyük "Koltuk Planı" başlığını mobilde küçült */
+ 1757:   .board-kicker{
+ 1758:     display:none;
+ 1759:   }
+ 1760: 
+ 1761:   .board-title h2{
+
+[Satır 1769 civarı]
+ 1767:   }
+ 1768: 
+ 1769:   .selected-stop-chip{
+ 1770:     min-height:36px;
+ 1771:     padding:8px 12px;
+ 1772:     font-size:13px;
+ 1773:   }
+ 1774: 
+
+[Satır 1805 civarı]
+ 1803: 
+ 1804:   /* Durak akışı daha yukarı ve daha kompakt */
+ 1805:   .route-strip-shell{
+ 1806:     margin-top:8px;
+ 1807:     margin-bottom:10px;
+ 1808:     padding:10px;
+ 1809:     border-radius:22px;
+ 1810:   }
+
+[Satır 1812 civarı]
+ 1810:   }
+ 1811: 
+ 1812:   .route-strip-head{
+ 1813:     margin-bottom:8px;
+ 1814:   }
+ 1815: 
+ 1816:   .route-strip-title{
+ 1817:     font-size:14px;
+
+[Satır 1816 civarı]
+ 1814:   }
+ 1815: 
+ 1816:   .route-strip-title{
+ 1817:     font-size:14px;
+ 1818:   }
+ 1819: 
+ 1820:   .route-pill{
+ 1821:     min-height:30px;
+
+[Satır 1820 civarı]
+ 1818:   }
+ 1819: 
+ 1820:   .route-pill{
+ 1821:     min-height:30px;
+ 1822:     font-size:12px;
+ 1823:   }
+ 1824: 
+ 1825:   .route-stop{
+
+[Satır 1825 civarı]
+ 1823:   }
+ 1824: 
+ 1825:   .route-stop{
+ 1826:     min-width:128px;
+ 1827:     min-height:78px;
+ 1828:     border-radius:18px;
+ 1829:   }
+ 1830: 
+
+[Satır 1864 civarı]
+ 1862:   }
+ 1863: 
+ 1864:   .route-stop{
+ 1865:     min-width:118px;
+ 1866:   }
+ 1867: }
+ 1868: 
+ 1869: 
+
+[Satır 1872 civarı]
+ 1870: /* =========================================================
+ 1871:    SÜRÜŞ MODU
+ 1872:    Amaç: Koltuk planını en üste almak, gereksiz kartları gizlemek
+ 1873: ========================================================= */
+ 1874: 
+ 1875: #driveModeToggle{
+ 1876:   position:fixed;
+ 1877:   right:10px;
+
+[Satır 1933 civarı]
+ 1931: }
+ 1932: 
+ 1933: body.drive-mode .selected-stop-chip{
+ 1934:   min-height:36px;
+ 1935:   padding:8px 12px;
+ 1936:   font-size:13px;
+ 1937: }
+ 1938: 
+
+[Satır 1961 civarı]
+ 1959: }
+ 1960: 
+ 1961: body.drive-mode .route-strip-shell{
+ 1962:   margin-top:0;
+ 1963:   margin-bottom:8px;
+ 1964:   padding:8px;
+ 1965:   border-radius:20px;
+ 1966: }
+
+[Satır 1968 civarı]
+ 1966: }
+ 1967: 
+ 1968: body.drive-mode .route-strip-head{
+ 1969:   margin-bottom:7px;
+ 1970: }
+ 1971: 
+ 1972: body.drive-mode .route-strip-title{
+ 1973:   font-size:14px;
+
+[Satır 1972 civarı]
+ 1970: }
+ 1971: 
+ 1972: body.drive-mode .route-strip-title{
+ 1973:   font-size:14px;
+ 1974: }
+ 1975: 
+ 1976: body.drive-mode .route-pill{
+ 1977:   min-height:28px;
+
+[Satır 1976 civarı]
+ 1974: }
+ 1975: 
+ 1976: body.drive-mode .route-pill{
+ 1977:   min-height:28px;
+ 1978:   padding:5px 9px;
+ 1979:   font-size:11px;
+ 1980: }
+ 1981: 
+
+[Satır 1982 civarı]
+ 1980: }
+ 1981: 
+ 1982: body.drive-mode .route-stop{
+ 1983:   min-width:122px;
+ 1984:   min-height:74px;
+ 1985:   padding:9px 10px;
+ 1986:   border-radius:17px;
+ 1987: }
+
+[Satır 2026 civarı]
+ 2024:   }
+ 2025: 
+ 2026:   body.drive-mode .selected-stop-chip{
+ 2027:     max-width:calc(100% - 92px);
+ 2028:     min-height:34px;
+ 2029:     font-size:12px;
+ 2030:     padding:7px 10px;
+ 2031:   }
+
+[Satır 2038 civarı]
+ 2036:   }
+ 2037: 
+ 2038:   body.drive-mode .route-strip-shell{
+ 2039:     padding:8px;
+ 2040:     margin-bottom:8px;
+ 2041:   }
+ 2042: 
+ 2043:   body.drive-mode .route-stop{
+
+[Satır 2043 civarı]
+ 2041:   }
+ 2042: 
+ 2043:   body.drive-mode .route-stop{
+ 2044:     min-width:112px;
+ 2045:     min-height:70px;
+ 2046:   }
+ 2047: 
+ 2048:   body.drive-mode .board-stage{
+
+[Satır 2083 civarı]
+ 2081:   padding:8px !important;
+ 2082:   border-radius:22px !important;
+ 2083:   overflow:hidden;
+ 2084: }
+ 2085: 
+ 2086: /* Üst başlık alanı: seçili durak + sesli komut */
+ 2087: body.drive-mode .board-head{
+ 2088:   grid-template-columns:minmax(0,1fr) auto !important;
+
+[Satır 2095 civarı]
+ 2093: 
+ 2094: /* Seçili durak rozeti daha net */
+ 2095: body.drive-mode .selected-stop-chip{
+ 2096:   min-height:42px;
+ 2097:   max-width:calc(100vw - 170px);
+ 2098:   padding:9px 13px;
+ 2099:   border-radius:18px;
+ 2100:   font-size:15px;
+
+[Satır 2102 civarı]
+ 2100:   font-size:15px;
+ 2101:   white-space:nowrap;
+ 2102:   overflow:hidden;
+ 2103:   text-overflow:ellipsis;
+ 2104:   background:linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+ 2105:   border-color:rgba(255,255,255,.14);
+ 2106: }
+ 2107: 
+
+[Satır 2103 civarı]
+ 2101:   white-space:nowrap;
+ 2102:   overflow:hidden;
+ 2103:   text-overflow:ellipsis;
+ 2104:   background:linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+ 2105:   border-color:rgba(255,255,255,.14);
+ 2106: }
+ 2107: 
+ 2108: /* Sesli komut butonu sürüş modunda daha kullanışlı */
+
+[Satır 2124 civarı]
+ 2122: 
+ 2123: /* Durak akışı kutusu daha profesyonel */
+ 2124: body.drive-mode .route-strip-shell{
+ 2125:   margin:4px 0 8px !important;
+ 2126:   padding:9px !important;
+ 2127:   border-radius:22px !important;
+ 2128:   background:
+ 2129:     linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.022)),
+
+[Satır 2134 civarı]
+ 2132: 
+ 2133: /* Başlık satırı daha derli toplu */
+ 2134: body.drive-mode .route-strip-head{
+ 2135:   display:flex;
+ 2136:   align-items:center;
+ 2137:   justify-content:space-between;
+ 2138:   gap:8px;
+ 2139:   margin-bottom:8px !important;
+
+[Satır 2142 civarı]
+ 2140: }
+ 2141: 
+ 2142: body.drive-mode .route-strip-title{
+ 2143:   font-size:17px !important;
+ 2144:   font-weight:950;
+ 2145:   letter-spacing:-.02em;
+ 2146: }
+ 2147: 
+
+[Satır 2148 civarı]
+ 2146: }
+ 2147: 
+ 2148: body.drive-mode .route-strip-meta{
+ 2149:   flex-wrap:nowrap;
+ 2150:   overflow:hidden;
+ 2151: }
+ 2152: 
+ 2153: body.drive-mode .route-pill{
+
+[Satır 2150 civarı]
+ 2148: body.drive-mode .route-strip-meta{
+ 2149:   flex-wrap:nowrap;
+ 2150:   overflow:hidden;
+ 2151: }
+ 2152: 
+ 2153: body.drive-mode .route-pill{
+ 2154:   min-height:34px !important;
+ 2155:   padding:7px 11px !important;
+
+[Satır 2153 civarı]
+ 2151: }
+ 2152: 
+ 2153: body.drive-mode .route-pill{
+ 2154:   min-height:34px !important;
+ 2155:   padding:7px 11px !important;
+ 2156:   font-size:13px !important;
+ 2157:   white-space:nowrap;
+ 2158: }
+
+[Satır 2161 civarı]
+ 2159: 
+ 2160: /* Durak kartları: yarım kırpılma daha estetik görünsün */
+ 2161: body.drive-mode .route-strip{
+ 2162:   gap:10px !important;
+ 2163:   padding:0 8px 2px !important;
+ 2164:   scroll-padding-left:8px;
+ 2165:   scroll-padding-right:8px;
+ 2166:   -webkit-overflow-scrolling:touch;
+
+[Satır 2166 civarı]
+ 2164:   scroll-padding-left:8px;
+ 2165:   scroll-padding-right:8px;
+ 2166:   -webkit-overflow-scrolling:touch;
+ 2167: }
+ 2168: 
+ 2169: /* Sürüş modunda durak kartları daha okunaklı */
+ 2170: body.drive-mode .route-stop{
+ 2171:   min-width:150px !important;
+
+[Satır 2170 civarı]
+ 2168: 
+ 2169: /* Sürüş modunda durak kartları daha okunaklı */
+ 2170: body.drive-mode .route-stop{
+ 2171:   min-width:150px !important;
+ 2172:   min-height:92px !important;
+ 2173:   padding:12px 13px !important;
+ 2174:   border-radius:20px !important;
+ 2175: }
+
+[Satır 2177 civarı]
+ 2175: }
+ 2176: 
+ 2177: body.drive-mode .route-stop .name{
+ 2178:   font-size:17px !important;
+ 2179:   line-height:1.12 !important;
+ 2180:   max-width:100%;
+ 2181:   white-space:nowrap;
+ 2182:   overflow:hidden;
+
+[Satır 2182 civarı]
+ 2180:   max-width:100%;
+ 2181:   white-space:nowrap;
+ 2182:   overflow:hidden;
+ 2183:   text-overflow:ellipsis;
+ 2184: }
+ 2185: 
+ 2186: body.drive-mode .route-stop .meta{
+ 2187:   font-size:13px !important;
+
+[Satır 2183 civarı]
+ 2181:   white-space:nowrap;
+ 2182:   overflow:hidden;
+ 2183:   text-overflow:ellipsis;
+ 2184: }
+ 2185: 
+ 2186: body.drive-mode .route-stop .meta{
+ 2187:   font-size:13px !important;
+ 2188:   line-height:1.2 !important;
+
+[Satır 2186 civarı]
+ 2184: }
+ 2185: 
+ 2186: body.drive-mode .route-stop .meta{
+ 2187:   font-size:13px !important;
+ 2188:   line-height:1.2 !important;
+ 2189:   white-space:nowrap;
+ 2190:   overflow:hidden;
+ 2191:   text-overflow:ellipsis;
+
+[Satır 2190 civarı]
+ 2188:   line-height:1.2 !important;
+ 2189:   white-space:nowrap;
+ 2190:   overflow:hidden;
+ 2191:   text-overflow:ellipsis;
+ 2192: }
+ 2193: 
+ 2194: body.drive-mode .route-stop .extra-line{
+ 2195:   font-size:13px !important;
+
+[Satır 2191 civarı]
+ 2189:   white-space:nowrap;
+ 2190:   overflow:hidden;
+ 2191:   text-overflow:ellipsis;
+ 2192: }
+ 2193: 
+ 2194: body.drive-mode .route-stop .extra-line{
+ 2195:   font-size:13px !important;
+ 2196: }
+
+[Satır 2194 civarı]
+ 2192: }
+ 2193: 
+ 2194: body.drive-mode .route-stop .extra-line{
+ 2195:   font-size:13px !important;
+ 2196: }
+ 2197: 
+ 2198: body.drive-mode .route-stop.active{
+ 2199:   transform:translateY(-1px);
+
+[Satır 2198 civarı]
+ 2196: }
+ 2197: 
+ 2198: body.drive-mode .route-stop.active{
+ 2199:   transform:translateY(-1px);
+ 2200: }
+ 2201: 
+ 2202: /* Koltuk alanı daha yukarı ve daha temiz */
+ 2203: body.drive-mode .board-stage{
+
+[Satır 2222 civarı]
+ 2220:   font-size:12px;
+ 2221:   line-height:1.15;
+ 2222:   overflow:hidden;
+ 2223:   display:-webkit-box;
+ 2224:   -webkit-line-clamp:2;
+ 2225:   -webkit-box-orient:vertical;
+ 2226: }
+ 2227: 
+
+[Satır 2233 civarı]
+ 2231: }
+ 2232: 
+ 2233: /* Bagaj/iniş rozetleri koltuk üstünde daha düzgün dursun */
+ 2234: body.drive-mode .bag-badge{
+ 2235:   right:-8px;
+ 2236:   top:-10px;
+ 2237:   min-height:24px;
+ 2238:   min-width:28px;
+
+[Satır 2234 civarı]
+ 2232: 
+ 2233: /* Bagaj/iniş rozetleri koltuk üstünde daha düzgün dursun */
+ 2234: body.drive-mode .bag-badge{
+ 2235:   right:-8px;
+ 2236:   top:-10px;
+ 2237:   min-height:24px;
+ 2238:   min-width:28px;
+ 2239:   font-size:12px;
+
+[Satır 2278 civarı]
+ 2276:   }
+ 2277: 
+ 2278:   body.drive-mode .selected-stop-chip{
+ 2279:     max-width:calc(100vw - 150px);
+ 2280:     min-height:38px;
+ 2281:     font-size:14px;
+ 2282:     padding:8px 12px;
+ 2283:   }
+
+[Satır 2292 civarı]
+ 2290:   }
+ 2291: 
+ 2292:   body.drive-mode .route-strip-title{
+ 2293:     font-size:16px !important;
+ 2294:   }
+ 2295: 
+ 2296:   body.drive-mode .route-pill{
+ 2297:     min-height:32px !important;
+
+[Satır 2296 civarı]
+ 2294:   }
+ 2295: 
+ 2296:   body.drive-mode .route-pill{
+ 2297:     min-height:32px !important;
+ 2298:     padding:6px 10px !important;
+ 2299:     font-size:12px !important;
+ 2300:   }
+ 2301: 
+
+[Satır 2302 civarı]
+ 2300:   }
+ 2301: 
+ 2302:   body.drive-mode .route-stop{
+ 2303:     min-width:142px !important;
+ 2304:     min-height:88px !important;
+ 2305:     padding:11px 12px !important;
+ 2306:   }
+ 2307: 
+
+[Satır 2308 civarı]
+ 2306:   }
+ 2307: 
+ 2308:   body.drive-mode .route-stop .name{
+ 2309:     font-size:16px !important;
+ 2310:   }
+ 2311: 
+ 2312:   body.drive-mode .route-stop .meta,
+ 2313:   body.drive-mode .route-stop .extra-line{
+
+[Satır 2312 civarı]
+ 2310:   }
+ 2311: 
+ 2312:   body.drive-mode .route-stop .meta,
+ 2313:   body.drive-mode .route-stop .extra-line{
+ 2314:     font-size:12px !important;
+ 2315:   }
+ 2316: 
+ 2317:   body.drive-mode .board-stage{
+
+[Satır 2313 civarı]
+ 2311: 
+ 2312:   body.drive-mode .route-stop .meta,
+ 2313:   body.drive-mode .route-stop .extra-line{
+ 2314:     font-size:12px !important;
+ 2315:   }
+ 2316: 
+ 2317:   body.drive-mode .board-stage{
+ 2318:     padding-right:66px !important;
+
+[Satır 2337 civarı]
+ 2335:   }
+ 2336: 
+ 2337:   body.drive-mode .selected-stop-chip{
+ 2338:     max-width:calc(100vw - 138px);
+ 2339:     font-size:13px;
+ 2340:   }
+ 2341: 
+ 2342:   body.drive-mode .voice-command-btn{
+
+[Satır 2348 civarı]
+ 2346:   }
+ 2347: 
+ 2348:   body.drive-mode .route-stop{
+ 2349:     min-width:132px !important;
+ 2350:   }
+ 2351: 
+ 2352:   body.drive-mode .board-stage{
+ 2353:     padding-right:62px !important;
+
+[Satır 2359 civarı]
+ 2357: 
+ 2358: /* =========================================================
+ 2359:    BAGAJ BALONU + SÜRÜŞ MODU KOLTUK SIKIŞTIRMA
+ 2360: ========================================================= */
+ 2361: 
+ 2362: /* Koltuk numarası kapanmasın diye rozet koltuğun üstüne çıkar */
+ 2363: .seat .bag-badge{
+ 2364:   top:-28px !important;
+
+[Satır 2363 civarı]
+ 2361: 
+ 2362: /* Koltuk numarası kapanmasın diye rozet koltuğun üstüne çıkar */
+ 2363: .seat .bag-badge{
+ 2364:   top:-28px !important;
+ 2365:   right:-12px !important;
+ 2366:   min-height:25px !important;
+ 2367:   min-width:34px !important;
+ 2368:   padding:4px 8px !important;
+
+[Satır 2381 civarı]
+ 2379: 
+ 2380: /* Küçük konuşma balonu kuyruğu */
+ 2381: .seat .bag-badge::after{
+ 2382:   content:"";
+ 2383:   position:absolute;
+ 2384:   right:14px;
+ 2385:   bottom:-5px;
+ 2386:   width:9px;
+
+[Satır 2394 civarı]
+ 2392: }
+ 2393: 
+ 2394: /* Bagaj yön ikonları fazla büyüyüp numarayı kapatmasın */
+ 2395: .seat .bag-dir{
+ 2396:   display:inline-flex;
+ 2397:   align-items:center;
+ 2398:   gap:1px;
+ 2399:   max-width:42px;
+
+[Satır 2395 civarı]
+ 2393: 
+ 2394: /* Bagaj yön ikonları fazla büyüyüp numarayı kapatmasın */
+ 2395: .seat .bag-dir{
+ 2396:   display:inline-flex;
+ 2397:   align-items:center;
+ 2398:   gap:1px;
+ 2399:   max-width:42px;
+ 2400:   overflow:hidden;
+
+[Satır 2400 civarı]
+ 2398:   gap:1px;
+ 2399:   max-width:42px;
+ 2400:   overflow:hidden;
+ 2401:   white-space:nowrap;
+ 2402:   font-size:11px;
+ 2403: }
+ 2404: 
+ 2405: .seat .bag-count{
+
+[Satır 2405 civarı]
+ 2403: }
+ 2404: 
+ 2405: .seat .bag-count{
+ 2406:   font-size:13px;
+ 2407:   font-weight:950;
+ 2408: }
+ 2409: 
+ 2410: /* Bagaj rozetinin çıkacağı yer için üst boşluk */
+
+[Satır 2410 civarı]
+ 2408: }
+ 2409: 
+ 2410: /* Bagaj rozetinin çıkacağı yer için üst boşluk */
+ 2411: .deck{
+ 2412:   padding-top:34px;
+ 2413: }
+ 2414: 
+ 2415: /* Sürüş modunda çiftli koltuklar biraz yaklaşsın */
+
+[Satır 2421 civarı]
+ 2419: }
+ 2420: 
+ 2421: /* Sürüş modunda bagaj balonu daha kontrollü */
+ 2422: body.drive-mode .seat .bag-badge{
+ 2423:   top:-27px !important;
+ 2424:   right:-10px !important;
+ 2425:   min-width:32px !important;
+ 2426:   min-height:24px !important;
+
+[Satır 2422 civarı]
+ 2420: 
+ 2421: /* Sürüş modunda bagaj balonu daha kontrollü */
+ 2422: body.drive-mode .seat .bag-badge{
+ 2423:   top:-27px !important;
+ 2424:   right:-10px !important;
+ 2425:   min-width:32px !important;
+ 2426:   min-height:24px !important;
+ 2427:   padding:4px 7px !important;
+
+[Satır 2431 civarı]
+ 2429: }
+ 2430: 
+ 2431: body.drive-mode .seat .bag-count{
+ 2432:   font-size:12px;
+ 2433: }
+ 2434: 
+ 2435: /* Sürüş modunda üst sıradaki bagaj balonları kesilmesin */
+ 2436: body.drive-mode .deck{
+
+[Satır 2435 civarı]
+ 2433: }
+ 2434: 
+ 2435: /* Sürüş modunda üst sıradaki bagaj balonları kesilmesin */
+ 2436: body.drive-mode .deck{
+ 2437:   padding-top:36px !important;
+ 2438: }
+ 2439: 
+ 2440: /* Dar ekranda rozet biraz daha küçük */
+
+[Satır 2442 civarı]
+ 2440: /* Dar ekranda rozet biraz daha küçük */
+ 2441: @media (max-width:420px){
+ 2442:   .seat .bag-badge{
+ 2443:     top:-25px !important;
+ 2444:     right:-9px !important;
+ 2445:     min-width:30px !important;
+ 2446:     min-height:23px !important;
+ 2447:     padding:4px 7px !important;
+
+[Satır 2450 civarı]
+ 2448:   }
+ 2449: 
+ 2450:   .seat .bag-dir{
+ 2451:     max-width:36px;
+ 2452:     font-size:10px;
+ 2453:   }
+ 2454: 
+ 2455:   .seat .bag-count{
+
+[Satır 2455 civarı]
+ 2453:   }
+ 2454: 
+ 2455:   .seat .bag-count{
+ 2456:     font-size:12px;
+ 2457:   }
+ 2458: 
+ 2459:   body.drive-mode{
+ 2460:     --seat-gap-x:10px;
+
+[Satır 2475 civarı]
+ 2473: }
+ 2474: 
+ 2475: /* Sağ tarafta boş kalan alanı koltuk planına geri ver */
+ 2476: body.drive-mode .board-stage{
+ 2477:   padding-left:8px !important;
+ 2478:   padding-right:22px !important;
+ 2479:   overflow-x:hidden !important;
+ 2480: }
+
+[Satır 2479 civarı]
+ 2477:   padding-left:8px !important;
+ 2478:   padding-right:22px !important;
+ 2479:   overflow-x:hidden !important;
+ 2480: }
+ 2481: 
+ 2482: /* Deck biraz daha ortaya otursun */
+ 2483: body.drive-mode .deck-wrap{
+ 2484:   min-width:100% !important;
+
+[Satır 2504 civarı]
+ 2502:   line-height:1.16 !important;
+ 2503:   text-align:center;
+ 2504:   overflow:hidden;
+ 2505:   display:-webkit-box;
+ 2506:   -webkit-line-clamp:2;
+ 2507:   -webkit-box-orient:vertical;
+ 2508: }
+ 2509: 
+
+[Satır 2515 civarı]
+ 2513: }
+ 2514: 
+ 2515: /* Bagaj balonları koltuk üstünde kalsın ama yan koltuğa fazla taşmasın */
+ 2516: body.drive-mode .seat .bag-badge{
+ 2517:   right:-8px !important;
+ 2518:   top:-27px !important;
+ 2519:   transform:scale(.96);
+ 2520: }
+
+[Satır 2516 civarı]
+ 2514: 
+ 2515: /* Bagaj balonları koltuk üstünde kalsın ama yan koltuğa fazla taşmasın */
+ 2516: body.drive-mode .seat .bag-badge{
+ 2517:   right:-8px !important;
+ 2518:   top:-27px !important;
+ 2519:   transform:scale(.96);
+ 2520: }
+ 2521: 
+
+[Satır 2567 civarı]
+ 2565: ========================================================= */
+ 2566: 
+ 2567: /* Alt bar için koltuk planının altında yer aç */
+ 2568: 
+ 2569: /* Deck içinde butonlara alt boşluk bırak */
+ 2570: 
+ 2571: /* Sağdaki dikey FAB kolonunu sürüş modunda yatay alt bara çevir */
+ 2572: body.drive-mode .fab-column{
+
+[Satır 2723 civarı]
+ 2721: ========================================================= */
+ 2722: 
+ 2723: .route-pill{
+ 2724:   cursor:pointer;
+ 2725:   user-select:none;
+ 2726:   transition:.16s ease;
+ 2727: }
+ 2728: 
+
+[Satır 2729 civarı]
+ 2727: }
+ 2728: 
+ 2729: .route-pill:hover{
+ 2730:   transform:translateY(-1px);
+ 2731:   filter:brightness(1.08);
+ 2732: }
+ 2733: 
+ 2734: .route-pill:active{
+
+[Satır 2734 civarı]
+ 2732: }
+ 2733: 
+ 2734: .route-pill:active{
+ 2735:   transform:scale(.98);
+ 2736: }
+ 2737: 
+ 2738: .route-stop.route-focus-flash{
+ 2739:   animation:routeFocusFlash 1.1s ease-in-out 1;
+
+[Satır 2738 civarı]
+ 2736: }
+ 2737: 
+ 2738: .route-stop.route-focus-flash{
+ 2739:   animation:routeFocusFlash 1.1s ease-in-out 1;
+ 2740: }
+ 2741: 
+ 2742: @keyframes routeFocusFlash{
+ 2743:   0%,100%{
+
+[Satır 2826 civarı]
+ 2824:   color:#cbd5e1;
+ 2825:   white-space:nowrap;
+ 2826:   overflow:hidden;
+ 2827:   text-overflow:ellipsis;
+ 2828: }
+ 2829: 
+ 2830: /* Renk durumları */
+ 2831: .drive-speed-chip.ok{
+
+[Satır 2827 civarı]
+ 2825:   white-space:nowrap;
+ 2826:   overflow:hidden;
+ 2827:   text-overflow:ellipsis;
+ 2828: }
+ 2829: 
+ 2830: /* Renk durumları */
+ 2831: .drive-speed-chip.ok{
+ 2832:   border-color:rgba(34,197,94,.42) !important;
+
+[Satır 2951 civarı]
+ 2949:   line-height:1.15 !important;
+ 2950:   white-space:nowrap !important;
+ 2951:   overflow:hidden !important;
+ 2952:   text-overflow:ellipsis !important;
+ 2953: }
+ 2954: 
+ 2955: /* Dar ekranda biraz daha kompakt */
+ 2956: @media (max-width:420px){
+
+[Satır 2952 civarı]
+ 2950:   white-space:nowrap !important;
+ 2951:   overflow:hidden !important;
+ 2952:   text-overflow:ellipsis !important;
+ 2953: }
+ 2954: 
+ 2955: /* Dar ekranda biraz daha kompakt */
+ 2956: @media (max-width:420px){
+ 2957:   body.drive-mode #driveModeToggle{
+
+[Satır 3078 civarı]
+ 3076:   line-height:1.15 !important;
+ 3077:   white-space:nowrap !important;
+ 3078:   overflow:hidden !important;
+ 3079:   text-overflow:ellipsis !important;
+ 3080: }
+ 3081: 
+ 3082: @media (max-width:420px){
+ 3083:   body.drive-mode #driveFixedDock{
+
+[Satır 3079 civarı]
+ 3077:   white-space:nowrap !important;
+ 3078:   overflow:hidden !important;
+ 3079:   text-overflow:ellipsis !important;
+ 3080: }
+ 3081: 
+ 3082: @media (max-width:420px){
+ 3083:   body.drive-mode #driveFixedDock{
+ 3084:     top:calc(10px + env(safe-area-inset-top)) !important;
+
+[Satır 3202 civarı]
+ 3200:   line-height:1.15 !important;
+ 3201:   white-space:nowrap !important;
+ 3202:   overflow:hidden !important;
+ 3203:   text-overflow:ellipsis !important;
+ 3204: }
+ 3205: 
+ 3206: /* Dock yer kaplamadığı için sağ üst alanda boşluk bırak */
+ 3207: body.drive-mode .board-head{
+
+... 110 eşleşme daha var.
+
+--- static/seats/seats-final.css | eşleşme: 203 ---
+
+[Satır 102 civarı]
+  100: }
+  101: 
+  102: .route-live-row{
+  103:   display:grid !important;
+  104:   grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  105:   gap:7px !important;
+  106:   margin-top:10px !important;
+  107: }
+
+[Satır 109 civarı]
+  107: }
+  108: 
+  109: .route-live-row .mini-chip{
+  110:   min-width:0 !important;
+  111:   min-height:38px !important;
+  112:   padding:7px 9px !important;
+  113:   border-radius:16px !important;
+  114:   background:rgba(255,255,255,.055) !important;
+
+[Satır 119 civarı]
+  117:   font-size:12px !important;
+  118:   font-weight:850 !important;
+  119:   overflow:hidden !important;
+  120:   white-space:nowrap !important;
+  121:   text-overflow:ellipsis !important;
+  122:   justify-content:center !important;
+  123: }
+  124: 
+
+[Satır 121 civarı]
+  119:   overflow:hidden !important;
+  120:   white-space:nowrap !important;
+  121:   text-overflow:ellipsis !important;
+  122:   justify-content:center !important;
+  123: }
+  124: 
+  125: .route-live-row .mini-chip span{
+  126:   color:var(--sf-muted) !important;
+
+[Satır 125 civarı]
+  123: }
+  124: 
+  125: .route-live-row .mini-chip span{
+  126:   color:var(--sf-muted) !important;
+  127: }
+  128: 
+  129: .route-live-row .mini-chip b{
+  130:   color:#fff !important;
+
+[Satır 129 civarı]
+  127: }
+  128: 
+  129: .route-live-row .mini-chip b{
+  130:   color:#fff !important;
+  131:   overflow:hidden !important;
+  132:   text-overflow:ellipsis !important;
+  133: }
+  134: 
+
+[Satır 131 civarı]
+  129: .route-live-row .mini-chip b{
+  130:   color:#fff !important;
+  131:   overflow:hidden !important;
+  132:   text-overflow:ellipsis !important;
+  133: }
+  134: 
+  135: .top-actions{
+  136:   display:grid !important;
+
+[Satır 132 civarı]
+  130:   color:#fff !important;
+  131:   overflow:hidden !important;
+  132:   text-overflow:ellipsis !important;
+  133: }
+  134: 
+  135: .top-actions{
+  136:   display:grid !important;
+  137:   grid-template-columns:repeat(5,42px) !important;
+
+[Satır 167 civarı]
+  165:   gap:8px !important;
+  166:   margin:9px 0 10px !important;
+  167:   overflow:visible !important;
+  168: }
+  169: 
+  170: .status-pill{
+  171:   min-height:58px !important;
+  172:   padding:10px 12px !important;
+
+[Satır 237 civarı]
+  235: .board-card{
+  236:   padding:10px !important;
+  237:   overflow:hidden !important;
+  238: }
+  239: 
+  240: .board-inner{
+  241:   position:relative !important;
+  242:   padding:0 !important;
+
+[Satır 272 civarı]
+  270:   min-height:42px !important;
+  271:   z-index:1 !important;
+  272:   overflow:hidden !important;
+  273:   pointer-events:auto !important;
+  274: }
+  275: 
+  276: #driveModeToggle,
+  277: #driveSpeedChip,
+
+[Satır 278 civarı]
+  276: #driveModeToggle,
+  277: #driveSpeedChip,
+  278: #driveEtaChip,
+  279: .drive-speed-chip,
+  280: .drive-eta-chip{
+  281:   position:relative !important;
+  282:   inset:auto !important;
+  283:   left:auto !important;
+
+[Satır 280 civarı]
+  278: #driveEtaChip,
+  279: .drive-speed-chip,
+  280: .drive-eta-chip{
+  281:   position:relative !important;
+  282:   inset:auto !important;
+  283:   left:auto !important;
+  284:   top:auto !important;
+  285:   right:auto !important;
+
+[Satır 299 civarı]
+  297:   color:#fff !important;
+  298:   box-shadow:inset 0 1px 0 rgba(255,255,255,.07) !important;
+  299:   overflow:hidden !important;
+  300: }
+  301: 
+  302: #driveModeToggle{
+  303:   display:flex !important;
+  304:   align-items:center !important;
+
+[Satır 314 civarı]
+  312: 
+  313: #driveSpeedChip,
+  314: #driveEtaChip{
+  315:   display:flex !important;
+  316:   flex-direction:column !important;
+  317:   justify-content:center !important;
+  318:   padding:6px 8px !important;
+  319: }
+
+[Satır 322 civarı]
+  320: 
+  321: .drive-speed-top,
+  322: .drive-eta-top{
+  323:   display:flex !important;
+  324:   align-items:center !important;
+  325:   gap:4px !important;
+  326:   max-width:100% !important;
+  327:   white-space:nowrap !important;
+
+[Satır 328 civarı]
+  326:   max-width:100% !important;
+  327:   white-space:nowrap !important;
+  328:   overflow:hidden !important;
+  329:   text-overflow:ellipsis !important;
+  330:   line-height:1 !important;
+  331:   color:#fff !important;
+  332:   font-size:12px !important;
+  333:   font-weight:900 !important;
+
+[Satır 329 civarı]
+  327:   white-space:nowrap !important;
+  328:   overflow:hidden !important;
+  329:   text-overflow:ellipsis !important;
+  330:   line-height:1 !important;
+  331:   color:#fff !important;
+  332:   font-size:12px !important;
+  333:   font-weight:900 !important;
+  334: }
+
+[Satır 337 civarı]
+  335: 
+  336: .drive-speed-top b,
+  337: .drive-eta-top b{
+  338:   min-width:0 !important;
+  339:   overflow:hidden !important;
+  340:   text-overflow:ellipsis !important;
+  341:   white-space:nowrap !important;
+  342: }
+
+[Satır 339 civarı]
+  337: .drive-eta-top b{
+  338:   min-width:0 !important;
+  339:   overflow:hidden !important;
+  340:   text-overflow:ellipsis !important;
+  341:   white-space:nowrap !important;
+  342: }
+  343: 
+  344: .drive-speed-sub,
+
+[Satır 340 civarı]
+  338:   min-width:0 !important;
+  339:   overflow:hidden !important;
+  340:   text-overflow:ellipsis !important;
+  341:   white-space:nowrap !important;
+  342: }
+  343: 
+  344: .drive-speed-sub,
+  345: .drive-eta-sub{
+
+[Satır 345 civarı]
+  343: 
+  344: .drive-speed-sub,
+  345: .drive-eta-sub{
+  346:   margin-top:3px !important;
+  347:   color:var(--sf-muted) !important;
+  348:   font-size:10px !important;
+  349:   line-height:1 !important;
+  350:   white-space:nowrap !important;
+
+[Satır 351 civarı]
+  349:   line-height:1 !important;
+  350:   white-space:nowrap !important;
+  351:   overflow:hidden !important;
+  352:   text-overflow:ellipsis !important;
+  353: }
+  354: 
+  355: /* =========================================================
+  356:    BOARD BAŞLIK
+
+[Satır 352 civarı]
+  350:   white-space:nowrap !important;
+  351:   overflow:hidden !important;
+  352:   text-overflow:ellipsis !important;
+  353: }
+  354: 
+  355: /* =========================================================
+  356:    BOARD BAŞLIK
+  357: ========================================================= */
+
+[Satır 399 civarı]
+  397: }
+  398: 
+  399: .selected-stop-chip{
+  400:   width:100% !important;
+  401:   min-height:40px !important;
+  402:   padding:9px 11px !important;
+  403:   border-radius:17px !important;
+  404:   background:rgba(255,255,255,.06) !important;
+
+[Satır 454 civarı]
+  452: .voice-command-btn span{
+  453:   font-size:13px !important;
+  454:   overflow:hidden !important;
+  455:   text-overflow:ellipsis !important;
+  456:   white-space:nowrap !important;
+  457: }
+  458: 
+  459: .voice-state{
+
+[Satır 455 civarı]
+  453:   font-size:13px !important;
+  454:   overflow:hidden !important;
+  455:   text-overflow:ellipsis !important;
+  456:   white-space:nowrap !important;
+  457: }
+  458: 
+  459: .voice-state{
+  460:   display:grid !important;
+
+[Satır 488 civarı]
+  486:   font-weight:850 !important;
+  487:   justify-content:center !important;
+  488:   overflow:hidden !important;
+  489:   white-space:nowrap !important;
+  490:   text-overflow:ellipsis !important;
+  491: }
+  492: 
+  493: /* =========================================================
+
+[Satır 490 civarı]
+  488:   overflow:hidden !important;
+  489:   white-space:nowrap !important;
+  490:   text-overflow:ellipsis !important;
+  491: }
+  492: 
+  493: /* =========================================================
+  494:    DURAK AKIŞI
+  495: ========================================================= */
+
+[Satır 497 civarı]
+  495: ========================================================= */
+  496: 
+  497: .route-strip-shell{
+  498:   margin:10px 0 !important;
+  499:   padding:9px !important;
+  500:   border-radius:21px !important;
+  501:   background:rgba(255,255,255,.045) !important;
+  502:   border:1px solid var(--sf-line2) !important;
+
+[Satır 506 civarı]
+  504: }
+  505: 
+  506: .route-strip-head{
+  507:   display:grid !important;
+  508:   gap:8px !important;
+  509:   margin-bottom:8px !important;
+  510: }
+  511: 
+
+[Satır 512 civarı]
+  510: }
+  511: 
+  512: .route-strip-title{
+  513:   color:#fff !important;
+  514:   font-size:14px !important;
+  515:   font-weight:1000 !important;
+  516: }
+  517: 
+
+[Satır 518 civarı]
+  516: }
+  517: 
+  518: .route-strip-meta{
+  519:   display:grid !important;
+  520:   grid-template-columns:minmax(0,.9fr) minmax(0,1.25fr) 46px !important;
+  521:   gap:7px !important;
+  522:   align-items:center !important;
+  523:   width:100% !important;
+
+[Satır 526 civarı]
+  524: }
+  525: 
+  526: .route-pill{
+  527:   min-width:0 !important;
+  528:   height:38px !important;
+  529:   padding:0 9px !important;
+  530:   border-radius:15px !important;
+  531:   background:rgba(255,255,255,.055) !important;
+
+[Satır 539 civarı]
+  537:   font-size:11.5px !important;
+  538:   font-weight:850 !important;
+  539:   overflow:hidden !important;
+  540:   white-space:nowrap !important;
+  541:   text-overflow:ellipsis !important;
+  542: }
+  543: 
+  544: .route-pill b{
+
+[Satır 541 civarı]
+  539:   overflow:hidden !important;
+  540:   white-space:nowrap !important;
+  541:   text-overflow:ellipsis !important;
+  542: }
+  543: 
+  544: .route-pill b{
+  545:   min-width:0 !important;
+  546:   overflow:hidden !important;
+
+[Satır 544 civarı]
+  542: }
+  543: 
+  544: .route-pill b{
+  545:   min-width:0 !important;
+  546:   overflow:hidden !important;
+  547:   text-overflow:ellipsis !important;
+  548:   white-space:nowrap !important;
+  549: }
+
+[Satır 546 civarı]
+  544: .route-pill b{
+  545:   min-width:0 !important;
+  546:   overflow:hidden !important;
+  547:   text-overflow:ellipsis !important;
+  548:   white-space:nowrap !important;
+  549: }
+  550: 
+  551: #nightVoiceToggle{
+
+[Satır 547 civarı]
+  545:   min-width:0 !important;
+  546:   overflow:hidden !important;
+  547:   text-overflow:ellipsis !important;
+  548:   white-space:nowrap !important;
+  549: }
+  550: 
+  551: #nightVoiceToggle{
+  552:   width:46px !important;
+
+[Satır 551 civarı]
+  549: }
+  550: 
+  551: #nightVoiceToggle{
+  552:   width:46px !important;
+  553:   min-width:46px !important;
+  554:   height:38px !important;
+  555:   padding:0 !important;
+  556:   border-radius:15px !important;
+
+[Satır 562 civarı]
+  560: }
+  561: 
+  562: #nightVoiceToggle::first-letter{
+  563:   font-size:18px !important;
+  564: }
+  565: 
+  566: .route-strip{
+  567:   display:flex !important;
+
+[Satır 566 civarı]
+  564: }
+  565: 
+  566: .route-strip{
+  567:   display:flex !important;
+  568:   gap:8px !important;
+  569:   overflow-x:auto !important;
+  570:   padding-bottom:2px !important;
+  571:   scrollbar-width:none !important;
+
+[Satır 569 civarı]
+  567:   display:flex !important;
+  568:   gap:8px !important;
+  569:   overflow-x:auto !important;
+  570:   padding-bottom:2px !important;
+  571:   scrollbar-width:none !important;
+  572: }
+  573: 
+  574: .route-strip::-webkit-scrollbar{
+
+[Satır 574 civarı]
+  572: }
+  573: 
+  574: .route-strip::-webkit-scrollbar{
+  575:   display:none !important;
+  576: }
+  577: 
+  578: .route-stop{
+  579:   min-width:118px !important;
+
+[Satır 578 civarı]
+  576: }
+  577: 
+  578: .route-stop{
+  579:   min-width:118px !important;
+  580:   min-height:68px !important;
+  581:   padding:9px 10px !important;
+  582:   border-radius:17px !important;
+  583: }
+
+[Satır 585 civarı]
+  583: }
+  584: 
+  585: .route-stop .name{
+  586:   font-size:12px !important;
+  587: }
+  588: 
+  589: .route-stop .meta{
+  590:   font-size:10.5px !important;
+
+[Satır 589 civarı]
+  587: }
+  588: 
+  589: .route-stop .meta{
+  590:   font-size:10.5px !important;
+  591: }
+  592: 
+  593: /* =========================================================
+  594:    KOLTUK DECK
+
+[Satır 604 civarı]
+  602:     linear-gradient(180deg,rgba(2,8,23,.56),rgba(2,8,23,.34)) !important;
+  603:   border:1px solid var(--sf-line2) !important;
+  604:   overflow-x:auto !important;
+  605:   overflow-y:visible !important;
+  606: }
+  607: 
+  608: .deck-wrap{
+  609:   min-width:100% !important;
+
+[Satır 605 civarı]
+  603:   border:1px solid var(--sf-line2) !important;
+  604:   overflow-x:auto !important;
+  605:   overflow-y:visible !important;
+  606: }
+  607: 
+  608: .deck-wrap{
+  609:   min-width:100% !important;
+  610:   display:flex !important;
+
+[Satır 654 civarı]
+  652:   top:auto !important;
+  653:   max-height:none !important;
+  654:   overflow:visible !important;
+  655: }
+  656: 
+  657: .panel-tabs{
+  658:   display:flex !important;
+  659:   gap:6px !important;
+
+[Satır 660 civarı]
+  658:   display:flex !important;
+  659:   gap:6px !important;
+  660:   overflow-x:auto !important;
+  661:   margin-bottom:9px !important;
+  662:   padding-bottom:3px !important;
+  663: }
+  664: 
+  665: .panel-tabs::-webkit-scrollbar{
+
+[Satır 681 civarı]
+  679: }
+  680: 
+  681: .tab-btn.active{
+  682:   background:linear-gradient(135deg,#2563eb,#0ea5e9) !important;
+  683:   color:#fff !important;
+  684: }
+  685: 
+  686: .section-box{
+
+[Satır 704 civarı]
+  702: }
+  703: 
+  704: .metric-card{
+  705:   background:rgba(2,8,23,.22) !important;
+  706:   border:1px solid var(--sf-line2) !important;
+  707: }
+  708: 
+  709: .metric-card .k,
+
+[Satır 709 civarı]
+  707: }
+  708: 
+  709: .metric-card .k,
+  710: .metric-card .s{
+  711:   color:var(--sf-muted) !important;
+  712: }
+  713: 
+  714: .metric-card .v{
+
+[Satır 710 civarı]
+  708: 
+  709: .metric-card .k,
+  710: .metric-card .s{
+  711:   color:var(--sf-muted) !important;
+  712: }
+  713: 
+  714: .metric-card .v{
+  715:   color:#fff !important;
+
+[Satır 714 civarı]
+  712: }
+  713: 
+  714: .metric-card .v{
+  715:   color:#fff !important;
+  716: }
+  717: 
+  718: /* Formlar */
+  719: .field span{
+
+[Satır 770 civarı]
+  768:   }
+  769: 
+  770:   .route-live-row{
+  771:     grid-template-columns:1fr 1fr !important;
+  772:   }
+  773: 
+  774:   .status-row{
+  775:     grid-template-columns:1fr 1fr !important;
+
+[Satır 798 civarı]
+  796:   }
+  797: 
+  798:   .route-strip-meta{
+  799:     grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr) 42px !important;
+  800:   }
+  801: 
+  802:   #nightVoiceToggle{
+  803:     width:42px !important;
+
+[Satır 802 civarı]
+  800:   }
+  801: 
+  802:   #nightVoiceToggle{
+  803:     width:42px !important;
+  804:     min-width:42px !important;
+  805:   }
+  806: 
+  807:   .board-stage{
+
+[Satır 876 civarı]
+  874: }
+  875: 
+  876: .route-live-row{
+  877:   margin-top:8px !important;
+  878:   gap:7px !important;
+  879: }
+  880: 
+  881: .route-live-row .mini-chip{
+
+[Satır 881 civarı]
+  879: }
+  880: 
+  881: .route-live-row .mini-chip{
+  882:   min-height:36px !important;
+  883:   border-radius:15px !important;
+  884:   font-size:11.5px !important;
+  885: }
+  886: 
+
+[Satır 921 civarı]
+  919: }
+  920: 
+  921: #driveEtaChip,
+  922: .drive-eta-chip{
+  923:   height:44px !important;
+  924:   min-height:44px !important;
+  925:   border-radius:18px !important;
+  926:   padding:7px 10px !important;
+
+[Satır 922 civarı]
+  920: 
+  921: #driveEtaChip,
+  922: .drive-eta-chip{
+  923:   height:44px !important;
+  924:   min-height:44px !important;
+  925:   border-radius:18px !important;
+  926:   padding:7px 10px !important;
+  927: }
+
+[Satır 929 civarı]
+  927: }
+  928: 
+  929: /* Koltuk Planı başlığı biraz yukarı */
+  930: .board-card{
+  931:   padding-top:9px !important;
+  932: }
+  933: 
+  934: .board-title h2{
+
+[Satır 938 civarı]
+  936: }
+  937: 
+  938: .selected-stop-chip{
+  939:   min-height:38px !important;
+  940: }
+  941: 
+  942: /* Mobil ince ayar */
+  943: @media(max-width:420px){
+
+[Satır 954 civarı]
+  952:   }
+  953: 
+  954:   .route-live-row .mini-chip{
+  955:     min-height:35px !important;
+  956:   }
+  957: }
+  958: 
+  959: 
+
+[Satır 967 civarı]
+  965: ========================================================= */
+  966: 
+  967: body.drive-mode .route-stop .name{
+  968:   display:flex !important;
+  969:   align-items:center !important;
+  970:   gap:8px !important;
+  971: }
+  972: 
+
+[Satır 973 civarı]
+  971: }
+  972: 
+  973: body.drive-mode .route-stop .name::before{
+  974:   content:"📍";
+  975:   width:24px;
+  976:   height:24px;
+  977:   min-width:24px;
+  978:   display:inline-flex;
+
+[Satır 987 civarı]
+  985: }
+  986: 
+  987: body.drive-mode .route-stop.active .name::before,
+  988: body.drive-mode .route-stop.live-danger .name::before,
+  989: body.drive-mode .route-stop.next-warning .name::before,
+  990: body.drive-mode .route-stop.flow-green .name::before{
+  991:   filter:drop-shadow(0 0 10px rgba(96,165,250,.55));
+  992: }
+
+[Satır 988 civarı]
+  986: 
+  987: body.drive-mode .route-stop.active .name::before,
+  988: body.drive-mode .route-stop.live-danger .name::before,
+  989: body.drive-mode .route-stop.next-warning .name::before,
+  990: body.drive-mode .route-stop.flow-green .name::before{
+  991:   filter:drop-shadow(0 0 10px rgba(96,165,250,.55));
+  992: }
+  993: 
+
+[Satır 989 civarı]
+  987: body.drive-mode .route-stop.active .name::before,
+  988: body.drive-mode .route-stop.live-danger .name::before,
+  989: body.drive-mode .route-stop.next-warning .name::before,
+  990: body.drive-mode .route-stop.flow-green .name::before{
+  991:   filter:drop-shadow(0 0 10px rgba(96,165,250,.55));
+  992: }
+  993: 
+  994: body.drive-mode .route-stop.done .name::before{
+
+[Satır 990 civarı]
+  988: body.drive-mode .route-stop.live-danger .name::before,
+  989: body.drive-mode .route-stop.next-warning .name::before,
+  990: body.drive-mode .route-stop.flow-green .name::before{
+  991:   filter:drop-shadow(0 0 10px rgba(96,165,250,.55));
+  992: }
+  993: 
+  994: body.drive-mode .route-stop.done .name::before{
+  995:   opacity:.72;
+
+[Satır 994 civarı]
+  992: }
+  993: 
+  994: body.drive-mode .route-stop.done .name::before{
+  995:   opacity:.72;
+  996: }
+  997: 
+  998: 
+  999: /* =========================================================
+
+[Satır 1004 civarı]
+ 1002: ========================================================= */
+ 1003: 
+ 1004: body.drive-mode .route-stop .name{
+ 1005:   display:flex !important;
+ 1006:   align-items:center !important;
+ 1007:   gap:10px !important;
+ 1008: }
+ 1009: 
+
+[Satır 1010 civarı]
+ 1008: }
+ 1009: 
+ 1010: body.drive-mode .route-stop .name::before{
+ 1011:   content:"" !important;
+ 1012:   width:25px !important;
+ 1013:   height:25px !important;
+ 1014:   min-width:25px !important;
+ 1015:   display:inline-block !important;
+
+[Satır 1030 civarı]
+ 1028: }
+ 1029: 
+ 1030: body.drive-mode .route-stop.active .name::before,
+ 1031: body.drive-mode .route-stop.live-danger .name::before,
+ 1032: body.drive-mode .route-stop.next-warning .name::before,
+ 1033: body.drive-mode .route-stop.flow-green .name::before{
+ 1034:   background:linear-gradient(180deg,#60a5fa,#1d4ed8) !important;
+ 1035:   filter:
+
+[Satır 1031 civarı]
+ 1029: 
+ 1030: body.drive-mode .route-stop.active .name::before,
+ 1031: body.drive-mode .route-stop.live-danger .name::before,
+ 1032: body.drive-mode .route-stop.next-warning .name::before,
+ 1033: body.drive-mode .route-stop.flow-green .name::before{
+ 1034:   background:linear-gradient(180deg,#60a5fa,#1d4ed8) !important;
+ 1035:   filter:
+ 1036:     drop-shadow(0 0 10px rgba(96,165,250,.65))
+
+[Satır 1032 civarı]
+ 1030: body.drive-mode .route-stop.active .name::before,
+ 1031: body.drive-mode .route-stop.live-danger .name::before,
+ 1032: body.drive-mode .route-stop.next-warning .name::before,
+ 1033: body.drive-mode .route-stop.flow-green .name::before{
+ 1034:   background:linear-gradient(180deg,#60a5fa,#1d4ed8) !important;
+ 1035:   filter:
+ 1036:     drop-shadow(0 0 10px rgba(96,165,250,.65))
+ 1037:     drop-shadow(0 6px 12px rgba(37,99,235,.35)) !important;
+
+[Satır 1033 civarı]
+ 1031: body.drive-mode .route-stop.live-danger .name::before,
+ 1032: body.drive-mode .route-stop.next-warning .name::before,
+ 1033: body.drive-mode .route-stop.flow-green .name::before{
+ 1034:   background:linear-gradient(180deg,#60a5fa,#1d4ed8) !important;
+ 1035:   filter:
+ 1036:     drop-shadow(0 0 10px rgba(96,165,250,.65))
+ 1037:     drop-shadow(0 6px 12px rgba(37,99,235,.35)) !important;
+ 1038: }
+
+[Satır 1040 civarı]
+ 1038: }
+ 1039: 
+ 1040: body.drive-mode .route-stop.done .name::before{
+ 1041:   opacity:.62 !important;
+ 1042: }
+ 1043: 
+ 1044: 
+ 1045: /* =========================================================
+
+[Satır 1050 civarı]
+ 1048: ========================================================= */
+ 1049: 
+ 1050: body.drive-mode .route-stop .name::before{
+ 1051:   background:linear-gradient(180deg,#7dd3fc 0%,#38bdf8 42%,#2563eb 100%) !important;
+ 1052:   opacity:1 !important;
+ 1053:   filter:
+ 1054:     drop-shadow(0 0 8px rgba(56,189,248,.72))
+ 1055:     drop-shadow(0 6px 12px rgba(37,99,235,.48)) !important;
+
+[Satır 1058 civarı]
+ 1056: }
+ 1057: 
+ 1058: body.drive-mode .route-stop.done .name::before{
+ 1059:   opacity:.95 !important;
+ 1060:   background:linear-gradient(180deg,#60a5fa 0%,#38bdf8 50%,#1d4ed8 100%) !important;
+ 1061: }
+ 1062: 
+ 1063: body.drive-mode .route-stop.active .name::before,
+
+[Satır 1063 civarı]
+ 1061: }
+ 1062: 
+ 1063: body.drive-mode .route-stop.active .name::before,
+ 1064: body.drive-mode .route-stop.live-danger .name::before,
+ 1065: body.drive-mode .route-stop.next-warning .name::before,
+ 1066: body.drive-mode .route-stop.flow-green .name::before{
+ 1067:   background:linear-gradient(180deg,#bae6fd 0%,#38bdf8 36%,#1d4ed8 100%) !important;
+ 1068:   filter:
+
+[Satır 1064 civarı]
+ 1062: 
+ 1063: body.drive-mode .route-stop.active .name::before,
+ 1064: body.drive-mode .route-stop.live-danger .name::before,
+ 1065: body.drive-mode .route-stop.next-warning .name::before,
+ 1066: body.drive-mode .route-stop.flow-green .name::before{
+ 1067:   background:linear-gradient(180deg,#bae6fd 0%,#38bdf8 36%,#1d4ed8 100%) !important;
+ 1068:   filter:
+ 1069:     drop-shadow(0 0 12px rgba(125,211,252,.95))
+
+[Satır 1065 civarı]
+ 1063: body.drive-mode .route-stop.active .name::before,
+ 1064: body.drive-mode .route-stop.live-danger .name::before,
+ 1065: body.drive-mode .route-stop.next-warning .name::before,
+ 1066: body.drive-mode .route-stop.flow-green .name::before{
+ 1067:   background:linear-gradient(180deg,#bae6fd 0%,#38bdf8 36%,#1d4ed8 100%) !important;
+ 1068:   filter:
+ 1069:     drop-shadow(0 0 12px rgba(125,211,252,.95))
+ 1070:     drop-shadow(0 0 22px rgba(37,99,235,.45)) !important;
+
+[Satır 1066 civarı]
+ 1064: body.drive-mode .route-stop.live-danger .name::before,
+ 1065: body.drive-mode .route-stop.next-warning .name::before,
+ 1066: body.drive-mode .route-stop.flow-green .name::before{
+ 1067:   background:linear-gradient(180deg,#bae6fd 0%,#38bdf8 36%,#1d4ed8 100%) !important;
+ 1068:   filter:
+ 1069:     drop-shadow(0 0 12px rgba(125,211,252,.95))
+ 1070:     drop-shadow(0 0 22px rgba(37,99,235,.45)) !important;
+ 1071: }
+
+[Satır 1079 civarı]
+ 1077: ========================================================= */
+ 1078: 
+ 1079: body.drive-mode .route-stop{
+ 1080:   opacity:1 !important;
+ 1081:   background:
+ 1082:     radial-gradient(circle at 16% 0%, rgba(59,130,246,.18), transparent 34%),
+ 1083:     linear-gradient(180deg, rgba(21,45,74,.92), rgba(10,24,42,.88)) !important;
+ 1084:   border:1px solid rgba(96,165,250,.24) !important;
+
+[Satır 1090 civarı]
+ 1088: }
+ 1089: 
+ 1090: body.drive-mode .route-stop.done{
+ 1091:   opacity:.86 !important;
+ 1092:   background:
+ 1093:     radial-gradient(circle at 16% 0%, rgba(59,130,246,.14), transparent 34%),
+ 1094:     linear-gradient(180deg, rgba(22,42,66,.82), rgba(9,22,38,.78)) !important;
+ 1095:   border-color:rgba(96,165,250,.18) !important;
+
+[Satır 1098 civarı]
+ 1096: }
+ 1097: 
+ 1098: body.drive-mode .route-stop.done .name{
+ 1099:   opacity:1 !important;
+ 1100:   color:rgba(238,247,255,.88) !important;
+ 1101: }
+ 1102: 
+ 1103: body.drive-mode .route-stop.done .meta,
+
+[Satır 1103 civarı]
+ 1101: }
+ 1102: 
+ 1103: body.drive-mode .route-stop.done .meta,
+ 1104: body.drive-mode .route-stop.done .extra-k,
+ 1105: body.drive-mode .route-stop.done .extra-v{
+ 1106:   color:rgba(226,232,240,.72) !important;
+ 1107: }
+ 1108: 
+
+[Satır 1104 civarı]
+ 1102: 
+ 1103: body.drive-mode .route-stop.done .meta,
+ 1104: body.drive-mode .route-stop.done .extra-k,
+ 1105: body.drive-mode .route-stop.done .extra-v{
+ 1106:   color:rgba(226,232,240,.72) !important;
+ 1107: }
+ 1108: 
+ 1109: /* Seçili / canlı kart daha güçlü dursun */
+
+[Satır 1105 civarı]
+ 1103: body.drive-mode .route-stop.done .meta,
+ 1104: body.drive-mode .route-stop.done .extra-k,
+ 1105: body.drive-mode .route-stop.done .extra-v{
+ 1106:   color:rgba(226,232,240,.72) !important;
+ 1107: }
+ 1108: 
+ 1109: /* Seçili / canlı kart daha güçlü dursun */
+ 1110: body.drive-mode .route-stop.active{
+
+[Satır 1110 civarı]
+ 1108: 
+ 1109: /* Seçili / canlı kart daha güçlü dursun */
+ 1110: body.drive-mode .route-stop.active{
+ 1111:   opacity:1 !important;
+ 1112:   background:
+ 1113:     radial-gradient(circle at 18% 0%, rgba(96,165,250,.26), transparent 34%),
+ 1114:     linear-gradient(180deg, rgba(31,74,118,.94), rgba(18,45,80,.90)) !important;
+ 1115:   border-color:rgba(96,165,250,.54) !important;
+
+[Satır 1122 civarı]
+ 1120: }
+ 1121: 
+ 1122: body.drive-mode .route-stop.active .name,
+ 1123: body.drive-mode .route-stop.active .meta,
+ 1124: body.drive-mode .route-stop.active .extra-k,
+ 1125: body.drive-mode .route-stop.active .extra-v{
+ 1126:   color:#f8fbff !important;
+ 1127: }
+
+[Satır 1123 civarı]
+ 1121: 
+ 1122: body.drive-mode .route-stop.active .name,
+ 1123: body.drive-mode .route-stop.active .meta,
+ 1124: body.drive-mode .route-stop.active .extra-k,
+ 1125: body.drive-mode .route-stop.active .extra-v{
+ 1126:   color:#f8fbff !important;
+ 1127: }
+ 1128: 
+
+[Satır 1124 civarı]
+ 1122: body.drive-mode .route-stop.active .name,
+ 1123: body.drive-mode .route-stop.active .meta,
+ 1124: body.drive-mode .route-stop.active .extra-k,
+ 1125: body.drive-mode .route-stop.active .extra-v{
+ 1126:   color:#f8fbff !important;
+ 1127: }
+ 1128: 
+ 1129: /* Normal bekleyen kartlar da çok sönük kalmasın */
+
+[Satır 1125 civarı]
+ 1123: body.drive-mode .route-stop.active .meta,
+ 1124: body.drive-mode .route-stop.active .extra-k,
+ 1125: body.drive-mode .route-stop.active .extra-v{
+ 1126:   color:#f8fbff !important;
+ 1127: }
+ 1128: 
+ 1129: /* Normal bekleyen kartlar da çok sönük kalmasın */
+ 1130: body.drive-mode .route-stop:not(.active):not(.live-danger):not(.next-warning):not(.flow-green){
+
+[Satır 1130 civarı]
+ 1128: 
+ 1129: /* Normal bekleyen kartlar da çok sönük kalmasın */
+ 1130: body.drive-mode .route-stop:not(.active):not(.live-danger):not(.next-warning):not(.flow-green){
+ 1131:   filter:saturate(1.12) brightness(1.06) !important;
+ 1132: }
+ 1133: 
+ 1134: 
+ 1135: /* =========================================================
+
+[Satır 1136 civarı]
+ 1134: 
+ 1135: /* =========================================================
+ 1136:    DRIVE LIVE DANGER COLOR RESTORE
+ 1137:    Canlı durak eşik km altına düşünce kırmızı uyarı geri gelsin.
+ 1138: ========================================================= */
+ 1139: 
+ 1140: body.drive-mode .route-stop.live-danger{
+ 1141:   opacity:1 !important;
+
+[Satır 1140 civarı]
+ 1138: ========================================================= */
+ 1139: 
+ 1140: body.drive-mode .route-stop.live-danger{
+ 1141:   opacity:1 !important;
+ 1142:   background:
+ 1143:     radial-gradient(circle at 18% 0%, rgba(248,113,113,.34), transparent 38%),
+ 1144:     linear-gradient(135deg, rgba(127,29,29,.98), rgba(239,68,68,.68)) !important;
+ 1145:   border-color:rgba(248,113,113,.96) !important;
+
+[Satır 1152 civarı]
+ 1150:     inset 0 1px 0 rgba(255,255,255,.16) !important;
+ 1151:   filter:brightness(1.08) saturate(1.18) !important;
+ 1152:   animation:liveStopBlink 0.9s linear infinite !important;
+ 1153: }
+ 1154: 
+ 1155: body.drive-mode .route-stop.live-danger .name,
+ 1156: body.drive-mode .route-stop.live-danger .meta,
+ 1157: body.drive-mode .route-stop.live-danger .extra-k,
+
+[Satır 1155 civarı]
+ 1153: }
+ 1154: 
+ 1155: body.drive-mode .route-stop.live-danger .name,
+ 1156: body.drive-mode .route-stop.live-danger .meta,
+ 1157: body.drive-mode .route-stop.live-danger .extra-k,
+ 1158: body.drive-mode .route-stop.live-danger .extra-v{
+ 1159:   color:#fff !important;
+ 1160:   opacity:1 !important;
+
+[Satır 1156 civarı]
+ 1154: 
+ 1155: body.drive-mode .route-stop.live-danger .name,
+ 1156: body.drive-mode .route-stop.live-danger .meta,
+ 1157: body.drive-mode .route-stop.live-danger .extra-k,
+ 1158: body.drive-mode .route-stop.live-danger .extra-v{
+ 1159:   color:#fff !important;
+ 1160:   opacity:1 !important;
+ 1161: }
+
+[Satır 1157 civarı]
+ 1155: body.drive-mode .route-stop.live-danger .name,
+ 1156: body.drive-mode .route-stop.live-danger .meta,
+ 1157: body.drive-mode .route-stop.live-danger .extra-k,
+ 1158: body.drive-mode .route-stop.live-danger .extra-v{
+ 1159:   color:#fff !important;
+ 1160:   opacity:1 !important;
+ 1161: }
+ 1162: 
+
+[Satır 1158 civarı]
+ 1156: body.drive-mode .route-stop.live-danger .meta,
+ 1157: body.drive-mode .route-stop.live-danger .extra-k,
+ 1158: body.drive-mode .route-stop.live-danger .extra-v{
+ 1159:   color:#fff !important;
+ 1160:   opacity:1 !important;
+ 1161: }
+ 1162: 
+ 1163: body.drive-mode .route-stop.live-danger .name::before{
+
+[Satır 1163 civarı]
+ 1161: }
+ 1162: 
+ 1163: body.drive-mode .route-stop.live-danger .name::before{
+ 1164:   background:linear-gradient(180deg,#fecaca 0%,#f87171 45%,#dc2626 100%) !important;
+ 1165:   filter:
+ 1166:     drop-shadow(0 0 12px rgba(248,113,113,.95))
+ 1167:     drop-shadow(0 0 22px rgba(239,68,68,.48)) !important;
+ 1168: }
+
+[Satır 1171 civarı]
+ 1169: 
+ 1170: /* Sıradaki uyarı sarı kalsın */
+ 1171: body.drive-mode .route-stop.next-warning:not(.live-danger){
+ 1172:   background:
+ 1173:     radial-gradient(circle at 18% 0%, rgba(251,191,36,.25), transparent 38%),
+ 1174:     linear-gradient(135deg, rgba(120,75,0,.96), rgba(245,158,11,.62)) !important;
+ 1175:   border-color:rgba(251,191,36,.88) !important;
+ 1176:   box-shadow:
+
+[Satır 1183 civarı]
+ 1181: 
+ 1182: /* Sonraki güvenli akış yeşil kalsın */
+ 1183: body.drive-mode .route-stop.flow-green:not(.live-danger):not(.next-warning){
+ 1184:   background:
+ 1185:     radial-gradient(circle at 18% 0%, rgba(74,222,128,.22), transparent 38%),
+ 1186:     linear-gradient(135deg, rgba(20,83,45,.94), rgba(34,197,94,.48)) !important;
+ 1187:   border-color:rgba(74,222,128,.72) !important;
+ 1188:   box-shadow:
+
+[Satır 1200 civarı]
+ 1198: ========================================================= */
+ 1199: 
+ 1200: body:not(.drive-mode) .route-stop .name{
+ 1201:   display:flex !important;
+ 1202:   align-items:center !important;
+ 1203:   gap:9px !important;
+ 1204: }
+ 1205: 
+
+[Satır 1206 civarı]
+ 1204: }
+ 1205: 
+ 1206: body:not(.drive-mode) .route-stop .name::before{
+ 1207:   content:"" !important;
+ 1208:   width:24px !important;
+ 1209:   height:24px !important;
+ 1210:   min-width:24px !important;
+ 1211:   display:inline-block !important;
+
+[Satır 1228 civarı]
+ 1226: }
+ 1227: 
+ 1228: body:not(.drive-mode) .route-stop.done .name::before{
+ 1229:   opacity:.85 !important;
+ 1230: }
+ 1231: 
+ 1232: body:not(.drive-mode) .route-stop.active .name::before,
+ 1233: body:not(.drive-mode) .route-stop.live-danger .name::before,
+
+[Satır 1232 civarı]
+ 1230: }
+ 1231: 
+ 1232: body:not(.drive-mode) .route-stop.active .name::before,
+ 1233: body:not(.drive-mode) .route-stop.live-danger .name::before,
+ 1234: body:not(.drive-mode) .route-stop.next-warning .name::before,
+ 1235: body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1236:   background:linear-gradient(180deg,#bae6fd 0%,#38bdf8 36%,#1d4ed8 100%) !important;
+ 1237:   filter:
+
+[Satır 1233 civarı]
+ 1231: 
+ 1232: body:not(.drive-mode) .route-stop.active .name::before,
+ 1233: body:not(.drive-mode) .route-stop.live-danger .name::before,
+ 1234: body:not(.drive-mode) .route-stop.next-warning .name::before,
+ 1235: body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1236:   background:linear-gradient(180deg,#bae6fd 0%,#38bdf8 36%,#1d4ed8 100%) !important;
+ 1237:   filter:
+ 1238:     drop-shadow(0 0 12px rgba(125,211,252,.95))
+
+[Satır 1234 civarı]
+ 1232: body:not(.drive-mode) .route-stop.active .name::before,
+ 1233: body:not(.drive-mode) .route-stop.live-danger .name::before,
+ 1234: body:not(.drive-mode) .route-stop.next-warning .name::before,
+ 1235: body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1236:   background:linear-gradient(180deg,#bae6fd 0%,#38bdf8 36%,#1d4ed8 100%) !important;
+ 1237:   filter:
+ 1238:     drop-shadow(0 0 12px rgba(125,211,252,.95))
+ 1239:     drop-shadow(0 0 22px rgba(37,99,235,.45)) !important;
+
+[Satır 1235 civarı]
+ 1233: body:not(.drive-mode) .route-stop.live-danger .name::before,
+ 1234: body:not(.drive-mode) .route-stop.next-warning .name::before,
+ 1235: body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1236:   background:linear-gradient(180deg,#bae6fd 0%,#38bdf8 36%,#1d4ed8 100%) !important;
+ 1237:   filter:
+ 1238:     drop-shadow(0 0 12px rgba(125,211,252,.95))
+ 1239:     drop-shadow(0 0 22px rgba(37,99,235,.45)) !important;
+ 1240: }
+
+[Satır 1248 civarı]
+ 1246: ========================================================= */
+ 1247: 
+ 1248: body:not(.drive-mode) .route-stop .name::before{
+ 1249:   background:linear-gradient(
+ 1250:     180deg,
+ 1251:     #dbeafe 0%,
+ 1252:     #7dd3fc 24%,
+ 1253:     #38bdf8 52%,
+
+[Satır 1268 civarı]
+ 1266: 
+ 1267: /* Geçildi kartlarında da çok sönük kalmasın */
+ 1268: body:not(.drive-mode) .route-stop.done .name::before{
+ 1269:   opacity:1 !important;
+ 1270:   background:linear-gradient(
+ 1271:     180deg,
+ 1272:     #bfdbfe 0%,
+ 1273:     #60a5fa 34%,
+
+[Satır 1286 civarı]
+ 1284: 
+ 1285: /* Seçili / canlı / uyarı kartında ikon daha güçlü parlasın */
+ 1286: body:not(.drive-mode) .route-stop.active .name::before,
+ 1287: body:not(.drive-mode) .route-stop.live-danger .name::before,
+ 1288: body:not(.drive-mode) .route-stop.next-warning .name::before,
+ 1289: body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1290:   background:linear-gradient(
+ 1291:     180deg,
+
+[Satır 1287 civarı]
+ 1285: /* Seçili / canlı / uyarı kartında ikon daha güçlü parlasın */
+ 1286: body:not(.drive-mode) .route-stop.active .name::before,
+ 1287: body:not(.drive-mode) .route-stop.live-danger .name::before,
+ 1288: body:not(.drive-mode) .route-stop.next-warning .name::before,
+ 1289: body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1290:   background:linear-gradient(
+ 1291:     180deg,
+ 1292:     #ffffff 0%,
+
+[Satır 1288 civarı]
+ 1286: body:not(.drive-mode) .route-stop.active .name::before,
+ 1287: body:not(.drive-mode) .route-stop.live-danger .name::before,
+ 1288: body:not(.drive-mode) .route-stop.next-warning .name::before,
+ 1289: body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1290:   background:linear-gradient(
+ 1291:     180deg,
+ 1292:     #ffffff 0%,
+ 1293:     #bae6fd 20%,
+
+[Satır 1289 civarı]
+ 1287: body:not(.drive-mode) .route-stop.live-danger .name::before,
+ 1288: body:not(.drive-mode) .route-stop.next-warning .name::before,
+ 1289: body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1290:   background:linear-gradient(
+ 1291:     180deg,
+ 1292:     #ffffff 0%,
+ 1293:     #bae6fd 20%,
+ 1294:     #38bdf8 50%,
+
+[Satır 1309 civarı]
+ 1307: /* =========================================================
+ 1308:    NORMAL ROUTE CARD BACKGROUND BOOST
+ 1309:    Normal modda Durak Akışı kartlarının arka planını canlı yapar.
+ 1310: ========================================================= */
+ 1311: 
+ 1312: body:not(.drive-mode) .route-stop{
+ 1313:   opacity:1 !important;
+ 1314:   background:
+
+[Satır 1312 civarı]
+ 1310: ========================================================= */
+ 1311: 
+ 1312: body:not(.drive-mode) .route-stop{
+ 1313:   opacity:1 !important;
+ 1314:   background:
+ 1315:     radial-gradient(circle at 18% 0%, rgba(59,130,246,.22), transparent 36%),
+ 1316:     linear-gradient(180deg, rgba(24,50,82,.94), rgba(11,28,50,.90)) !important;
+ 1317:   border-color:rgba(96,165,250,.28) !important;
+
+[Satır 1325 civarı]
+ 1323: 
+ 1324: /* Geçildi kartları tamamen solmasın */
+ 1325: body:not(.drive-mode) .route-stop.done{
+ 1326:   opacity:.92 !important;
+ 1327:   background:
+ 1328:     radial-gradient(circle at 18% 0%, rgba(59,130,246,.18), transparent 36%),
+ 1329:     linear-gradient(180deg, rgba(22,46,75,.90), rgba(10,25,45,.86)) !important;
+ 1330:   border-color:rgba(96,165,250,.22) !important;
+
+[Satır 1335 civarı]
+ 1333: 
+ 1334: /* Geçildi kartındaki yazılar biraz daha okunaklı */
+ 1335: body:not(.drive-mode) .route-stop.done .name{
+ 1336:   color:rgba(248,251,255,.88) !important;
+ 1337:   opacity:1 !important;
+ 1338: }
+ 1339: 
+ 1340: body:not(.drive-mode) .route-stop.done .meta,
+
+[Satır 1340 civarı]
+ 1338: }
+ 1339: 
+ 1340: body:not(.drive-mode) .route-stop.done .meta,
+ 1341: body:not(.drive-mode) .route-stop.done .extra-k,
+ 1342: body:not(.drive-mode) .route-stop.done .extra-v{
+ 1343:   color:rgba(226,232,240,.74) !important;
+ 1344: }
+ 1345: 
+
+[Satır 1341 civarı]
+ 1339: 
+ 1340: body:not(.drive-mode) .route-stop.done .meta,
+ 1341: body:not(.drive-mode) .route-stop.done .extra-k,
+ 1342: body:not(.drive-mode) .route-stop.done .extra-v{
+ 1343:   color:rgba(226,232,240,.74) !important;
+ 1344: }
+ 1345: 
+ 1346: /* Seçili/canlı kırmızı kart kendi rengini korusun */
+
+[Satır 1342 civarı]
+ 1340: body:not(.drive-mode) .route-stop.done .meta,
+ 1341: body:not(.drive-mode) .route-stop.done .extra-k,
+ 1342: body:not(.drive-mode) .route-stop.done .extra-v{
+ 1343:   color:rgba(226,232,240,.74) !important;
+ 1344: }
+ 1345: 
+ 1346: /* Seçili/canlı kırmızı kart kendi rengini korusun */
+ 1347: body:not(.drive-mode) .route-stop.live-danger{
+
+[Satır 1347 civarı]
+ 1345: 
+ 1346: /* Seçili/canlı kırmızı kart kendi rengini korusun */
+ 1347: body:not(.drive-mode) .route-stop.live-danger{
+ 1348:   background:
+ 1349:     radial-gradient(circle at 18% 0%, rgba(248,113,113,.34), transparent 38%),
+ 1350:     linear-gradient(135deg, rgba(127,29,29,.98), rgba(239,68,68,.68)) !important;
+ 1351:   border-color:rgba(248,113,113,.96) !important;
+ 1352:   filter:brightness(1.08) saturate(1.18) !important;
+
+[Satır 1362 civarı]
+ 1360: 
+ 1361: /* Canlı / tehlike: kırmızı */
+ 1362: body:not(.drive-mode) .route-stop.live-danger{
+ 1363:   opacity:1 !important;
+ 1364:   background:
+ 1365:     radial-gradient(circle at 18% 0%, rgba(248,113,113,.38), transparent 38%),
+ 1366:     linear-gradient(135deg, rgba(127,29,29,.98), rgba(239,68,68,.72)) !important;
+ 1367:   border-color:rgba(248,113,113,.96) !important;
+
+[Satır 1374 civarı]
+ 1372:     inset 0 1px 0 rgba(255,255,255,.16) !important;
+ 1373:   filter:brightness(1.08) saturate(1.18) !important;
+ 1374:   animation:liveStopBlink .9s linear infinite !important;
+ 1375: }
+ 1376: 
+ 1377: /* Sıradaki uyarı: turuncu */
+ 1378: body:not(.drive-mode) .route-stop.next-warning:not(.live-danger){
+ 1379:   opacity:1 !important;
+
+[Satır 1378 civarı]
+ 1376: 
+ 1377: /* Sıradaki uyarı: turuncu */
+ 1378: body:not(.drive-mode) .route-stop.next-warning:not(.live-danger){
+ 1379:   opacity:1 !important;
+ 1380:   background:
+ 1381:     radial-gradient(circle at 18% 0%, rgba(251,191,36,.34), transparent 38%),
+ 1382:     linear-gradient(135deg, rgba(120,75,0,.98), rgba(245,158,11,.70)) !important;
+ 1383:   border-color:rgba(251,191,36,.92) !important;
+
+[Satır 1393 civarı]
+ 1391: 
+ 1392: /* Sonraki güvenli akış: yeşil */
+ 1393: body:not(.drive-mode) .route-stop.flow-green:not(.live-danger):not(.next-warning){
+ 1394:   opacity:1 !important;
+ 1395:   background:
+ 1396:     radial-gradient(circle at 18% 0%, rgba(74,222,128,.30), transparent 38%),
+ 1397:     linear-gradient(135deg, rgba(20,83,45,.96), rgba(34,197,94,.58)) !important;
+ 1398:   border-color:rgba(74,222,128,.78) !important;
+
+[Satır 1408 civarı]
+ 1406: 
+ 1407: /* Bu renklerde yazılar net beyaz kalsın */
+ 1408: body:not(.drive-mode) .route-stop.live-danger .name,
+ 1409: body:not(.drive-mode) .route-stop.live-danger .meta,
+ 1410: body:not(.drive-mode) .route-stop.live-danger .extra-k,
+ 1411: body:not(.drive-mode) .route-stop.live-danger .extra-v,
+ 1412: body:not(.drive-mode) .route-stop.next-warning .name,
+ 1413: body:not(.drive-mode) .route-stop.next-warning .meta,
+
+[Satır 1409 civarı]
+ 1407: /* Bu renklerde yazılar net beyaz kalsın */
+ 1408: body:not(.drive-mode) .route-stop.live-danger .name,
+ 1409: body:not(.drive-mode) .route-stop.live-danger .meta,
+ 1410: body:not(.drive-mode) .route-stop.live-danger .extra-k,
+ 1411: body:not(.drive-mode) .route-stop.live-danger .extra-v,
+ 1412: body:not(.drive-mode) .route-stop.next-warning .name,
+ 1413: body:not(.drive-mode) .route-stop.next-warning .meta,
+ 1414: body:not(.drive-mode) .route-stop.next-warning .extra-k,
+
+[Satır 1410 civarı]
+ 1408: body:not(.drive-mode) .route-stop.live-danger .name,
+ 1409: body:not(.drive-mode) .route-stop.live-danger .meta,
+ 1410: body:not(.drive-mode) .route-stop.live-danger .extra-k,
+ 1411: body:not(.drive-mode) .route-stop.live-danger .extra-v,
+ 1412: body:not(.drive-mode) .route-stop.next-warning .name,
+ 1413: body:not(.drive-mode) .route-stop.next-warning .meta,
+ 1414: body:not(.drive-mode) .route-stop.next-warning .extra-k,
+ 1415: body:not(.drive-mode) .route-stop.next-warning .extra-v,
+
+[Satır 1411 civarı]
+ 1409: body:not(.drive-mode) .route-stop.live-danger .meta,
+ 1410: body:not(.drive-mode) .route-stop.live-danger .extra-k,
+ 1411: body:not(.drive-mode) .route-stop.live-danger .extra-v,
+ 1412: body:not(.drive-mode) .route-stop.next-warning .name,
+ 1413: body:not(.drive-mode) .route-stop.next-warning .meta,
+ 1414: body:not(.drive-mode) .route-stop.next-warning .extra-k,
+ 1415: body:not(.drive-mode) .route-stop.next-warning .extra-v,
+ 1416: body:not(.drive-mode) .route-stop.flow-green .name,
+
+[Satır 1412 civarı]
+ 1410: body:not(.drive-mode) .route-stop.live-danger .extra-k,
+ 1411: body:not(.drive-mode) .route-stop.live-danger .extra-v,
+ 1412: body:not(.drive-mode) .route-stop.next-warning .name,
+ 1413: body:not(.drive-mode) .route-stop.next-warning .meta,
+ 1414: body:not(.drive-mode) .route-stop.next-warning .extra-k,
+ 1415: body:not(.drive-mode) .route-stop.next-warning .extra-v,
+ 1416: body:not(.drive-mode) .route-stop.flow-green .name,
+ 1417: body:not(.drive-mode) .route-stop.flow-green .meta,
+
+[Satır 1413 civarı]
+ 1411: body:not(.drive-mode) .route-stop.live-danger .extra-v,
+ 1412: body:not(.drive-mode) .route-stop.next-warning .name,
+ 1413: body:not(.drive-mode) .route-stop.next-warning .meta,
+ 1414: body:not(.drive-mode) .route-stop.next-warning .extra-k,
+ 1415: body:not(.drive-mode) .route-stop.next-warning .extra-v,
+ 1416: body:not(.drive-mode) .route-stop.flow-green .name,
+ 1417: body:not(.drive-mode) .route-stop.flow-green .meta,
+ 1418: body:not(.drive-mode) .route-stop.flow-green .extra-k,
+
+[Satır 1414 civarı]
+ 1412: body:not(.drive-mode) .route-stop.next-warning .name,
+ 1413: body:not(.drive-mode) .route-stop.next-warning .meta,
+ 1414: body:not(.drive-mode) .route-stop.next-warning .extra-k,
+ 1415: body:not(.drive-mode) .route-stop.next-warning .extra-v,
+ 1416: body:not(.drive-mode) .route-stop.flow-green .name,
+ 1417: body:not(.drive-mode) .route-stop.flow-green .meta,
+ 1418: body:not(.drive-mode) .route-stop.flow-green .extra-k,
+ 1419: body:not(.drive-mode) .route-stop.flow-green .extra-v{
+
+[Satır 1415 civarı]
+ 1413: body:not(.drive-mode) .route-stop.next-warning .meta,
+ 1414: body:not(.drive-mode) .route-stop.next-warning .extra-k,
+ 1415: body:not(.drive-mode) .route-stop.next-warning .extra-v,
+ 1416: body:not(.drive-mode) .route-stop.flow-green .name,
+ 1417: body:not(.drive-mode) .route-stop.flow-green .meta,
+ 1418: body:not(.drive-mode) .route-stop.flow-green .extra-k,
+ 1419: body:not(.drive-mode) .route-stop.flow-green .extra-v{
+ 1420:   color:#fff !important;
+
+[Satır 1416 civarı]
+ 1414: body:not(.drive-mode) .route-stop.next-warning .extra-k,
+ 1415: body:not(.drive-mode) .route-stop.next-warning .extra-v,
+ 1416: body:not(.drive-mode) .route-stop.flow-green .name,
+ 1417: body:not(.drive-mode) .route-stop.flow-green .meta,
+ 1418: body:not(.drive-mode) .route-stop.flow-green .extra-k,
+ 1419: body:not(.drive-mode) .route-stop.flow-green .extra-v{
+ 1420:   color:#fff !important;
+ 1421:   opacity:1 !important;
+
+[Satır 1417 civarı]
+ 1415: body:not(.drive-mode) .route-stop.next-warning .extra-v,
+ 1416: body:not(.drive-mode) .route-stop.flow-green .name,
+ 1417: body:not(.drive-mode) .route-stop.flow-green .meta,
+ 1418: body:not(.drive-mode) .route-stop.flow-green .extra-k,
+ 1419: body:not(.drive-mode) .route-stop.flow-green .extra-v{
+ 1420:   color:#fff !important;
+ 1421:   opacity:1 !important;
+ 1422: }
+
+[Satır 1418 civarı]
+ 1416: body:not(.drive-mode) .route-stop.flow-green .name,
+ 1417: body:not(.drive-mode) .route-stop.flow-green .meta,
+ 1418: body:not(.drive-mode) .route-stop.flow-green .extra-k,
+ 1419: body:not(.drive-mode) .route-stop.flow-green .extra-v{
+ 1420:   color:#fff !important;
+ 1421:   opacity:1 !important;
+ 1422: }
+ 1423: 
+
+[Satır 1419 civarı]
+ 1417: body:not(.drive-mode) .route-stop.flow-green .meta,
+ 1418: body:not(.drive-mode) .route-stop.flow-green .extra-k,
+ 1419: body:not(.drive-mode) .route-stop.flow-green .extra-v{
+ 1420:   color:#fff !important;
+ 1421:   opacity:1 !important;
+ 1422: }
+ 1423: 
+ 1424: /* Pin ikonları da renge uysun */
+
+[Satır 1425 civarı]
+ 1423: 
+ 1424: /* Pin ikonları da renge uysun */
+ 1425: body:not(.drive-mode) .route-stop.live-danger .name::before{
+ 1426:   background:linear-gradient(180deg,#fecaca 0%,#f87171 45%,#dc2626 100%) !important;
+ 1427: }
+ 1428: 
+ 1429: body:not(.drive-mode) .route-stop.next-warning .name::before{
+ 1430:   background:linear-gradient(180deg,#fef3c7 0%,#fbbf24 45%,#d97706 100%) !important;
+
+[Satır 1429 civarı]
+ 1427: }
+ 1428: 
+ 1429: body:not(.drive-mode) .route-stop.next-warning .name::before{
+ 1430:   background:linear-gradient(180deg,#fef3c7 0%,#fbbf24 45%,#d97706 100%) !important;
+ 1431: }
+ 1432: 
+ 1433: body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1434:   background:linear-gradient(180deg,#bbf7d0 0%,#22c55e 48%,#15803d 100%) !important;
+
+[Satır 1433 civarı]
+ 1431: }
+ 1432: 
+ 1433: body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1434:   background:linear-gradient(180deg,#bbf7d0 0%,#22c55e 48%,#15803d 100%) !important;
+ 1435: }
+ 1436: 
+ 1437: 
+ 1438: /* =========================================================
+
+[Satır 1439 civarı]
+ 1437: 
+ 1438: /* =========================================================
+ 1439:    ROUTE LIVE / NEXT PILL BACKGROUND BOOST
+ 1440:    Canlı ve Sıradaki durak kutularını daha canlı yapar.
+ 1441: ========================================================= */
+ 1442: 
+ 1443: .route-pill:has(#routeMiniLive),
+ 1444: .route-pill:has(#routeMiniNext){
+
+[Satır 1443 civarı]
+ 1441: ========================================================= */
+ 1442: 
+ 1443: .route-pill:has(#routeMiniLive),
+ 1444: .route-pill:has(#routeMiniNext){
+ 1445:   background:
+ 1446:     radial-gradient(circle at 18% 0%, rgba(96,165,250,.22), transparent 36%),
+ 1447:     linear-gradient(180deg, rgba(30,58,92,.92), rgba(15,35,62,.86)) !important;
+ 1448:   border-color:rgba(96,165,250,.28) !important;
+
+[Satır 1444 civarı]
+ 1442: 
+ 1443: .route-pill:has(#routeMiniLive),
+ 1444: .route-pill:has(#routeMiniNext){
+ 1445:   background:
+ 1446:     radial-gradient(circle at 18% 0%, rgba(96,165,250,.22), transparent 36%),
+ 1447:     linear-gradient(180deg, rgba(30,58,92,.92), rgba(15,35,62,.86)) !important;
+ 1448:   border-color:rgba(96,165,250,.28) !important;
+ 1449:   box-shadow:
+
+[Satır 1457 civarı]
+ 1455: 
+ 1456: /* Canlı kutusu biraz yeşil vurgu alsın */
+ 1457: .route-pill:has(#routeMiniLive){
+ 1458:   background:
+ 1459:     radial-gradient(circle at 18% 0%, rgba(34,197,94,.20), transparent 34%),
+ 1460:     linear-gradient(180deg, rgba(26,67,72,.92), rgba(15,45,58,.86)) !important;
+ 1461:   border-color:rgba(74,222,128,.30) !important;
+ 1462: }
+
+[Satır 1465 civarı]
+ 1463: 
+ 1464: /* Sıradaki kutusu mavi vurgu */
+ 1465: .route-pill:has(#routeMiniNext){
+ 1466:   background:
+ 1467:     radial-gradient(circle at 18% 0%, rgba(59,130,246,.24), transparent 34%),
+ 1468:     linear-gradient(180deg, rgba(30,58,92,.94), rgba(15,35,62,.88)) !important;
+ 1469:   border-color:rgba(96,165,250,.32) !important;
+ 1470: }
+
+[Satır 1472 civarı]
+ 1470: }
+ 1471: 
+ 1472: .route-pill:has(#routeMiniLive) b,
+ 1473: .route-pill:has(#routeMiniNext) b{
+ 1474:   color:#ffffff !important;
+ 1475:   font-weight:1000 !important;
+ 1476: }
+ 1477: 
+
+[Satır 1473 civarı]
+ 1471: 
+ 1472: .route-pill:has(#routeMiniLive) b,
+ 1473: .route-pill:has(#routeMiniNext) b{
+ 1474:   color:#ffffff !important;
+ 1475:   font-weight:1000 !important;
+ 1476: }
+ 1477: 
+ 1478: .route-pill:has(#routeMiniLive)::before{
+
+[Satır 1478 civarı]
+ 1476: }
+ 1477: 
+ 1478: .route-pill:has(#routeMiniLive)::before{
+ 1479:   filter:
+ 1480:     drop-shadow(0 0 8px rgba(74,222,128,.80))
+ 1481:     drop-shadow(0 0 14px rgba(34,197,94,.42)) !important;
+ 1482: }
+ 1483: 
+
+[Satır 1490 civarı]
+ 1488: ========================================================= */
+ 1489: 
+ 1490: .route-strip-meta{
+ 1491:   width:100% !important;
+ 1492:   display:grid !important;
+ 1493:   grid-template-columns:minmax(0,.9fr) minmax(0,1.25fr) 50px !important;
+ 1494:   gap:8px !important;
+ 1495:   align-items:center !important;
+
+[Satır 1496 civarı]
+ 1494:   gap:8px !important;
+ 1495:   align-items:center !important;
+ 1496:   overflow:hidden !important;
+ 1497: }
+ 1498: 
+ 1499: .route-pill-live,
+ 1500: .route-pill-next{
+ 1501:   display:grid !important;
+
+[Satır 1499 civarı]
+ 1497: }
+ 1498: 
+ 1499: .route-pill-live,
+ 1500: .route-pill-next{
+ 1501:   display:grid !important;
+ 1502:   align-items:center !important;
+ 1503:   justify-content:stretch !important;
+ 1504:   overflow:hidden !important;
+
+[Satır 1500 civarı]
+ 1498: 
+ 1499: .route-pill-live,
+ 1500: .route-pill-next{
+ 1501:   display:grid !important;
+ 1502:   align-items:center !important;
+ 1503:   justify-content:stretch !important;
+ 1504:   overflow:hidden !important;
+ 1505:   min-width:0 !important;
+
+... 43 eşleşme daha var.
+
+--- static/seats/patches/stop-selected-toast.css | eşleşme: 4 ---
+
+[Satır 1 civarı]
+    1: #stopSelectedToast{
+    2:     position:fixed;
+    3:     left:50%;
+    4:     bottom:calc(env(safe-area-inset-bottom, 0px) + 92px);
+    5:     transform:translateX(-50%) translateY(22px) scale(.96);
+    6:     z-index:2147483600;
+
+[Satır 14 civarı]
+   12:   }
+   13: 
+   14:   #stopSelectedToast.show{
+   15:     opacity:1;
+   16:     transform:translateX(-50%) translateY(0) scale(1);
+   17:   }
+   18: 
+   19:   .stop-toast-inner{
+
+[Satır 58 civarı]
+   56:     line-height:1.15;
+   57:     white-space:nowrap;
+   58:     overflow:hidden;
+   59:     text-overflow:ellipsis;
+   60:   }
+   61: 
+   62:   .stop-toast-sub{
+   63:     display:block;
+
+[Satır 59 civarı]
+   57:     white-space:nowrap;
+   58:     overflow:hidden;
+   59:     text-overflow:ellipsis;
+   60:   }
+   61: 
+   62:   .stop-toast-sub{
+   63:     display:block;
+   64:     margin-top:4px;
+
+--- static/seats/patches/stop-flow-focus-patch.css | eşleşme: 14 ---
+
+[Satır 1 civarı]
+    1: html.stop-flow-focus-lock,
+    2:   body.stop-flow-focus-lock{
+    3:     overflow:hidden !important;
+    4:     height:100% !important;
+    5:   }
+    6: 
+
+[Satır 2 civarı]
+    1: html.stop-flow-focus-lock,
+    2:   body.stop-flow-focus-lock{
+    3:     overflow:hidden !important;
+    4:     height:100% !important;
+    5:   }
+    6: 
+    7:   #stopFlowFocusOverlay{
+
+[Satır 3 civarı]
+    1: html.stop-flow-focus-lock,
+    2:   body.stop-flow-focus-lock{
+    3:     overflow:hidden !important;
+    4:     height:100% !important;
+    5:   }
+    6: 
+    7:   #stopFlowFocusOverlay{
+    8:     position:fixed;
+
+[Satır 7 civarı]
+    5:   }
+    6: 
+    7:   #stopFlowFocusOverlay{
+    8:     position:fixed;
+    9:     inset:0;
+   10:     z-index:2147483000;
+   11:     background:
+   12:       radial-gradient(circle at 18% 10%, rgba(47,111,255,.26), transparent 32%),
+
+[Satır 20 civarı]
+   18:   }
+   19: 
+   20:   #stopFlowFocusOverlay[hidden]{
+   21:     display:none !important;
+   22:   }
+   23: 
+   24:   .stop-focus-panel{
+   25:     height:100%;
+
+[Satır 33 civarı]
+   31:     background:linear-gradient(180deg, rgba(12,28,55,.96), rgba(5,13,26,.98));
+   32:     box-shadow:0 28px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08);
+   33:     overflow:hidden;
+   34:     display:flex;
+   35:     flex-direction:column;
+   36:   }
+   37: 
+   38:   .stop-focus-head{
+
+[Satır 96 civarı]
+   94:   .stop-focus-list{
+   95:     flex:1;
+   96:     overflow:auto;
+   97:     padding:16px;
+   98:     display:grid;
+   99:     gap:12px;
+  100:     -webkit-overflow-scrolling:touch;
+  101:   }
+
+[Satır 100 civarı]
+   98:     display:grid;
+   99:     gap:12px;
+  100:     -webkit-overflow-scrolling:touch;
+  101:   }
+  102: 
+  103:   .stop-focus-card{
+  104:     width:100%;
+  105:     border:1px solid rgba(105,151,255,.24);
+
+[Satır 118 civarı]
+  116:   }
+  117: 
+  118:   .stop-focus-card:active{
+  119:     transform:scale(.985);
+  120:   }
+  121: 
+  122:   .stop-focus-card.is-active{
+  123:     border-color:rgba(61,255,145,.75);
+
+[Satır 122 civarı]
+  120:   }
+  121: 
+  122:   .stop-focus-card.is-active{
+  123:     border-color:rgba(61,255,145,.75);
+  124:     background:linear-gradient(135deg, rgba(18,105,62,.86), rgba(8,35,27,.96));
+  125:     box-shadow:0 16px 38px rgba(18,214,96,.18), inset 0 1px 0 rgba(255,255,255,.10);
+  126:   }
+  127: 
+
+[Satır 150 civarı]
+  148:     font-weight:1000;
+  149:     letter-spacing:-.02em;
+  150:     overflow:hidden;
+  151:     text-overflow:ellipsis;
+  152:     white-space:nowrap;
+  153:   }
+  154: 
+  155:   .stop-focus-meta{
+
+[Satır 151 civarı]
+  149:     letter-spacing:-.02em;
+  150:     overflow:hidden;
+  151:     text-overflow:ellipsis;
+  152:     white-space:nowrap;
+  153:   }
+  154: 
+  155:   .stop-focus-meta{
+  156:     display:block;
+
+[Satır 155 civarı]
+  153:   }
+  154: 
+  155:   .stop-focus-meta{
+  156:     display:block;
+  157:     margin-top:6px;
+  158:     color:rgba(226,237,255,.68);
+  159:     font-size:13px;
+  160:     font-weight:800;
+
+[Satır 174 civarı]
+  172:   }
+  173: 
+  174:   .stop-focus-card.is-active .stop-focus-select{
+  175:     color:#04140b;
+  176:     background:#79ffad;
+  177:   }
+
+--- static/seats/patches/stop-flow-compact-mobile.css | eşleşme: 22 ---
+
+[Satır 5 civarı]
+    3: @media (max-width: 900px){
+    4: 
+    5:   #stopFlowFocusOverlay{
+    6:     padding:calc(env(safe-area-inset-top, 0px) + 8px) 8px calc(env(safe-area-inset-bottom, 0px) + 8px) !important;
+    7:   }
+    8: 
+    9:   #stopFlowFocusOverlay .stop-focus-panel{
+   10:     max-width:100% !important;
+
+[Satır 9 civarı]
+    7:   }
+    8: 
+    9:   #stopFlowFocusOverlay .stop-focus-panel{
+   10:     max-width:100% !important;
+   11:     border-radius:22px !important;
+   12:   }
+   13: 
+   14:   #stopFlowFocusOverlay .stop-focus-head{
+
+[Satır 14 civarı]
+   12:   }
+   13: 
+   14:   #stopFlowFocusOverlay .stop-focus-head{
+   15:     padding:12px 12px 10px !important;
+   16:   }
+   17: 
+   18:   #stopFlowFocusOverlay .stop-focus-topline{
+   19:     margin-bottom:8px !important;
+
+[Satır 18 civarı]
+   16:   }
+   17: 
+   18:   #stopFlowFocusOverlay .stop-focus-topline{
+   19:     margin-bottom:8px !important;
+   20:     gap:8px !important;
+   21:   }
+   22: 
+   23:   #stopFlowFocusOverlay .stop-focus-back{
+
+[Satır 23 civarı]
+   21:   }
+   22: 
+   23:   #stopFlowFocusOverlay .stop-focus-back{
+   24:     padding:10px 12px !important;
+   25:     border-radius:15px !important;
+   26:     font-size:14px !important;
+   27:   }
+   28: 
+
+[Satır 29 civarı]
+   27:   }
+   28: 
+   29:   #stopFlowFocusOverlay .stop-focus-badge{
+   30:     padding:7px 9px !important;
+   31:     font-size:12px !important;
+   32:     max-width:180px !important;
+   33:     overflow:hidden !important;
+   34:     text-overflow:ellipsis !important;
+
+[Satır 33 civarı]
+   31:     font-size:12px !important;
+   32:     max-width:180px !important;
+   33:     overflow:hidden !important;
+   34:     text-overflow:ellipsis !important;
+   35:   }
+   36: 
+   37:   #stopFlowFocusOverlay .stop-focus-title{
+   38:     font-size:28px !important;
+
+[Satır 34 civarı]
+   32:     max-width:180px !important;
+   33:     overflow:hidden !important;
+   34:     text-overflow:ellipsis !important;
+   35:   }
+   36: 
+   37:   #stopFlowFocusOverlay .stop-focus-title{
+   38:     font-size:28px !important;
+   39:     line-height:1.04 !important;
+
+[Satır 37 civarı]
+   35:   }
+   36: 
+   37:   #stopFlowFocusOverlay .stop-focus-title{
+   38:     font-size:28px !important;
+   39:     line-height:1.04 !important;
+   40:     letter-spacing:-.035em !important;
+   41:   }
+   42: 
+
+[Satır 43 civarı]
+   41:   }
+   42: 
+   43:   #stopFlowFocusOverlay .stop-focus-sub{
+   44:     margin-top:6px !important;
+   45:     font-size:14px !important;
+   46:     line-height:1.2 !important;
+   47:   }
+   48: 
+
+[Satır 49 civarı]
+   47:   }
+   48: 
+   49:   #stopFlowFocusOverlay .stop-focus-list{
+   50:     padding:10px !important;
+   51:     gap:8px !important;
+   52:   }
+   53: 
+   54:   #stopFlowFocusOverlay .stop-focus-card{
+
+[Satır 54 civarı]
+   52:   }
+   53: 
+   54:   #stopFlowFocusOverlay .stop-focus-card{
+   55:     min-height:68px !important;
+   56:     padding:10px 10px !important;
+   57:     gap:10px !important;
+   58:     border-radius:18px !important;
+   59:   }
+
+[Satır 61 civarı]
+   59:   }
+   60: 
+   61:   #stopFlowFocusOverlay .stop-focus-pin{
+   62:     flex-basis:38px !important;
+   63:     width:38px !important;
+   64:     height:38px !important;
+   65:     border-radius:14px !important;
+   66:     font-size:20px !important;
+
+[Satır 69 civarı]
+   67:   }
+   68: 
+   69:   #stopFlowFocusOverlay .stop-focus-name{
+   70:     font-size:18px !important;
+   71:     line-height:1.08 !important;
+   72:   }
+   73: 
+   74:   #stopFlowFocusOverlay .stop-focus-meta{
+
+[Satır 74 civarı]
+   72:   }
+   73: 
+   74:   #stopFlowFocusOverlay .stop-focus-meta{
+   75:     margin-top:4px !important;
+   76:     font-size:12px !important;
+   77:     line-height:1.12 !important;
+   78:   }
+   79: 
+
+[Satır 80 civarı]
+   78:   }
+   79: 
+   80:   #stopFlowFocusOverlay .stop-focus-select{
+   81:     padding:6px 8px !important;
+   82:     font-size:11px !important;
+   83:     max-width:58px !important;
+   84:     overflow:hidden !important;
+   85:     text-overflow:ellipsis !important;
+
+[Satır 84 civarı]
+   82:     font-size:11px !important;
+   83:     max-width:58px !important;
+   84:     overflow:hidden !important;
+   85:     text-overflow:ellipsis !important;
+   86:   }
+   87: }
+   88: 
+   89: @media (max-width: 430px){
+
+[Satır 85 civarı]
+   83:     max-width:58px !important;
+   84:     overflow:hidden !important;
+   85:     text-overflow:ellipsis !important;
+   86:   }
+   87: }
+   88: 
+   89: @media (max-width: 430px){
+   90:   #stopFlowFocusOverlay .stop-focus-title{
+
+[Satır 90 civarı]
+   88: 
+   89: @media (max-width: 430px){
+   90:   #stopFlowFocusOverlay .stop-focus-title{
+   91:     font-size:26px !important;
+   92:   }
+   93: 
+   94:   #stopFlowFocusOverlay .stop-focus-card{
+   95:     min-height:64px !important;
+
+[Satır 94 civarı]
+   92:   }
+   93: 
+   94:   #stopFlowFocusOverlay .stop-focus-card{
+   95:     min-height:64px !important;
+   96:     padding:9px 9px !important;
+   97:   }
+   98: 
+   99:   #stopFlowFocusOverlay .stop-focus-name{
+
+[Satır 99 civarı]
+   97:   }
+   98: 
+   99:   #stopFlowFocusOverlay .stop-focus-name{
+  100:     font-size:17px !important;
+  101:   }
+  102: 
+  103:   #stopFlowFocusOverlay .stop-focus-meta{
+  104:     font-size:11.5px !important;
+
+[Satır 103 civarı]
+  101:   }
+  102: 
+  103:   #stopFlowFocusOverlay .stop-focus-meta{
+  104:     font-size:11.5px !important;
+  105:   }
+  106: }
+
+--- static/seats/patches/seat-layout-fab-pack.css | eşleşme: 2 ---
+
+[Satır 223 civarı]
+  221:   }
+  222: 
+  223:   .fab-column.fab-left-gap-moved .fab:active{
+  224:     transform:scale(.94) !important;
+  225:   }
+  226: 
+  227:   @media(max-width:380px){
+  228:     .fab-column.fab-left-gap-moved{
+
+[Satır 340 civarı]
+  338:       0 0 22px rgba(37,99,235,.16) !important;
+  339: 
+  340:     overflow:visible !important;
+  341:     z-index:90 !important;
+  342:   }
+  343: 
+  344:   .fab-column.fab-left-gap-moved::before,
+  345:   body.drive-mode .fab-column.fab-left-gap-moved::before{
+
+--- static/seats/patches/top-sound-toggle.css | eşleşme: 1 ---
+
+[Satır 44 civarı]
+   42:   }
+   43: 
+   44:   #seatSimpleSoundToggle:active{
+   45:     transform:scale(.985);
+   46:   }
+   47: 
+   48:   @media(max-width:380px){
+   49:     #seatSimpleTopSoundRow{
+
+--- static/seats/patches/seat-simple-ui-pack.css | eşleşme: 14 ---
+
+[Satır 4 civarı]
+    2: /* =========================================================
+    3:    SADE KOLTUK MODU
+    4:    İlk açılışta koltuk planını öne alır, gelişmiş panelleri gizler.
+    5: ========================================================= */
+    6: 
+    7: .seat-simple-toggle{
+    8:   position:sticky;
+    9:   top:8px;
+
+[Satır 57 civarı]
+   55: }
+   56: 
+   57: /* üst sürüş/eta dock sade modda gizli */
+   58: html.seat-simple-mode #driveInlineDock,
+   59: html.seat-simple-mode #driveModeActionsDock{
+   60:   display:none !important;
+   61: }
+   62: 
+
+[Satır 93 civarı]
+   91: }
+   92: 
+   93: html.seat-simple-mode .selected-stop-chip{
+   94:   min-height:42px !important;
+   95:   display:flex !important;
+   96:   align-items:center !important;
+   97:   justify-content:flex-start !important;
+   98:   border-radius:18px !important;
+
+[Satır 104 civarı]
+  102: 
+  103: /* rota/durak akışı ilk açılışta gizli */
+  104: html.seat-simple-mode .route-strip-shell,
+  105: html.seat-simple-mode .route-flow-shell,
+  106: html.seat-simple-mode .route-flow,
+  107: html.seat-simple-mode #routeStrip,
+  108: html.seat-simple-mode .route-mini,
+  109: html.seat-simple-mode .route-pill{
+
+[Satır 105 civarı]
+  103: /* rota/durak akışı ilk açılışta gizli */
+  104: html.seat-simple-mode .route-strip-shell,
+  105: html.seat-simple-mode .route-flow-shell,
+  106: html.seat-simple-mode .route-flow,
+  107: html.seat-simple-mode #routeStrip,
+  108: html.seat-simple-mode .route-mini,
+  109: html.seat-simple-mode .route-pill{
+  110:   display:none !important;
+
+[Satır 106 civarı]
+  104: html.seat-simple-mode .route-strip-shell,
+  105: html.seat-simple-mode .route-flow-shell,
+  106: html.seat-simple-mode .route-flow,
+  107: html.seat-simple-mode #routeStrip,
+  108: html.seat-simple-mode .route-mini,
+  109: html.seat-simple-mode .route-pill{
+  110:   display:none !important;
+  111: }
+
+[Satır 107 civarı]
+  105: html.seat-simple-mode .route-flow-shell,
+  106: html.seat-simple-mode .route-flow,
+  107: html.seat-simple-mode #routeStrip,
+  108: html.seat-simple-mode .route-mini,
+  109: html.seat-simple-mode .route-pill{
+  110:   display:none !important;
+  111: }
+  112: 
+
+[Satır 109 civarı]
+  107: html.seat-simple-mode #routeStrip,
+  108: html.seat-simple-mode .route-mini,
+  109: html.seat-simple-mode .route-pill{
+  110:   display:none !important;
+  111: }
+  112: 
+  113: /* koltuk deck yukarı gelsin */
+  114: html.seat-simple-mode .deck-card,
+
+[Satır 178 civarı]
+  176:   font-weight:1000;
+  177:   letter-spacing:-.035em;
+  178:   overflow:hidden;
+  179:   text-overflow:ellipsis;
+  180:   white-space:nowrap;
+  181: }
+  182: 
+  183: .seat-simple-status{
+
+[Satır 179 civarı]
+  177:   letter-spacing:-.035em;
+  178:   overflow:hidden;
+  179:   text-overflow:ellipsis;
+  180:   white-space:nowrap;
+  181: }
+  182: 
+  183: .seat-simple-status{
+  184:   flex:0 0 auto;
+
+[Satır 213 civarı]
+  211:   border:1px solid rgba(255,255,255,.07);
+  212:   box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  213:   overflow:hidden;
+  214: }
+  215: 
+  216: .seat-simple-mini small{
+  217:   display:block;
+  218:   margin-bottom:5px;
+
+[Satır 233 civarı]
+  231:   line-height:1.08;
+  232:   font-weight:1000;
+  233:   overflow:hidden;
+  234:   text-overflow:ellipsis;
+  235:   white-space:nowrap;
+  236: }
+  237: 
+  238: .seat-simple-mini .ok{
+
+[Satır 234 civarı]
+  232:   font-weight:1000;
+  233:   overflow:hidden;
+  234:   text-overflow:ellipsis;
+  235:   white-space:nowrap;
+  236: }
+  237: 
+  238: .seat-simple-mini .ok{
+  239:   color:#4ade80;
+
+[Satır 363 civarı]
+  361: }
+  362: 
+  363: .seat-simple-bottom-item:active{
+  364:   transform:scale(.96);
+  365: }
+  366: 
+  367: @media(max-width:430px){
+  368:   .seat-simple-bottom-bar{
+
+--- static/seats/patches/unified-seat-deck-report-style.css | eşleşme: 15 ---
+
+[Satır 3 civarı]
+    1: /* =========================================================
+    2:    UNIFIED SEAT DECK REPORT STYLE
+    3:    Normal mod + Sürüş modu + Sade mod aynı koltuk planını kullanır.
+    4:    JS / HTML mantığına dokunmaz.
+    5: ========================================================= */
+    6: 
+    7: :root{
+    8:   --unified-seat-w:82px;
+
+[Satır 22 civarı]
+   20:   padding:12px 10px 14px !important;
+   21:   border-radius:24px !important;
+   22:   overflow-x:auto !important;
+   23:   overflow-y:visible !important;
+   24: }
+   25: 
+   26: /* Deck ortalansın, sağ boşluk/fab baskısı koltuk planını bozmasın */
+   27: .deck-wrap,
+
+[Satır 23 civarı]
+   21:   border-radius:24px !important;
+   22:   overflow-x:auto !important;
+   23:   overflow-y:visible !important;
+   24: }
+   25: 
+   26: /* Deck ortalansın, sağ boşluk/fab baskısı koltuk planını bozmasın */
+   27: .deck-wrap,
+   28: body.drive-mode .deck-wrap,
+
+[Satır 26 civarı]
+   24: }
+   25: 
+   26: /* Deck ortalansın, sağ boşluk/fab baskısı koltuk planını bozmasın */
+   27: .deck-wrap,
+   28: body.drive-mode .deck-wrap,
+   29: html.seat-simple-mode .deck-wrap{
+   30:   width:100% !important;
+   31:   min-width:100% !important;
+
+[Satır 38 civarı]
+   36: }
+   37: 
+   38: /* Ana koltuk planı: rapor ekranındaki düzen mantığı */
+   39: .deck,
+   40: body.drive-mode .deck,
+   41: html.seat-simple-mode .deck{
+   42:   width:max-content !important;
+   43:   min-width:0 !important;
+
+[Satır 106 civarı]
+  104:   margin:0 !important;
+  105:   padding:0 !important;
+  106:   overflow:hidden !important;
+  107: }
+  108: 
+  109: /* Koltuk görünümü: büyük, yatay, rapor ekranı stili */
+  110: .seat,
+  111: body.drive-mode .seat,
+
+[Satır 164 civarı]
+  162: 
+  163: /* Seçili koltuk */
+  164: .seat.selected,
+  165: body.drive-mode .seat.selected,
+  166: html.seat-simple-mode .seat.selected{
+  167:   outline:4px solid rgba(127,199,255,.72) !important;
+  168:   outline-offset:3px !important;
+  169:   box-shadow:
+
+[Satır 165 civarı]
+  163: /* Seçili koltuk */
+  164: .seat.selected,
+  165: body.drive-mode .seat.selected,
+  166: html.seat-simple-mode .seat.selected{
+  167:   outline:4px solid rgba(127,199,255,.72) !important;
+  168:   outline-offset:3px !important;
+  169:   box-shadow:
+  170:     0 0 0 7px rgba(96,165,250,.13),
+
+[Satır 166 civarı]
+  164: .seat.selected,
+  165: body.drive-mode .seat.selected,
+  166: html.seat-simple-mode .seat.selected{
+  167:   outline:4px solid rgba(127,199,255,.72) !important;
+  168:   outline-offset:3px !important;
+  169:   box-shadow:
+  170:     0 0 0 7px rgba(96,165,250,.13),
+  171:     inset 0 2px 0 rgba(255,255,255,.20),
+
+[Satır 248 civarı]
+  246: }
+  247: 
+  248: /* Bagaj / servis / inecek rozetleri koltuğun üstünde kalsın */
+  249: .seat .bag-badge,
+  250: body.drive-mode .seat .bag-badge,
+  251: html.seat-simple-mode .seat .bag-badge{
+  252:   right:-12px !important;
+  253:   top:-12px !important;
+
+[Satır 249 civarı]
+  247: 
+  248: /* Bagaj / servis / inecek rozetleri koltuğun üstünde kalsın */
+  249: .seat .bag-badge,
+  250: body.drive-mode .seat .bag-badge,
+  251: html.seat-simple-mode .seat .bag-badge{
+  252:   right:-12px !important;
+  253:   top:-12px !important;
+  254:   min-width:34px !important;
+
+[Satır 250 civarı]
+  248: /* Bagaj / servis / inecek rozetleri koltuğun üstünde kalsın */
+  249: .seat .bag-badge,
+  250: body.drive-mode .seat .bag-badge,
+  251: html.seat-simple-mode .seat .bag-badge{
+  252:   right:-12px !important;
+  253:   top:-12px !important;
+  254:   min-width:34px !important;
+  255:   min-height:28px !important;
+
+[Satır 251 civarı]
+  249: .seat .bag-badge,
+  250: body.drive-mode .seat .bag-badge,
+  251: html.seat-simple-mode .seat .bag-badge{
+  252:   right:-12px !important;
+  253:   top:-12px !important;
+  254:   min-width:34px !important;
+  255:   min-height:28px !important;
+  256:   border-radius:999px !important;
+
+[Satır 283 civarı]
+  281: }
+  282: 
+  283: /* Sürüş modunda koltuk planı artık ayrı küçülmesin/büyümesin */
+  284: body.drive-mode{
+  285:   --seat-gap-x:var(--unified-gap-x) !important;
+  286:   --seat-gap-y:var(--unified-gap-y) !important;
+  287: }
+  288: 
+
+[Satır 385 civarı]
+  383:   padding:0 2px !important;
+  384: 
+  385:   overflow:hidden !important;
+  386:   -webkit-line-clamp:2 !important;
+  387:   -webkit-box-orient:vertical !important;
+  388: 
+  389:   text-align:center !important;
+  390:   font-size:11.5px !important;
+
+--- static/seats/patches/mobile-performance-fix.css | eşleşme: 7 ---
+
+[Satır 71 civarı]
+   69:   .fab,
+   70:   .tab-btn,
+   71:   .route-stop,
+   72:   .voice-command-btn,
+   73:   .drive-voice-btn,
+   74:   .seat-simple-bottom-item,
+   75:   .drive-speed-chip,
+   76:   .drive-eta-chip{
+
+[Satır 76 civarı]
+   74:   .seat-simple-bottom-item,
+   75:   .drive-speed-chip,
+   76:   .drive-eta-chip{
+   77:     box-shadow:0 4px 10px rgba(0,0,0,.18) !important;
+   78:     text-shadow:none !important;
+   79:   }
+   80: 
+   81:   /* Scroll sırasında animasyonlar paint yükü bindiriyor */
+
+[Satır 82 civarı]
+   80: 
+   81:   /* Scroll sırasında animasyonlar paint yükü bindiriyor */
+   82:   .route-stop,
+   83:   .route-stop *,
+   84:   .voice-command-btn,
+   85:   .drive-voice-btn,
+   86:   .drive-speed-chip,
+   87:   .drive-eta-chip,
+
+[Satır 83 civarı]
+   81:   /* Scroll sırasında animasyonlar paint yükü bindiriyor */
+   82:   .route-stop,
+   83:   .route-stop *,
+   84:   .voice-command-btn,
+   85:   .drive-voice-btn,
+   86:   .drive-speed-chip,
+   87:   .drive-eta-chip,
+   88:   .fab,
+
+[Satır 87 civarı]
+   85:   .drive-voice-btn,
+   86:   .drive-speed-chip,
+   87:   .drive-eta-chip,
+   88:   .fab,
+   89:   .seat,
+   90:   .cell,
+   91:   [class*="pulse"],
+   92:   [class*="blink"],
+
+[Satır 93 civarı]
+   91:   [class*="pulse"],
+   92:   [class*="blink"],
+   93:   [class*="live"],
+   94:   [class*="listening"]{
+   95:     animation:none !important;
+   96:   }
+   97: 
+   98:   /* Geçişleri kısalt: his olarak hızlı, yük olarak hafif */
+
+[Satır 104 civarı]
+  102:   .fab,
+  103:   .tab-btn,
+  104:   .route-stop,
+  105:   .seat-simple-bottom-item,
+  106:   .voice-command-btn,
+  107:   .drive-voice-btn{
+  108:     transition:transform .06s linear, opacity .06s linear !important;
+  109:   }
+
+--- static/seats/patches/seat-label-ghost-clean.css | eşleşme: 2 ---
+
+[Satır 23 civarı]
+   21:     box-shadow:none !important;
+   22:     opacity:0 !important;
+   23:     overflow:hidden !important;
+   24:   }
+   25: 
+   26:   /* Dolu label varsa yazı kalsın, kare arka plan kalksın */
+   27:   html.seat-simple-mode .deck .cell .label,
+   28:   body.seat-simple-mode .deck .cell .label{
+
+[Satır 26 civarı]
+   24:   }
+   25: 
+   26:   /* Dolu label varsa yazı kalsın, kare arka plan kalksın */
+   27:   html.seat-simple-mode .deck .cell .label,
+   28:   body.seat-simple-mode .deck .cell .label{
+   29:     background:transparent !important;
+   30:     box-shadow:none !important;
+   31:     border:0 !important;
+
+==========================================================================================
+4) seats.html inline style bloklarında route flow etkisi var mı?
+==========================================================================================
+  380: style id=drive-mode-actions-independent-style -> route flow ile ilgili görünmüyor
+
+--- style id=drive-dock-stability-final | başlangıç satırı 630 ---
+
+[Satır 658 civarı]
+  656:   z-index:4 !important;
+  657: 
+  658:   overflow:hidden !important;
+  659: }
+  660: 
+  661: /* Eğer JS gerçekten gizlemek isterse buna izin ver */
+  662: #driveInlineDock[style*="display: none"],
+  663: #driveInlineDock[style*="display:none"]{
+
+[Satır 692 civarı]
+  690: 
+  691:   white-space:nowrap !important;
+  692:   overflow:hidden !important;
+  693:   text-overflow:ellipsis !important;
+  694: 
+  695:   font-size:13px !important;
+  696:   font-weight:950 !important;
+  697:   background:linear-gradient(135deg,#2563eb,#1d4ed8) !important;
+
+[Satır 693 civarı]
+  691:   white-space:nowrap !important;
+  692:   overflow:hidden !important;
+  693:   text-overflow:ellipsis !important;
+  694: 
+  695:   font-size:13px !important;
+  696:   font-weight:950 !important;
+  697:   background:linear-gradient(135deg,#2563eb,#1d4ed8) !important;
+  698:   color:#fff !important;
+
+[Satır 722 civarı]
+  720:   box-shadow:inset 0 1px 0 rgba(255,255,255,.08) !important;
+  721: 
+  722:   overflow:hidden !important;
+  723: }
+  724: 
+  725: #driveSpeedChip,
+  726: .drive-speed-chip{
+  727:   flex:1 1 105px !important;
+
+[Satır 743 civarı]
+  741:   min-width:0 !important;
+  742:   white-space:nowrap !important;
+  743:   overflow:hidden !important;
+  744:   text-overflow:ellipsis !important;
+  745:   line-height:1 !important;
+  746: }
+  747: 
+  748: .drive-speed-top b,
+
+[Satır 744 civarı]
+  742:   white-space:nowrap !important;
+  743:   overflow:hidden !important;
+  744:   text-overflow:ellipsis !important;
+  745:   line-height:1 !important;
+  746: }
+  747: 
+  748: .drive-speed-top b,
+  749: .drive-eta-top b{
+
+[Satır 751 civarı]
+  749: .drive-eta-top b{
+  750:   min-width:0 !important;
+  751:   overflow:hidden !important;
+  752:   text-overflow:ellipsis !important;
+  753:   white-space:nowrap !important;
+  754: }
+  755: 
+  756: .drive-speed-sub,
+
+[Satır 752 civarı]
+  750:   min-width:0 !important;
+  751:   overflow:hidden !important;
+  752:   text-overflow:ellipsis !important;
+  753:   white-space:nowrap !important;
+  754: }
+  755: 
+  756: .drive-speed-sub,
+  757: .drive-eta-sub{
+
+[Satır 760 civarı]
+  758:   margin-top:3px !important;
+  759:   min-width:0 !important;
+  760:   overflow:hidden !important;
+  761:   text-overflow:ellipsis !important;
+  762:   white-space:nowrap !important;
+  763:   font-size:10.5px !important;
+  764:   line-height:1 !important;
+  765:   color:rgba(226,232,240,.62) !important;
+
+[Satır 761 civarı]
+  759:   min-width:0 !important;
+  760:   overflow:hidden !important;
+  761:   text-overflow:ellipsis !important;
+  762:   white-space:nowrap !important;
+  763:   font-size:10.5px !important;
+  764:   line-height:1 !important;
+  765:   color:rgba(226,232,240,.62) !important;
+  766: }
+
+==========================================================================================
+6) Ana JS fonksiyonları tam blok
+==========================================================================================
+
+--- static/seats/seats.js | renderRouteStrip() | satır 1072-1216 ---
+ 1072: function renderRouteStrip(){
+ 1073:   const wrap = $("#routeStrip");
+ 1074:   if(!wrap) return;
+ 1075: 
+ 1076:   const list = allStopsList();
+ 1077:   wrap.innerHTML = "";
+ 1078: 
+ 1079:   if(!list.length){
+ 1080:     wrap.innerHTML = `
+ 1081:       <div class="route-stop active">
+ 1082:         <div class="name">Rota hazırlanıyor</div>
+ 1083:         <div class="meta">Duraklar yüklenecek</div>
+ 1084:       </div>
+ 1085:     `;
+ 1086:     return;
+ 1087:   }
+ 1088: 
+ 1089:   const selected = getSelectedStopName();
+ 1090:   const live = getDisplayLiveStop();
+ 1091:   const selectedNorm = norm(selected);
+ 1092:   const liveNorm = norm(live);
+ 1093:   let routeFocusItem = null;
+ 1094:   const liveKm = stopDistanceKmByName(live);
+ 1095:   const liveDangerOn = Number.isFinite(liveKm) && liveKm <= 5;
+ 1096:   // if(liveDangerOn){maybeSpeakApproachStop(live, liveKm);}
+ 1097:   const nextWarnStop = liveDangerOn? computeNextStopName(live || selected || "", "nextWithSeats"): "";
+ 1098:   const greenStop = liveDangerOn && nextWarnStop? computeNextStopName(nextWarnStop, "nextWithSeats"): "";
+ 1099: 
+ 1100:   const nextWarnNorm = norm(nextWarnStop);
+ 1101:   const greenNorm = norm(greenStop);
+ 1102:   const seatCounts = computeSeatCountsByStop();
+ 1103:   const standingCounts = computeStandingCountsByStop();
+ 1104:   const parcelCounts = computeParcelCountsByStop();
+ 1105: 
+ 1106:   const actualSchedule = buildActualSchedule();
+ 1107:   const planMap = new Map(
+ 1108:     actualSchedule.map(x => [norm(x.stop), x.plan || ""])
+ 1109:   );
+ 1110: 
+ 1111:   const etaMap = new Map(
+ 1112:     (speedState.etaItems || []).map(x => [norm(x.stop), x])
+ 1113:   );
+ 1114: 
+ 1115:   list.forEach(stop => {
+ 1116:     const seatCt = seatCounts[stop] || 0;
+ 1117:     const standingCt = standingCounts[stop] || 0;
+ 1118:     const parcelCt = parcelCounts[stop] || 0;
+ 1119: 
+ 1120:     const isActive = !!selectedNorm && norm(stop) === selectedNorm;
+ 1121:     const isLive = !!liveNorm && norm(stop) === liveNorm;
+ 1122:     const isDone = speedState.passedStops.has(stop) && !isActive && !isLive;
+ 1123:     const isNextWarn = liveDangerOn && !!nextWarnNorm && norm(stop) === nextWarnNorm;
+ 1124:     const isFlowGreen = liveDangerOn && !!greenNorm && norm(stop) === greenNorm;
+ 1125: 
+ 1126:     const stopObj = findStopByName(stop);
+ 1127:     const plan = planMap.get(norm(stop)) || "";
+ 1128:     let kmText = "";
+ 1129: 
+ 1130:     if(currentCoords && stopObj && hasCoord(stopObj)){
+ 1131:       const km = distKm(currentCoords, {
+ 1132:         lat: Number(stopObj.lat),
+ 1133:         lng: Number(stopObj.lng)
+ 1134:       });
+ 1135:       kmText = `${km.toFixed(1)} km`;
+ 1136:     }
+ 1137: 
+ 1138:     let metaLine1 = "";
+ 1139:     if(isLive) metaLine1 = "Canlı";
+ 1140:     else if(isActive) metaLine1 = "Seçili";
+ 1141:     else if(isDone) metaLine1 = "Geçildi";
+ 1142:     else metaLine1 = "Bekliyor";
+ 1143: 
+ 1144:     let metaLine2 = "";
+ 1145:     const flowLine = stopFlowSummaryLine(stop);
+ 1146: 
+ 1147:     if(flowLine && flowLine !== "İşlem yok"){
+ 1148:       metaLine2 = flowLine;
+ 1149:     }else if(seatCt || standingCt || parcelCt){
+ 1150:       metaLine2 = `${seatCt}K ${standingCt}A ${parcelCt}E`;
+ 1151:     }else if(isDone){
+ 1152:       metaLine2 = "İşlem bitti";
+ 1153:     }else{
+ 1154:       metaLine2 = "İşlem yok";
+ 1155:     }
+ 1156: 
+ 1157:     const extraBits = [];
+ 1158:     if(plan) extraBits.push(`Plan ${plan}`);
+ 1159:     if(kmText) extraBits.push(kmText);
+ 1160:     const item = document.createElement("button");
+ 1161:     item.type = "button";
+ 1162:     item.dataset.stop = stop;
+ 1163:     item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done has-flow-summary" : ""} ${liveDangerOn && isLive ? "live-danger" : ""} ${isNextWarn ? "next-warning" : ""} ${isFlowGreen ? "flow-green" : ""}`;
+ 1164:     if(isLive){routeFocusItem = item;}   
+ 1165: 
+ 1166:     const etaItem = etaMap.get(norm(stop));
+ 1167:     const planText = plan || "—";
+ 1168:     const etaText = etaItem && plan ? fmtHour(etaItem.etaDate) : "";
+ 1169:     const delayText = etaItem && plan ? etaItem.badgeText : "";
+ 1170:     const kmValue = kmText || (etaItem && Number.isFinite(etaItem.km) ? `${etaItem.km.toFixed(1)} km` : "—");
+ 1171: 
+ 1172:     const timeText = etaText ? `${planText} → ${etaText}` : planText;
+ 1173:     const statusText = delayText ? `${kmValue} · ${delayText}` : kmValue;
+ 1174: 
+ 1175:     item.innerHTML = `
+ 1176:   <div class="name">${stop}</div>
+ 1177:   <div class="meta ${isDone ? "done-summary" : ""}">${metaLine1} · ${metaLine2}</div>
+ 1178:   <div class="extra">
+ 1179:     <div class="extra-line">
+ 1180:       <span class="extra-k">Plan/ETA</span>
+ 1181:       <span class="extra-v">${timeText}</span>
+ 1182:     </div>
+ 1183:     <div class="extra-line">
+ 1184:       <span class="extra-k">Durum</span>
+ 1185:       <span class="extra-v">${statusText}</span>
+ 1186:     </div>
+ 1187:   </div>
+ 1188:    `;
+ 1189: 
+ 1190: item.addEventListener("click", () => {
+ 1191:   setSelectedStop(stop, { silent:false, voiceReply:true });
+ 1192: 
+ 1193:   // APK/WebView için ek garanti: durak kartı tıklamasında doğrudan TTS tetikle
+ 1194:   try{
+ 1195:     const msg = stopHumanVoiceSummary(stop);
+ 1196:     if(typeof speakOnce === "function") speakOnce(msg);
+ 1197:   }catch(_){}
+ 1198: });
+ 1199: 
+ 1200: wrap.appendChild(item);
+ 1201: });
+ 1202: 
+ 1203: if(routeFocusItem && live){
+ 1204:   const focusKey = norm(live);
+ 1205: 
+ 1206:   if(lastRouteStripCenteredStop !== focusKey){
+ 1207:     lastRouteStripCenteredStop = focusKey;
+ 1208: 
+ 1209:     requestAnimationFrame(() => {
+ 1210:       setTimeout(() => {
+ 1211:         centerRouteStripItem(routeFocusItem, "smooth");
+ 1212:       }, 80);
+ 1213:     });
+ 1214:   }
+ 1215: }
+ 1216: }
+
+--- static/seats/seats.js | computeNextStopName() | satır 1247-1272 ---
+ 1247:   function computeNextStopName(currentName, mode="nextWithSeats"){
+ 1248:     const list = allStopsList();
+ 1249:     if(!list.length) return "";
+ 1250: 
+ 1251:     const curIdx = indexOfStopByName(currentName);
+ 1252:     let i = curIdx >= 0 ? curIdx + 1 : 0;
+ 1253: 
+ 1254:     if(mode === "strictNext") return list[i] || "";
+ 1255: 
+ 1256:     for(; i < list.length; i++){
+ 1257:       const nm = list[i];
+ 1258:       if(!nm) continue;
+ 1259:       if(mode === "nextWithSeats"){
+ 1260:         if(
+ 1261:           hasPassengersFor(nm) ||
+ 1262:           computeStandingCountsByStop()[nm] ||
+ 1263:           computeParcelCountsByStop()[nm] ||
+ 1264:           isTimedStop(nm)
+ 1265:         ){
+ 1266:           return nm;
+ 1267:         }
+ 1268:       }
+ 1269:     }
+ 1270: 
+ 1271:     return "";
+ 1272:   }
+
+--- static/seats/seats.js | stopDistanceKmByName() | satır 421-431 ---
+  421: function stopDistanceKmByName(name){
+  422:   if(!name || !currentCoords) return NaN;
+  423: 
+  424:   const stopObj = findStopByName(name);
+  425:   if(!stopObj || !hasCoord(stopObj)) return NaN;
+  426: 
+  427:   return distKm(currentCoords, {
+  428:     lat: Number(stopObj.lat),
+  429:     lng: Number(stopObj.lng)
+  430:   });
+  431: }
+
+--- static/seats/seats.js | buildActualSchedule() | satır 515-526 ---
+  515:   function buildActualSchedule(){
+  516:     const start = tripStartDate();
+  517:     const offsets = scheduleOffsetsForRoute();
+  518: 
+  519:     return offsets.map(x => ({
+  520:       stop: x.stop,
+  521:       plan: x.sampleTime,
+  522:       planDate: new Date(start.getTime() + x.offsetMin * 60000),
+  523:       offsetMin: x.offsetMin,
+  524:       routeIndex: indexOfStopByName(x.stop)
+  525:     }));
+  526:   }
+
+--- static/seats/seats.js | scheduleOffsetsForRoute() | satır 485-513 ---
+  485:   function scheduleOffsetsForRoute(){
+  486:     const sample = getRouteSchedule();
+  487:     if(!sample.length) return [];
+  488: 
+  489:     let prev = null;
+  490:     let carry = 0;
+  491:     let firstAbs = null;
+  492: 
+  493:     return sample.map(item => {
+  494:       const parts = String(item.time || "00:00").split(":");
+  495:       const hh = parseInt(parts[0], 10) || 0;
+  496:       const mm = parseInt(parts[1], 10) || 0;
+  497:       let cur = hh * 60 + mm + carry;
+  498: 
+  499:       if(prev !== null && cur < prev){
+  500:         carry += 1440;
+  501:         cur = hh * 60 + mm + carry;
+  502:       }
+  503: 
+  504:       if(firstAbs === null) firstAbs = cur;
+  505:       prev = cur;
+  506: 
+  507:       return {
+  508:         stop:item.stop,
+  509:         sampleTime:item.time,
+  510:         offsetMin: cur - firstAbs
+  511:       };
+  512:     });
+  513:   }
+
+--- static/seats/seats.js | renderTimeline() | satır 2145-2180 ---
+ 2145:   function renderTimeline(){
+ 2146:     const list = $("#etaTimeline");
+ 2147:     if(!list) return;
+ 2148: 
+ 2149:     const items = buildEtaModel();
+ 2150:     list.innerHTML = "";
+ 2151: 
+ 2152:     if(!items.length){
+ 2153:       list.innerHTML = `
+ 2154:         <div class="eta-row">
+ 2155:           <div>
+ 2156:             <div class="eta-name">Saatli durak yok</div>
+ 2157:             <div class="eta-meta">Bu hatta henüz saat tanımı yapılmamış.</div>
+ 2158:           </div>
+ 2159:         </div>
+ 2160:       `;
+ 2161:       return;
+ 2162:     }
+ 2163: 
+ 2164:     items.forEach(item => {
+ 2165:       const row = document.createElement("div");
+ 2166:       row.className = `eta-row ${item.active ? "active" : ""} ${item.passed ? "passed" : ""}`;
+ 2167:       row.innerHTML = `
+ 2168:         <div>
+ 2169:           <div class="eta-name">${item.stop}</div>
+ 2170:           <div class="eta-meta">Plan ${item.plan}</div>
+ 2171:         </div>
+ 2172:         <div class="eta-right">
+ 2173:           <div class="eta-main">ETA ${fmtHour(item.etaDate)}</div>
+ 2174:           <div class="eta-badge ${item.badgeCls}">${item.badgeText}</div>
+ 2175:         </div>
+ 2176:       `;
+ 2177:       row.addEventListener("click", () => setSelectedStop(item.stop, { silent:true, voiceReply:false }));
+ 2178:       list.appendChild(row);
+ 2179:     });
+ 2180:   }
+
+--- static/seats/seats.js | renderAI() | satır 2182-2234 ---
+ 2182:   function renderAI(){
+ 2183:     const stop = getSelectedStopName();
+ 2184:     const seatCounts = computeSeatCountsByStop();
+ 2185:     const standingCounts = computeStandingCountsByStop();
+ 2186:     const parcelCounts = computeParcelCountsByStop();
+ 2187: 
+ 2188:     const selectedSeatCount = stop ? (seatCounts[stop] || 0) : 0;
+ 2189:     const selectedStanding = stop ? (standingCounts[stop] || 0) : 0;
+ 2190:     const selectedParcel = stop ? (parcelCounts[stop] || 0) : 0;
+ 2191: 
+ 2192:     let unserved = 0;
+ 2193:     Object.keys(assigned || {}).forEach(k => {
+ 2194:       if(assigned[k] && !serviceMap[k]) unserved++;
+ 2195:     });
+ 2196: 
+ 2197:     let busiestStop = "—";
+ 2198:     let busiestCount = 0;
+ 2199:     Object.entries(seatCounts).forEach(([k,v]) => {
+ 2200:       if(v > busiestCount){
+ 2201:         busiestCount = v;
+ 2202:         busiestStop = k;
+ 2203:       }
+ 2204:     });
+ 2205: 
+ 2206:     const totalOps = selectedSeatCount + selectedStanding + selectedParcel;
+ 2207:     const live = speedState.liveStop || "—";
+ 2208:     const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+ 2209: 
+ 2210:     setText("#aiMain", stop
+ 2211:       ? `${stop} için ${selectedSeatCount} koltuk, ${selectedStanding} ayakta, ${selectedParcel} emanet görünüyor.`
+ 2212:       : `${live} civarındasın. Sistem canlı durak ve rötarı izliyor.`
+ 2213:     );
+ 2214: 
+ 2215:     let aiSub = "Şu an sistem normal akışta.";
+ 2216:     if(stop && totalOps >= 6) aiSub = "Bu durakta yoğun işlem bekleniyor. Ön hazırlık yap.";
+ 2217:     else if(stop && totalOps > 0) aiSub = "Bu durak orta yoğunlukta görünüyor.";
+ 2218:     else if(stop) aiSub = "Bu durak için kayıtlı işlem görünmüyor.";
+ 2219:     else if(nextTimed) aiSub = `${nextTimed.stop} için plan ${nextTimed.plan}, tahmini ${fmtHour(nextTimed.etaDate)}.`;
+ 2220: 
+ 2221:     setText("#aiSub", aiSub);
+ 2222: 
+ 2223:     const nextAction = stop
+ 2224:       ? (totalOps ? `Hazırlık: ${stop}` : "İleri atlanabilir")
+ 2225:       : (nextTimed?.stop || "Durak bekleniyor");
+ 2226: 
+ 2227:     setText("#aiNextAction", nextAction);
+ 2228:     setText("#aiNextActionMirror", nextAction);
+ 2229:     setText("#aiLiveStop", live);
+ 2230:     setText("#aiDelay", nextTimed ? fmtSignedMin(nextTimed.delayMin) : "—");
+ 2231:     setText("#aiDensity", busiestCount > 0 ? `${busiestStop} (${busiestCount} koltuk)` : "Henüz veri yok");
+ 2232:     setText("#aiService", unserved > 0 ? `${unserved} yolcu servis bekliyor` : "Servis tarafı temiz");
+ 2233:     setText("#aiParcel", selectedParcel > 0 ? `${selectedParcel} teslim var` : (stop ? "Teslim yok" : "Durak seçilmedi"));
+ 2234:   }
+
+--- static/seats/seats.js | liveStopOperationCount() | satır 2257-2285 ---
+ 2257:   function liveStopOperationCount(stopName){
+ 2258:     const canonical = findCanonicalStopName(stopName) || String(stopName || "").trim();
+ 2259:     if(!canonical) return 0;
+ 2260: 
+ 2261:     let total = 0;
+ 2262: 
+ 2263:     try{
+ 2264:       const arr = seatsForStop(canonical);
+ 2265:       if(Array.isArray(arr)) total += arr.length;
+ 2266:     }catch(_){}
+ 2267: 
+ 2268:     try{
+ 2269:       if(typeof boardCountForStop === "function"){
+ 2270:         total += Number(boardCountForStop(canonical) || 0);
+ 2271:       }
+ 2272:     }catch(_){}
+ 2273: 
+ 2274:     try{
+ 2275:       const standingMap = computeStandingCountsByStop();
+ 2276:       total += Number(standingMap[canonical] || 0);
+ 2277:     }catch(_){}
+ 2278: 
+ 2279:     try{
+ 2280:       const parcelMap = computeParcelCountsByStop();
+ 2281:       total += Number(parcelMap[canonical] || 0);
+ 2282:     }catch(_){}
+ 2283: 
+ 2284:     return total;
+ 2285:   }
+
+==========================================================================================
+5) seats.js içinde route flow DOM / veri bağlantıları
+==========================================================================================
+   47: const BAG_TRIP = BOOT.bagTrip || TRIP_KEY;
+  220:     etaItems: []
+  382: function getDisplayLiveStop(){
+  403:     const km = stopDistanceKmByName(live);
+  421: function stopDistanceKmByName(name){
+  786:         bag: Number(old.bag || 0) + Number(delta.bag || 0),
+  799:         live_bag: rec.bag,
+  804:       if(typeof renderRouteStrip === "function") renderRouteStrip();
+  871:     const bag = Math.max(
+  872:       Number(rec.bag || rec.bag_count || rec.live_bag || 0),
+  873:       Number(liveRec.bag || 0)
+  880:     if(bag > 0) parts.push(`${bag} bagaj`);
+ 1050:     renderRouteStrip();
+ 1058:       const target = Array.from(wrap.querySelectorAll(".route-stop"))
+ 1072: function renderRouteStrip(){
+ 1081:       <div class="route-stop active">
+ 1090:   const live = getDisplayLiveStop();
+ 1094:   const liveKm = stopDistanceKmByName(live);
+ 1097:   const nextWarnStop = liveDangerOn? computeNextStopName(live || selected || "", "nextWithSeats"): "";
+ 1098:   const greenStop = liveDangerOn && nextWarnStop? computeNextStopName(nextWarnStop, "nextWithSeats"): "";
+ 1107:   const planMap = new Map(
+ 1112:     (speedState.etaItems || []).map(x => [norm(x.stop), x])
+ 1127:     const plan = planMap.get(norm(stop)) || "";
+ 1163:     item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done has-flow-summary" : ""} ${liveDangerOn && isLive ? "live-danger" : ""} ${isNextWarn ? "next-warning" : ""} ${isFlowGreen ? "flow-green" : ""}`;
+ 1219:     const live = getDisplayLiveStop();
+ 1220:     const next = computeNextStopName(live || selected || "", "nextWithSeats");
+ 1244:     renderRouteStrip();
+ 1247:   function computeNextStopName(currentName, mode="nextWithSeats"){
+ 1347:     const next = computeNextStopName(cur, mode);
+ 1505:       el.classList.remove("has-stop","multi-picked","blink-yellow","has-bag");
+ 1506:       const cnt = el.querySelector(".bag-count");
+ 1507:       const dir = el.querySelector(".bag-dir");
+ 1580:       const live = getDisplayLiveStop();
+ 1982:       speedState.etaItems = [];
+ 1992:     const liveName = getDisplayLiveStop();
+ 2084:       const km = stopDistanceKmByName(nextTimedForDistance.stop);
+ 2103:     speedState.etaItems = model;
+ 2208:     const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+ 2257:   function liveStopOperationCount(stopName){
+ 2288:     return liveStopOperationCount(stopName) > 0;
+ 2335:         renderRouteStrip();
+ 2588:           renderRouteStrip();
+ 2606:     const bagBadge = e.target.closest(".bag-badge");
+ 2607:     if(bagBadge){
+ 2610:       const seat = bagBadge.closest(".seat")?.dataset.seat;
+ 2613:       const url = `/bags?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seat)}&next=${encodeURIComponent(next)}`;
+ 2641:     const url = `/bags/capture?trip_code=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seat)}&to_stop=${encodeURIComponent(drop)}&next=${encodeURIComponent(next)}`;
+ 2649:     const url = `/bags?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seat)}&next=${encodeURIComponent(next)}`;
+ 2755:       const live = getDisplayLiveStop();
+ 2767:       const live = getDisplayLiveStop();
+ 2769:       const next = computeNextStopName(live || selected || "", "nextWithSeats") || selected;
+ 2806:       renderRouteStrip();
+ 2812:       const next = computeNextStopName(speedState.liveStop || "", "nextWithSeats");
+ 2817:       renderRouteStrip();
+ 2836:     // getDisplayLiveStop() içindeki 15 km fallback burada kullanılmaz.
+ 2843:       if(liveStop && typeof stopDistanceKmByName === "function"){
+ 2844:         const liveKmCheck = stopDistanceKmByName(liveStop);
+ 2855:       if(liveStop && typeof stopDistanceKmByName === "function"){
+ 2856:         const km = stopDistanceKmByName(liveStop);
+
+==========================================================================================
+7) Yorum
+==========================================================================================
+Bu rapordan sonra karar vereceğiz:
+1) Sadece CSS patch yeterli mi?
+2) route_flow.html yapısını değiştirmek gerekir mi?
+3) renderRouteStrip() HTML üretiyorsa JS patch gerekir mi?
+4) V2 renkleri mevcut selectorlara mı uygulanacak, yoksa yeni scoped wrapper mı açılacak?

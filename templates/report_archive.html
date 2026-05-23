@@ -1,101 +1,496 @@
-{% extends "base.html" %}
-{% block content %}
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sefer Rapor Arşivi</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-  body{
-    background:#06101c;
-    color:#eaf2ff;
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  :root{
+    --bg:#0d0f14;
+    --bg-row:#181c27;
+    --bg-hover:#1e2333;
+    --border:rgba(255,255,255,.07);
+    --border-act:rgba(255,255,255,.14);
+    --text:#e8edf5;
+    --text-sub:rgba(232,237,245,.54);
+    --text-dim:rgba(232,237,245,.32);
+    --accent:#3b8bff;
+    --amber:#f5a623;
+    --green:#30d988;
+    --red:#ff4f4f;
+    --font-display:'Barlow Condensed',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    --font-body:'Barlow',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    --r-card:20px;
   }
 
-  .wrap{
-    max-width:900px;
+  *,*::before,*::after{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+  }
+
+  html,body{
+    min-height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .page{
+    position:relative;
+    z-index:1;
+    max-width:480px;
+    min-height:100vh;
     margin:0 auto;
-    padding:18px 12px 42px;
+    padding:0 0 40px;
   }
 
   .hero{
-    background:linear-gradient(145deg,rgba(37,99,235,.24),rgba(15,23,42,.96));
-    border:1px solid rgba(148,163,184,.22);
-    border-radius:26px;
-    padding:18px;
-    box-shadow:0 18px 55px rgba(0,0,0,.42);
-    margin-bottom:14px;
+    position:relative;
+    overflow:hidden;
+    padding:52px 24px 32px;
+    background:linear-gradient(160deg,#0e1624 0%,#0d0f14 62%);
+    border-bottom:1px solid var(--border);
   }
 
-  h1{
-    margin:0 0 8px;
-    font-size:32px;
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:-60px;
+    right:-40px;
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(59,139,255,.18) 0%,transparent 70%);
+    pointer-events:none;
   }
 
-  .muted{
-    color:rgba(226,232,240,.65);
+  .hero::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+    opacity:.45;
   }
 
-  .item{
-    background:rgba(15,23,42,.78);
-    border:1px solid rgba(148,163,184,.18);
-    border-radius:20px;
-    padding:14px;
+  .hero-tag{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-family:var(--font-display);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--accent);
     margin-bottom:10px;
+    opacity:0;
+    animation:fadeUp .5s .05s forwards;
   }
 
-  .title{
+  .hero-tag::before{
+    content:"";
+    width:24px;
+    height:1px;
+    background:var(--accent);
+    display:block;
+  }
+
+  .hero h1{
+    position:relative;
+    font-family:var(--font-display);
+    font-size:54px;
+    font-weight:800;
+    letter-spacing:-.02em;
+    line-height:.95;
+    color:var(--text);
+    opacity:0;
+    animation:fadeUp .5s .12s forwards;
+  }
+
+  .hero h1 span{
+    display:block;
+    max-width:370px;
     font-size:20px;
-    font-weight:950;
-    margin-bottom:10px;
+    font-weight:600;
+    color:var(--text-sub);
+    margin-top:8px;
+    line-height:1.32;
+  }
+
+  .content{
+    padding:24px 16px 0;
+    display:grid;
+    gap:12px;
+  }
+
+  .summary{
+    display:grid;
+    grid-template-columns:1fr auto;
+    align-items:center;
+    gap:14px;
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    padding:18px;
+    box-shadow:0 20px 60px rgba(0,0,0,.22);
+    opacity:0;
+    animation:fadeUp .4s .16s forwards;
+  }
+
+  .summary-title{
+    font-family:var(--font-display);
+    font-size:28px;
+    font-weight:800;
+    line-height:1;
+  }
+
+  .summary-sub{
+    margin-top:5px;
+    color:var(--text-sub);
+    font-size:14px;
+    font-weight:600;
+    line-height:1.35;
+  }
+
+  .summary-count{
+    min-width:64px;
+    height:56px;
+    border-radius:17px;
+    display:grid;
+    place-items:center;
+    background:rgba(59,139,255,.12);
+    color:#a9ccff;
+    border:1px solid rgba(59,139,255,.24);
+    font-family:var(--font-display);
+    font-size:30px;
+    font-weight:800;
+  }
+
+  .search-card{
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    padding:14px;
+    opacity:0;
+    animation:fadeUp .4s .22s forwards;
+  }
+
+  .search-box{
+    position:relative;
+  }
+
+  .search-box input{
+    width:100%;
+    min-height:56px;
+    border-radius:17px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.035);
+    color:var(--text);
+    padding:0 16px 0 48px;
+    outline:none;
+    font-size:17px;
+    font-weight:700;
+    font-family:var(--font-body);
+  }
+
+  .search-box input:focus{
+    border-color:rgba(59,139,255,.55);
+    box-shadow:0 0 0 4px rgba(59,139,255,.10);
+  }
+
+  .search-icon{
+    position:absolute;
+    left:16px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--text-dim);
+    font-size:20px;
+  }
+
+  .report-list{
+    display:grid;
+    gap:12px;
+  }
+
+  .report-card{
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.18);
+    opacity:0;
+    animation:fadeUp .4s .28s forwards;
+  }
+
+  .report-head{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    padding:18px;
+    border-bottom:1px solid var(--border);
+  }
+
+  .report-icon{
+    width:48px;
+    height:48px;
+    border-radius:14px;
+    display:grid;
+    place-items:center;
+    background:rgba(245,166,35,.13);
+    font-size:24px;
+    flex-shrink:0;
+  }
+
+  .report-title{
+    font-family:var(--font-display);
+    font-size:27px;
+    font-weight:800;
+    line-height:1.05;
+    word-break:break-word;
+  }
+
+  .report-sub{
+    margin-top:5px;
+    color:var(--text-sub);
+    font-size:14px;
+    font-weight:600;
+    line-height:1.35;
   }
 
   .actions{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    padding:14px;
   }
 
   .btn{
-    border:1px solid rgba(148,163,184,.24);
-    background:rgba(15,23,42,.82);
-    color:#fff;
-    border-radius:999px;
-    padding:9px 12px;
-    font-weight:900;
+    min-height:52px;
+    border-radius:17px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
     text-decoration:none;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.035);
+    color:var(--text);
+    font-family:var(--font-display);
+    font-size:17px;
+    font-weight:800;
+    letter-spacing:.02em;
   }
 
-  .btn.blue{
-    background:linear-gradient(180deg,#3b82f6,#1d4ed8);
+  .btn.primary{
+    background:linear-gradient(145deg,#38bdf8,#2563eb);
+    color:#fff;
+    border-color:rgba(59,139,255,.35);
+    box-shadow:0 14px 30px rgba(37,99,235,.22);
+  }
+
+  .btn.ghost{
+    color:var(--text-sub);
+  }
+
+  .btn.json{
+    color:#ffd38a;
+    background:rgba(245,166,35,.10);
+    border-color:rgba(245,166,35,.22);
   }
 
   .empty{
-    background:rgba(15,23,42,.78);
-    border:1px solid rgba(148,163,184,.18);
+    background:var(--bg-row);
+    border:1px dashed rgba(59,139,255,.26);
+    border-radius:var(--r-card);
+    padding:24px 18px;
+    text-align:center;
+    opacity:0;
+    animation:fadeUp .4s .28s forwards;
+  }
+
+  .empty-ico{
+    width:62px;
+    height:62px;
     border-radius:20px;
-    padding:18px;
-    color:rgba(226,232,240,.65);
+    display:grid;
+    place-items:center;
+    margin:0 auto 14px;
+    background:rgba(59,139,255,.12);
+    font-size:30px;
+  }
+
+  .empty-title{
+    font-family:var(--font-display);
+    font-size:28px;
+    font-weight:800;
+    line-height:1;
+  }
+
+  .empty-sub{
+    margin-top:8px;
+    color:var(--text-sub);
+    font-size:15px;
+    font-weight:650;
+    line-height:1.35;
+  }
+
+  .back-btn{
+    min-height:58px;
+    margin:10px 16px 0;
+    border-radius:var(--r-card);
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    font-family:var(--font-display);
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:.04em;
+    opacity:0;
+    animation:fadeUp .4s .38s forwards;
+  }
+
+  .hidden{
+    display:none !important;
+  }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(12px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  @media(max-width:390px){
+    .hero{
+      padding:46px 20px 28px;
+    }
+
+    .hero h1{
+      font-size:48px;
+    }
+
+    .hero h1 span{
+      font-size:18px;
+    }
+
+    .content{
+      padding-left:12px;
+      padding-right:12px;
+    }
+
+    .actions{
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+
+    .btn{
+      font-size:16px;
+      min-height:50px;
+    }
   }
 </style>
+</head>
 
-<div class="wrap">
+<body>
+<div class="page">
+
   <div class="hero">
-    <h1>📁 Sefer Rapor Arşivi</h1>
-    <div class="muted">Sefer bitince oluşturulan rapor dosyaları burada listelenir.</div>
+    <div class="hero-tag">Raporlar</div>
+    <h1>Rapor Arşivi
+      <span>Sefer bitince oluşturulan rapor dosyaları burada listelenir</span>
+    </h1>
   </div>
 
-  {% if items %}
-    {% for it in items %}
-      <div class="item">
-        <div class="title">{{ it.title }}</div>
-        <div class="actions">
-          <a class="btn blue" href="{{ it.view }}">📄 Aç</a>
-          <a class="btn" href="{{ it.txt }}">TXT indir</a>
-          <a class="btn" href="{{ it.csv }}">CSV indir</a>
-          <a class="btn" href="{{ it.json }}">JSON</a>
+  <div class="content">
+
+    <section class="summary">
+      <div>
+        <div class="summary-title">Arşiv Durumu</div>
+        <div class="summary-sub">
+          {% if items %}
+            Kayıtlı sefer raporlarını açabilir veya dosya olarak indirebilirsin.
+          {% else %}
+            Henüz arşivlenmiş sefer raporu yok.
+          {% endif %}
         </div>
       </div>
-    {% endfor %}
-  {% else %}
-    <div class="empty">Henüz arşivlenmiş sefer raporu yok.</div>
-  {% endif %}
+      <div class="summary-count">{{ items|length if items else 0 }}</div>
+    </section>
+
+    {% if items %}
+      <section class="search-card">
+        <div class="search-box">
+          <span class="search-icon">⌕</span>
+          <input id="reportSearch" type="search" placeholder="Rapor ara...">
+        </div>
+      </section>
+
+      <section class="report-list" id="reportList">
+        {% for it in items %}
+          <article class="report-card" data-title="{{ it.title|lower }}">
+            <div class="report-head">
+              <div class="report-icon">📁</div>
+              <div>
+                <div class="report-title">{{ it.title }}</div>
+                <div class="report-sub">Raporu görüntüle, TXT / CSV / JSON olarak indir.</div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <a class="btn primary" href="{{ it.view }}">📄 Aç</a>
+              <a class="btn ghost" href="{{ it.txt }}">TXT</a>
+              <a class="btn ghost" href="{{ it.csv }}">CSV</a>
+              <a class="btn json" href="{{ it.json }}">JSON</a>
+            </div>
+          </article>
+        {% endfor %}
+      </section>
+    {% else %}
+      <section class="empty">
+        <div class="empty-ico">📁</div>
+        <div class="empty-title">Arşiv boş</div>
+        <div class="empty-sub">Sefer bitirildiğinde oluşturulan raporlar burada görünecek.</div>
+      </section>
+    {% endif %}
+
+  </div>
+
+  <a class="back-btn" href="/ayarlar">← Ayarlara dön</a>
+
 </div>
 
-{% endblock %}
+<script>
+  const reportSearch = document.getElementById("reportSearch");
+  const cards = Array.from(document.querySelectorAll(".report-card"));
+
+  reportSearch?.addEventListener("input", function(){
+    const q = this.value.trim().toLowerCase();
+
+    cards.forEach(card => {
+      const title = card.getAttribute("data-title") || "";
+      card.classList.toggle("hidden", q && !title.includes(q));
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,243 +1,622 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kurtarma Kodu</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Kurtarma Kodu</title>
 
-  <style>
-    *{ box-sizing:border-box; }
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    body{
-      margin:0;
-      min-height:100vh;
-      background:
-        radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 34%),
-        linear-gradient(180deg,#f8fbff,#eaf3ff);
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      color:#0f172a;
-    }
+<style>
+  :root{
+    --bg:#0d0f14;
+    --bg-row:#181c27;
+    --bg-hover:#1e2333;
+    --border:rgba(255,255,255,.07);
+    --border-act:rgba(255,255,255,.14);
+    --text:#e8edf5;
+    --text-sub:rgba(232,237,245,.54);
+    --text-dim:rgba(232,237,245,.32);
+    --accent:#3b8bff;
+    --amber:#f5a623;
+    --green:#30d988;
+    --red:#ff4f4f;
+    --font-display:'Barlow Condensed',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    --font-body:'Barlow',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    --r-card:20px;
+  }
 
-    .shell{
-      width:min(94vw,720px);
-      margin:18px auto 28px;
-      padding:16px;
-      border-radius:30px;
-      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
-      border:1px solid rgba(255,255,255,.82);
-      box-shadow:0 28px 80px rgba(15,23,42,.18);
-    }
+  *,*::before,*::after{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+  }
 
+  html,body{
+    min-height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .page{
+    position:relative;
+    z-index:1;
+    max-width:480px;
+    min-height:100vh;
+    margin:0 auto;
+    padding:0 0 40px;
+  }
+
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:52px 24px 32px;
+    background:linear-gradient(160deg,#0e1624 0%,#0d0f14 62%);
+    border-bottom:1px solid var(--border);
+  }
+
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:-60px;
+    right:-40px;
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(59,139,255,.18) 0%,transparent 70%);
+    pointer-events:none;
+  }
+
+  .hero::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+    opacity:.45;
+  }
+
+  .hero-tag{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-family:var(--font-display);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:10px;
+    opacity:0;
+    animation:fadeUp .5s .05s forwards;
+  }
+
+  .hero-tag::before{
+    content:"";
+    width:24px;
+    height:1px;
+    background:var(--accent);
+    display:block;
+  }
+
+  .hero h1{
+    position:relative;
+    font-family:var(--font-display);
+    font-size:54px;
+    font-weight:800;
+    letter-spacing:-.02em;
+    line-height:.95;
+    color:var(--text);
+    opacity:0;
+    animation:fadeUp .5s .12s forwards;
+  }
+
+  .hero h1 span{
+    display:block;
+    max-width:360px;
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:.01em;
+    color:var(--text-sub);
+    margin-top:8px;
+    line-height:1.32;
+  }
+
+  .content{
+    padding:24px 16px 0;
+    display:grid;
+    gap:12px;
+  }
+
+  .card{
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.22);
+    opacity:0;
+    animation:fadeUp .4s .16s forwards;
+  }
+
+  .card-pad{
+    padding:18px;
+  }
+
+  .status-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:18px;
+    border-bottom:1px solid var(--border);
+  }
+
+  .status-icon{
+    width:48px;
+    height:48px;
+    border-radius:14px;
+    display:grid;
+    place-items:center;
+    font-size:24px;
+    background:rgba(255,79,79,.12);
+    flex-shrink:0;
+  }
+
+  .status-title{
+    font-family:var(--font-display);
+    font-size:26px;
+    font-weight:800;
+    line-height:1;
+  }
+
+  .status-sub{
+    margin-top:4px;
+    color:var(--text-sub);
+    font-size:14px;
+    font-weight:600;
+    line-height:1.3;
+  }
+
+  .alert{
+    margin-bottom:12px;
+    padding:14px 15px;
+    border-radius:16px;
+    font-size:15px;
+    font-weight:750;
+    line-height:1.35;
+  }
+
+  .alert.ok{
+    background:rgba(48,217,136,.12);
+    color:#9af2c8;
+    border:1px solid rgba(48,217,136,.24);
+  }
+
+  .alert.warn{
+    background:rgba(245,166,35,.12);
+    color:#ffd38a;
+    border:1px solid rgba(245,166,35,.24);
+  }
+
+  .code-box{
+    margin:14px 0;
+    padding:18px;
+    border-radius:18px;
+    background:linear-gradient(160deg,rgba(59,139,255,.12),rgba(255,255,255,.025));
+    border:1px dashed rgba(59,139,255,.35);
+    text-align:center;
+  }
+
+  .code-label{
+    font-family:var(--font-display);
+    color:var(--text-dim);
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    margin-bottom:9px;
+  }
+
+  .code{
+    font-family:var(--font-display);
+    font-size:31px;
+    line-height:1.05;
+    font-weight:800;
+    color:var(--text);
+    word-break:break-word;
+    letter-spacing:.04em;
+  }
+
+  .info-line{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:14px 0;
+    border-top:1px solid var(--border);
+  }
+
+  .info-line:first-child{
+    border-top:0;
+    padding-top:0;
+  }
+
+  .dot{
+    width:34px;
+    height:34px;
+    border-radius:11px;
+    display:grid;
+    place-items:center;
+    background:rgba(245,166,35,.12);
+    flex-shrink:0;
+  }
+
+  .info-title{
+    font-family:var(--font-display);
+    font-size:19px;
+    font-weight:800;
+    line-height:1.05;
+  }
+
+  .info-sub{
+    margin-top:4px;
+    color:var(--text-sub);
+    font-size:14px;
+    font-weight:600;
+    line-height:1.35;
+  }
+
+  .actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:16px;
+  }
+
+  .btn{
+    min-height:58px;
+    border:0;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    cursor:pointer;
+    font-family:var(--font-display);
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:.02em;
+    color:var(--text);
+  }
+
+  .btn.primary{
+    background:linear-gradient(145deg,#38bdf8,#2563eb);
+    box-shadow:0 16px 34px rgba(37,99,235,.24);
+  }
+
+  .btn.danger{
+    background:linear-gradient(145deg,#fb923c,#ef4444);
+    box-shadow:0 16px 34px rgba(239,68,68,.18);
+  }
+
+  .btn.secondary{
+    background:rgba(255,255,255,.035);
+    color:var(--accent);
+    border:1px solid var(--border);
+  }
+
+  .back-btn{
+    min-height:58px;
+    margin:10px 16px 0;
+    border-radius:var(--r-card);
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    font-family:var(--font-display);
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:.04em;
+    opacity:0;
+    animation:fadeUp .4s .32s forwards;
+  }
+
+  .toast{
+    position:fixed;
+    left:16px;
+    right:16px;
+    bottom:18px;
+    max-width:448px;
+    margin:0 auto;
+    padding:14px 15px;
+    border-radius:18px;
+    background:rgba(24,28,39,.96);
+    color:var(--text);
+    border:1px solid var(--border-act);
+    box-shadow:0 18px 50px rgba(0,0,0,.45);
+    font-weight:750;
+    line-height:1.3;
+    opacity:0;
+    transform:translateY(14px);
+    pointer-events:none;
+    transition:.22s ease;
+    z-index:30;
+  }
+
+  .toast.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .modal{
+    position:fixed;
+    inset:0;
+    z-index:40;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    background:rgba(0,0,0,.54);
+    padding:16px;
+  }
+
+  .modal.show{
+    display:flex;
+  }
+
+  .modal-card{
+    width:100%;
+    max-width:448px;
+    border-radius:24px;
+    background:#181c27;
+    border:1px solid var(--border-act);
+    box-shadow:0 24px 80px rgba(0,0,0,.55);
+    padding:18px;
+    animation:modalUp .18s ease-out;
+  }
+
+  .modal-title{
+    font-family:var(--font-display);
+    font-size:28px;
+    font-weight:800;
+    line-height:1;
+    margin-bottom:8px;
+  }
+
+  .modal-text{
+    color:var(--text-sub);
+    font-size:15px;
+    font-weight:650;
+    line-height:1.4;
+    margin-bottom:14px;
+  }
+
+  .modal-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(12px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  @keyframes modalUp{
+    from{ transform:translateY(20px); opacity:0; }
+    to{ transform:translateY(0); opacity:1; }
+  }
+
+  @media(max-width:390px){
     .hero{
-      padding:24px 20px;
-      border-radius:26px;
-      background:linear-gradient(145deg,#2563eb,#06b6d4);
-      color:#fff;
-      box-shadow:0 18px 38px rgba(37,99,235,.22);
-      margin-bottom:14px;
+      padding:46px 20px 28px;
     }
 
     .hero h1{
-      margin:0;
-      font-size:34px;
-      line-height:1;
-      font-weight:950;
+      font-size:48px;
     }
 
-    .hero p{
-      margin:8px 0 0;
-      font-size:15px;
-      font-weight:700;
-      color:rgba(255,255,255,.88);
+    .hero h1 span{
+      font-size:18px;
     }
 
-    .card{
-      border-radius:26px;
-      background:#fff;
-      border:1px solid #e5edf6;
-      box-shadow:0 14px 34px rgba(15,23,42,.10);
-      padding:18px;
+    .content{
+      padding-left:12px;
+      padding-right:12px;
     }
 
-    .alert{
-      padding:13px 14px;
-      border-radius:18px;
-      margin-bottom:14px;
-      font-size:15px;
-      font-weight:850;
-      line-height:1.3;
-    }
-
-    .alert.ok{
-      background:#ecfdf5;
-      color:#047857;
-      border:1px solid #a7f3d0;
-    }
-
-    .alert.warn{
-      background:#fffbeb;
-      color:#92400e;
-      border:1px solid #fde68a;
-    }
-
-    .code-box{
-      margin:16px 0;
-      padding:18px;
-      border-radius:22px;
-      background:linear-gradient(145deg,#eff6ff,#ffffff);
-      border:1px dashed rgba(37,99,235,.45);
-      text-align:center;
-    }
-
-    .code-label{
-      color:#64748b;
-      font-size:13px;
-      font-weight:900;
-      text-transform:uppercase;
-      letter-spacing:.4px;
-      margin-bottom:8px;
+    .actions,
+    .modal-actions{
+      grid-template-columns:1fr;
     }
 
     .code{
-      font-size:25px;
-      line-height:1.15;
-      font-weight:950;
-      color:#0f172a;
-      word-break:break-word;
-      letter-spacing:.5px;
+      font-size:26px;
     }
-
-    .small{
-      color:#64748b;
-      font-size:14px;
-      line-height:1.35;
-      font-weight:650;
-    }
-
-    .actions{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-top:16px;
-    }
-
-    .btn{
-      min-height:58px;
-      border:0;
-      border-radius:21px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-decoration:none;
-      font-size:17px;
-      font-weight:950;
-      font-family:inherit;
-    }
-
-    .btn.primary{
-      color:#fff;
-      background:linear-gradient(145deg,#38bdf8,#2563eb);
-      box-shadow:0 16px 34px rgba(37,99,235,.26);
-    }
-
-    .btn.secondary{
-      color:#2563eb;
-      background:#f8fbff;
-      border:1px solid #e5edf6;
-    }
-
-    .btn.danger{
-      color:#fff;
-      background:linear-gradient(145deg,#fb923c,#ef4444);
-      box-shadow:0 16px 34px rgba(239,68,68,.18);
-    }
-
-    @media(max-width:420px){
-      .shell{
-        width:calc(100vw - 24px);
-        margin:14px auto 24px;
-        padding:14px;
-      }
-
-      .code{
-        font-size:21px;
-      }
-
-      .actions{
-        grid-template-columns:1fr;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 
 <body>
-  <main class="shell">
-    <section class="hero">
-      <h1>🧾 Kurtarma Kodu</h1>
-      <p>Şifre unutulursa bu kodla yeni şifre belirlenir.</p>
-    </section>
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-tag">Güvenlik</div>
+    <h1>Kurtarma
+      <span>Şifre unutulursa bu kodla yeni şifre belirlenir</span>
+    </h1>
+  </div>
+
+  <div class="content">
 
     <section class="card">
-      {% if msg %}
-        <div class="alert ok">{{ msg }}</div>
-      {% endif %}
-
-      {% if error %}
-        <div class="alert warn">{{ error }}</div>
-      {% endif %}
-
-      {% if code %}
-        <div class="code-box">
-          <div class="code-label">Kurtarma kodun</div>
-          <div class="code" id="recoveryCode">{{ code }}</div>
+      <div class="status-head">
+        <div class="status-icon">🗝️</div>
+        <div>
+          <div class="status-title">Kurtarma Kodu</div>
+          <div class="status-sub">Bu kod hesabı sıfırlamak için kullanılır.</div>
         </div>
+      </div>
 
-        <p class="small">
-          Bu kod güvenlik için sadece şimdi gösterilir. Bir yere not et veya fotoğrafını çek.
-        </p>
-
-        <div class="actions">
-          <button class="btn primary" type="button" onclick="copyCode()">Kodu Kopyala</button>
-          <a class="btn secondary" href="/ayarlar">← Geri</a>
-        </div>
-      {% else %}
-        <div class="alert warn">
-          Kurtarma kodu daha önce oluşturulmuş. Güvenlik için eski kod tekrar gösterilmez.
-        </div>
-
-        {% if updated_at %}
-          <p class="small">Son oluşturma zamanı: <b>{{ updated_at }}</b></p>
+      <div class="card-pad">
+        {% if msg %}
+          <div class="alert ok">{{ msg }}</div>
         {% endif %}
 
-        <p class="small">
-          Eski kodu kaybettiysen yeni kod oluşturabilirsin. Yeni kod oluşturulunca eski kod geçersiz olur.
-        </p>
+        {% if error %}
+          <div class="alert warn">{{ error }}</div>
+        {% endif %}
 
-        <form method="post" class="actions" onsubmit="return confirm('Yeni kurtarma kodu oluşturulsun mu? Eski kod geçersiz olacak.');">
-          {% if csrf_token is defined %}
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% if code %}
+          <div class="code-box">
+            <div class="code-label">Yeni kurtarma kodun</div>
+            <div class="code" id="recoveryCode">{{ code }}</div>
+          </div>
+
+          <div class="info-line">
+            <div class="dot">⚠️</div>
+            <div>
+              <div class="info-title">Bu kod sadece şimdi görünür</div>
+              <div class="info-sub">Bir yere not et veya güvenli şekilde sakla. Sayfadan çıkınca eski kod tekrar gösterilmez.</div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary" type="button" onclick="copyCode()">Kodu Kopyala</button>
+            <a class="btn secondary" href="/ayarlar">← Geri</a>
+          </div>
+        {% else %}
+          <div class="info-line">
+            <div class="dot">✅</div>
+            <div>
+              <div class="info-title">Kurtarma kodu oluşturulmuş</div>
+              <div class="info-sub">Güvenlik için eski kod tekrar gösterilmez.</div>
+            </div>
+          </div>
+
+          {% if updated_at %}
+            <div class="info-line">
+              <div class="dot">🕒</div>
+              <div>
+                <div class="info-title">Son oluşturma zamanı</div>
+                <div class="info-sub">{{ updated_at }}</div>
+              </div>
+            </div>
           {% endif %}
-          <input type="hidden" name="action" value="generate">
-          <button class="btn danger" type="submit">Yeni Kod Oluştur</button>
-          <a class="btn secondary" href="/ayarlar">← Geri</a>
-        </form>
-      {% endif %}
+
+          <div class="info-line">
+            <div class="dot">🔄</div>
+            <div>
+              <div class="info-title">Yeni kod oluşturabilirsin</div>
+              <div class="info-sub">Yeni kod oluşturulunca eski kurtarma kodu geçersiz olur.</div>
+            </div>
+          </div>
+
+          <form method="post" id="generateForm">
+            {% if csrf_token is defined %}
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            {% endif %}
+            <input type="hidden" name="action" value="generate">
+          </form>
+
+          <div class="actions">
+            <button class="btn danger" type="button" onclick="openConfirm()">Yeni Kod Oluştur</button>
+            <a class="btn secondary" href="/ayarlar">← Geri</a>
+          </div>
+        {% endif %}
+      </div>
     </section>
-  </main>
 
-  <script>
-    function copyCode(){
-      const el = document.getElementById("recoveryCode");
-      if(!el) return;
+  </div>
 
-      const code = el.textContent.trim();
+  <a class="back-btn" href="/ayarlar">← Ayarlara dön</a>
 
-      if(navigator.clipboard){
-        navigator.clipboard.writeText(code).then(() => alert("Kurtarma kodu kopyalandı."));
-      }else{
-        alert(code);
-      }
+</div>
+
+<div class="toast" id="toast">Kurtarma kodu kopyalandı.</div>
+
+<div class="modal" id="confirmModal" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-title">Yeni kod oluşturulsun mu?</div>
+    <div class="modal-text">
+      Yeni kurtarma kodu oluşturulunca eski kod geçersiz olur. Bu işlem geri alınamaz.
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" type="button" onclick="closeConfirm()">Vazgeç</button>
+      <button class="btn danger" type="button" onclick="submitGenerate()">Evet, oluştur</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showToast(text){
+    const toast = document.getElementById("toast");
+    if(!toast) return;
+
+    toast.textContent = text || "İşlem tamamlandı.";
+    toast.classList.add("show");
+
+    clearTimeout(window.__recoveryToastTimer);
+    window.__recoveryToastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 2300);
+  }
+
+  function copyCode(){
+    const el = document.getElementById("recoveryCode");
+    if(!el) return;
+
+    const code = el.textContent.trim();
+
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(code)
+        .then(() => showToast("Kurtarma kodu kopyalandı."))
+        .catch(() => showToast(code));
+    }else{
+      showToast(code);
     }
-  </script>
+  }
+
+  function openConfirm(){
+    const modal = document.getElementById("confirmModal");
+    if(!modal) return;
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeConfirm(){
+    const modal = document.getElementById("confirmModal");
+    if(!modal) return;
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  function submitGenerate(){
+    const form = document.getElementById("generateForm");
+    if(form) form.submit();
+  }
+
+  document.addEventListener("keydown", function(ev){
+    if(ev.key === "Escape") closeConfirm();
+  });
+
+  document.getElementById("confirmModal")?.addEventListener("click", function(ev){
+    if(ev.target === this) closeConfirm();
+  });
+</script>
 </body>
 </html>

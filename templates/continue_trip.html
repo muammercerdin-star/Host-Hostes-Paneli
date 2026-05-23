@@ -3289,7 +3289,463 @@
   font-weight:1000;
 }
 </style>
-\n</head>
+<style id="continue-live-v2-style">
+/* =========================================================
+   CONTINUE TRIP - CANLI AKIŞ V2
+   Hedef: templates/continue_trip.html içindeki canlı durak kartı
+========================================================= */
+
+body.continue-live-v2{
+  --clv2-ink:#0a0a0f;
+  --clv2-card:#13131a;
+  --clv2-card2:#1a1a24;
+  --clv2-line:rgba(255,255,255,.06);
+  --clv2-red:#ff2d55;
+  --clv2-amber:#ffcc00;
+  --clv2-blue:#0a84ff;
+  --clv2-green:#30d158;
+  --clv2-white:#ffffff;
+  --clv2-dim:rgba(255,255,255,.42);
+}
+
+/* Canlı akış alanını v2 için genişlet */
+body.continue-live-v2 .timeline{
+  padding-left:0 !important;
+  margin-top:18px !important;
+}
+
+body.continue-live-v2 .timeline-line,
+body.continue-live-v2 .node{
+  display:none !important;
+}
+
+body.continue-live-v2 .journey-card{
+  margin-bottom:12px !important;
+}
+
+/* Aktif canlı durak kartı */
+body.continue-live-v2 #liveCurrentCard.card.live{
+  position:relative !important;
+  overflow:hidden !important;
+  padding:0 !important;
+  border-radius:28px !important;
+  background:var(--clv2-card) !important;
+  border:1px solid rgba(255,45,85,.22) !important;
+  box-shadow:
+    0 22px 58px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+
+body.continue-live-v2 #liveCurrentCard.card.live::before{
+  content:"" !important;
+  position:absolute !important;
+  left:0 !important;
+  top:20% !important;
+  bottom:20% !important;
+  width:3px !important;
+  border-radius:0 3px 3px 0 !important;
+  background:var(--clv2-red) !important;
+  box-shadow:0 0 16px var(--clv2-red) !important;
+}
+
+/* Üst satır */
+body.continue-live-v2 #liveCurrentCard .card-head{
+  padding:22px 22px 0 !important;
+  margin:0 !important;
+  display:flex !important;
+  align-items:flex-start !important;
+  justify-content:space-between !important;
+  gap:12px !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .card-label{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  margin-bottom:12px !important;
+  font-size:11px !important;
+  font-weight:1000 !important;
+  letter-spacing:.14em !important;
+  text-transform:uppercase !important;
+  color:var(--clv2-red) !important;
+}
+
+body.continue-live-v2 .continue-v2-dot{
+  width:8px !important;
+  height:8px !important;
+  border-radius:50% !important;
+  background:var(--clv2-red) !important;
+  box-shadow:0 0 12px var(--clv2-red) !important;
+  display:inline-block !important;
+  flex:0 0 auto !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .status-pill.live{
+  max-width:120px !important;
+  min-height:34px !important;
+  padding:7px 12px !important;
+  border-radius:12px !important;
+  color:var(--clv2-dim) !important;
+  background:rgba(255,255,255,.06) !important;
+  border:0 !important;
+  box-shadow:none !important;
+  font-size:12px !important;
+  font-weight:850 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* Durak adı */
+body.continue-live-v2 #liveCurrentStopName{
+  font-size:clamp(42px, 11vw, 58px) !important;
+  line-height:.95 !important;
+  letter-spacing:-.055em !important;
+  font-weight:1000 !important;
+  color:var(--clv2-white) !important;
+  max-width:100% !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* Kalan mesafe satırı */
+body.continue-live-v2 .continue-v2-distance-line{
+  padding:8px 22px 20px !important;
+  font-size:14px !important;
+  color:var(--clv2-dim) !important;
+  font-weight:800 !important;
+  line-height:1.2 !important;
+}
+
+body.continue-live-v2 .continue-v2-distance-line span{
+  color:var(--clv2-white) !important;
+  font-weight:1000 !important;
+}
+
+/* İlk iki eski metrik gizli: ETA ve mesafe artık başlık alanında */
+body.continue-live-v2 #liveCurrentCard .metric-grid > .metric:nth-child(1),
+body.continue-live-v2 #liveCurrentCard .metric-grid > .metric:nth-child(2){
+  display:none !important;
+}
+
+/* Altta 2 büyük operasyon kutusu */
+body.continue-live-v2 #liveCurrentCard .metric-grid{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:0 !important;
+  margin:0 !important;
+  border-top:1px solid var(--clv2-line) !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-action{
+  min-height:96px !important;
+  border-radius:0 !important;
+  padding:18px 20px !important;
+  background:transparent !important;
+  border:0 !important;
+  border-right:1px solid var(--clv2-line) !important;
+  box-shadow:none !important;
+  display:flex !important;
+  align-items:flex-start !important;
+  justify-content:center !important;
+  text-align:left !important;
+  position:relative !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-action:last-child{
+  border-right:0 !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-action[data-kind="offload"]{
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255,45,85,.18), transparent 62%) !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-action small{
+  order:3 !important;
+  margin:0 !important;
+  color:var(--clv2-dim) !important;
+  font-size:11px !important;
+  font-weight:950 !important;
+  letter-spacing:.11em !important;
+  text-transform:uppercase !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-action b{
+  order:2 !important;
+  margin:0 0 6px !important;
+  color:var(--clv2-white) !important;
+  font-size:34px !important;
+  line-height:.95 !important;
+  letter-spacing:-.045em !important;
+  font-weight:1000 !important;
+}
+
+body.continue-live-v2 #liveCurrentCard #liveOffloadCount{
+  color:var(--clv2-red) !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-action::before{
+  order:1 !important;
+  display:block !important;
+  margin-bottom:7px !important;
+  font-size:26px !important;
+  line-height:1 !important;
+}
+
+body.continue-live-v2 #liveCurrentCard #liveOffloadMetric::before{
+  content:"👤" !important;
+}
+
+body.continue-live-v2 #liveCurrentCard #liveBagajMetric::before{
+  content:"🧳" !important;
+}
+
+body.continue-live-v2 #liveCurrentCard .metric-hint{
+  position:absolute !important;
+  right:14px !important;
+  bottom:14px !important;
+  padding:5px 9px !important;
+  border-radius:9px !important;
+  background:rgba(255,45,85,.12) !important;
+  color:var(--clv2-red) !important;
+  font-size:11px !important;
+  font-weight:1000 !important;
+  letter-spacing:.04em !important;
+}
+
+body.continue-live-v2 #liveBagajMetric .metric-hint{
+  background:rgba(255,255,255,.05) !important;
+  color:var(--clv2-dim) !important;
+}
+
+/* Sonraki durak kartlarını biraz daha kompakt ve aynı palete yakın yap */
+body.continue-live-v2 .card.regular{
+  border-radius:22px !important;
+  background:var(--clv2-card) !important;
+  border:1px solid var(--clv2-line) !important;
+  box-shadow:0 12px 34px rgba(0,0,0,.24) !important;
+}
+
+body.continue-live-v2 .card.regular .card-title{
+  font-size:clamp(24px, 7vw, 36px) !important;
+  line-height:1 !important;
+  letter-spacing:-.045em !important;
+  color:rgba(255,255,255,.86) !important;
+}
+
+body.continue-live-v2 .status-pill.next{
+  color:var(--clv2-amber) !important;
+  background:rgba(255,204,0,.10) !important;
+  border-color:rgba(255,204,0,.24) !important;
+}
+
+body.continue-live-v2 .status-pill.upcoming{
+  color:#93c5fd !important;
+  background:rgba(10,132,255,.10) !important;
+  border-color:rgba(10,132,255,.22) !important;
+}
+
+body.continue-live-v2 .card.regular .metric{
+  min-height:76px !important;
+  border-radius:16px !important;
+  background:rgba(255,255,255,.035) !important;
+  border-color:var(--clv2-line) !important;
+}
+
+@media(max-width:430px){
+  body.continue-live-v2 .shell{
+    padding-left:14px !important;
+    padding-right:14px !important;
+  }
+
+  body.continue-live-v2 #liveCurrentCard .card-head{
+    padding:20px 20px 0 !important;
+  }
+
+  body.continue-live-v2 #liveCurrentStopName{
+    font-size:clamp(42px, 13vw, 56px) !important;
+  }
+
+  body.continue-live-v2 .continue-v2-distance-line{
+    padding-left:20px !important;
+    padding-right:20px !important;
+  }
+
+  body.continue-live-v2 #liveCurrentCard .metric-action{
+    min-height:92px !important;
+    padding:16px 18px !important;
+  }
+
+  body.continue-live-v2 #liveCurrentCard .metric-action b{
+    font-size:32px !important;
+  }
+}
+</style>
+
+
+<style id="continue-live-v2-dot-blink">
+/* CANLI yanındaki kırmızı nokta yanıp sönsün */
+body.continue-live-v2 .continue-v2-dot{
+  animation:continueLiveDotBlink 1s ease-in-out infinite !important;
+}
+
+@keyframes continueLiveDotBlink{
+  0%,100%{
+    opacity:1;
+    transform:scale(1);
+    box-shadow:
+      0 0 0 0 rgba(255,45,85,.42),
+      0 0 10px rgba(255,45,85,.95) !important;
+  }
+  50%{
+    opacity:.28;
+    transform:scale(.82);
+    box-shadow:
+      0 0 0 7px rgba(255,45,85,0),
+      0 0 18px rgba(255,45,85,.55) !important;
+  }
+}
+</style>
+
+
+
+
+
+
+<style id="continue-top-status-stable-compact-style">
+/* Üst DURUM yazısı: tek stabil kompakt format */
+.stats-row .stat-box.status{
+  overflow:hidden !important;
+}
+
+#liveTopStatusText{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  justify-content:center !important;
+  gap:2px !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+  white-space:normal !important;
+  line-height:1 !important;
+  animation:liveTopStatusSoftBlink 1.35s ease-in-out infinite !important;
+}
+
+#liveTopStatusText .status-main{
+  display:block !important;
+  color:#4ade80 !important;
+  font-size:17px !important;
+  font-weight:1000 !important;
+  line-height:1 !important;
+  letter-spacing:-.035em !important;
+  white-space:nowrap !important;
+}
+
+#liveTopStatusText .status-sub{
+  display:block !important;
+  color:rgba(74,222,128,.72) !important;
+  font-size:9px !important;
+  font-weight:950 !important;
+  line-height:1 !important;
+  letter-spacing:.13em !important;
+  text-transform:uppercase !important;
+  white-space:nowrap !important;
+}
+
+#liveTopStatusText.status-late .status-main,
+#liveTopStatusText.status-late .status-sub{
+  color:#f87171 !important;
+}
+
+#liveTopStatusText.status-plan .status-main{
+  font-size:15px !important;
+}
+
+#liveTopStatusText.status-plan .status-sub{
+  display:none !important;
+}
+
+@keyframes liveTopStatusSoftBlink{
+  0%,100%{
+    opacity:1;
+    filter:brightness(1.05);
+    text-shadow:0 0 10px rgba(74,222,128,.20);
+  }
+  50%{
+    opacity:.58;
+    filter:brightness(.92);
+    text-shadow:0 0 4px rgba(74,222,128,.10);
+  }
+}
+</style>
+
+
+<style id="live-occupancy-gender-style">
+/* Doluluk kutusu altında Bay/Bayan mini satırı */
+.stat-box.occupancy-box{
+  justify-content:center !important;
+  gap:2px !important;
+}
+
+.stat-box.occupancy-box b{
+  line-height:1.02 !important;
+  margin-bottom:2px !important;
+}
+
+.live-gender-mini{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:5px !important;
+  max-width:100% !important;
+  overflow:hidden !important;
+
+  font-size:9.5px !important;
+  line-height:1 !important;
+  font-weight:950 !important;
+  letter-spacing:.015em !important;
+  white-space:nowrap !important;
+}
+
+.live-gender-mini .male{
+  color:#93c5fd !important;
+}
+
+.live-gender-mini .female{
+  color:#f9a8d4 !important;
+}
+
+.live-gender-mini .unknown{
+  color:rgba(226,232,240,.58) !important;
+}
+
+@media(max-width:430px){
+  .live-gender-mini{
+    font-size:8.5px !important;
+    gap:4px !important;
+  }
+}
+</style>
+
+<style id="continue-clean-top-no-announcement">
+/* Sağ üst anons / megafon ikonunu kaldırır */
+.top-brand > :last-child:not(.brand-left){
+  display:none !important;
+}
+
+/* Eğer megafon özel buton sınıfıyla geldiyse onu da kapat */
+.announce-btn,
+.anons-btn,
+.brand-announce,
+.top-announce,
+.megaphone-btn{
+  display:none !important;
+}
+</style>
+</head>
 
 <body>
   <main class="shell">
@@ -3337,14 +3793,21 @@
         <b id="liveSpeedText">— km/sa</b>
       </div>
 
-      <div class="stat-box">
+      <div class="stat-box occupancy-box">
         <small>Doluluk</small>
         <b>{{ live_summary.passenger_count }} / {{ live_summary.total_seats }}</b>
+        <span class="live-gender-mini">
+          <span class="male">Bay {{ live_summary.male_count or 0 }}</span>
+          <span class="female">Bayan {{ live_summary.female_count or 0 }}</span>
+          {% if live_summary.unknown_gender_count %}
+            <span class="unknown">? {{ live_summary.unknown_gender_count }}</span>
+          {% endif %}
+        </span>
       </div>
 
       <div class="stat-box status">
         <small>Durum</small>
-        <b>Planında</b>
+        <b id="liveTopStatusText">Planında</b>
       </div>
     </section>
 
@@ -3384,6 +3847,7 @@
             <button class="metric metric-action" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
               <small>Bagaj</small>
               <b id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</b>
+              <span id="liveEmanetCount" hidden></span>
               <span class="metric-hint">Detay</span>
             </button>
           </div>
@@ -3394,7 +3858,7 @@
       <article class="journey-card">
         <div class="node {{ stop.kind }}"></div>
 
-        <div class="card regular">
+        <div class="card regular {% if stop.kind == "next" %}next-card{% endif %}">
           <div class="card-head">
             <div>
               <h3 class="card-title">{{ stop.name }}</h3>
@@ -3611,6 +4075,93 @@
 
 
 
+
+
+<style id="next-stop-glow-style">
+@keyframes nextStopGlowPulse{
+  0%{
+    box-shadow:
+      0 0 0 1px rgba(250,204,21,.10) inset,
+      0 0 0 rgba(250,204,21,0),
+      0 16px 36px rgba(0,0,0,.28);
+  }
+  50%{
+    box-shadow:
+      0 0 0 1px rgba(250,204,21,.22) inset,
+      0 0 24px rgba(250,204,21,.18),
+      0 18px 38px rgba(0,0,0,.30);
+  }
+  100%{
+    box-shadow:
+      0 0 0 1px rgba(250,204,21,.10) inset,
+      0 0 0 rgba(250,204,21,0),
+      0 16px 36px rgba(0,0,0,.28);
+  }
+}
+
+.card.regular.next-card{
+  position:relative !important;
+  overflow:hidden !important;
+  isolation:isolate !important;
+  border:1px solid rgba(250,204,21,.26) !important;
+  border-radius:28px !important;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(250,204,21,.13), transparent 32%),
+    radial-gradient(circle at 92% 0%, rgba(245,158,11,.10), transparent 28%),
+    linear-gradient(180deg, rgba(255,215,64,.035), rgba(255,255,255,.02)),
+    rgba(10,16,30,.88) !important;
+  animation:nextStopGlowPulse 2.5s ease-in-out infinite !important;
+}
+
+/* Kartın tamamını canlı durak gibi çevreleyen sarı hat */
+.card.regular.next-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:28px;
+  pointer-events:none;
+  border:1px solid rgba(250,204,21,.22);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,220,90,.05),
+    0 0 0 1px rgba(250,204,21,.06),
+    0 0 18px rgba(250,204,21,.10);
+  z-index:0;
+}
+
+/* Soldaki sarı canlı çizgi kalsın */
+.card.regular.next-card::after{
+  content:"";
+  position:absolute;
+  left:0;
+  top:18px;
+  bottom:18px;
+  width:6px;
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(250,204,21,.98), rgba(245,158,11,.52));
+  box-shadow:
+    0 0 10px rgba(250,204,21,.72),
+    0 0 22px rgba(250,204,21,.30);
+  z-index:1;
+}
+
+.card.regular.next-card > *{
+  position:relative;
+  z-index:2;
+}
+
+.card.regular.next-card .status-pill.next{
+  border-color:rgba(250,204,21,.34) !important;
+  box-shadow:
+    0 0 0 1px rgba(250,204,21,.22) inset,
+    0 0 18px rgba(250,204,21,.16) !important;
+}
+
+.card.regular.next-card .metric{
+  border-color:rgba(250,204,21,.12) !important;
+}
+</style>
+
+
 <script id="live-clock-script">
 (function(){
   const el = document.getElementById("liveClockText");
@@ -3681,7 +4232,7 @@
     const distEl  = document.getElementById("liveDistanceValue");
     const etaEl   = document.getElementById("liveEtaValue");
 
-    if(speedEl){
+    if(speedEl && !window.CONTINUE_LIVE_SPEED_ENGINE_ACTIVE){
       const n = parseInt(runtimeSpeed || 0, 10) || 0;
       speedEl.textContent = `${n} km/sa`;
     }
@@ -3715,7 +4266,7 @@
       const distEl  = document.getElementById("liveDistanceValue");
       const etaEl   = document.getElementById("liveEtaValue");
 
-      if(speedEl){
+      if(speedEl && !window.CONTINUE_LIVE_SPEED_ENGINE_ACTIVE){
         const n = parseInt(s.speed || 0, 10) || 0;
         speedEl.textContent = `${n} km/sa`;
       }
@@ -3752,6 +4303,11 @@
 
 
 
+
+
+<!-- CONTINUE_TTS_BRIDGE_START -->
+<script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+<!-- CONTINUE_TTS_BRIDGE_END -->
 
 <script id="live-stop-sheet-script">
 (function(){
@@ -4830,20 +5386,78 @@
   function speakStopSummary(data){
     const msg = buildStopSummarySentence(data);
 
+    function setSpeakState(text){
+      try{
+        const btn = document.getElementById("sheetSummarySpeak");
+        if(!btn) return;
+
+        if(!btn.dataset.originalText){
+          btn.dataset.originalText = btn.textContent || "Sesli Oku";
+        }
+
+        btn.textContent = text || btn.dataset.originalText || "Sesli Oku";
+
+        setTimeout(function(){
+          btn.textContent = btn.dataset.originalText || "Sesli Oku";
+        }, 900);
+      }catch(_){}
+    }
+
+    if(!msg){
+      setSpeakState("Metin yok");
+      return;
+    }
+
+    // 1) Ortak ses köprüsü: APK'da AndroidTTS, tarayıcıda speechSynthesis kullanır.
     try{
-      if(window.speechSynthesis){
+      if(window.SeatsSpeak && typeof window.SeatsSpeak === "function"){
+        window.SeatsSpeak(msg, { force:true });
+        setSpeakState("Okunuyor...");
+        return;
+      }
+    }catch(err){
+      console.warn("SeatsSpeak summary error", err);
+    }
+
+    // 2) APK native TTS köprüsü
+    try{
+      if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
+        if(typeof window.AndroidTTS.stop === "function"){
+          try{ window.AndroidTTS.stop(); }catch(_){}
+        }
+
+        window.AndroidTTS.speak(msg);
+        setSpeakState("Okunuyor...");
+        return;
+      }
+    }catch(err){
+      console.warn("AndroidTTS summary error", err);
+    }
+
+    // 3) Tarayıcı fallback
+    try{
+      if(window.speechSynthesis && window.SpeechSynthesisUtterance){
         window.speechSynthesis.cancel();
+
         const u = new SpeechSynthesisUtterance(msg);
         u.lang = "tr-TR";
         u.rate = 0.95;
         u.pitch = 1;
+
+        const voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+        const trVoice = voices.find(v => String(v.lang || "").toLowerCase().startsWith("tr"));
+        if(trVoice) u.voice = trVoice;
+
         window.speechSynthesis.speak(u);
+        setSpeakState("Okunuyor...");
+        return;
       }
     }catch(err){
       console.error("summary speak error", err);
     }
-  }
 
+    setSpeakState("Ses yok");
+  }
 
   async function completeStopFromSummary(data){
     const stop = (data && data.stop) || currentStopName();
@@ -5423,5 +6037,598 @@
 })();
 </script>
 
+
+<script id="continue-live-v2-script">
+(function(){
+  function q(sel){ return document.querySelector(sel); }
+
+  function ensureV2(){
+    document.body.classList.add("continue-live-v2");
+
+    const card = q("#liveCurrentCard");
+    if(!card) return;
+
+    const label = card.querySelector(".card-label");
+    if(label && !label.dataset.v2Ready){
+      label.dataset.v2Ready = "1";
+      label.innerHTML = '<span class="continue-v2-dot"></span> CANLI';
+    }
+
+    if(!q("#continueLiveV2Distance")){
+      const line = document.createElement("div");
+      line.className = "continue-v2-distance-line";
+      line.innerHTML = 'Kalan mesafe: <span id="continueLiveV2Distance">—</span>';
+
+      const head = card.querySelector(".card-head");
+      const grid = card.querySelector(".metric-grid");
+
+      if(head && grid){
+        card.insertBefore(line, grid);
+      }
+    }
+
+    syncV2Texts();
+  }
+
+  function syncV2Texts(){
+    const eta = q("#liveEtaValue");
+    const distance = q("#liveDistanceValue");
+    const distanceMirror = q("#continueLiveV2Distance");
+    const status = q("#liveCurrentCard .status-pill.live");
+
+    if(distance && distanceMirror){
+      distanceMirror.textContent = distance.textContent || "—";
+    }
+
+    if(eta && status){
+      status.textContent = eta.textContent || "Plan dışı";
+      status.title = eta.textContent || "";
+    }
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", ensureV2);
+  }else{
+    ensureV2();
+  }
+
+  setTimeout(ensureV2, 150);
+  setTimeout(ensureV2, 800);
+  setInterval(syncV2Texts, 700);
+})();
+</script>
+
+
+
+<script id="continue-top-status-stable-compact-script">
+(function(){
+  function esc(v){
+    return String(v || "").replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function clean(v){
+    const t = String(v || "").trim();
+    if(!t || t === "-" || t === "—" || t === "--:--") return "Planında";
+    return t;
+  }
+
+  function splitStatus(v){
+    const t = clean(v);
+    let m = t.match(/^(\d+)\s*(dk|dakika)?\s+(erken|geç)$/i);
+    if(m){
+      return { main:m[1] + " dk", sub:m[3].toUpperCase(), raw:t };
+    }
+    return { main:t, sub:"", raw:t };
+  }
+
+  function render(){
+    const top = document.getElementById("liveTopStatusText");
+    const eta = document.getElementById("liveEtaValue");
+    if(!top) return;
+
+    const data = splitStatus(eta ? eta.textContent : top.textContent);
+    const html = '<span class="status-main">' + esc(data.main) + '</span>' +
+                 (data.sub ? '<span class="status-sub">' + esc(data.sub) + '</span>' : '');
+
+    if(top.dataset.lastHtml !== html){
+      top.innerHTML = html;
+      top.dataset.lastHtml = html;
+    }
+
+    top.classList.toggle("status-early", /erken/i.test(data.raw));
+    top.classList.toggle("status-late", /ge[cç]/i.test(data.raw));
+    top.classList.toggle("status-plan", /plan/i.test(data.raw));
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", render);
+  }else{
+    render();
+  }
+
+  setTimeout(render, 150);
+  setTimeout(render, 800);
+  setInterval(render, 700);
+})();
+</script>
+
+
+
+<script id="continue-live-eta-engine">
+(function(){
+  window.CONTINUE_LIVE_SPEED_ENGINE_ACTIVE = true;
+
+  const tripId = {{ trip['id'] | tojson | safe }};
+  const tripDate = {{ (trip['date'] or '') | tojson | safe }};
+  const routeStops = {{ stops | tojson | safe }};
+  const routeCoords = {{ continue_route_coords | default([]) | tojson | safe }};
+  const scheduleItems = {{ continue_schedule_items | default([]) | tojson | safe }};
+
+  let lastPos = null;
+  let lastGpsPoint = null;
+  let lastMeasuredSpeedKmh = NaN;
+  let speedHistory = [];
+  let lastWriteSig = "";
+  let lastWriteAt = 0;
+
+  function q(sel){ return document.querySelector(sel); }
+
+  function setText(sel, val){
+    const el = q(sel);
+    if(el) el.textContent = val;
+  }
+
+  function norm(v){
+    return String(v || "")
+      .trim()
+      .toLocaleLowerCase("tr-TR")
+      .replace(/[–—_\/\\.,()[\]]/g, " ")
+      .replace(/\s+/g, " ");
+  }
+
+  function pad(n){ return String(n).padStart(2, "0"); }
+
+  function fmtHour(d){
+    if(!(d instanceof Date) || isNaN(d.getTime())) return "—";
+    return pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+
+  function parseTime(t){
+    const m = String(t || "").trim().match(/^(\d{1,2}):(\d{2})$/);
+    if(!m) return NaN;
+    return (parseInt(m[1],10) || 0) * 60 + (parseInt(m[2],10) || 0);
+  }
+
+  function minutesDiff(a,b){
+    return Math.round((a.getTime() - b.getTime()) / 60000);
+  }
+
+  function fmtDelay(min){
+    const n = Number(min || 0);
+    if(n <= -1) return Math.abs(n) + " dk erken";
+    if(n >= 1) return n + " dk geç";
+    return "Planında";
+  }
+
+  function formatKm(km){
+    if(!Number.isFinite(km) || km < 0) return "—";
+    if(km < 1) return Math.round(km * 1000) + " m";
+    return km.toFixed(2) + " km";
+  }
+
+  function distKm(a,b){
+    const R = 6371;
+    const toRad = x => x * Math.PI / 180;
+    const dLat = toRad(Number(b.lat) - Number(a.lat));
+    const dLng = toRad(Number(b.lng) - Number(a.lng));
+    const lat1 = toRad(Number(a.lat));
+    const lat2 = toRad(Number(b.lat));
+
+    const h =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1) * Math.cos(lat2) *
+      Math.sin(dLng/2) * Math.sin(dLng/2);
+
+    return 2 * R * Math.atan2(Math.sqrt(h), Math.sqrt(1-h));
+  }
+
+  function routeIndex(name){
+    const n = norm(name);
+    if(!n || !Array.isArray(routeStops)) return -1;
+    return routeStops.findIndex(x => norm(x) === n);
+  }
+
+  function findCoord(name){
+    const n = norm(name);
+    if(!n || !Array.isArray(routeCoords)) return null;
+
+    const item = routeCoords.find(x => norm(x.stop) === n);
+    if(!item) return null;
+
+    const lat = Number(item.lat);
+    const lng = Number(item.lng);
+    if(!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+    return { lat, lng };
+  }
+
+  function baseDate(){
+    if(tripDate && /^\d{4}-\d{2}-\d{2}$/.test(tripDate)){
+      return new Date(tripDate + "T00:00:00");
+    }
+
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    return d;
+  }
+
+  function buildSchedule(){
+    if(!Array.isArray(scheduleItems) || !scheduleItems.length) return [];
+
+    let prev = null;
+    let carry = 0;
+
+    return scheduleItems
+      .map(x => ({
+        stop: String(x.stop || x.stop_name || "").trim(),
+        time: String(x.time || x.planned_time || "").trim(),
+        isTimed: Number(x.is_timed || x.isTimed || 0)
+      }))
+      .filter(x => x.stop && x.time)
+      .map(x => {
+        let cur = parseTime(x.time);
+        if(!Number.isFinite(cur)) return null;
+
+        cur += carry;
+
+        if(prev !== null && cur < prev){
+          carry += 1440;
+          cur += 1440;
+        }
+
+        prev = cur;
+
+        const d = baseDate();
+        d.setMinutes(d.getMinutes() + cur);
+
+        return {
+          stop:x.stop,
+          plan:x.time,
+          planDate:d,
+          routeIndex:routeIndex(x.stop),
+          isTimed:x.isTimed
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function liveStopName(){
+    return String(q("#liveCurrentStopName")?.textContent || "").trim();
+  }
+
+  function liveDisplaySpeed(){
+    if(!Number.isFinite(lastMeasuredSpeedKmh)) return 0;
+    if(lastMeasuredSpeedKmh < 3) return 0;
+    return Math.round(lastMeasuredSpeedKmh);
+  }
+
+  function updateSpeedDisplay(){
+    setText("#liveSpeedText", liveDisplaySpeed() + " km/sa");
+  }
+
+  function acceptSpeed(kmh){
+    if(!Number.isFinite(kmh)) return;
+
+    if(kmh < 3) kmh = 0;
+    if(kmh > 160) return;
+
+    if(!Number.isFinite(lastMeasuredSpeedKmh)){
+      lastMeasuredSpeedKmh = kmh;
+    }else{
+      lastMeasuredSpeedKmh = (lastMeasuredSpeedKmh * 0.55) + (kmh * 0.45);
+    }
+
+    if(lastMeasuredSpeedKmh < 3) lastMeasuredSpeedKmh = 0;
+
+    const shown = liveDisplaySpeed();
+
+    if(shown >= 15){
+      speedHistory.push(shown);
+      if(speedHistory.length > 10) speedHistory.shift();
+    }
+
+    updateSpeedDisplay();
+  }
+
+  function measureSpeedFromGps(coords, point){
+    const gpsSpeed = Number(coords.speed);
+
+    if(Number.isFinite(gpsSpeed) && gpsSpeed > 0.5){
+      acceptSpeed(gpsSpeed * 3.6);
+      return;
+    }
+
+    if(!lastGpsPoint){
+      acceptSpeed(0);
+      return;
+    }
+
+    const dt = Math.max(0, (point.t - lastGpsPoint.t) / 1000);
+    if(dt < 1 || dt > 20) return;
+
+    const km = distKm(lastGpsPoint, point);
+    const meters = km * 1000;
+
+    const acc = Number(point.accuracy || 999);
+    const jitterLimit = Math.max(4, Math.min(25, acc * 0.35));
+
+    if(meters < jitterLimit){
+      acceptSpeed(0);
+      return;
+    }
+
+    const kmh = km / (dt / 3600);
+    acceptSpeed(kmh);
+  }
+
+  function etaSpeedKmh(){
+    const live = liveDisplaySpeed();
+
+    if(live >= 25){
+      return Math.min(95, Math.max(35, live));
+    }
+
+    const hist = speedHistory.filter(x => Number.isFinite(x) && x >= 15);
+
+    if(hist.length){
+      const avg = hist.reduce((a,b) => a + b, 0) / hist.length;
+      if(avg >= 20) return Math.min(95, Math.max(35, avg));
+    }
+
+    return 70; // Sadece ETA iç hesabı. Ekrana yazılmaz.
+  }
+
+  function pickTarget(schedule, liveName){
+    if(!schedule.length) return null;
+
+    const liveIdx = routeIndex(liveName);
+    const liveNorm = norm(liveName);
+
+    let target = null;
+
+    if(liveIdx >= 0){
+      target = schedule.find(x => x.routeIndex >= liveIdx);
+    }
+
+    if(!target && liveNorm){
+      target = schedule.find(x => norm(x.stop) === liveNorm);
+    }
+
+    if(!target){
+      const now = new Date();
+      target = schedule.find(x => x.planDate.getTime() >= now.getTime() - 5 * 60000);
+    }
+
+    return target || schedule[schedule.length - 1];
+  }
+
+  function updateAllDistances(){
+    if(!lastPos) return;
+
+    document.querySelectorAll(".stop-distance-value[data-stop-name]").forEach(el => {
+      const name = el.getAttribute("data-stop-name") || "";
+      const c = findCoord(name);
+      if(!c) return;
+
+      el.textContent = formatKm(distKm(lastPos, c));
+    });
+  }
+
+  function updateStatus(etaMain){
+    const etaEl = q("#liveEtaValue");
+    const statusPill = q("#liveCurrentCard .status-pill.live");
+
+    if(etaEl) etaEl.textContent = etaMain;
+    if(statusPill) statusPill.textContent = etaMain;
+
+    window.dispatchEvent(new CustomEvent("continueEtaUpdated", {
+      detail:{ etaMain }
+    }));
+  }
+
+  function writeRuntime(liveName, gpsKm, etaMain){
+    const now = Date.now();
+    const displaySpeed = liveDisplaySpeed();
+    const sig = [liveName, displaySpeed, gpsKm, etaMain].join("|");
+
+    if(sig === lastWriteSig && now - lastWriteAt < 2500) return;
+
+    lastWriteSig = sig;
+    lastWriteAt = now;
+
+    const url =
+      `/api/live-runtime-state?write=1` +
+      `&trip_id=${encodeURIComponent(tripId)}` +
+      `&live_stop=${encodeURIComponent(liveName || "")}` +
+      `&speed=${encodeURIComponent(displaySpeed)}` +
+      `&gps_km=${encodeURIComponent(gpsKm || "")}` +
+      `&eta_main=${encodeURIComponent(etaMain || "")}` +
+      `&eta_sub=${encodeURIComponent("continue-live-speed-engine")}` +
+      `&_=${Date.now()}`;
+
+    fetch(url, {
+      method:"GET",
+      credentials:"same-origin",
+      cache:"no-store"
+    }).catch(() => {});
+  }
+
+  function compute(){
+    if(!lastPos) return;
+
+    const liveName = liveStopName();
+    if(!liveName) return;
+
+    const liveCoord = findCoord(liveName);
+    let gpsKm = "—";
+
+    if(liveCoord){
+      const liveKm = distKm(lastPos, liveCoord);
+      gpsKm = formatKm(liveKm);
+      setText("#liveDistanceValue", gpsKm);
+    }
+
+    updateAllDistances();
+
+    const schedule = buildSchedule();
+    const target = pickTarget(schedule, liveName);
+
+    if(!target) return;
+
+    const targetCoord = findCoord(target.stop);
+    if(!targetCoord) return;
+
+    const km = distKm(lastPos, targetCoord);
+    const speed = etaSpeedKmh();
+    const travelMin = Math.max(1, Math.round((km / speed) * 60));
+    const etaDate = new Date(Date.now() + travelMin * 60000);
+    const delayMin = minutesDiff(etaDate, target.planDate);
+    const etaMain = fmtDelay(delayMin);
+
+    updateStatus(etaMain);
+    writeRuntime(liveName, gpsKm, etaMain);
+  }
+
+  function onPosition(pos){
+    const c = pos && pos.coords ? pos.coords : null;
+    if(!c) return;
+
+    const lat = Number(c.latitude);
+    const lng = Number(c.longitude);
+
+    if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    const point = {
+      lat,
+      lng,
+      t: Date.now(),
+      accuracy: Number(c.accuracy || 999)
+    };
+
+    measureSpeedFromGps(c, point);
+
+    lastPos = { lat, lng };
+    lastGpsPoint = point;
+
+    compute();
+  }
+
+  function start(){
+    updateSpeedDisplay();
+    compute();
+
+    if(!navigator.geolocation){
+      console.warn("Canlı hız: geolocation yok");
+      return;
+    }
+
+    navigator.geolocation.watchPosition(onPosition, function(err){
+      console.warn("Canlı hız GPS hatası:", err && err.message ? err.message : err);
+    }, {
+      enableHighAccuracy:true,
+      timeout:10000,
+      maximumAge:1000
+    });
+
+    setInterval(compute, 1500);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", start);
+  }else{
+    start();
+  }
+})();
+</script>
+
+
+<style id="live-bag-emanet-hard-fix-style">
+#liveBagajMetric{
+  position:relative !important;
+}
+
+#liveEmanetMini{
+  position:absolute !important;
+  top:22px !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+  z-index:6 !important;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+  pointer-events:none;
+  color:#fde047 !important;
+  font-size:14px !important;
+  line-height:1 !important;
+  font-weight:1000 !important;
+  letter-spacing:.01em !important;
+  text-shadow:
+    0 0 12px rgba(250,204,21,.36),
+    0 2px 6px rgba(0,0,0,.55);
+}
+
+@media(max-width:430px){
+  #liveEmanetMini{
+    font-size:13px !important;
+    top:21px !important;
+  }
+}
+</style>
+
+<script id="live-bag-emanet-hard-fix-script">
+(function(){
+  const REAL_BAG_COUNT = Number({{ (live_current.bagaj_count if live_current and live_current.bagaj_count is defined else 0) | tojson | safe }}) || 0;
+  const EMANET_COUNT = Number({{ (live_current.emanet_count if live_current and live_current.emanet_count is defined else (live_current.consignment_count if live_current and live_current.consignment_count is defined else 0)) | tojson | safe }}) || 0;
+
+  function applyBagEmanetFix(){
+    const metric = document.getElementById("liveBagajMetric");
+    const bagEl = document.getElementById("liveBagajCount");
+
+    if(bagEl){
+      bagEl.textContent = String(Math.max(0, REAL_BAG_COUNT));
+    }
+
+    if(!metric) return;
+
+    Array.from(metric.querySelectorAll("*")).forEach(el => {
+      const txt = (el.textContent || "").trim();
+      if(el.id !== "liveEmanetMini" && /^\+\s*\d+\s*emanet$/i.test(txt)){
+        el.remove();
+      }
+    });
+
+    let mini = document.getElementById("liveEmanetMini");
+    if(!mini){
+      mini = document.createElement("span");
+      mini.id = "liveEmanetMini";
+      metric.appendChild(mini);
+    }
+
+    if(EMANET_COUNT > 0){
+      mini.textContent = "+" + EMANET_COUNT + " emanet";
+      mini.style.display = "inline-flex";
+    }else{
+      mini.textContent = "";
+      mini.style.display = "none";
+    }
+  }
+
+  applyBagEmanetFix();
+  setInterval(applyBagEmanetFix, 500);
+})();
+</script>
 </body>
 </html>

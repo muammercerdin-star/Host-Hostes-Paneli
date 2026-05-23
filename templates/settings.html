@@ -1,204 +1,585 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ayarlar</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ayarlar</title>
 
-  <style>
-    *{ box-sizing:border-box; }
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    body{
-      margin:0;
-      min-height:100vh;
-      background:
-        radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 34%),
-        linear-gradient(180deg,#f8fbff,#eaf3ff);
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      color:#0f172a;
+<style>
+  :root {
+    --bg:#0d0f14;
+    --bg-card:#13161e;
+    --bg-row:#181c27;
+    --bg-hover:#1e2333;
+    --border:rgba(255,255,255,.07);
+    --border-act:rgba(255,255,255,.14);
+    --text:#e8edf5;
+    --text-sub:rgba(232,237,245,.52);
+    --text-dim:rgba(232,237,245,.30);
+    --accent:#3b8bff;
+    --accent-glow:rgba(59,139,255,.22);
+    --amber:#f5a623;
+    --green:#30d988;
+    --red:#ff4f4f;
+    --purple:#a769ff;
+    --slate:#94a3b8;
+
+    --font-display:'Barlow Condensed',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    --font-body:'Barlow',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+
+    --r-card:20px;
+    --r-row:14px;
+  }
+
+  *,*::before,*::after{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+  }
+
+  html,body{
+    min-height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .page{
+    position:relative;
+    z-index:1;
+    max-width:480px;
+    min-height:100vh;
+    margin:0 auto;
+    padding:0 0 40px;
+  }
+
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:52px 24px 32px;
+    background:linear-gradient(160deg,#0e1624 0%,#0d0f14 62%);
+    border-bottom:1px solid var(--border);
+  }
+
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:-60px;
+    right:-40px;
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(59,139,255,.18) 0%,transparent 70%);
+    pointer-events:none;
+  }
+
+  .hero::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+    opacity:.45;
+  }
+
+  .hero-tag{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-family:var(--font-display);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:10px;
+    opacity:0;
+    animation:fadeUp .5s .05s forwards;
+  }
+
+  .hero-tag::before{
+    content:"";
+    width:24px;
+    height:1px;
+    background:var(--accent);
+    display:block;
+  }
+
+  .hero h1{
+    position:relative;
+    font-family:var(--font-display);
+    font-size:54px;
+    font-weight:800;
+    letter-spacing:-.02em;
+    line-height:.95;
+    color:var(--text);
+    opacity:0;
+    animation:fadeUp .5s .12s forwards;
+  }
+
+  .hero h1 span{
+    display:block;
+    max-width:340px;
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:.01em;
+    color:var(--text-sub);
+    margin-top:8px;
+    line-height:1.32;
+  }
+
+  .content{
+    padding:24px 16px 0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .group-label{
+    font-family:var(--font-display);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    padding:16px 4px 6px;
+    opacity:0;
+    animation:fadeUp .4s forwards;
+  }
+
+  .card-group{
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    overflow:hidden;
+    opacity:0;
+    animation:fadeUp .4s forwards;
+  }
+
+  .setting-row{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    min-height:76px;
+    padding:14px 16px;
+    background:transparent;
+    border:none;
+    border-bottom:1px solid var(--border);
+    cursor:pointer;
+    text-decoration:none;
+    color:inherit;
+    transition:background .15s,border-color .15s,transform .1s;
+  }
+
+  .setting-row:last-child{
+    border-bottom:none;
+  }
+
+  .setting-row:active{
+    transform:scale(.985);
+    background:var(--bg-hover);
+  }
+
+  @media(hover:hover){
+    .setting-row:hover{
+      background:var(--bg-hover);
+    }
+  }
+
+  .setting-row::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:22%;
+    bottom:22%;
+    width:2px;
+    border-radius:2px;
+    opacity:0;
+    transition:opacity .2s;
+  }
+
+  .setting-row:hover::before,
+  .setting-row:focus::before,
+  .setting-row:active::before{
+    opacity:1;
+  }
+
+  .setting-row.c-blue::before{ background:var(--accent); }
+  .setting-row.c-amber::before{ background:var(--amber); }
+  .setting-row.c-green::before{ background:var(--green); }
+  .setting-row.c-red::before{ background:var(--red); }
+  .setting-row.c-purple::before{ background:var(--purple); }
+  .setting-row.c-slate::before{ background:var(--slate); }
+
+  .row-icon{
+    width:44px;
+    height:44px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    flex-shrink:0;
+  }
+
+  .row-icon.blue{ background:rgba(59,139,255,.14); }
+  .row-icon.amber{ background:rgba(245,166,35,.13); }
+  .row-icon.green{ background:rgba(48,217,136,.12); }
+  .row-icon.red{ background:rgba(255,79,79,.12); }
+  .row-icon.purple{ background:rgba(167,105,255,.12); }
+  .row-icon.slate{ background:rgba(148,163,184,.10); }
+
+  .row-text{
+    flex:1;
+    min-width:0;
+  }
+
+  .row-title{
+    font-family:var(--font-display);
+    font-size:21px;
+    font-weight:800;
+    letter-spacing:.01em;
+    line-height:1.05;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .row-sub{
+    font-size:13px;
+    color:var(--text-sub);
+    margin-top:3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .row-badge{
+    font-family:var(--font-display);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.06em;
+    padding:4px 8px;
+    border-radius:7px;
+    background:rgba(48,217,136,.15);
+    color:var(--green);
+    border:1px solid rgba(48,217,136,.25);
+    flex-shrink:0;
+    white-space:nowrap;
+  }
+
+  .row-badge.amber{
+    background:rgba(245,166,35,.14);
+    color:var(--amber);
+    border-color:rgba(245,166,35,.24);
+  }
+
+  .row-badge.red{
+    background:rgba(255,79,79,.13);
+    color:var(--red);
+    border-color:rgba(255,79,79,.24);
+  }
+
+  .row-badge.blue{
+    background:rgba(59,139,255,.14);
+    color:#7db4ff;
+    border-color:rgba(59,139,255,.24);
+  }
+
+  .row-badge.slate{
+    background:rgba(148,163,184,.10);
+    color:var(--slate);
+    border-color:rgba(148,163,184,.20);
+  }
+
+  .row-chevron{
+    color:var(--text-dim);
+    font-size:22px;
+    line-height:1;
+    flex-shrink:0;
+    transition:transform .2s,color .2s;
+  }
+
+  .setting-row:hover .row-chevron{
+    transform:translateX(3px);
+    color:var(--text-sub);
+  }
+
+  .back-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-height:58px;
+    margin:24px 16px 0;
+    padding:16px;
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    font-family:var(--font-display);
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:.04em;
+    color:var(--accent);
+    cursor:pointer;
+    text-decoration:none;
+    transition:background .15s,border-color .15s;
+    opacity:0;
+    animation:fadeUp .4s .55s forwards;
+  }
+
+  .back-btn:hover{
+    background:var(--bg-hover);
+    border-color:rgba(59,139,255,.3);
+  }
+
+  .version-tag{
+    text-align:center;
+    margin-top:20px;
+    font-size:12px;
+    color:var(--text-dim);
+    letter-spacing:.08em;
+    font-family:var(--font-display);
+    opacity:0;
+    animation:fadeUp .4s .6s forwards;
+  }
+
+  .toast{
+    position:fixed;
+    left:16px;
+    right:16px;
+    bottom:18px;
+    max-width:448px;
+    margin:0 auto;
+    padding:14px 15px;
+    border-radius:18px;
+    background:rgba(24,28,39,.96);
+    color:var(--text);
+    border:1px solid var(--border-act);
+    box-shadow:0 18px 50px rgba(0,0,0,.45);
+    font-weight:750;
+    line-height:1.3;
+    opacity:0;
+    transform:translateY(14px);
+    pointer-events:none;
+    transition:.22s ease;
+    z-index:20;
+  }
+
+  .toast.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(12px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  .d1{ animation-delay:.10s; }
+  .d2{ animation-delay:.16s; }
+  .d3{ animation-delay:.22s; }
+  .d4{ animation-delay:.28s; }
+  .d5{ animation-delay:.34s; }
+  .d6{ animation-delay:.40s; }
+
+  @media(max-width:390px){
+    .hero{
+      padding:46px 20px 28px;
     }
 
-    .settings-shell{
-      width:min(94vw,720px);
-      margin:18px auto 28px;
-      padding:16px;
-      border-radius:30px;
-      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
-      border:1px solid rgba(255,255,255,.82);
-      box-shadow:0 28px 80px rgba(15,23,42,.18);
+    .hero h1{
+      font-size:48px;
     }
 
-    .settings-hero{
-      padding:24px 20px;
-      border-radius:26px;
-      background:linear-gradient(145deg,#2563eb,#06b6d4);
-      color:#fff;
-      box-shadow:0 18px 38px rgba(37,99,235,.22);
-      margin-bottom:14px;
+    .hero h1 span{
+      font-size:18px;
     }
 
-    .settings-hero h1{
-      margin:0;
-      font-size:34px;
-      line-height:1;
-      font-weight:950;
+    .content{
+      padding-left:12px;
+      padding-right:12px;
     }
 
-    .settings-hero p{
-      margin:8px 0 0;
-      font-size:15px;
-      font-weight:700;
-      color:rgba(255,255,255,.88);
-    }
-
-    .settings-list{
-      overflow:hidden;
-      border-radius:24px;
-      background:#fff;
-      border:1px solid #e5edf6;
-      box-shadow:0 14px 34px rgba(15,23,42,.10);
-    }
-
-    .settings-item{
-      min-height:72px;
-      display:grid;
-      grid-template-columns:46px 1fr 30px;
-      align-items:center;
+    .setting-row{
       gap:12px;
-      padding:12px 14px;
-      border-bottom:1px solid #e5edf6;
-      text-decoration:none;
-      color:#10203a;
+      padding:13px 13px;
     }
 
-    .settings-item:last-child{
-      border-bottom:none;
-    }
-
-    .settings-ico{
+    .row-icon{
       width:42px;
       height:42px;
-      display:grid;
-      place-items:center;
-      border-radius:16px;
-      background:#eff6ff;
-      font-size:22px;
     }
 
-    .settings-title{
-      font-size:17px;
-      font-weight:950;
-      line-height:1.05;
+    .row-title{
+      font-size:20px;
     }
-
-    .settings-desc{
-      margin-top:4px;
-      font-size:13px;
-      color:#64748b;
-      font-weight:650;
-      line-height:1.2;
-    }
-
-    .settings-arrow{
-      font-size:30px;
-      font-weight:900;
-      color:#64748b;
-      justify-self:end;
-    }
-
-    .back-btn{
-      margin-top:14px;
-      min-height:56px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:21px;
-      background:#fff;
-      color:#2563eb;
-      border:1px solid #e5edf6;
-      box-shadow:0 12px 28px rgba(15,23,42,.10);
-      text-decoration:none;
-      font-size:17px;
-      font-weight:950;
-    }
-  </style>
+  }
+</style>
 </head>
 
 <body>
-  <main class="settings-shell">
-    <section class="settings-hero">
-      <h1>⚙️ Ayarlar</h1>
-      <p>Panel şifresi, görünüm ve sistem tercihleri.</p>
-    </section>
+{% set sub_badge = "Deneme" %}
+{% set sub_badge_class = "amber" %}
+{% set sub_text = "30 gün deneme ve ödeme durumu" %}
 
-    <section class="settings-list">
-<a class="settings-item" href="/ayarlar/abonelik">
-        <span class="settings-ico">💳</span>
-        <span>
-          <div class="settings-title">Abonelik</div>
-          <div class="settings-desc">30 gün deneme ve ödeme durumu</div>
-        </span>
-        <span class="settings-arrow">›</span>
+{% if subscription_info %}
+  {% if subscription_info.status == "active" %}
+    {% set sub_badge = subscription_info.plan or "Aktif" %}
+    {% set sub_badge_class = "" %}
+    {% set sub_text = "Abonelik aktif" %}
+  {% elif subscription_info.status == "trial" %}
+    {% set sub_badge = "Deneme" %}
+    {% set sub_badge_class = "amber" %}
+    {% if subscription_info.days_left is not none %}
+      {% set sub_text = subscription_info.days_left ~ " gün deneme süresi kaldı" %}
+    {% endif %}
+  {% elif subscription_info.expired %}
+    {% set sub_badge = "Bitti" %}
+    {% set sub_badge_class = "red" %}
+    {% set sub_text = "Deneme süresi dolmuş görünüyor" %}
+  {% endif %}
+{% endif %}
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-tag">Sistem</div>
+    <h1>Ayarlar
+      <span>Panel şifresi, görünüm ve sistem tercihleri</span>
+    </h1>
+  </div>
+
+  <div class="content">
+
+    <div class="group-label d1">Hesap</div>
+
+    <div class="card-group d2">
+      <a href="/ayarlar/abonelik" class="setting-row c-blue">
+        <div class="row-icon blue">💳</div>
+        <div class="row-text">
+          <div class="row-title">Abonelik</div>
+          <div class="row-sub">{{ sub_text }}</div>
+        </div>
+        <span class="row-badge {{ sub_badge_class }}">{{ sub_badge }}</span>
+        <span class="row-chevron">›</span>
       </a>
 
+      <a href="/ayarlar/profil" class="setting-row c-blue">
+        <div class="row-icon blue">👤</div>
+        <div class="row-text">
+          <div class="row-title">Profil Bilgileri</div>
+          <div class="row-sub">
+            {% if admin_profile and admin_profile.full_name %}
+              {{ admin_profile.full_name }}
+            {% else %}
+              Ad, cep telefonu ve fotoğraf
+            {% endif %}
+          </div>
+        </div>
+        {% if admin_profile and admin_profile.full_name %}
+          <span class="row-badge blue">Hazır</span>
+        {% endif %}
+        <span class="row-chevron">›</span>
+      </a>
+    </div>
 
-      <a class="settings-item" href="/ayarlar/profil">
-        <span class="settings-ico">👤</span>
-        <span>
-          <div class="settings-title">Profil Bilgileri</div>
-          <div class="settings-desc">Ad, cep telefonu ve fotoğraf</div>
-        </span>
-        <span class="settings-arrow">›</span>
+    <div class="group-label d3">Güvenlik</div>
+
+    <div class="card-group d4">
+      <a href="/ayarlar/sifre" class="setting-row c-amber">
+        <div class="row-icon amber">🔐</div>
+        <div class="row-text">
+          <div class="row-title">Şifre Değiştir</div>
+          <div class="row-sub">Panel giriş şifresini güncelle</div>
+        </div>
+        <span class="row-chevron">›</span>
       </a>
 
-      <a class="settings-item" href="/ayarlar/sifre">
-        <span class="settings-ico">🔐</span>
-        <span>
-          <div class="settings-title">Şifre Değiştir</div>
-          <div class="settings-desc">Panel giriş şifresini güncelle</div>
-        </span>
-        <span class="settings-arrow">›</span>
+      <a href="/ayarlar/kurtarma-kodu" class="setting-row c-red">
+        <div class="row-icon red">🗝️</div>
+        <div class="row-text">
+          <div class="row-title">Kurtarma Kodu</div>
+          <div class="row-sub">Şifre unutulursa hesabı kurtar</div>
+        </div>
+        <span class="row-chevron">›</span>
+      </a>
+    </div>
+
+    <div class="group-label d5">Sistem</div>
+
+    <div class="card-group d6">
+      <a href="#" class="setting-row c-purple" onclick="showSoon(event)">
+        <div class="row-icon purple">🔊</div>
+        <div class="row-text">
+          <div class="row-title">Sesli Robot</div>
+          <div class="row-sub">Sesli uyarı ve komut ayarları</div>
+        </div>
+        <span class="row-badge slate">Hazırlık</span>
+        <span class="row-chevron">›</span>
       </a>
 
-      <a class="settings-item" href="/ayarlar/kurtarma-kodu">
-        <span class="settings-ico">🧾</span>
-        <span>
-          <div class="settings-title">Kurtarma Kodu</div>
-          <div class="settings-desc">Şifre unutulursa hesabı kurtar</div>
-        </span>
-        <span class="settings-arrow">›</span>
+      <a href="/rapor-arsiv" class="setting-row c-amber">
+        <div class="row-icon amber">📁</div>
+        <div class="row-text">
+          <div class="row-title">Rapor Arşivi</div>
+          <div class="row-sub">Bitmiş sefer dosyalarını görüntüle</div>
+        </div>
+        <span class="row-chevron">›</span>
       </a>
 
-
-      <a class="settings-item" href="#">
-        <span class="settings-ico">🔊</span>
-        <span>
-          <div class="settings-title">Sesli Robot</div>
-          <div class="settings-desc">Sesli uyarı ve komut ayarları</div>
-        </span>
-        <span class="settings-arrow">›</span>
+      <a href="/ayarlar/yedekleme" class="setting-row c-slate">
+        <div class="row-icon slate">💾</div>
+        <div class="row-text">
+          <div class="row-title">Yedekleme</div>
+          <div class="row-sub">Veritabanı ve raporları yedekle</div>
+        </div>
+        <span class="row-chevron">›</span>
       </a>
+    </div>
 
-      <a class="settings-item" href="/rapor-arsiv">
-        <span class="settings-ico">📁</span>
-        <span>
-          <div class="settings-title">Rapor Arşivi</div>
-          <div class="settings-desc">Bitmiş sefer dosyalarını görüntüle</div>
-        </span>
-        <span class="settings-arrow">›</span>
-      </a>
+  </div>
 
-      <a class="settings-item" href="/ayarlar/yedekleme">
-        <span class="settings-ico">💾</span>
-        <span>
-          <div class="settings-title">Yedekleme</div>
-          <div class="settings-desc">Veritabanı ve raporları yedekle</div>
-        </span>
-        <span class="settings-arrow">›</span>
-      </a>
-    </section>
+  <a href="/" class="back-btn">← Ana ekrana dön</a>
 
-    <a class="back-btn" href="/">← Ana ekrana dön</a>
-  </main>
+  <div class="version-tag">MUAVİN ASİSTANI · YEREL PANEL</div>
+
+</div>
+
+<div class="toast" id="settingsToast">Sesli Robot ayar sayfasını ikinci aşamada gerçek ayarlara bağlayacağız.</div>
+
+<script>
+  function showSoon(ev){
+    ev.preventDefault();
+
+    const toast = document.getElementById("settingsToast");
+    if(!toast) return false;
+
+    toast.classList.add("show");
+
+    clearTimeout(window.__settingsToastTimer);
+    window.__settingsToastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 2300);
+
+    return false;
+  }
+</script>
 </body>
 </html>

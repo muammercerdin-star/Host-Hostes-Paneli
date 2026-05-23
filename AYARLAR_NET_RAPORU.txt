@@ -1,0 +1,3971 @@
+
+
+==========================================================================================
+AYARLAR NET RAPORU - AKTİF DOSYALAR
+==========================================================================================
+
+Aktif bulunan dosyalar:
+- app.py
+- modules/settings_panel.py
+- modules/subscription_panel.py
+- modules/backup_panel.py
+- modules/reports_panel.py
+- templates/settings.html
+- templates/settings_profile.html
+- templates/settings_password.html
+- templates/settings_recovery.html
+- templates/settings_subscription.html
+- templates/settings_backup.html
+- templates/settings_package_requests.html
+- templates/report_archive.html
+- templates/reports.html
+- templates/forgot_password.html
+- templates/user_reset.html
+
+
+==========================================================================================
+1) ROUTE / BLUEPRINT / ENDPOINT HARİTASI
+==========================================================================================
+
+
+--- app.py:16 ---
+   14: from flask import (
+   15:     Flask,
+   16:     render_template,
+   17:     request,
+   18:     redirect,
+   19:     url_for,
+   20:     jsonify,
+   21:     g,
+   22:     session,
+   23:     abort,
+   24:     send_from_directory,
+   25:     send_file,
+
+--- app.py:18 ---
+   16:     render_template,
+   17:     request,
+   18:     redirect,
+   19:     url_for,
+   20:     jsonify,
+   21:     g,
+   22:     session,
+   23:     abort,
+   24:     send_from_directory,
+   25:     send_file,
+   26:     make_response,
+   27: )
+
+--- app.py:19 ---
+   17:     request,
+   18:     redirect,
+   19:     url_for,
+   20:     jsonify,
+   21:     g,
+   22:     session,
+   23:     abort,
+   24:     send_from_directory,
+   25:     send_file,
+   26:     make_response,
+   27: )
+   28: from werkzeug.utils import secure_filename
+
+--- app.py:22 ---
+   20:     jsonify,
+   21:     g,
+   22:     session,
+   23:     abort,
+   24:     send_from_directory,
+   25:     send_file,
+   26:     make_response,
+   27: )
+   28: from werkzeug.utils import secure_filename
+   29: from werkzeug.security import generate_password_hash, check_password_hash
+   30: 
+   31: from speedlimit import bp_speed
+
+--- app.py:40 ---
+   38: # =========================================================
+   39: 
+   40: def env_bool(name: str, default: bool = False) -> bool:
+   41:     raw = os.getenv(name)
+   42:     if raw is None:
+   43:         return default
+   44:     return raw.strip().lower() in {"1", "true", "yes", "on"}
+   45: 
+   46: 
+   47: app = Flask(__name__)
+   48: app.secret_key = os.getenv("SECRET_KEY", "degistir-beni")
+   49: 
+
+--- app.py:60 ---
+   58: # Admin Profil / İlk Kurulum
+   59: # =========================================================
+   60: def ensure_admin_profile_table(db):
+   61:     db.execute("""
+   62:         CREATE TABLE IF NOT EXISTS admin_profile(
+   63:             id INTEGER PRIMARY KEY CHECK(id=1),
+   64:             full_name TEXT NOT NULL DEFAULT '',
+   65:             phone TEXT NOT NULL DEFAULT '',
+   66:             photo_path TEXT NOT NULL DEFAULT '',
+   67:             created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+   68:             updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+   69:         )
+
+--- app.py:73 ---
+   71: 
+   72: 
+   73: def get_admin_profile():
+   74:     db = get_db()
+   75:     ensure_admin_profile_table(db)
+   76:     row = db.execute("""
+   77:         SELECT id, full_name, phone, photo_path, created_at, updated_at
+   78:         FROM admin_profile
+   79:         WHERE id=1
+   80:     """).fetchone()
+   81: 
+   82:     if not row:
+
+--- app.py:95 ---
+   93: 
+   94: 
+   95: def admin_profile_exists():
+   96:     prof = get_admin_profile()
+   97:     return bool(prof and prof.get("full_name"))
+   98: 
+   99: 
+  100: def save_admin_profile(full_name, phone, photo_path=""):
+  101:     full_name = (full_name or "").strip()
+  102:     phone = (phone or "").strip()
+  103:     photo_path = (photo_path or "").strip()
+  104: 
+
+--- app.py:100 ---
+   98: 
+   99: 
+  100: def save_admin_profile(full_name, phone, photo_path=""):
+  101:     full_name = (full_name or "").strip()
+  102:     phone = (phone or "").strip()
+  103:     photo_path = (photo_path or "").strip()
+  104: 
+  105:     db = get_db()
+  106:     ensure_admin_profile_table(db)
+  107: 
+  108:     old = get_admin_profile()
+  109:     if not photo_path and old:
+
+--- app.py:125 ---
+  123: 
+  124: 
+  125: def save_profile_photo(file_storage):
+  126:     if not file_storage or not getattr(file_storage, "filename", ""):
+  127:         return ""
+  128: 
+  129:     filename = secure_filename(file_storage.filename or "")
+  130:     ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+  131: 
+  132:     allowed = {"jpg", "jpeg", "png", "webp"}
+  133:     if ext not in allowed:
+  134:         return ""
+
+--- app.py:147 ---
+  145: 
+  146: @app.context_processor
+  147: def inject_admin_profile():
+  148:     try:
+  149:         return {"admin_profile": get_admin_profile()}
+  150:     except Exception:
+  151:         return {"admin_profile": None}
+  152: 
+  153: # =========================================================
+  154: # Admin Şifre Yönetimi
+  155: # =========================================================
+  156: def ensure_security_table(db):
+
+--- app.py:156 ---
+  154: # Admin Şifre Yönetimi
+  155: # =========================================================
+  156: def ensure_security_table(db):
+  157:     db.execute("""
+  158:         CREATE TABLE IF NOT EXISTS admin_security(
+  159:             id INTEGER PRIMARY KEY CHECK(id=1),
+  160:             password_hash TEXT NOT NULL,
+  161:             updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+  162:         )
+  163:     """)
+  164: 
+  165: 
+
+--- app.py:166 ---
+  164: 
+  165: 
+  166: def get_admin_password_hash(db):
+  167:     ensure_security_table(db)
+  168:     row = db.execute("SELECT password_hash FROM admin_security WHERE id=1").fetchone()
+  169:     return row["password_hash"] if row else ""
+  170: 
+  171: 
+  172: def verify_admin_password(password):
+  173:     password = (password or "").strip()
+  174:     if not password:
+  175:         return False
+... sonuç sınırı doldu ...
+
+--- modules/settings_panel.py:1 ---
+    1: from flask import render_template, request, redirect, url_for, session
+    2: 
+    3: 
+    4: def register_settings_routes(app, deps):
+    5:     admin_profile_exists = deps["admin_profile_exists"]
+    6:     verify_admin_password = deps["verify_admin_password"]
+    7:     issue_csrf = deps["issue_csrf"]
+    8:     get_csrf = deps["get_csrf"]
+    9: 
+   10:     reset_admin_owner = deps["reset_admin_owner"]
+
+--- modules/settings_panel.py:4 ---
+    2: 
+    3: 
+    4: def register_settings_routes(app, deps):
+    5:     admin_profile_exists = deps["admin_profile_exists"]
+    6:     verify_admin_password = deps["verify_admin_password"]
+    7:     issue_csrf = deps["issue_csrf"]
+    8:     get_csrf = deps["get_csrf"]
+    9: 
+   10:     reset_admin_owner = deps["reset_admin_owner"]
+   11:     verify_recovery_code = deps["verify_recovery_code"]
+   12:     get_recovery_code_hash = deps["get_recovery_code_hash"]
+   13:     make_recovery_code = deps["make_recovery_code"]
+
+--- modules/settings_panel.py:24 ---
+   22:     start_trial_if_missing = deps["start_trial_if_missing"]
+   23: 
+   24:     def reset_user_page():
+   25:         if not admin_profile_exists():
+   26:             return redirect(url_for("setup_page"))
+   27: 
+   28:         error = ""
+   29: 
+   30:         if request.method == "POST":
+   31:             recovery_code = (request.form.get("recovery_code") or "").strip()
+   32: 
+   33:             if not verify_recovery_code(recovery_code):
+
+--- modules/settings_panel.py:26 ---
+   24:     def reset_user_page():
+   25:         if not admin_profile_exists():
+   26:             return redirect(url_for("setup_page"))
+   27: 
+   28:         error = ""
+   29: 
+   30:         if request.method == "POST":
+   31:             recovery_code = (request.form.get("recovery_code") or "").strip()
+   32: 
+   33:             if not verify_recovery_code(recovery_code):
+   34:                 error = "Kurtarma kodu yanlış."
+   35:             else:
+
+--- modules/settings_panel.py:31 ---
+   29: 
+   30:         if request.method == "POST":
+   31:             recovery_code = (request.form.get("recovery_code") or "").strip()
+   32: 
+   33:             if not verify_recovery_code(recovery_code):
+   34:                 error = "Kurtarma kodu yanlış."
+   35:             else:
+   36:                 reset_admin_owner()
+   37:                 session.clear()
+   38:                 return redirect(url_for("onboarding_page"))
+   39: 
+   40:         return render_template("user_reset.html", error=error, csrf_token=get_csrf())
+
+--- modules/settings_panel.py:37 ---
+   35:             else:
+   36:                 reset_admin_owner()
+   37:                 session.clear()
+   38:                 return redirect(url_for("onboarding_page"))
+   39: 
+   40:         return render_template("user_reset.html", error=error, csrf_token=get_csrf())
+   41: 
+   42:     def login():
+   43:         if not admin_profile_exists():
+   44:             return redirect(url_for("setup_page"))
+   45: 
+   46:         if request.method == "POST":
+
+--- modules/settings_panel.py:38 ---
+   36:                 reset_admin_owner()
+   37:                 session.clear()
+   38:                 return redirect(url_for("onboarding_page"))
+   39: 
+   40:         return render_template("user_reset.html", error=error, csrf_token=get_csrf())
+   41: 
+   42:     def login():
+   43:         if not admin_profile_exists():
+   44:             return redirect(url_for("setup_page"))
+   45: 
+   46:         if request.method == "POST":
+   47:             pwd = (request.form.get("password") or "").strip()
+
+--- modules/settings_panel.py:40 ---
+   38:                 return redirect(url_for("onboarding_page"))
+   39: 
+   40:         return render_template("user_reset.html", error=error, csrf_token=get_csrf())
+   41: 
+   42:     def login():
+   43:         if not admin_profile_exists():
+   44:             return redirect(url_for("setup_page"))
+   45: 
+   46:         if request.method == "POST":
+   47:             pwd = (request.form.get("password") or "").strip()
+   48: 
+   49:             if verify_admin_password(pwd):
+
+--- modules/settings_panel.py:42 ---
+   40:         return render_template("user_reset.html", error=error, csrf_token=get_csrf())
+   41: 
+   42:     def login():
+   43:         if not admin_profile_exists():
+   44:             return redirect(url_for("setup_page"))
+   45: 
+   46:         if request.method == "POST":
+   47:             pwd = (request.form.get("password") or "").strip()
+   48: 
+   49:             if verify_admin_password(pwd):
+   50:                 session["auth_ok"] = True
+   51:                 issue_csrf()
+
+--- modules/settings_panel.py:44 ---
+   42:     def login():
+   43:         if not admin_profile_exists():
+   44:             return redirect(url_for("setup_page"))
+   45: 
+   46:         if request.method == "POST":
+   47:             pwd = (request.form.get("password") or "").strip()
+   48: 
+   49:             if verify_admin_password(pwd):
+   50:                 session["auth_ok"] = True
+   51:                 issue_csrf()
+   52:                 nxt = request.args.get("next") or url_for("index")
+   53:                 return redirect(nxt)
+
+--- modules/settings_panel.py:47 ---
+   45: 
+   46:         if request.method == "POST":
+   47:             pwd = (request.form.get("password") or "").strip()
+   48: 
+   49:             if verify_admin_password(pwd):
+   50:                 session["auth_ok"] = True
+   51:                 issue_csrf()
+   52:                 nxt = request.args.get("next") or url_for("index")
+   53:                 return redirect(nxt)
+   54: 
+   55:             return render_template("login.html", error="Hatalı şifre", csrf_token=get_csrf())
+   56: 
+
+--- modules/settings_panel.py:50 ---
+   48: 
+   49:             if verify_admin_password(pwd):
+   50:                 session["auth_ok"] = True
+   51:                 issue_csrf()
+   52:                 nxt = request.args.get("next") or url_for("index")
+   53:                 return redirect(nxt)
+   54: 
+   55:             return render_template("login.html", error="Hatalı şifre", csrf_token=get_csrf())
+   56: 
+   57:         return render_template("login.html", csrf_token=get_csrf())
+   58: 
+   59:     def logout():
+
+--- modules/settings_panel.py:52 ---
+   50:                 session["auth_ok"] = True
+   51:                 issue_csrf()
+   52:                 nxt = request.args.get("next") or url_for("index")
+   53:                 return redirect(nxt)
+   54: 
+   55:             return render_template("login.html", error="Hatalı şifre", csrf_token=get_csrf())
+   56: 
+   57:         return render_template("login.html", csrf_token=get_csrf())
+   58: 
+   59:     def logout():
+   60:         session.clear()
+   61:         return redirect(url_for("login"))
+... sonuç sınırı doldu ...
+
+--- modules/subscription_panel.py:4 ---
+    2: from datetime import datetime, timedelta
+    3: 
+    4: from flask import render_template, request, redirect, url_for, jsonify, abort
+    5: 
+    6: 
+    7: TRIAL_DAYS = 30
+    8: 
+    9: PLAN_LEVELS = {
+   10:     "": 0,
+   11:     "Deneme": 2,      # Deneme süresinde Pro özellikleri açık
+   12:     "Standart": 1,
+   13:     "Pro": 2,
+
+--- modules/subscription_panel.py:30 ---
+   28: 
+   29: 
+   30: def register_subscription_routes(app, deps):
+   31:     settings_get = deps["settings_get"]
+   32:     settings_set = deps["settings_set"]
+   33: 
+   34:     def parse_dt_safe(value):
+   35:         try:
+   36:             return datetime.fromisoformat(str(value))
+   37:         except Exception:
+   38:             return None
+   39: 
+
+--- modules/subscription_panel.py:34 ---
+   32:     settings_set = deps["settings_set"]
+   33: 
+   34:     def parse_dt_safe(value):
+   35:         try:
+   36:             return datetime.fromisoformat(str(value))
+   37:         except Exception:
+   38:             return None
+   39: 
+   40:     def format_dt_tr(value):
+   41:         dt = parse_dt_safe(value)
+   42:         if not dt:
+   43:             return value or "-"
+
+--- modules/subscription_panel.py:40 ---
+   38:             return None
+   39: 
+   40:     def format_dt_tr(value):
+   41:         dt = parse_dt_safe(value)
+   42:         if not dt:
+   43:             return value or "-"
+   44:         return dt.strftime("%d.%m.%Y %H:%M")
+   45: 
+   46:     def subscription_defaults():
+   47:         now = datetime.now()
+   48:         ends = now + timedelta(days=TRIAL_DAYS)
+   49: 
+
+--- modules/subscription_panel.py:46 ---
+   44:         return dt.strftime("%d.%m.%Y %H:%M")
+   45: 
+   46:     def subscription_defaults():
+   47:         now = datetime.now()
+   48:         ends = now + timedelta(days=TRIAL_DAYS)
+   49: 
+   50:         return {
+   51:             "subscription_status": "trial",
+   52:             "trial_started_at": now.isoformat(timespec="seconds"),
+   53:             "trial_ends_at": ends.isoformat(timespec="seconds"),
+   54:             "subscription_plan": "Deneme",
+   55:             "payment_method_added": "0",
+
+--- modules/subscription_panel.py:61 ---
+   59:         }
+   60: 
+   61:     def ensure_subscription_state():
+   62:         status = settings_get("subscription_status", "")
+   63: 
+   64:         if status:
+   65:             return
+   66: 
+   67:         data = subscription_defaults()
+   68:         for k, v in data.items():
+   69:             settings_set(k, v)
+   70: 
+
+--- modules/subscription_panel.py:71 ---
+   69:             settings_set(k, v)
+   70: 
+   71:     def get_subscription_info():
+   72:         ensure_subscription_state()
+   73: 
+   74:         status = settings_get("subscription_status", "trial") or "trial"
+   75:         trial_started_at = settings_get("trial_started_at", "") or ""
+   76:         trial_ends_at = settings_get("trial_ends_at", "") or ""
+   77:         plan = settings_get("subscription_plan", "Deneme") or "Deneme"
+   78:         payment_method_added = settings_get("payment_method_added", "0") or "0"
+   79:         subscription_started_at = settings_get("subscription_started_at", "") or ""
+   80:         last_payment_at = settings_get("last_payment_at", "") or ""
+
+--- modules/subscription_panel.py:116 ---
+  114:         }
+  115: 
+  116:     def subscription_allows_access():
+  117:         info = get_subscription_info()
+  118: 
+  119:         if info["status"] == "active":
+  120:             return True
+  121: 
+  122:         if info["status"] == "trial" and not info["expired"]:
+  123:             return True
+  124: 
+  125:         return False
+
+--- modules/subscription_panel.py:127 ---
+  125:         return False
+  126: 
+  127:     def start_trial_if_missing():
+  128:         ensure_subscription_state()
+  129: 
+  130:     def activate_subscription_manually(plan="Standart"):
+  131:         settings_set("subscription_status", "active")
+  132:         settings_set("subscription_plan", plan or "Standart")
+  133:         settings_set("payment_method_added", "1")
+  134:         settings_set("subscription_started_at", datetime.now().isoformat(timespec="seconds"))
+  135:         settings_set("last_payment_at", datetime.now().isoformat(timespec="seconds"))
+  136: 
+
+--- modules/subscription_panel.py:130 ---
+  128:         ensure_subscription_state()
+  129: 
+  130:     def activate_subscription_manually(plan="Standart"):
+  131:         settings_set("subscription_status", "active")
+  132:         settings_set("subscription_plan", plan or "Standart")
+  133:         settings_set("payment_method_added", "1")
+  134:         settings_set("subscription_started_at", datetime.now().isoformat(timespec="seconds"))
+  135:         settings_set("last_payment_at", datetime.now().isoformat(timespec="seconds"))
+  136: 
+  137:     def force_expire_trial_for_test():
+  138:         settings_set("subscription_status", "expired")
+  139:         settings_set("trial_ends_at", (datetime.now() - timedelta(minutes=1)).isoformat(timespec="seconds"))
+
+--- modules/subscription_panel.py:137 ---
+  135:         settings_set("last_payment_at", datetime.now().isoformat(timespec="seconds"))
+  136: 
+  137:     def force_expire_trial_for_test():
+  138:         settings_set("subscription_status", "expired")
+  139:         settings_set("trial_ends_at", (datetime.now() - timedelta(minutes=1)).isoformat(timespec="seconds"))
+  140: 
+  141:     def subscription_dev_mode():
+  142:         try:
+  143:             return os.getenv("SHOW_TEST_CONTROLS", "").strip().lower() in {"1", "true", "yes", "on"}
+  144:         except Exception:
+  145:             return False
+  146: 
+
+--- modules/subscription_panel.py:141 ---
+  139:         settings_set("trial_ends_at", (datetime.now() - timedelta(minutes=1)).isoformat(timespec="seconds"))
+  140: 
+  141:     def subscription_dev_mode():
+  142:         try:
+  143:             return os.getenv("SHOW_TEST_CONTROLS", "").strip().lower() in {"1", "true", "yes", "on"}
+  144:         except Exception:
+  145:             return False
+  146: 
+  147:     def get_effective_plan():
+  148:         info = get_subscription_info()
+  149: 
+  150:         if info.get("status") == "trial" and not info.get("expired"):
+
+--- modules/subscription_panel.py:147 ---
+  145:             return False
+  146: 
+  147:     def get_effective_plan():
+  148:         info = get_subscription_info()
+  149: 
+  150:         if info.get("status") == "trial" and not info.get("expired"):
+  151:             return "Deneme"
+  152: 
+  153:         if info.get("status") == "active":
+  154:             return info.get("plan") or "Standart"
+  155: 
+  156:         return ""
+... sonuç sınırı doldu ...
+
+--- modules/backup_panel.py:7 ---
+    5: 
+    6: from flask import (
+    7:     render_template,
+    8:     request,
+    9:     redirect,
+   10:     url_for,
+   11:     send_file,
+   12:     abort,
+   13:     g,
+   14: )
+   15: from werkzeug.utils import secure_filename
+   16: 
+
+--- modules/backup_panel.py:9 ---
+    7:     render_template,
+    8:     request,
+    9:     redirect,
+   10:     url_for,
+   11:     send_file,
+   12:     abort,
+   13:     g,
+   14: )
+   15: from werkzeug.utils import secure_filename
+   16: 
+   17: 
+   18: def register_backup_routes(app, deps=None):
+
+--- modules/backup_panel.py:10 ---
+    8:     request,
+    9:     redirect,
+   10:     url_for,
+   11:     send_file,
+   12:     abort,
+   13:     g,
+   14: )
+   15: from werkzeug.utils import secure_filename
+   16: 
+   17: 
+   18: def register_backup_routes(app, deps=None):
+   19:     deps = deps or {}
+
+--- modules/backup_panel.py:18 ---
+   16: 
+   17: 
+   18: def register_backup_routes(app, deps=None):
+   19:     deps = deps or {}
+   20: 
+   21:     def backup_dir_path():
+   22:         p = Path(app.root_path) / "storage" / "backups"
+   23:         p.mkdir(parents=True, exist_ok=True)
+   24:         return p
+   25: 
+   26:     def safe_backup_filename(name):
+   27:         name = (name or "").strip()
+
+--- modules/backup_panel.py:21 ---
+   19:     deps = deps or {}
+   20: 
+   21:     def backup_dir_path():
+   22:         p = Path(app.root_path) / "storage" / "backups"
+   23:         p.mkdir(parents=True, exist_ok=True)
+   24:         return p
+   25: 
+   26:     def safe_backup_filename(name):
+   27:         name = (name or "").strip()
+   28:         if not name:
+   29:             return ""
+   30:         name = Path(name).name
+
+--- modules/backup_panel.py:26 ---
+   24:         return p
+   25: 
+   26:     def safe_backup_filename(name):
+   27:         name = (name or "").strip()
+   28:         if not name:
+   29:             return ""
+   30:         name = Path(name).name
+   31:         if not name.startswith("yedek_"):
+   32:             return ""
+   33:         if not name.endswith(".zip"):
+   34:             return ""
+   35:         return name
+
+--- modules/backup_panel.py:37 ---
+   35:         return name
+   36: 
+   37:     def file_size_text(size):
+   38:         try:
+   39:             size = float(size)
+   40:         except Exception:
+   41:             return "0 B"
+   42: 
+   43:         units = ["B", "KB", "MB", "GB"]
+   44:         i = 0
+   45:         while size >= 1024 and i < len(units) - 1:
+   46:             size /= 1024
+
+--- modules/backup_panel.py:53 ---
+   51:         return f"{size:.1f} {units[i]}"
+   52: 
+   53:     def list_backup_files():
+   54:         folder = backup_dir_path()
+   55:         items = []
+   56: 
+   57:         for f in sorted(folder.glob("yedek_*.zip"), key=lambda x: x.stat().st_mtime, reverse=True):
+   58:             st = f.stat()
+   59:             items.append({
+   60:                 "name": f.name,
+   61:                 "size": file_size_text(st.st_size),
+   62:                 "mtime": datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
+
+--- modules/backup_panel.py:67 ---
+   65:         return items
+   66: 
+   67:     def add_file_to_zip(zf, file_path, arcname):
+   68:         file_path = Path(file_path)
+   69:         if file_path.exists() and file_path.is_file():
+   70:             zf.write(str(file_path), arcname)
+   71: 
+   72:     def add_folder_to_zip(zf, folder_path, arc_prefix):
+   73:         folder_path = Path(folder_path)
+   74:         if not folder_path.exists() or not folder_path.is_dir():
+   75:             return
+   76: 
+
+--- modules/backup_panel.py:72 ---
+   70:             zf.write(str(file_path), arcname)
+   71: 
+   72:     def add_folder_to_zip(zf, folder_path, arc_prefix):
+   73:         folder_path = Path(folder_path)
+   74:         if not folder_path.exists() or not folder_path.is_dir():
+   75:             return
+   76: 
+   77:         for item in folder_path.rglob("*"):
+   78:             if item.is_file():
+   79:                 rel = item.relative_to(folder_path)
+   80:                 zf.write(str(item), str(Path(arc_prefix) / rel))
+   81: 
+
+--- modules/backup_panel.py:82 ---
+   80:                 zf.write(str(item), str(Path(arc_prefix) / rel))
+   81: 
+   82:     def create_backup_zip():
+   83:         folder = backup_dir_path()
+   84:         now = datetime.now().strftime("%Y%m%d_%H%M%S")
+   85:         filename = f"yedek_{now}.zip"
+   86:         target = folder / filename
+   87: 
+   88:         root = Path(app.root_path)
+   89: 
+   90:         with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as zf:
+   91:             # Ana veritabanı
+
+--- modules/backup_panel.py:122 ---
+  120:         return filename
+  121: 
+  122:     def settings_backup_page():
+  123:         created = (request.args.get("created") or "").strip()
+  124:         deleted = (request.args.get("deleted") or "").strip()
+  125:         restored = (request.args.get("restored") or "").strip()
+  126:         emergency = (request.args.get("emergency") or "").strip()
+  127:         restore_error = (request.args.get("restore_error") or "").strip()
+  128:         items = list_backup_files()
+  129: 
+  130:         return render_template(
+  131:             "settings_backup.html",
+
+--- modules/backup_panel.py:130 ---
+  128:         items = list_backup_files()
+  129: 
+  130:         return render_template(
+  131:             "settings_backup.html",
+  132:             items=items,
+  133:             created=created,
+  134:             deleted=deleted,
+  135:             restored=restored,
+  136:             emergency=emergency,
+  137:             restore_error=restore_error,
+  138:         )
+  139: 
+... sonuç sınırı doldu ...
+
+--- modules/reports_panel.py:3 ---
+    1: import json
+    2: 
+    3: from flask import render_template, request, jsonify
+    4: 
+    5: 
+    6: def register_reports_routes(app, deps):
+    7:     get_db = deps["get_db"]
+    8:     all_route_names = deps["all_route_names"]
+    9:     SEAT_NUMBERS = deps["SEAT_NUMBERS"]
+   10: 
+   11:     def events_page():
+   12:         get_active_trip = deps.get("get_active_trip")
+
+--- modules/reports_panel.py:6 ---
+    4: 
+    5: 
+    6: def register_reports_routes(app, deps):
+    7:     get_db = deps["get_db"]
+    8:     all_route_names = deps["all_route_names"]
+    9:     SEAT_NUMBERS = deps["SEAT_NUMBERS"]
+   10: 
+   11:     def events_page():
+   12:         get_active_trip = deps.get("get_active_trip")
+   13:         tid = get_active_trip() if callable(get_active_trip) else None
+   14: 
+   15:         sums = {"devir": 0, "giris": 0, "cikis": 0, "kalan": 0}
+
+--- modules/reports_panel.py:11 ---
+    9:     SEAT_NUMBERS = deps["SEAT_NUMBERS"]
+   10: 
+   11:     def events_page():
+   12:         get_active_trip = deps.get("get_active_trip")
+   13:         tid = get_active_trip() if callable(get_active_trip) else None
+   14: 
+   15:         sums = {"devir": 0, "giris": 0, "cikis": 0, "kalan": 0}
+   16:         trip = {}
+   17: 
+   18:         if tid:
+   19:             db = get_db()
+   20:             trip_row = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+
+--- modules/reports_panel.py:29 ---
+   27:                 pass
+   28: 
+   29:         return render_template("events.html", sums=sums, trip=trip)
+   30: 
+   31:     def api_events():
+   32:         route = (request.args.get("route") or "").strip()
+   33:         d1 = request.args.get("date_from")
+   34:         d2 = request.args.get("date_to")
+   35: 
+   36:         sql = """
+   37:         SELECT l.id, l.trip_id, t.date, t.route, l.stop_name, l.event, l.distance_km,
+   38:                l.seats_for_stop, l.meta_json, l.ts
+
+--- modules/reports_panel.py:31 ---
+   29:         return render_template("events.html", sums=sums, trip=trip)
+   30: 
+   31:     def api_events():
+   32:         route = (request.args.get("route") or "").strip()
+   33:         d1 = request.args.get("date_from")
+   34:         d2 = request.args.get("date_to")
+   35: 
+   36:         sql = """
+   37:         SELECT l.id, l.trip_id, t.date, t.route, l.stop_name, l.event, l.distance_km,
+   38:                l.seats_for_stop, l.meta_json, l.ts
+   39:         FROM stop_logs l
+   40:         JOIN trips t ON t.id = l.trip_id
+
+--- modules/reports_panel.py:80 ---
+   78:         return jsonify({"ok": True, "items": items})
+   79: 
+   80:     def reports_page():
+   81:         return render_template("reports.html", all_routes=all_route_names())
+   82: 
+   83:     def api_report_seat_stats():
+   84:         route = (request.args.get("route") or "").strip()
+   85:         d1 = request.args.get("date_from")
+   86:         d2 = request.args.get("date_to")
+   87: 
+   88:         where = ["1=1"]
+   89:         args = []
+
+--- modules/reports_panel.py:81 ---
+   79: 
+   80:     def reports_page():
+   81:         return render_template("reports.html", all_routes=all_route_names())
+   82: 
+   83:     def api_report_seat_stats():
+   84:         route = (request.args.get("route") or "").strip()
+   85:         d1 = request.args.get("date_from")
+   86:         d2 = request.args.get("date_to")
+   87: 
+   88:         where = ["1=1"]
+   89:         args = []
+   90: 
+
+--- modules/reports_panel.py:83 ---
+   81:         return render_template("reports.html", all_routes=all_route_names())
+   82: 
+   83:     def api_report_seat_stats():
+   84:         route = (request.args.get("route") or "").strip()
+   85:         d1 = request.args.get("date_from")
+   86:         d2 = request.args.get("date_to")
+   87: 
+   88:         where = ["1=1"]
+   89:         args = []
+   90: 
+   91:         if route:
+   92:             where.append("t.route=?")
+
+
+==========================================================================================
+2) AYARLAR ANA SAYFA KARTLARI / LİNKLER
+==========================================================================================
+
+
+--- templates/settings.html:5 ---
+    4:   <meta charset="utf-8">
+    5:   <meta name="viewport" content="width=device-width, initial-scale=1">
+    6:   <title>Ayarlar</title>
+    7: 
+    8:   <style>
+    9:     *{ box-sizing:border-box; }
+
+--- templates/settings.html:128 ---
+  127: <body>
+  128:   <main class="settings-shell">
+  129:     <section class="settings-hero">
+  130:       <h1>⚙️ Ayarlar</h1>
+  131:       <p>Panel şifresi, görünüm ve sistem tercihleri.</p>
+  132:     </section>
+
+--- templates/settings.html:129 ---
+  128:   <main class="settings-shell">
+  129:     <section class="settings-hero">
+  130:       <h1>⚙️ Ayarlar</h1>
+  131:       <p>Panel şifresi, görünüm ve sistem tercihleri.</p>
+  132:     </section>
+  133: 
+
+--- templates/settings.html:130 ---
+  129:     <section class="settings-hero">
+  130:       <h1>⚙️ Ayarlar</h1>
+  131:       <p>Panel şifresi, görünüm ve sistem tercihleri.</p>
+  132:     </section>
+  133: 
+  134:     <section class="settings-list">
+
+--- templates/settings.html:134 ---
+  133: 
+  134:     <section class="settings-list">
+  135: <a class="settings-item" href="/ayarlar/abonelik">
+  136:         <span class="settings-ico">💳</span>
+  137:         <span>
+  138:           <div class="settings-title">Abonelik</div>
+
+--- templates/settings.html:135 ---
+  134:     <section class="settings-list">
+  135: <a class="settings-item" href="/ayarlar/abonelik">
+  136:         <span class="settings-ico">💳</span>
+  137:         <span>
+  138:           <div class="settings-title">Abonelik</div>
+  139:           <div class="settings-desc">30 gün deneme ve ödeme durumu</div>
+
+--- templates/settings.html:136 ---
+  135: <a class="settings-item" href="/ayarlar/abonelik">
+  136:         <span class="settings-ico">💳</span>
+  137:         <span>
+  138:           <div class="settings-title">Abonelik</div>
+  139:           <div class="settings-desc">30 gün deneme ve ödeme durumu</div>
+  140:         </span>
+
+--- templates/settings.html:138 ---
+  137:         <span>
+  138:           <div class="settings-title">Abonelik</div>
+  139:           <div class="settings-desc">30 gün deneme ve ödeme durumu</div>
+  140:         </span>
+  141:         <span class="settings-arrow">›</span>
+  142:       </a>
+
+--- templates/settings.html:139 ---
+  138:           <div class="settings-title">Abonelik</div>
+  139:           <div class="settings-desc">30 gün deneme ve ödeme durumu</div>
+  140:         </span>
+  141:         <span class="settings-arrow">›</span>
+  142:       </a>
+  143: 
+
+--- templates/settings.html:141 ---
+  140:         </span>
+  141:         <span class="settings-arrow">›</span>
+  142:       </a>
+  143: 
+  144: 
+  145:       <a class="settings-item" href="/ayarlar/profil">
+
+--- templates/settings.html:145 ---
+  144: 
+  145:       <a class="settings-item" href="/ayarlar/profil">
+  146:         <span class="settings-ico">👤</span>
+  147:         <span>
+  148:           <div class="settings-title">Profil Bilgileri</div>
+  149:           <div class="settings-desc">Ad, cep telefonu ve fotoğraf</div>
+
+--- templates/settings.html:146 ---
+  145:       <a class="settings-item" href="/ayarlar/profil">
+  146:         <span class="settings-ico">👤</span>
+  147:         <span>
+  148:           <div class="settings-title">Profil Bilgileri</div>
+  149:           <div class="settings-desc">Ad, cep telefonu ve fotoğraf</div>
+  150:         </span>
+
+--- templates/settings.html:148 ---
+  147:         <span>
+  148:           <div class="settings-title">Profil Bilgileri</div>
+  149:           <div class="settings-desc">Ad, cep telefonu ve fotoğraf</div>
+  150:         </span>
+  151:         <span class="settings-arrow">›</span>
+  152:       </a>
+
+--- templates/settings.html:149 ---
+  148:           <div class="settings-title">Profil Bilgileri</div>
+  149:           <div class="settings-desc">Ad, cep telefonu ve fotoğraf</div>
+  150:         </span>
+  151:         <span class="settings-arrow">›</span>
+  152:       </a>
+  153: 
+
+--- templates/settings.html:151 ---
+  150:         </span>
+  151:         <span class="settings-arrow">›</span>
+  152:       </a>
+  153: 
+  154:       <a class="settings-item" href="/ayarlar/sifre">
+  155:         <span class="settings-ico">🔐</span>
+
+--- templates/settings.html:154 ---
+  153: 
+  154:       <a class="settings-item" href="/ayarlar/sifre">
+  155:         <span class="settings-ico">🔐</span>
+  156:         <span>
+  157:           <div class="settings-title">Şifre Değiştir</div>
+  158:           <div class="settings-desc">Panel giriş şifresini güncelle</div>
+
+--- templates/settings.html:155 ---
+  154:       <a class="settings-item" href="/ayarlar/sifre">
+  155:         <span class="settings-ico">🔐</span>
+  156:         <span>
+  157:           <div class="settings-title">Şifre Değiştir</div>
+  158:           <div class="settings-desc">Panel giriş şifresini güncelle</div>
+  159:         </span>
+
+--- templates/settings.html:157 ---
+  156:         <span>
+  157:           <div class="settings-title">Şifre Değiştir</div>
+  158:           <div class="settings-desc">Panel giriş şifresini güncelle</div>
+  159:         </span>
+  160:         <span class="settings-arrow">›</span>
+  161:       </a>
+
+--- templates/settings.html:158 ---
+  157:           <div class="settings-title">Şifre Değiştir</div>
+  158:           <div class="settings-desc">Panel giriş şifresini güncelle</div>
+  159:         </span>
+  160:         <span class="settings-arrow">›</span>
+  161:       </a>
+  162: 
+
+--- templates/settings.html:160 ---
+  159:         </span>
+  160:         <span class="settings-arrow">›</span>
+  161:       </a>
+  162: 
+  163:       <a class="settings-item" href="/ayarlar/kurtarma-kodu">
+  164:         <span class="settings-ico">🧾</span>
+
+--- templates/settings.html:163 ---
+  162: 
+  163:       <a class="settings-item" href="/ayarlar/kurtarma-kodu">
+  164:         <span class="settings-ico">🧾</span>
+  165:         <span>
+  166:           <div class="settings-title">Kurtarma Kodu</div>
+  167:           <div class="settings-desc">Şifre unutulursa hesabı kurtar</div>
+
+--- templates/settings.html:164 ---
+  163:       <a class="settings-item" href="/ayarlar/kurtarma-kodu">
+  164:         <span class="settings-ico">🧾</span>
+  165:         <span>
+  166:           <div class="settings-title">Kurtarma Kodu</div>
+  167:           <div class="settings-desc">Şifre unutulursa hesabı kurtar</div>
+  168:         </span>
+
+--- templates/settings.html:166 ---
+  165:         <span>
+  166:           <div class="settings-title">Kurtarma Kodu</div>
+  167:           <div class="settings-desc">Şifre unutulursa hesabı kurtar</div>
+  168:         </span>
+  169:         <span class="settings-arrow">›</span>
+  170:       </a>
+... sonuç sınırı doldu ...
+
+--- templates/settings_profile.html:5 ---
+    4:   <meta charset="utf-8">
+    5:   <meta name="viewport" content="width=device-width, initial-scale=1">
+    6:   <title>Profil Bilgileri</title>
+    7: 
+    8:   <style>
+    9:     *{ box-sizing:border-box; }
+
+--- templates/settings_profile.html:173 ---
+  172: <body>
+  173:   <main class="shell">
+  174:     <section class="hero">
+  175:       <h1>👤 Profil Bilgileri</h1>
+  176:       <p>Panel sahibinin adı, telefonu ve fotoğrafı.</p>
+  177:     </section>
+
+--- templates/settings_profile.html:174 ---
+  173:   <main class="shell">
+  174:     <section class="hero">
+  175:       <h1>👤 Profil Bilgileri</h1>
+  176:       <p>Panel sahibinin adı, telefonu ve fotoğrafı.</p>
+  177:     </section>
+  178: 
+
+--- templates/settings_profile.html:175 ---
+  174:     <section class="hero">
+  175:       <h1>👤 Profil Bilgileri</h1>
+  176:       <p>Panel sahibinin adı, telefonu ve fotoğrafı.</p>
+  177:     </section>
+  178: 
+  179:     <section class="card">
+
+--- templates/settings_profile.html:179 ---
+  178: 
+  179:     <section class="card">
+  180:       <div class="photo-preview">
+  181:         {% if profile and profile.photo_path %}
+  182:           <img src="{{ profile.photo_path }}" alt="Profil">
+  183:         {% else %}
+
+--- templates/settings_profile.html:180 ---
+  179:     <section class="card">
+  180:       <div class="photo-preview">
+  181:         {% if profile and profile.photo_path %}
+  182:           <img src="{{ profile.photo_path }}" alt="Profil">
+  183:         {% else %}
+  184:           👤
+
+--- templates/settings_profile.html:189 ---
+  188:       {% if msg %}
+  189:         <div class="alert ok">{{ msg }}</div>
+  190:       {% endif %}
+  191: 
+  192:       {% if error %}
+  193:         <div class="alert err">{{ error }}</div>
+
+--- templates/settings_profile.html:193 ---
+  192:       {% if error %}
+  193:         <div class="alert err">{{ error }}</div>
+  194:       {% endif %}
+  195: 
+  196:       <form method="post" enctype="multipart/form-data">
+  197:         {% if csrf_token is defined %}
+
+--- templates/settings_profile.html:196 ---
+  195: 
+  196:       <form method="post" enctype="multipart/form-data">
+  197:         {% if csrf_token is defined %}
+  198:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  199:         {% endif %}
+  200: 
+
+--- templates/settings_profile.html:197 ---
+  196:       <form method="post" enctype="multipart/form-data">
+  197:         {% if csrf_token is defined %}
+  198:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  199:         {% endif %}
+  200: 
+  201:         <div class="field">
+
+--- templates/settings_profile.html:198 ---
+  197:         {% if csrf_token is defined %}
+  198:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  199:         {% endif %}
+  200: 
+  201:         <div class="field">
+  202:           <label>Ad Soyad</label>
+
+--- templates/settings_profile.html:201 ---
+  200: 
+  201:         <div class="field">
+  202:           <label>Ad Soyad</label>
+  203:           <input name="full_name" type="text" value="{{ profile.full_name if profile else '' }}" required>
+  204:         </div>
+  205: 
+
+--- templates/settings_profile.html:203 ---
+  202:           <label>Ad Soyad</label>
+  203:           <input name="full_name" type="text" value="{{ profile.full_name if profile else '' }}" required>
+  204:         </div>
+  205: 
+  206:         <div class="field">
+  207:           <label>Cep Telefonu</label>
+
+--- templates/settings_profile.html:206 ---
+  205: 
+  206:         <div class="field">
+  207:           <label>Cep Telefonu</label>
+  208:           <input name="phone" type="tel" value="{{ profile.phone if profile else '' }}" required>
+  209:         </div>
+  210: 
+
+--- templates/settings_profile.html:208 ---
+  207:           <label>Cep Telefonu</label>
+  208:           <input name="phone" type="tel" value="{{ profile.phone if profile else '' }}" required>
+  209:         </div>
+  210: 
+  211:         <div class="field">
+  212:           <label>Profil Fotoğrafı Değiştir</label>
+
+--- templates/settings_profile.html:211 ---
+  210: 
+  211:         <div class="field">
+  212:           <label>Profil Fotoğrafı Değiştir</label>
+  213:           <input name="profile_photo" type="file" accept="image/*">
+  214:         </div>
+  215: 
+
+--- templates/settings_profile.html:213 ---
+  212:           <label>Profil Fotoğrafı Değiştir</label>
+  213:           <input name="profile_photo" type="file" accept="image/*">
+  214:         </div>
+  215: 
+  216:         <div class="actions">
+  217:           <button class="btn primary" type="submit">Kaydet</button>
+
+--- templates/settings_profile.html:216 ---
+  215: 
+  216:         <div class="actions">
+  217:           <button class="btn primary" type="submit">Kaydet</button>
+  218:           <a class="btn secondary" href="/ayarlar">← Geri</a>
+  219:         </div>
+  220:       </form>
+
+--- templates/settings_profile.html:217 ---
+  216:         <div class="actions">
+  217:           <button class="btn primary" type="submit">Kaydet</button>
+  218:           <a class="btn secondary" href="/ayarlar">← Geri</a>
+  219:         </div>
+  220:       </form>
+  221:     </section>
+
+--- templates/settings_profile.html:218 ---
+  217:           <button class="btn primary" type="submit">Kaydet</button>
+  218:           <a class="btn secondary" href="/ayarlar">← Geri</a>
+  219:         </div>
+  220:       </form>
+  221:     </section>
+  222:   </main>
+
+--- templates/settings_password.html:5 ---
+    4:   <meta charset="utf-8">
+    5:   <meta name="viewport" content="width=device-width, initial-scale=1">
+    6:   <title>Şifre Değiştir</title>
+    7: 
+    8:   <style>
+    9:     *{ box-sizing:border-box; }
+
+--- templates/settings_password.html:184 ---
+  183: <body>
+  184:   <main class="shell">
+  185:     <section class="hero">
+  186:       <h1>🔐 Şifre Değiştir</h1>
+  187:       <p>Panel giriş şifresini güvenli şekilde güncelle.</p>
+  188:     </section>
+
+--- templates/settings_password.html:185 ---
+  184:   <main class="shell">
+  185:     <section class="hero">
+  186:       <h1>🔐 Şifre Değiştir</h1>
+  187:       <p>Panel giriş şifresini güvenli şekilde güncelle.</p>
+  188:     </section>
+  189: 
+
+--- templates/settings_password.html:186 ---
+  185:     <section class="hero">
+  186:       <h1>🔐 Şifre Değiştir</h1>
+  187:       <p>Panel giriş şifresini güvenli şekilde güncelle.</p>
+  188:     </section>
+  189: 
+  190:     <section class="card">
+
+--- templates/settings_password.html:190 ---
+  189: 
+  190:     <section class="card">
+  191:       {% if msg %}
+  192:         <div class="alert ok">{{ msg }}</div>
+  193:       {% endif %}
+  194: 
+
+--- templates/settings_password.html:192 ---
+  191:       {% if msg %}
+  192:         <div class="alert ok">{{ msg }}</div>
+  193:       {% endif %}
+  194: 
+  195:       {% if error %}
+  196:         <div class="alert err">{{ error }}</div>
+
+--- templates/settings_password.html:196 ---
+  195:       {% if error %}
+  196:         <div class="alert err">{{ error }}</div>
+  197:       {% endif %}
+  198: 
+  199:       <form method="post">
+  200:         {% if csrf_token is defined %}
+
+--- templates/settings_password.html:199 ---
+  198: 
+  199:       <form method="post">
+  200:         {% if csrf_token is defined %}
+  201:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  202:         {% endif %}
+  203: 
+
+--- templates/settings_password.html:200 ---
+  199:       <form method="post">
+  200:         {% if csrf_token is defined %}
+  201:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  202:         {% endif %}
+  203: 
+  204:         <div class="field">
+
+--- templates/settings_password.html:201 ---
+  200:         {% if csrf_token is defined %}
+  201:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  202:         {% endif %}
+  203: 
+  204:         <div class="field">
+  205:           <label>Eski şifre</label>
+
+--- templates/settings_password.html:204 ---
+  203: 
+  204:         <div class="field">
+  205:           <label>Eski şifre</label>
+  206:           <div class="passbox">
+  207:             <input name="old_password" type="password" autocomplete="current-password" required>
+  208:             <button class="eye" type="button">👁️</button>
+
+--- templates/settings_password.html:206 ---
+  205:           <label>Eski şifre</label>
+  206:           <div class="passbox">
+  207:             <input name="old_password" type="password" autocomplete="current-password" required>
+  208:             <button class="eye" type="button">👁️</button>
+  209:           </div>
+  210:         </div>
+
+--- templates/settings_password.html:207 ---
+  206:           <div class="passbox">
+  207:             <input name="old_password" type="password" autocomplete="current-password" required>
+  208:             <button class="eye" type="button">👁️</button>
+  209:           </div>
+  210:         </div>
+  211: 
+
+--- templates/settings_password.html:208 ---
+  207:             <input name="old_password" type="password" autocomplete="current-password" required>
+  208:             <button class="eye" type="button">👁️</button>
+  209:           </div>
+  210:         </div>
+  211: 
+  212:         <div class="field">
+
+--- templates/settings_password.html:212 ---
+  211: 
+  212:         <div class="field">
+  213:           <label>Yeni şifre</label>
+  214:           <div class="passbox">
+  215:             <input name="new_password" type="password" autocomplete="new-password" required>
+  216:             <button class="eye" type="button">👁️</button>
+
+--- templates/settings_password.html:214 ---
+  213:           <label>Yeni şifre</label>
+  214:           <div class="passbox">
+  215:             <input name="new_password" type="password" autocomplete="new-password" required>
+  216:             <button class="eye" type="button">👁️</button>
+  217:           </div>
+  218:         </div>
+
+--- templates/settings_password.html:215 ---
+  214:           <div class="passbox">
+  215:             <input name="new_password" type="password" autocomplete="new-password" required>
+  216:             <button class="eye" type="button">👁️</button>
+  217:           </div>
+  218:         </div>
+  219: 
+
+--- templates/settings_password.html:216 ---
+  215:             <input name="new_password" type="password" autocomplete="new-password" required>
+  216:             <button class="eye" type="button">👁️</button>
+  217:           </div>
+  218:         </div>
+  219: 
+  220:         <div class="field">
+
+--- templates/settings_password.html:220 ---
+  219: 
+  220:         <div class="field">
+  221:           <label>Yeni şifre tekrar</label>
+  222:           <div class="passbox">
+  223:             <input name="new_password2" type="password" autocomplete="new-password" required>
+  224:             <button class="eye" type="button">👁️</button>
+
+--- templates/settings_password.html:222 ---
+  221:           <label>Yeni şifre tekrar</label>
+  222:           <div class="passbox">
+  223:             <input name="new_password2" type="password" autocomplete="new-password" required>
+  224:             <button class="eye" type="button">👁️</button>
+  225:           </div>
+  226:         </div>
+
+--- templates/settings_password.html:223 ---
+  222:           <div class="passbox">
+  223:             <input name="new_password2" type="password" autocomplete="new-password" required>
+  224:             <button class="eye" type="button">👁️</button>
+  225:           </div>
+  226:         </div>
+  227: 
+
+--- templates/settings_password.html:224 ---
+  223:             <input name="new_password2" type="password" autocomplete="new-password" required>
+  224:             <button class="eye" type="button">👁️</button>
+  225:           </div>
+  226:         </div>
+  227: 
+  228:         <div class="actions">
+
+--- templates/settings_password.html:228 ---
+  227: 
+  228:         <div class="actions">
+  229:           <button class="btn primary" type="submit">Şifreyi Kaydet</button>
+  230:           <a class="btn secondary" href="/ayarlar">← Geri</a>
+  231:         </div>
+  232:       </form>
+... sonuç sınırı doldu ...
+
+--- templates/settings_recovery.html:5 ---
+    4:   <meta charset="utf-8">
+    5:   <meta name="viewport" content="width=device-width, initial-scale=1">
+    6:   <title>Kurtarma Kodu</title>
+    7: 
+    8:   <style>
+    9:     *{ box-sizing:border-box; }
+
+--- templates/settings_recovery.html:174 ---
+  173: <body>
+  174:   <main class="shell">
+  175:     <section class="hero">
+  176:       <h1>🧾 Kurtarma Kodu</h1>
+  177:       <p>Şifre unutulursa bu kodla yeni şifre belirlenir.</p>
+  178:     </section>
+
+--- templates/settings_recovery.html:175 ---
+  174:   <main class="shell">
+  175:     <section class="hero">
+  176:       <h1>🧾 Kurtarma Kodu</h1>
+  177:       <p>Şifre unutulursa bu kodla yeni şifre belirlenir.</p>
+  178:     </section>
+  179: 
+
+--- templates/settings_recovery.html:176 ---
+  175:     <section class="hero">
+  176:       <h1>🧾 Kurtarma Kodu</h1>
+  177:       <p>Şifre unutulursa bu kodla yeni şifre belirlenir.</p>
+  178:     </section>
+  179: 
+  180:     <section class="card">
+
+--- templates/settings_recovery.html:180 ---
+  179: 
+  180:     <section class="card">
+  181:       {% if msg %}
+  182:         <div class="alert ok">{{ msg }}</div>
+  183:       {% endif %}
+  184: 
+
+--- templates/settings_recovery.html:182 ---
+  181:       {% if msg %}
+  182:         <div class="alert ok">{{ msg }}</div>
+  183:       {% endif %}
+  184: 
+  185:       {% if error %}
+  186:         <div class="alert warn">{{ error }}</div>
+
+--- templates/settings_recovery.html:186 ---
+  185:       {% if error %}
+  186:         <div class="alert warn">{{ error }}</div>
+  187:       {% endif %}
+  188: 
+  189:       {% if code %}
+  190:         <div class="code-box">
+
+--- templates/settings_recovery.html:190 ---
+  189:       {% if code %}
+  190:         <div class="code-box">
+  191:           <div class="code-label">Kurtarma kodun</div>
+  192:           <div class="code" id="recoveryCode">{{ code }}</div>
+  193:         </div>
+  194: 
+
+--- templates/settings_recovery.html:191 ---
+  190:         <div class="code-box">
+  191:           <div class="code-label">Kurtarma kodun</div>
+  192:           <div class="code" id="recoveryCode">{{ code }}</div>
+  193:         </div>
+  194: 
+  195:         <p class="small">
+
+--- templates/settings_recovery.html:192 ---
+  191:           <div class="code-label">Kurtarma kodun</div>
+  192:           <div class="code" id="recoveryCode">{{ code }}</div>
+  193:         </div>
+  194: 
+  195:         <p class="small">
+  196:           Bu kod güvenlik için sadece şimdi gösterilir. Bir yere not et veya fotoğrafını çek.
+
+--- templates/settings_recovery.html:195 ---
+  194: 
+  195:         <p class="small">
+  196:           Bu kod güvenlik için sadece şimdi gösterilir. Bir yere not et veya fotoğrafını çek.
+  197:         </p>
+  198: 
+  199:         <div class="actions">
+
+--- templates/settings_recovery.html:199 ---
+  198: 
+  199:         <div class="actions">
+  200:           <button class="btn primary" type="button" onclick="copyCode()">Kodu Kopyala</button>
+  201:           <a class="btn secondary" href="/ayarlar">← Geri</a>
+  202:         </div>
+  203:       {% else %}
+
+--- templates/settings_recovery.html:200 ---
+  199:         <div class="actions">
+  200:           <button class="btn primary" type="button" onclick="copyCode()">Kodu Kopyala</button>
+  201:           <a class="btn secondary" href="/ayarlar">← Geri</a>
+  202:         </div>
+  203:       {% else %}
+  204:         <div class="alert warn">
+
+--- templates/settings_recovery.html:201 ---
+  200:           <button class="btn primary" type="button" onclick="copyCode()">Kodu Kopyala</button>
+  201:           <a class="btn secondary" href="/ayarlar">← Geri</a>
+  202:         </div>
+  203:       {% else %}
+  204:         <div class="alert warn">
+  205:           Kurtarma kodu daha önce oluşturulmuş. Güvenlik için eski kod tekrar gösterilmez.
+
+--- templates/settings_recovery.html:204 ---
+  203:       {% else %}
+  204:         <div class="alert warn">
+  205:           Kurtarma kodu daha önce oluşturulmuş. Güvenlik için eski kod tekrar gösterilmez.
+  206:         </div>
+  207: 
+  208:         {% if updated_at %}
+
+--- templates/settings_recovery.html:209 ---
+  208:         {% if updated_at %}
+  209:           <p class="small">Son oluşturma zamanı: <b>{{ updated_at }}</b></p>
+  210:         {% endif %}
+  211: 
+  212:         <p class="small">
+  213:           Eski kodu kaybettiysen yeni kod oluşturabilirsin. Yeni kod oluşturulunca eski kod geçersiz olur.
+
+--- templates/settings_recovery.html:212 ---
+  211: 
+  212:         <p class="small">
+  213:           Eski kodu kaybettiysen yeni kod oluşturabilirsin. Yeni kod oluşturulunca eski kod geçersiz olur.
+  214:         </p>
+  215: 
+  216:         <form method="post" class="actions" onsubmit="return confirm('Yeni kurtarma kodu oluşturulsun mu? Eski kod geçersiz olacak.');">
+
+--- templates/settings_recovery.html:216 ---
+  215: 
+  216:         <form method="post" class="actions" onsubmit="return confirm('Yeni kurtarma kodu oluşturulsun mu? Eski kod geçersiz olacak.');">
+  217:           {% if csrf_token is defined %}
+  218:             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  219:           {% endif %}
+  220:           <input type="hidden" name="action" value="generate">
+
+--- templates/settings_recovery.html:217 ---
+  216:         <form method="post" class="actions" onsubmit="return confirm('Yeni kurtarma kodu oluşturulsun mu? Eski kod geçersiz olacak.');">
+  217:           {% if csrf_token is defined %}
+  218:             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  219:           {% endif %}
+  220:           <input type="hidden" name="action" value="generate">
+  221:           <button class="btn danger" type="submit">Yeni Kod Oluştur</button>
+
+--- templates/settings_recovery.html:218 ---
+  217:           {% if csrf_token is defined %}
+  218:             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  219:           {% endif %}
+  220:           <input type="hidden" name="action" value="generate">
+  221:           <button class="btn danger" type="submit">Yeni Kod Oluştur</button>
+  222:           <a class="btn secondary" href="/ayarlar">← Geri</a>
+
+--- templates/settings_recovery.html:220 ---
+  219:           {% endif %}
+  220:           <input type="hidden" name="action" value="generate">
+  221:           <button class="btn danger" type="submit">Yeni Kod Oluştur</button>
+  222:           <a class="btn secondary" href="/ayarlar">← Geri</a>
+  223:         </form>
+  224:       {% endif %}
+
+--- templates/settings_recovery.html:221 ---
+  220:           <input type="hidden" name="action" value="generate">
+  221:           <button class="btn danger" type="submit">Yeni Kod Oluştur</button>
+  222:           <a class="btn secondary" href="/ayarlar">← Geri</a>
+  223:         </form>
+  224:       {% endif %}
+  225:     </section>
+
+--- templates/settings_recovery.html:222 ---
+  221:           <button class="btn danger" type="submit">Yeni Kod Oluştur</button>
+  222:           <a class="btn secondary" href="/ayarlar">← Geri</a>
+  223:         </form>
+  224:       {% endif %}
+  225:     </section>
+  226:   </main>
+... sonuç sınırı doldu ...
+
+--- templates/settings_subscription.html:5 ---
+    4:   <meta charset="utf-8">
+    5:   <meta name="viewport" content="width=device-width, initial-scale=1">
+    6:   <title>Abonelik</title>
+    7: 
+    8:   <style>
+    9:     *{ box-sizing:border-box; }
+
+--- templates/settings_subscription.html:1011 ---
+ 1010: <body>
+ 1011:   <main class="shell">
+ 1012:     <section class="hero">
+ 1013:       <h1>💳 Abonelik</h1>
+ 1014:       {% if info.status == "active" %}
+ 1015:         <p>Aboneliğiniz aktif. Paket ve ödeme durumunu buradan takip edebilirsiniz.</p>
+
+--- templates/settings_subscription.html:1012 ---
+ 1011:   <main class="shell">
+ 1012:     <section class="hero">
+ 1013:       <h1>💳 Abonelik</h1>
+ 1014:       {% if info.status == "active" %}
+ 1015:         <p>Aboneliğiniz aktif. Paket ve ödeme durumunu buradan takip edebilirsiniz.</p>
+ 1016:       {% elif info.status == "trial" and not info.expired %}
+
+--- templates/settings_subscription.html:1013 ---
+ 1012:     <section class="hero">
+ 1013:       <h1>💳 Abonelik</h1>
+ 1014:       {% if info.status == "active" %}
+ 1015:         <p>Aboneliğiniz aktif. Paket ve ödeme durumunu buradan takip edebilirsiniz.</p>
+ 1016:       {% elif info.status == "trial" and not info.expired %}
+ 1017:         <p>30 gün ücretsiz deneme süreniz devam ediyor.</p>
+
+--- templates/settings_subscription.html:1023 ---
+ 1022: 
+ 1023:     <section class="card">
+ 1024:       {% if msg %}
+ 1025:         <div class="alert ok">{{ msg }}</div>
+ 1026:       {% endif %}
+ 1027: 
+
+--- templates/settings_subscription.html:1025 ---
+ 1024:       {% if msg %}
+ 1025:         <div class="alert ok">{{ msg }}</div>
+ 1026:       {% endif %}
+ 1027: 
+ 1028:       {% if error %}
+ 1029:         <div class="alert err">{{ error }}</div>
+
+--- templates/settings_subscription.html:1029 ---
+ 1028:       {% if error %}
+ 1029:         <div class="alert err">{{ error }}</div>
+ 1030:       {% endif %}
+ 1031: 
+ 1032:       <div class="status">
+ 1033:         <strong>Durum</strong>
+
+--- templates/settings_subscription.html:1032 ---
+ 1031: 
+ 1032:       <div class="status">
+ 1033:         <strong>Durum</strong>
+ 1034: 
+ 1035:         {% if info.status == "active" %}
+ 1036:           <span class="pill active">AKTİF</span>
+
+--- templates/settings_subscription.html:1036 ---
+ 1035:         {% if info.status == "active" %}
+ 1036:           <span class="pill active">AKTİF</span>
+ 1037:         {% elif info.status == "trial" and not info.expired %}
+ 1038:           <span class="pill trial">DENEME</span>
+ 1039:         {% else %}
+ 1040:           <span class="pill expired">SÜRE BİTTİ</span>
+
+--- templates/settings_subscription.html:1038 ---
+ 1037:         {% elif info.status == "trial" and not info.expired %}
+ 1038:           <span class="pill trial">DENEME</span>
+ 1039:         {% else %}
+ 1040:           <span class="pill expired">SÜRE BİTTİ</span>
+ 1041:         {% endif %}
+ 1042:       </div>
+
+--- templates/settings_subscription.html:1040 ---
+ 1039:         {% else %}
+ 1040:           <span class="pill expired">SÜRE BİTTİ</span>
+ 1041:         {% endif %}
+ 1042:       </div>
+ 1043: 
+ 1044:       {% if info.status == "trial" and not info.expired %}
+
+--- templates/settings_subscription.html:1045 ---
+ 1044:       {% if info.status == "trial" and not info.expired %}
+ 1045:         <div class="big-number">
+ 1046:           <b>{{ info.days_left }}</b>
+ 1047:           <span>gün ücretsiz kullanım kaldı</span>
+ 1048:         </div>
+ 1049:       {% elif info.status == "active" %}
+
+--- templates/settings_subscription.html:1050 ---
+ 1049:       {% elif info.status == "active" %}
+ 1050:         <div class="alert ok">
+ 1051:           Abonelik aktif. Uygulamayı kullanmaya devam edebilirsin.
+ 1052:         </div>
+ 1053:       {% else %}
+ 1054:         <div class="alert err">
+
+--- templates/settings_subscription.html:1054 ---
+ 1053:       {% else %}
+ 1054:         <div class="alert err">
+ 1055:           Ücretsiz deneme süreniz sona erdi. Uygulamayı kullanmaya devam etmek için abonelik gereklidir.
+ 1056:         </div>
+ 1057:       {% endif %}
+ 1058: 
+
+--- templates/settings_subscription.html:1059 ---
+ 1058: 
+ 1059:       <div class="detail">
+ 1060:         <div><b>Paket:</b> {{ info.plan }}</div>
+ 1061: 
+ 1062:         {% if info.status == "active" %}
+ 1063:           <div><b>Abonelik Başlangıcı:</b> {{ info.subscription_started_text }}</div>
+
+--- templates/settings_subscription.html:1077 ---
+ 1076:     {% if upgrade_required %}
+ 1077:       <section class="upgrade-alert" id="upgradeAlert" data-required="{{ upgrade_required }}">
+ 1078:         <b>🚀 Paket yükseltme önerisi</b>
+ 1079:         {{ upgrade_feature or "Bu özellik" }} için {{ upgrade_required }} veya üstü paket gerekir.
+ 1080:       </section>
+ 1081:     {% endif %}
+
+--- templates/settings_subscription.html:1084 ---
+ 1083: 
+ 1084:     <section class="restore-card">
+ 1085:       <div class="restore-head">
+ 1086:         <div class="restore-icon">🔄</div>
+ 1087:         <div>
+ 1088:           <h2>Aboneliği Geri Yükle</h2>
+
+--- templates/settings_subscription.html:1085 ---
+ 1084:     <section class="restore-card">
+ 1085:       <div class="restore-head">
+ 1086:         <div class="restore-icon">🔄</div>
+ 1087:         <div>
+ 1088:           <h2>Aboneliği Geri Yükle</h2>
+ 1089:           <p>
+
+--- templates/settings_subscription.html:1086 ---
+ 1085:       <div class="restore-head">
+ 1086:         <div class="restore-icon">🔄</div>
+ 1087:         <div>
+ 1088:           <h2>Aboneliği Geri Yükle</h2>
+ 1089:           <p>
+ 1090:             Daha önce Google Play üzerinden satın alma yaptıysan,
+
+--- templates/settings_subscription.html:1088 ---
+ 1087:         <div>
+ 1088:           <h2>Aboneliği Geri Yükle</h2>
+ 1089:           <p>
+ 1090:             Daha önce Google Play üzerinden satın alma yaptıysan,
+ 1091:             aboneliğini bu cihazda tekrar aktif edebilirsin.
+ 1092:           </p>
+
+--- templates/settings_subscription.html:1096 ---
+ 1095: 
+ 1096:       <button class="restore-btn" type="button" id="restorePurchaseBtn">
+ 1097:         Google Play Aboneliğini Geri Yükle
+ 1098:       </button>
+ 1099: 
+ 1100:       <div class="restore-msg" id="restorePurchaseMsg"></div>
+
+--- templates/settings_subscription.html:1100 ---
+ 1099: 
+ 1100:       <div class="restore-msg" id="restorePurchaseMsg"></div>
+ 1101:     </section>
+ 1102: 
+ 1103: 
+ 1104: <section class="plans-card">
+
+--- templates/settings_subscription.html:1104 ---
+ 1103: 
+ 1104: <section class="plans-card">
+ 1105:       <div class="plans-head">
+ 1106:         <h2>📦 Paketler</h2>
+ 1107:         <p>30 günlük ücretsiz denemede Pro özellikleri açık olur. Deneme bitince ihtiyaca göre paket seçilir.</p>
+ 1108:       </div>
+... sonuç sınırı doldu ...
+
+--- templates/settings_backup.html:5 ---
+    4:   <meta charset="utf-8">
+    5:   <meta name="viewport" content="width=device-width, initial-scale=1">
+    6:   <title>Yedekleme</title>
+    7: 
+    8:   <style>
+    9:     *{ box-sizing:border-box; }
+
+--- templates/settings_backup.html:255 ---
+  254: <body>
+  255:   <main class="shell">
+  256:     <section class="hero">
+  257:       <h1>💾 Yedekleme</h1>
+  258:       <p>Veritabanı, raporlar ve yüklenen dosyaları tek zip dosyasına al.</p>
+  259:     </section>
+
+--- templates/settings_backup.html:256 ---
+  255:   <main class="shell">
+  256:     <section class="hero">
+  257:       <h1>💾 Yedekleme</h1>
+  258:       <p>Veritabanı, raporlar ve yüklenen dosyaları tek zip dosyasına al.</p>
+  259:     </section>
+  260: 
+
+--- templates/settings_backup.html:257 ---
+  256:     <section class="hero">
+  257:       <h1>💾 Yedekleme</h1>
+  258:       <p>Veritabanı, raporlar ve yüklenen dosyaları tek zip dosyasına al.</p>
+  259:     </section>
+  260: 
+  261:     <section class="card">
+
+--- templates/settings_backup.html:261 ---
+  260: 
+  261:     <section class="card">
+  262:       {% if created %}
+  263:         <div class="alert ok">Yedek oluşturuldu: {{ created }}</div>
+  264:       {% endif %}
+  265: 
+
+--- templates/settings_backup.html:263 ---
+  262:       {% if created %}
+  263:         <div class="alert ok">Yedek oluşturuldu: {{ created }}</div>
+  264:       {% endif %}
+  265: 
+  266:       {% if deleted %}
+  267:         <div class="alert ok">Yedek silindi: {{ deleted }}</div>
+
+--- templates/settings_backup.html:267 ---
+  266:       {% if deleted %}
+  267:         <div class="alert ok">Yedek silindi: {{ deleted }}</div>
+  268:       {% endif %}
+  269: 
+  270:       <div class="alert info">
+  271:         Yedek dosyası; sefer kayıtlarını, raporları, profil fotoğraflarını ve yüklenen dosyaları içerir.
+
+--- templates/settings_backup.html:270 ---
+  269: 
+  270:       <div class="alert info">
+  271:         Yedek dosyası; sefer kayıtlarını, raporları, profil fotoğraflarını ve yüklenen dosyaları içerir.
+  272:       </div>
+  273: 
+  274:       <form method="post" action="/ayarlar/yedekleme/olustur">
+
+--- templates/settings_backup.html:274 ---
+  273: 
+  274:       <form method="post" action="/ayarlar/yedekleme/olustur">
+  275:         {% if csrf_token is defined %}
+  276:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  277:         {% endif %}
+  278:         <button class="create-btn" type="submit">＋ Yeni Yedek Oluştur</button>
+
+--- templates/settings_backup.html:275 ---
+  274:       <form method="post" action="/ayarlar/yedekleme/olustur">
+  275:         {% if csrf_token is defined %}
+  276:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  277:         {% endif %}
+  278:         <button class="create-btn" type="submit">＋ Yeni Yedek Oluştur</button>
+  279:       </form>
+
+--- templates/settings_backup.html:276 ---
+  275:         {% if csrf_token is defined %}
+  276:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  277:         {% endif %}
+  278:         <button class="create-btn" type="submit">＋ Yeni Yedek Oluştur</button>
+  279:       </form>
+  280:     </section>
+
+--- templates/settings_backup.html:278 ---
+  277:         {% endif %}
+  278:         <button class="create-btn" type="submit">＋ Yeni Yedek Oluştur</button>
+  279:       </form>
+  280:     </section>
+  281: 
+  282: 
+
+--- templates/settings_backup.html:283 ---
+  282: 
+  283:     <section class="card" id="restoreBackupCard">
+  284:       {% if restored %}
+  285:         <div class="alert ok">
+  286:           Yedek geri yüklendi: {{ restored }}<br>
+  287:           Geri yüklemeden önce acil yedek oluşturuldu: {{ emergency }}
+
+--- templates/settings_backup.html:285 ---
+  284:       {% if restored %}
+  285:         <div class="alert ok">
+  286:           Yedek geri yüklendi: {{ restored }}<br>
+  287:           Geri yüklemeden önce acil yedek oluşturuldu: {{ emergency }}
+  288:         </div>
+  289: 
+
+--- templates/settings_backup.html:290 ---
+  289: 
+  290:         <div class="restart-warning">
+  291:           <b>⚠️ Uygulamayı yeniden başlatın</b>
+  292:           Geri yükleme sonrası veritabanı değiştiği için uygulamayı kapatıp Termux’tan tekrar başlatmanız önerilir.
+  293:         </div>
+  294:       {% endif %}
+
+--- templates/settings_backup.html:297 ---
+  296:       {% if restore_error %}
+  297:         <div class="alert err">{{ restore_error }}</div>
+  298:       {% endif %}
+  299: 
+  300:       <div class="alert info">
+  301:         Geri yükleme yapmadan önce sistem otomatik olarak mevcut halin acil yedeğini alır.
+
+--- templates/settings_backup.html:300 ---
+  299: 
+  300:       <div class="alert info">
+  301:         Geri yükleme yapmadan önce sistem otomatik olarak mevcut halin acil yedeğini alır.
+  302:       </div>
+  303: 
+  304:       <form method="post" action="/ayarlar/yedekleme/geri-yukle" enctype="multipart/form-data"
+
+--- templates/settings_backup.html:304 ---
+  303: 
+  304:       <form method="post" action="/ayarlar/yedekleme/geri-yukle" enctype="multipart/form-data"
+  305:             onsubmit="return confirm('Bu yedek geri yüklenecek. Mevcut veriler seçilen yedekle değiştirilecek. Devam edilsin mi?');">
+  306:         {% if csrf_token is defined %}
+  307:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  308:         {% endif %}
+
+--- templates/settings_backup.html:306 ---
+  305:             onsubmit="return confirm('Bu yedek geri yüklenecek. Mevcut veriler seçilen yedekle değiştirilecek. Devam edilsin mi?');">
+  306:         {% if csrf_token is defined %}
+  307:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  308:         {% endif %}
+  309: 
+  310:         <input class="restore-file" type="file" name="backup_file" accept=".zip" required>
+
+--- templates/settings_backup.html:307 ---
+  306:         {% if csrf_token is defined %}
+  307:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  308:         {% endif %}
+  309: 
+  310:         <input class="restore-file" type="file" name="backup_file" accept=".zip" required>
+  311:         <button class="restore-btn" type="submit">↩ Yedekten Geri Yükle</button>
+
+--- templates/settings_backup.html:310 ---
+  309: 
+  310:         <input class="restore-file" type="file" name="backup_file" accept=".zip" required>
+  311:         <button class="restore-btn" type="submit">↩ Yedekten Geri Yükle</button>
+  312:       </form>
+  313:     </section>
+  314: 
+
+--- templates/settings_backup.html:311 ---
+  310:         <input class="restore-file" type="file" name="backup_file" accept=".zip" required>
+  311:         <button class="restore-btn" type="submit">↩ Yedekten Geri Yükle</button>
+  312:       </form>
+  313:     </section>
+  314: 
+  315:     <section class="backup-list">
+
+--- templates/settings_backup.html:315 ---
+  314: 
+  315:     <section class="backup-list">
+  316:       {% if items %}
+  317:         {% for item in items %}
+  318:           <div class="backup-item">
+  319:             <div class="backup-title">📦 {{ item.name }}</div>
+... sonuç sınırı doldu ...
+
+--- templates/settings_package_requests.html:5 ---
+    4:   <meta charset="utf-8">
+    5:   <meta name="viewport" content="width=device-width, initial-scale=1">
+    6:   <title>Paket Talepleri</title>
+    7: 
+    8:   <style>
+    9:     *{ box-sizing:border-box; }
+
+--- templates/settings_package_requests.html:157 ---
+  156: <body>
+  157:   <main class="shell">
+  158:     <section class="hero">
+  159:       <h1>🧾 Paket Talepleri</h1>
+  160:       <p>Kullanıcıların paket yükseltme talepleri burada listelenir.</p>
+  161:     </section>
+
+--- templates/settings_package_requests.html:158 ---
+  157:   <main class="shell">
+  158:     <section class="hero">
+  159:       <h1>🧾 Paket Talepleri</h1>
+  160:       <p>Kullanıcıların paket yükseltme talepleri burada listelenir.</p>
+  161:     </section>
+  162: 
+
+--- templates/settings_package_requests.html:159 ---
+  158:     <section class="hero">
+  159:       <h1>🧾 Paket Talepleri</h1>
+  160:       <p>Kullanıcıların paket yükseltme talepleri burada listelenir.</p>
+  161:     </section>
+  162: 
+  163:     {% if rows %}
+
+--- templates/settings_package_requests.html:164 ---
+  163:     {% if rows %}
+  164:       <section class="list">
+  165:         {% for r in rows %}
+  166:           <article class="req">
+  167:             <div class="top">
+  168:               <div class="plan">{{ r["requested_plan"] }}</div>
+
+--- templates/settings_package_requests.html:166 ---
+  165:         {% for r in rows %}
+  166:           <article class="req">
+  167:             <div class="top">
+  168:               <div class="plan">{{ r["requested_plan"] }}</div>
+  169:               {% if r["is_done"] %}
+  170:                 <div class="badge done">Tamamlandı</div>
+
+--- templates/settings_package_requests.html:167 ---
+  166:           <article class="req">
+  167:             <div class="top">
+  168:               <div class="plan">{{ r["requested_plan"] }}</div>
+  169:               {% if r["is_done"] %}
+  170:                 <div class="badge done">Tamamlandı</div>
+  171:               {% else %}
+
+--- templates/settings_package_requests.html:168 ---
+  167:             <div class="top">
+  168:               <div class="plan">{{ r["requested_plan"] }}</div>
+  169:               {% if r["is_done"] %}
+  170:                 <div class="badge done">Tamamlandı</div>
+  171:               {% else %}
+  172:                 <div class="badge open">Yeni Talep</div>
+
+--- templates/settings_package_requests.html:170 ---
+  169:               {% if r["is_done"] %}
+  170:                 <div class="badge done">Tamamlandı</div>
+  171:               {% else %}
+  172:                 <div class="badge open">Yeni Talep</div>
+  173:               {% endif %}
+  174:             </div>
+
+--- templates/settings_package_requests.html:172 ---
+  171:               {% else %}
+  172:                 <div class="badge open">Yeni Talep</div>
+  173:               {% endif %}
+  174:             </div>
+  175: 
+  176:             <div class="meta">
+
+--- templates/settings_package_requests.html:176 ---
+  175: 
+  176:             <div class="meta">
+  177:               <div><b>Mevcut Paket:</b> {{ r["current_plan"] or "-" }}</div>
+  178:               <div><b>Abonelik Durumu:</b> {{ r["subscription_status"] or "-" }}</div>
+  179:               <div><b>Tarih:</b> {{ r["created_at"] }}</div>
+  180:               <div><b>Not:</b> {{ r["note"] or "-" }}</div>
+
+--- templates/settings_package_requests.html:184 ---
+  183:             {% if not r["is_done"] %}
+  184:               <form method="post" action="/ayarlar/paket-talepleri/{{ r['id'] }}/tamamla">
+  185:                 {% if csrf_token is defined %}
+  186:                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  187:                 {% endif %}
+  188:                 <button class="btn primary" type="submit">Tamamlandı İşaretle</button>
+
+--- templates/settings_package_requests.html:185 ---
+  184:               <form method="post" action="/ayarlar/paket-talepleri/{{ r['id'] }}/tamamla">
+  185:                 {% if csrf_token is defined %}
+  186:                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  187:                 {% endif %}
+  188:                 <button class="btn primary" type="submit">Tamamlandı İşaretle</button>
+  189:               </form>
+
+--- templates/settings_package_requests.html:186 ---
+  185:                 {% if csrf_token is defined %}
+  186:                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  187:                 {% endif %}
+  188:                 <button class="btn primary" type="submit">Tamamlandı İşaretle</button>
+  189:               </form>
+  190:             {% endif %}
+
+--- templates/settings_package_requests.html:188 ---
+  187:                 {% endif %}
+  188:                 <button class="btn primary" type="submit">Tamamlandı İşaretle</button>
+  189:               </form>
+  190:             {% endif %}
+  191:           </article>
+  192:         {% endfor %}
+
+--- templates/settings_package_requests.html:195 ---
+  194:     {% else %}
+  195:       <div class="empty">Henüz paket talebi yok.</div>
+  196:     {% endif %}
+  197: 
+  198:     <a class="btn secondary" href="/ayarlar">← Ayarlara dön</a>
+  199:   </main>
+
+--- templates/settings_package_requests.html:198 ---
+  197: 
+  198:     <a class="btn secondary" href="/ayarlar">← Ayarlara dön</a>
+  199:   </main>
+  200: </body>
+  201: </html>
+
+--- templates/report_archive.html:78 ---
+   77: 
+   78: <div class="wrap">
+   79:   <div class="hero">
+   80:     <h1>📁 Sefer Rapor Arşivi</h1>
+   81:     <div class="muted">Sefer bitince oluşturulan rapor dosyaları burada listelenir.</div>
+   82:   </div>
+
+--- templates/report_archive.html:79 ---
+   78: <div class="wrap">
+   79:   <div class="hero">
+   80:     <h1>📁 Sefer Rapor Arşivi</h1>
+   81:     <div class="muted">Sefer bitince oluşturulan rapor dosyaları burada listelenir.</div>
+   82:   </div>
+   83: 
+
+--- templates/report_archive.html:80 ---
+   79:   <div class="hero">
+   80:     <h1>📁 Sefer Rapor Arşivi</h1>
+   81:     <div class="muted">Sefer bitince oluşturulan rapor dosyaları burada listelenir.</div>
+   82:   </div>
+   83: 
+   84:   {% if items %}
+
+--- templates/report_archive.html:81 ---
+   80:     <h1>📁 Sefer Rapor Arşivi</h1>
+   81:     <div class="muted">Sefer bitince oluşturulan rapor dosyaları burada listelenir.</div>
+   82:   </div>
+   83: 
+   84:   {% if items %}
+   85:     {% for it in items %}
+
+--- templates/report_archive.html:86 ---
+   85:     {% for it in items %}
+   86:       <div class="item">
+   87:         <div class="title">{{ it.title }}</div>
+   88:         <div class="actions">
+   89:           <a class="btn blue" href="{{ it.view }}">📄 Aç</a>
+   90:           <a class="btn" href="{{ it.txt }}">TXT indir</a>
+
+--- templates/report_archive.html:87 ---
+   86:       <div class="item">
+   87:         <div class="title">{{ it.title }}</div>
+   88:         <div class="actions">
+   89:           <a class="btn blue" href="{{ it.view }}">📄 Aç</a>
+   90:           <a class="btn" href="{{ it.txt }}">TXT indir</a>
+   91:           <a class="btn" href="{{ it.csv }}">CSV indir</a>
+
+--- templates/report_archive.html:88 ---
+   87:         <div class="title">{{ it.title }}</div>
+   88:         <div class="actions">
+   89:           <a class="btn blue" href="{{ it.view }}">📄 Aç</a>
+   90:           <a class="btn" href="{{ it.txt }}">TXT indir</a>
+   91:           <a class="btn" href="{{ it.csv }}">CSV indir</a>
+   92:           <a class="btn" href="{{ it.json }}">JSON</a>
+
+--- templates/report_archive.html:89 ---
+   88:         <div class="actions">
+   89:           <a class="btn blue" href="{{ it.view }}">📄 Aç</a>
+   90:           <a class="btn" href="{{ it.txt }}">TXT indir</a>
+   91:           <a class="btn" href="{{ it.csv }}">CSV indir</a>
+   92:           <a class="btn" href="{{ it.json }}">JSON</a>
+   93:         </div>
+
+--- templates/report_archive.html:90 ---
+   89:           <a class="btn blue" href="{{ it.view }}">📄 Aç</a>
+   90:           <a class="btn" href="{{ it.txt }}">TXT indir</a>
+   91:           <a class="btn" href="{{ it.csv }}">CSV indir</a>
+   92:           <a class="btn" href="{{ it.json }}">JSON</a>
+   93:         </div>
+   94:       </div>
+
+--- templates/report_archive.html:91 ---
+   90:           <a class="btn" href="{{ it.txt }}">TXT indir</a>
+   91:           <a class="btn" href="{{ it.csv }}">CSV indir</a>
+   92:           <a class="btn" href="{{ it.json }}">JSON</a>
+   93:         </div>
+   94:       </div>
+   95:     {% endfor %}
+
+--- templates/report_archive.html:92 ---
+   91:           <a class="btn" href="{{ it.csv }}">CSV indir</a>
+   92:           <a class="btn" href="{{ it.json }}">JSON</a>
+   93:         </div>
+   94:       </div>
+   95:     {% endfor %}
+   96:   {% else %}
+
+--- templates/report_archive.html:97 ---
+   96:   {% else %}
+   97:     <div class="empty">Henüz arşivlenmiş sefer raporu yok.</div>
+   98:   {% endif %}
+   99: </div>
+  100: 
+  101: {% endblock %}
+
+--- templates/reports.html:161 ---
+  160: 
+  161: <div class="wrap fade" id="rootWrap">
+  162:   <div class="topbar">
+  163:     <div class="title">Raporlama / Analiz</div>
+  164: 
+  165:     <!-- Tema Toggler -->
+
+--- templates/reports.html:162 ---
+  161: <div class="wrap fade" id="rootWrap">
+  162:   <div class="topbar">
+  163:     <div class="title">Raporlama / Analiz</div>
+  164: 
+  165:     <!-- Tema Toggler -->
+  166:     <label class="toggler" title="Tema">
+
+--- templates/reports.html:163 ---
+  162:   <div class="topbar">
+  163:     <div class="title">Raporlama / Analiz</div>
+  164: 
+  165:     <!-- Tema Toggler -->
+  166:     <label class="toggler" title="Tema">
+  167:       <svg id="iconSun" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M6.76 4.84 5.34 3.42 3.92 4.84l1.42 1.42 1.42-1.42zM1 13h3v-2H1v2zm10-9h2V1h-2v3zm7.66 1.84 1.42-1.42-1.42-1.42-1.42 1.42 1.42 1.42zM20 13h3v-2h-3v2zm-7 7h2v-3h-2v3zM6.76 19.16l-1.42 1.42 1.42 1.42 1.42-1.42-1.42-1.42zM17.24 19.16l1.42 1.42 1.42-1.42-1.42-1.42-1.42 1.42zM12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+
+--- templates/reports.html:166 ---
+  165:     <!-- Tema Toggler -->
+  166:     <label class="toggler" title="Tema">
+  167:       <svg id="iconSun" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M6.76 4.84 5.34 3.42 3.92 4.84l1.42 1.42 1.42-1.42zM1 13h3v-2H1v2zm10-9h2V1h-2v3zm7.66 1.84 1.42-1.42-1.42-1.42-1.42 1.42 1.42 1.42zM20 13h3v-2h-3v2zm-7 7h2v-3h-2v3zM6.76 19.16l-1.42 1.42 1.42 1.42 1.42-1.42-1.42-1.42zM17.24 19.16l1.42 1.42 1.42-1.42-1.42-1.42-1.42 1.42zM12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+  168:       <input id="themeToggle" type="checkbox" />
+  169:       <svg id="iconMoon" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M20.742 13.045A8 8 0 1 1 10.955 3.258a8.002 8.002 0 1 0 9.787 9.787z"/></svg>
+  170:     </label>
+
+--- templates/reports.html:167 ---
+  166:     <label class="toggler" title="Tema">
+  167:       <svg id="iconSun" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M6.76 4.84 5.34 3.42 3.92 4.84l1.42 1.42 1.42-1.42zM1 13h3v-2H1v2zm10-9h2V1h-2v3zm7.66 1.84 1.42-1.42-1.42-1.42-1.42 1.42 1.42 1.42zM20 13h3v-2h-3v2zm-7 7h2v-3h-2v3zM6.76 19.16l-1.42 1.42 1.42 1.42 1.42-1.42-1.42-1.42zM17.24 19.16l1.42 1.42 1.42-1.42-1.42-1.42-1.42 1.42zM12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+  168:       <input id="themeToggle" type="checkbox" />
+  169:       <svg id="iconMoon" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M20.742 13.045A8 8 0 1 1 10.955 3.258a8.002 8.002 0 1 0 9.787 9.787z"/></svg>
+  170:     </label>
+  171: 
+
+--- templates/reports.html:168 ---
+  167:       <svg id="iconSun" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M6.76 4.84 5.34 3.42 3.92 4.84l1.42 1.42 1.42-1.42zM1 13h3v-2H1v2zm10-9h2V1h-2v3zm7.66 1.84 1.42-1.42-1.42-1.42-1.42 1.42 1.42 1.42zM20 13h3v-2h-3v2zm-7 7h2v-3h-2v3zM6.76 19.16l-1.42 1.42 1.42 1.42 1.42-1.42-1.42-1.42zM17.24 19.16l1.42 1.42 1.42-1.42-1.42-1.42-1.42 1.42zM12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+  168:       <input id="themeToggle" type="checkbox" />
+  169:       <svg id="iconMoon" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M20.742 13.045A8 8 0 1 1 10.955 3.258a8.002 8.002 0 1 0 9.787 9.787z"/></svg>
+  170:     </label>
+  171: 
+  172:     <a class="iconbtn" href="{{ url_for('index') }}">
+
+--- templates/reports.html:169 ---
+  168:       <input id="themeToggle" type="checkbox" />
+  169:       <svg id="iconMoon" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M20.742 13.045A8 8 0 1 1 10.955 3.258a8.002 8.002 0 1 0 9.787 9.787z"/></svg>
+  170:     </label>
+  171: 
+  172:     <a class="iconbtn" href="{{ url_for('index') }}">
+  173:       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 3 11h2v9h6v-6h2v6h6v-9h2z"/></svg>
+
+--- templates/reports.html:172 ---
+  171: 
+  172:     <a class="iconbtn" href="{{ url_for('index') }}">
+  173:       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 3 11h2v9h6v-6h2v6h6v-9h2z"/></svg>
+  174:       Ana sayfa
+  175:     </a>
+  176:     <button id="btnDownload" class="iconbtn">
+
+--- templates/reports.html:176 ---
+  175:     </a>
+  176:     <button id="btnDownload" class="iconbtn">
+  177:       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 20h14v-2H5v2zM11 4v8H8l4 4 4-4h-3V4h-2z"/></svg>
+  178:       İndir (CSV)
+  179:     </button>
+  180:     <button id="btnReset" class="iconbtn warn">
+
+--- templates/reports.html:180 ---
+  179:     </button>
+  180:     <button id="btnReset" class="iconbtn warn">
+  181:       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 6V3L7 8l5 5V9a5 5 0 1 1-5 5H5a7 7 0 1 0 7-8z"/></svg>
+  182:       Verileri sıfırla
+  183:     </button>
+  184:     <button id="btnFetch" class="iconbtn primary">
+
+--- templates/reports.html:184 ---
+  183:     </button>
+  184:     <button id="btnFetch" class="iconbtn primary">
+  185:       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 13h14v-2H5v2z"/></svg>
+  186:       Raporu Görüntüle
+  187:     </button>
+  188:   </div>
+
+--- templates/reports.html:191 ---
+  190:   <!-- Filtreler -->
+  191:   <div class="filters">
+  192:     <div class="group">
+  193:       <span>Tarih Aralığı</span>
+  194:       <div style="display:flex;gap:8px">
+  195:         <input type="date" id="fStart" style="flex:1">
+
+--- templates/reports.html:192 ---
+  191:   <div class="filters">
+  192:     <div class="group">
+  193:       <span>Tarih Aralığı</span>
+  194:       <div style="display:flex;gap:8px">
+  195:         <input type="date" id="fStart" style="flex:1">
+  196:         <input type="date" id="fEnd" style="flex:1">
+
+--- templates/reports.html:195 ---
+  194:       <div style="display:flex;gap:8px">
+  195:         <input type="date" id="fStart" style="flex:1">
+  196:         <input type="date" id="fEnd" style="flex:1">
+  197:       </div>
+  198:     </div>
+  199:     <div class="group">
+
+--- templates/reports.html:196 ---
+  195:         <input type="date" id="fStart" style="flex:1">
+  196:         <input type="date" id="fEnd" style="flex:1">
+  197:       </div>
+  198:     </div>
+  199:     <div class="group">
+  200:       <span>Hat (opsiyonel)</span>
+
+--- templates/reports.html:199 ---
+  198:     </div>
+  199:     <div class="group">
+  200:       <span>Hat (opsiyonel)</span>
+  201:       <select id="fRoute">
+  202:         <option value="">— Hepsi —</option>
+  203:         {% for r in all_routes %}
+
+--- templates/reports.html:201 ---
+  200:       <span>Hat (opsiyonel)</span>
+  201:       <select id="fRoute">
+  202:         <option value="">— Hepsi —</option>
+  203:         {% for r in all_routes %}
+  204:           <option value="{{ r }}">{{ r }}</option>
+  205:         {% endfor %}
+
+--- templates/reports.html:211 ---
+  210:   <!-- Kartlar -->
+  211:   <div class="cards">
+  212:     <div class="card fade"><div class="k">Toplam Yolcu</div><div class="v" id="mPax">0</div></div>
+  213:     <div class="card fade"><div class="k">Toplam Gelir (₺)</div><div class="v" id="mRev">₺0.00</div></div>
+  214:     <div class="card fade"><div class="k">Ortalama Gelir (₺/kişi)</div><div class="v" id="mAvg">₺0.00</div></div>
+  215:     <div class="card fade">
+
+--- templates/reports.html:212 ---
+  211:   <div class="cards">
+  212:     <div class="card fade"><div class="k">Toplam Yolcu</div><div class="v" id="mPax">0</div></div>
+  213:     <div class="card fade"><div class="k">Toplam Gelir (₺)</div><div class="v" id="mRev">₺0.00</div></div>
+  214:     <div class="card fade"><div class="k">Ortalama Gelir (₺/kişi)</div><div class="v" id="mAvg">₺0.00</div></div>
+  215:     <div class="card fade">
+  216:       <div class="k">Hiç Satılmayan Koltuk</div>
+
+--- templates/reports.html:213 ---
+  212:     <div class="card fade"><div class="k">Toplam Yolcu</div><div class="v" id="mPax">0</div></div>
+  213:     <div class="card fade"><div class="k">Toplam Gelir (₺)</div><div class="v" id="mRev">₺0.00</div></div>
+  214:     <div class="card fade"><div class="k">Ortalama Gelir (₺/kişi)</div><div class="v" id="mAvg">₺0.00</div></div>
+  215:     <div class="card fade">
+  216:       <div class="k">Hiç Satılmayan Koltuk</div>
+  217:       <div class="v" id="mUnsold">0</div>
+
+--- templates/reports.html:214 ---
+  213:     <div class="card fade"><div class="k">Toplam Gelir (₺)</div><div class="v" id="mRev">₺0.00</div></div>
+  214:     <div class="card fade"><div class="k">Ortalama Gelir (₺/kişi)</div><div class="v" id="mAvg">₺0.00</div></div>
+  215:     <div class="card fade">
+  216:       <div class="k">Hiç Satılmayan Koltuk</div>
+  217:       <div class="v" id="mUnsold">0</div>
+  218:       <div class="sub" id="unsoldMini">—</div>
+
+--- templates/reports.html:215 ---
+  214:     <div class="card fade"><div class="k">Ortalama Gelir (₺/kişi)</div><div class="v" id="mAvg">₺0.00</div></div>
+  215:     <div class="card fade">
+  216:       <div class="k">Hiç Satılmayan Koltuk</div>
+  217:       <div class="v" id="mUnsold">0</div>
+  218:       <div class="sub" id="unsoldMini">—</div>
+  219:     </div>
+
+--- templates/reports.html:216 ---
+  215:     <div class="card fade">
+  216:       <div class="k">Hiç Satılmayan Koltuk</div>
+  217:       <div class="v" id="mUnsold">0</div>
+  218:       <div class="sub" id="unsoldMini">—</div>
+  219:     </div>
+  220:   </div>
+... sonuç sınırı doldu ...
+
+--- templates/forgot_password.html:5 ---
+    4:   <meta charset="utf-8">
+    5:   <meta name="viewport" content="width=device-width, initial-scale=1">
+    6:   <title>Şifremi Unuttum</title>
+    7: 
+    8:   <style>
+    9:     *{ box-sizing:border-box; }
+
+--- templates/forgot_password.html:185 ---
+  184: <body>
+  185:   <main class="shell">
+  186:     <section class="hero">
+  187:       <h1>🔁 Şifremi Unuttum</h1>
+  188:       <p>Kurtarma koduyla yeni panel şifresi belirle.</p>
+  189:     </section>
+
+--- templates/forgot_password.html:186 ---
+  185:   <main class="shell">
+  186:     <section class="hero">
+  187:       <h1>🔁 Şifremi Unuttum</h1>
+  188:       <p>Kurtarma koduyla yeni panel şifresi belirle.</p>
+  189:     </section>
+  190: 
+
+--- templates/forgot_password.html:187 ---
+  186:     <section class="hero">
+  187:       <h1>🔁 Şifremi Unuttum</h1>
+  188:       <p>Kurtarma koduyla yeni panel şifresi belirle.</p>
+  189:     </section>
+  190: 
+  191:     <section class="card">
+
+--- templates/forgot_password.html:191 ---
+  190: 
+  191:     <section class="card">
+  192:       {% if msg %}
+  193:         <div class="alert ok">{{ msg }}</div>
+  194:       {% endif %}
+  195: 
+
+--- templates/forgot_password.html:193 ---
+  192:       {% if msg %}
+  193:         <div class="alert ok">{{ msg }}</div>
+  194:       {% endif %}
+  195: 
+  196:       {% if error %}
+  197:         <div class="alert err">{{ error }}</div>
+
+--- templates/forgot_password.html:197 ---
+  196:       {% if error %}
+  197:         <div class="alert err">{{ error }}</div>
+  198:       {% endif %}
+  199: 
+  200:       <form method="post">
+  201:         {% if csrf_token is defined %}
+
+--- templates/forgot_password.html:200 ---
+  199: 
+  200:       <form method="post">
+  201:         {% if csrf_token is defined %}
+  202:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  203:         {% endif %}
+  204: 
+
+--- templates/forgot_password.html:201 ---
+  200:       <form method="post">
+  201:         {% if csrf_token is defined %}
+  202:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  203:         {% endif %}
+  204: 
+  205:         <div class="field">
+
+--- templates/forgot_password.html:202 ---
+  201:         {% if csrf_token is defined %}
+  202:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  203:         {% endif %}
+  204: 
+  205:         <div class="field">
+  206:           <label>Kurtarma kodu</label>
+
+--- templates/forgot_password.html:205 ---
+  204: 
+  205:         <div class="field">
+  206:           <label>Kurtarma kodu</label>
+  207:           <input name="recovery_code" type="text" placeholder="SARIKIZ-0000-0000-0000" autocomplete="off" required>
+  208:         </div>
+  209: 
+
+--- templates/forgot_password.html:207 ---
+  206:           <label>Kurtarma kodu</label>
+  207:           <input name="recovery_code" type="text" placeholder="SARIKIZ-0000-0000-0000" autocomplete="off" required>
+  208:         </div>
+  209: 
+  210:         <div class="field">
+  211:           <label>Yeni şifre</label>
+
+--- templates/forgot_password.html:210 ---
+  209: 
+  210:         <div class="field">
+  211:           <label>Yeni şifre</label>
+  212:           <div class="passbox">
+  213:             <input name="new_password" type="password" autocomplete="new-password" required>
+  214:             <button class="eye" type="button">👁️</button>
+
+--- templates/forgot_password.html:212 ---
+  211:           <label>Yeni şifre</label>
+  212:           <div class="passbox">
+  213:             <input name="new_password" type="password" autocomplete="new-password" required>
+  214:             <button class="eye" type="button">👁️</button>
+  215:           </div>
+  216:         </div>
+
+--- templates/forgot_password.html:213 ---
+  212:           <div class="passbox">
+  213:             <input name="new_password" type="password" autocomplete="new-password" required>
+  214:             <button class="eye" type="button">👁️</button>
+  215:           </div>
+  216:         </div>
+  217: 
+
+--- templates/forgot_password.html:214 ---
+  213:             <input name="new_password" type="password" autocomplete="new-password" required>
+  214:             <button class="eye" type="button">👁️</button>
+  215:           </div>
+  216:         </div>
+  217: 
+  218:         <div class="field">
+
+--- templates/forgot_password.html:218 ---
+  217: 
+  218:         <div class="field">
+  219:           <label>Yeni şifre tekrar</label>
+  220:           <div class="passbox">
+  221:             <input name="new_password2" type="password" autocomplete="new-password" required>
+  222:             <button class="eye" type="button">👁️</button>
+
+--- templates/forgot_password.html:220 ---
+  219:           <label>Yeni şifre tekrar</label>
+  220:           <div class="passbox">
+  221:             <input name="new_password2" type="password" autocomplete="new-password" required>
+  222:             <button class="eye" type="button">👁️</button>
+  223:           </div>
+  224:         </div>
+
+--- templates/forgot_password.html:221 ---
+  220:           <div class="passbox">
+  221:             <input name="new_password2" type="password" autocomplete="new-password" required>
+  222:             <button class="eye" type="button">👁️</button>
+  223:           </div>
+  224:         </div>
+  225: 
+
+--- templates/forgot_password.html:222 ---
+  221:             <input name="new_password2" type="password" autocomplete="new-password" required>
+  222:             <button class="eye" type="button">👁️</button>
+  223:           </div>
+  224:         </div>
+  225: 
+  226:         <div class="actions">
+
+--- templates/forgot_password.html:226 ---
+  225: 
+  226:         <div class="actions">
+  227:           <button class="btn primary" type="submit">Şifreyi Sıfırla</button>
+  228:           <a class="btn secondary" href="/login">← Girişe dön</a>
+  229:         </div>
+  230:       </form>
+
+--- templates/forgot_password.html:227 ---
+  226:         <div class="actions">
+  227:           <button class="btn primary" type="submit">Şifreyi Sıfırla</button>
+  228:           <a class="btn secondary" href="/login">← Girişe dön</a>
+  229:         </div>
+  230:       </form>
+  231:     </section>
+
+--- templates/forgot_password.html:228 ---
+  227:           <button class="btn primary" type="submit">Şifreyi Sıfırla</button>
+  228:           <a class="btn secondary" href="/login">← Girişe dön</a>
+  229:         </div>
+  230:       </form>
+  231:     </section>
+  232:   </main>
+... sonuç sınırı doldu ...
+
+--- templates/user_reset.html:5 ---
+    4:   <meta charset="utf-8">
+    5:   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    6:   <title>Kullanıcıyı Değiştir</title>
+    7: 
+    8:   <style>
+    9:     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+--- templates/user_reset.html:159 ---
+  158: <body>
+  159:   <main class="shell">
+  160:     <section class="hero">
+  161:       <h1>🔁 Kullanıcıyı Değiştir</h1>
+  162:       <p>Mevcut panel sahibini sıfırlayıp yeni kullanıcı oluşturabilirsin.</p>
+  163:     </section>
+
+--- templates/user_reset.html:160 ---
+  159:   <main class="shell">
+  160:     <section class="hero">
+  161:       <h1>🔁 Kullanıcıyı Değiştir</h1>
+  162:       <p>Mevcut panel sahibini sıfırlayıp yeni kullanıcı oluşturabilirsin.</p>
+  163:     </section>
+  164: 
+
+--- templates/user_reset.html:161 ---
+  160:     <section class="hero">
+  161:       <h1>🔁 Kullanıcıyı Değiştir</h1>
+  162:       <p>Mevcut panel sahibini sıfırlayıp yeni kullanıcı oluşturabilirsin.</p>
+  163:     </section>
+  164: 
+  165:     <section class="card">
+
+--- templates/user_reset.html:165 ---
+  164: 
+  165:     <section class="card">
+  166:       <div class="warning">
+  167:         Bu işlem mevcut panel sahibini ve giriş şifresini sıfırlar.
+  168:         Devam etmek için kurtarma kodunu girmen gerekir.
+  169:       </div>
+
+--- templates/user_reset.html:166 ---
+  165:     <section class="card">
+  166:       <div class="warning">
+  167:         Bu işlem mevcut panel sahibini ve giriş şifresini sıfırlar.
+  168:         Devam etmek için kurtarma kodunu girmen gerekir.
+  169:       </div>
+  170: 
+
+--- templates/user_reset.html:172 ---
+  171:       {% if error %}
+  172:         <div class="error">{{ error }}</div>
+  173:       {% endif %}
+  174: 
+  175:       <form method="post">
+  176:         {% if csrf_token is defined %}
+
+--- templates/user_reset.html:175 ---
+  174: 
+  175:       <form method="post">
+  176:         {% if csrf_token is defined %}
+  177:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  178:         {% endif %}
+  179: 
+
+--- templates/user_reset.html:176 ---
+  175:       <form method="post">
+  176:         {% if csrf_token is defined %}
+  177:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  178:         {% endif %}
+  179: 
+  180:         <label for="recovery_code">Kurtarma Kodu</label>
+
+--- templates/user_reset.html:177 ---
+  176:         {% if csrf_token is defined %}
+  177:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  178:         {% endif %}
+  179: 
+  180:         <label for="recovery_code">Kurtarma Kodu</label>
+  181:         <input id="recovery_code" name="recovery_code" type="text" placeholder="Örn: ABCD-1234" autocomplete="off" required>
+
+--- templates/user_reset.html:181 ---
+  180:         <label for="recovery_code">Kurtarma Kodu</label>
+  181:         <input id="recovery_code" name="recovery_code" type="text" placeholder="Örn: ABCD-1234" autocomplete="off" required>
+  182: 
+  183:         <button class="btn" type="submit">Kullanıcıyı Sıfırla</button>
+  184:       </form>
+  185: 
+
+--- templates/user_reset.html:183 ---
+  182: 
+  183:         <button class="btn" type="submit">Kullanıcıyı Sıfırla</button>
+  184:       </form>
+  185: 
+  186:       <a class="back" href="/login">← Giriş ekranına dön</a>
+  187:     </section>
+
+--- templates/user_reset.html:186 ---
+  185: 
+  186:       <a class="back" href="/login">← Giriş ekranına dön</a>
+  187:     </section>
+  188:   </main>
+  189: </body>
+  190: </html>
+
+
+==========================================================================================
+3) AYARLAR ŞABLONLARINDA BAŞLIKLAR
+==========================================================================================
+
+
+### templates/settings.html
+- ⚙️ Ayarlar
+
+### templates/settings_profile.html
+- 👤 Profil Bilgileri
+
+### templates/settings_password.html
+- 🔐 Şifre Değiştir
+
+### templates/settings_recovery.html
+- 🧾 Kurtarma Kodu
+
+### templates/settings_subscription.html
+- 💳 Abonelik
+- Aboneliği Geri Yükle
+- 📦 Paketler
+- 🧪 Google Play Test
+- Google Play ile Satın Al
+
+### templates/settings_backup.html
+- 💾 Yedekleme
+
+### templates/settings_package_requests.html
+- 🧾 Paket Talepleri
+
+### templates/report_archive.html
+- 📁 Sefer Rapor Arşivi
+
+### templates/reports.html
+- Koltuk
+
+### templates/forgot_password.html
+- 🔁 Şifremi Unuttum
+
+### templates/user_reset.html
+- 🔁 Kullanıcıyı Değiştir
+
+
+==========================================================================================
+4) SETTINGS / PROFILE / PASSWORD / BACKUP / REPORT VERİ AKIŞI
+==========================================================================================
+
+
+--- app.py:2 ---
+    1: import shutil
+    2: import zipfile
+    3: import os
+    4: import csv
+    5: import json
+    6: import secrets
+    7: import sqlite3
+    8: import re
+    9: from io import StringIO
+   10: from pathlib import Path
+   11: from datetime import datetime, timedelta
+   12: from typing import Any, Optional, Tuple
+
+--- app.py:7 ---
+    4: import csv
+    5: import json
+    6: import secrets
+    7: import sqlite3
+    8: import re
+    9: from io import StringIO
+   10: from pathlib import Path
+   11: from datetime import datetime, timedelta
+   12: from typing import Any, Optional, Tuple
+   13: 
+   14: from flask import (
+   15:     Flask,
+   16:     render_template,
+   17:     request,
+
+--- app.py:25 ---
+   22:     session,
+   23:     abort,
+   24:     send_from_directory,
+   25:     send_file,
+   26:     make_response,
+   27: )
+   28: from werkzeug.utils import secure_filename
+   29: from werkzeug.security import generate_password_hash, check_password_hash
+   30: 
+   31: from speedlimit import bp_speed
+   32: from modules.bags import bp as bags_bp
+   33: from modules.bags import bag_root, safe, get_counts
+   34: 
+   35: 
+
+--- app.py:29 ---
+   26:     make_response,
+   27: )
+   28: from werkzeug.utils import secure_filename
+   29: from werkzeug.security import generate_password_hash, check_password_hash
+   30: 
+   31: from speedlimit import bp_speed
+   32: from modules.bags import bp as bags_bp
+   33: from modules.bags import bag_root, safe, get_counts
+   34: 
+   35: 
+   36: # =========================================================
+   37: # Ayarlar
+   38: # =========================================================
+   39: 
+
+--- app.py:50 ---
+   47: app = Flask(__name__)
+   48: app.secret_key = os.getenv("SECRET_KEY", "degistir-beni")
+   49: 
+   50: DB_PATH = os.getenv("DB_PATH", "db.sqlite3")
+   51: DEBUG = env_bool("FLASK_DEBUG", True)
+   52: ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "yusuf")
+   53: 
+   54: 
+   55: 
+   56: 
+   57: # =========================================================
+   58: # Admin Profil / İlk Kurulum
+   59: # =========================================================
+   60: def ensure_admin_profile_table(db):
+
+--- app.py:52 ---
+   49: 
+   50: DB_PATH = os.getenv("DB_PATH", "db.sqlite3")
+   51: DEBUG = env_bool("FLASK_DEBUG", True)
+   52: ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "yusuf")
+   53: 
+   54: 
+   55: 
+   56: 
+   57: # =========================================================
+   58: # Admin Profil / İlk Kurulum
+   59: # =========================================================
+   60: def ensure_admin_profile_table(db):
+   61:     db.execute("""
+   62:         CREATE TABLE IF NOT EXISTS admin_profile(
+
+--- app.py:58 ---
+   55: 
+   56: 
+   57: # =========================================================
+   58: # Admin Profil / İlk Kurulum
+   59: # =========================================================
+   60: def ensure_admin_profile_table(db):
+   61:     db.execute("""
+   62:         CREATE TABLE IF NOT EXISTS admin_profile(
+   63:             id INTEGER PRIMARY KEY CHECK(id=1),
+   64:             full_name TEXT NOT NULL DEFAULT '',
+   65:             phone TEXT NOT NULL DEFAULT '',
+   66:             photo_path TEXT NOT NULL DEFAULT '',
+   67:             created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+   68:             updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+
+--- app.py:60 ---
+   57: # =========================================================
+   58: # Admin Profil / İlk Kurulum
+   59: # =========================================================
+   60: def ensure_admin_profile_table(db):
+   61:     db.execute("""
+   62:         CREATE TABLE IF NOT EXISTS admin_profile(
+   63:             id INTEGER PRIMARY KEY CHECK(id=1),
+   64:             full_name TEXT NOT NULL DEFAULT '',
+   65:             phone TEXT NOT NULL DEFAULT '',
+   66:             photo_path TEXT NOT NULL DEFAULT '',
+   67:             created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+   68:             updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+   69:         )
+   70:     """)
+
+--- app.py:62 ---
+   59: # =========================================================
+   60: def ensure_admin_profile_table(db):
+   61:     db.execute("""
+   62:         CREATE TABLE IF NOT EXISTS admin_profile(
+   63:             id INTEGER PRIMARY KEY CHECK(id=1),
+   64:             full_name TEXT NOT NULL DEFAULT '',
+   65:             phone TEXT NOT NULL DEFAULT '',
+   66:             photo_path TEXT NOT NULL DEFAULT '',
+   67:             created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+   68:             updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+   69:         )
+   70:     """)
+   71: 
+   72: 
+
+--- app.py:68 ---
+   65:             phone TEXT NOT NULL DEFAULT '',
+   66:             photo_path TEXT NOT NULL DEFAULT '',
+   67:             created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+   68:             updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+   69:         )
+   70:     """)
+   71: 
+   72: 
+   73: def get_admin_profile():
+   74:     db = get_db()
+   75:     ensure_admin_profile_table(db)
+   76:     row = db.execute("""
+   77:         SELECT id, full_name, phone, photo_path, created_at, updated_at
+   78:         FROM admin_profile
+
+--- app.py:73 ---
+   70:     """)
+   71: 
+   72: 
+   73: def get_admin_profile():
+   74:     db = get_db()
+   75:     ensure_admin_profile_table(db)
+   76:     row = db.execute("""
+   77:         SELECT id, full_name, phone, photo_path, created_at, updated_at
+   78:         FROM admin_profile
+   79:         WHERE id=1
+   80:     """).fetchone()
+   81: 
+   82:     if not row:
+   83:         return None
+... sonuç sınırı doldu ...
+
+--- modules/settings_panel.py:4 ---
+    1: from flask import render_template, request, redirect, url_for, session
+    2: 
+    3: 
+    4: def register_settings_routes(app, deps):
+    5:     admin_profile_exists = deps["admin_profile_exists"]
+    6:     verify_admin_password = deps["verify_admin_password"]
+    7:     issue_csrf = deps["issue_csrf"]
+    8:     get_csrf = deps["get_csrf"]
+    9: 
+   10:     reset_admin_owner = deps["reset_admin_owner"]
+   11:     verify_recovery_code = deps["verify_recovery_code"]
+   12:     get_recovery_code_hash = deps["get_recovery_code_hash"]
+   13:     make_recovery_code = deps["make_recovery_code"]
+   14:     set_recovery_code = deps["set_recovery_code"]
+
+--- modules/settings_panel.py:5 ---
+    2: 
+    3: 
+    4: def register_settings_routes(app, deps):
+    5:     admin_profile_exists = deps["admin_profile_exists"]
+    6:     verify_admin_password = deps["verify_admin_password"]
+    7:     issue_csrf = deps["issue_csrf"]
+    8:     get_csrf = deps["get_csrf"]
+    9: 
+   10:     reset_admin_owner = deps["reset_admin_owner"]
+   11:     verify_recovery_code = deps["verify_recovery_code"]
+   12:     get_recovery_code_hash = deps["get_recovery_code_hash"]
+   13:     make_recovery_code = deps["make_recovery_code"]
+   14:     set_recovery_code = deps["set_recovery_code"]
+   15:     settings_get = deps["settings_get"]
+
+--- modules/settings_panel.py:6 ---
+    3: 
+    4: def register_settings_routes(app, deps):
+    5:     admin_profile_exists = deps["admin_profile_exists"]
+    6:     verify_admin_password = deps["verify_admin_password"]
+    7:     issue_csrf = deps["issue_csrf"]
+    8:     get_csrf = deps["get_csrf"]
+    9: 
+   10:     reset_admin_owner = deps["reset_admin_owner"]
+   11:     verify_recovery_code = deps["verify_recovery_code"]
+   12:     get_recovery_code_hash = deps["get_recovery_code_hash"]
+   13:     make_recovery_code = deps["make_recovery_code"]
+   14:     set_recovery_code = deps["set_recovery_code"]
+   15:     settings_get = deps["settings_get"]
+   16: 
+
+--- modules/settings_panel.py:11 ---
+    8:     get_csrf = deps["get_csrf"]
+    9: 
+   10:     reset_admin_owner = deps["reset_admin_owner"]
+   11:     verify_recovery_code = deps["verify_recovery_code"]
+   12:     get_recovery_code_hash = deps["get_recovery_code_hash"]
+   13:     make_recovery_code = deps["make_recovery_code"]
+   14:     set_recovery_code = deps["set_recovery_code"]
+   15:     settings_get = deps["settings_get"]
+   16: 
+   17:     set_admin_password = deps["set_admin_password"]
+   18:     get_admin_profile = deps["get_admin_profile"]
+   19:     save_admin_profile = deps["save_admin_profile"]
+   20:     save_profile_photo = deps["save_profile_photo"]
+   21: 
+
+--- modules/settings_panel.py:12 ---
+    9: 
+   10:     reset_admin_owner = deps["reset_admin_owner"]
+   11:     verify_recovery_code = deps["verify_recovery_code"]
+   12:     get_recovery_code_hash = deps["get_recovery_code_hash"]
+   13:     make_recovery_code = deps["make_recovery_code"]
+   14:     set_recovery_code = deps["set_recovery_code"]
+   15:     settings_get = deps["settings_get"]
+   16: 
+   17:     set_admin_password = deps["set_admin_password"]
+   18:     get_admin_profile = deps["get_admin_profile"]
+   19:     save_admin_profile = deps["save_admin_profile"]
+   20:     save_profile_photo = deps["save_profile_photo"]
+   21: 
+   22:     start_trial_if_missing = deps["start_trial_if_missing"]
+
+--- modules/settings_panel.py:13 ---
+   10:     reset_admin_owner = deps["reset_admin_owner"]
+   11:     verify_recovery_code = deps["verify_recovery_code"]
+   12:     get_recovery_code_hash = deps["get_recovery_code_hash"]
+   13:     make_recovery_code = deps["make_recovery_code"]
+   14:     set_recovery_code = deps["set_recovery_code"]
+   15:     settings_get = deps["settings_get"]
+   16: 
+   17:     set_admin_password = deps["set_admin_password"]
+   18:     get_admin_profile = deps["get_admin_profile"]
+   19:     save_admin_profile = deps["save_admin_profile"]
+   20:     save_profile_photo = deps["save_profile_photo"]
+   21: 
+   22:     start_trial_if_missing = deps["start_trial_if_missing"]
+   23: 
+
+--- modules/settings_panel.py:14 ---
+   11:     verify_recovery_code = deps["verify_recovery_code"]
+   12:     get_recovery_code_hash = deps["get_recovery_code_hash"]
+   13:     make_recovery_code = deps["make_recovery_code"]
+   14:     set_recovery_code = deps["set_recovery_code"]
+   15:     settings_get = deps["settings_get"]
+   16: 
+   17:     set_admin_password = deps["set_admin_password"]
+   18:     get_admin_profile = deps["get_admin_profile"]
+   19:     save_admin_profile = deps["save_admin_profile"]
+   20:     save_profile_photo = deps["save_profile_photo"]
+   21: 
+   22:     start_trial_if_missing = deps["start_trial_if_missing"]
+   23: 
+   24:     def reset_user_page():
+
+--- modules/settings_panel.py:15 ---
+   12:     get_recovery_code_hash = deps["get_recovery_code_hash"]
+   13:     make_recovery_code = deps["make_recovery_code"]
+   14:     set_recovery_code = deps["set_recovery_code"]
+   15:     settings_get = deps["settings_get"]
+   16: 
+   17:     set_admin_password = deps["set_admin_password"]
+   18:     get_admin_profile = deps["get_admin_profile"]
+   19:     save_admin_profile = deps["save_admin_profile"]
+   20:     save_profile_photo = deps["save_profile_photo"]
+   21: 
+   22:     start_trial_if_missing = deps["start_trial_if_missing"]
+   23: 
+   24:     def reset_user_page():
+   25:         if not admin_profile_exists():
+
+--- modules/settings_panel.py:17 ---
+   14:     set_recovery_code = deps["set_recovery_code"]
+   15:     settings_get = deps["settings_get"]
+   16: 
+   17:     set_admin_password = deps["set_admin_password"]
+   18:     get_admin_profile = deps["get_admin_profile"]
+   19:     save_admin_profile = deps["save_admin_profile"]
+   20:     save_profile_photo = deps["save_profile_photo"]
+   21: 
+   22:     start_trial_if_missing = deps["start_trial_if_missing"]
+   23: 
+   24:     def reset_user_page():
+   25:         if not admin_profile_exists():
+   26:             return redirect(url_for("setup_page"))
+   27: 
+
+--- modules/settings_panel.py:18 ---
+   15:     settings_get = deps["settings_get"]
+   16: 
+   17:     set_admin_password = deps["set_admin_password"]
+   18:     get_admin_profile = deps["get_admin_profile"]
+   19:     save_admin_profile = deps["save_admin_profile"]
+   20:     save_profile_photo = deps["save_profile_photo"]
+   21: 
+   22:     start_trial_if_missing = deps["start_trial_if_missing"]
+   23: 
+   24:     def reset_user_page():
+   25:         if not admin_profile_exists():
+   26:             return redirect(url_for("setup_page"))
+   27: 
+   28:         error = ""
+
+--- modules/settings_panel.py:19 ---
+   16: 
+   17:     set_admin_password = deps["set_admin_password"]
+   18:     get_admin_profile = deps["get_admin_profile"]
+   19:     save_admin_profile = deps["save_admin_profile"]
+   20:     save_profile_photo = deps["save_profile_photo"]
+   21: 
+   22:     start_trial_if_missing = deps["start_trial_if_missing"]
+   23: 
+   24:     def reset_user_page():
+   25:         if not admin_profile_exists():
+   26:             return redirect(url_for("setup_page"))
+   27: 
+   28:         error = ""
+   29: 
+... sonuç sınırı doldu ...
+
+--- modules/subscription_panel.py:18 ---
+   15: }
+   16: 
+   17: FEATURE_RULES = [
+   18:     ("/sefer-raporu-son", "Pro", "Gelişmiş sefer raporları"),
+   19:     ("/api/report-archive", "Pro", "Rapor arşivi API"),
+   20:     ("/ayarlar/yedekleme/geri-yukle", "Pro", "Yedekten geri yükleme"),
+   21: ]
+   22: 
+   23: GOOGLE_PLAY_PRODUCT_TO_PLAN = {
+   24:     "standart_monthly": "Standart",
+   25:     "pro_monthly": "Pro",
+   26:     "unlimited_monthly": "Sınırsız",
+   27: }
+   28: 
+
+--- modules/subscription_panel.py:19 ---
+   16: 
+   17: FEATURE_RULES = [
+   18:     ("/sefer-raporu-son", "Pro", "Gelişmiş sefer raporları"),
+   19:     ("/api/report-archive", "Pro", "Rapor arşivi API"),
+   20:     ("/ayarlar/yedekleme/geri-yukle", "Pro", "Yedekten geri yükleme"),
+   21: ]
+   22: 
+   23: GOOGLE_PLAY_PRODUCT_TO_PLAN = {
+   24:     "standart_monthly": "Standart",
+   25:     "pro_monthly": "Pro",
+   26:     "unlimited_monthly": "Sınırsız",
+   27: }
+   28: 
+   29: 
+
+--- modules/subscription_panel.py:20 ---
+   17: FEATURE_RULES = [
+   18:     ("/sefer-raporu-son", "Pro", "Gelişmiş sefer raporları"),
+   19:     ("/api/report-archive", "Pro", "Rapor arşivi API"),
+   20:     ("/ayarlar/yedekleme/geri-yukle", "Pro", "Yedekten geri yükleme"),
+   21: ]
+   22: 
+   23: GOOGLE_PLAY_PRODUCT_TO_PLAN = {
+   24:     "standart_monthly": "Standart",
+   25:     "pro_monthly": "Pro",
+   26:     "unlimited_monthly": "Sınırsız",
+   27: }
+   28: 
+   29: 
+   30: def register_subscription_routes(app, deps):
+
+--- modules/subscription_panel.py:30 ---
+   27: }
+   28: 
+   29: 
+   30: def register_subscription_routes(app, deps):
+   31:     settings_get = deps["settings_get"]
+   32:     settings_set = deps["settings_set"]
+   33: 
+   34:     def parse_dt_safe(value):
+   35:         try:
+   36:             return datetime.fromisoformat(str(value))
+   37:         except Exception:
+   38:             return None
+   39: 
+   40:     def format_dt_tr(value):
+
+--- modules/subscription_panel.py:31 ---
+   28: 
+   29: 
+   30: def register_subscription_routes(app, deps):
+   31:     settings_get = deps["settings_get"]
+   32:     settings_set = deps["settings_set"]
+   33: 
+   34:     def parse_dt_safe(value):
+   35:         try:
+   36:             return datetime.fromisoformat(str(value))
+   37:         except Exception:
+   38:             return None
+   39: 
+   40:     def format_dt_tr(value):
+   41:         dt = parse_dt_safe(value)
+
+--- modules/subscription_panel.py:32 ---
+   29: 
+   30: def register_subscription_routes(app, deps):
+   31:     settings_get = deps["settings_get"]
+   32:     settings_set = deps["settings_set"]
+   33: 
+   34:     def parse_dt_safe(value):
+   35:         try:
+   36:             return datetime.fromisoformat(str(value))
+   37:         except Exception:
+   38:             return None
+   39: 
+   40:     def format_dt_tr(value):
+   41:         dt = parse_dt_safe(value)
+   42:         if not dt:
+
+--- modules/subscription_panel.py:46 ---
+   43:             return value or "-"
+   44:         return dt.strftime("%d.%m.%Y %H:%M")
+   45: 
+   46:     def subscription_defaults():
+   47:         now = datetime.now()
+   48:         ends = now + timedelta(days=TRIAL_DAYS)
+   49: 
+   50:         return {
+   51:             "subscription_status": "trial",
+   52:             "trial_started_at": now.isoformat(timespec="seconds"),
+   53:             "trial_ends_at": ends.isoformat(timespec="seconds"),
+   54:             "subscription_plan": "Deneme",
+   55:             "payment_method_added": "0",
+   56:             "subscription_started_at": "",
+
+--- modules/subscription_panel.py:51 ---
+   48:         ends = now + timedelta(days=TRIAL_DAYS)
+   49: 
+   50:         return {
+   51:             "subscription_status": "trial",
+   52:             "trial_started_at": now.isoformat(timespec="seconds"),
+   53:             "trial_ends_at": ends.isoformat(timespec="seconds"),
+   54:             "subscription_plan": "Deneme",
+   55:             "payment_method_added": "0",
+   56:             "subscription_started_at": "",
+   57:             "subscription_ends_at": "",
+   58:             "last_payment_at": "",
+   59:         }
+   60: 
+   61:     def ensure_subscription_state():
+
+--- modules/subscription_panel.py:54 ---
+   51:             "subscription_status": "trial",
+   52:             "trial_started_at": now.isoformat(timespec="seconds"),
+   53:             "trial_ends_at": ends.isoformat(timespec="seconds"),
+   54:             "subscription_plan": "Deneme",
+   55:             "payment_method_added": "0",
+   56:             "subscription_started_at": "",
+   57:             "subscription_ends_at": "",
+   58:             "last_payment_at": "",
+   59:         }
+   60: 
+   61:     def ensure_subscription_state():
+   62:         status = settings_get("subscription_status", "")
+   63: 
+   64:         if status:
+
+--- modules/subscription_panel.py:56 ---
+   53:             "trial_ends_at": ends.isoformat(timespec="seconds"),
+   54:             "subscription_plan": "Deneme",
+   55:             "payment_method_added": "0",
+   56:             "subscription_started_at": "",
+   57:             "subscription_ends_at": "",
+   58:             "last_payment_at": "",
+   59:         }
+   60: 
+   61:     def ensure_subscription_state():
+   62:         status = settings_get("subscription_status", "")
+   63: 
+   64:         if status:
+   65:             return
+   66: 
+
+--- modules/subscription_panel.py:57 ---
+   54:             "subscription_plan": "Deneme",
+   55:             "payment_method_added": "0",
+   56:             "subscription_started_at": "",
+   57:             "subscription_ends_at": "",
+   58:             "last_payment_at": "",
+   59:         }
+   60: 
+   61:     def ensure_subscription_state():
+   62:         status = settings_get("subscription_status", "")
+   63: 
+   64:         if status:
+   65:             return
+   66: 
+   67:         data = subscription_defaults()
+... sonuç sınırı doldu ...
+
+--- modules/backup_panel.py:2 ---
+    1: import shutil
+    2: import zipfile
+    3: from pathlib import Path
+    4: from datetime import datetime
+    5: 
+    6: from flask import (
+    7:     render_template,
+    8:     request,
+    9:     redirect,
+   10:     url_for,
+   11:     send_file,
+   12:     abort,
+
+--- modules/backup_panel.py:11 ---
+    8:     request,
+    9:     redirect,
+   10:     url_for,
+   11:     send_file,
+   12:     abort,
+   13:     g,
+   14: )
+   15: from werkzeug.utils import secure_filename
+   16: 
+   17: 
+   18: def register_backup_routes(app, deps=None):
+   19:     deps = deps or {}
+   20: 
+   21:     def backup_dir_path():
+
+--- modules/backup_panel.py:18 ---
+   15: from werkzeug.utils import secure_filename
+   16: 
+   17: 
+   18: def register_backup_routes(app, deps=None):
+   19:     deps = deps or {}
+   20: 
+   21:     def backup_dir_path():
+   22:         p = Path(app.root_path) / "storage" / "backups"
+   23:         p.mkdir(parents=True, exist_ok=True)
+   24:         return p
+   25: 
+   26:     def safe_backup_filename(name):
+   27:         name = (name or "").strip()
+   28:         if not name:
+
+--- modules/backup_panel.py:21 ---
+   18: def register_backup_routes(app, deps=None):
+   19:     deps = deps or {}
+   20: 
+   21:     def backup_dir_path():
+   22:         p = Path(app.root_path) / "storage" / "backups"
+   23:         p.mkdir(parents=True, exist_ok=True)
+   24:         return p
+   25: 
+   26:     def safe_backup_filename(name):
+   27:         name = (name or "").strip()
+   28:         if not name:
+   29:             return ""
+   30:         name = Path(name).name
+   31:         if not name.startswith("yedek_"):
+
+--- modules/backup_panel.py:22 ---
+   19:     deps = deps or {}
+   20: 
+   21:     def backup_dir_path():
+   22:         p = Path(app.root_path) / "storage" / "backups"
+   23:         p.mkdir(parents=True, exist_ok=True)
+   24:         return p
+   25: 
+   26:     def safe_backup_filename(name):
+   27:         name = (name or "").strip()
+   28:         if not name:
+   29:             return ""
+   30:         name = Path(name).name
+   31:         if not name.startswith("yedek_"):
+   32:             return ""
+
+--- modules/backup_panel.py:26 ---
+   23:         p.mkdir(parents=True, exist_ok=True)
+   24:         return p
+   25: 
+   26:     def safe_backup_filename(name):
+   27:         name = (name or "").strip()
+   28:         if not name:
+   29:             return ""
+   30:         name = Path(name).name
+   31:         if not name.startswith("yedek_"):
+   32:             return ""
+   33:         if not name.endswith(".zip"):
+   34:             return ""
+   35:         return name
+   36: 
+
+--- modules/backup_panel.py:31 ---
+   28:         if not name:
+   29:             return ""
+   30:         name = Path(name).name
+   31:         if not name.startswith("yedek_"):
+   32:             return ""
+   33:         if not name.endswith(".zip"):
+   34:             return ""
+   35:         return name
+   36: 
+   37:     def file_size_text(size):
+   38:         try:
+   39:             size = float(size)
+   40:         except Exception:
+   41:             return "0 B"
+
+--- modules/backup_panel.py:33 ---
+   30:         name = Path(name).name
+   31:         if not name.startswith("yedek_"):
+   32:             return ""
+   33:         if not name.endswith(".zip"):
+   34:             return ""
+   35:         return name
+   36: 
+   37:     def file_size_text(size):
+   38:         try:
+   39:             size = float(size)
+   40:         except Exception:
+   41:             return "0 B"
+   42: 
+   43:         units = ["B", "KB", "MB", "GB"]
+
+--- modules/backup_panel.py:53 ---
+   50:             return f"{int(size)} {units[i]}"
+   51:         return f"{size:.1f} {units[i]}"
+   52: 
+   53:     def list_backup_files():
+   54:         folder = backup_dir_path()
+   55:         items = []
+   56: 
+   57:         for f in sorted(folder.glob("yedek_*.zip"), key=lambda x: x.stat().st_mtime, reverse=True):
+   58:             st = f.stat()
+   59:             items.append({
+   60:                 "name": f.name,
+   61:                 "size": file_size_text(st.st_size),
+   62:                 "mtime": datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
+   63:             })
+
+--- modules/backup_panel.py:54 ---
+   51:         return f"{size:.1f} {units[i]}"
+   52: 
+   53:     def list_backup_files():
+   54:         folder = backup_dir_path()
+   55:         items = []
+   56: 
+   57:         for f in sorted(folder.glob("yedek_*.zip"), key=lambda x: x.stat().st_mtime, reverse=True):
+   58:             st = f.stat()
+   59:             items.append({
+   60:                 "name": f.name,
+   61:                 "size": file_size_text(st.st_size),
+   62:                 "mtime": datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
+   63:             })
+   64: 
+
+--- modules/backup_panel.py:57 ---
+   54:         folder = backup_dir_path()
+   55:         items = []
+   56: 
+   57:         for f in sorted(folder.glob("yedek_*.zip"), key=lambda x: x.stat().st_mtime, reverse=True):
+   58:             st = f.stat()
+   59:             items.append({
+   60:                 "name": f.name,
+   61:                 "size": file_size_text(st.st_size),
+   62:                 "mtime": datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
+   63:             })
+   64: 
+   65:         return items
+   66: 
+   67:     def add_file_to_zip(zf, file_path, arcname):
+... sonuç sınırı doldu ...
+
+--- modules/reports_panel.py:6 ---
+    3: from flask import render_template, request, jsonify
+    4: 
+    5: 
+    6: def register_reports_routes(app, deps):
+    7:     get_db = deps["get_db"]
+    8:     all_route_names = deps["all_route_names"]
+    9:     SEAT_NUMBERS = deps["SEAT_NUMBERS"]
+   10: 
+   11:     def events_page():
+   12:         get_active_trip = deps.get("get_active_trip")
+   13:         tid = get_active_trip() if callable(get_active_trip) else None
+   14: 
+   15:         sums = {"devir": 0, "giris": 0, "cikis": 0, "kalan": 0}
+   16:         trip = {}
+
+--- modules/reports_panel.py:20 ---
+   17: 
+   18:         if tid:
+   19:             db = get_db()
+   20:             trip_row = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+   21:             trip = dict(trip_row) if trip_row else {}
+   22: 
+   23:             try:
+   24:                 if hasattr(app, "cash_sums"):
+   25:                     sums = dict(app.cash_sums(tid))
+   26:             except Exception:
+   27:                 pass
+   28: 
+   29:         return render_template("events.html", sums=sums, trip=trip)
+   30: 
+
+--- modules/reports_panel.py:37 ---
+   34:         d2 = request.args.get("date_to")
+   35: 
+   36:         sql = """
+   37:         SELECT l.id, l.trip_id, t.date, t.route, l.stop_name, l.event, l.distance_km,
+   38:                l.seats_for_stop, l.meta_json, l.ts
+   39:         FROM stop_logs l
+   40:         JOIN trips t ON t.id = l.trip_id
+   41:         WHERE 1=1
+   42:         """
+   43:         args = []
+   44: 
+   45:         if route:
+   46:             sql += " AND t.route=?"
+   47:             args.append(route)
+
+--- modules/reports_panel.py:80 ---
+   77: 
+   78:         return jsonify({"ok": True, "items": items})
+   79: 
+   80:     def reports_page():
+   81:         return render_template("reports.html", all_routes=all_route_names())
+   82: 
+   83:     def api_report_seat_stats():
+   84:         route = (request.args.get("route") or "").strip()
+   85:         d1 = request.args.get("date_from")
+   86:         d2 = request.args.get("date_to")
+   87: 
+   88:         where = ["1=1"]
+   89:         args = []
+   90: 
+
+--- modules/reports_panel.py:81 ---
+   78:         return jsonify({"ok": True, "items": items})
+   79: 
+   80:     def reports_page():
+   81:         return render_template("reports.html", all_routes=all_route_names())
+   82: 
+   83:     def api_report_seat_stats():
+   84:         route = (request.args.get("route") or "").strip()
+   85:         d1 = request.args.get("date_from")
+   86:         d2 = request.args.get("date_to")
+   87: 
+   88:         where = ["1=1"]
+   89:         args = []
+   90: 
+   91:         if route:
+
+--- modules/reports_panel.py:83 ---
+   80:     def reports_page():
+   81:         return render_template("reports.html", all_routes=all_route_names())
+   82: 
+   83:     def api_report_seat_stats():
+   84:         route = (request.args.get("route") or "").strip()
+   85:         d1 = request.args.get("date_from")
+   86:         d2 = request.args.get("date_to")
+   87: 
+   88:         where = ["1=1"]
+   89:         args = []
+   90: 
+   91:         if route:
+   92:             where.append("t.route=?")
+   93:             args.append(route)
+
+--- modules/reports_panel.py:106 ---
+  103: 
+  104:         per = db.execute(
+  105:             f"""
+  106:             SELECT s.seat_no, COUNT(*) AS times, COALESCE(SUM(s.amount),0) AS revenue
+  107:             FROM seats s
+  108:             JOIN trips t ON t.id=s.trip_id
+  109:             WHERE {sql_where}
+  110:             GROUP BY s.seat_no
+  111:             ORDER BY s.seat_no
+  112:             """,
+  113:             args,
+  114:         ).fetchall()
+  115: 
+  116:         per_seat = [{
+
+--- modules/reports_panel.py:127 ---
+  124: 
+  125:         seat_tot = db.execute(
+  126:             f"""
+  127:             SELECT COALESCE(SUM(s.amount),0) AS revenue, COUNT(*) AS cnt
+  128:             FROM seats s
+  129:             JOIN trips t ON t.id=s.trip_id
+  130:             WHERE {sql_where}
+  131:             """,
+  132:             args,
+  133:         ).fetchone()
+  134: 
+  135:         walk_tot = db.execute(
+  136:             f"""
+  137:             SELECT COALESCE(SUM(w.total_amount),0) AS revenue, COALESCE(SUM(w.pax),0) AS pax
+
+--- modules/reports_panel.py:137 ---
+  134: 
+  135:         walk_tot = db.execute(
+  136:             f"""
+  137:             SELECT COALESCE(SUM(w.total_amount),0) AS revenue, COALESCE(SUM(w.pax),0) AS pax
+  138:             FROM walk_on_sales w
+  139:             JOIN trips t ON t.id=w.trip_id
+  140:             WHERE {sql_where}
+  141:             """,
+  142:             args,
+  143:         ).fetchone()
+  144: 
+  145:         top_seat = max(per_seat, key=lambda x: (x["times"], x["revenue"])) if per_seat else None
+  146: 
+  147:         return jsonify({
+
+--- modules/reports_panel.py:164 ---
+  161: 
+  162:     app.add_url_rule("/olaylar", endpoint="events_page", view_func=events_page, methods=["GET"])
+  163:     app.add_url_rule("/api/events", endpoint="api_events", view_func=api_events, methods=["GET"])
+  164:     app.add_url_rule("/raporlar", endpoint="reports_page", view_func=reports_page, methods=["GET"])
+  165:     app.add_url_rule("/api/report/seat-stats", endpoint="api_report_seat_stats", view_func=api_report_seat_stats, methods=["GET"])
+
+--- modules/reports_panel.py:165 ---
+  162:     app.add_url_rule("/olaylar", endpoint="events_page", view_func=events_page, methods=["GET"])
+  163:     app.add_url_rule("/api/events", endpoint="api_events", view_func=api_events, methods=["GET"])
+  164:     app.add_url_rule("/raporlar", endpoint="reports_page", view_func=reports_page, methods=["GET"])
+  165:     app.add_url_rule("/api/report/seat-stats", endpoint="api_report_seat_stats", view_func=api_report_seat_stats, methods=["GET"])
+
+
+==========================================================================================
+5) DB TABLOLARI - AYARLARLA İLİŞKİLİ OLASI TABLOLAR
+==========================================================================================
+
+
+DB: db.sqlite3
+
+[TABLE] admin_profile
+  - id INTEGER default=None pk=1
+  - full_name TEXT default='' pk=0
+  - phone TEXT default='' pk=0
+  - photo_path TEXT default='' pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+  - updated_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] admin_security
+  - id INTEGER default=None pk=1
+  - password_hash TEXT default=None pk=0
+  - updated_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] app_state
+  - id INTEGER default=None pk=1
+  - active_trip_id INTEGER default=None pk=0
+
+[TABLE] cash_moves
+  - id INTEGER default=None pk=1
+  - trip_id INTEGER default=None pk=0
+  - direction TEXT default=None pk=0
+  - category TEXT default=None pk=0
+  - amount INTEGER default=0 pk=0
+  - note TEXT default=None pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] consignment_photos
+  - id INTEGER default=None pk=1
+  - consignment_id INTEGER default=None pk=0
+  - role TEXT default=None pk=0
+  - file_path TEXT default=None pk=0
+  - mime TEXT default=None pk=0
+  - size_bytes INTEGER default=None pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] consignments
+  - id INTEGER default=None pk=1
+  - trip_id INTEGER default=None pk=0
+  - code TEXT default=None pk=0
+  - item_name TEXT default=None pk=0
+  - item_type TEXT default=None pk=0
+  - from_name TEXT default=None pk=0
+  - from_phone TEXT default=None pk=0
+  - to_name TEXT default=None pk=0
+  - to_phone TEXT default=None pk=0
+  - from_stop TEXT default=None pk=0
+  - to_stop TEXT default=None pk=0
+  - amount REAL default=0 pk=0
+  - payment TEXT default='nakit' pk=0
+  - status TEXT default='bekliyor' pk=0
+  - notes TEXT default=None pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+  - updated_at TEXT default=None pk=0
+  - delivered_at TEXT default=None pk=0
+
+[TABLE] package_requests
+  - id INTEGER default=None pk=1
+  - requested_plan TEXT default=None pk=0
+  - current_plan TEXT default=None pk=0
+  - subscription_status TEXT default=None pk=0
+  - note TEXT default=None pk=0
+  - user_agent TEXT default=None pk=0
+  - created_at TEXT default=None pk=0
+  - is_done INTEGER default=0 pk=0
+
+[TABLE] route_profile_segments
+  - route TEXT default=None pk=1
+  - profile_key TEXT default=None pk=2
+  - from_stop TEXT default=None pk=3
+  - to_stop TEXT default=None pk=4
+  - sort_order INTEGER default=None pk=0
+  - distance_m REAL default=0 pk=0
+  - duration_s REAL default=0 pk=0
+  - geometry_json TEXT default=None pk=0
+  - provider TEXT default='osrm' pk=0
+  - updated_at TEXT default=CURRENT_TIMESTAMP pk=0
+
+[TABLE] route_profile_vias
+  - route TEXT default=None pk=1
+  - profile_key TEXT default=None pk=2
+  - from_stop TEXT default=None pk=3
+  - to_stop TEXT default=None pk=4
+  - via_name TEXT default=None pk=5
+  - lat REAL default=None pk=0
+  - lng REAL default=None pk=0
+  - sort_order INTEGER default=0 pk=0
+  - created_at TEXT default=CURRENT_TIMESTAMP pk=0
+
+[TABLE] route_profiles
+  - route TEXT default=None pk=1
+  - profile_key TEXT default=None pk=2
+  - title TEXT default=None pk=0
+  - note TEXT default='' pk=0
+  - is_default INTEGER default=0 pk=0
+  - created_at TEXT default=CURRENT_TIMESTAMP pk=0
+  - updated_at TEXT default=None pk=0
+
+[TABLE] route_schedule_profiles
+  - id INTEGER default=None pk=1
+  - route_name TEXT default=None pk=0
+  - title TEXT default=None pk=0
+  - direction TEXT default='gidis' pk=0
+  - is_default INTEGER default=0 pk=0
+  - note TEXT default='' pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+  - updated_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] seats
+  - trip_id INTEGER default=None pk=1
+  - seat_no INTEGER default=None pk=2
+  - stop TEXT default=None pk=0
+  - ticket_type TEXT default=None pk=0
+  - payment TEXT default=None pk=0
+  - amount REAL default=None pk=0
+  - gender TEXT default='' pk=0
+  - pair_ok INTEGER default=0 pk=0
+  - service INTEGER default=0 pk=0
+  - service_note TEXT default=None pk=0
+  - from_stop TEXT default='' pk=0
+  - to_stop TEXT default='' pk=0
+  - passenger_name TEXT default='' pk=0
+  - passenger_phone TEXT default='' pk=0
+
+[TABLE] settings
+  - key TEXT default=None pk=1
+  - value TEXT default=None pk=0
+
+[TABLE] trips
+  - id INTEGER default=None pk=1
+  - date TEXT default=None pk=0
+  - route TEXT default=None pk=0
+  - departure_time TEXT default=None pk=0
+  - plate TEXT default=None pk=0
+  - captain1 TEXT default=None pk=0
+  - captain2 TEXT default=None pk=0
+  - attendant TEXT default=None pk=0
+  - note TEXT default=None pk=0
+
+DB: tmp/muavin_seed_clean.sqlite3
+
+[TABLE] admin_profile
+  - id INTEGER default=None pk=1
+  - full_name TEXT default='' pk=0
+  - phone TEXT default='' pk=0
+  - photo_path TEXT default='' pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+  - updated_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] admin_security
+  - id INTEGER default=None pk=1
+  - password_hash TEXT default=None pk=0
+  - updated_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] app_state
+  - id INTEGER default=None pk=1
+  - active_trip_id INTEGER default=None pk=0
+
+[TABLE] cash_moves
+  - id INTEGER default=None pk=1
+  - trip_id INTEGER default=None pk=0
+  - direction TEXT default=None pk=0
+  - category TEXT default=None pk=0
+  - amount INTEGER default=0 pk=0
+  - note TEXT default=None pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] consignment_photos
+  - id INTEGER default=None pk=1
+  - consignment_id INTEGER default=None pk=0
+  - role TEXT default=None pk=0
+  - file_path TEXT default=None pk=0
+  - mime TEXT default=None pk=0
+  - size_bytes INTEGER default=None pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] consignments
+  - id INTEGER default=None pk=1
+  - trip_id INTEGER default=None pk=0
+  - code TEXT default=None pk=0
+  - item_name TEXT default=None pk=0
+  - item_type TEXT default=None pk=0
+  - from_name TEXT default=None pk=0
+  - from_phone TEXT default=None pk=0
+  - to_name TEXT default=None pk=0
+  - to_phone TEXT default=None pk=0
+  - from_stop TEXT default=None pk=0
+  - to_stop TEXT default=None pk=0
+  - amount REAL default=0 pk=0
+  - payment TEXT default='nakit' pk=0
+  - status TEXT default='bekliyor' pk=0
+  - notes TEXT default=None pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+  - updated_at TEXT default=None pk=0
+  - delivered_at TEXT default=None pk=0
+
+[TABLE] package_requests
+  - id INTEGER default=None pk=1
+  - requested_plan TEXT default=None pk=0
+  - current_plan TEXT default=None pk=0
+  - subscription_status TEXT default=None pk=0
+  - note TEXT default=None pk=0
+  - user_agent TEXT default=None pk=0
+  - created_at TEXT default=None pk=0
+  - is_done INTEGER default=0 pk=0
+
+[TABLE] route_profile_segments
+  - route TEXT default=None pk=1
+  - profile_key TEXT default=None pk=2
+  - from_stop TEXT default=None pk=3
+  - to_stop TEXT default=None pk=4
+  - sort_order INTEGER default=None pk=0
+  - distance_m REAL default=0 pk=0
+  - duration_s REAL default=0 pk=0
+  - geometry_json TEXT default=None pk=0
+  - provider TEXT default='osrm' pk=0
+  - updated_at TEXT default=CURRENT_TIMESTAMP pk=0
+
+[TABLE] route_profile_vias
+  - route TEXT default=None pk=1
+  - profile_key TEXT default=None pk=2
+  - from_stop TEXT default=None pk=3
+  - to_stop TEXT default=None pk=4
+  - via_name TEXT default=None pk=5
+  - lat REAL default=None pk=0
+  - lng REAL default=None pk=0
+  - sort_order INTEGER default=0 pk=0
+  - created_at TEXT default=CURRENT_TIMESTAMP pk=0
+
+[TABLE] route_profiles
+  - route TEXT default=None pk=1
+  - profile_key TEXT default=None pk=2
+  - title TEXT default=None pk=0
+  - note TEXT default='' pk=0
+  - is_default INTEGER default=0 pk=0
+  - created_at TEXT default=CURRENT_TIMESTAMP pk=0
+  - updated_at TEXT default=None pk=0
+
+[TABLE] route_schedule_profiles
+  - id INTEGER default=None pk=1
+  - route_name TEXT default=None pk=0
+  - title TEXT default=None pk=0
+  - direction TEXT default='gidis' pk=0
+  - is_default INTEGER default=0 pk=0
+  - note TEXT default='' pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+  - updated_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] seats
+  - trip_id INTEGER default=None pk=1
+  - seat_no INTEGER default=None pk=2
+  - stop TEXT default=None pk=0
+  - ticket_type TEXT default=None pk=0
+  - payment TEXT default=None pk=0
+  - amount REAL default=None pk=0
+  - gender TEXT default='' pk=0
+  - pair_ok INTEGER default=0 pk=0
+  - service INTEGER default=0 pk=0
+  - service_note TEXT default=None pk=0
+  - from_stop TEXT default='' pk=0
+  - to_stop TEXT default='' pk=0
+  - passenger_name TEXT default='' pk=0
+  - passenger_phone TEXT default='' pk=0
+
+[TABLE] settings
+  - key TEXT default=None pk=1
+  - value TEXT default=None pk=0
+
+[TABLE] trips
+  - id INTEGER default=None pk=1
+  - date TEXT default=None pk=0
+  - route TEXT default=None pk=0
+  - departure_time TEXT default=None pk=0
+  - plate TEXT default=None pk=0
+  - captain1 TEXT default=None pk=0
+  - captain2 TEXT default=None pk=0
+  - attendant TEXT default=None pk=0
+  - note TEXT default=None pk=0
+
+DB: backups/apk_sync_20260520_234501/seed_db.sqlite3
+
+[TABLE] admin_profile
+  - id INTEGER default=None pk=1
+  - full_name TEXT default='' pk=0
+  - phone TEXT default='' pk=0
+  - photo_path TEXT default='' pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+  - updated_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] admin_security
+  - id INTEGER default=None pk=1
+  - password_hash TEXT default=None pk=0
+  - updated_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] app_state
+  - id INTEGER default=None pk=1
+  - active_trip_id INTEGER default=None pk=0
+
+[TABLE] cash_moves
+  - id INTEGER default=None pk=1
+  - trip_id INTEGER default=None pk=0
+  - direction TEXT default=None pk=0
+  - category TEXT default=None pk=0
+  - amount INTEGER default=0 pk=0
+  - note TEXT default=None pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] consignment_photos
+  - id INTEGER default=None pk=1
+  - consignment_id INTEGER default=None pk=0
+  - role TEXT default=None pk=0
+  - file_path TEXT default=None pk=0
+  - mime TEXT default=None pk=0
+  - size_bytes INTEGER default=None pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] consignments
+  - id INTEGER default=None pk=1
+  - trip_id INTEGER default=None pk=0
+  - code TEXT default=None pk=0
+  - item_name TEXT default=None pk=0
+  - item_type TEXT default=None pk=0
+  - from_name TEXT default=None pk=0
+  - from_phone TEXT default=None pk=0
+  - to_name TEXT default=None pk=0
+  - to_phone TEXT default=None pk=0
+  - from_stop TEXT default=None pk=0
+  - to_stop TEXT default=None pk=0
+  - amount REAL default=0 pk=0
+  - payment TEXT default='nakit' pk=0
+  - status TEXT default='bekliyor' pk=0
+  - notes TEXT default=None pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+  - updated_at TEXT default=None pk=0
+  - delivered_at TEXT default=None pk=0
+
+[TABLE] package_requests
+  - id INTEGER default=None pk=1
+  - requested_plan TEXT default=None pk=0
+  - current_plan TEXT default=None pk=0
+  - subscription_status TEXT default=None pk=0
+  - note TEXT default=None pk=0
+  - user_agent TEXT default=None pk=0
+  - created_at TEXT default=None pk=0
+  - is_done INTEGER default=0 pk=0
+
+[TABLE] route_schedule_profiles
+  - id INTEGER default=None pk=1
+  - route_name TEXT default=None pk=0
+  - title TEXT default=None pk=0
+  - direction TEXT default='gidis' pk=0
+  - is_default INTEGER default=0 pk=0
+  - note TEXT default='' pk=0
+  - created_at TEXT default=datetime('now','localtime') pk=0
+  - updated_at TEXT default=datetime('now','localtime') pk=0
+
+[TABLE] seats
+  - trip_id INTEGER default=None pk=1
+  - seat_no INTEGER default=None pk=2
+  - stop TEXT default=None pk=0
+  - ticket_type TEXT default=None pk=0
+  - payment TEXT default=None pk=0
+  - amount REAL default=None pk=0
+  - gender TEXT default='' pk=0
+  - pair_ok INTEGER default=0 pk=0
+  - service INTEGER default=0 pk=0
+  - service_note TEXT default=None pk=0
+  - from_stop TEXT default='' pk=0
+  - to_stop TEXT default='' pk=0
+  - passenger_name TEXT default='' pk=0
+  - passenger_phone TEXT default='' pk=0
+
+[TABLE] settings
+  - key TEXT default=None pk=1
+  - value TEXT default=None pk=0
+
+[TABLE] trips
+  - id INTEGER default=None pk=1
+  - date TEXT default=None pk=0
+  - route TEXT default=None pk=0
+  - departure_time TEXT default=None pk=0
+  - plate TEXT default=None pk=0
+  - captain1 TEXT default=None pk=0
+  - captain2 TEXT default=None pk=0
+  - attendant TEXT default=None pk=0
+  - note TEXT default=None pk=0

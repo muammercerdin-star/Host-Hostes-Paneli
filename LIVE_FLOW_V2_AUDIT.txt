@@ -1,0 +1,3126 @@
+
+==========================================================================================
+0) HEDEF V2 RENK PALETİ
+==========================================================================================
+--ink      = #0a0a0f
+--card     = #13131a
+--card2    = #1a1a24
+--line     = rgba(255,255,255,.06)
+--red      = #ff2d55
+--amber    = #ffcc00
+--blue     = #0a84ff
+--green    = #30d158
+--white    = #ffffff
+--dim      = rgba(255,255,255,.42)
+
+==========================================================================================
+1) seats.html ve base.html içinde CSS / JS yüklenme sırası
+==========================================================================================
+
+--- templates/base.html ---
+   10: CSS    {{ url_for(
+   11: CSS    {{ url_for(
+   12: CSS    {{ url_for(
+   20: SCRIPT {{ url_for(
+   21: SCRIPT {{ url_for(
+   22: SCRIPT {{ url_for(
+
+--- templates/seats.html ---
+    4: CSS    /static/style.css
+    5: CSS    /static/seats/seats.css?v=41
+    6: CSS    /static/seats/seats-final.css?v=drive-voice-real-width-test-1
+    7: CSS    /static/seats/patches/stop-selected-toast.css?v=1
+    8: CSS    /static/seats/patches/stop-flow-focus-patch.css?v=1
+    9: CSS    /static/seats/patches/stop-flow-compact-mobile.css?v=1
+   10: CSS    /static/seats/patches/seat-layout-fab-pack.css?v=1
+   11: CSS    /static/seats/patches/bottom-voice-command.css?v=1
+   12: CSS    /static/seats/patches/modal-bottom-nav-autohide.css?v=1
+   13: CSS    /static/seats/patches/manual-ticket-system.css?v=1
+   14: CSS    /static/seats/patches/top-sound-toggle.css?v=1
+   15: CSS    /static/seats/patches/seat-simple-ui-pack.css?v=1
+   16: CSS    /static/seats/patches/unified-seat-deck-report-style.css?v=seat-smaller-removed-2
+   17: CSS    /static/seats/patches/mobile-performance-fix.css?v=2
+   18: CSS    /static/seats/patches/fab-sheet-solid-fix.css?v=1
+   19: CSS    /static/seats/patches/seat-label-ghost-clean.css?v=1
+  364: SCRIPT /static/seats/bags.js?v=1
+  365: SCRIPT /static/seats/voice-commands.js?v=voice-listen-guard-1
+  366: SCRIPT /static/seats/standing.js?v=1
+  367: SCRIPT /static/seats/seats.js?v=tripkey-by-id-1
+  368: SCRIPT /static/seats/route-marquee.js?v=route-clean-ticker-single-1
+  369: SCRIPT /static/seats/seats-time-prayer.js?v=time-prayer-apk-1
+  370: SCRIPT /static/seats/voice-tts.js?v=voice-owner-fix-1
+  371: SCRIPT /static/seats/drive-eta-chip.js?v=1
+  372: SCRIPT /static/seats/drive-controls.js?v=drive-toggle-fix-1
+  373: SCRIPT /static/seats/patches/stop-selected-toast.js?v=1
+  374: SCRIPT /static/seats/patches/stop-flow-focus-patch.js?v=simple-scope-1
+  375: SCRIPT /static/seats/patches/seat-layout-fab-pack.js?v=1
+  376: SCRIPT /static/seats/patches/modal-bottom-nav-autohide.js?v=1
+  377: SCRIPT /static/seats/patches/manual-ticket-system.js?v=1
+  378: SCRIPT /static/seats/patches/top-sound-toggle.js?v=1
+  379: SCRIPT /static/seats/patches/seat-simple-ui-pack.js?v=1
+
+==========================================================================================
+2) seats.html içindeki inline <style> blokları
+==========================================================================================
+  380-463: style id=drive-mode-actions-independent-style
+  630-835: style id=drive-dock-stability-final
+
+==========================================================================================
+3) Canlı Durak Akışı HTML kaynağı nerede?
+==========================================================================================
+
+--- templates/seats.html | 1 eşleşme | pattern: Sıradaki\s+Durak ---
+
+[Satır 198 civarı]
+  188:       <div class="tab-pane" data-pane="route">
+  189:         <div class="pane-grid">
+  190:           <div class="section-box">
+  191:             <div class="section-head">
+  192:               <h3>Canlı Durak Yönetimi</h3>
+  193:               <small id="routeLiveStop">—</small>
+  194:             </div>
+  195: 
+  196:             <div class="field-grid">
+  197:               <label class="field">
+  198:                 <span>Sıradaki Durak</span>
+  199:                 <select id="alertStop">
+  200:                   <option value="">—</option>
+  201:                 </select>
+  202:               </label>
+  203: 
+  204:               <div class="field-row">
+  205:                 <label class="field">
+  206:                   <span>Eşik (km)</span>
+  207:                   <input type="number" id="alertRadius" min="0.1" step="0.1" value="3">
+  208:                 </label>
+  209: 
+  210:                 <label class="field">
+  211:                   <span>Konum İzleme</span>
+  212:                   <button class="btn primary" type="button" id="btnGeoWatch">KAPALI</button>
+  213:                 </label>
+  214:               </div>
+  215: 
+  216:               <div class="toggle-line">
+  217:                 <label><input type="checkbox" id="soundToggle" checked> Sesli yanıt</label>
+  218:                 <label><input type="checkbox" id="autoAdvanceToggle" checked> Oto ilerle</label>
+  219:               </div>
+  220: 
+
+--- templates/seats.html | 1 eşleşme | pattern: İnecek ---
+
+[Satır 223 civarı]
+  213:                 </label>
+  214:               </div>
+  215: 
+  216:               <div class="toggle-line">
+  217:                 <label><input type="checkbox" id="soundToggle" checked> Sesli yanıt</label>
+  218:                 <label><input type="checkbox" id="autoAdvanceToggle" checked> Oto ilerle</label>
+  219:               </div>
+  220: 
+  221:               <div class="action-grid">
+  222:                 <button class="btn warn" type="button" id="btnTriggerNow">Şimdi Uyar</button>
+  223:                 <button class="btn danger" type="button" id="btnOffloadNowPane">İnecekleri İndir</button>
+  224:               </div>
+  225: 
+  226:               <div class="muted" id="geoHint">Durak seç.</div>
+  227:             </div>
+  228:           </div>
+  229: 
+  230:           <div class="section-box">
+  231:             <div class="section-head">
+  232:               <h3>Koordinat</h3>
+  233:               <small>route_stop_coords</small>
+  234:             </div>
+  235: 
+  236:             <div class="field-grid">
+  237:               <label class="field">
+  238:                 <span>Seçili Durak</span>
+  239:                 <input type="text" id="coordStopName" readonly>
+  240:               </label>
+  241: 
+  242:               <div class="field-row">
+  243:                 <label class="field">
+  244:                   <span>Lat</span>
+  245:                   <input type="number" id="coordLat" step="0.000001" placeholder="37.xxxxxx">
+
+--- templates/seats.html | 1 eşleşme | pattern: Bagaj ---
+
+[Satır 91 civarı]
+   81:       <em>/</em>
+   82:       <b id="driveVoiceEmpty">0</b>
+   83:     </span>
+   84:   </div>
+   85: </div>
+   86: <!-- DRIVE VOICE ROW END -->
+   87: <div class="legend">
+   88:               <div class="mini-chip">🟢 Boş</div>
+   89:               <div class="mini-chip">🔵 Bay</div>
+   90:               <div class="mini-chip">🩷 Bayan</div>
+   91:               <div class="mini-chip">🧳 Bagaj</div>
+   92:               <div class="mini-chip">🔔 İniş</div>
+   93:               <div class="mini-chip">🚌 Servis</div>
+   94:             </div>
+   95:           </div>
+   96:         </div>
+   97: 
+   98:         {% include "seats_parts/route_flow.html" %}
+   99:         {% include "seats_parts/deck.html" %}
+  100: 
+  101:       </div>
+  102:     </section>
+  103: 
+  104:     <aside class="panel-card glass">
+  105:       <div class="panel-handle"></div>
+  106: 
+  107:       <div class="panel-tabs">
+  108:         <button class="tab-btn active" type="button" data-tab="overview">Genel</button>
+  109:         <button class="tab-btn" type="button" data-tab="route">Durak</button>
+  110:         <button class="tab-btn" type="button" data-tab="eta">ETA</button>
+  111:         <button class="tab-btn" type="button" data-tab="quick">İşlem</button>
+  112:         <button class="tab-btn" type="button" data-tab="ai">Asistan</button>
+  113:       </div>
+
+==========================================================================================
+4) Durak akışıyla ilgili tüm dosya eşleşmeleri
+==========================================================================================
+
+--- modules/ai_panel.py | 1 ilgili satır ---
+  605: [stop_logs] FROM stop_logs
+
+--- modules/coords_panel.py | 17 ilgili satır ---
+   48: [route_stop_coords] "SELECT route, COUNT(*) AS c FROM route_stop_coords WHERE route=? GROUP BY route LIMIT 1",
+   61: [route_stop_coords] "SELECT route, COUNT(*) AS c FROM route_stop_coords GROUP BY route ORDER BY c DESC, route ASC"
+   76: [route_stop_coords] Koordinatlar route_stop_coords tablosundan aynı sıraya giydirilir.
+   86: [route_stop_coords] "SELECT route, stop, lat, lng FROM route_stop_coords WHERE route=?",
+  122: [route_stop_coords] def ensure_route_stop_coords_table(db=None):
+  125: [route_stop_coords] CREATE TABLE IF NOT EXISTS route_stop_coords(
+  166: [route_stop_coords] - Sadece verilen route içindeki route_stop_coords kayıtları
+  169: [route_stop_coords] ensure_route_stop_coords_table(db)
+  190: [route_stop_coords] "SELECT route, stop, lat, lng FROM route_stop_coords WHERE route=? AND stop=? LIMIT 1",
+  221: [route_stop_coords] "SELECT route, stop, lat, lng FROM route_stop_coords WHERE route=? ORDER BY stop",
+  252: [route_stop_coords] "DELETE FROM route_stop_coords WHERE route=? AND stop=?",
+  269: [route_stop_coords] INSERT INTO route_stop_coords(route, stop, lat, lng)
+  325: [route_stop_coords] INSERT INTO route_stop_coords(route, stop, lat, lng)
+  335: [route_stop_coords] ensure_route_stop_coords_table()
+  362: [route_stop_coords] "SELECT route, stop, lat, lng FROM route_stop_coords WHERE route=? AND stop=? LIMIT 1",
+  394: [route_stop_coords] ensure_route_stop_coords_table()
+  437: [route_stop_coords] app.ensure_route_stop_coords_table = ensure_route_stop_coords_table
+
+--- modules/reports_panel.py | 1 ilgili satır ---
+   39: [stop_logs] FROM stop_logs l
+
+--- modules/trip_report_builder.py | 1 ilgili satır ---
+   32: [stop_logs] FROM stop_logs
+
+--- static/live_map/muavin_live_map_extra.js | 10 ilgili satır ---
+  804: [nextStop] let nextStop = null;
+  810: [nextStop] nextStop = stops[i];
+  816: [nextStop] if (!nextStop) {
+  817: [nextStop] nextStop = stops[stops.length - 1];
+  827: [nextStop] nextStop = sorted[0].s;
+  833: [nextStop] const liveToNext = nextStop
+  834: [nextStop] ? calcRouteDistance(routePoints, cum, currentOrder, nextStop.order, currentLatLng, nextStop.latlng)
+  837: [nextStop] const nextToAfter = nextStop && afterStop
+  838: [nextStop] ? calcRouteDistance(routePoints, cum, nextStop.order, afterStop.order, nextStop.latlng, afterStop.latlng)
+ 1581: [Kalan mesafe] const msg = `${name} yaklaşıyor. Kalan mesafe ${km}. ${op}.`;
+
+--- static/seats/_archive_theme_trials/seats-dashboard-final.css | 4 ilgili satır ---
+  422: [route-flow] .route-flow,
+  423: [stop-flow] .stop-flow,
+  424: [routeFlow] #routeFlow,
+  425: [route-flow] .route-flow-card{
+
+--- static/seats/_archive_theme_trials/seats-dashboard-tone.css | 4 ilgili satır ---
+  154: [route-flow] .route-flow,
+  155: [stop-flow] .stop-flow,
+  156: [routeFlow] #routeFlow,
+  157: [route-flow] .route-flow-card{
+
+--- static/seats/bags.js | 6 ilgili satır ---
+   18: [bag-count] const cntText = el.querySelector(".bag-count")?.textContent || "0";
+  139: [bag-count] const bagCount = el.querySelector(".bag-count");
+  140: [bag-dir] const bagDir = el.querySelector(".bag-dir");
+  141: [bag-badge] const badge = el.querySelector(".bag-badge");
+  168: [bag-count] const cnt = el.querySelector(".bag-count");
+  169: [bag-dir] const dir = el.querySelector(".bag-dir");
+
+--- static/seats/drive-controls.js | 8 ilgili satır ---
+   65: [liveStop] function getLiveStop(){
+   67: [liveStop] if(typeof getDisplayLiveStop === "function"){
+   68: [liveStop] return getDisplayLiveStop() || "";
+   73: [liveStop] return speedState?.liveStop || "";
+   84: [speedState] speed = Math.round(Number(speedState?.current || 0));
+   85: [speedState] limit = Number(speedState?.lastLimitValue || speedState?.lastLimitObj?.limit || 0);
+  152: [liveStop] const liveStop = getLiveStop();
+  164: [liveStop] const stopText = liveStop ? ` · ${liveStop}` : "";
+
+--- static/seats/patches/mobile-performance-fix.css | 4 ilgili satır ---
+   71: [route-stop] .route-stop,
+   82: [route-stop] .route-stop,
+   83: [route-stop] .route-stop *,
+  104: [route-stop] .route-stop,
+
+--- static/seats/patches/seat-simple-ui-pack.css | 2 ilgili satır ---
+  105: [route-flow] html.seat-simple-mode .route-flow-shell,
+  106: [route-flow] html.seat-simple-mode .route-flow,
+
+--- static/seats/patches/stop-flow-compact-mobile.css | 18 ilgili satır ---
+    5: [stopFlow] #stopFlowFocusOverlay{
+    9: [stopFlow] #stopFlowFocusOverlay .stop-focus-panel{
+   14: [stopFlow] #stopFlowFocusOverlay .stop-focus-head{
+   18: [stopFlow] #stopFlowFocusOverlay .stop-focus-topline{
+   23: [stopFlow] #stopFlowFocusOverlay .stop-focus-back{
+   29: [stopFlow] #stopFlowFocusOverlay .stop-focus-badge{
+   37: [stopFlow] #stopFlowFocusOverlay .stop-focus-title{
+   43: [stopFlow] #stopFlowFocusOverlay .stop-focus-sub{
+   49: [stopFlow] #stopFlowFocusOverlay .stop-focus-list{
+   54: [stopFlow] #stopFlowFocusOverlay .stop-focus-card{
+   61: [stopFlow] #stopFlowFocusOverlay .stop-focus-pin{
+   69: [stopFlow] #stopFlowFocusOverlay .stop-focus-name{
+   74: [stopFlow] #stopFlowFocusOverlay .stop-focus-meta{
+   80: [stopFlow] #stopFlowFocusOverlay .stop-focus-select{
+   90: [stopFlow] #stopFlowFocusOverlay .stop-focus-title{
+   94: [stopFlow] #stopFlowFocusOverlay .stop-focus-card{
+   99: [stopFlow] #stopFlowFocusOverlay .stop-focus-name{
+  103: [stopFlow] #stopFlowFocusOverlay .stop-focus-meta{
+
+--- static/seats/patches/stop-flow-focus-patch.css | 4 ilgili satır ---
+    1: [stop-flow] html.stop-flow-focus-lock,
+    2: [stop-flow] body.stop-flow-focus-lock{
+    7: [stopFlow] #stopFlowFocusOverlay{
+   20: [stopFlow] #stopFlowFocusOverlay[hidden]{
+
+--- static/seats/patches/stop-flow-focus-patch.js | 18 ilgili satır ---
+    2: [stopFlow] if(window.__stopFlowFocusPatchLoaded) return;
+    3: [stopFlow] window.__stopFlowFocusPatchLoaded = true;
+    5: [stopFlow] var overlayId = "stopFlowFocusOverlay";
+   38: [currentStop] function getCurrentStop(){
+   81: [route-stop] qsa(".route-stop, [data-stop-name], [data-stop]").forEach(function(el){
+  107: [liveStop] ["#seatSimpleStop", "#topLiveStop"].forEach(function(sel){
+  197: [currentStop] var current = getCurrentStop();
+  246: [stop-flow] document.documentElement.classList.add("stop-flow-focus-lock");
+  247: [stop-flow] document.body.classList.add("stop-flow-focus-lock");
+  254: [stop-flow] document.documentElement.classList.remove("stop-flow-focus-lock");
+  255: [stop-flow] document.body.classList.remove("stop-flow-focus-lock");
+  265: [stopFlow] window.openStopFlowFocus = openStopFocus;
+  266: [stopFlow] window.closeStopFlowFocus = closeStopFocus;
+  343: [stopFlow] if(window.setSelectedStop.__stopFlowFocusHooked) return;
+  356: [stopFlow] wrapped.__stopFlowFocusHooked = true;
+  363: [stopFlow] if(window[fn].__stopFlowFocusHooked) return;
+  369: [currentStop] setPickupToSelected(getCurrentStop(), false);
+  373: [stopFlow] wrapped.__stopFlowFocusHooked = true;
+
+--- static/seats/patches/unified-seat-deck-report-style.css | 3 ilgili satır ---
+  249: [bag-badge] .seat .bag-badge,
+  250: [bag-badge] body.drive-mode .seat .bag-badge,
+  251: [bag-badge] html.seat-simple-mode .seat .bag-badge{
+
+--- static/seats/seats-final.css | 92 ilgili satır ---
+  578: [route-stop] .route-stop{
+  585: [route-stop] .route-stop .name{
+  589: [route-stop] .route-stop .meta{
+  967: [route-stop] body.drive-mode .route-stop .name{
+  973: [route-stop] body.drive-mode .route-stop .name::before{
+  987: [route-stop] body.drive-mode .route-stop.active .name::before,
+  988: [route-stop] body.drive-mode .route-stop.live-danger .name::before,
+  989: [route-stop] body.drive-mode .route-stop.next-warning .name::before,
+  990: [route-stop] body.drive-mode .route-stop.flow-green .name::before{
+  994: [route-stop] body.drive-mode .route-stop.done .name::before{
+ 1004: [route-stop] body.drive-mode .route-stop .name{
+ 1010: [route-stop] body.drive-mode .route-stop .name::before{
+ 1030: [route-stop] body.drive-mode .route-stop.active .name::before,
+ 1031: [route-stop] body.drive-mode .route-stop.live-danger .name::before,
+ 1032: [route-stop] body.drive-mode .route-stop.next-warning .name::before,
+ 1033: [route-stop] body.drive-mode .route-stop.flow-green .name::before{
+ 1040: [route-stop] body.drive-mode .route-stop.done .name::before{
+ 1050: [route-stop] body.drive-mode .route-stop .name::before{
+ 1058: [route-stop] body.drive-mode .route-stop.done .name::before{
+ 1063: [route-stop] body.drive-mode .route-stop.active .name::before,
+ 1064: [route-stop] body.drive-mode .route-stop.live-danger .name::before,
+ 1065: [route-stop] body.drive-mode .route-stop.next-warning .name::before,
+ 1066: [route-stop] body.drive-mode .route-stop.flow-green .name::before{
+ 1079: [route-stop] body.drive-mode .route-stop{
+ 1090: [route-stop] body.drive-mode .route-stop.done{
+ 1098: [route-stop] body.drive-mode .route-stop.done .name{
+ 1103: [route-stop] body.drive-mode .route-stop.done .meta,
+ 1104: [route-stop] body.drive-mode .route-stop.done .extra-k,
+ 1105: [route-stop] body.drive-mode .route-stop.done .extra-v{
+ 1110: [route-stop] body.drive-mode .route-stop.active{
+ 1122: [route-stop] body.drive-mode .route-stop.active .name,
+ 1123: [route-stop] body.drive-mode .route-stop.active .meta,
+ 1124: [route-stop] body.drive-mode .route-stop.active .extra-k,
+ 1125: [route-stop] body.drive-mode .route-stop.active .extra-v{
+ 1130: [route-stop] body.drive-mode .route-stop:not(.active):not(.live-danger):not(.next-warning):not(.flow-green){
+ 1140: [route-stop] body.drive-mode .route-stop.live-danger{
+ 1152: [liveStop] animation:liveStopBlink 0.9s linear infinite !important;
+ 1155: [route-stop] body.drive-mode .route-stop.live-danger .name,
+ 1156: [route-stop] body.drive-mode .route-stop.live-danger .meta,
+ 1157: [route-stop] body.drive-mode .route-stop.live-danger .extra-k,
+ 1158: [route-stop] body.drive-mode .route-stop.live-danger .extra-v{
+ 1163: [route-stop] body.drive-mode .route-stop.live-danger .name::before{
+ 1171: [route-stop] body.drive-mode .route-stop.next-warning:not(.live-danger){
+ 1183: [route-stop] body.drive-mode .route-stop.flow-green:not(.live-danger):not(.next-warning){
+ 1200: [route-stop] body:not(.drive-mode) .route-stop .name{
+ 1206: [route-stop] body:not(.drive-mode) .route-stop .name::before{
+ 1228: [route-stop] body:not(.drive-mode) .route-stop.done .name::before{
+ 1232: [route-stop] body:not(.drive-mode) .route-stop.active .name::before,
+ 1233: [route-stop] body:not(.drive-mode) .route-stop.live-danger .name::before,
+ 1234: [route-stop] body:not(.drive-mode) .route-stop.next-warning .name::before,
+ 1235: [route-stop] body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1248: [route-stop] body:not(.drive-mode) .route-stop .name::before{
+ 1268: [route-stop] body:not(.drive-mode) .route-stop.done .name::before{
+ 1286: [route-stop] body:not(.drive-mode) .route-stop.active .name::before,
+ 1287: [route-stop] body:not(.drive-mode) .route-stop.live-danger .name::before,
+ 1288: [route-stop] body:not(.drive-mode) .route-stop.next-warning .name::before,
+ 1289: [route-stop] body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1312: [route-stop] body:not(.drive-mode) .route-stop{
+ 1325: [route-stop] body:not(.drive-mode) .route-stop.done{
+ 1335: [route-stop] body:not(.drive-mode) .route-stop.done .name{
+ 1340: [route-stop] body:not(.drive-mode) .route-stop.done .meta,
+ 1341: [route-stop] body:not(.drive-mode) .route-stop.done .extra-k,
+ 1342: [route-stop] body:not(.drive-mode) .route-stop.done .extra-v{
+ 1347: [route-stop] body:not(.drive-mode) .route-stop.live-danger{
+ 1362: [route-stop] body:not(.drive-mode) .route-stop.live-danger{
+ 1374: [liveStop] animation:liveStopBlink .9s linear infinite !important;
+ 1378: [route-stop] body:not(.drive-mode) .route-stop.next-warning:not(.live-danger){
+ 1393: [route-stop] body:not(.drive-mode) .route-stop.flow-green:not(.live-danger):not(.next-warning){
+ 1408: [route-stop] body:not(.drive-mode) .route-stop.live-danger .name,
+ 1409: [route-stop] body:not(.drive-mode) .route-stop.live-danger .meta,
+ 1410: [route-stop] body:not(.drive-mode) .route-stop.live-danger .extra-k,
+ 1411: [route-stop] body:not(.drive-mode) .route-stop.live-danger .extra-v,
+ 1412: [route-stop] body:not(.drive-mode) .route-stop.next-warning .name,
+ 1413: [route-stop] body:not(.drive-mode) .route-stop.next-warning .meta,
+ 1414: [route-stop] body:not(.drive-mode) .route-stop.next-warning .extra-k,
+ 1415: [route-stop] body:not(.drive-mode) .route-stop.next-warning .extra-v,
+ 1416: [route-stop] body:not(.drive-mode) .route-stop.flow-green .name,
+ 1417: [route-stop] body:not(.drive-mode) .route-stop.flow-green .meta,
+ 1418: [route-stop] body:not(.drive-mode) .route-stop.flow-green .extra-k,
+ 1419: [route-stop] body:not(.drive-mode) .route-stop.flow-green .extra-v{
+ 1425: [route-stop] body:not(.drive-mode) .route-stop.live-danger .name::before{
+ 1429: [route-stop] body:not(.drive-mode) .route-stop.next-warning .name::before{
+ 1433: [route-stop] body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1594: [route-stop] body.drive-mode .route-strip:has(.route-stop.live-danger) ~ *,
+ 1595: [route-stop] body:not(.drive-mode) .route-strip:has(.route-stop.live-danger) ~ *{
+ 1599: [route-stop] .route-strip-shell:has(.route-stop.live-danger) .route-pill-live{
+ 1610: [route-stop] .route-strip-shell:has(.route-stop.live-danger) .route-pill-live .route-mini-label,
+ 1611: [route-stop] .route-strip-shell:has(.route-stop.live-danger) .route-pill-live #routeMiniLive{
+ 1618: [route-stop] .route-strip-shell:has(.route-stop.live-danger) .route-mini-dot{
+ 1631: [route-stop] .route-strip-shell:has(.route-stop.next-warning) .route-pill-next{
+... 2 satır daha var.
+
+--- static/seats/seats.css | 60 ilgili satır ---
+  474: [route-stop] .route-stop{
+  490: [route-stop] .route-stop .name{
+  497: [route-stop] .route-stop .meta{
+  503: [route-stop] .route-stop .extra{
+  509: [route-stop] .route-stop .extra-line{
+  518: [route-stop] .route-stop .extra-k{
+  524: [route-stop] .route-stop .extra-v{
+  531: [route-stop] .route-stop.active{
+  539: [route-stop] .route-stop.done{
+  685: [bag-badge] .bag-badge,
+  707: [bag-badge] .bag-badge{
+  727: [bag-badge] .seat.has-bag .bag-badge{ display:inline-flex; }
+ 1135: [timeline] .timeline-list{
+ 1503: [route-stop] .route-stop{
+ 1586: [route-stop] .route-stop{
+ 1595: [route-stop] .route-stop.live-danger{
+ 1602: [liveStop] animation:liveStopBlink .85s linear infinite;
+ 1605: [route-stop] .route-stop.live-danger .name,
+ 1606: [route-stop] .route-stop.live-danger .meta,
+ 1607: [route-stop] .route-stop.live-danger .extra-k,
+ 1608: [route-stop] .route-stop.live-danger .extra-v{
+ 1612: [liveStop] @keyframes liveStopBlink{
+ 1623: [route-stop] .route-stop.next-warning{
+ 1632: [route-stop] .route-stop.next-warning .name,
+ 1633: [route-stop] .route-stop.next-warning .meta,
+ 1634: [route-stop] .route-stop.next-warning .extra-k,
+ 1635: [route-stop] .route-stop.next-warning .extra-v{
+ 1639: [route-stop] .route-stop.flow-green{
+ 1825: [route-stop] .route-stop{
+ 1864: [route-stop] .route-stop{
+ 1982: [route-stop] body.drive-mode .route-stop{
+ 2043: [route-stop] body.drive-mode .route-stop{
+ 2170: [route-stop] body.drive-mode .route-stop{
+ 2177: [route-stop] body.drive-mode .route-stop .name{
+ 2186: [route-stop] body.drive-mode .route-stop .meta{
+ 2194: [route-stop] body.drive-mode .route-stop .extra-line{
+ 2198: [route-stop] body.drive-mode .route-stop.active{
+ 2234: [bag-badge] body.drive-mode .bag-badge{
+ 2302: [route-stop] body.drive-mode .route-stop{
+ 2308: [route-stop] body.drive-mode .route-stop .name{
+ 2312: [route-stop] body.drive-mode .route-stop .meta,
+ 2313: [route-stop] body.drive-mode .route-stop .extra-line{
+ 2348: [route-stop] body.drive-mode .route-stop{
+ 2363: [bag-badge] .seat .bag-badge{
+ 2381: [bag-badge] .seat .bag-badge::after{
+ 2395: [bag-dir] .seat .bag-dir{
+ 2405: [bag-count] .seat .bag-count{
+ 2422: [bag-badge] body.drive-mode .seat .bag-badge{
+ 2431: [bag-count] body.drive-mode .seat .bag-count{
+ 2442: [bag-badge] .seat .bag-badge{
+ 2450: [bag-dir] .seat .bag-dir{
+ 2455: [bag-count] .seat .bag-count{
+ 2516: [bag-badge] body.drive-mode .seat .bag-badge{
+ 2738: [route-stop] .route-stop.route-focus-flash{
+ 4034: [route-stop] .route-stop.done.has-flow-summary .meta.done-summary{
+ 4041: [route-stop] .route-stop.done.has-flow-summary{
+ 4045: [route-stop] .route-stop.done.has-flow-summary .name{
+ 4049: [route-stop] body.drive-mode .route-stop.done.has-flow-summary .meta.done-summary{
+ 4055: [route-stop] .route-stop.done.has-flow-summary .meta.done-summary{
+ 4829: [route-stop] .route-stop.active {
+
+--- static/seats/seats.js | 167 ilgili satır ---
+   24: [stopFlow] (function hardCleanOldStopFlowOnce(){
+   28: [stopFlow] const key = "hardCleanStopFlowOnce:" + TRIP_KEY;
+   34: [stopFlow] "stopFlowSummary:" + TRIP_KEY,
+   36: [liveStop] "liveStop:" + TRIP_KEY,
+  139: [stop-flow] const memorySchemaVersion = "v2-stop-flow-clean-20260512";
+  155: [liveStop] "liveStop:",
+  161: [stopFlow] "stopFlowSummary:"
+  210: [speedState] const speedState = {
+  218: [liveStop] liveStop: "",
+  278: [liveStop] localStorage.setItem("liveStop:" + TRIP_KEY, speedState.liveStop || "");
+  279: [speedState] localStorage.setItem("passedStops:" + TRIP_KEY, JSON.stringify([...speedState.passedStops]));
+  283: [liveStop] speedState.liveStop = localStorage.getItem("liveStop:" + TRIP_KEY) || "";
+  285: [speedState] speedState.passedStops = new Set(JSON.parse(localStorage.getItem("passedStops:" + TRIP_KEY) || "[]"));
+  287: [speedState] speedState.passedStops = new Set();
+  382: [liveStop] function getDisplayLiveStop(){
+  383: [liveStop] const live = speedState.liveStop || "";
+  388: [liveStop] if(typeof hasLiveStopOperation === "function" && !hasLiveStopOperation(live)){
+  389: [liveStop] speedState.liveStop = "";
+  390: [speedState] speedState.passedStops = new Set();
+  393: [liveStop] localStorage.removeItem("liveStop:" + TRIP_KEY);
+  406: [liveStop] speedState.liveStop = "";
+  407: [speedState] speedState.passedStops = new Set();
+  410: [liveStop] localStorage.removeItem("liveStop:" + TRIP_KEY);
+  485: [scheduleOffsetsForRoute] function scheduleOffsetsForRoute(){
+  515: [buildActualSchedule] function buildActualSchedule(){
+  517: [scheduleOffsetsForRoute] const offsets = scheduleOffsetsForRoute();
+  539: [Plan dışı] if(Math.abs(mins) > 720) return "Plan dışı";
+  646: [stopFlow] const STOP_FLOW_SUMMARY_KEY = "stopFlowSummary:" + TRIP_KEY;
+  647: [stopFlow] const STOP_FLOW_EVENT_KEY = "stopFlowLiveEvents:" + TRIP_KEY;
+  648: [stopFlow] let stopFlowSummary = {};
+  650: [stopFlow] function readStopFlowLiveEvents(){
+  660: [stopFlow] function writeStopFlowLiveEvents(obj){
+  666: [stopFlow] function loadStopFlowSummary(){
+  670: [stopFlow] stopFlowSummary = obj && typeof obj === "object" ? obj : {};
+  672: [stopFlow] stopFlowSummary = {};
+  677: [stopFlow] function clearStaleStopFlowIfTripEmpty(){
+  685: [stopFlow] "stopFlowSummary:" + TRIP_KEY,
+  686: [liveStop] "liveStop:" + TRIP_KEY,
+  697: [stopFlow] stopFlowSummary = {};
+  699: [speedState] if(speedState){
+  700: [liveStop] speedState.liveStop = "";
+  701: [speedState] speedState.passedStops = new Set();
+  704: [timeline] if(typeof renderTimeline === "function") renderTimeline();
+  711: [stopFlow] setTimeout(clearStaleStopFlowIfTripEmpty, 0);
+  713: [stopFlow] function persistStopFlowSummary(){
+  715: [stopFlow] localStorage.setItem(STOP_FLOW_SUMMARY_KEY, JSON.stringify(stopFlowSummary || {}));
+  771: [stopFlow] function recordStopFlowEvent(stopName, delta = {}){
+  776: [stopFlow] const liveEvents = readStopFlowLiveEvents();
+  791: [stopFlow] writeStopFlowLiveEvents(liveEvents);
+  794: [stopFlow] stopFlowSummary[key] = {
+  795: [stopFlow] ...(stopFlowSummary[key] || {}),
+  802: [stopFlow] persistStopFlowSummary();
+  806: [stopFlow] console.log("recordStopFlowEvent error", err);
+  811: [stopFlow] function snapshotStopFlowSummary(stopName, data = {}){
+  815: [stopFlow] const old = stopFlowSummary[key] || {};
+  829: [stopFlow] stopFlowSummary[key] = {
+  836: [stopFlow] persistStopFlowSummary();
+  839: [stopFlow] function stopFlowSummaryLine(stopName){
+  841: [stopFlow] const rec = stopFlowSummary[key] || {};
+  842: [stopFlow] const liveRec = readStopFlowLiveEvents()[key] || {};
+ 1058: [route-stop] const target = Array.from(wrap.querySelectorAll(".route-stop"))
+ 1081: [route-stop] <div class="route-stop active">
+ 1090: [liveStop] const live = getDisplayLiveStop();
+ 1097: [nextStop] const nextWarnStop = liveDangerOn? computeNextStopName(live || selected || "", "nextWithSeats"): "";
+ 1098: [nextStop] const greenStop = liveDangerOn && nextWarnStop? computeNextStopName(nextWarnStop, "nextWithSeats"): "";
+ 1106: [buildActualSchedule] const actualSchedule = buildActualSchedule();
+ 1107: [planMap] const planMap = new Map(
+ 1112: [speedState] (speedState.etaItems || []).map(x => [norm(x.stop), x])
+ 1122: [speedState] const isDone = speedState.passedStops.has(stop) && !isActive && !isLive;
+ 1127: [planMap] const plan = planMap.get(norm(stop)) || "";
+ 1145: [stopFlow] const flowLine = stopFlowSummaryLine(stop);
+ 1163: [route-stop] item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done has-flow-summary" : ""} ${liveDangerOn && isLive ? "live-danger" : ""} ${isNextWarn ? "next-warning" : ""} ${isFlowGreen ? "flow-green" 
+ 1219: [liveStop] const live = getDisplayLiveStop();
+ 1220: [nextStop] const next = computeNextStopName(live || selected || "", "nextWithSeats");
+ 1222: [liveStop] setText("#topLiveStop", live || selected || "—");
+ 1223: [speedState] setText("#topSpeed", `${Math.round(Number(speedState.current || 0))} km/h`);
+ 1226: [liveStop] setText("#routeLiveStop", live || "—");
+ 1227: [liveStop] setText("#routeLiveStopCard", live || "—");
+ 1247: [nextStop] function computeNextStopName(currentName, mode="nextWithSeats"){
+ 1284: [timeline] renderTimeline();
+ 1300: [timeline] renderTimeline();
+ 1323: [stopFlow] snapshotStopFlowSummary(list[i]);
+ 1324: [speedState] speedState.passedStops.add(list[i]);
+ 1329: [liveStop] function setLiveStop(name){
+ 1333: [liveStop] speedState.liveStop = canonical;
+ 1337: [timeline] renderTimeline();
+ 1342: [nextStop] function advanceToNextStop({ mode="nextWithSeats", silent=false, ignoreToggle=false } = {}){
+ 1347: [nextStop] const next = computeNextStopName(cur, mode);
+ 1468: [stopFlow] recordStopFlowEvent(from, { board: 1 });
+ 1478: [timeline] renderTimeline();
+... 77 satır daha var.
+
+--- static/seats/standing.js | 5 ilgili satır ---
+    9: [liveStop] const live = getDisplayLiveStop();
+   27: [liveStop] const from = $("#cashFrom")?.value || speedState.liveStop || getSelectedStopName() || serverStops?.[0] || "";
+   51: [timeline] renderTimeline();
+  197: [timeline] renderTimeline();
+  223: [timeline] renderTimeline();
+
+--- static/seats/voice-commands.js | 21 ilgili satır ---
+   67: [liveStop] if(!selected && speedState && speedState.liveStop){
+   68: [liveStop] selected = speedState.liveStop || "";
+  131: [speedState] if(speedState && Array.isArray(speedState.etaItems)){
+  132: [speedState] const nextTimed = speedState.etaItems.find(x => !x.passed);
+  138: [nextStop] if(!next && typeof computeNextStopName === "function"){
+  139: [nextStop] next = computeNextStopName(selected || "", "nextWithSeats") || "";
+  298: [liveStop] const stop = getSelectedStopName() || speedState.liveStop || "";
+  612: [liveStop] Çünkü liveStop localStorage'dan eski Sarıgöl gibi bir değeri geri getirebilir.
+  644: [liveStop] Böylece eski liveStop hafızası seçili durağı ezmez.
+  647: [liveStop] if(!stop && typeof getDisplayLiveStop === "function"){
+  648: [liveStop] stop = voiceCleanStopValue(getDisplayLiveStop());
+  653: [liveStop] if(!stop && speedState && speedState.liveStop){
+  654: [liveStop] stop = voiceCleanStopValue(speedState.liveStop);
+  783: [timeline] try{ if(typeof renderTimeline === "function") renderTimeline(); }catch(_){}
+  903: [timeline] renderTimeline();
+ 1067: [liveStop] const stop = getSelectedStopName() || speedState.liveStop || "";
+ 1076: [liveStop] const stop = getSelectedStopName() || speedState.liveStop || "";
+ 1085: [liveStop] const stop = cmd.stop || getSelectedStopName() || speedState.liveStop || "";
+ 1107: [liveStop] const live = speedState.liveStop || getSelectedStopName() || "henüz belli değil";
+ 1115: [speedState] const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+ 1130: [speedState] const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+
+--- templates/ai_console.html | 1 ilgili satır ---
+ 1332: [Canlı Akış] <p class="section-sub">Canlı akış ve sistem notları</p>
+
+--- templates/continue_trip.html | 76 ilgili satır ---
+    6: [Canlı Durak Akışı] <title>Canlı Durak Akışı</title>
+  290: [timeline] .timeline{
+  296: [timeline] .timeline-line{
+  778: [timeline] .timeline{
+  782: [timeline] .timeline-line{
+ 1050: [timeline] .timeline{
+ 1055: [timeline] .timeline-line{
+ 1231: [timeline] .timeline{
+ 1235: [timeline] .timeline-line{
+ 1280: [timeline] <style id="live-timeline-neon-final">
+ 1282: [timeline] CANLI DURAK TIMELINE NEON FINAL
+ 1286: [timeline] .timeline{
+ 1292: [timeline] .timeline-line{
+ 1319: [timeline] .timeline-line::before{
+ 1477: [timeline] /* Mobilde timeline dengesi */
+ 1479: [timeline] .timeline{
+ 1483: [timeline] .timeline-line{
+ 1513: [timeline] <style id="live-timeline-balance-final">
+ 1515: [timeline] CANLI DURAK TIMELINE BALANCE FINAL
+ 1519: [timeline] .timeline{
+ 1523: [timeline] .timeline-line{
+ 1603: [timeline] .timeline{
+ 1607: [timeline] .timeline-line{
+ 1674: [Canlı Durak Akışı] /* Canlı Durak Akışı başlığını daha kompakt yapar */
+ 2307: [bag-count] .sheet-bag-count{
+ 2343: [bag-count] .sheet-bag-count{
+ 3315: [Canlı Durak Akışı] <h1 class="hero-title">Canlı Durak Akışı</h1>
+ 3347: [Planında] <b>Planında</b>
+ 3351: [timeline] <section class="timeline">
+ 3352: [timeline] <div class="timeline-line"></div>
+ 3360: [Şu Anki Durak] <span class="card-label">Şu anki durak</span>
+ 3361: [currentStop] <h2 class="card-title" id="liveCurrentStopName">{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or "Durak seçilmedi" }}</h2>
+ 3441: [liveStop] <div class="live-sheet-overlay" id="liveStopSheetOverlay"></div>
+ 3443: [liveStop] <section class="live-stop-sheet" id="liveStopSheet" aria-hidden="true">
+ 3448: [liveStop] <div class="sheet-kicker" id="liveStopSheetKicker">Canlı durak</div>
+ 3449: [liveStop] <h2 class="sheet-title" id="liveStopSheetTitle">Durak detayı</h2>
+ 3450: [liveStop] <p class="sheet-sub" id="liveStopSheetSub">Yükleniyor...</p>
+ 3453: [liveStop] <button class="sheet-close" type="button" id="liveStopSheetClose" aria-label="Kapat">×</button>
+ 3456: [liveStop] <div class="sheet-body" id="liveStopSheetBody">
+ 3568: [liveStop] "liveStop:" + tripKey,
+ 3575: [stopFlow] "stopFlowSummary:" + tripKey,
+ 3576: [stopFlow] "stopFlowLiveEvents:" + tripKey
+ 3585: [liveStop] k.startsWith("liveStop:") ||
+ 3591: [stopFlow] k.startsWith("stopFlowSummary:") ||
+ 3592: [stopFlow] k.startsWith("stopFlowLiveEvents:")
+ 3680: [currentStop] const stopEl  = document.getElementById("liveCurrentStopName");
+ 3714: [currentStop] const stopEl  = document.getElementById("liveCurrentStopName");
+ 3760: [currentStop] const stopNameEl = document.getElementById("liveCurrentStopName");
+ 3762: [liveStop] const overlay = document.getElementById("liveStopSheetOverlay");
+ 3763: [liveStop] const sheet = document.getElementById("liveStopSheet");
+ 3764: [liveStop] const closeBtn = document.getElementById("liveStopSheetClose");
+ 3765: [liveStop] const titleEl = document.getElementById("liveStopSheetTitle");
+ 3766: [liveStop] const subEl = document.getElementById("liveStopSheetSub");
+ 3767: [liveStop] const bodyEl = document.getElementById("liveStopSheetBody");
+ 3768: [liveStop] const kickerEl = document.getElementById("liveStopSheetKicker");
+ 3789: [currentStop] function currentStopName(){
+ 3954: [currentStop] const routeText = `${passenger.from_stop || "Biniş yok"} → ${passenger.to_stop || currentStopName() || "İniş yok"}`;
+ 4035: [currentStop] stop: currentStopName()
+ 4077: [currentStop] const stop = data.stop || currentStopName() || "seçili durak";
+ 4126: [currentStop] async function bulkOffloadCurrentStop(){
+ 4150: [currentStop] titleEl.textContent = data.stop || currentStopName() || "Durak";
+ 4158: [currentStop] stop: data.stop || currentStopName()
+ 4341: [currentStop] Teslim durağı: ${escapeHtml(item.stop_name || currentStopName() || "-")}
+ 4479: [bag-count] <div class="sheet-bag-count">${Number(loc.count || 0)}</div>
+ 4669: [currentStop] const stop = c.stop_name || data.stop || currentStopName() || "";
+ 4801: [currentStop] parts.push(`${data.stop || currentStopName() || "Bu"} durağında ${passengers.length} yolcu inecek.`);
+ 4849: [currentStop] const stop = (data && data.stop) || currentStopName();
+ 4959: [currentStop] titleEl.textContent = `${data.stop || currentStopName() || "Durak"} durağı`;
+ 4967: [currentStop] titleEl.textContent = `${data.stop || currentStopName() || "Durak"} durağı`;
+ 4993: [currentStop] titleEl.textContent = `${data.stop || currentStopName() || "Durak"} durağı`;
+ 5080: [currentStop] titleEl.textContent = `${data.stop || currentStopName() || "Durak"} durağı`;
+ 5090: [currentStop] titleEl.textContent = `${data.stop || currentStopName() || "Durak"} durağı`;
+ 5098: [currentStop] const stop = currentStopName();
+ 5141: [currentStop] const stop = currentStopName();
+ 5260: [currentStop] bulkOffloadCurrentStop();
+ 5380: [liveStop] const liveSheet = document.getElementById("liveStopSheet");
+
+--- templates/live_map.html | 6 ilgili satır ---
+ 1727: [Canlı Akış] <a class="back" href="{{ url_for('continue_trip') }}">← Canlı Akış</a>
+ 1824: [liveStop] const liveStop = BOOT.live_stop || "";
+ 1833: [liveStop] if(sumLive) sumLive.textContent = liveStop || "—";
+ 2016: [liveStop] if(liveStop && stop.name === liveStop) return "live";
+ 2426: [liveStop] const liveIndex = stops.findIndex(s => liveStop && s.name === liveStop);
+ 2527: [Kalan mesafe] speech:`${stop.name} yaklaşıyor. Kalan mesafe ${kmText}. ${opText}.`
+
+--- templates/route_stops.html | 1 ilgili satır ---
+   57: [route-stop] const res = await fetch('/api/route-stop', {
+
+--- templates/seats.html | 10 ilgili satır ---
+    8: [stop-flow] <link rel="stylesheet" href="/static/seats/patches/stop-flow-focus-patch.css?v=1">
+    9: [stop-flow] <link rel="stylesheet" href="/static/seats/patches/stop-flow-compact-mobile.css?v=1">
+  193: [liveStop] <small id="routeLiveStop">—</small>
+  233: [route_stop_coords] <small>route_stop_coords</small>
+  254: [route_stop_coords] <div class="muted">Bu kayıt route_stop_coords tablosuna yazılır.</div>
+  271: [liveStop] <div class="v" id="routeLiveStopCard">—</div>
+  279: [timeline] <div class="timeline-list" id="etaTimeline" style="margin-top:12px;"></div>
+  323: [liveStop] <div class="ai-item"><b>Canlı Durak</b><span id="aiLiveStop">—</span></div>
+  374: [stop-flow] <script src="/static/seats/patches/stop-flow-focus-patch.js?v=simple-scope-1"></script>
+ 1061: [route-flow] const flow = q("#routeStrip") || q(".route-strip-shell") || q(".route-flow-shell");
+
+--- templates/seats_parts/deck.html | 1 ilgili satır ---
+   15: [bag-badge] <span class="bag-badge" title="Bagaj"><span class="bag-dir"></span><span class="bag-count">0</span></span>
+
+--- templates/seats_parts/route_flow.html | 1 ilgili satır ---
+   26: [route-stop] <div class="route-stop active">
+
+--- templates/seats_parts/topbar.html | 1 ilgili satır ---
+   22: [liveStop] <div class="mini-chip">📍 <span>Durak</span> <b id="topLiveStop">—</b></div>
+
+--- templates/trip_report.html | 9 ilgili satır ---
+  257: [stop-card] .stop-card{
+  413: [timeline] .timeline{
+  482: [stop-card] .hero,.section-card,.stop-card,.sum-card,.box{
+  772: [timeline] const timeline = h.events.map(e => {
+  821: [timeline] <div class="timeline">
+  822: [timeline] ${timeline || '<div class="empty">Bu koltuk için henüz kayıt yok.</div>'}
+  840: [stop-card] <section class="stop-card">
+  863: [stop-card] <div class="stop-card">
+  985: [stop-card] `<div class="stop-card"><div class="empty">Rapor yüklenemedi: ${esc(err.message)}</div></div>`;
+
+==========================================================================================
+5) CSS tarafında muhtemel selector / override kaynakları
+==========================================================================================
+
+--- static/live_map/muavin_live_map_extra.css | CSS aday satır: 1 ---
+  832: .next-op-task-btn.bag{
+
+--- static/seats/_archive_theme_trials/seats-dashboard-final.css | CSS aday satır: 38 ---
+   57: .route-meta{
+   61: .route-title-row{
+   68: .route-badge{
+   82: .route-title{
+   92: .route-sub{
+  100: .route-sub b{
+  106: .route-live-row{
+  113: .route-live-row .mini-chip{
+  128: .route-live-row .mini-chip span{
+  135: .route-live-row .mini-chip b{
+  176: .status-row{
+  183: .status-pill{
+  196: .status-pill .k{
+  202: .status-pill .v{
+  209: .status-pill.total{
+  214: .status-pill.empty{
+  219: .status-pill.standing,
+  220: .status-pill.cash,
+  221: .status-pill.service,
+  222: .status-pill.parcel{
+  422: .route-flow,
+  423: .stop-flow,
+  425: .route-flow-card{
+  690:   .route-title-row{
+  695:   .route-badge{
+  702:   .route-title{
+  706:   .route-sub{
+  710:   .route-live-row{
+  715:   .route-live-row .mini-chip{
+  725:   .status-row{
+  729:   .status-pill{
+  735:   .status-pill .k{
+  739:   .status-pill .v{
+  795:   .route-title{
+  799:   .route-sub{
+  803:   .route-live-row .mini-chip b{
+  807:   .status-pill{
+  811:   .status-pill .v{
+
+--- static/seats/_archive_theme_trials/seats-dashboard-tone.css | CSS aday satır: 17 ---
+   23: .route-title{
+   27: .route-sub{
+   31: .route-sub b{
+   35: .route-badge{
+   41: .route-live-row .mini-chip{
+   48: .route-live-row .mini-chip span{
+   52: .route-live-row .mini-chip b{
+   64: .status-pill{
+   72: .status-pill.empty{
+   78: .status-pill .k{
+   82: .status-pill .v{
+  154: .route-flow,
+  155: .stop-flow,
+  157: .route-flow-card{
+  182: .status-row .status-pill.total{
+  190: .status-row .status-pill.total .k{
+  194: .status-row .status-pill.total .v{
+
+--- static/seats/patches/mobile-performance-fix.css | CSS aday satır: 6 ---
+   47:   .status-card,
+   51:   .route-card,
+   71:   .route-stop,
+   82:   .route-stop,
+   83:   .route-stop *,
+  104:   .route-stop,
+
+--- static/seats/patches/seat-simple-ui-pack.css | CSS aday satır: 5 ---
+  104: html.seat-simple-mode .route-strip-shell,
+  105: html.seat-simple-mode .route-flow-shell,
+  106: html.seat-simple-mode .route-flow,
+  108: html.seat-simple-mode .route-mini,
+  109: html.seat-simple-mode .route-pill{
+
+--- static/seats/patches/stop-flow-focus-patch.css | CSS aday satır: 2 ---
+    1: html.stop-flow-focus-lock,
+    2:   body.stop-flow-focus-lock{
+
+--- static/seats/patches/unified-seat-deck-report-style.css | CSS aday satır: 3 ---
+  249: .seat .bag-badge,
+  250: body.drive-mode .seat .bag-badge,
+  251: html.seat-simple-mode .seat .bag-badge{
+
+--- static/seats/seats-final.css | CSS aday satır: 159 ---
+   63: .route-title-row{
+   70: .route-badge{
+   82: .route-title{
+   90: .route-sub{
+   98: .route-sub b{
+  102: .route-live-row{
+  109: .route-live-row .mini-chip{
+  125: .route-live-row .mini-chip span{
+  129: .route-live-row .mini-chip b{
+  162: .status-row{
+  170: .status-pill{
+  182: .status-pill.total{
+  188: .status-pill.empty{
+  194: .status-pill.standing,
+  195: .status-pill.cash,
+  196: .status-pill.service,
+  197: .status-pill.parcel{
+  201: .status-pill .k{
+  207: .status-pill .v{
+  497: .route-strip-shell{
+  506: .route-strip-head{
+  512: .route-strip-title{
+  518: .route-strip-meta{
+  526: .route-pill{
+  544: .route-pill b{
+  566: .route-strip{
+  574: .route-strip::-webkit-scrollbar{
+  578: .route-stop{
+  585: .route-stop .name{
+  589: .route-stop .meta{
+  770:   .route-live-row{
+  774:   .status-row{
+  798:   .route-strip-meta{
+  813:   .route-title{
+  817:   .route-sub{
+  821:   .status-pill{
+  825:   .status-pill .v{
+  856: .route-badge{
+  863: .route-title-row{
+  867: .route-title{
+  871: .route-sub{
+  876: .route-live-row{
+  881: .route-live-row .mini-chip{
+  888: .status-row{
+  892: .status-pill{
+  897: .status-pill .v{
+  950:   .route-title{
+  954:   .route-live-row .mini-chip{
+  967: body.drive-mode .route-stop .name{
+  973: body.drive-mode .route-stop .name::before{
+  987: body.drive-mode .route-stop.active .name::before,
+  988: body.drive-mode .route-stop.live-danger .name::before,
+  989: body.drive-mode .route-stop.next-warning .name::before,
+  990: body.drive-mode .route-stop.flow-green .name::before{
+  994: body.drive-mode .route-stop.done .name::before{
+ 1004: body.drive-mode .route-stop .name{
+ 1010: body.drive-mode .route-stop .name::before{
+ 1030: body.drive-mode .route-stop.active .name::before,
+ 1031: body.drive-mode .route-stop.live-danger .name::before,
+ 1032: body.drive-mode .route-stop.next-warning .name::before,
+ 1033: body.drive-mode .route-stop.flow-green .name::before{
+ 1040: body.drive-mode .route-stop.done .name::before{
+ 1050: body.drive-mode .route-stop .name::before{
+ 1058: body.drive-mode .route-stop.done .name::before{
+ 1063: body.drive-mode .route-stop.active .name::before,
+ 1064: body.drive-mode .route-stop.live-danger .name::before,
+ 1065: body.drive-mode .route-stop.next-warning .name::before,
+ 1066: body.drive-mode .route-stop.flow-green .name::before{
+ 1079: body.drive-mode .route-stop{
+ 1090: body.drive-mode .route-stop.done{
+ 1098: body.drive-mode .route-stop.done .name{
+ 1103: body.drive-mode .route-stop.done .meta,
+ 1104: body.drive-mode .route-stop.done .extra-k,
+ 1105: body.drive-mode .route-stop.done .extra-v{
+ 1110: body.drive-mode .route-stop.active{
+ 1122: body.drive-mode .route-stop.active .name,
+ 1123: body.drive-mode .route-stop.active .meta,
+ 1124: body.drive-mode .route-stop.active .extra-k,
+ 1125: body.drive-mode .route-stop.active .extra-v{
+ 1130: body.drive-mode .route-stop:not(.active):not(.live-danger):not(.next-warning):not(.flow-green){
+ 1140: body.drive-mode .route-stop.live-danger{
+ 1155: body.drive-mode .route-stop.live-danger .name,
+ 1156: body.drive-mode .route-stop.live-danger .meta,
+ 1157: body.drive-mode .route-stop.live-danger .extra-k,
+ 1158: body.drive-mode .route-stop.live-danger .extra-v{
+ 1163: body.drive-mode .route-stop.live-danger .name::before{
+ 1171: body.drive-mode .route-stop.next-warning:not(.live-danger){
+ 1183: body.drive-mode .route-stop.flow-green:not(.live-danger):not(.next-warning){
+ 1200: body:not(.drive-mode) .route-stop .name{
+ 1206: body:not(.drive-mode) .route-stop .name::before{
+ 1228: body:not(.drive-mode) .route-stop.done .name::before{
+ 1232: body:not(.drive-mode) .route-stop.active .name::before,
+ 1233: body:not(.drive-mode) .route-stop.live-danger .name::before,
+ 1234: body:not(.drive-mode) .route-stop.next-warning .name::before,
+ 1235: body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1248: body:not(.drive-mode) .route-stop .name::before{
+ 1268: body:not(.drive-mode) .route-stop.done .name::before{
+ 1286: body:not(.drive-mode) .route-stop.active .name::before,
+ 1287: body:not(.drive-mode) .route-stop.live-danger .name::before,
+ 1288: body:not(.drive-mode) .route-stop.next-warning .name::before,
+ 1289: body:not(.drive-mode) .route-stop.flow-green .name::before{
+ 1312: body:not(.drive-mode) .route-stop{
+ 1325: body:not(.drive-mode) .route-stop.done{
+ 1335: body:not(.drive-mode) .route-stop.done .name{
+ 1340: body:not(.drive-mode) .route-stop.done .meta,
+ 1341: body:not(.drive-mode) .route-stop.done .extra-k,
+ 1342: body:not(.drive-mode) .route-stop.done .extra-v{
+ 1347: body:not(.drive-mode) .route-stop.live-danger{
+ 1362: body:not(.drive-mode) .route-stop.live-danger{
+ 1378: body:not(.drive-mode) .route-stop.next-warning:not(.live-danger){
+ 1393: body:not(.drive-mode) .route-stop.flow-green:not(.live-danger):not(.next-warning){
+ 1408: body:not(.drive-mode) .route-stop.live-danger .name,
+ 1409: body:not(.drive-mode) .route-stop.live-danger .meta,
+ 1410: body:not(.drive-mode) .route-stop.live-danger .extra-k,
+ 1411: body:not(.drive-mode) .route-stop.live-danger .extra-v,
+ 1412: body:not(.drive-mode) .route-stop.next-warning .name,
+ 1413: body:not(.drive-mode) .route-stop.next-warning .meta,
+ 1414: body:not(.drive-mode) .route-stop.next-warning .extra-k,
+ 1415: body:not(.drive-mode) .route-stop.next-warning .extra-v,
+ 1416: body:not(.drive-mode) .route-stop.flow-green .name,
+... 39 satır daha var.
+
+--- static/seats/seats.css | CSS aday satır: 144 ---
+   80:   .route-meta{
+   87:   .route-title-row{
+   94:   .route-badge{
+  108:   .route-title-wrap{
+  112:   .route-title{
+  120:   .route-sub{
+  127:   .route-live-row{
+  200:   .status-row{
+  207:   .status-pill{
+  221:   .status-pill .k{
+  228:   .status-pill .v{
+  236:   .status-pill.total{ background:linear-gradient(135deg, rgba(37,99,235,.18), rgba(37,99,235,.07)); }
+  237:   .status-pill.empty{ background:linear-gradient(135deg, rgba(34,197,94,.16), rgba(34,197,94,.06)); }
+  238:   .status-pill.standing{ background:linear-gradient(135deg, rgba(239,68,68,.16), rgba(239,68,68,.06)); cursor:pointer; }
+  239:   .status-pill.cash{ background:linear-gradient(135deg, rgba(124,58,237,.18), rgba(124,58,237,.06)); }
+  240:   .status-pill.service{ background:linear-gradient(135deg, rgba(14,165,233,.18), rgba(14,165,233,.06)); }
+  241:   .status-pill.parcel{ background:linear-gradient(135deg, rgba(245,158,11,.17), rgba(245,158,11,.06)); }
+  419:   .route-strip-shell{
+  428:   .route-strip-head{
+  437:   .route-strip-title{
+  443:   .route-strip-meta{
+  450:   .route-pill{
+  464:   .route-strip{
+  472:   .route-strip::-webkit-scrollbar{ display:none; }
+  474:   .route-stop{
+  490:   .route-stop .name{
+  497:   .route-stop .meta{
+  503:   .route-stop .extra{
+  509:   .route-stop .extra-line{
+  518:   .route-stop .extra-k{
+  524:   .route-stop .extra-v{
+  531:   .route-stop.active{
+  539:   .route-stop.done{
+  685:   .bag-badge,
+  707:   .bag-badge{
+  727:   .seat.has-bag .bag-badge{ display:inline-flex; }
+ 1135:   .timeline-list{
+ 1354:     .status-row{
+ 1418:     .route-badge{
+ 1425:     .route-title{
+ 1430:     .route-sub{
+ 1441:     .status-row{
+ 1450:     .status-row::-webkit-scrollbar{ display:none; }
+ 1498:     .route-strip-shell{
+ 1503:     .route-stop{
+ 1586:     .route-stop{
+ 1595: .route-stop.live-danger{
+ 1605: .route-stop.live-danger .name,
+ 1606: .route-stop.live-danger .meta,
+ 1607: .route-stop.live-danger .extra-k,
+ 1608: .route-stop.live-danger .extra-v{
+ 1623: .route-stop.next-warning{
+ 1632: .route-stop.next-warning .name,
+ 1633: .route-stop.next-warning .meta,
+ 1634: .route-stop.next-warning .extra-k,
+ 1635: .route-stop.next-warning .extra-v{
+ 1639: .route-stop.flow-green{
+ 1665:   .route-title-row{
+ 1669:   .route-badge{
+ 1676:   .route-title{
+ 1681:   .route-sub{
+ 1688:   .route-live-row{
+ 1694:   .route-live-row .mini-chip{
+ 1715:   .status-row{
+ 1723:   .status-pill{
+ 1729:   .status-pill .k{
+ 1733:   .status-pill .v{
+ 1738:   .status-pill.standing,
+ 1739:   .status-pill.cash,
+ 1740:   .status-pill.service,
+ 1741:   .status-pill.parcel{
+ 1805:   .route-strip-shell{
+ 1812:   .route-strip-head{
+ 1816:   .route-strip-title{
+ 1820:   .route-pill{
+ 1825:   .route-stop{
+ 1840:   .route-title{
+ 1844:   .route-sub{
+ 1848:   .status-pill{
+ 1852:   .status-pill .v{
+ 1864:   .route-stop{
+ 1897: body.drive-mode .status-row,
+ 1961: body.drive-mode .route-strip-shell{
+ 1968: body.drive-mode .route-strip-head{
+ 1972: body.drive-mode .route-strip-title{
+ 1976: body.drive-mode .route-pill{
+ 1982: body.drive-mode .route-stop{
+ 2038:   body.drive-mode .route-strip-shell{
+ 2043:   body.drive-mode .route-stop{
+ 2124: body.drive-mode .route-strip-shell{
+ 2134: body.drive-mode .route-strip-head{
+ 2142: body.drive-mode .route-strip-title{
+ 2148: body.drive-mode .route-strip-meta{
+ 2153: body.drive-mode .route-pill{
+ 2161: body.drive-mode .route-strip{
+ 2170: body.drive-mode .route-stop{
+ 2177: body.drive-mode .route-stop .name{
+ 2186: body.drive-mode .route-stop .meta{
+ 2194: body.drive-mode .route-stop .extra-line{
+ 2198: body.drive-mode .route-stop.active{
+ 2234: body.drive-mode .bag-badge{
+ 2292:   body.drive-mode .route-strip-title{
+ 2296:   body.drive-mode .route-pill{
+ 2302:   body.drive-mode .route-stop{
+ 2308:   body.drive-mode .route-stop .name{
+ 2312:   body.drive-mode .route-stop .meta,
+ 2313:   body.drive-mode .route-stop .extra-line{
+ 2348:   body.drive-mode .route-stop{
+ 2363: .seat .bag-badge{
+ 2381: .seat .bag-badge::after{
+ 2395: .seat .bag-dir{
+ 2405: .seat .bag-count{
+ 2422: body.drive-mode .seat .bag-badge{
+ 2431: body.drive-mode .seat .bag-count{
+ 2442:   .seat .bag-badge{
+ 2450:   .seat .bag-dir{
+ 2455:   .seat .bag-count{
+ 2516: body.drive-mode .seat .bag-badge{
+ 2723: .route-pill{
+ 2729: .route-pill:hover{
+... 24 satır daha var.
+
+--- static/style.css | CSS aday satır: 10 ---
+   14: .stats-fab-wrap{ position:fixed; right:16px; bottom:16px; z-index:9999; }
+   15: .stats-fab{
+   20: .stats-panel{
+   26: .stats-panel::after{
+   31: .stats-panel .panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+   32: .stats-panel .close-x{ background:transparent; color:#fff; border:none; font-size:20px; line-height:1; cursor:pointer; }
+   33: .stats-panel .row{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #40464d; }
+   34: .stats-panel .row:last-child{ border-bottom:none; }
+   36:   .stats-panel{ transition: transform .18s ease, opacity .18s ease, visibility 0s linear .18s; }
+   37:   .stats-panel.open{
+
+--- static/vendor/bootstrap/bootstrap.min.css | CSS aday satır: 1 ---
+    5:  */:root,[data-bs-theme=light]{--bs-blue:#0d6efd;--bs-indigo:#6610f2;--bs-purple:#6f42c1;--bs-pink:#d63384;--bs-red:#dc3545;--bs-orange:#fd7e14;--bs-yellow:#ffc107;--bs-green:#198754;--bs-teal:#20c997;--bs-cyan:#0dcaf0;--bs-black:#000;--bs-
+
+--- templates/add_route.html | CSS aday satır: 1 ---
+  287:   .badge{display:inline-block;background:#30363d;border-radius:8px;padding:4px 8px;margin:4px 6px 0 0}
+
+--- templates/ai_console.html | CSS aday satır: 41 ---
+  200:   .btn,.icon-btn,.chip,.mode-btn,.intent-pill,.soft-btn{
+  210:   .chip:hover,
+  293:   .summary-card.route{ background:linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); }
+  378:   .chip{
+  477:   .route-strip{
+  545:   .flow-card{
+  553:   .flow-card.open{
+  578:   .badges{
+  585:   .badge{
+  599:   .badge.good{
+  605:   .badge.info{
+  611:   .badge.warn{
+  617:   .badge.err{
+ 1588:     $$('.chip').forEach(btn => {
+ 1688:       throw new Error(txt || `İstek başarısız (${res.status})`);
+ 1692:       throw new Error(data.msg || data.error || `İstek başarısız (${res.status})`);
+ 1721:     state.runtime.route = stopsData.route || state.runtime.route || window.ACTIVE_ROUTE || '';
+ 1737:     if (!els.routeStopsList) return;
+ 1738:     els.routeStopsList.innerHTML = '';
+ 1742:       els.routeStopsList.appendChild(opt);
+ 1753:     els.routeMiniRoute.textContent = state.runtime.route || '-';
+ 1754:     els.routeMiniSeats.textContent = String(seats);
+ 1755:     els.routeMiniStanding.textContent = String(standing);
+ 1756:     els.routeMiniParcel.textContent = String(parcel);
+ 1758:     els.liveSeatCount.textContent = String(seats);
+ 1759:     els.liveStandingCount.textContent = String(standing);
+ 1760:     els.liveParcelCount.textContent = String(parcel);
+ 1761:     els.liveTotalPax.textContent = String(total);
+ 1762:     els.liveEmptySeats.textContent = String(empty);
+ 1881:       if (result.status === 'matched') {
+ 1887:       if (result.status === 'suggest') {
+ 1936:     els.badgeStatus.className = 'badge info';
+ 1937:     els.badgeStatus.textContent = 'Durum: ' + (result.status || '-');
+ 1939:     els.badgeConfidence.className = 'badge ' + confidenceClass(result.confidence || 0);
+ 1940:     els.badgeConfidence.textContent = 'Güven: ' + Math.round((result.confidence || 0) * 100) + '%';
+ 2467:     els.statMode.textContent = state.mode === 'teach' ? 'Öğretme' : 'Normal';
+ 2469:     els.statConfidence.textContent = state.lastConfidence ? `${Math.round(state.lastConfidence * 100)}%` : '-';
+ 2470:     els.statIntent.textContent = state.lastIntent || '-';
+ 2471:     els.statLearned.textContent = String(state.learned.length);
+ 2472:     els.statRoute.textContent = state.runtime.route || '-';
+ 2480:     els.statPending.textContent = pending;
+
+--- templates/consignments.html | CSS aday satır: 9 ---
+  351: .status-badge{
+  363: .status-badge.yüklendi{
+  368: .status-badge.teslim{
+  373: .status-badge.bekliyor{
+  675: .status-badge{
+  680: .status-badge.yüklendi{
+  685: .status-badge.teslim{
+  690: .status-badge.bekliyor{
+  830:               <span class="status-badge {{ r.status }}">{{ r.status }}</span>
+
+--- templates/continue_trip.html | CSS aday satır: 147 ---
+  242:     .stats-row{
+  255:     .stat-box{
+  264:     .stat-box:last-child{
+  268:     .stat-box small{
+  278:     .stat-box b{
+  286:     .stat-box.status b{
+  290:     .timeline{
+  296:     .timeline-line{
+  333:     .node.live{
+  386:     .card.live{
+  428:     .status-pill{
+  442:     .status-pill.live{
+  448:     .status-pill.next{
+  454:     .status-pill.upcoming{
+  460:     .status-pill.passed{
+  769:       .stat-box{
+  774:       .stat-box b{
+  778:       .timeline{
+  782:       .timeline-line{
+  786:       .node.live{
+  915: .stats-row{
+  919: .stat-box{
+  923: .stat-box small{
+  927: .stat-box b{
+  934:   .stats-row{
+  938:   .stat-box{
+  943:   .stat-box small{
+  947:   .stat-box b{
+ 1031: .stats-row{
+ 1036: .stat-box{
+ 1041: .stat-box small{
+ 1046: .stat-box b{
+ 1050: .timeline{
+ 1055: .timeline-line{
+ 1073: .node.live{
+ 1103: .card.live{
+ 1125: .status-pill{
+ 1222:   .stat-box{
+ 1227:   .stat-box b{
+ 1231:   .timeline{
+ 1235:   .timeline-line{
+ 1239:   .node.live{
+ 1252:   .card.live{
+ 1286: .timeline{
+ 1292: .timeline-line{
+ 1319: .timeline-line::before{
+ 1352: .node.live{
+ 1375: .node.live::before{
+ 1391: .node.live::after{
+ 1465: .card.live{
+ 1479:   .timeline{
+ 1483:   .timeline-line{
+ 1488:   .node.live{
+ 1519: .timeline{
+ 1523: .timeline-line{
+ 1533: .node.live{
+ 1556: .node.live::before{
+ 1561: .node.live::after{
+ 1603:   .timeline{
+ 1607:   .timeline-line{
+ 1612:   .node.live{
+ 1698: .stats-row{
+ 1703: .stat-box{
+ 1709: .stat-box small{
+ 1716: .stat-box b{
+ 1729: .stat-box.status b,
+ 1730: .stat-box b.ok{
+ 1736:   .stat-box{
+ 1741:   .stat-box small{
+ 1745:   .stat-box b{
+ 1753:   .stat-box.status b,
+ 1754:   .stat-box b.ok{
+ 1808: .live-sheet-overlay{
+ 1819: .live-sheet-overlay.open{
+ 1824: .live-stop-sheet{
+ 1841: .live-stop-sheet.open{
+ 2000:   .live-stop-sheet{
+ 2475: .bag-photo-viewer{
+ 2487: .bag-photo-viewer.open{
+ 2492: .bag-viewer-top{
+ 2502: .bag-viewer-title{
+ 2506: .bag-viewer-kicker{
+ 2514: .bag-viewer-name{
+ 2523: .bag-viewer-close{
+ 2534: .bag-viewer-stage{
+ 2542: .bag-viewer-img-wrap{
+ 2555: .bag-viewer-img{
+ 2562: .bag-viewer-bottom{
+ 2568: .bag-viewer-caption{
+ 2580: .bag-viewer-actions{
+ 2586: .bag-viewer-btn{
+ 2596: .bag-viewer-btn:disabled{
+ 2600: .bag-viewer-btn:active{
+ 2658: .card.live .metric-action{
+ 2663: .card.live .metric-action small{
+ 2670: .card.live .metric-action b{
+ 2682: .card.live .metric-action .metric-hint{
+ 2692: .card.live .metric-action::after{
+ 3066: .live-summary-trigger{
+ 3071: .live-summary-trigger:active{
+ 3152: .sheet-summary-pill.bag{
+ 3182: .sheet-summary-action.bag{
+ 3361:               <h2 class="card-title" id="liveCurrentStopName">{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or "Durak seçilmedi" }}</h2>
+ 3364:             <span class="status-pill live">{{ live_current.status or "Canlı" }}</span>
+ 3375:               <b id="liveDistanceValue" class="stop-distance-value" data-stop-name="{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or '' }}">{{ (live_runtime.gps_km if live_runtime and live_run
+ 3386:               <b id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</b>
+ 3404:               <span class="status-pill next">{{ stop.status }}</span>
+ 3406:               <span class="status-pill upcoming">{{ stop.status }}</span>
+ 3408:               <span class="status-pill passed">{{ stop.status }}</span>
+ 3410:               <span class="status-pill live">{{ stop.status }}</span>
+ 3432:               <b>{{ stop.bagaj_label }}</b>
+ 3649:   const runtimeStop = {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }};
+ 3710:       const s = j && j.state ? j.state : null;
+ 3723:       if(stopEl && s.live_stop){
+ 3724:         stopEl.textContent = s.live_stop;
+ 3952:       const bag = Number(passenger.bag_count || 0);
+ 4054:           ${Number(data.bag_deleted || 0) > 0 ? `<br><br>🧳 ${Number(data.bag_deleted || 0)} bagaj kaydı temizlendi.` : ""}
+ 4079:       const bagTotal = passengers.reduce((sum, p) => sum + Number(p.bag_count || 0), 0);
+ 4179:           ${Number(j.bag_deleted || 0) > 0 ? `<br><br>🧳 ${Number(j.bag_deleted || 0)} bagaj kaydı temizlendi.` : ""}
+ 4282:             <div class="sheet-cargo-line"><span>Durum</span><b>${escapeHtml(item.status || "-")}</b></div>
+... 27 satır daha var.
+
+--- templates/events.html | CSS aday satır: 2 ---
+   22: .badge{display:inline-block;background:#25313b;border:1px solid #33414d;color:#c8d1d9;padding:4px 8px;border-radius:999px;font-size:12px;margin-right:6px}
+   41:       {% if trip.route %}<span class="badge">Hat: {{ trip.route }}</span>{% endif %}
+
+--- templates/hesap.html | CSS aday satır: 7 ---
+  453:     .chip{
+  467:     .chip:hover{
+  473:     .chip.warn{
+ 1565:     .chip{
+ 1583:     .chip.warn{
+ 1863:             {% if trip.route %}<span class="pill">🚌 {{ trip.route }}</span>{% endif %}
+ 2393:       const route = TRIP?.route || "";
+
+--- templates/index.html | CSS aday satır: 80 ---
+   42:     .route-card{
+   58:     .route-card .pin{
+   63:     .route-card .caret{
+  301: .route-form,
+  302: .route-premium{
+  306: .route-picker-premium{
+  325: .route-pin{
+  338: .route-name{
+  352: .route-caret{
+  532: .route-sheet-backdrop{
+  536: .route-sheet{
+  545: .route-sheet-handle{
+  549: .route-sheet-head{
+  553: .route-sheet-kicker{
+  557: .route-sheet-head h2{
+  561: .route-sheet-close{
+  567: .route-option{
+  574: .route-option-icon{
+  578: .route-option-text b{
+  582: .route-option-text small{
+  586: .route-option-check{
+  590: .route-option.active{
+  597: .route-option.active .route-option-check{
+  636:   .route-picker-premium{
+  641:   .route-name{
+  679: .route-picker-premium{
+  685: .route-pin{
+  693: .route-name{
+  698: .route-caret{
+  762:   .route-picker-premium{
+  766:   .route-name{
+  814: .route-form,
+  815: .route-premium{
+  819: .route-picker-premium{
+  826: .route-pin{
+  834: .route-name{
+  839: .route-caret{
+  909:   .route-picker-premium{
+  914:   .route-name{
+  989:   .status-title,
+  990:   .route-title,
+ 1021:   .status-desc,
+ 1049:     {% set current_route = selected_route if selected_route is defined and selected_route else (active_trip.route if active_trip is defined and active_trip else 'Denizli – İstanbul') %}
+ 1051:     {% set current_route = selected_route if selected_route is defined and selected_route else (active_trip.route if active_trip is defined and active_trip else 'Denizli – İstanbul') %}
+ 1210: .route-form{
+ 1214: .route-picker{
+ 1226: .route-picker .pin{
+ 1244: .route-picker .caret{
+ 1299: .route-premium{
+ 1303: .route-picker-premium{
+ 1324: .route-pin{
+ 1334: .route-name{
+ 1345: .route-caret{
+ 1357: .route-sheet-backdrop{
+ 1367: .route-sheet-backdrop.show{
+ 1371: .route-sheet{
+ 1391: .route-sheet.show{
+ 1395: .route-sheet-handle{
+ 1403: .route-sheet-head{
+ 1412: .route-sheet-kicker{
+ 1420: .route-sheet-head h2{
+ 1428: .route-sheet-close{
+ 1443: .route-sheet-list{
+ 1449: .route-option{
+ 1467: .route-option-icon{
+ 1477: .route-option-text b{
+ 1485: .route-option-text small{
+ 1493: .route-option-check{
+ 1504: .route-option.active{
+ 1512: .route-option.active .route-option-icon{
+ 1517: .route-option.active .route-option-check{
+ 1523:   .route-sheet{
+ 1529:   .route-sheet-head h2{
+ 1533:   .route-option{
+ 1538:   .route-option-text b{
+ 1580:     document.querySelectorAll(".route-option").forEach(x => {
+ 1581:       x.classList.toggle("active", x.dataset.route === route);
+ 1595:   document.querySelectorAll(".route-option").forEach(opt => {
+ 1597:       setRoute(opt.dataset.route || "");
+ 1764:   const ACTIVE_TRIP_ROUTE = {% if active_trip is defined and active_trip %}{{ active_trip.route|tojson }}{% else %}""{% endif %};
+
+--- templates/live_map.html | CSS aday satır: 18 ---
+  168:     .pin.live{background:linear-gradient(135deg,#ef4444,#991b1b)}
+  250: .pin.live{
+  297: .leaflet-interactive.route-line{
+  321: .map-actions button.route-off{
+  325: .leaflet-interactive.route-line{
+  582: .map-popup-state.live{
+  674: .map-popup-actions a.bag{
+  760: .leaflet-interactive.route-line-passed{
+  764: .leaflet-interactive.route-line-ahead{
+  836: .next-op-item.live{
+ 1823:     const routeSegments = Array.isArray(BOOT.route_segments) ? BOOT.route_segments : [];
+ 1824:     const liveStop = BOOT.live_stop || "";
+ 1831:     updateMapSpeed((BOOT.live_runtime && BOOT.live_runtime.speed) || 0);
+ 2038:       const bag = Number(stop.bag_count || 0);
+ 2397:       const bag = Number(stop.bag_count || 0);
+ 2513:       const bag = Number(stop.bag_count || 0);
+ 2828:   body.voice-map-fullscreen .live-map-header,
+ 2838:   body.voice-map-fullscreen .live-map-shell,
+
+--- templates/passenger_control.html | CSS aday satır: 28 ---
+  126: .status-pill{
+  176: .chips{
+  183: .chip{
+  198: .chip b{
+  208: .stats{
+  215: .stat{
+  224: .stat .k{
+  231: .stat .v{
+  593:   .chips{
+  597:   .chip{
+  602:   .chip b{
+  606:   .stats{
+  611:   .stat{
+ 1141: .status-pill{
+ 1159: .chips{
+ 1164: .chip{
+ 1170: .chip b{
+ 1195: .stats{
+ 1202: .stat{
+ 1208: .stat .k{
+ 1212: .stat .v{
+ 1281:   .chips{
+ 1285:   .chip{
+ 1289:   .chip b{
+ 1301:   .stats{
+ 1306:   .stat{
+ 1312:   .stat .k{
+ 1316:   .stat .v{
+
+--- templates/route_edit.html | CSS aday satır: 26 ---
+   20: .route-edit-shell{
+   30: .route-edit-top{
+   55: .route-pill{
+   70: .route-hero{
+   74: .route-hero h1{
+   83: .route-hero p{
+   91: .route-card{
+  114: .route-label{
+  123: .route-input,
+  124: .route-textarea{
+  137: .route-input{
+  143: .route-textarea{
+  153: .route-input::placeholder,
+  154: .route-textarea::placeholder{
+  158: .route-input:focus,
+  159: .route-textarea:focus{
+  287:   .route-edit-shell{
+  293:   .route-edit-top{
+  302:   .route-pill{
+  306:   .route-hero h1{
+  310:   .route-card{
+  315:   .route-input{
+  320:   .route-textarea{
+  669:     const cls = item.status || "missing";
+  673:     const manual = item.status === "missing" ? `
+  683:         <div class="local-coord-icon ${cls}">${iconFor(item.status)}</div>
+
+--- templates/route_schedule_edit.html | CSS aday satır: 11 ---
+  101:   .chip{
+  298:   .badge{
+  312:   .badge.blue{
+  318:   .badge.green{
+  615: .chip{
+  631: .chip b{
+  976:   .chip{
+ 1023: .chip{
+ 1032: .chip b{
+ 1062:   .chip{
+ 1067:   .chip b{
+
+--- templates/routes_list.html | CSS aday satır: 24 ---
+   21: .routes-shell{
+   31: .routes-top{
+   65: .routes-hero{
+   69: .routes-hero h1{
+   78: .routes-hero p{
+  144: .routes-list{
+  149: .route-card{
+  157: .route-main{
+  165: .route-icon{
+  176: .route-name{
+  185: .route-sub{
+  193: .badge{
+  203: .badge.dynamic{
+  209: .badge.fixed{
+  215: .badge.special{
+  221: .route-actions{
+  226: .route-actions.dynamic-actions{
+  230: .route-actions.fixed-actions{
+  304:   .routes-shell{
+  310:   .routes-top{
+  321:   .routes-hero h1{
+  338:   .route-card{
+  343:   .route-name{
+  347:   .route-actions.dynamic-actions{
+
+--- templates/seats.html | CSS aday satır: 4 ---
+  501:       const routeShell = board.querySelector(".route-strip-shell");
+  847:     const tripKey = boot.tripKey || window.TRIP_KEY || window.BAG_TRIP || "default";
+  990:       const tripKey = boot.tripKey || window.TRIP_KEY || window.BAG_TRIP || "default";
+ 1061:           const flow = q("#routeStrip") || q(".route-strip-shell") || q(".route-flow-shell");
+
+--- templates/settings.html | CSS aday satır: 2 ---
+  443:   {% if subscription_info.status == "active" %}
+  447:   {% elif subscription_info.status == "trial" %}
+
+--- templates/settings_backup.html | CSS aday satır: 4 ---
+  152:   .status-head{
+  160:   .status-icon{
+  171:   .status-title{
+  178:   .status-sub{
+
+--- templates/settings_package_requests.html | CSS aday satır: 1 ---
+   82:     .badge{
+
+--- templates/settings_password.html | CSS aday satır: 4 ---
+  155:   .status-head{
+  163:   .status-icon{
+  174:   .status-title{
+  181:   .status-sub{
+
+--- templates/settings_profile.html | CSS aday satır: 4 ---
+  153:   .status-head{
+  161:   .status-icon{
+  172:   .status-title{
+  179:   .status-sub{
+
+--- templates/settings_recovery.html | CSS aday satır: 4 ---
+  159:   .status-head{
+  167:   .status-icon{
+  178:   .status-title{
+  185:   .status-sub{
+
+--- templates/settings_subscription.html | CSS aday satır: 9 ---
+  153:   .status-head{
+  161:   .status-icon{
+  172:   .status-title{
+  179:   .status-sub{
+  187:   .badge{
+  198:   .badge.green{
+  204:   .badge.amber{
+  210:   .badge.red{
+  492: {% set status = info.status if info else "trial" %}
+
+--- templates/trip_report.html | CSS aday satır: 6 ---
+  257:   .stop-card{
+  313:   .badge{
+  413:   .timeline{
+  482:     .hero,.section-card,.stop-card,.sum-card,.box{
+  875:     `${trip.route || "-"} · Plaka: ${trip.plate || "-"} · Tarih: ${trip.date || "-"} · Çıkış: ${trip.departure_time || "-"}`;
+  906:   lines.push(`${trip.route || "-"} · ${trip.plate || "-"}`);
+
+==========================================================================================
+6) JS tarafında canlı durak / mesafe / render kaynakları
+==========================================================================================
+
+--- static/live_map/muavin_live_map_extra.js | JS aday satır: 44 ---
+  409:   function render(mode) {
+  424:       render("more");
+  429:       render("main");
+  435:       render("main");
+  441:       render("main");
+  447:       render("main");
+  453:       render("main");
+  517:     render("main");
+  740:   function calcRouteDistance(routePoints, cum, fromIndex, toIndex, fromLatLng, toLatLng) {
+  804:     let nextStop = null;
+  810:           nextStop = stops[i];
+  816:       if (!nextStop) {
+  817:         nextStop = stops[stops.length - 1];
+  827:       nextStop = sorted[0].s;
+  833:     const liveToNext = nextStop
+  834:       ? calcRouteDistance(routePoints, cum, currentOrder, nextStop.order, currentLatLng, nextStop.latlng)
+  837:     const nextToAfter = nextStop && afterStop
+  838:       ? calcRouteDistance(routePoints, cum, nextStop.order, afterStop.order, nextStop.latlng, afterStop.latlng)
+  995:       const d = calcRouteDistance(routePoints, cum, a.order, b.order, a.latlng, b.latlng);
+ 1548:   function safeDistance(stop) {
+ 1550:       if (typeof distanceToStopText === "function") return distanceToStopText(stop);
+ 1574:   function speakStop(stop) {
+ 1578:     const km = safeDistance(stop);
+ 1589:         window.speechSynthesis.speak(u);
+ 1598:   function renderHero(stop) {
+ 1601:     const bag = Number(stop.bag_count || 0);
+ 1608:       metricChip("Bagaj", bag, bag ? "warn" : "good"),
+ 1619:           <div class="next-op-hero-distance" data-op-km="${esc(stop.name)}">${esc(safeDistance(stop))}</div>
+ 1627:           <button class="next-op-task-btn speak" type="button" data-next-task="speak" data-stop="${esc(stop.name)}">🔊 Anons</button>
+ 1629:           <button class="next-op-task-btn bag" type="button" data-next-task="bag" data-stop="${esc(stop.name)}">🎒 Bagaj</button>
+ 1636:   function renderMini(stop) {
+ 1643:         <div class="next-op-mini-km" data-op-km="${esc(stop.name)}">${esc(safeDistance(stop))}</div>
+ 1648:   function renderEnhancedNextOps() {
+ 1672:         ${renderHero(first)}
+ 1677:             ${rest.map(renderMini).join("")}
+ 1684:   function refreshDistances() {
+ 1695:       if (stop) el.textContent = safeDistance(stop);
+ 1722:         if (action === "speak") speakStop(stop);
+ 1724:         if (action === "bag") openStop(name);
+ 1727:           renderEnhancedNextOps();
+ 1744:       window.renderNextOpsPanel = renderEnhancedNextOps;
+ 1748:     renderEnhancedNextOps();
+ 1749:     refreshDistances();
+ 1751:     setInterval(refreshDistances, 2500);
+
+--- static/seats/bags.js | JS aday satır: 53 ---
+    2:    BAGS MODULE
+    3:    Bagaj rozetleri + bagaj ses özeti + bagaj temizleme
+    6: // Bagaj göz bilgisi sesli uyarıda kullanılacak.
+    7: // Örnek: bagMetaCache["3"] = {count:1, right:0, left_front:1, left_back:0, eyes:["LF"]}
+    8: const bagMetaCache = {};
+   10: function bagSeatsForStop(stopName){
+   12:   const bagSeats = [];
+   18:     const cntText = el.querySelector(".bag-count")?.textContent || "0";
+   20:     const hasBag = el.classList.contains("has-bag") || cnt > 0;
+   22:     if(hasBag){
+   23:       bagSeats.push(seatNo);
+   27:   return bagSeats;
+   40: function bagEyeVoicePartsForSeat(seatNo){
+   41:   const meta = bagMetaCache[String(seatNo)] || {};
+   50:     if(count === 1) parts.push(`${label} gözde bagaj`);
+   51:     else parts.push(`${label} gözde ${count} bagaj`);
+   59:     if(meta.eyes.includes("R")) parts.push("sağ gözde bagaj");
+   60:     if(meta.eyes.includes("LF")) parts.push("sol ön gözde bagaj");
+   61:     if(meta.eyes.includes("LB")) parts.push("sol arka gözde bagaj");
+   67: function bagVoiceSummaryForStop(stopName){
+   68:   const seats = bagSeatsForStop(stopName).map(Number).filter(Boolean);
+   72:     const parts = bagEyeVoicePartsForSeat(seatNo);
+   78:     return `${seatNo} numarada bagaj`;
+   81:   return `Bagaj uyarısı: ${chunks.join(". ")} var.`;
+   84: async function fetchBagMeta(seatNo){
+   88:     const u = `/api/bags/meta?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seatNo)}`;
+  109:     bagMetaCache[key] = meta;
+  112:     return bagMetaCache[key] || { count:0, right:0, left_front:0, left_back:0, eyes:[] };
+  129: async function refreshBagBadgeForSeat(seatNo){
+  133:   const meta = await fetchBagMeta(seatNo);
+  137:   el.classList.toggle("has-bag", cnt > 0);
+  139:   const bagCount = el.querySelector(".bag-count");
+  140:   const bagDir = el.querySelector(".bag-dir");
+  141:   const badge = el.querySelector(".bag-badge");
+  143:   if(bagCount) bagCount.textContent = String(cnt || 0);
+  144:   if(bagDir) bagDir.textContent = eyesToIcons(eyes) || "";
+  145:   if(badge) badge.title = cnt ? `Bagaj: ${cnt} adet` : "Bagaj yok";
+  148: async function refreshBagsAll(){
+  151:     await refreshBagBadgeForSeat(n);
+  155: async function clearBagsForSeat(seatNo){
+  157:     const u = `/bags/clear?trip=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seatNo)}`;
+  166:     el.classList.remove("has-bag");
+  168:     const cnt = el.querySelector(".bag-count");
+  169:     const dir = el.querySelector(".bag-dir");
+  176: window.SeatsBags = {
+  177:   bagMetaCache,
+  178:   bagSeatsForStop,
+  180:   bagEyeVoicePartsForSeat,
+  181:   bagVoiceSummaryForStop,
+  182:   fetchBagMeta,
+  184:   refreshBagBadgeForSeat,
+  185:   refreshBagsAll,
+  186:   clearBagsForSeat
+
+--- static/seats/drive-controls.js | JS aday satır: 21 ---
+   14:     const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+   22:         if(typeof renderRouteStrip === "function") renderRouteStrip();
+   45:   const tripKey = window.BAG_TRIP || boot.tripKey || "default";
+   54:   function safeSpeak(msg){
+   56:       if(window.SeatsSpeak){
+   57:         window.SeatsSpeak(msg, { force:true });
+   61:       if(typeof speak === "function") speak(msg);
+   65:   function getLiveStop(){
+   67:       if(typeof getDisplayLiveStop === "function"){
+   68:         return getDisplayLiveStop() || "";
+   73:       return speedState?.liveStop || "";
+   84:       speed = Math.round(Number(speedState?.current || 0));
+   85:       limit = Number(speedState?.lastLimitValue || speedState?.lastLimitObj?.limit || 0);
+  109:       if(typeof renderRouteStrip === "function") renderRouteStrip();
+  152:     const liveStop = getLiveStop();
+  164:     const stopText = liveStop ? ` · ${liveStop}` : "";
+  183:     const saved = localStorage.getItem("ttsEnabled");
+  221:           localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+  225:           localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+  239:         setTimeout(() => safeSpeak("Sesli robot açık."), 80);
+  259:       #nightVoiceToggle butonunun tek sahibi voice-tts.js.
+
+--- static/seats/patches/manual-ticket-system.js | JS aday satır: 1 ---
+    8:         window.BAG_TRIP ||
+
+--- static/seats/patches/seat-simple-ui-pack.js | JS aday satır: 2 ---
+    8:       return (window.SEATS_BOOT && window.SEATS_BOOT.tripKey) || window.BAG_TRIP || "default";
+   46:       if(typeof renderRouteStrip === "function") renderRouteStrip();
+
+--- static/seats/patches/stop-flow-focus-patch.js | JS aday satır: 8 ---
+    6:   var memoryKey = "muavin:selectedStop:" + String(window.TRIP_KEY || window.BAG_TRIP || location.pathname);
+   38:   function getCurrentStop(){
+  107:     ["#seatSimpleStop", "#topLiveStop"].forEach(function(sel){
+  194:   function renderOverlay(){
+  197:     var current = getCurrentStop();
+  243:     renderOverlay();
+  277:       var tripKey = String((window.SEATS_BOOT && window.SEATS_BOOT.tripKey) || window.BAG_TRIP || "default");
+  369:           setPickupToSelected(getCurrentStop(), false);
+
+--- static/seats/patches/top-sound-toggle.js | JS aday satır: 9 ---
+    5:   var KEY = "ttsEnabled";
+   47:     var tts = q("#ttsToggle");
+   48:     if(tts){
+   49:       tts.classList.toggle("muted", !on);
+   50:       tts.title = on ? "Sesli uyarı açık" : "Sesli uyarı kapalı";
+   66:       window.dispatchEvent(new CustomEvent("ttsEnabledChanged", {detail:{enabled:on}}));
+  116:         if(next && window.SeatsSpeak){
+  117:           try{ window.SeatsSpeak("Sesli asistan açık.", {force:true}); }catch(_){}
+  142:   window.addEventListener("ttsEnabledChanged", syncButton);
+
+--- static/seats/seats-time-prayer.js | JS aday satır: 4 ---
+  143:   function render(place, timings){
+  164:       render(place, timings);
+  173:           render(place, await fetchTimings(lat, lng));
+  175:           render(place, timings);
+
+--- static/seats/seats.js | JS aday satır: 240 ---
+   36:       "liveStop:" + TRIP_KEY,
+   47: const BAG_TRIP = BOOT.bagTrip || TRIP_KEY;
+   48:   window.BAG_TRIP = BAG_TRIP;
+  155:       "liveStop:",
+  210:   const speedState = {
+  218:     liveStop: "",
+  278:     localStorage.setItem("liveStop:" + TRIP_KEY, speedState.liveStop || "");
+  279:     localStorage.setItem("passedStops:" + TRIP_KEY, JSON.stringify([...speedState.passedStops]));
+  283:     speedState.liveStop = localStorage.getItem("liveStop:" + TRIP_KEY) || "";
+  285:       speedState.passedStops = new Set(JSON.parse(localStorage.getItem("passedStops:" + TRIP_KEY) || "[]"));
+  287:       speedState.passedStops = new Set();
+  342:   function distKm(a, b){
+  361:     const km = distKm(currentCoords, {
+  382: function getDisplayLiveStop(){
+  383:   const live = speedState.liveStop || "";
+  388:     if(typeof hasLiveStopOperation === "function" && !hasLiveStopOperation(live)){
+  389:       speedState.liveStop = "";
+  390:       speedState.passedStops = new Set();
+  393:         localStorage.removeItem("liveStop:" + TRIP_KEY);
+  403:     const km = stopDistanceKmByName(live);
+  406:       speedState.liveStop = "";
+  407:       speedState.passedStops = new Set();
+  410:         localStorage.removeItem("liveStop:" + TRIP_KEY);
+  421: function stopDistanceKmByName(name){
+  427:   return distKm(currentCoords, {
+  485:   function scheduleOffsetsForRoute(){
+  515:   function buildActualSchedule(){
+  517:     const offsets = scheduleOffsetsForRoute();
+  686:         "liveStop:" + TRIP_KEY,
+  699:       if(speedState){
+  700:         speedState.liveStop = "";
+  701:         speedState.passedStops = new Set();
+  704:       if(typeof renderTimeline === "function") renderTimeline();
+  706:       if(typeof renderAI === "function") renderAI();
+  786:         bag: Number(old.bag || 0) + Number(delta.bag || 0),
+  799:         live_bag: rec.bag,
+  804:       if(typeof renderRouteStrip === "function") renderRouteStrip();
+  871:     const bag = Math.max(
+  872:       Number(rec.bag || rec.bag_count || rec.live_bag || 0),
+  873:       Number(liveRec.bag || 0)
+  880:     if(bag > 0) parts.push(`${bag} bagaj`);
+  997:   function renderQuickStandingList(){
+ 1050:     renderRouteStrip();
+ 1072: function renderRouteStrip(){
+ 1090:   const live = getDisplayLiveStop();
+ 1094:   const liveKm = stopDistanceKmByName(live);
+ 1096:   // if(liveDangerOn){maybeSpeakApproachStop(live, liveKm);}
+ 1097:   const nextWarnStop = liveDangerOn? computeNextStopName(live || selected || "", "nextWithSeats"): "";
+ 1098:   const greenStop = liveDangerOn && nextWarnStop? computeNextStopName(nextWarnStop, "nextWithSeats"): "";
+ 1106:   const actualSchedule = buildActualSchedule();
+ 1107:   const planMap = new Map(
+ 1112:     (speedState.etaItems || []).map(x => [norm(x.stop), x])
+ 1122:     const isDone = speedState.passedStops.has(stop) && !isActive && !isLive;
+ 1127:     const plan = planMap.get(norm(stop)) || "";
+ 1131:       const km = distKm(currentCoords, {
+ 1193:   // APK/WebView için ek garanti: durak kartı tıklamasında doğrudan TTS tetikle
+ 1196:     if(typeof speakOnce === "function") speakOnce(msg);
+ 1219:     const live = getDisplayLiveStop();
+ 1220:     const next = computeNextStopName(live || selected || "", "nextWithSeats");
+ 1222:     setText("#topLiveStop", live || selected || "—");
+ 1223:     setText("#topSpeed", `${Math.round(Number(speedState.current || 0))} km/h`);
+ 1226:     setText("#routeLiveStop", live || "—");
+ 1227:     setText("#routeLiveStopCard", live || "—");
+ 1244:     renderRouteStrip();
+ 1247:   function computeNextStopName(currentName, mode="nextWithSeats"){
+ 1283:       renderAI();
+ 1284:       renderTimeline();
+ 1299:     renderAI();
+ 1300:     renderTimeline();
+ 1305:       if(window.SeatsSpeak){
+ 1306:         window.SeatsSpeak(msg);
+ 1307:       }else if(typeof speakOnce === "function"){
+ 1308:         speakOnce(msg);
+ 1309:       }else if(typeof speak === "function"){
+ 1310:         speak(msg);
+ 1324:       speedState.passedStops.add(list[i]);
+ 1329:   function setLiveStop(name){
+ 1333:     speedState.liveStop = canonical;
+ 1337:     renderTimeline();
+ 1338:     renderAI();
+ 1342:   function advanceToNextStop({ mode="nextWithSeats", silent=false, ignoreToggle=false } = {}){
+ 1347:     const next = computeNextStopName(cur, mode);
+ 1477:       renderAI();
+ 1478:       renderTimeline();
+ 1505:       el.classList.remove("has-stop","multi-picked","blink-yellow","has-bag");
+ 1506:       const cnt = el.querySelector(".bag-count");
+ 1507:       const dir = el.querySelector(".bag-dir");
+ 1530:       await clearBagsForSeat(currentSeat);
+ 1536:       renderAI();
+ 1537:       renderTimeline();
+ 1580:       const live = getDisplayLiveStop();
+ 1594:     const from = $("#bulkFrom")?.value || speedState.liveStop || getSelectedStopName() || "";
+ 1685:       renderAI();
+ 1686:       renderTimeline();
+ 1716: function renderApproachPanel(stop, seats){
+ 1756:     if(isFinalStop(stop) && typeof speakFinalStopSequence === "function"){
+ 1757:       speakFinalStopSequence(stop);
+ 1760:       if(window.SeatsSpeak){
+ 1761:         window.SeatsSpeak(msg);
+ 1762:       }else if(typeof speakOnce === "function"){
+ 1763:         speakOnce(msg);
+ 1764:       }else if(typeof speak === "function"){
+ 1765:         speak(msg);
+ 1807:         await clearBagsForSeat(n);
+ 1815:       renderAI();
+ 1816:       renderTimeline();
+ 1835:       advanceToNextStop({ mode:"nextWithSeats" });
+ 1839:     renderApproachPanel(stop, seats);
+ 1874:     setLiveStop(stop);
+ 1877:     advanceToNextStop({ mode:"nextWithSeats", ignoreToggle:true });
+ 1912:       const d = distKm(p, { lat:Number(s.lat), lng:Number(s.lng) });
+ 1915:       autoDetectLiveStop(p);
+ 1916:       renderTimeline();
+ 1923:           renderApproachPanel(stopName, seats);
+ 1966:       renderAI();
+ 1967:       renderTimeline();
+ 1979:     const items = buildActualSchedule();
+ 1982:       speedState.etaItems = [];
+ 1992:     const liveName = getDisplayLiveStop();
+ 2009:       const current = Number(speedState.current || 0);
+ 2011:       const hist = (speedState.history || [])
+ 2081:     const nextTimedForDistance = model.find(x => !x.passed) || model[model.length - 1];
+ 2083:     if(nextTimedForDistance && currentCoords && !nextTimedForDistance.passed){
+ 2084:       const km = stopDistanceKmByName(nextTimedForDistance.stop);
+ 2090:         const delayMin = minutesDiff(etaDate, nextTimedForDistance.planDate);
+ 2092:         nextTimedForDistance.km = km;
+ 2093:         nextTimedForDistance.speedKmh = speedKmh;
+ 2094:         nextTimedForDistance.travelMin = travelMin;
+ 2095:         nextTimedForDistance.etaDate = etaDate;
+ 2096:         nextTimedForDistance.delayMin = delayMin;
+ 2097:         nextTimedForDistance.etaMode = "gps-distance";
+ 2099:         applyEtaBadge(nextTimedForDistance);
+ 2103:     speedState.etaItems = model;
+ 2132:       const modeText = nextTimed.etaMode === "gps-distance"
+ 2145:   function renderTimeline(){
+ 2182:   function renderAI(){
+ 2207:     const live = speedState.liveStop || "—";
+ 2208:     const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+ 2229:     setText("#aiLiveStop", live);
+ 2257:   function liveStopOperationCount(stopName){
+... 100 satır daha var.
+
+--- static/seats/standing.js | JS aday satır: 17 ---
+    9:     const live = getDisplayLiveStop();
+   27:   const from = $("#cashFrom")?.value || speedState.liveStop || getSelectedStopName() || serverStops?.[0] || "";
+   50:     renderAI();
+   51:     renderTimeline();
+   52:     renderStandingList();
+   53:     renderQuickStandingList();
+  119: function renderStandingList(){
+  170:   renderStandingList();
+  194:     renderStandingList();
+  195:     renderQuickStandingList();
+  196:     renderAI();
+  197:     renderTimeline();
+  220:     renderQuickStandingList();
+  221:     renderStandingList();
+  222:     renderAI();
+  223:     renderTimeline();
+  240:   renderStandingList,
+
+--- static/seats/voice-commands.js | JS aday satır: 112 ---
+   25:   "bu durakta bagaj var mı",
+   67:     if(!selected && speedState && speedState.liveStop){
+   68:       selected = speedState.liveStop || "";
+   80:     let bagMsg = "";
+  101:       bagMsg = String(bagVoiceSummaryForStop(selected) || "").trim();
+  103:       bagMsg = "";
+  117:     if(bagMsg){
+  118:       ops.push(bagMsg.replace(/\.$/, ""));
+  131:     if(speedState && Array.isArray(speedState.etaItems)){
+  132:       const nextTimed = speedState.etaItems.find(x => !x.passed);
+  138:     if(!next && typeof computeNextStopName === "function"){
+  139:       next = computeNextStopName(selected || "", "nextWithSeats") || "";
+  211:     const bagMsg = bagVoiceSummaryForStop(stop);
+  212:     if(bagMsg){
+  213:       msg += ` ${bagMsg}`;
+  229:   let bagMsg = "";
+  256:     bagMsg = bagVoiceSummaryForStop(stop) || "";
+  258:     bagMsg = "";
+  264:   const hasBagOps = !!String(bagMsg || "").trim();
+  266:   if(!hasPassengerOps && !hasParcelOps && !hasServiceOps && !hasBagOps){
+  285: function stopBagVoiceOnly(stopName){
+  290:     const bagMsg = String(bagVoiceSummaryForStop(stop) || "").trim();
+  291:     if(bagMsg) return `${stop} için ${bagMsg}`;
+  294:   return `${stop} durağı için bagaj görünmüyor.`;
+  298:   const stop = getSelectedStopName() || speedState.liveStop || "";
+  301:     speak("Önce durak seç.");
+  324:     speak("Bu durakta indirilecek yolcu yok.");
+  331:     speak(`${stop} için indirilecek yolcular işleme alındı.`);
+  337:     speak(`${stop} için indirilecek yolcular indirildi.`);
+  341:   speak("İndirme işlemi başlatılamadı.");
+  346: function maybeSpeakApproachStop(stopName, km){
+  355:   speak(`${stopName} durağına yaklaşılıyor. ${stopHumanVoiceSummary(stopName)}`);
+  358: function speak(text){
+  367:     if(typeof window.SeatsSpeak === "function"){
+  368:       window.SeatsSpeak(msg);
+  371:       typeof window.SeatsVoice.speak === "function" &&
+  372:       window.SeatsVoice.speak !== speak
+  374:       window.SeatsVoice.speak(msg);
+  389:         speechSynthesis.speak(u);
+  399: function speakFinalStopSequence(name){
+  400:   speak(stopHumanVoiceSummary(name));
+  402:     speak("Sarıkız Turizm ailesini tercih ettiğiniz için teşekkür ederiz. Bir sonraki yolculukta görüşmek üzere.");
+  452:     speak("Koltuk bulunamadı.");
+  461:     speak("Önce koltuğa yolcu eklemelisin.");
+  494:   speak(msg);
+  548:   if(mentionedStop && /(bagaj var mi|bagaj var mı)/.test(t)){
+  549:     return { type:"ask_stop_bags", stop: mentionedStop };
+  552:   if(/(bu durakta bagaj var mi|bu durakta bagaj var mı|secili durakta bagaj var mi|seçili durakta bagaj var mı|bagajli var mi|bagajlı var mı)/.test(t)){
+  553:     return { type:"ask_stop_bags" };
+  612:     Çünkü liveStop localStorage'dan eski Sarıgöl gibi bir değeri geri getirebilir.
+  644:     Böylece eski liveStop hafızası seçili durağı ezmez.
+  647:     if(!stop && typeof getDisplayLiveStop === "function"){
+  648:       stop = voiceCleanStopValue(getDisplayLiveStop());
+  653:     if(!stop && speedState && speedState.liveStop){
+  654:       stop = voiceCleanStopValue(speedState.liveStop);
+  675:     speak("Koltuk numarası bulunamadı.");
+  708:     speak("Önce canlı durak ya da seçili durak belirlenmeli.");
+  714:     speak("İniş durağı bulunamadı.");
+  720:     speak("Biniş ve iniş durağı aynı olamaz.");
+  782:       try{ if(typeof renderAI === "function") renderAI(); }catch(_){}
+  783:       try{ if(typeof renderTimeline === "function") renderTimeline(); }catch(_){}
+  806:     speak(msg);
+  810:     speak(`${failed.join(", ")} numarada kayıt yapılamadı.`);
+  825:   speak(`Koltuk ${seatNo} için giriş formu açıldı.`);
+  849:   speak("Toplu giriş formu açıldı.");
+  868:   speak("Ayakta satış formu açıldı.");
+  874:     speak("Servis için koltuk bulunamadı.");
+  902:   renderAI();
+  903:   renderTimeline();
+  907:   speak(`Servis işlendi. Koltuklar ${seats.join(", ")}`);
+  918:     speak(`Komut düşük güvenle algılandı. Tahmin edilen işlem ${aiIntentTitle(intent)}.`);
+  929:       speak("Boşaltılacak koltuk bulunamadı.");
+  934:     speak(`${seats.join(" ve ")} numaralı koltuk boşaltıldı.`);
+  946:       speak("Koltuk bulunamadı.");
+  957:       speak("Koltuk listesi bulunamadı.");
+  983:     speak(help);
+  990:     speak(msg);
+  995:     speak("Hesap sayfası açılıyor.");
+ 1001:     speak("Emanet sayfası açılıyor.");
+ 1007:     speak("Canlı harita tam ekran açılıyor.");
+ 1025:       speak("Biletsiz işaretleme hazır değil.");
+ 1036:       speak(`${txt} biletsiz yolcu olarak işaretlendi.`);
+ 1040:       speak(`${failed.join(", ")} numarada dolu yolcu bulunamadı.`);
+ 1054:     speak(msg);
+ 1061:     speak(msg);
+ 1067:     const stop = getSelectedStopName() || speedState.liveStop || "";
+ 1071:     speak(msg);
+ 1076:     const stop = getSelectedStopName() || speedState.liveStop || "";
+ 1080:     speak(msg);
+ 1084:   if(cmd.type === "ask_stop_bags"){
+ 1085:     const stop = cmd.stop || getSelectedStopName() || speedState.liveStop || "";
+ 1086:     const msg = stopBagVoiceOnly(stop);
+ 1089:     speak(msg);
+ 1102:     speak(msg);
+ 1107:     const live = speedState.liveStop || getSelectedStopName() || "henüz belli değil";
+ 1110:     speak(msg);
+ 1115:     const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+ 1119:       speak(msg);
+ 1125:     speak(msg);
+ 1130:     const nextTimed = speedState.etaItems.find(x => !x.passed) || null;
+ 1134:       speak(msg);
+ 1140:     speak(msg);
+ 1148:       speak("Bu durak bu güzergâhta bulunmuyor.");
+ 1155:     speak(msg);
+ 1179:         speak(msg);
+ 1191:         speak(msg);
+ 1198:         speak(msg);
+ 1204:     speak("Komutu anlayamadım. Sesli yardım diyebilirsin.");
+ 1208:     speak("AI sesli komut tarafında bir hata oluştu.");
+ 1313:   maybeSpeakApproachStop,
+ 1314:   speak,
+ 1315:   speakFinalStopSequence,
+
+--- static/seats/voice-tts.js | JS aday satır: 18 ---
+    4:    Tarayıcıda speechSynthesis, APK’da AndroidTTS kullanır.
+   11:   const KEY = "ttsEnabled";
+   29:       window.dispatchEvent(new CustomEvent("ttsEnabledChanged", {
+   36:     if(window.AndroidTTS && typeof window.AndroidTTS.stop === "function"){
+   37:       try{ window.AndroidTTS.stop(); }catch(e){}
+   45:   function speak(text, opts = {}){
+   51:     if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
+   53:         window.AndroidTTS.speak(msg);
+   56:         console.warn("AndroidTTS hata:", e);
+   78:       speechSynthesis.speak(u);
+   97:     const ttsBtn = document.getElementById("ttsToggle");
+   98:     if(ttsBtn){
+   99:       ttsBtn.classList.toggle("muted", !on);
+  100:       ttsBtn.title = on ? "Sesli uyarı açık" : "Sesli uyarı kapalı";
+  111:   window.SeatsSpeak = speak;
+  115:   // Onları ezmeden, TTS yönetimini aynı objeye ekliyoruz.
+  117:     speak,
+  137:       speak("Durak akışı sesi açık.", { force:true });
+
+--- templates/ai_console.html | JS aday satır: 14 ---
+ 1558:     renderStopsDatalist();
+ 1651:     els.learnedSearch.addEventListener('input', renderLearned);
+ 1701:     renderIntentLegend();
+ 1702:     renderTeachIntents();
+ 1708:     renderLearned();
+ 1731:     renderStopsDatalist();
+ 1736:   function renderStopsDatalist(){
+ 1765:   function renderIntentLegend(){
+ 1778:   function renderTeachIntents(){
+ 1787:         renderTeachIntents();
+ 1793:   function renderLearned(){
+ 1879:       renderResolver(result);
+ 1933:   function renderResolver(result){
+ 2038:     renderTeachIntents();
+
+--- templates/continue_trip.html | JS aday satır: 327 ---
+ 2263: <style id="sheet-bag-detail-style">
+ 2264: .sheet-bag-detail-btn{
+ 2276: .sheet-bag-detail-btn:active{
+ 2280: .sheet-bag-grid{
+ 2287: .sheet-bag-cell{
+ 2295: .sheet-bag-cell.active{
+ 2301: .sheet-bag-label{
+ 2307: .sheet-bag-count{
+ 2314: .sheet-bag-info{
+ 2325: .sheet-bag-back{
+ 2338: <style id="sheet-bag-text-polish">
+ 2343: .sheet-bag-count{
+ 2349: .sheet-bag-info b{
+ 2353: <style id="sheet-bag-photo-gallery-style">
+ 2354: .sheet-bag-gallery{
+ 2362: .sheet-bag-gallery-head{
+ 2370: .sheet-bag-gallery-title{
+ 2376: .sheet-bag-gallery-count{
+ 2385: .sheet-bag-photo-grid{
+ 2391: .sheet-bag-photo{
+ 2403: .sheet-bag-photo img{
+ 2410: .sheet-bag-photo-badge{
+ 2424: .sheet-bag-photo-side{
+ 2438: .sheet-bag-photo-open{
+ 2452: .sheet-bag-no-photo{
+ 2463:   .sheet-bag-photo img{
+ 2467:   .sheet-bag-photo{
+ 2474: <style id="bag-photo-viewer-style">
+ 2475: .bag-photo-viewer{
+ 2487: .bag-photo-viewer.open{
+ 2492: .bag-viewer-top{
+ 2502: .bag-viewer-title{
+ 2506: .bag-viewer-kicker{
+ 2514: .bag-viewer-name{
+ 2523: .bag-viewer-close{
+ 2534: .bag-viewer-stage{
+ 2542: .bag-viewer-img-wrap{
+ 2555: .bag-viewer-img{
+ 2562: .bag-viewer-bottom{
+ 2568: .bag-viewer-caption{
+ 2580: .bag-viewer-actions{
+ 2586: .bag-viewer-btn{
+ 2596: .bag-viewer-btn:disabled{
+ 2600: .bag-viewer-btn:active{
+ 2699: <style id="sheet-bag-centered-modal-style">
+ 2700: .sheet-bag-stop-summary{
+ 2707: .sheet-bag-stop-cell{
+ 2715: .sheet-bag-stop-cell.active{
+ 2721: .sheet-bag-stop-cell small{
+ 2728: .sheet-bag-stop-cell b{
+ 2736: .sheet-bag-item{
+ 2743: .sheet-bag-item-head{
+ 2750: .sheet-bag-icon{
+ 2761: .sheet-bag-item-title{
+ 2767: .sheet-bag-item-sub{
+ 2774: .sheet-bag-mini{
+ 2785: .sheet-bag-actions{
+ 2792: .sheet-bag-detail-open{
+ 2806: <style id="sheet-bag-cargo-section-style">
+ 2991: .sheet-cargo-photo .sheet-bag-photo-badge{
+ 2996: .sheet-cargo-photo .sheet-bag-photo-side{
+ 3001: .sheet-cargo-photo .sheet-bag-photo-open{
+ 3152: .sheet-summary-pill.bag{
+ 3176: .sheet-summary-action.speak{
+ 3182: .sheet-summary-action.bag{
+ 3361:               <h2 class="card-title" id="liveCurrentStopName">{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or "Durak seçilmedi" }}</h2>
+ 3375:               <b id="liveDistanceValue" class="stop-distance-value" data-stop-name="{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or '' }}">{{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else liv
+ 3384:             <button class="metric metric-action" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
+ 3385:               <small>Bagaj</small>
+ 3386:               <b id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</b>
+ 3422:               <b class="stop-distance-value" data-stop-name="{{ stop.name }}">{{ stop.distance }}</b>
+ 3431:               <small>Bagaj</small>
+ 3432:               <b>{{ stop.bagaj_label }}</b>
+ 3441:     <div class="live-sheet-overlay" id="liveStopSheetOverlay"></div>
+ 3443:     <section class="live-stop-sheet" id="liveStopSheet" aria-hidden="true">
+ 3448:           <div class="sheet-kicker" id="liveStopSheetKicker">Canlı durak</div>
+ 3449:           <h2 class="sheet-title" id="liveStopSheetTitle">Durak detayı</h2>
+ 3450:           <p class="sheet-sub" id="liveStopSheetSub">Yükleniyor...</p>
+ 3453:         <button class="sheet-close" type="button" id="liveStopSheetClose" aria-label="Kapat">×</button>
+ 3456:       <div class="sheet-body" id="liveStopSheetBody">
+ 3568:             "liveStop:" + tripKey,
+ 3585:                 k.startsWith("liveStop:") ||
+ 3680:     const stopEl  = document.getElementById("liveCurrentStopName");
+ 3681:     const distEl  = document.getElementById("liveDistanceValue");
+ 3714:       const stopEl  = document.getElementById("liveCurrentStopName");
+ 3715:       const distEl  = document.getElementById("liveDistanceValue");
+ 3759:   const bagBtn = document.getElementById("liveBagajMetric");
+ 3760:   const stopNameEl = document.getElementById("liveCurrentStopName");
+ 3762:   const overlay = document.getElementById("liveStopSheetOverlay");
+ 3763:   const sheet = document.getElementById("liveStopSheet");
+ 3764:   const closeBtn = document.getElementById("liveStopSheetClose");
+ 3765:   const titleEl = document.getElementById("liveStopSheetTitle");
+ 3766:   const subEl = document.getElementById("liveStopSheetSub");
+ 3767:   const bodyEl = document.getElementById("liveStopSheetBody");
+ 3768:   const kickerEl = document.getElementById("liveStopSheetKicker");
+ 3789:   function currentStopName(){
+ 3811:   function renderEmpty(message){
+ 3832:   function renderChangeDestinationForm(passenger){
+ 3834:       renderEmpty("Koltuk bilgisi bulunamadı.");
+ 3859:           Kaydedince koltuğun iniş durağı değişir. Koltuğa bağlı bagaj bilgisi de yeni durağın bagaj listesinde görünür.
+ 3874:         if(lastKind === "bagaj") renderBags(lastDetailData || {});
+ 3875:         else renderPassengers(lastDetailData || {});
+ 3890:       renderEmpty("Koltuk veya durak bilgisi eksik.");
+ 3952:       const bag = Number(passenger.bag_count || 0);
+ 3954:       const routeText = `${passenger.from_stop || "Biniş yok"} → ${passenger.to_stop || currentStopName() || "İniş yok"}`;
+ 3967:               ${bag > 0 ? `🧳 ${bag} bagaj teslim edildi sayılıp temizlenecek.` : "🧳 Bagaj yok."}
+ 3988:           if(lastKind === "bagaj") renderBags(lastDetailData || {});
+ 3989:           else renderPassengers(lastDetailData || {});
+ 4035:           stop: currentStopName()
+ 4044:         renderEmpty(data.error || "Bir hata oluştu.");
+ 4054:           ${Number(data.bag_deleted || 0) > 0 ? `<br><br>🧳 ${Number(data.bag_deleted || 0)} bagaj kaydı temizlendi.` : ""}
+ 4068:       renderEmpty("Bağlantı hatası. Koltuk indirilemedi.");
+ 4077:       const stop = data.stop || currentStopName() || "seçili durak";
+ 4079:       const bagTotal = passengers.reduce((sum, p) => sum + Number(p.bag_count || 0), 0);
+ 4092:               ${bagTotal > 0 ? `🧳 Toplam ${bagTotal} bagaj teslim edildi sayılıp temizlenecek.` : "🧳 Bagaj görünmüyor."}
+ 4113:           renderPassengers(lastDetailData || {});
+ 4126:   async function bulkOffloadCurrentStop(){
+ 4131:       renderEmpty("Bu durakta indirilecek yolcu bulunmuyor.");
+ 4150:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+ 4158:           stop: data.stop || currentStopName()
+ 4167:         renderEmpty(j.error || "Bir hata oluştu.");
+ 4179:           ${Number(j.bag_deleted || 0) > 0 ? `<br><br>🧳 ${Number(j.bag_deleted || 0)} bagaj kaydı temizlendi.` : ""}
+ 4193:       renderEmpty("Bağlantı hatası. Yolcular indirilemedi.");
+ 4200:   function renderBagPhotoGallery(photos){
+ 4205:         <div class="sheet-bag-no-photo">
+ 4206:           Bu koltuk için görünür bagaj fotoğrafı bulunamadı.
+ 4212:       <div class="sheet-bag-gallery">
+ 4213:         <div class="sheet-bag-gallery-head">
+ 4214:           <div class="sheet-bag-gallery-title">Bagaj Fotoğrafları</div>
+ 4215:           <div class="sheet-bag-gallery-count">${photos.length} fotoğraf</div>
+ 4218:         <div class="sheet-bag-photo-grid">
+ 4220:             <a class="sheet-bag-photo"
+ 4225:               <img src="${escapeHtml(photo.thumb_url || photo.url || "")}" alt="Bagaj fotoğrafı ${idx + 1}" loading="lazy">
+ 4226:               <span class="sheet-bag-photo-badge">${idx + 1} / ${photos.length}</span>
+ 4227:               <span class="sheet-bag-photo-side">${escapeHtml(photo.side_label || "Bagaj")}</span>
+ 4228:               <span class="sheet-bag-photo-open">Aç</span>
+ 4238:   async function renderConsignmentDetail(cid){
+ 4240:       renderEmpty("Emanet bilgisi bulunamadı.");
+ 4259:         renderEmpty(data.error || "Bir hata oluştu.");
+ 4296:                 <span class="sheet-bag-photo-badge">${idx + 1} / ${photos.length}</span>
+... 187 satır daha var.
+
+--- templates/index.html | JS aday satır: 2 ---
+  963:     text-rendering:geometricPrecision;
+ 1032:   /* Route picker ilk render parlamasını engeller */
+
+--- templates/live_map.html | JS aday satır: 39 ---
+  674: .map-popup-actions a.bag{
+ 1427: .approach-alert-actions .speak{
+ 1772:           <button class="speak" type="button" id="approachAlertSpeak">Sesli</button>
+ 1824:     const liveStop = BOOT.live_stop || "";
+ 1833:     if(sumLive) sumLive.textContent = liveStop || "—";
+ 2016:       if(liveStop && stop.name === liveStop) return "live";
+ 2038:       const bag = Number(stop.bag_count || 0);
+ 2040:       const total = off + board + bag + parcel;
+ 2048:         if(bag) parts.push(`${bag} bagaj`);
+ 2072:               <small>Bagaj</small>
+ 2073:               <b>${bag}</b>
+ 2089:             <a class="bag" href="{{ url_for('continue_trip') }}?stop=${encodeURIComponent(stop.name)}">Bagaj</a>
+ 2308:     function formatRouteDistance(meters){
+ 2342:         meters = map.distance(
+ 2357:         text.textContent = `Rotadan ${formatRouteDistance(meters)}`;
+ 2360:         text.textContent = `Rota dışı ${formatRouteDistance(meters)}`;
+ 2397:       const bag = Number(stop.bag_count || 0);
+ 2402:       if(bag) parts.push(`${bag} bagaj`);
+ 2408:     function distanceToStopText(stop){
+ 2412:         const km = map.distance(
+ 2426:       const liveIndex = stops.findIndex(s => liveStop && s.name === liveStop);
+ 2435:     function renderNextOpsPanel(){
+ 2461:             <div class="next-op-km" data-op-km="${escapeHtmlForAttr(stop.name)}">${distanceToStopText(stop)}</div>
+ 2467:     function refreshNextOpsDistances(){
+ 2471:         if(stop) el.textContent = distanceToStopText(stop);
+ 2495:     function approachDistanceKm(stop){
+ 2499:         return map.distance(
+ 2513:       const bag = Number(stop.bag_count || 0);
+ 2518:       if(bag) parts.push(`${bag} bagaj`);
+ 2531:     function speakApproach(stop, km){
+ 2540:           window.speechSynthesis.speak(u);
+ 2543:         console.log("approach speak error", err);
+ 2596:       const km = approachDistanceKm(target);
+ 2613:         speakApproach(target, km);
+ 2631:       refreshNextOpsDistances();
+ 2674:     renderNextOpsPanel();
+ 2726:     document.getElementById("approachAlertSpeak")?.addEventListener("click", () => {
+ 2731:       const km = approachDistanceKm(target);
+ 2734:         speakApproach(target, km);
+
+--- templates/onboarding.html | JS aday satır: 4 ---
+  234:     function render(){
+  255:         render();
+  282:       render();
+  285:     render();
+
+--- templates/rehber.html | JS aday satır: 15 ---
+ 2290:           Koltuk, durak, bagaj, emanet, hesap ve sesli komutlar. Hepsi tek, sade ve güçlü bir ekranda.
+ 2311:           <div class="hero-floating f3">🧳 Bagaj kontrolü</div>
+ 2326:           <p>Yolcu, cinsiyet, iniş durağı, servis ve bagaj bilgisi aynı akışta görünür.</p>
+ 2342:           <p>“Kaç yolcu var”, “Rötar kaç”, “Bu durakta bagaj var mı” gibi kısa komutlarla bilgi al.</p>
+ 2372:               <span>Koltuk, durak, bagaj, servis ve hesap takibi.</span>
+ 2410:             <p>Koltuk planı üzerinden biniş, iniş, cinsiyet, ödeme, servis ve bagaj bilgileri düzenli tutulur.</p>
+ 2415:               <span>Bagaj gör</span>
+ 2448:               <span>Bagaj var mı</span>
+ 2498:               <div class="guide-line"><b>Koltuk ekranını kullan</b><span>Koltuk planı ekranında yolcu ekleme, indirme, ayakta yolcu, servis, durak ve bagaj işlemleri aynı ekrandan yapılır.</span></div>
+ 2525:               <div class="guide-voice-item"><div class="cmd">Bu durakta işlem var mı</div><p>Seçili durakta yolcu, bagaj, emanet ve servis durumunu özetler.</p></div>
+ 2527:               <div class="guide-voice-item"><div class="cmd">Bu durakta bagaj var mı</div><p>Seçili durak için bagaj bilgisini söyler.</p></div>
+ 2548:               <div class="guide-line"><b>Bagaj ve emanet kontrolü</b><span>İniş durağında yolcu özetine ek olarak bagaj ve emanet bilgisini kontrol et.</span></div>
+ 2582:               <div class="guide-line"><b>APK’da ses çıkmıyorsa</b><span>Telefonun medya sesi, TTS motoru ve uygulama içi ses durumu açık mı kontrol et.</span></div>
+ 2607:               <div class="guide-chip">9. Bu durakta bagaj var mı</div>
+ 2613:               <p>Mikrofona bastıktan sonra kısa ve tek komut ver. Uzun cümle yerine net ifade kullan: “Rötar kaç”, “Durak seç Alaşehir”, “Bu durakta bagaj var mı”.</p>
+
+--- templates/reports.html | JS aday satır: 3 ---
+  371:       renderSeatTable(j.per_seat||[], j.never_sold||[]);
+  382:   // Tablo render
+  383:   function renderSeatTable(per, neverSold){
+
+--- templates/route_edit.html | JS aday satır: 3 ---
+  420:   function renderStops(){
+  441:   textarea.addEventListener("input", renderStops);
+  442:   renderStops();
+
+--- templates/route_schedule_edit.html | JS aday satır: 2 ---
+ 1616:   function renderOptions(select){
+ 1642:     renderOptions(select);
+
+--- templates/seats.html | JS aday satır: 14 ---
+   91:               <div class="mini-chip">🧳 Bagaj</div>
+  161:               <button class="tts-btn" id="ttsToggle" title="Sesli uyarı">🔊</button>
+  193:               <small id="routeLiveStop">—</small>
+  233:               <small>route_stop_coords</small>
+  254:               <div class="muted">Bu kayıt route_stop_coords tablosuna yazılır.</div>
+  271:                 <div class="v" id="routeLiveStopCard">—</div>
+  323:               <div class="ai-item"><b>Canlı Durak</b><span id="aiLiveStop">—</span></div>
+  346:     bagTrip: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
+  364: <script src="/static/seats/bags.js?v=1"></script>
+  370: <script src="/static/seats/voice-tts.js?v=voice-owner-fix-1"></script>
+  847:     const tripKey = boot.tripKey || window.TRIP_KEY || window.BAG_TRIP || "default";
+  874:     try{ if(typeof renderRouteStrip === "function") renderRouteStrip(); }catch(e){}
+  990:       const tripKey = boot.tripKey || window.TRIP_KEY || window.BAG_TRIP || "default";
+ 1002:     try{ if(typeof renderRouteStrip === "function") renderRouteStrip(); }catch(_){}
+
+--- templates/seats_parts/deck.html | JS aday satır: 1 ---
+   15:                     <span class="bag-badge" title="Bagaj"><span class="bag-dir"></span><span class="bag-count">0</span></span>
+
+--- templates/seats_parts/modals.html | JS aday satır: 2 ---
+   41:       <button class="btn primary" type="button" id="btnBagAdd">🧳 Bagaj Ekle</button>
+   42:       <button class="btn dark" type="button" id="btnBagView">📸 Bagaj Gör</button>
+
+--- templates/seats_parts/topbar.html | JS aday satır: 1 ---
+   22:         <div class="mini-chip">📍 <span>Durak</span> <b id="topLiveStop">—</b></div>
+
+--- templates/trip_report.html | JS aday satır: 11 ---
+  644: function renderBox(title, items, type){
+  713: function renderSeatDeck(){
+  835: function renderStopReport(data){
+  853:           ${renderBox("🟢 Binenler", stop.board, "seat")}
+  854:           ${renderBox("🔴 İnenler", stop.offload, "seat")}
+  855:           ${renderBox("🧍 Ayakta Binen", stop.standing_add, "standing")}
+  856:           ${renderBox("⬇ Ayakta İnen", stop.standing_off, "standing")}
+  869: function renderReport(data){
+  896:   renderSeatDeck();
+  897:   renderStopReport(data);
+  981:     renderReport(j);
+
+==========================================================================================
+7) Mevcut renk kodları envanteri
+==========================================================================================
+
+--- static/live_map/muavin_live_map_extra.css | benzersiz renk: 83 ---
+   23: rgba(26, 115, 232, .16)
+   24: rgba(26, 115, 232, .32)
+   35: #1a73e8
+   36: #fff
+   38: rgba(0,0,0,.28)
+   39: rgba(26,115,232,.22)
+   55: rgba(255,255,255,.96)
+   56: rgba(15,23,42,.22)
+   73: rgba(26,115,232,.10)
+   86: rgba(0,0,0,.22)
+   90: rgba(26,115,232,.17)
+  176: rgba(15,23,42,.24)
+  177: rgba(255,255,255,.10)
+  185: rgba(15, 23, 42, .93)
+  190: rgba(255,255,255,.94)
+  191: #111827
+  251: #1f2937
+  251: #0f172a
+  254: rgba(15,23,42,.28)
+  255: rgba(255,255,255,.12)
+  291: rgba(15,23,42,.94)
+  294: rgba(15,23,42,.34)
+  316: rgba(255,255,255,.74)
+  331: rgba(255,255,255,.08)
+  356: #2563eb
+  361: #dfe7ea
+  376: rgba(8,18,34,.10)
+  377: rgba(8,18,34,0)
+  378: rgba(8,18,34,.16)
+  386: rgba(59,130,246,.28)
+  413: rgba(15,23,42,.90)
+  421: rgba(255,255,255,.18)
+  442: rgba(15,23,42,.30)
+  473: rgba(15,23,42,.48)
+  474: rgba(26,115,232,.38)
+  491: rgba(26,115,232,.30)
+  492: rgba(255,255,255,.14)
+  517: rgba(255,255,255,.78)
+  532: rgba(255,255,255,.16)
+  534: rgba(15,23,42,.40)
+  565: rgba(255,255,255,.72)
+  573: rgba(255,255,255,.11)
+  590: rgba(255,255,255,.075)
+  597: rgba(255,255,255,.62)
+  614: #bfdbfe
+  618: #bbf7d0
+  622: #fde68a
+  628: rgba(255,255,255,.50)
+  723: rgba(245,158,11,.20)
+  725: rgba(245,158,11,.22)
+  726: rgba(0,0,0,.18)
+  758: rgba(15,23,42,.62)
+  777: rgba(255,255,255,.86)
+  784: rgba(245,158,11,.14)
+  790: rgba(34,197,94,.13)
+  792: rgba(34,197,94,.20)
+  821: rgba(34,197,94,.14)
+  822: #dcfce7
+  823: rgba(34,197,94,.24)
+  827: rgba(59,130,246,.15)
+  828: #dbeafe
+  829: rgba(147,197,253,.22)
+  833: rgba(249,115,22,.14)
+  834: #fed7aa
+  835: rgba(249,115,22,.22)
+  839: rgba(148,163,184,.12)
+  840: #e2e8f0
+  846: rgba(34,197,94,.30)
+  851: rgba(255,255,255,.58)
+  868: rgba(255,255,255,.06)
+  887: rgba(255,255,255,.67)
+  900: rgba(15,23,42,.58)
+  909: rgba(255,255,255,.68)
+ 1093: rgba(15,23,42,.38)
+ 1162: rgba(255,255,255,.82)
+ 1169: rgba(255,255,255,.92)
+ 1263: rgba(15,23,42,.46)
+ 1407: rgba(15,23,42,.20)
+ 1408: rgba(255,255,255,.09)
+ 1501: rgba(15,23,42,.32)
+ 1570: rgba(15,23,42,.88)
+ 1585: rgba(239,68,68,.94)
+ 1585: rgba(153,27,27,.94)
+
+--- static/live_map/muavin_live_map_extra.js | benzersiz renk: 1 ---
+  167: #1a73e8
+
+--- static/seats/_archive_theme_trials/seats-dashboard-final.css | benzersiz renk: 48 ---
+    8: #f8fbff
+    9: #eaf3ff
+   10: #ffffff
+   12: #0f172a
+   13: #64748b
+   14: #e5edf6
+   15: #2563eb
+   16: #0ea5e9
+   17: #22c55e
+   18: #ef4444
+   19: #071423
+   20: #0d1726
+   26: rgba(37,99,235,.12)
+   27: rgba(14,165,233,.14)
+   47: rgba(255,255,255,.98)
+   47: rgba(248,251,255,.96)
+   48: rgba(255,255,255,.95)
+   49: rgba(15,23,42,.12)
+   75: rgba(14,165,233,.08)
+   76: #f1f7ff
+   79: rgba(255,255,255,.8)
+  101: #334155
+  117: #fff
+  119: rgba(15,23,42,.06)
+  167: rgba(15,23,42,.07)
+  189: rgba(15,23,42,.08)
+  216: #f0fdf4
+  242: rgba(15,23,42,.10)
+  333: #eff6ff
+  359: #fecdd3
+  361: rgba(244,63,94,.08)
+  386: #8b5cf6
+  415: rgba(15,23,42,.05)
+  442: rgba(37,99,235,.15)
+  443: #0b1726
+  446: rgba(255,255,255,.06)
+  452: rgba(148,163,184,.12)
+  453: rgba(2,8,23,.55)
+  454: rgba(255,255,255,.08)
+  466: rgba(0,0,0,.22)
+  467: rgba(255,255,255,.15)
+  502: #dbe4ef
+  525: #f1f5f9
+  526: #475569
+  656: #16a34a
+  657: #f59e0b
+  657: #d97706
+  658: #b91c1c
+
+--- static/seats/_archive_theme_trials/seats-dashboard-tone.css | benzersiz renk: 39 ---
+    8: rgba(37,99,235,.22)
+    9: rgba(14,165,233,.16)
+   10: #dfeeff
+   10: #d7e7f8
+   10: #cddff2
+   16: rgba(37,99,235,.20)
+   17: rgba(15,32,52,.96)
+   17: rgba(8,19,33,.95)
+   18: rgba(255,255,255,.14)
+   19: rgba(15,23,42,.24)
+   20: #f8fafc
+   28: rgba(226,232,240,.72)
+   32: #ffffff
+   36: rgba(255,255,255,.08)
+   43: rgba(255,255,255,.13)
+   49: rgba(226,232,240,.64)
+   66: rgba(37,99,235,.14)
+   68: rgba(255,255,255,.12)
+   69: rgba(15,23,42,.20)
+   74: rgba(34,197,94,.16)
+   75: rgba(12,45,38,.96)
+   75: rgba(8,28,28,.95)
+   79: rgba(226,232,240,.65)
+   89: rgba(37,99,235,.16)
+   90: rgba(8,19,33,.96)
+   92: rgba(15,23,42,.25)
+   99: rgba(147,197,253,.18)
+  100: #bfdbfe
+  108: rgba(255,255,255,.07)
+  109: rgba(244,63,94,.36)
+  111: rgba(255,255,255,.06)
+  127: #2563eb
+  127: #1d4ed8
+  137: rgba(226,232,240,.62)
+  165: rgba(248,251,255,.96)
+  166: rgba(255,255,255,.90)
+  173: rgba(37,99,235,.18)
+  174: #e8f2ff
+  191: rgba(226,232,240,.68)
+
+--- static/seats/patches/bottom-voice-command.css | benzersiz renk: 9 ---
+    3: rgba(255,255,255,.20)
+    4: #2563eb
+    4: #7c3aed
+    5: #fff
+   22: rgba(255,255,255,.22)
+   23: #dc2626
+   23: #7f1d1d
+   24: rgba(220,38,38,.30)
+   24: rgba(255,255,255,.14)
+
+--- static/seats/patches/fab-sheet-solid-fix.css | benzersiz renk: 10 ---
+   13: rgba(2, 7, 16, .76)
+   21: rgba(8,18,34,.985)
+   21: rgba(3,9,20,.992)
+   22: rgba(148,163,184,.20)
+   23: rgba(0,0,0,.58)
+   23: rgba(255,255,255,.06)
+   43: rgba(3,10,22,.98)
+   44: #f8fafc
+   45: rgba(255,255,255,.14)
+   52: rgba(226,237,255,.72)
+
+--- static/seats/patches/manual-ticket-system.css | benzersiz renk: 6 ---
+   25: #fbbf24
+   25: #d97706
+   26: #111827
+   27: rgba(255,255,255,.78)
+   29: rgba(0,0,0,.35)
+   30: rgba(255,255,255,.45)
+
+--- static/seats/patches/mobile-performance-fix.css | benzersiz renk: 10 ---
+   10: #06111f
+   62: rgba(0,0,0,.22)
+   77: rgba(0,0,0,.18)
+  133: rgba(1, 8, 20, .72)
+  151: rgba(3, 10, 22, .94)
+  162: rgba(8, 18, 32, .98)
+  163: rgba(148, 163, 184, .22)
+  164: rgba(0,0,0,.42)
+  173: rgba(3, 10, 22, .98)
+  174: #f8fafc
+
+--- static/seats/patches/seat-label-ghost-clean.css | benzersiz renk: 2 ---
+   41: rgba(235,245,255,.88)
+   42: rgba(0,0,0,.35)
+
+--- static/seats/patches/seat-layout-fab-pack.css | benzersiz renk: 26 ---
+  117: rgba(0,0,0,.34)
+  152: rgba(56,189,248,.22)
+  153: rgba(15,23,42,.92)
+  153: rgba(2,6,23,.86)
+  155: rgba(125,211,252,.36)
+  157: rgba(255,255,255,.05)
+  158: rgba(0,0,0,.42)
+  159: rgba(37,99,235,.20)
+  175: rgba(191,219,254,.92)
+  176: rgba(96,165,250,.55)
+  186: rgba(255,255,255,.30)
+  187: rgba(125,211,252,.18)
+  191: rgba(255,255,255,.22)
+  192: rgba(0,0,0,.20)
+  193: rgba(0,0,0,.38)
+  201: rgba(255,255,255,.08)
+  207: rgba(255,255,255,.24)
+  208: #60a5fa
+  208: #1d4ed8
+  214: #34d399
+  214: #047857
+  220: #fbbf24
+  220: #b45309
+  332: rgba(2,6,23,.88)
+  337: rgba(0,0,0,.36)
+  338: rgba(37,99,235,.16)
+
+--- static/seats/patches/seat-simple-ui-pack.css | benzersiz renk: 39 ---
+   14: rgba(96,165,250,.28)
+   16: #eaf3ff
+   17: rgba(37,99,235,.96)
+   17: rgba(29,78,216,.92)
+   18: rgba(37,99,235,.24)
+   18: rgba(255,255,255,.16)
+  151: rgba(59,130,246,.20)
+  152: rgba(14,27,48,.96)
+  152: rgba(6,13,25,.98)
+  153: rgba(148,163,184,.16)
+  155: rgba(0,0,0,.28)
+  156: rgba(255,255,255,.06)
+  173: #fff
+  192: #bbf7d0
+  193: rgba(34,197,94,.12)
+  194: rgba(34,197,94,.22)
+  210: rgba(255,255,255,.045)
+  211: rgba(255,255,255,.07)
+  212: rgba(255,255,255,.04)
+  219: rgba(226,232,240,.56)
+  239: #4ade80
+  243: #93c5fd
+  297: rgba(8,18,34,.96)
+  297: rgba(3,9,20,.98)
+  298: rgba(148,163,184,.18)
+  300: rgba(0,0,0,.42)
+  319: rgba(255,255,255,.08)
+  321: rgba(59,130,246,.16)
+  322: rgba(20,35,58,.92)
+  322: rgba(8,17,31,.96)
+  346: rgba(255,255,255,.20)
+  347: rgba(37,99,235,.98)
+  347: rgba(29,78,216,.96)
+  348: rgba(147,197,253,.25)
+  354: rgba(124,58,237,.92)
+  354: rgba(67,56,202,.96)
+  359: rgba(255,255,255,.18)
+  360: rgba(239,68,68,.95)
+  360: rgba(127,29,29,.96)
+
+--- static/seats/patches/stop-flow-focus-patch.css | benzersiz renk: 38 ---
+   12: rgba(47,111,255,.26)
+   13: rgba(30,214,111,.16)
+   14: #071329
+   14: #06101f
+   14: #040914
+   15: #fff
+   29: rgba(110,154,255,.23)
+   31: rgba(12,28,55,.96)
+   31: rgba(5,13,26,.98)
+   32: rgba(0,0,0,.55)
+   32: rgba(255,255,255,.08)
+   40: rgba(120,160,255,.18)
+   41: rgba(28,56,105,.70)
+   41: rgba(9,22,45,.20)
+   59: #245cff
+   59: #6e38ff
+   60: rgba(37,92,255,.28)
+   64: rgba(96,255,160,.24)
+   65: rgba(20,120,70,.18)
+   66: #b9ffd5
+   84: rgba(232,240,255,.74)
+  105: rgba(105,151,255,.24)
+  111: rgba(22,55,103,.78)
+  111: rgba(7,18,38,.92)
+  112: rgba(0,0,0,.26)
+  112: rgba(255,255,255,.06)
+  123: rgba(61,255,145,.75)
+  124: rgba(18,105,62,.86)
+  124: rgba(8,35,27,.96)
+  125: rgba(18,214,96,.18)
+  125: rgba(255,255,255,.10)
+  136: rgba(64,224,255,.14)
+  137: rgba(95,227,255,.20)
+  158: rgba(226,237,255,.68)
+  169: #cfe0ff
+  171: rgba(255,255,255,.12)
+  175: #04140b
+  176: #79ffad
+
+--- static/seats/patches/stop-selected-toast.css | benzersiz renk: 9 ---
+   25: #fff
+   27: rgba(69,255,153,.24)
+   28: rgba(16,126,68,.94)
+   28: rgba(9,35,31,.96)
+   29: rgba(111,255,174,.36)
+   30: rgba(0,0,0,.42)
+   30: rgba(255,255,255,.12)
+   44: rgba(255,255,255,.14)
+   65: rgba(232,255,241,.78)
+
+--- static/seats/patches/top-sound-toggle.css | benzersiz renk: 12 ---
+   20: #fff
+   30: rgba(255,255,255,.22)
+   31: #16a34a
+   31: #15803d
+   32: rgba(22,163,74,.22)
+   32: rgba(255,255,255,.14)
+   38: rgba(255,255,255,.18)
+   39: #475569
+   39: #1e293b
+   40: rgba(15,23,42,.25)
+   40: rgba(255,255,255,.10)
+   41: #dbeafe
+
+--- static/seats/patches/unified-seat-deck-report-style.css | benzersiz renk: 34 ---
+   62: rgba(59,139,255,.12)
+   63: rgba(2,6,23,.22)
+   65: rgba(148,163,184,.12)
+  126: #fff
+  128: rgba(255,255,255,.14)
+  131: rgba(255,255,255,.20)
+  132: rgba(0,0,0,.18)
+  133: rgba(0,0,0,.30)
+  142: #22c55e
+  142: #15803d
+  148: #3b82f6
+  148: #1d4ed8
+  154: #f472b6
+  154: #db2777
+  160: #64748b
+  160: #334155
+  167: rgba(127,199,255,.72)
+  170: rgba(96,165,250,.13)
+  172: rgba(0,0,0,.32)
+  180: rgba(245,158,11,.42)
+  201: #7f1d1d
+  201: #991b1b
+  205: rgba(0,0,0,.35)
+  206: rgba(0,0,0,.28)
+  230: #b7791f
+  230: #8a5a12
+  244: rgba(255,255,255,.16)
+  245: rgba(0,0,0,.26)
+  259: #0f172a
+  260: rgba(147,197,253,.55)
+  261: #bfdbfe
+  271: #2563eb
+  393: rgba(232,237,245,.82)
+  396: rgba(0,0,0,.25)
+
+--- static/seats/seats-final.css | benzersiz renk: 203 ---
+    8: #07111f
+    9: #0b1728
+   10: #101d30
+   11: #15243a
+   12: rgba(255,255,255,.10)
+   13: rgba(255,255,255,.06)
+   14: #eef6ff
+   15: #9fb2c8
+   16: #2563eb
+   17: #0ea5e9
+   18: #22c55e
+   19: #ef4444
+   20: #f59e0b
+   26: rgba(37,99,235,.18)
+   27: rgba(14,165,233,.12)
+   28: #0a1525
+   57: rgba(59,130,246,.16)
+   58: rgba(16,31,51,.96)
+   58: rgba(7,17,31,.96)
+   60: rgba(0,0,0,.28)
+   77: rgba(255,255,255,.07)
+   79: rgba(255,255,255,.08)
+   99: #fff
+  114: rgba(255,255,255,.055)
+  151: rgba(255,255,255,.065)
+  154: rgba(0,0,0,.22)
+  184: rgba(37,99,235,.20)
+  190: rgba(34,197,94,.18)
+  191: rgba(13,45,38,.96)
+  191: rgba(7,24,29,.96)
+  229: rgba(37,99,235,.12)
+  230: rgba(16,31,51,.94)
+  230: rgba(7,17,31,.94)
+  307: #1d4ed8
+  378: rgba(37,99,235,.16)
+  379: rgba(147,197,253,.18)
+  380: #bfdbfe
+  405: rgba(244,63,94,.34)
+  441: #8b5cf6
+  501: rgba(255,255,255,.045)
+  503: rgba(0,0,0,.16)
+  601: rgba(37,99,235,.10)
+  602: rgba(2,8,23,.56)
+  602: rgba(2,8,23,.34)
+  624: rgba(0,0,0,.30)
+  628: #dbeafe
+  691: rgba(0,0,0,.12)
+  705: rgba(2,8,23,.22)
+  729: rgba(2,8,23,.44)
+  984: rgba(37,99,235,.25)
+  991: rgba(96,165,250,.55)
+ 1017: #38bdf8
+ 1027: rgba(37,99,235,.40)
+ 1034: #60a5fa
+ 1036: rgba(96,165,250,.65)
+ 1037: rgba(37,99,235,.35)
+ 1051: #7dd3fc
+ 1054: rgba(56,189,248,.72)
+ 1055: rgba(37,99,235,.48)
+ 1067: #bae6fd
+ 1069: rgba(125,211,252,.95)
+ 1070: rgba(37,99,235,.45)
+ 1082: rgba(59,130,246,.18)
+ 1083: rgba(21,45,74,.92)
+ 1083: rgba(10,24,42,.88)
+ 1084: rgba(96,165,250,.24)
+ 1086: rgba(0,0,0,.24)
+ 1093: rgba(59,130,246,.14)
+ 1094: rgba(22,42,66,.82)
+ 1094: rgba(9,22,38,.78)
+ 1095: rgba(96,165,250,.18)
+ 1100: rgba(238,247,255,.88)
+ 1106: rgba(226,232,240,.72)
+ 1113: rgba(96,165,250,.26)
+ 1114: rgba(31,74,118,.94)
+ 1114: rgba(18,45,80,.90)
+ 1115: rgba(96,165,250,.54)
+ 1117: rgba(37,99,235,.22)
+ 1126: #f8fbff
+ 1143: rgba(248,113,113,.34)
+ 1144: rgba(127,29,29,.98)
+ 1144: rgba(239,68,68,.68)
+ 1145: rgba(248,113,113,.96)
+ 1147: rgba(248,113,113,.48)
+ 1148: rgba(239,68,68,.52)
+ 1149: rgba(127,29,29,.34)
+ 1150: rgba(255,255,255,.16)
+ 1164: #fecaca
+ 1164: #f87171
+ 1164: #dc2626
+... 113 renk daha var.
+
+--- static/seats/seats.css | benzersiz renk: 210 ---
+    2: #07101d
+    3: #0d1726
+    4: #121d2d
+    5: #192638
+    6: #223248
+    7: rgba(255,255,255,.08)
+    8: rgba(255,255,255,.05)
+    9: #edf3fb
+   10: #97a9bf
+   11: #b8c7d7
+   13: #16a34a
+   14: #22c55e
+   15: #2563eb
+   16: #0ea5e9
+   17: #f59e0b
+   18: #ef4444
+   19: #7c3aed
+   20: #ec4899
+   22: rgba(0,0,0,.34)
+   23: rgba(0,0,0,.22)
+   48: rgba(37,99,235,.15)
+   49: rgba(14,165,233,.12)
+   50: rgba(124,58,237,.10)
+   51: #06101c
+   51: #0a1422
+   55: rgba(255,255,255,.055)
+   55: rgba(255,255,255,.025)
+  103: rgba(37,99,235,.28)
+  103: rgba(14,165,233,.18)
+  104: rgba(255,255,255,.10)
+  140: rgba(255,255,255,.045)
+  142: #fff
+  147: rgba(0,0,0,.16)
+  197: rgba(0,0,0,.24)
+  215: rgba(255,255,255,.04)
+  236: rgba(37,99,235,.18)
+  236: rgba(37,99,235,.07)
+  237: rgba(34,197,94,.16)
+  237: rgba(34,197,94,.06)
+  238: rgba(239,68,68,.16)
+  238: rgba(239,68,68,.06)
+  239: rgba(124,58,237,.18)
+  239: rgba(124,58,237,.06)
+  240: rgba(14,165,233,.06)
+  241: rgba(245,158,11,.17)
+  241: rgba(245,158,11,.06)
+  276: rgba(59,130,246,.10)
+  277: rgba(14,165,233,.08)
+  310: #d8e4f0
+  362: #8b5cf6
+  362: #6d28d9
+  363: rgba(255,255,255,.16)
+  372: #b91c1c
+  384: #dbe7f4
+  416: rgba(0,0,0,.18)
+  423: rgba(255,255,255,.02)
+  440: #dce6f0
+  459: #dfe9f5
+  493: #ecf3fb
+  532: rgba(37,99,235,.22)
+  532: rgba(37,99,235,.10)
+  533: rgba(96,165,250,.35)
+  536: rgba(96,165,250,.16)
+  548: rgba(255,255,255,.03)
+  548: rgba(255,255,255,.015)
+  549: rgba(37,99,235,.04)
+  582: #7b1d1d
+  582: #8f2525
+  583: rgba(0,0,0,.25)
+  601: #a16d24
+  601: #7b551b
+  636: #1ea34f
+  636: #16763a
+  637: rgba(255,255,255,.12)
+  639: rgba(0,0,0,.14)
+  643: #7fc7ff
+  644: #465b70
+  644: #304455
+  645: #2970e0
+  645: #1c4ca8
+  646: #eb5aa6
+  646: #c82773
+  647: #92b7ff
+  650: rgba(245,158,11,.42)
+  656: rgba(245,158,11,.95)
+  662: rgba(245,158,11,0)
+  668: rgba(245,158,11,.20)
+  680: #dce6ef
+  695: rgba(0,0,0,.26)
+  723: #1f1f1f
+... 120 renk daha var.
+
+--- templates/continue_trip.html | benzersiz renk: 305 ---
+   15: #020612
+   16: #071223
+   17: #09172b
+   18: rgba(255,255,255,.08)
+   19: rgba(255,255,255,.05)
+   20: #f8fafc
+   21: rgba(226,232,240,.72)
+   22: rgba(226,232,240,.48)
+   23: #ff4747
+   24: rgba(255,71,71,.16)
+   25: #f6a400
+   26: rgba(246,164,0,.16)
+   27: #3b82f6
+   28: rgba(59,130,246,.16)
+   29: #4ade80
+   30: rgba(0,0,0,.34)
+   44: rgba(255,70,70,.15)
+   45: rgba(37,99,235,.18)
+   46: rgba(14,165,233,.10)
+   47: #020611
+   47: #061226
+   47: #040813
+   60: rgba(255,255,255,.012)
+  109: #dbeafe
+  111: rgba(21,34,60,.94)
+  111: rgba(8,15,28,.94)
+  112: rgba(255,71,71,.28)
+  114: rgba(255,255,255,.06)
+  115: rgba(255,71,71,.04)
+  116: rgba(0,0,0,.28)
+  129: #fff
+  138: rgba(255,255,255,.82)
+  147: rgba(24,36,64,.92)
+  147: rgba(10,16,30,.92)
+  163: rgba(125,211,252,.14)
+  164: rgba(8,19,39,.96)
+  164: rgba(4,10,22,.98)
+  165: rgba(255,255,255,.07)
+  168: rgba(255,255,255,.04)
+  180: rgba(255,255,255,.22)
+  181: rgba(59,130,246,.18)
+  194: rgba(2,8,23,.72)
+  195: rgba(255,255,255,.03)
+  223: rgba(255,255,255,.80)
+  250: rgba(9,17,33,.94)
+  250: rgba(5,10,20,.96)
+  252: rgba(0,0,0,.26)
+  270: rgba(255,255,255,.48)
+  305: rgba(255,255,255,.18)
+  306: rgba(255,255,255,.12)
+  307: rgba(255,71,71,1)
+  309: rgba(246,164,0,1)
+  310: rgba(59,130,246,1)
+  311: rgba(255,71,71,.18)
+  334: #ff4a4a
+  336: rgba(255,74,74,.14)
+  337: rgba(255,74,74,.45)
+  343: rgba(246,164,0,.12)
+  344: rgba(246,164,0,.35)
+  354: rgba(59,130,246,.12)
+  355: rgba(59,130,246,.30)
+  363: #6b7280
+  365: rgba(107,114,128,.12)
+  379: rgba(8,17,34,.94)
+  379: rgba(5,10,20,.97)
+  382: rgba(0,0,0,.25)
+  388: rgba(255,71,71,.22)
+  389: rgba(45,9,18,.95)
+  389: rgba(8,13,24,.98)
+  390: rgba(255,71,71,.34)
+  393: rgba(255,71,71,.05)
+  407: #ffd0d0
+  445: rgba(255,71,71,.24)
+  449: #fff1c2
+  450: rgba(246,164,0,.15)
+  451: rgba(246,164,0,.22)
+  456: rgba(59,130,246,.15)
+  457: rgba(59,130,246,.22)
+  461: #cbd5e1
+  462: rgba(107,114,128,.14)
+  463: rgba(107,114,128,.20)
+  470: rgba(255,255,255,.88)
+  497: rgba(255,255,255,.58)
+  523: rgba(0,0,0,.24)
+  534: #e5eefc
+  535: rgba(255,255,255,.02)
+  560: #fb4458
+  560: #dc2626
+  560: #b91c1c
+  561: rgba(185,28,28,.30)
+... 215 renk daha var.
+
+--- templates/live_map.html | benzersiz renk: 168 ---
+   12: #050b16
+   13: rgba(15,23,42,.86)
+   14: rgba(255,255,255,.10)
+   15: #f8fafc
+   16: rgba(255,255,255,.68)
+   17: #3b82f6
+   18: #ef4444
+   19: #f59e0b
+   20: #22c55e
+   29: rgba(59,130,246,.14)
+   30: #071426
+   30: #030712
+   58: rgba(255,255,255,.08)
+   60: #fff
+   90: rgba(0,0,0,.22)
+  115: rgba(255,255,255,.13)
+  116: rgba(0,0,0,.38)
+  117: #020617
+  141: rgba(255,255,255,.16)
+  144: rgba(15,23,42,.82)
+  157: rgba(255,255,255,.85)
+  158: rgba(0,0,0,.35)
+  168: #991b1b
+  169: #b45309
+  170: #1d4ed8
+  171: #64748b
+  171: #334155
+  179: #0ea5e9
+  181: rgba(255,255,255,.88)
+  182: rgba(14,165,233,.35)
+  188: #0f172a
+  203: rgba(255,255,255,.74)
+  218: rgba(59,130,246,.20)
+  219: rgba(147,197,253,.20)
+  239: rgba(255,255,255,.78)
+  253: rgba(239,68,68,.16)
+  254: rgba(239,68,68,.55)
+  260: rgba(245,158,11,.14)
+  261: rgba(245,158,11,.48)
+  267: rgba(59,130,246,.12)
+  268: rgba(59,130,246,.32)
+  269: rgba(0,0,0,.30)
+  275: rgba(239,68,68,.14)
+  276: rgba(239,68,68,.40)
+  281: rgba(239,68,68,.06)
+  282: rgba(239,68,68,.70)
+  283: rgba(0,0,0,.40)
+  292: rgba(245,158,11,.30)
+  292: rgba(59,130,246,.18)
+  293: rgba(245,158,11,.36)
+  294: #fff7ed
+  298: rgba(59,130,246,.34)
+  326: rgba(59,130,246,.22)
+  345: rgba(255,255,255,.22)
+  345: rgba(255,255,255,0)
+  346: #10213d
+  347: rgba(255,255,255,.92)
+  349: rgba(34,197,94,.13)
+  350: rgba(14,165,233,.48)
+  351: rgba(0,0,0,.46)
+  365: rgba(219,234,254,.95)
+  365: rgba(125,211,252,.72)
+  368: rgba(255,255,255,.70)
+  380: rgba(226,232,240,.92)
+  384: rgba(255,255,255,.18)
+  394: rgba(14,165,233,.75)
+  394: rgba(15,23,42,.30)
+  395: rgba(255,255,255,.36)
+  405: #fef3c7
+  406: rgba(254,243,199,.8)
+  416: rgba(255,255,255,.82)
+  426: rgba(15,23,42,.88)
+  428: #bbf7d0
+  439: rgba(14,165,233,.38)
+  440: rgba(0,0,0,.42)
+  444: rgba(34,197,94,.06)
+  445: rgba(14,165,233,.62)
+  446: rgba(0,0,0,.48)
+  458: rgba(34,197,94,.45)
+  459: rgba(0,0,0,.45)
+  471: rgba(15,23,42,.92)
+  489: rgba(34,197,94,.38)
+  496: rgba(0,0,0,.50)
+  507: rgba(56,189,248,.55)
+  508: rgba(0,0,0,.55)
+  520: rgba(2,6,23,.92)
+  521: rgba(125,211,252,.32)
+  522: #bae6fd
+  527: rgba(56,189,248,.22)
+  540: rgba(56,189,248,.42)
+... 78 renk daha var.
+
+--- templates/seats.html | benzersiz renk: 22 ---
+  400: rgba(5,15,28,.95)
+  401: rgba(96,165,250,.28)
+  403: rgba(255,255,255,.05)
+  404: rgba(0,0,0,.38)
+  418: rgba(148,163,184,.20)
+  419: rgba(31,63,102,.98)
+  419: rgba(13,28,48,.98)
+  421: rgba(255,255,255,.16)
+  422: rgba(0,0,0,.24)
+  428: #fff
+  437: rgba(239,68,68,.95)
+  437: rgba(127,29,29,.95)
+  438: rgba(248,113,113,.35)
+  696: #2563eb
+  696: #1d4ed8
+  698: rgba(147,197,253,.20)
+  699: rgba(37,99,235,.22)
+  699: rgba(255,255,255,.15)
+  717: rgba(255,255,255,.07)
+  718: rgba(148,163,184,.16)
+  719: rgba(255,255,255,.08)
+  764: rgba(226,232,240,.62)
+
+--- templates/seats_parts/finish_trip_modal.html | benzersiz renk: 26 ---
+   47: rgba(2,8,18,.72)
+   61: #0f172a
+   63: rgba(96,165,250,.22)
+   64: #ffffff
+   64: #f4f8ff
+   65: rgba(255,255,255,.72)
+   67: rgba(0,0,0,.45)
+   68: rgba(255,255,255,.70)
+   85: #fff
+   86: #111827
+   89: rgba(15,23,42,.14)
+  100: #e0f2fe
+  100: #bfdbfe
+  101: rgba(37,99,235,.18)
+  106: #2563eb
+  124: #64748b
+  140: #eef6ff
+  141: rgba(147,197,253,.45)
+  163: #1d4ed8
+  164: #eaf3ff
+  165: rgba(96,165,250,.34)
+  189: #f8fbff
+  190: rgba(148,163,184,.24)
+  191: rgba(15,23,42,.08)
+  196: #38bdf8
+  197: rgba(37,99,235,.28)
+
+--- templates/seats_parts/offload_confirm.html | benzersiz renk: 35 ---
+   12: rgba(37,99,235,.18)
+   13: rgba(8,15,28,.72)
+   27: rgba(255,255,255,.96)
+   28: #ffffff
+   28: #f7faff
+   28: #eef4ff
+   29: rgba(255,255,255,.86)
+   31: rgba(0,0,0,.40)
+   32: rgba(255,255,255,.72)
+   58: rgba(255,255,255,.75)
+   59: #e0f2fe
+   59: #bfdbfe
+   61: rgba(37,99,235,.16)
+   62: rgba(255,255,255,.92)
+   67: #0f172a
+   76: #64748b
+   88: #334155
+   98: rgba(239,246,255,.96)
+   98: rgba(219,234,254,.92)
+   99: rgba(147,197,253,.32)
+  100: #1e3a8a
+  110: rgba(254,243,199,.90)
+  110: rgba(255,251,235,.94)
+  111: rgba(251,191,36,.24)
+  112: #92400e
+  137: #eef3fb
+  138: rgba(148,163,184,.20)
+  140: rgba(15,23,42,.08)
+  145: #fff
+  147: rgba(255,255,255,.22)
+  148: #22c55e
+  148: #16a34a
+  148: #15803d
+  150: rgba(22,163,74,.28)
+  151: rgba(255,255,255,.18)
+
+==========================================================================================
+8) SONUÇ İPUCU
+==========================================================================================
+Bu rapora göre şunları belirleyeceğiz:
+1) Canlı Durak Akışı HTML'i templates/seats.html içinde mi, JS ile mi üretiliyor?
+2) Görünümü hangi CSS dosyası yönetiyor?
+3) En son hangi yama dosyası override ediyor?
+4) V2 renkleri ayrı bir scoped blokla mı eklenmeli, mevcut dosya mı düzenlenmeli?
+5) Koltuk planına dokunmadan sadece canlı akış bölümü hedeflenebilir mi?

@@ -1,0 +1,4408 @@
+import shutil
+import zipfile
+import os
+import csv
+import json
+import secrets
+import sqlite3
+import re
+from io import StringIO
+from pathlib import Path
+from datetime import datetime, timedelta
+from typing import Any, Optional, Tuple
+
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    jsonify,
+    g,
+    session,
+    abort,
+    send_from_directory,
+    send_file,
+    make_response,
+)
+from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from speedlimit import bp_speed
+from modules.bags import bp as bags_bp
+from modules.bags import bag_root, safe, get_counts
+
+
+# =========================================================
+# Ayarlar
+# =========================================================
+
+def env_bool(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "degistir-beni")
+
+DB_PATH = os.getenv("DB_PATH", "db.sqlite3")
+DEBUG = env_bool("FLASK_DEBUG", True)
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "yusuf")
+
+
+
+
+# =========================================================
+# Admin Profil / İlk Kurulum
+# =========================================================
+def ensure_admin_profile_table(db):
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS admin_profile(
+            id INTEGER PRIMARY KEY CHECK(id=1),
+            full_name TEXT NOT NULL DEFAULT '',
+            phone TEXT NOT NULL DEFAULT '',
+            photo_path TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+        )
+    """)
+
+
+def get_admin_profile():
+    db = get_db()
+    ensure_admin_profile_table(db)
+    row = db.execute("""
+        SELECT id, full_name, phone, photo_path, created_at, updated_at
+        FROM admin_profile
+        WHERE id=1
+    """).fetchone()
+
+    if not row:
+        return None
+
+    return {
+        "id": row["id"],
+        "full_name": row["full_name"] or "",
+        "phone": row["phone"] or "",
+        "photo_path": row["photo_path"] or "",
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+
+
+def admin_profile_exists():
+    prof = get_admin_profile()
+    return bool(prof and prof.get("full_name"))
+
+
+def save_admin_profile(full_name, phone, photo_path=""):
+    full_name = (full_name or "").strip()
+    phone = (phone or "").strip()
+    photo_path = (photo_path or "").strip()
+
+    db = get_db()
+    ensure_admin_profile_table(db)
+
+    old = get_admin_profile()
+    if not photo_path and old:
+        photo_path = old.get("photo_path", "")
+
+    db.execute("""
+        INSERT INTO admin_profile(id, full_name, phone, photo_path, created_at, updated_at)
+        VALUES(1, ?, ?, ?, datetime('now','localtime'), datetime('now','localtime'))
+        ON CONFLICT(id) DO UPDATE SET
+            full_name=excluded.full_name,
+            phone=excluded.phone,
+            photo_path=excluded.photo_path,
+            updated_at=datetime('now','localtime')
+    """, (full_name, phone, photo_path))
+
+    db.commit()
+
+
+def save_profile_photo(file_storage):
+    if not file_storage or not getattr(file_storage, "filename", ""):
+        return ""
+
+    filename = secure_filename(file_storage.filename or "")
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+    allowed = {"jpg", "jpeg", "png", "webp"}
+    if ext not in allowed:
+        return ""
+
+    folder = Path(app.root_path) / "static" / "profile"
+    folder.mkdir(parents=True, exist_ok=True)
+
+    new_name = f"admin_profile_{secrets.token_hex(6)}.{ext}"
+    target = folder / new_name
+    file_storage.save(str(target))
+
+    return f"/static/profile/{new_name}"
+
+
+@app.context_processor
+def inject_admin_profile():
+    try:
+        return {"admin_profile": get_admin_profile()}
+    except Exception:
+        return {"admin_profile": None}
+
+# =========================================================
+# Admin Şifre Yönetimi
+# =========================================================
+def ensure_security_table(db):
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS admin_security(
+            id INTEGER PRIMARY KEY CHECK(id=1),
+            password_hash TEXT NOT NULL,
+            updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+        )
+    """)
+
+
+def get_admin_password_hash(db):
+    ensure_security_table(db)
+    row = db.execute("SELECT password_hash FROM admin_security WHERE id=1").fetchone()
+    return row["password_hash"] if row else ""
+
+
+def verify_admin_password(password):
+    password = (password or "").strip()
+    if not password:
+        return False
+
+    db = get_db()
+    saved_hash = get_admin_password_hash(db)
+
+    # Veritabanında yeni şifre varsa onu kontrol et
+    if saved_hash:
+        try:
+            return check_password_hash(saved_hash, password)
+        except Exception:
+            return False
+
+    # İlk kurulum / eski sistem desteği
+    return password == ADMIN_PASSWORD
+
+
+def set_admin_password(new_password):
+    new_password = (new_password or "").strip()
+    if len(new_password) < 4:
+        return False, "Yeni şifre en az 4 karakter olmalı."
+
+    db = get_db()
+    ensure_security_table(db)
+
+    password_hash = generate_password_hash(new_password)
+
+    db.execute("""
+        INSERT INTO admin_security(id, password_hash, updated_at)
+        VALUES(1, ?, datetime('now','localtime'))
+        ON CONFLICT(id) DO UPDATE SET
+            password_hash=excluded.password_hash,
+            updated_at=datetime('now','localtime')
+    """, (password_hash,))
+
+    db.commit()
+    return True, "Şifre başarıyla güncellendi."
+
+PORT = int(os.getenv("PORT", "5000"))
+
+UPLOAD_DIR = os.getenv(
+    "UPLOAD_DIR",
+    os.path.join(os.getcwd(), "uploads", "consignments"),
+)
+MAX_UPLOAD_MB = int(os.getenv("MAX_UPLOAD_MB", "10"))
+app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
+
+ALLOWED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
+ALLOWED_IMAGE_MIMES = {"image/jpeg", "image/png", "image/webp"}
+
+app.register_blueprint(bags_bp)
+app.register_blueprint(bp_speed)
+
+
+# =========================================================
+# Sabitler
+# =========================================================
+
+SEAT_NUMBERS = [
+    1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20, 21, 23, 24,
+    25, 27, 28, 29, 31, 33, 34, 35, 37, 38, 39, 41, 42, 43, 45, 46,
+    49, 50, 51, 52, 53, 54,
+]
+
+SEAT_POSITIONS = {
+    1: [1, 1], 3: [1, 3], 4: [1, 4],
+    5: [2, 1], 7: [2, 3], 8: [2, 4],
+    9: [3, 1], 11: [3, 3], 12: [3, 4],
+    13: [4, 1], 15: [4, 3], 16: [4, 4],
+    17: [5, 1], 19: [5, 3], 20: [5, 4],
+    21: [6, 1], 23: [6, 3], 24: [6, 4],
+    25: [7, 1], 27: [8, 3], 28: [8, 4],
+    29: [8, 1],
+    31: [9, 1], 33: [9, 3], 34: [9, 4],
+    35: [10, 1], 37: [10, 3], 38: [10, 4],
+    39: [11, 1], 41: [11, 3], 42: [11, 4],
+    43: [12, 1], 45: [12, 3], 46: [12, 4],
+    49: [13, 3], 50: [13, 4],
+    51: [14, 1], 52: [14, 2], 53: [14, 3], 54: [14, 4],
+}
+
+ROUTE_STOPS = {
+    "Denizli – İstanbul": [
+        "Denizli otogar", "Sarayköy", "Buldan", "Bozalan", "Derbent(Denizli)", "Kadıköy",
+        "İl Sınırı(Manisa)", "Dindarlı", "Dadağlı", "Sarıgöl Garaj", "Afşar", "Bereketli",
+        "Hacıaliler", "Ortahan", "Belenyaka", "Alaşehir Otogar", "Alaşehir Stadyum",
+        "Akkeçili", "Piyadeler", "Kavaklıdere", "Salihli Garaj", "Sart", "Ahmetli",
+        "Gökkaya", "Akçapınar", "Derbent(Turgutlu)", "Turgutlu Garaj", "Özdilek(Turgutlu)",
+        "Manisa Otogar", "Akhisar", "Saruhanlı", "Soma", "Kırkağaç", "Balıkesir", "Susurluk",
+        "Mustafa K.P(Bursa)", "Bursa Otogar", "Gebze Garaj", "Harem", "Alibeyköy", "Esenler Otogar",
+    ],
+    "Denizli – İzmir": [
+        "Denizli otogar", "Sarayköy", "Alaşehir Otogar", "Salihli Garaj", "Turgutlu Garaj",
+        "Manisa Otogar", "Bornova", "İzmir Otogar",
+    ],
+    "İstanbul – Denizli": [
+        "Esenler Otogar", "Alibeyköy", "Harem", "Gebze Garaj", "Bursa Otogar", "Susurluk",
+        "Balıkesir", "Kırkağaç", "Soma", "Akhisar", "Manisa Otogar", "Turgutlu Garaj",
+        "Salihli Garaj", "Alaşehir Otogar", "Denizli otogar",
+    ],
+    "İzmir – Denizli": [
+        "İzmir Otogar", "Bornova", "Manisa Otogar", "Turgutlu Garaj", "Salihli Garaj",
+        "Alaşehir Otogar", "Sarayköy", "Denizli otogar",
+    ],
+    "İstanbul – Antalya": [
+        "Esenler", "Alibeyköy", "Harem", "Gebze", "Bursa", "Korkuteli", "Antalya Otogar",
+    ],
+    "Antalya – İstanbul": [
+        "Antalya Otogar", "Korkuteli", "Bursa", "Gebze", "Harem", "Alibeyköy", "Esenler",
+    ],
+}
+
+TICKET_TYPES = {"biletli", "biletsiz", "ucretsiz"}
+PAYMENT_TYPES = {"nakit", "iban", "online", "pos", "ucretsiz"}
+GENDERS = {"bay", "bayan", ""}
+
+NEIGHBORS = {
+    3: 4, 4: 3, 7: 8, 8: 7, 11: 12, 12: 11, 15: 16, 16: 15,
+    19: 20, 20: 19, 23: 24, 24: 23, 27: 28, 28: 27, 33: 34, 34: 33,
+    37: 38, 38: 37, 41: 42, 42: 41, 45: 46, 46: 45, 49: 50, 50: 49, 53: 54, 54: 53,
+}
+
+DEFAULT_CATS_IN = ["Devir", "Garaj", "Harem", "Eşya", "Nakit Bilet", "Avans", "Diğer"]
+DEFAULT_CATS_OUT = ["Yıkama", "Sigara", "Yemek", "Otoyol", "Otogar", "İkram", "Temizlik", "Su/Çay", "Bakım", "Diğer"]
+
+AI_INTENTS = {
+    "seat_add_single": {"title": "Tek koltuk ekleme", "pattern": "seat + add"},
+    "seat_add_group": {"title": "Çoklu koltuk ekleme", "pattern": "seat_list + add"},
+    "seat_remove_single": {"title": "Tek koltuk boşaltma", "pattern": "seat + offload"},
+    "seat_remove_group": {"title": "Çoklu koltuk boşaltma", "pattern": "seat_list + offload"},
+    "standing_add": {"title": "Ayakta ekleme", "pattern": "standing + add"},
+    "service_mark": {"title": "Servis işaretleme", "pattern": "service + mark"},
+    "query": {"title": "Sorgu", "pattern": "query"},
+}
+
+
+# =========================================================
+# Genel yardımcılar
+# =========================================================
+
+def norm_ticket_type(val: str) -> str:
+    v = (val or "").strip().lower()
+    return v if v in TICKET_TYPES else "biletsiz"
+
+
+def norm_payment(val: str) -> str:
+    v = (val or "").strip().lower()
+    return v if v in PAYMENT_TYPES else "nakit"
+
+
+def norm_gender(val: str) -> str:
+    v = (val or "").strip().lower()
+    return v if v in GENDERS else ""
+
+
+def norm_bool(val: Any) -> int:
+    if isinstance(val, bool):
+        return 1 if val else 0
+    s = str(val or "").strip().lower()
+    return 1 if s in {"1", "true", "yes", "on"} else 0
+
+
+def parse_float(val: Any, default: Optional[float] = 0.0) -> Optional[float]:
+    try:
+        return float(val)
+    except Exception:
+        return default
+
+
+def parse_int(val: Any, default: Optional[int] = 0) -> Optional[int]:
+    try:
+        return int(val)
+    except Exception:
+        return default
+
+
+def ensure_upload_dir() -> None:
+    Path(UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+
+
+def allowed_file(filename: str) -> bool:
+    if not filename or "." not in filename:
+        return False
+    ext = "." + filename.rsplit(".", 1)[1].lower()
+    return ext in ALLOWED_IMAGE_EXTS
+
+def validate_seat_no(seat_no: int) -> bool:
+    return seat_no in SEAT_NUMBERS
+
+
+def parse_int_list(raw: str):
+    if not raw:
+        return []
+    out = []
+    for part in raw.split(","):
+        n = parse_int(part.strip(), None)
+        if n is not None and n not in out:
+            out.append(n)
+    return out
+
+
+def delete_walkon_rows(
+    db: sqlite3.Connection,
+    trip_id: int,
+    *,
+    item_id: Optional[int] = None,
+    ids: Optional[list[int]] = None,
+    to_stop: Optional[str] = None,
+    clear_all: bool = False,
+):
+    rows = []
+
+    if item_id is not None:
+        rows = db.execute(
+            "SELECT id FROM walk_on_sales WHERE trip_id=? AND id=?",
+            (trip_id, item_id),
+        ).fetchall()
+
+    elif ids:
+        placeholders = ",".join("?" * len(ids))
+        rows = db.execute(
+            f"SELECT id FROM walk_on_sales WHERE trip_id=? AND id IN ({placeholders})",
+            [trip_id, *ids],
+        ).fetchall()
+
+    elif clear_all:
+        rows = db.execute(
+            "SELECT id FROM walk_on_sales WHERE trip_id=?",
+            (trip_id,),
+        ).fetchall()
+
+    elif to_stop:
+        rows = db.execute(
+            "SELECT id FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
+            (trip_id, to_stop),
+        ).fetchall()
+
+    deleted_ids = [r["id"] for r in rows]
+
+    if deleted_ids:
+        db.executemany(
+            "DELETE FROM walk_on_sales WHERE trip_id=? AND id=?",
+            [(trip_id, i) for i in deleted_ids],
+        )
+
+    return deleted_ids
+# =========================================================
+# DB
+# =========================================================
+
+def get_db() -> sqlite3.Connection:
+    if "db" not in g:
+        g.db = sqlite3.connect(DB_PATH)
+        g.db.row_factory = sqlite3.Row
+        g.db.execute("PRAGMA foreign_keys=ON;")
+        g.db.execute("PRAGMA journal_mode=WAL;")
+    return g.db
+
+
+@app.teardown_appcontext
+def close_db(exc):
+    db = g.pop("db", None)
+    if db is not None:
+        db.close()
+
+
+def ensure_schema() -> None:
+    db = get_db()
+
+    db.executescript(
+        """
+        PRAGMA journal_mode=WAL;
+
+        CREATE TABLE IF NOT EXISTS trips(
+            id INTEGER PRIMARY KEY,
+            date TEXT,
+            route TEXT,
+            departure_time TEXT,
+            plate TEXT,
+            captain1 TEXT,
+            captain2 TEXT,
+            attendant TEXT,
+            note TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS app_state(
+            id INTEGER PRIMARY KEY CHECK(id=1),
+            active_trip_id INTEGER
+        );
+        INSERT OR IGNORE INTO app_state(id, active_trip_id) VALUES (1, NULL);
+
+        CREATE TABLE IF NOT EXISTS routes(
+            id INTEGER PRIMARY KEY,
+            name TEXT UNIQUE,
+            stops TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS seats(
+            trip_id INTEGER NOT NULL,
+            seat_no INTEGER NOT NULL,
+            from_stop TEXT DEFAULT '',
+            to_stop TEXT DEFAULT '',
+            ticket_type TEXT DEFAULT 'biletsiz',
+            payment TEXT DEFAULT 'nakit',
+            amount REAL DEFAULT 0,
+            gender TEXT DEFAULT '',
+            pair_ok INTEGER DEFAULT 0,
+            service INTEGER DEFAULT 0,
+            service_note TEXT DEFAULT '',
+            passenger_name TEXT DEFAULT '',
+            passenger_phone TEXT DEFAULT '',
+            PRIMARY KEY(trip_id, seat_no),
+            FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_seats_trip ON seats(trip_id);
+        CREATE INDEX IF NOT EXISTS idx_seats_trip_to_stop ON seats(trip_id, to_stop);
+        CREATE INDEX IF NOT EXISTS idx_seats_trip_from_stop ON seats(trip_id, from_stop);
+        CREATE INDEX IF NOT EXISTS idx_seats_trip_payment ON seats(trip_id, payment);
+
+        CREATE TABLE IF NOT EXISTS walk_on_sales(
+            id INTEGER PRIMARY KEY,
+            trip_id INTEGER NOT NULL,
+            from_stop TEXT NOT NULL,
+            to_stop TEXT NOT NULL,
+            pax INTEGER NOT NULL DEFAULT 1,
+            unit_price REAL NOT NULL DEFAULT 0,
+            total_amount REAL NOT NULL DEFAULT 0,
+            payment TEXT NOT NULL DEFAULT 'nakit',
+            note TEXT,
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_walkon_trip ON walk_on_sales(trip_id);
+
+        CREATE TABLE IF NOT EXISTS route_stop_coords(
+            route TEXT NOT NULL,
+            stop TEXT NOT NULL,
+            lat REAL NOT NULL,
+            lng REAL NOT NULL,
+            PRIMARY KEY(route, stop)
+        );
+
+        CREATE TABLE IF NOT EXISTS stop_logs(
+            id INTEGER PRIMARY KEY,
+            trip_id INTEGER NOT NULL,
+            stop_name TEXT NOT NULL,
+            event TEXT NOT NULL,
+            distance_km REAL,
+            seats_for_stop INTEGER,
+            meta_json TEXT,
+            ts TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+            FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_stoplogs_trip_ts ON stop_logs(trip_id, ts);
+
+        CREATE TABLE IF NOT EXISTS consignments(
+            id INTEGER PRIMARY KEY,
+            trip_id INTEGER,
+            code TEXT UNIQUE,
+            item_name TEXT,
+            item_type TEXT,
+            from_name TEXT,
+            from_phone TEXT,
+            to_name TEXT,
+            to_phone TEXT,
+            from_stop TEXT,
+            to_stop TEXT,
+            amount REAL DEFAULT 0,
+            payment TEXT DEFAULT 'nakit',
+            status TEXT DEFAULT 'bekliyor',
+            notes TEXT,
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            updated_at TEXT,
+            delivered_at TEXT,
+            FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_cons_trip ON consignments(trip_id);
+        CREATE INDEX IF NOT EXISTS idx_cons_status ON consignments(status);
+
+        CREATE TABLE IF NOT EXISTS consignment_photos(
+            id INTEGER PRIMARY KEY,
+            consignment_id INTEGER NOT NULL,
+            role TEXT,
+            file_path TEXT NOT NULL,
+            mime TEXT,
+            size_bytes INTEGER,
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            FOREIGN KEY(consignment_id) REFERENCES consignments(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS fares(
+            route TEXT NOT NULL,
+            from_stop TEXT NOT NULL,
+            to_stop TEXT NOT NULL,
+            price REAL NOT NULL,
+            updated_at TEXT DEFAULT (datetime('now','localtime')),
+            PRIMARY KEY(route, from_stop, to_stop)
+        );
+
+        CREATE TABLE IF NOT EXISTS settings(
+            key TEXT PRIMARY KEY,
+            value TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS cash_moves(
+            id INTEGER PRIMARY KEY,
+            trip_id INTEGER NOT NULL,
+            direction TEXT NOT NULL CHECK(direction IN ('+','-')),
+            category TEXT NOT NULL,
+            amount INTEGER NOT NULL DEFAULT 0,
+            note TEXT,
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_cash_moves_trip ON cash_moves(trip_id);
+
+        CREATE TABLE IF NOT EXISTS learned_commands(
+            id INTEGER PRIMARY KEY,
+            phrase TEXT NOT NULL,
+            phrase_norm TEXT NOT NULL UNIQUE,
+            skeleton TEXT,
+            intent TEXT NOT NULL,
+            pattern TEXT,
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            updated_at TEXT DEFAULT (datetime('now','localtime'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_learned_commands_phrase_norm
+        ON learned_commands(phrase_norm);
+
+        CREATE INDEX IF NOT EXISTS idx_learned_commands_skeleton
+        ON learned_commands(skeleton);
+
+        CREATE INDEX IF NOT EXISTS idx_learned_commands_intent
+        ON learned_commands(intent);
+
+        CREATE TABLE IF NOT EXISTS route_schedule_profiles(
+            id INTEGER PRIMARY KEY,
+            route_name TEXT NOT NULL,
+            title TEXT NOT NULL,
+            direction TEXT NOT NULL DEFAULT 'gidis',
+            is_default INTEGER NOT NULL DEFAULT 0,
+            note TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            updated_at TEXT DEFAULT (datetime('now','localtime'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_route_schedule_profiles_route
+        ON route_schedule_profiles(route_name);
+
+        CREATE INDEX IF NOT EXISTS idx_route_schedule_profiles_route_direction
+        ON route_schedule_profiles(route_name, direction);
+
+        CREATE TABLE IF NOT EXISTS route_schedule_items(
+            id INTEGER PRIMARY KEY,
+            profile_id INTEGER NOT NULL,
+            stop_name TEXT NOT NULL,
+            planned_time TEXT DEFAULT '',
+            segment_km REAL DEFAULT NULL,
+            is_timed INTEGER NOT NULL DEFAULT 0,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            note TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            updated_at TEXT DEFAULT (datetime('now','localtime')),
+            FOREIGN KEY(profile_id) REFERENCES route_schedule_profiles(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_route_schedule_items_profile
+        ON route_schedule_items(profile_id);
+
+        CREATE INDEX IF NOT EXISTS idx_route_schedule_items_profile_sort
+        ON route_schedule_items(profile_id, sort_order);
+
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_route_schedule_items_profile_stop
+        ON route_schedule_items(profile_id, stop_name);
+        """
+    )
+
+    seat_cols = [r["name"] for r in db.execute("PRAGMA table_info(seats)").fetchall()]
+    migrations = {
+        "from_stop": "ALTER TABLE seats ADD COLUMN from_stop TEXT DEFAULT ''",
+        "to_stop": "ALTER TABLE seats ADD COLUMN to_stop TEXT DEFAULT ''",
+        "gender": "ALTER TABLE seats ADD COLUMN gender TEXT DEFAULT ''",
+        "pair_ok": "ALTER TABLE seats ADD COLUMN pair_ok INTEGER DEFAULT 0",
+        "service": "ALTER TABLE seats ADD COLUMN service INTEGER DEFAULT 0",
+        "service_note": "ALTER TABLE seats ADD COLUMN service_note TEXT DEFAULT ''",
+        "passenger_name": "ALTER TABLE seats ADD COLUMN passenger_name TEXT DEFAULT ''",
+        "passenger_phone": "ALTER TABLE seats ADD COLUMN passenger_phone TEXT DEFAULT ''",
+    }
+
+    for col, sql in migrations.items():
+        if col not in seat_cols:
+            db.execute(sql)
+
+    db.commit()
+
+
+# =========================================================
+# Template filter
+# =========================================================
+
+@app.template_filter("tl")
+def format_tl(value):
+    try:
+        value = float(value)
+        s = f"{value:,.2f} ₺"
+        return s.replace(",", "X").replace(".", ",").replace("X", ".")
+    except Exception:
+        return "0,00 ₺"
+
+
+# =========================================================
+# Settings helper
+# =========================================================
+
+def settings_get(key: str, default=None):
+    row = get_db().execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+    if not row:
+        return default
+    raw = row["value"]
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
+
+
+def settings_set(key: str, value) -> None:
+    raw = json.dumps(value, ensure_ascii=False) if not isinstance(value, str) else value
+    db = get_db()
+    db.execute("INSERT OR REPLACE INTO settings(key, value) VALUES(?, ?)", (key, raw))
+    db.commit()
+
+
+# =========================================================
+# Kurtarma Kodu Yönetimi
+# =========================================================
+def normalize_recovery_code(code: str) -> str:
+    raw = (code or "").strip().upper()
+    raw = raw.replace(" ", "").replace("_", "-")
+    while "--" in raw:
+        raw = raw.replace("--", "-")
+    return raw
+
+
+def make_recovery_code() -> str:
+    # Örnek: SARIKIZ-4829-7315-6042
+    parts = [f"{secrets.randbelow(10000):04d}" for _ in range(3)]
+    return "SARIKIZ-" + "-".join(parts)
+
+
+def get_recovery_code_hash() -> str:
+    try:
+        return settings_get("recovery_code_hash", "") or ""
+    except Exception:
+        return ""
+
+
+def set_recovery_code(code: str) -> None:
+    code = normalize_recovery_code(code)
+    settings_set("recovery_code_hash", generate_password_hash(code))
+    settings_set("recovery_code_updated_at", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+
+def verify_recovery_code(code: str) -> bool:
+    code = normalize_recovery_code(code)
+    if not code:
+        return False
+
+    saved_hash = get_recovery_code_hash()
+    if not saved_hash:
+        return False
+
+    try:
+        return check_password_hash(saved_hash, code)
+    except Exception:
+        return False
+
+
+def ensure_list(x):
+    if isinstance(x, list):
+        return x
+    if isinstance(x, str):
+        parts = [p.strip() for p in x.replace("\n", ",").split(",")]
+        return [p for p in parts if p]
+    return []
+
+
+def get_cash_categories():
+    cats_in = ensure_list(settings_get("cash_cat_in"))
+    cats_out = ensure_list(settings_get("cash_cat_out"))
+    if not cats_in:
+        cats_in = DEFAULT_CATS_IN
+    if not cats_out:
+        cats_out = DEFAULT_CATS_OUT
+    settings_set("cash_cat_in", cats_in)
+    settings_set("cash_cat_out", cats_out)
+    return cats_in, cats_out
+
+
+def save_cash_categories(text_in: str, text_out: str) -> None:
+    def parse_lines(s: str):
+        return [x.strip() for x in (s or "").replace("\n", ",").split(",") if x.strip()]
+
+    settings_set("cash_cat_in", parse_lines(text_in) or DEFAULT_CATS_IN)
+    settings_set("cash_cat_out", parse_lines(text_out) or DEFAULT_CATS_OUT)
+
+
+# =========================================================
+# Aktif sefer
+# =========================================================
+
+def set_active_trip(trip_id: Optional[int]) -> None:
+    db = get_db()
+    db.execute("UPDATE app_state SET active_trip_id=? WHERE id=1", (trip_id,))
+    db.commit()
+
+
+def get_active_trip() -> Optional[int]:
+    row = get_db().execute("SELECT active_trip_id FROM app_state WHERE id=1").fetchone()
+    return row["active_trip_id"] if row else None
+
+
+def get_active_trip_row():
+    tid = get_active_trip()
+    if not tid:
+        return None
+    return get_db().execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+
+
+def ensure_live_runtime_state_table() -> None:
+    db = get_db()
+    db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS live_runtime_state(
+            trip_id INTEGER PRIMARY KEY,
+            live_stop TEXT DEFAULT '',
+            speed REAL DEFAULT 0,
+            gps_km TEXT DEFAULT '',
+            eta_main TEXT DEFAULT '',
+            eta_sub TEXT DEFAULT '',
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    db.commit()
+
+
+def fetch_live_runtime_state(trip_id: int) -> dict:
+    ensure_live_runtime_state_table()
+    row = get_db().execute(
+        """
+        SELECT trip_id, live_stop, speed, gps_km, eta_main, eta_sub, updated_at
+        FROM live_runtime_state
+        WHERE trip_id=?
+        """,
+        (trip_id,),
+    ).fetchone()
+    if not row:
+        return {
+            "trip_id": trip_id,
+            "live_stop": "",
+            "speed": 0,
+            "gps_km": "",
+            "eta_main": "",
+            "eta_sub": "",
+            "updated_at": "",
+        }
+    return {
+        "trip_id": row["trip_id"],
+        "live_stop": row["live_stop"] or "",
+        "speed": row["speed"] or 0,
+        "gps_km": row["gps_km"] or "",
+        "eta_main": row["eta_main"] or "",
+        "eta_sub": row["eta_sub"] or "",
+        "updated_at": row["updated_at"] or "",
+    }
+
+
+def upsert_live_runtime_state(
+    trip_id: int,
+    *,
+    live_stop: str = "",
+    speed: float = 0,
+    gps_km: str = "",
+    eta_main: str = "",
+    eta_sub: str = "",
+) -> None:
+    ensure_live_runtime_state_table()
+    db = get_db()
+    db.execute(
+        """
+        INSERT INTO live_runtime_state(trip_id, live_stop, speed, gps_km, eta_main, eta_sub, updated_at)
+        VALUES(?, ?, ?, ?, ?, ?, datetime('now','localtime'))
+        ON CONFLICT(trip_id) DO UPDATE SET
+            live_stop=excluded.live_stop,
+            speed=excluded.speed,
+            gps_km=excluded.gps_km,
+            eta_main=excluded.eta_main,
+            eta_sub=excluded.eta_sub,
+            updated_at=datetime('now','localtime')
+        """,
+        (
+            trip_id,
+            (live_stop or "").strip(),
+            float(speed or 0),
+            (gps_km or "").strip(),
+            (eta_main or "").strip(),
+            (eta_sub or "").strip(),
+        ),
+    )
+    db.commit()
+
+
+
+
+# DEV_NO_CACHE_HEADERS_FINAL
+@app.after_request
+def dev_no_cache_headers(response):
+    """
+    Geliştirme sırasında Android Chrome'un eski HTML/CSS/JS göstermesini engeller.
+    Üretimde performans için kaldırılabilir.
+    """
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
+@app.route("/api/live-runtime-state")
+def api_live_runtime_state():
+    tid_raw = (request.args.get("trip_id") or "").strip()
+    try:
+        tid = int(tid_raw) if tid_raw else int(get_active_trip() or 0)
+    except Exception:
+        tid = int(get_active_trip() or 0)
+
+    if not tid:
+        return jsonify({"ok": False, "msg": "trip_id gerekli"}), 400
+
+    write_mode = (request.args.get("write") or "").strip() == "1"
+
+    if write_mode:
+        live_stop = (request.args.get("live_stop") or "").strip()
+        gps_km = (request.args.get("gps_km") or "").strip()
+        eta_main = (request.args.get("eta_main") or "").strip()
+        eta_sub = (request.args.get("eta_sub") or "").strip()
+
+        speed_raw = (request.args.get("speed") or "0").strip()
+        try:
+            speed = float(speed_raw or 0)
+        except Exception:
+            speed = 0.0
+
+        upsert_live_runtime_state(
+            tid,
+            live_stop=live_stop,
+            speed=speed,
+            gps_km=gps_km,
+            eta_main=eta_main,
+            eta_sub=eta_sub,
+        )
+        return jsonify({"ok": True, "state": fetch_live_runtime_state(tid)})
+
+    return jsonify({"ok": True, "state": fetch_live_runtime_state(tid)})
+
+
+# =========================================================
+# Hat / durak yardımcıları
+# =========================================================
+
+def parse_stops(text: str):
+    if not text:
+        return []
+    parts = []
+    for line in text.splitlines():
+        parts.extend(x.strip() for x in line.split(","))
+    return [x for x in parts if x]
+
+
+def get_stops(route_name: str):
+    row = get_db().execute("SELECT stops FROM routes WHERE name=?", (route_name,)).fetchone()
+    if row:
+        try:
+            return json.loads(row["stops"]) or []
+        except Exception:
+            pass
+    return ROUTE_STOPS.get(route_name, ROUTE_STOPS.get("Denizli – İstanbul", []))
+
+
+def all_route_names():
+    dyn = [r["name"] for r in get_db().execute("SELECT name FROM routes ORDER BY name").fetchall()]
+    return list(dict.fromkeys(list(ROUTE_STOPS.keys()) + dyn))
+
+
+def validate_stop_for_trip(route_name: str, stop: str) -> bool:
+    return (stop or "").strip() in set(get_stops(route_name))
+
+
+def validate_stop_for_active_trip(stop: str) -> bool:
+    trip = get_active_trip_row()
+    if not trip:
+        return False
+    return validate_stop_for_trip(trip["route"], stop)
+
+def valid_hhmm(val: str) -> bool:
+    v = (val or "").strip()
+    return bool(re.match(r"^\d{2}:\d{2}$", v))
+
+
+def normalize_hhmm(val: str) -> str:
+    v = (val or "").strip()
+    return v if valid_hhmm(v) else ""
+
+
+def schedule_profiles_for_route(route_name: str):
+    rows = get_db().execute(
+        """
+        SELECT id, route_name, title, direction, is_default, note, created_at, updated_at
+        FROM route_schedule_profiles
+        WHERE route_name=?
+        ORDER BY direction, is_default DESC, title, id
+        """,
+        (route_name,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def schedule_profile_get(profile_id: Optional[int]):
+    if not profile_id:
+        return None
+    row = get_db().execute(
+        """
+        SELECT id, route_name, title, direction, is_default, note, created_at, updated_at
+        FROM route_schedule_profiles
+        WHERE id=?
+        """,
+        (profile_id,),
+    ).fetchone()
+    return dict(row) if row else None
+
+
+def schedule_items_for_profile(profile_id: int):
+    rows = get_db().execute(
+        """
+        SELECT id, profile_id, stop_name, planned_time, segment_km, is_timed, sort_order, note
+        FROM route_schedule_items
+        WHERE profile_id=?
+        ORDER BY sort_order, id
+        """,
+        (profile_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def schedule_editor_rows(route_name: str, profile_id: Optional[int] = None):
+    stops = get_stops(route_name)
+    items_map = {}
+
+    if profile_id:
+        for r in schedule_items_for_profile(profile_id):
+            items_map[r["stop_name"]] = r
+
+    rows = []
+    for idx, stop in enumerate(stops):
+        item = items_map.get(stop, {})
+        rows.append({
+            "stop_name": stop,
+            "planned_time": item.get("planned_time", "") or "",
+            "segment_km": item.get("segment_km", None),
+            "is_timed": int(item.get("is_timed", 0) or 0),
+            "note": item.get("note", "") or "",
+            "sort_order": idx,
+        })
+
+    return rows
+
+def schedule_default_profile_for_route(route_name: str, direction: str = "gidis"):
+    row = get_db().execute(
+        """
+        SELECT id, route_name, title, direction, is_default, note
+        FROM route_schedule_profiles
+        WHERE route_name=? AND direction=?
+        ORDER BY is_default DESC, id ASC
+        LIMIT 1
+        """,
+        (route_name, direction),
+    ).fetchone()
+    return dict(row) if row else None
+
+# =========================================================
+# Yan koltuk kuralı
+# =========================================================
+
+def neighbor_rule_ok(trip_id: int, seat_no: int, gender: str, pair_ok: bool) -> Tuple[bool, str]:
+    nb = NEIGHBORS.get(seat_no)
+    if not nb or not gender:
+        return True, ""
+
+    row = get_db().execute(
+        """
+        SELECT gender, COALESCE(pair_ok,0) AS pair_ok
+        FROM seats
+        WHERE trip_id=? AND seat_no=?
+        """,
+        (trip_id, nb),
+    ).fetchone()
+
+    if not row:
+        return True, ""
+
+    nb_gender = norm_gender(row["gender"])
+    nb_pair_ok = bool(row["pair_ok"])
+
+    if gender in {"bay", "bayan"} and nb_gender in {"bay", "bayan"}:
+        if gender != nb_gender and not (pair_ok or nb_pair_ok):
+            return False, f"Yan koltuk {nb} '{nb_gender}' kayıtlı. İstisna olmadan farklı cins yan yana olmaz."
+
+    return True, ""
+
+
+# =========================================================
+# CSRF / Auth
+# =========================================================
+
+def issue_csrf() -> str:
+    token = secrets.token_urlsafe(32)
+    session["csrf_token"] = token
+    return token
+
+
+def get_csrf() -> str:
+    tok = session.get("csrf_token")
+    if not tok:
+        tok = issue_csrf()
+    return tok
+
+
+def check_csrf() -> None:
+    form_tok = request.form.get("csrf_token")
+    header_tok = request.headers.get("X-CSRF-Token")
+    json_tok = None
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+        json_tok = data.get("csrf_token")
+    supplied = form_tok or header_tok or json_tok
+    if not supplied or supplied != session.get("csrf_token"):
+        abort(403, description="CSRF doğrulaması başarısız")
+
+
+PROTECTED_PREFIXES = ("/",)
+EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+
+
+def is_excluded_path(path: str) -> bool:
+    return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+
+
+@app.before_request
+def bootstrap_and_guard():
+    if request.path == "/kullanici-sifirla" or request.path == "/tanitim":
+        return None
+
+    if request.path == "/tanitim" or request.path.startswith("/static/"):
+        return None
+
+    # =====================================================
+    # Paket özellik kilidi
+    # Örn: Standart kullanıcı Pro özelliğe girerse paket ekranına yönlenir.
+    # =====================================================
+    try:
+        rule = find_feature_rule_for_path(request.path)
+        if rule and admin_profile_exists() and session.get("auth_ok"):
+            if not plan_allows(rule["required_plan"]):
+                return redirect(url_for(
+                    "package_required_page",
+                    feature=rule["feature_name"],
+                    required=rule["required_plan"],
+                ))
+    except Exception:
+        pass
+
+    # =====================================================
+    # Abonelik erişim kilidi
+    # Deneme bittiyse ana uygulama sayfalarını kilitler.
+    # Login, kurulum ve abonelik ekranları açık kalır.
+    # =====================================================
+    sub_free_paths = (
+        "/static",
+        "/login",
+        "/logout",
+        "/kurulum",
+        "/sifre-unuttum",
+        "/abonelik-gerekli",
+        "/ayarlar/abonelik",
+    )
+
+    if not any(request.path.startswith(x) for x in sub_free_paths):
+        try:
+            if admin_profile_exists() and session.get("auth_ok") and not subscription_allows_access():
+                return redirect(url_for("subscription_required_page"))
+        except Exception:
+            pass
+
+    if request.path.startswith("/kurulum"):
+        return None
+
+    if request.path.startswith("/sifre-unuttum"):
+        return None
+
+    if request.path.startswith("/static"):
+        return None
+
+    if not app.config.get("_schema_ready"):
+        ensure_schema()
+        ensure_upload_dir()
+        app.config["_schema_ready"] = True
+
+    p = request.path
+    if any(p.startswith(pref) for pref in PROTECTED_PREFIXES) and not is_excluded_path(p):
+        if not session.get("auth_ok"):
+            return redirect(url_for("login", next=p))
+        if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+            check_csrf()
+
+
+@app.context_processor
+def inject_globals():
+    try:
+        return {
+            "active_trip": get_active_trip_row(),
+            "csrf_token": get_csrf(),
+        }
+    except Exception:
+        return {
+            "active_trip": None,
+            "csrf_token": get_csrf(),
+        }
+
+
+# =========================================================
+# AI yardımcıları
+# =========================================================
+
+def normalize_ai_text(text: str) -> str:
+    text = (text or "").strip().lower()
+    text = text.replace("’", "").replace("'", "").replace("`", "")
+    text = re.sub(r"[^0-9a-zçğıöşü\s-]", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def ai_extract_seat_list(text: str):
+    text = text or ""
+    text = re.sub(r"(\d+)\s*-\s*(\d+)", r"\1 \2", text)
+    text = re.sub(r"(\d+)\sve\s(\d+)", r"\1 \2", text, flags=re.IGNORECASE)
+    text = re.sub(r"(\d+)\sile\s(\d+)", r"\1 \2", text, flags=re.IGNORECASE)
+
+    nums = re.findall(r"\b\d{1,2}\b", text)
+    out = []
+    for n in nums:
+        x = int(n)
+        if 1 <= x <= 60 and x not in out:
+            out.append(x)
+    return out
+
+
+def ai_make_skeleton(text: str) -> str:
+    text = normalize_ai_text(text)
+    text = re.sub(r"\d+", "{n}", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def ai_find_learned_match(command: str):
+    db = get_db()
+    phrase_norm = normalize_ai_text(command)
+    skeleton = ai_make_skeleton(command)
+
+    row = db.execute(
+        """
+        SELECT id, phrase, intent, pattern
+        FROM learned_commands
+        WHERE phrase_norm=?
+        LIMIT 1
+        """,
+        (phrase_norm,),
+    ).fetchone()
+    if row:
+        return dict(row), "exact"
+
+    row = db.execute(
+        """
+        SELECT id, phrase, intent, pattern
+        FROM learned_commands
+        WHERE skeleton=?
+        LIMIT 1
+        """,
+        (skeleton,),
+    ).fetchone()
+    if row:
+        return dict(row), "skeleton"
+
+    return None, None
+
+
+@app.route("/tanitim")
+def onboarding_page():
+    return render_template("onboarding.html")
+
+
+
+# =========================================================
+# Kullanıcı / Panel Sahibi Sıfırlama
+# =========================================================
+def reset_admin_owner():
+    db = get_db()
+
+    try:
+        ensure_admin_profile_table(db)
+        ensure_security_table(db)
+
+        prof = get_admin_profile()
+        photo_path = (prof or {}).get("photo_path", "")
+
+        # Profil fotoğrafını mümkünse sil
+        if photo_path and photo_path.startswith("/static/profile/"):
+            try:
+                target = Path(app.root_path) / photo_path.lstrip("/")
+                if target.exists():
+                    target.unlink()
+            except Exception:
+                pass
+
+        db.execute("DELETE FROM admin_profile WHERE id=1")
+        db.execute("DELETE FROM admin_security WHERE id=1")
+
+        # Kurtarma kodunu da temizle
+        try:
+            db.execute("DELETE FROM settings WHERE key IN (?, ?)", (
+                "recovery_code_hash",
+                "recovery_code_updated_at",
+            ))
+        except Exception:
+            pass
+
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+
+# =========================================================
+# Ana sayfalar
+# =========================================================
+
+@app.route("/ai-console")
+def ai_console_page():
+    return render_template("ai_console.html")
+
+
+@app.route("/")
+def index():
+    routes = all_route_names()
+    current_route = session.get("route", routes[0] if routes else "Denizli – İstanbul")
+    return render_template("index.html", current_route=current_route, all_routes=routes)
+
+
+@app.route("/set-route", methods=["POST"])
+def set_route():
+    payload = request.get_json(silent=True) or {}
+    route = (request.form.get("route") or payload.get("route") or "").strip()
+
+    if not route:
+        return jsonify({"ok": False, "msg": "route gerekli"}), 400
+    if route not in set(all_route_names()):
+        return jsonify({"ok": False, "msg": "Geçersiz hat"}), 400
+
+    session["route"] = route
+    return jsonify({"ok": True, "route": route})
+
+
+@app.route("/sefer-baslat", methods=["GET", "POST"])
+def trip_start():
+    routes = all_route_names()
+
+    selected_route = (
+        request.args.get("route")
+        or request.form.get("route")
+        or session.get("route")
+        or (routes[0] if routes else "Denizli – İstanbul")
+    ).strip()
+
+    if selected_route not in set(routes):
+        selected_route = routes[0] if routes else "Denizli – İstanbul"
+
+    session["route"] = selected_route
+
+    if request.method == "POST":
+        db = get_db()
+        date_val = request.form.get("date") or datetime.now().strftime("%Y-%m-%d")
+        time_val = request.form.get("departure_time") or datetime.now().strftime("%H:%M")
+
+        db.execute(
+            """
+            INSERT INTO trips(date, route, departure_time, plate, captain1, captain2, attendant, note)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                date_val,
+                selected_route,
+                time_val,
+                request.form.get("plate"),
+                request.form.get("captain1"),
+                request.form.get("captain2"),
+                request.form.get("attendant"),
+                request.form.get("note"),
+            ),
+        )
+
+        trip_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+        db.commit()
+        set_active_trip(trip_id)
+        return redirect(url_for("seats_page"))
+
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    return render_template(
+        "start_trip.html",
+        now=now_str,
+        current_route=selected_route,
+        all_routes=routes,
+    )
+
+@app.route("/continue-trip")
+def continue_trip():
+    tid = get_active_trip()
+    if not tid:
+        return redirect(url_for("trip_start"))
+
+    db = get_db()
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+
+    if not trip:
+        set_active_trip(None)
+        return redirect(url_for("trip_start"))
+
+    # Koltuk doluluk bilgisi
+    passenger_count = db.execute(
+        "SELECT COUNT(*) FROM seats WHERE trip_id=?",
+        (tid,),
+    ).fetchone()[0] or 0
+
+    total_seats = len(SEAT_POSITIONS)
+    empty_seats = max(total_seats - passenger_count, 0)
+    occupancy = round((passenger_count / total_seats) * 100) if total_seats else 0
+
+    # Tahmini koltuk tahsilatı
+    seat_total = db.execute(
+        "SELECT COALESCE(SUM(COALESCE(amount,0)),0) FROM seats WHERE trip_id=?",
+        (tid,),
+    ).fetchone()[0] or 0
+
+    # Ayakta satış varsa ekle
+    walkon_total = 0
+    try:
+        walkon_total = db.execute(
+            "SELECT COALESCE(SUM(COALESCE(total_amount,0)),0) FROM walk_on_sales WHERE trip_id=?",
+            (tid,),
+        ).fetchone()[0] or 0
+    except Exception:
+        walkon_total = 0
+
+    total_revenue = seat_total + walkon_total
+
+    stops = get_stops(trip["route"])
+    first_stop = stops[0] if stops else ""
+    last_stop = stops[-1] if stops else ""
+
+    live_runtime = fetch_live_runtime_state(tid)
+    runtime_live_stop = ""
+    try:
+        runtime_live_stop = find_route_stop((live_runtime.get("live_stop") or "").strip())
+    except Exception:
+        runtime_live_stop = (live_runtime.get("live_stop") or "").strip()
+
+    def norm_stop(v):
+        return (v or "").strip().lower()
+
+    def stop_key(v):
+        s = norm_stop(v)
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        s = " ".join(s.split())
+        return s
+
+    def find_route_stop(value):
+        raw = (value or "").strip()
+        if not raw:
+            return ""
+
+        # 1) birebir
+        if raw in stops:
+            return raw
+
+        raw_key = stop_key(raw)
+        if not raw_key:
+            return ""
+
+        # 2) normalize birebir
+        for s in stops:
+            if stop_key(s) == raw_key:
+                return s
+
+        # 3) kısa ad -> uzun ad, örn Sarıgöl -> Sarıgöl Garaj
+        for s in stops:
+            sk = stop_key(s)
+            if raw_key in sk or sk in raw_key:
+                return s
+
+        return ""
+
+    # Durak bazlı koltuk sayıları
+    stop_board_counts = {}
+    stop_off_counts = {}
+    stop_service_counts = {}
+
+    try:
+        rows = db.execute(
+            """
+            SELECT COALESCE(from_stop,'') AS from_stop,
+                   COALESCE(to_stop,'') AS to_stop,
+                   COALESCE(service,0) AS service
+            FROM seats
+            WHERE trip_id=?
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            fs = (r["from_stop"] or "").strip()
+            ts = (r["to_stop"] or "").strip()
+
+            if fs:
+                stop_board_counts[norm_stop(fs)] = stop_board_counts.get(norm_stop(fs), 0) + 1
+
+            if ts:
+                stop_off_counts[norm_stop(ts)] = stop_off_counts.get(norm_stop(ts), 0) + 1
+
+            if ts and int(r["service"] or 0):
+                stop_service_counts[norm_stop(ts)] = stop_service_counts.get(norm_stop(ts), 0) + 1
+
+    except Exception:
+        pass
+
+    # Durak bazlı ayakta yolcu sayısı
+    stop_walkon_counts = {}
+    try:
+        rows = db.execute(
+            """
+            SELECT COALESCE(to_stop,'') AS to_stop,
+                   COALESCE(SUM(COALESCE(pax,0)),0) AS c
+            FROM walk_on_sales
+            WHERE trip_id=?
+            GROUP BY to_stop
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            ts = (r["to_stop"] or "").strip()
+            if ts:
+                stop_walkon_counts[norm_stop(ts)] = int(r["c"] or 0)
+    except Exception:
+        pass
+
+    # Durak bazlı emanet/bagaj sayısı - tablo/kolon farklarına dayanıklı
+    stop_consignment_counts = {}
+    try:
+        cols = [
+            x["name"]
+            for x in db.execute("PRAGMA table_info(consignments)").fetchall()
+        ]
+
+        stop_col = None
+        for candidate in ["to_stop", "delivery_stop", "to_stop_name", "stop_name", "target_stop"]:
+            if candidate in cols:
+                stop_col = candidate
+                break
+
+        if stop_col:
+            rows = db.execute(
+                f"""
+                SELECT COALESCE({stop_col}, '') AS stop_name,
+                       COUNT(*) AS c
+                FROM consignments
+                WHERE trip_id=?
+                  AND (
+                    status IS NULL
+                    OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+                  )
+                GROUP BY {stop_col}
+                """,
+                (tid,),
+            ).fetchall()
+
+            for r in rows:
+                sname = (r["stop_name"] or "").strip()
+                if sname:
+                    stop_consignment_counts[norm_stop(sname)] = int(r["c"] or 0)
+    except Exception:
+        pass
+
+    # Gerçek koltuk bagaj meta verisini de stop bazında ekle
+    def _bag_count_from_meta(meta):
+        # modules.bags.get_counts -> tuple[int, int, int] => (R, LF, LB)
+        if isinstance(meta, (tuple, list)):
+            total = 0
+            for x in meta[:3]:
+                try:
+                    total += int(x or 0)
+                except Exception:
+                    pass
+            return total
+
+        if isinstance(meta, dict):
+            counts = meta.get("counts")
+            if isinstance(counts, dict):
+                total = 0
+                for k in ("R", "LF", "LB"):
+                    try:
+                        total += int(counts.get(k) or 0)
+                    except Exception:
+                        pass
+                return total
+
+        return 0
+
+    try:
+        trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+        bag_rows = db.execute(
+            """
+            SELECT seat_no, COALESCE(to_stop,'') AS to_stop
+            FROM seats
+            WHERE trip_id=? AND COALESCE(to_stop,'') <> ''
+            ORDER BY seat_no
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in bag_rows:
+            to_stop = (r["to_stop"] or "").strip()
+            if not to_stop:
+                continue
+
+            try:
+                meta = get_counts(trip_key, str(r["seat_no"]))
+            except Exception:
+                meta = ()
+
+            cnt = _bag_count_from_meta(meta)
+            if cnt > 0:
+                key = norm_stop(to_stop)
+                stop_consignment_counts[key] = int(stop_consignment_counts.get(key, 0) or 0) + cnt
+    except Exception:
+        pass
+
+    # Canlı / seçili durak seçimi:
+    # Öncelik:
+    # 1) URL parametresi ?stop=...
+    # 2) Seats ekranından gelen canlı runtime durak
+    # 3) Session'da son seçili durak
+    # 4) Route sırasına göre ilk işlem olan durak
+    # 5) İlk durak
+    requested_stop = (request.args.get("stop") or "").strip()
+    session_stop = (session.get("continue_current_stop") or "").strip()
+    current_stop = ""
+
+    matched_requested_stop = find_route_stop(requested_stop)
+    matched_runtime_stop = find_route_stop(runtime_live_stop)
+    matched_session_stop = find_route_stop(session_stop)
+
+    if matched_requested_stop:
+        current_stop = matched_requested_stop
+        session["continue_current_stop"] = current_stop
+    elif matched_runtime_stop:
+        current_stop = matched_runtime_stop
+        session["continue_current_stop"] = current_stop
+    elif matched_session_stop:
+        current_stop = matched_session_stop
+    else:
+        # Rotadaki sıraya göre, iniş/biniş/bagaj/servis işlemi olan ilk durağı seç.
+        operation_keys = set()
+        operation_keys.update(k for k, v in stop_off_counts.items() if v)
+        operation_keys.update(k for k, v in stop_board_counts.items() if v)
+        operation_keys.update(k for k, v in stop_walkon_counts.items() if v)
+        operation_keys.update(k for k, v in stop_consignment_counts.items() if v)
+        operation_keys.update(k for k, v in stop_service_counts.items() if v)
+
+        for stop_name in stops:
+            if norm_stop(stop_name) in operation_keys:
+                current_stop = stop_name
+                break
+
+    if not current_stop:
+        current_stop = first_stop
+
+    current_index = stops.index(current_stop) if current_stop in stops else 0
+
+    def make_stop_payload(stop_name, idx):
+        key = norm_stop(stop_name)
+
+        off_count = int(stop_off_counts.get(key, 0) or 0)
+        board_count = int(stop_board_counts.get(key, 0) or 0)
+        walkon_count = int(stop_walkon_counts.get(key, 0) or 0)
+        bagaj_count = int(stop_consignment_counts.get(key, 0) or 0)
+        service_count = int(stop_service_counts.get(key, 0) or 0)
+
+        if idx == current_index:
+            kind = "live"
+            status = "Canlı"
+            eta = "Şimdi"
+        elif idx == current_index + 1:
+            kind = "next"
+            status = "Sıradaki"
+            eta = "Sırada"
+        elif idx > current_index:
+            kind = "upcoming"
+            status = "Bekliyor"
+            eta = f"{idx - current_index} durak sonra"
+        else:
+            kind = "passed"
+            status = "Geçildi"
+            eta = "Geçildi"
+
+        # mesafe gerçek canlı konum yoksa sıra bazlı gösterim
+        if idx == current_index:
+            distance = "0 km"
+        elif idx > current_index:
+            distance = f"{idx - current_index} durak"
+        else:
+            distance = "Geçildi"
+
+        return {
+            "name": stop_name,
+            "kind": kind,
+            "status": status,
+            "eta": eta,
+            "distance": distance,
+            "off_count": off_count,
+            "board_count": board_count + walkon_count,
+            "bagaj_count": bagaj_count,
+            "service_count": service_count,
+            "bagaj_label": "var" if bagaj_count else "yok",
+        }
+
+    # Ekranda canlı durak + sonraki 3 durak göster
+    show_start = max(current_index, 0)
+    selected_stops = stops[show_start:show_start + 4] if stops else []
+    if current_stop and current_stop not in selected_stops:
+        selected_stops.insert(0, current_stop)
+
+    live_stops = [
+        make_stop_payload(stop_name, stops.index(stop_name) if stop_name in stops else i)
+        for i, stop_name in enumerate(selected_stops)
+    ]
+
+    live_current = make_stop_payload(current_stop, current_index) if current_stop else {
+        "name": "Durak seçilmedi",
+        "kind": "live",
+        "status": "Canlı",
+        "eta": "-",
+        "distance": "-",
+        "off_count": 0,
+        "board_count": 0,
+        "bagaj_count": 0,
+        "service_count": 0,
+        "bagaj_label": "yok",
+    }
+
+    if live_runtime:
+        if runtime_live_stop:
+            live_current["name"] = runtime_live_stop
+        if str(live_runtime.get("gps_km") or "").strip():
+            live_current["distance"] = str(live_runtime.get("gps_km") or "").strip()
+        if str(live_runtime.get("eta_main") or "").strip():
+            live_current["eta"] = str(live_runtime.get("eta_main") or "").strip()
+        try:
+            live_current["speed"] = int(float(live_runtime.get("speed") or 0))
+        except Exception:
+            live_current["speed"] = 0
+    else:
+        live_current["speed"] = 0
+
+    live_summary = {
+        "passenger_count": passenger_count,
+        "total_seats": total_seats,
+        "empty_seats": empty_seats,
+        "occupancy": occupancy,
+        "off_count": live_current.get("off_count", 0),
+        "board_count": live_current.get("board_count", 0),
+        "bagaj_count": live_current.get("bagaj_count", 0),
+        "service_count": live_current.get("service_count", 0),
+        "total_revenue": total_revenue,
+    }
+
+    stats = {
+        "passenger_count": passenger_count,
+        "total_seats": total_seats,
+        "empty_seats": empty_seats,
+        "occupancy": occupancy,
+        "seat_total": seat_total,
+        "walkon_total": walkon_total,
+        "total_revenue": total_revenue,
+        "first_stop": first_stop,
+        "last_stop": last_stop,
+        "next_stop": live_stops[1]["name"] if len(live_stops) > 1 else current_stop,
+    }
+
+    return render_template(
+        "continue_trip.html",
+        trip=trip,
+        stats=stats,
+        stops=stops,
+        live_current=live_current,
+        live_stops=live_stops,
+        live_summary=live_summary,
+        live_runtime=live_runtime,
+    )
+
+
+@app.route("/api/live-seat-bag-detail")
+def api_live_seat_bag_detail():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    seat_no = str(request.args.get("seat_no") or request.args.get("seat") or "").strip()
+    if not seat_no:
+        return jsonify({"ok": False, "error": "Koltuk numarası eksik."}), 400
+
+    db = get_db()
+
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    row = db.execute(
+        """
+        SELECT seat_no,
+               COALESCE(from_stop,'') AS from_stop,
+               COALESCE(to_stop,'') AS to_stop,
+               COALESCE(passenger_name,'') AS passenger_name
+        FROM seats
+        WHERE trip_id=? AND seat_no=?
+        """,
+        (tid, seat_no),
+    ).fetchone()
+
+    if not row:
+        return jsonify({
+            "ok": False,
+            "error": f"Koltuk {seat_no} bulunamadı veya boş."
+        }), 404
+
+    trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+
+    right = left_front = left_back = 0
+
+    try:
+        right, left_front, left_back = get_counts(trip_key, seat_no)
+    except Exception:
+        right, left_front, left_back = 0, 0, 0
+
+    right = int(right or 0)
+    left_front = int(left_front or 0)
+    left_back = int(left_back or 0)
+    total = right + left_front + left_back
+
+    files = []
+    photos = []
+    try:
+        from modules.bags import ensure_thumb, thumb_path, _is_image, _side_from_filename, _side_label
+
+        d = bag_root() / safe(trip_key) / safe(seat_no)
+
+        if d.exists() and d.is_dir():
+            for fp in sorted(d.iterdir(), key=lambda x: x.name):
+                if fp.is_file():
+                    files.append(fp.name)
+
+            for fp in sorted(d.iterdir(), key=lambda x: x.name):
+                if not (fp.is_file() and _is_image(fp)):
+                    continue
+
+                # Mevcut bagaj modülünün thumbnail mantığını kullan.
+                try:
+                    ensure_thumb(fp)
+                except Exception:
+                    pass
+
+                tn = thumb_path(fp)
+                thumb_name = tn.name if tn.exists() else fp.name
+
+                side = _side_from_filename(fp.name)
+
+                photos.append({
+                    "index": len(photos) + 1,
+                    "name": fp.name,
+                    "side": side,
+                    "side_label": _side_label(side),
+                    "url": url_for("bags.raw", trip=trip_key, seat=seat_no, filename=fp.name),
+                    "thumb_url": url_for("bags.thumb", trip=trip_key, seat=seat_no, filename=thumb_name),
+                })
+
+    except Exception:
+        files = []
+        photos = []
+
+    return jsonify({
+        "ok": True,
+        "seat_no": seat_no,
+        "from_stop": row["from_stop"] or "",
+        "to_stop": row["to_stop"] or "",
+        "passenger_name": row["passenger_name"] or "",
+        "trip_key": trip_key,
+        "right": right,
+        "left_front": left_front,
+        "left_back": left_back,
+        "total": total,
+        "files": files,
+        "photos": photos,
+        "photo_count": len(photos),
+        "locations": [
+            {"key": "R", "label": "Sağ göz", "count": right},
+            {"key": "LF", "label": "Sol ön", "count": left_front},
+            {"key": "LB", "label": "Sol arka", "count": left_back},
+        ],
+    })
+
+
+@app.route("/api/live-stop-offload", methods=["POST"])
+def api_live_stop_offload():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    data = request.get_json(silent=True) or request.form or {}
+    stop_raw = str(data.get("stop") or "").strip()
+
+    if not stop_raw:
+        return jsonify({"ok": False, "error": "Durak seçilmedi."}), 400
+
+    db = get_db()
+
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    def norm_stop(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    stop_key = norm_stop(stop_raw)
+
+    rows = db.execute(
+        """
+        SELECT *
+        FROM seats
+        WHERE trip_id=? AND COALESCE(to_stop,'') <> ''
+        ORDER BY CAST(seat_no AS INTEGER), seat_no
+        """,
+        (tid,),
+    ).fetchall()
+
+    selected = []
+    for r in rows:
+        if norm_stop(r["to_stop"] or "") == stop_key:
+            selected.append(r)
+
+    if not selected:
+        return jsonify({
+            "ok": False,
+            "error": "Bu durakta indirilecek yolcu bulunamadı."
+        }), 404
+
+    trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+
+    deleted = []
+    bag_deleted = 0
+
+    for r in selected:
+        seat_no = int(r["seat_no"])
+
+        if (r["to_stop"] or "").strip():
+            log_trip_stop_event(
+                db,
+                tid,
+                r["to_stop"],
+                "offload",
+                _seat_event_meta(r, {"action": "live_stop_bulk_offload"}),
+            )
+
+        db.execute(
+            "DELETE FROM seats WHERE trip_id=? AND seat_no=?",
+            (tid, seat_no),
+        )
+
+        deleted.append(seat_no)
+
+        # Koltuğa bağlı bagaj dosyalarını temizle
+        try:
+            d = bag_root() / safe(trip_key) / safe(str(seat_no))
+            if d.exists() and d.is_dir():
+                for fp in d.iterdir():
+                    try:
+                        if fp.is_file():
+                            fp.unlink(missing_ok=True)
+                            bag_deleted += 1
+                    except Exception:
+                        pass
+
+                try:
+                    d.rmdir()
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "stop": stop_raw,
+        "deleted": deleted,
+        "count": len(deleted),
+        "bag_deleted": bag_deleted,
+        "message": f"{stop_raw} durağında {len(deleted)} yolcu indirildi."
+    })
+
+
+@app.route("/api/live-seat-offload", methods=["POST"])
+def api_live_seat_offload():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    data = request.get_json(silent=True) or request.form or {}
+
+    seat_no_raw = str(data.get("seat_no") or "").strip()
+    stop_raw = str(data.get("stop") or "").strip()
+
+    seat_no = parse_int(seat_no_raw, None)
+    if seat_no is None:
+        return jsonify({"ok": False, "error": "Koltuk numarası geçersiz."}), 400
+
+    if not validate_seat_no(seat_no):
+        return jsonify({"ok": False, "error": "Geçersiz koltuk numarası."}), 400
+
+    db = get_db()
+
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    row = db.execute(
+        """
+        SELECT *
+        FROM seats
+        WHERE trip_id=? AND seat_no=?
+        """,
+        (tid, seat_no),
+    ).fetchone()
+
+    if not row:
+        return jsonify({
+            "ok": False,
+            "error": f"Koltuk {seat_no} zaten boş veya bu seferde bulunamadı."
+        }), 404
+
+    def norm_stop(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    old_to_stop = (row["to_stop"] or "").strip()
+
+    # Modal hangi duraktan açıldıysa güvenlik için kontrol ediyoruz.
+    # Boş gönderilirse engellemiyoruz.
+    if stop_raw and old_to_stop and norm_stop(stop_raw) != norm_stop(old_to_stop):
+        return jsonify({
+            "ok": False,
+            "error": f"Koltuk {seat_no} şu an {old_to_stop} durağına kayıtlı görünüyor."
+        }), 409
+
+    if old_to_stop:
+        log_trip_stop_event(
+            db,
+            tid,
+            old_to_stop,
+            "offload",
+            _seat_event_meta(row, {"action": "live_sheet_offload"}),
+        )
+
+    db.execute(
+        "DELETE FROM seats WHERE trip_id=? AND seat_no=?",
+        (tid, seat_no),
+    )
+
+    # Koltuğa bağlı bagaj meta dosyalarını temizle
+    bag_deleted = 0
+    try:
+        trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+        d = bag_root() / safe(trip_key) / safe(str(seat_no))
+
+        if d.exists() and d.is_dir():
+            for fp in d.iterdir():
+                try:
+                    if fp.is_file():
+                        fp.unlink(missing_ok=True)
+                        bag_deleted += 1
+                except Exception:
+                    pass
+
+            try:
+                d.rmdir()
+            except Exception:
+                pass
+    except Exception:
+        bag_deleted = 0
+
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "seat_no": seat_no,
+        "from_stop": row["from_stop"] or "",
+        "to_stop": old_to_stop,
+        "bag_deleted": bag_deleted,
+        "message": f"Koltuk {seat_no} indirildi."
+    })
+
+
+@app.route("/api/live-seat-destination", methods=["POST"])
+def api_live_seat_destination():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    data = request.get_json(silent=True) or request.form or {}
+
+    seat_no = str(data.get("seat_no") or "").strip()
+    new_to_stop_raw = str(data.get("to_stop") or "").strip()
+
+    if not seat_no:
+        return jsonify({"ok": False, "error": "Koltuk numarası eksik."}), 400
+
+    if not new_to_stop_raw:
+        return jsonify({"ok": False, "error": "Yeni iniş durağı seçilmedi."}), 400
+
+    db = get_db()
+
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    stops = get_stops(trip["route"])
+
+    def stop_key(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    def find_route_stop(value):
+        raw = (value or "").strip()
+        if not raw:
+            return ""
+
+        if raw in stops:
+            return raw
+
+        raw_key = stop_key(raw)
+        if not raw_key:
+            return ""
+
+        for stop_name in stops:
+            if stop_key(stop_name) == raw_key:
+                return stop_name
+
+        for stop_name in stops:
+            sk = stop_key(stop_name)
+            if raw_key in sk or sk in raw_key:
+                return stop_name
+
+        return ""
+
+    new_to_stop = find_route_stop(new_to_stop_raw)
+    if not new_to_stop:
+        return jsonify({
+            "ok": False,
+            "error": "Seçilen durak bu rota içinde bulunamadı."
+        }), 400
+
+    row = db.execute(
+        """
+        SELECT seat_no,
+               COALESCE(from_stop,'') AS from_stop,
+               COALESCE(to_stop,'') AS to_stop
+        FROM seats
+        WHERE trip_id=? AND seat_no=?
+        """,
+        (tid, seat_no),
+    ).fetchone()
+
+    if not row:
+        return jsonify({
+            "ok": False,
+            "error": f"Koltuk {seat_no} bu seferde bulunamadı."
+        }), 404
+
+    old_to_stop = row["to_stop"] or ""
+
+    db.execute(
+        """
+        UPDATE seats
+        SET to_stop=?
+        WHERE trip_id=? AND seat_no=?
+        """,
+        (new_to_stop, tid, seat_no),
+    )
+
+    # LIVE_SEAT_DESTINATION_CHANGE_LOG_FINAL
+    try:
+        if (old_to_stop or "").strip() != (new_to_stop or "").strip():
+            updated_row = db.execute(
+                "SELECT * FROM seats WHERE trip_id=? AND seat_no=?",
+                (tid, seat_no),
+            ).fetchone()
+
+            if updated_row:
+                log_trip_stop_event(
+                    db,
+                    tid,
+                    new_to_stop,
+                    "seat_destination_change",
+                    _seat_event_meta(updated_row, {
+                        "action": "seat_destination_change",
+                        "old_from_stop": row["from_stop"] or "",
+                        "old_to_stop": old_to_stop or "",
+                        "new_from_stop": row["from_stop"] or "",
+                        "new_to_stop": new_to_stop or "",
+                    }),
+                )
+    except Exception:
+        pass
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "seat_no": seat_no,
+        "from_stop": row["from_stop"] or "",
+        "old_to_stop": old_to_stop,
+        "new_to_stop": new_to_stop,
+        "message": f"Koltuk {seat_no} iniş durağı {new_to_stop} olarak güncellendi."
+    })
+
+
+@app.route("/api/live-consignment-detail/<int:cid>")
+def api_live_consignment_detail(cid):
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    db = get_db()
+
+    row = db.execute(
+        "SELECT * FROM consignments WHERE id=? AND trip_id=?",
+        (cid, tid),
+    ).fetchone()
+
+    if not row:
+        return jsonify({"ok": False, "error": "Emanet bulunamadı."}), 404
+
+    photos = []
+    try:
+        photo_rows = db.execute(
+            """
+            SELECT id, role, file_path, mime, size_bytes, created_at
+            FROM consignment_photos
+            WHERE consignment_id=?
+            ORDER BY id DESC
+            """,
+            (cid,),
+        ).fetchall()
+
+        for pr in photo_rows:
+            fp = (pr["file_path"] or "").strip()
+
+            raw_fp = (fp or "").replace("\\", "/").strip()
+            filename = raw_fp.split("/")[-1] if raw_fp else ""
+
+            if filename:
+                url = url_for("serve_uploaded", filename=filename)
+            else:
+                url = ""
+
+            photos.append({
+                "id": pr["id"],
+                "role": pr["role"] or "",
+                "file_path": fp,
+                "url": url,
+                "mime": pr["mime"] or "",
+                "size_bytes": int(pr["size_bytes"] or 0),
+                "created_at": pr["created_at"] or "",
+            })
+    except Exception:
+        photos = []
+
+    return jsonify({
+        "ok": True,
+        "item": {
+            "id": row["id"],
+            "code": row["code"] or "",
+            "item_name": row["item_name"] or "",
+            "item_type": row["item_type"] or "",
+            "from_name": row["from_name"] or "",
+            "from_phone": row["from_phone"] or "",
+            "to_name": row["to_name"] or "",
+            "to_phone": row["to_phone"] or "",
+            "from_stop": row["from_stop"] or "",
+            "to_stop": row["to_stop"] or "",
+            "amount": float(row["amount"] or 0),
+            "payment": row["payment"] or "",
+            "status": row["status"] or "",
+            "notes": row["notes"] or "",
+            "created_at": row["created_at"] or "",
+            "updated_at": row["updated_at"] or "",
+            "delivered_at": row["delivered_at"] or "",
+            "photos": photos,
+            "photo_count": len(photos),
+        }
+    })
+
+
+@app.route("/api/live-consignment-deliver/<int:cid>", methods=["POST"])
+def api_live_consignment_deliver(cid):
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    db = get_db()
+
+    row = db.execute(
+        "SELECT * FROM consignments WHERE id=? AND trip_id=?",
+        (cid, tid),
+    ).fetchone()
+
+    if not row:
+        return jsonify({"ok": False, "error": "Emanet bulunamadı."}), 404
+
+    current_status = (row["status"] or "").strip().lower()
+    if current_status in {"teslim", "teslim_edildi", "delivered"}:
+        return jsonify({
+            "ok": True,
+            "already": True,
+            "message": "Bu emanet zaten teslim edilmiş.",
+            "id": cid,
+            "code": row["code"] or "",
+        })
+
+    db.execute(
+        """
+        UPDATE consignments
+        SET status='teslim_edildi',
+            delivered_at=datetime('now','localtime'),
+            updated_at=datetime('now','localtime')
+        WHERE id=? AND trip_id=?
+        """,
+        (cid, tid),
+    )
+
+    try:
+        if (row["to_stop"] or "").strip():
+            log_trip_stop_event(
+                db,
+                tid,
+                row["to_stop"],
+                "parcel_deliver",
+                {
+                    "action": "live_consignment_deliver",
+                    "consignment_id": cid,
+                    "code": row["code"] or "",
+                    "item_name": row["item_name"] or "",
+                    "to_name": row["to_name"] or "",
+                    "to_phone": row["to_phone"] or "",
+                    "count": 1,
+                },
+            )
+    except Exception:
+        pass
+
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "id": cid,
+        "code": row["code"] or "",
+        "item_name": row["item_name"] or "",
+        "to_stop": row["to_stop"] or "",
+        "message": f"{row['code'] or cid} kodlu emanet teslim edildi.",
+    })
+
+
+@app.route("/api/live-stop-complete", methods=["POST"])
+def api_live_stop_complete():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    data = request.get_json(silent=True) or request.form or {}
+    stop_raw = str(data.get("stop") or "").strip()
+
+    if not stop_raw:
+        return jsonify({"ok": False, "error": "Durak seçilmedi."}), 400
+
+    db = get_db()
+
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    stops = get_stops(trip["route"])
+
+    def stop_key(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    def find_route_stop(value):
+        raw = (value or "").strip()
+        if not raw:
+            return ""
+
+        if raw in stops:
+            return raw
+
+        raw_key = stop_key(raw)
+        if not raw_key:
+            return ""
+
+        for stop_name in stops:
+            if stop_key(stop_name) == raw_key:
+                return stop_name
+
+        for stop_name in stops:
+            sk = stop_key(stop_name)
+            if raw_key in sk or sk in raw_key:
+                return stop_name
+
+        return raw
+
+    stop_name = find_route_stop(stop_raw)
+    target_key = stop_key(stop_name)
+
+    pending_seats = []
+    bag_total = 0
+
+    try:
+        trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+
+        rows = db.execute(
+            """
+            SELECT seat_no,
+                   COALESCE(from_stop,'') AS from_stop,
+                   COALESCE(to_stop,'') AS to_stop,
+                   COALESCE(passenger_name,'') AS passenger_name,
+                   COALESCE(gender,'') AS gender
+            FROM seats
+            WHERE trip_id=?
+              AND COALESCE(to_stop,'') <> ''
+            ORDER BY CAST(seat_no AS INTEGER), seat_no
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            to_stop = (r["to_stop"] or "").strip()
+
+            if stop_key(to_stop) != target_key:
+                continue
+
+            pending_seats.append({
+                "seat_no": str(r["seat_no"]),
+                "from_stop": r["from_stop"] or "",
+                "to_stop": to_stop,
+                "passenger_name": r["passenger_name"] or "",
+                "gender": r["gender"] or "",
+            })
+
+            try:
+                meta = get_counts(trip_key, str(r["seat_no"]))
+            except Exception:
+                meta = ()
+
+            if isinstance(meta, (tuple, list)):
+                for x in meta[:3]:
+                    try:
+                        bag_total += int(x or 0)
+                    except Exception:
+                        pass
+            elif isinstance(meta, dict):
+                counts = meta.get("counts")
+                if isinstance(counts, dict):
+                    for k in ("R", "LF", "LB"):
+                        try:
+                            bag_total += int(counts.get(k) or 0)
+                        except Exception:
+                            pass
+
+    except Exception:
+        pending_seats = []
+
+    standing_count = 0
+    try:
+        row = db.execute(
+            """
+            SELECT COALESCE(SUM(COALESCE(pax,0)),0) AS c
+            FROM walk_on_sales
+            WHERE trip_id=?
+              AND lower(COALESCE(to_stop,''))=lower(?)
+            """,
+            (tid, stop_name),
+        ).fetchone()
+
+        standing_count = int(row["c"] or 0) if row else 0
+    except Exception:
+        standing_count = 0
+
+    pending_consignments = []
+    try:
+        rows = db.execute(
+            """
+            SELECT id,
+                   COALESCE(code,'') AS code,
+                   COALESCE(item_name,'') AS item_name,
+                   COALESCE(to_name,'') AS to_name,
+                   COALESCE(to_stop,'') AS to_stop,
+                   COALESCE(status,'') AS status
+            FROM consignments
+            WHERE trip_id=?
+              AND lower(COALESCE(to_stop,''))=lower(?)
+              AND (
+                status IS NULL
+                OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+              )
+            ORDER BY id DESC
+            """,
+            (tid, stop_name),
+        ).fetchall()
+
+        for r in rows:
+            pending_consignments.append({
+                "id": r["id"],
+                "code": r["code"] or "",
+                "item_name": r["item_name"] or "",
+                "to_name": r["to_name"] or "",
+                "to_stop": r["to_stop"] or "",
+                "status": r["status"] or "",
+            })
+
+    except Exception:
+        pending_consignments = []
+
+    pending = {
+        "seat_count": len(pending_seats),
+        "seats": pending_seats,
+        "standing_count": standing_count,
+        "bag_count": int(bag_total or 0),
+        "consignment_count": len(pending_consignments),
+        "consignments": pending_consignments,
+    }
+
+    total_pending = (
+        pending["seat_count"]
+        + pending["standing_count"]
+        + pending["bag_count"]
+        + pending["consignment_count"]
+    )
+
+    if total_pending > 0:
+        return jsonify({
+            "ok": True,
+            "completed": False,
+            "stop": stop_name,
+            "pending": pending,
+            "message": "Bu durakta eksik işlem var."
+        })
+
+    try:
+        log_trip_stop_event(
+            db,
+            tid,
+            stop_name,
+            "pass_stop",
+            {
+                "action": "live_stop_complete",
+                "stop": stop_name,
+                "count": 1,
+            },
+        )
+        db.commit()
+    except Exception:
+        pass
+
+    return jsonify({
+        "ok": True,
+        "completed": True,
+        "stop": stop_name,
+        "pending": pending,
+        "message": f"{stop_name} durağı tamamlandı."
+    })
+
+
+@app.route("/api/live-stop-detail")
+def api_live_stop_detail():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    stop = (request.args.get("stop") or "").strip()
+    if not stop:
+        return jsonify({"ok": False, "error": "Durak seçilmedi."}), 400
+
+    db = get_db()
+
+    def norm_stop(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    stop_key = norm_stop(stop)
+
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+
+    def _bag_count_from_meta(meta):
+        if isinstance(meta, (tuple, list)):
+            total = 0
+            for x in meta[:3]:
+                try:
+                    total += int(x or 0)
+                except Exception:
+                    pass
+            return total
+
+        if isinstance(meta, dict):
+            counts = meta.get("counts")
+            if isinstance(counts, dict):
+                total = 0
+                for k in ("R", "LF", "LB"):
+                    try:
+                        total += int(counts.get(k) or 0)
+                    except Exception:
+                        pass
+                return total
+
+        return 0
+
+    passengers = []
+    try:
+        rows = db.execute(
+            """
+            SELECT seat_no,
+                   COALESCE(from_stop,'') AS from_stop,
+                   COALESCE(to_stop,'') AS to_stop,
+                   COALESCE(passenger_name,'') AS passenger_name,
+                   COALESCE(passenger_phone,'') AS passenger_phone,
+                   COALESCE(ticket_type,'') AS ticket_type,
+                   COALESCE(payment,'') AS payment,
+                   COALESCE(amount,0) AS amount,
+                   COALESCE(gender,'') AS gender,
+                   COALESCE(service,0) AS service
+            FROM seats
+            WHERE trip_id=?
+            ORDER BY CAST(seat_no AS INTEGER), seat_no
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            to_stop = (r["to_stop"] or "").strip()
+            if norm_stop(to_stop) != stop_key:
+                continue
+
+            try:
+                meta = get_counts(trip_key, str(r["seat_no"]))
+            except Exception:
+                meta = ()
+
+            bag_right = bag_left_front = bag_left_back = 0
+
+            if isinstance(meta, (tuple, list)):
+                try:
+                    bag_right = int(meta[0] or 0) if len(meta) > 0 else 0
+                    bag_left_front = int(meta[1] or 0) if len(meta) > 1 else 0
+                    bag_left_back = int(meta[2] or 0) if len(meta) > 2 else 0
+                except Exception:
+                    bag_right = bag_left_front = bag_left_back = 0
+            elif isinstance(meta, dict):
+                counts = meta.get("counts")
+                if isinstance(counts, dict):
+                    try:
+                        bag_right = int(counts.get("R") or 0)
+                        bag_left_front = int(counts.get("LF") or 0)
+                        bag_left_back = int(counts.get("LB") or 0)
+                    except Exception:
+                        bag_right = bag_left_front = bag_left_back = 0
+
+            bag_count = int(bag_right or 0) + int(bag_left_front or 0) + int(bag_left_back or 0)
+            if bag_count <= 0:
+                bag_count = _bag_count_from_meta(meta)
+
+            bag_photo_count = 0
+            try:
+                d = bag_root() / safe(trip_key) / safe(str(r["seat_no"]))
+                if d.exists() and d.is_dir():
+                    for fp in d.iterdir():
+                        low = fp.name.lower()
+                        if not fp.is_file():
+                            continue
+                        if ".thumb." in low:
+                            continue
+                        if low.endswith((".jpg", ".jpeg", ".png", ".webp")):
+                            bag_photo_count += 1
+            except Exception:
+                bag_photo_count = 0
+
+            passengers.append({
+                "seat_no": str(r["seat_no"]),
+                "from_stop": r["from_stop"] or "",
+                "to_stop": to_stop,
+                "passenger_name": r["passenger_name"] or "",
+                "passenger_phone": r["passenger_phone"] or "",
+                "ticket_type": r["ticket_type"] or "",
+                "payment": r["payment"] or "",
+                "amount": float(r["amount"] or 0),
+                "gender": r["gender"] or "",
+                "service": int(r["service"] or 0),
+                "bag_count": int(bag_count or 0),
+                "bag_right": int(bag_right or 0),
+                "bag_left_front": int(bag_left_front or 0),
+                "bag_left_back": int(bag_left_back or 0),
+                "bag_photo_count": int(bag_photo_count or 0),
+            })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+    consignments = []
+    try:
+        cols = [
+            x["name"]
+            for x in db.execute("PRAGMA table_info(consignments)").fetchall()
+        ]
+
+        stop_col = None
+        for candidate in ["to_stop", "delivery_stop", "to_stop_name", "stop_name", "target_stop"]:
+            if candidate in cols:
+                stop_col = candidate
+                break
+
+        if stop_col:
+            select_cols = ["id", stop_col]
+            for c in [
+                "code", "item_name", "item_type", "item", "title",
+                "from_name", "from_phone", "to_name", "to_phone",
+                "note", "notes", "receiver_name", "amount", "payment",
+                "status", "created_at", "updated_at", "delivered_at"
+            ]:
+                if c in cols and c not in select_cols:
+                    select_cols.append(c)
+
+            status_filter = ""
+            if "status" in cols:
+                status_filter = " AND (status IS NULL OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered'))"
+
+            q = f"SELECT {', '.join(select_cols)} FROM consignments WHERE trip_id=?{status_filter}"
+            rows = db.execute(q, (tid,)).fetchall()
+
+            for r in rows:
+                sname = (r[stop_col] or "").strip()
+                if norm_stop(sname) != stop_key:
+                    continue
+
+                item_label = ""
+                for c in ["item_name", "item", "title", "note"]:
+                    if c in cols:
+                        try:
+                            item_label = (r[c] or "").strip()
+                        except Exception:
+                            item_label = ""
+                        if item_label:
+                            break
+
+                receiver = ""
+                for c in ["receiver_name", "to_name"]:
+                    if c in cols:
+                        try:
+                            receiver = (r[c] or "").strip()
+                        except Exception:
+                            receiver = ""
+                        if receiver:
+                            break
+
+                code = ""
+                if "code" in cols:
+                    try:
+                        code = (r["code"] or "").strip()
+                    except Exception:
+                        code = ""
+
+                try:
+                    cid = r["id"]
+                except Exception:
+                    cid = ""
+
+                def _rv(col, default=""):
+                    try:
+                        return r[col] if col in cols or col == "id" else default
+                    except Exception:
+                        return default
+
+                consignments.append({
+                    "id": cid,
+                    "code": code,
+                    "item_label": item_label,
+                    "item_type": _rv("item_type", "") or "",
+                    "receiver": receiver,
+                    "to_name": _rv("to_name", "") or "",
+                    "to_phone": _rv("to_phone", "") or "",
+                    "from_name": _rv("from_name", "") or "",
+                    "from_phone": _rv("from_phone", "") or "",
+                    "stop_name": sname,
+                    "amount": float(_rv("amount", 0) or 0),
+                    "payment": _rv("payment", "") or "",
+                    "status": _rv("status", "") or "",
+                    "notes": _rv("notes", "") or _rv("note", "") or "",
+                    "delivered_at": _rv("delivered_at", "") or "",
+                })
+    except Exception:
+        consignments = []
+
+    seat_bag_total = sum(int(x.get("bag_count") or 0) for x in passengers)
+
+    return jsonify({
+        "ok": True,
+        "stop": stop,
+        "passengers": passengers,
+        "off_count": len(passengers),
+        "seat_bag_total": seat_bag_total,
+        "consignments": consignments,
+        "consignment_count": len(consignments),
+        "bag_total": seat_bag_total + len(consignments),
+    })
+
+
+@app.route("/canli-harita")
+def live_map_page():
+    tid = get_active_trip()
+    if not tid:
+        return redirect(url_for("trip_start"))
+
+    db = get_db()
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+
+    if not trip:
+        set_active_trip(None)
+        return redirect(url_for("trip_start"))
+
+    route_name = trip["route"] or ""
+    stops = get_stops(route_name)
+    live_runtime = fetch_live_runtime_state(tid)
+
+    def norm_stop(v):
+        s = (v or "").strip().lower()
+        for ch in ["–", "-", "_", "/", "\\", ".", ",", "(", ")", "[", "]"]:
+            s = s.replace(ch, " ")
+        return " ".join(s.split())
+
+    # Durak koordinatları: önce rota+durak eşleşmesi, yoksa sadece durak adına göre fallback
+    coord_map = {}
+
+    try:
+        rows = db.execute(
+            """
+            SELECT route, stop, lat, lng
+            FROM route_stop_coords
+            WHERE route=?
+            """,
+            (route_name,),
+        ).fetchall()
+
+        for r in rows:
+            coord_map[norm_stop(r["stop"])] = {
+                "lat": float(r["lat"]),
+                "lng": float(r["lng"]),
+            }
+    except Exception:
+        pass
+
+    # Rota tam eşleşmezse stop adına göre koordinat ara
+    if not coord_map:
+        try:
+            rows = db.execute(
+                """
+                SELECT route, stop, lat, lng
+                FROM route_stop_coords
+                """
+            ).fetchall()
+
+            wanted = {norm_stop(x) for x in stops}
+
+            for r in rows:
+                k = norm_stop(r["stop"])
+                if k in wanted and k not in coord_map:
+                    coord_map[k] = {
+                        "lat": float(r["lat"]),
+                        "lng": float(r["lng"]),
+                    }
+        except Exception:
+            pass
+
+    # Yolcu iniş/biniş sayıları
+    off_counts = {}
+    board_counts = {}
+
+    try:
+        rows = db.execute(
+            """
+            SELECT COALESCE(from_stop,'') AS from_stop,
+                   COALESCE(to_stop,'') AS to_stop,
+                   seat_no
+            FROM seats
+            WHERE trip_id=?
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            fs = (r["from_stop"] or "").strip()
+            ts = (r["to_stop"] or "").strip()
+
+            if fs:
+                k = norm_stop(fs)
+                board_counts[k] = board_counts.get(k, 0) + 1
+
+            if ts:
+                k = norm_stop(ts)
+                off_counts[k] = off_counts.get(k, 0) + 1
+    except Exception:
+        pass
+
+    # Bagaj sayıları
+    bag_counts = {}
+
+    def _bag_count_from_meta(meta):
+        if isinstance(meta, (tuple, list)):
+            total = 0
+            for x in meta[:3]:
+                try:
+                    total += int(x or 0)
+                except Exception:
+                    pass
+            return total
+
+        if isinstance(meta, dict):
+            counts = meta.get("counts")
+            if isinstance(counts, dict):
+                total = 0
+                for k in ("R", "LF", "LB"):
+                    try:
+                        total += int(counts.get(k) or 0)
+                    except Exception:
+                        pass
+                return total
+
+        return 0
+
+    try:
+        trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+
+        rows = db.execute(
+            """
+            SELECT seat_no, COALESCE(to_stop,'') AS to_stop
+            FROM seats
+            WHERE trip_id=?
+              AND COALESCE(to_stop,'') <> ''
+            ORDER BY seat_no
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            to_stop = (r["to_stop"] or "").strip()
+            if not to_stop:
+                continue
+
+            try:
+                meta = get_counts(trip_key, str(r["seat_no"]))
+            except Exception:
+                meta = ()
+
+            cnt = _bag_count_from_meta(meta)
+
+            if cnt > 0:
+                k = norm_stop(to_stop)
+                bag_counts[k] = bag_counts.get(k, 0) + int(cnt)
+    except Exception:
+        pass
+
+    # Emanet / kargo sayıları: teslim edilmemiş olanlar
+    parcel_counts = {}
+
+    try:
+        rows = db.execute(
+            """
+            SELECT COALESCE(to_stop,'') AS to_stop,
+                   COUNT(*) AS c
+            FROM consignments
+            WHERE trip_id=?
+              AND (
+                status IS NULL
+                OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+              )
+            GROUP BY to_stop
+            """,
+            (tid,),
+        ).fetchall()
+
+        for r in rows:
+            ts = (r["to_stop"] or "").strip()
+            if ts:
+                k = norm_stop(ts)
+                parcel_counts[k] = int(r["c"] or 0)
+    except Exception:
+        pass
+
+    live_stop = (live_runtime.get("live_stop") or "").strip()
+    live_key = norm_stop(live_stop)
+
+    stop_items = []
+
+    for idx, stop_name in enumerate(stops):
+        key = norm_stop(stop_name)
+        coord = coord_map.get(key)
+
+        off_c = int(off_counts.get(key, 0) or 0)
+        board_c = int(board_counts.get(key, 0) or 0)
+        bag_c = int(bag_counts.get(key, 0) or 0)
+        parcel_c = int(parcel_counts.get(key, 0) or 0)
+        total_ops = off_c + board_c + bag_c + parcel_c
+
+        kind = "waiting"
+        if live_key and key == live_key:
+            kind = "live"
+        elif total_ops > 0:
+            kind = "operation"
+
+        stop_items.append({
+            "name": stop_name,
+            "index": idx,
+            "lat": coord["lat"] if coord else None,
+            "lng": coord["lng"] if coord else None,
+            "has_coord": bool(coord),
+            "kind": kind,
+            "off_count": off_c,
+            "board_count": board_c,
+            "bag_count": bag_c,
+            "parcel_count": parcel_c,
+            "total_ops": total_ops,
+        })
+
+    # Sıradaki işlemli durak
+    next_operation = None
+    live_idx = -1
+
+    for item in stop_items:
+        if item["kind"] == "live":
+            live_idx = item["index"]
+            break
+
+    for item in stop_items:
+        if item["total_ops"] <= 0:
+            continue
+
+        if live_idx >= 0 and item["index"] <= live_idx:
+            continue
+
+        next_operation = item
+        break
+
+    # Gerçek yol geometrisi segmentleri
+    route_segments = []
+    try:
+        import json as _json
+
+        seg_rows = db.execute(
+            """
+            SELECT route, from_stop, to_stop, sort_order,
+                   distance_m, duration_s, geometry_json, provider, updated_at
+            FROM route_segments
+            WHERE route=?
+            ORDER BY sort_order ASC
+            """,
+            (route_name,),
+        ).fetchall()
+
+        for r in seg_rows:
+            try:
+                geom = _json.loads(r["geometry_json"] or "[]")
+            except Exception:
+                geom = []
+
+            route_segments.append({
+                "route": r["route"],
+                "from_stop": r["from_stop"],
+                "to_stop": r["to_stop"],
+                "sort_order": int(r["sort_order"] or 0),
+                "distance_m": float(r["distance_m"] or 0),
+                "duration_s": float(r["duration_s"] or 0),
+                "geometry": geom,
+                "provider": r["provider"] or "",
+                "updated_at": r["updated_at"] or "",
+            })
+    except Exception:
+        route_segments = []
+
+    # APK tarafında db.sqlite3 farklı olabileceği için static JSON fallback kullan.
+    # Böylece gerçek yol geometrisi kodla beraber APK'ya taşınır.
+    if not route_segments:
+        try:
+            import json as _json
+            from pathlib import Path as _Path
+
+            seg_path = _Path(app.static_folder or "static") / "data" / "route_segments.json"
+
+            if seg_path.exists():
+                all_segments = _json.loads(seg_path.read_text(encoding="utf-8"))
+
+                route_segments = [
+                    x for x in all_segments
+                    if (x.get("route") or "") == route_name
+                ]
+
+                route_segments.sort(key=lambda x: int(x.get("sort_order") or 0))
+        except Exception:
+            route_segments = []
+
+    map_boot = {
+        "trip": {
+            "id": trip["id"],
+            "route": trip["route"] or "",
+            "plate": trip["plate"] or "",
+        },
+        "live_runtime": live_runtime,
+        "live_stop": live_stop,
+        "next_operation": next_operation,
+        "route_segments": route_segments,
+        "stops": stop_items,
+    }
+
+    return render_template(
+        "live_map.html",
+        trip=trip,
+        map_boot=map_boot,
+    )
+
+
+# =========================================================
+# Hat / Saat / Fiyat
+# =========================================================
+from modules.routes_panel import register_routes_routes
+
+register_routes_routes(app, {
+    "get_db": get_db,
+    "get_active_trip_row": get_active_trip_row,
+    "get_stops": get_stops,
+    "all_route_names": all_route_names,
+    "parse_stops": parse_stops,
+    "ROUTE_STOPS": ROUTE_STOPS,
+    "norm_bool": norm_bool,
+    "parse_int": parse_int,
+    "parse_float": parse_float,
+    "normalize_hhmm": normalize_hhmm,
+    "get_csrf": get_csrf,
+    "schedule_profiles_for_route": schedule_profiles_for_route,
+    "schedule_profile_get": schedule_profile_get,
+    "schedule_editor_rows": schedule_editor_rows,
+    "schedule_default_profile_for_route": schedule_default_profile_for_route,
+})
+
+
+# =========================================================
+# Hesap / kasa
+# =========================================================
+from modules.cash_panel import register_cash_routes
+
+register_cash_routes(app, {
+    "get_active_trip": get_active_trip,
+    "get_db": get_db,
+    "get_cash_categories": get_cash_categories,
+    "save_cash_categories": save_cash_categories,
+    "parse_int": parse_int,
+    "get_csrf": get_csrf,
+})
+
+
+# =========================================================
+# AI Console v2
+# =========================================================
+from modules.ai_panel import register_ai_routes
+
+_ai_exports = register_ai_routes(app, {
+    "get_db": get_db,
+    "get_active_trip_row": get_active_trip_row,
+    "get_stops": get_stops,
+    "parse_int": parse_int,
+    "parse_float": parse_float,
+    "norm_payment": norm_payment,
+    "norm_ticket_type": norm_ticket_type,
+    "norm_gender": norm_gender,
+    "validate_seat_no": validate_seat_no,
+    "validate_stop_for_active_trip": validate_stop_for_active_trip,
+    "neighbor_rule_ok": neighbor_rule_ok,
+    "delete_walkon_rows": delete_walkon_rows,
+    "fetch_live_runtime_state": fetch_live_runtime_state,
+    "bag_root": bag_root,
+    "safe": safe,
+    "normalize_ai_text": normalize_ai_text,
+    "ai_extract_seat_list": ai_extract_seat_list,
+    "ai_make_skeleton": ai_make_skeleton,
+    "ai_find_learned_match": ai_find_learned_match,
+})
+
+AI_INTENTS = _ai_exports["AI_INTENTS"]
+ai_intent_title = _ai_exports["ai_intent_title"]
+ai_intent_pattern = _ai_exports["ai_intent_pattern"]
+ai_extract_stop_mentions = _ai_exports["ai_extract_stop_mentions"]
+ai_extract_payment = _ai_exports["ai_extract_payment"]
+ai_extract_gender = _ai_exports["ai_extract_gender"]
+ai_extract_amount = _ai_exports["ai_extract_amount"]
+ai_extract_count = _ai_exports["ai_extract_count"]
+ai_extract_entities = _ai_exports["ai_extract_entities"]
+ai_parse_default_command = _ai_exports["ai_parse_default_command"]
+ai_required_fields = _ai_exports["ai_required_fields"]
+ai_preview_text = _ai_exports["ai_preview_text"]
+resolve_ai_command = _ai_exports["resolve_ai_command"]
+ai_last_stop_info = _ai_exports["ai_last_stop_info"]
+ai_answer_query = _ai_exports["ai_answer_query"]
+ai_upsert_single_seat = _ai_exports["ai_upsert_single_seat"]
+ai_execute_intent = _ai_exports["ai_execute_intent"]
+
+
+# =========================================================
+# Koltuk API
+# =========================================================
+
+# =========================================================
+# Sefer durak olay kayıt yardımcıları
+# =========================================================
+
+def _row_dict(row):
+    if not row:
+        return {}
+    try:
+        return {k: row[k] for k in row.keys()}
+    except Exception:
+        return {}
+
+
+def _seat_event_meta(row, extra=None):
+    d = _row_dict(row)
+    meta = {
+        "seat_no": d.get("seat_no"),
+        "from_stop": d.get("from_stop") or "",
+        "to_stop": d.get("to_stop") or "",
+        "ticket_type": d.get("ticket_type") or "",
+        "payment": d.get("payment") or "",
+        "amount": float(d.get("amount") or 0),
+        "gender": d.get("gender") or "",
+        "service": int(d.get("service") or 0),
+        "service_note": d.get("service_note") or "",
+        "passenger_name": d.get("passenger_name") or "",
+        "passenger_phone": d.get("passenger_phone") or "",
+        "source": "seat",
+    }
+    if isinstance(extra, dict):
+        meta.update(extra)
+    return meta
+
+
+def _walkon_event_meta(row, extra=None):
+    d = _row_dict(row)
+    meta = {
+        "walkon_id": d.get("id"),
+        "from_stop": d.get("from_stop") or "",
+        "to_stop": d.get("to_stop") or "",
+        "pax": int(d.get("pax") or 0),
+        "unit_price": float(d.get("unit_price") or 0),
+        "total_amount": float(d.get("total_amount") or 0),
+        "payment": d.get("payment") or "",
+        "note": d.get("note") or "",
+        "source": "standing",
+    }
+    if isinstance(extra, dict):
+        meta.update(extra)
+    return meta
+
+
+def log_trip_stop_event(db, tid, stop_name, event, meta=None, distance_km=None, seats_for_stop=None):
+    """
+    stop_logs içine profesyonel sefer raporu için olay kaydı atar.
+    event örnekleri:
+      board, offload, standing_add, standing_off, parcel_deliver, pass_stop
+    """
+    stop_name = (stop_name or "").strip()
+    event = (event or "").strip().lower()
+
+    if not tid or not stop_name or not event:
+        return
+
+    try:
+        if seats_for_stop is None:
+            seats_for_stop = seats_count_for_stop(tid, stop_name)
+    except Exception:
+        seats_for_stop = 0
+
+    try:
+        meta_json = json.dumps(meta or {}, ensure_ascii=False)
+    except Exception:
+        meta_json = "{}"
+
+    db.execute(
+        """
+        INSERT INTO stop_logs(trip_id, stop_name, event, distance_km, seats_for_stop, meta_json)
+        VALUES(?,?,?,?,?,?)
+        """,
+        (tid, stop_name, event, distance_km, seats_for_stop, meta_json),
+    )
+
+
+
+def _trip_key_from_row(trip_row) -> str:
+    if not trip_row:
+        return ""
+    try:
+        return ((trip_row["route"] or "") + "|" + (trip_row["plate"] or "")).replace(" ", "_")
+    except Exception:
+        return ""
+
+
+def clear_bags_for_seat(trip_key: str, seat_no) -> int:
+    if not trip_key or seat_no is None:
+        return 0
+
+    deleted = 0
+
+    try:
+        d = bag_root() / safe(trip_key) / safe(str(seat_no))
+        if not (d.exists() and d.is_dir()):
+            return 0
+
+        for fp in d.rglob("*"):
+            try:
+                if fp.is_file():
+                    deleted += 1
+            except Exception:
+                pass
+
+        shutil.rmtree(d, ignore_errors=True)
+    except Exception:
+        return deleted
+
+    return deleted
+
+
+from modules.seats_panel import register_seats_routes
+
+register_seats_routes(app, {
+    "get_active_trip": get_active_trip,
+    "set_active_trip": set_active_trip,
+    "get_db": get_db,
+    "get_stops": get_stops,
+    "SEAT_POSITIONS": SEAT_POSITIONS,
+    "validate_seat_no": validate_seat_no,
+    "parse_int": parse_int,
+    "parse_int_list": parse_int_list,
+    "parse_float": parse_float,
+    "norm_ticket_type": norm_ticket_type,
+    "norm_payment": norm_payment,
+    "norm_gender": norm_gender,
+    "norm_bool": norm_bool,
+    "neighbor_rule_ok": neighbor_rule_ok,
+    "validate_stop_for_active_trip": validate_stop_for_active_trip,
+    "log_trip_stop_event": log_trip_stop_event,
+    "_seat_event_meta": _seat_event_meta,
+    "_trip_key_from_row": _trip_key_from_row,
+    "clear_bags_for_seat": clear_bags_for_seat,
+})
+
+
+# =========================================================
+# Durak / koordinat API
+# =========================================================
+from modules.coords_panel import register_coords_routes
+
+register_coords_routes(app, {
+    "get_db": get_db,
+    "get_active_trip": get_active_trip,
+    "get_active_trip_row": get_active_trip_row,
+    "get_stops": get_stops,
+})
+
+
+@app.route("/api/walkon", methods=["GET", "POST", "DELETE"])
+def api_walkon():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
+    db = get_db()
+
+    if request.method == "GET":
+        if request.args.get("aggregate"):
+            row = db.execute(
+                """
+                SELECT COALESCE(SUM(total_amount),0) AS total_amount,
+                       COALESCE(SUM(pax),0) AS pax
+                FROM walk_on_sales
+                WHERE trip_id=?
+                """,
+                (tid,),
+            ).fetchone()
+            return jsonify({
+                "ok": True,
+                "pax": int(row["pax"]),
+                "total_amount": float(row["total_amount"]),
+            })
+
+        rows = db.execute(
+            "SELECT * FROM walk_on_sales WHERE trip_id=? ORDER BY id DESC",
+            (tid,),
+        ).fetchall()
+        return jsonify({"ok": True, "items": [dict(r) for r in rows]})
+
+    if request.method == "POST":
+        data = request.get_json(force=True) or {}
+
+        from_stop = (data.get("from_stop") or data.get("from") or "").strip()
+        to_stop = (data.get("to_stop") or data.get("to") or "").strip()
+
+        if not to_stop:
+            return jsonify({"ok": False, "msg": "to gerekli"}), 400
+
+        if from_stop and not validate_stop_for_active_trip(from_stop):
+            return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {from_stop}"}), 400
+        if to_stop and not validate_stop_for_active_trip(to_stop):
+            return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
+
+        pax = max(1, parse_int(data.get("pax") or data.get("count"), 1) or 1)
+        unit_price = parse_float(data.get("unit_price") or data.get("price"), 0.0) or 0.0
+        total_amount = parse_float(data.get("total_amount"), None)
+        if total_amount is None:
+            total_amount = pax * unit_price
+
+        payment = norm_payment(data.get("payment"))
+        note = (data.get("note") or "").strip()
+
+        cur = db.execute(
+            """
+            INSERT INTO walk_on_sales(trip_id, from_stop, to_stop, pax, unit_price, total_amount, payment, note)
+            VALUES(?,?,?,?,?,?,?,?)
+            """,
+            (tid, from_stop, to_stop, pax, unit_price, total_amount, payment, note),
+        )
+        new_id = cur.lastrowid
+
+        if from_stop:
+            row_for_log = db.execute(
+                "SELECT * FROM walk_on_sales WHERE id=? AND trip_id=?",
+                (new_id, tid),
+            ).fetchone()
+
+            log_trip_stop_event(
+                db,
+                tid,
+                from_stop,
+                "standing_add",
+                _walkon_event_meta(row_for_log, {"action": "standing_board"}),
+            )
+
+        db.commit()
+
+        return jsonify({
+            "ok": True,
+            "id": new_id,
+            "pax": pax,
+            "total_amount": total_amount,
+        })
+
+    item_id = parse_int(request.args.get("id"), None)
+    ids = parse_int_list(request.args.get("ids") or "")
+    to_param = (request.args.get("to_stop") or request.args.get("to") or "").strip()
+    clear_all = bool(norm_bool(request.args.get("all")))
+
+    if to_param and not validate_stop_for_active_trip(to_param):
+        return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_param}"}), 400
+
+    if item_id is None and not ids and not to_param and not clear_all:
+        return jsonify({"ok": False, "msg": "id, ids, to/to_stop veya all gerekli"}), 400
+
+    rows_to_log = []
+
+    if item_id is not None:
+        rows_to_log = db.execute(
+            "SELECT * FROM walk_on_sales WHERE trip_id=? AND id=?",
+            (tid, item_id),
+        ).fetchall()
+    elif ids:
+        placeholders = ",".join("?" for _ in ids)
+        rows_to_log = db.execute(
+            f"SELECT * FROM walk_on_sales WHERE trip_id=? AND id IN ({placeholders})",
+            [tid] + ids,
+        ).fetchall()
+    elif to_param:
+        rows_to_log = db.execute(
+            "SELECT * FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
+            (tid, to_param),
+        ).fetchall()
+    elif clear_all:
+        rows_to_log = db.execute(
+            "SELECT * FROM walk_on_sales WHERE trip_id=?",
+            (tid,),
+        ).fetchall()
+
+    deleted_ids = delete_walkon_rows(
+        db,
+        tid,
+        item_id=item_id,
+        ids=ids or None,
+        to_stop=to_param or None,
+        clear_all=clear_all,
+    )
+
+    for r in rows_to_log:
+        if r["id"] in deleted_ids and (r["to_stop"] or "").strip():
+            log_trip_stop_event(
+                db,
+                tid,
+                r["to_stop"],
+                "standing_off",
+                _walkon_event_meta(r, {"action": "standing_offload"}),
+            )
+
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "deleted": deleted_ids,
+        "count": len(deleted_ids),
+    })
+
+@app.route("/api/standing", methods=["GET", "POST", "DELETE"])
+def api_standing():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
+    db = get_db()
+
+    if request.method == "GET":
+        row = db.execute(
+            """
+            SELECT COALESCE(SUM(total_amount),0) AS total_amount,
+                   COALESCE(SUM(pax),0) AS pax
+            FROM walk_on_sales
+            WHERE trip_id=?
+            """,
+            (tid,),
+        ).fetchone()
+
+        return jsonify({
+            "ok": True,
+            "count": int(row["pax"] or 0),
+            "revenue": float(row["total_amount"] or 0.0),
+        })
+
+    if request.method == "POST":
+        data = request.get_json(force=True) or {}
+
+        from_stop = (data.get("from_stop") or data.get("from") or "").strip()
+        to_stop = (data.get("to_stop") or data.get("to") or "").strip()
+
+        if not to_stop:
+            return jsonify({"ok": False, "msg": "to gerekli"}), 400
+
+        if from_stop and not validate_stop_for_active_trip(from_stop):
+            return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {from_stop}"}), 400
+        if to_stop and not validate_stop_for_active_trip(to_stop):
+            return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
+
+        pax = max(1, parse_int(data.get("pax") or data.get("count"), 1) or 1)
+        unit_price = parse_float(data.get("unit_price") or data.get("price"), 0.0) or 0.0
+        total_amount = parse_float(data.get("total_amount"), None)
+        if total_amount is None:
+            total_amount = pax * unit_price
+
+        payment = norm_payment(data.get("payment"))
+        note = (data.get("note") or "").strip()
+
+        cur = db.execute(
+            """
+            INSERT INTO walk_on_sales(trip_id, from_stop, to_stop, pax, unit_price, total_amount, payment, note)
+            VALUES(?,?,?,?,?,?,?,?)
+            """,
+            (tid, from_stop, to_stop, pax, unit_price, total_amount, payment, note),
+        )
+        db.commit()
+        new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+        return jsonify({
+            "ok": True,
+            "id": new_id,
+            "pax": pax,
+            "total_amount": total_amount,
+        })
+
+    item_id = parse_int(request.args.get("id"), None)
+    ids = parse_int_list(request.args.get("ids") or "")
+    to_param = (request.args.get("to_stop") or request.args.get("to") or "").strip()
+    clear_all = bool(norm_bool(request.args.get("all")))
+
+    if to_param and not validate_stop_for_active_trip(to_param):
+        return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_param}"}), 400
+
+    if item_id is None and not ids and not to_param and not clear_all:
+        return jsonify({"ok": False, "msg": "id, ids, to/to_stop veya all gerekli"}), 400
+
+    deleted_ids = delete_walkon_rows(
+        db,
+        tid,
+        item_id=item_id,
+        ids=ids or None,
+        to_stop=to_param or None,
+        clear_all=clear_all,
+    )
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "deleted": deleted_ids,
+        "count": len(deleted_ids),
+    })
+
+@app.route("/api/standing/list")
+def api_standing_list():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok", "items": []}), 400
+
+    rows = get_db().execute(
+        """
+        SELECT id, from_stop, to_stop, pax, unit_price, total_amount, payment, note, created_at
+        FROM walk_on_sales
+        WHERE trip_id=?
+        ORDER BY id DESC
+        """,
+        (tid,),
+    ).fetchall()
+
+    items = [{
+        "id": r["id"],
+        "from": r["from_stop"],
+        "to": r["to_stop"],
+        "count": r["pax"],
+        "price": r["unit_price"],
+        "total_amount": r["total_amount"],
+        "payment": r["payment"],
+        "note": r["note"],
+        "ts": r["created_at"],
+    } for r in rows]
+
+    return jsonify({"ok": True, "items": items})
+
+# =========================================================
+# İstatistik API
+# =========================================================
+
+@app.route("/api/stats")
+def api_stats():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
+    db = get_db()
+
+    seat_row = db.execute(
+        """
+        SELECT COUNT(*) AS c,
+               COALESCE(SUM(amount),0) AS s,
+               COALESCE(SUM(service),0) AS svc
+        FROM seats
+        WHERE trip_id=?
+        """,
+        (tid,),
+    ).fetchone()
+
+    walk_row = db.execute(
+        """
+        SELECT COALESCE(SUM(pax),0) AS pax,
+               COALESCE(SUM(total_amount),0) AS tot
+        FROM walk_on_sales
+        WHERE trip_id=?
+        """,
+        (tid,),
+    ).fetchone()
+
+    by_pay = {}
+    for r in db.execute(
+        "SELECT payment, COALESCE(SUM(amount),0) AS s FROM seats WHERE trip_id=? GROUP BY payment",
+        (tid,),
+    ).fetchall():
+        by_pay[r["payment"]] = by_pay.get(r["payment"], 0.0) + float(r["s"])
+
+    for r in db.execute(
+        "SELECT payment, COALESCE(SUM(total_amount),0) AS s FROM walk_on_sales WHERE trip_id=? GROUP BY payment",
+        (tid,),
+    ).fetchall():
+        by_pay[r["payment"]] = by_pay.get(r["payment"], 0.0) + float(r["s"])
+
+    seats_revenue = float(seat_row["s"] or 0)
+    walkon_revenue = float(walk_row["tot"] or 0)
+
+    return jsonify({
+        "ok": True,
+        "seats_reserved": int(seat_row["c"] or 0),
+        "seats_revenue": seats_revenue,
+        "walkon_pax": int(walk_row["pax"] or 0),
+        "walkon_revenue": walkon_revenue,
+        "total_revenue": seats_revenue + walkon_revenue,
+        "by_payment": by_pay,
+        "service_count": int(seat_row["svc"] or 0),
+    })
+
+
+# =========================================================
+# Stop log API
+# =========================================================
+
+def seats_count_for_stop(tid: int, stop_name: str) -> int:
+    row = get_db().execute(
+        "SELECT COUNT(*) AS c FROM seats WHERE trip_id=? AND to_stop=?",
+        (tid, stop_name),
+    ).fetchone()
+    return int(row["c"] or 0)
+
+
+@app.route("/api/stoplog", methods=["GET", "POST"])
+def api_stoplog():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
+    db = get_db()
+
+    if request.method == "GET":
+        rows = db.execute(
+            """
+            SELECT id, trip_id, stop_name, event, distance_km, seats_for_stop, meta_json, ts
+            FROM stop_logs
+            WHERE trip_id=?
+            ORDER BY ts DESC, id DESC
+            """,
+            (tid,),
+        ).fetchall()
+
+        items = []
+        for r in rows:
+            try:
+                meta = json.loads(r["meta_json"]) if r["meta_json"] else None
+            except Exception:
+                meta = None
+
+            items.append({
+                "id": r["id"],
+                "trip_id": r["trip_id"],
+                "stop_name": r["stop_name"],
+                "event": r["event"],
+                "distance_km": r["distance_km"],
+                "seats_for_stop": r["seats_for_stop"],
+                "meta": meta,
+                "ts": r["ts"],
+            })
+
+        return jsonify({"ok": True, "items": items})
+
+    data = request.get_json(force=True) or {}
+    stop_name = (data.get("stop_name") or data.get("stop") or "").strip()
+    event = (data.get("event") or "arrive").strip().lower()
+
+    if not stop_name:
+        return jsonify({"ok": False, "msg": "stop_name gerekli"}), 400
+    if not validate_stop_for_active_trip(stop_name):
+        return jsonify({"ok": False, "msg": "Durak bu hat üzerinde değil"}), 400
+    allowed_events = {
+        "arrive", "depart", "approach",
+        "board", "offload",
+        "standing_add", "standing_off",
+        "parcel_deliver", "pass_stop",
+    }
+
+    if event not in allowed_events:
+        return jsonify({"ok": False, "msg": "event geçersiz"}), 400
+
+    distance_km = data.get("distance_km")
+    if distance_km is not None:
+        distance_km = parse_float(distance_km, None)
+        if distance_km is None:
+            return jsonify({"ok": False, "msg": "distance_km geçersiz"}), 400
+
+    seats_for_stop = seats_count_for_stop(tid, stop_name)
+    meta = data.get("meta")
+    try:
+        meta_json = json.dumps(meta, ensure_ascii=False) if isinstance(meta, (dict, list)) else None
+    except Exception:
+        meta_json = None
+
+    db.execute(
+        """
+        INSERT INTO stop_logs(trip_id, stop_name, event, distance_km, seats_for_stop, meta_json)
+        VALUES(?,?,?,?,?,?)
+        """,
+        (tid, stop_name, event, distance_km, seats_for_stop, meta_json),
+    )
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "stop_name": stop_name,
+        "event": event,
+        "distance_km": distance_km,
+        "seats_for_stop": seats_for_stop,
+    })
+
+
+
+
+@app.route("/sefer-raporu")
+def trip_report_page():
+    return render_template("trip_report.html")
+
+
+@app.route("/api/trip-report")
+def api_trip_report():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "msg": "Aktif sefer yok"}), 400
+
+    db = get_db()
+
+    trip = db.execute(
+        "SELECT * FROM trips WHERE id=?",
+        (tid,),
+    ).fetchone()
+
+    rows = db.execute(
+        """
+        SELECT id, stop_name, event, seats_for_stop, meta_json, ts
+        FROM stop_logs
+        WHERE trip_id=?
+        ORDER BY id ASC
+        """,
+        (tid,),
+    ).fetchall()
+
+    groups = {}
+    order = []
+
+    def group_for(stop):
+        if stop not in groups:
+            groups[stop] = {
+                "stop_name": stop,
+                "board": [],
+                "offload": [],
+                "standing_add": [],
+                "standing_off": [],
+                "parcel_deliver": [],
+                "pass_stop": [],
+                "seat_destination_change": [],
+                "other": [],
+                "summary": {
+                    "board_count": 0,
+                    "offload_count": 0,
+                    "standing_board_count": 0,
+                    "standing_off_count": 0,
+                    "parcel_count": 0,
+                    "destination_change_count": 0,
+                },
+            }
+            order.append(stop)
+        return groups[stop]
+
+    for r in rows:
+        stop = r["stop_name"] or "—"
+        event = r["event"] or "other"
+
+        try:
+            meta = json.loads(r["meta_json"]) if r["meta_json"] else {}
+        except Exception:
+            meta = {}
+
+        item = {
+            "id": r["id"],
+            "event": event,
+            "ts": r["ts"],
+            "seats_for_stop": r["seats_for_stop"],
+            "meta": meta,
+        }
+
+        g = group_for(stop)
+
+        if event == "board":
+            g["board"].append(item)
+            g["summary"]["board_count"] += 1
+
+        elif event == "offload":
+            g["offload"].append(item)
+            g["summary"]["offload_count"] += 1
+
+        elif event == "standing_add":
+            g["standing_add"].append(item)
+            g["summary"]["standing_board_count"] += int(meta.get("pax") or 0)
+
+        elif event == "standing_off":
+            g["standing_off"].append(item)
+            g["summary"]["standing_off_count"] += int(meta.get("pax") or 0)
+
+        elif event == "parcel_deliver":
+            g["parcel_deliver"].append(item)
+            g["summary"]["parcel_count"] += int(meta.get("count") or 1)
+
+        elif event == "pass_stop":
+            g["pass_stop"].append(item)
+
+        elif event == "seat_destination_change":
+            g["seat_destination_change"].append(item)
+            g["summary"]["destination_change_count"] += 1
+
+        else:
+            g["other"].append(item)
+
+    return jsonify({
+        "ok": True,
+        "trip": _row_dict(trip),
+        "stops": [groups[x] for x in order],
+    })
+
+
+
+# =========================================================
+# Raporlar / Olaylar
+# =========================================================
+from modules.reports_panel import register_reports_routes
+
+register_reports_routes(app, {
+    "get_db": get_db,
+    "get_active_trip": get_active_trip,
+    "all_route_names": all_route_names,
+    "SEAT_NUMBERS": SEAT_NUMBERS,
+})
+
+
+# =========================================================
+# Bitmiş sefer rapor arşivi
+# =========================================================
+
+def reports_dir_path():
+    d = Path(app.root_path) / "storage" / "reports"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def safe_report_base(base):
+    b = str(base or "").strip()
+    b = b.replace("/", "").replace("\\", "")
+    if not b or ".." in b:
+        return ""
+    return b
+
+
+@app.route("/sefer-raporu/arsiv/<base>")
+def archived_trip_report_page(base):
+    base = safe_report_base(base)
+    if not base:
+        abort(404)
+
+    json_path = reports_dir_path() / f"{base}.json"
+    if not json_path.exists():
+        abort(404)
+
+    return render_template("trip_report.html", archive_base=base)
+
+
+@app.route("/api/trip-report/archive/<base>")
+def api_archived_trip_report(base):
+    base = safe_report_base(base)
+    if not base:
+        return jsonify({"ok": False, "msg": "Geçersiz rapor"}), 400
+
+    json_path = reports_dir_path() / f"{base}.json"
+    if not json_path.exists():
+        return jsonify({"ok": False, "msg": "Rapor dosyası bulunamadı"}), 404
+
+    try:
+        data = json.loads(json_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        return jsonify({"ok": False, "msg": f"Rapor okunamadı: {e}"}), 500
+
+    return jsonify(data)
+
+
+
+
+@app.route("/api/report-archive")
+def api_report_archive():
+    items = []
+
+    for f in sorted(reports_dir_path().glob("*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+        base = f.stem
+        title = base
+        route = ""
+        plate = ""
+        date = ""
+
+        try:
+            data = json.loads(f.read_text(encoding="utf-8"))
+            trip = data.get("trip") or {}
+            date = trip.get("date") or ""
+            route = trip.get("route") or ""
+            plate = trip.get("plate") or ""
+            title = f"{date or '-'} · {route or '-'} · {plate or '-'}"
+        except Exception:
+            pass
+
+        items.append({
+            "base": base,
+            "title": title,
+            "date": date,
+            "route": route,
+            "plate": plate,
+            "view": f"/sefer-raporu/arsiv/{base}",
+            "txt": f"/rapor-dosya/{base}/txt",
+            "csv": f"/rapor-dosya/{base}/csv",
+            "json": f"/api/trip-report/archive/{base}",
+        })
+
+    return jsonify({"ok": True, "items": items})
+
+
+
+
+@app.route("/sefer-raporu-son")
+def latest_trip_report_redirect():
+    """
+    Ana ekrandaki SEFER RAPORLARI kartı buraya gelir.
+    Aktif sefer varsa canlı sefer raporunu açar.
+    Aktif sefer yoksa en son arşivlenen raporu açar.
+    """
+    tid = get_active_trip()
+
+    if tid:
+        return redirect("/sefer-raporu")
+
+    files = sorted(
+        reports_dir_path().glob("*.json"),
+        key=lambda x: x.stat().st_mtime,
+        reverse=True
+    )
+
+    if files:
+        return redirect(url_for("archived_trip_report_page", base=files[0].stem))
+
+    return redirect("/rapor-arsiv")
+
+
+@app.route("/rapor-arsiv")
+def report_archive_page():
+    items = []
+
+    for f in sorted(reports_dir_path().glob("*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+        base = f.stem
+        title = base
+
+        try:
+            data = json.loads(f.read_text(encoding="utf-8"))
+            trip = data.get("trip") or {}
+            title = f"{trip.get('date') or '-'} · {trip.get('route') or '-'} · {trip.get('plate') or '-'}"
+        except Exception:
+            pass
+
+        items.append({
+            "base": base,
+            "title": title,
+            "json": f"/api/trip-report/archive/{base}",
+            "view": f"/sefer-raporu/arsiv/{base}",
+            "txt": f"/rapor-dosya/{base}/txt",
+            "csv": f"/rapor-dosya/{base}/csv",
+        })
+
+    return render_template("report_archive.html", items=items)
+
+
+@app.route("/rapor-dosya/<base>/<kind>")
+def report_file_download(base, kind):
+    base = safe_report_base(base)
+    if not base:
+        abort(404)
+
+    ext_map = {
+        "json": "json",
+        "txt": "txt",
+        "csv": "csv",
+    }
+
+    ext = ext_map.get(kind)
+    if not ext:
+        abort(404)
+
+    path = reports_dir_path() / f"{base}.{ext}"
+    if not path.exists():
+        abort(404)
+
+    return send_from_directory(str(reports_dir_path()), path.name, as_attachment=True)
+
+
+
+# =========================================================
+# Emanetler
+# =========================================================
+from modules.consignments_panel import register_consignments_routes
+
+register_consignments_routes(app, {
+    "get_active_trip": get_active_trip,
+    "get_db": get_db,
+    "get_stops": get_stops,
+    "validate_stop_for_active_trip": validate_stop_for_active_trip,
+    "norm_payment": norm_payment,
+    "parse_float": parse_float,
+    "allowed_file": allowed_file,
+    "ensure_upload_dir": ensure_upload_dir,
+    "UPLOAD_DIR": UPLOAD_DIR,
+    "ALLOWED_IMAGE_MIMES": ALLOWED_IMAGE_MIMES,
+})
+
+
+# =========================================================
+# Bagaj meta + clear
+# =========================================================
+
+@app.get("/api/bags/meta")
+def api_bags_meta():
+    trip_code = (request.args.get("trip") or request.args.get("trip_code") or "").strip()
+    seat_no = (request.args.get("seat") or "").strip()
+
+    if not trip_code or not seat_no:
+        return jsonify({
+            "ok": False,
+            "msg": "trip ve seat gerekli",
+            "count": 0,
+            "right": 0,
+            "left_front": 0,
+            "left_back": 0,
+            "eyes": [],
+        }), 400
+
+    # modules/bags içindeki asıl doğru okuyucuyu kullanıyoruz.
+    # Bu fonksiyon meta.json varsa onu okur,
+    # yoksa R1_, LF2_, LB3_ gibi dosya adlarını doğru çözer.
+    from modules.bags import get_counts
+
+    right, left_front, left_back = get_counts(trip_code, seat_no)
+
+    right = int(right or 0)
+    left_front = int(left_front or 0)
+    left_back = int(left_back or 0)
+
+    total = right + left_front + left_back
+
+    eyes = []
+    if right > 0:
+        eyes.append("R")
+    if left_front > 0:
+        eyes.append("LF")
+    if left_back > 0:
+        eyes.append("LB")
+
+    return jsonify({
+        "ok": True,
+        "count": total,
+        "right": right,
+        "left_front": left_front,
+        "left_back": left_back,
+        "eyes": eyes,
+    })
+
+
+@app.route("/bags/clear", methods=["DELETE"])
+def bags_clear_alias():
+    trip = (request.args.get("trip") or request.args.get("trip_code") or "").strip()
+    seat = (request.args.get("seat") or "").strip()
+
+    if not trip or not seat:
+        return jsonify({"ok": False, "msg": "trip ve seat gerekli"}), 400
+
+    d = bag_root() / safe(trip) / safe(seat)
+    deleted = 0
+
+    if d.exists() and d.is_dir():
+        for p in d.iterdir():
+            try:
+                if p.is_file():
+                    p.unlink(missing_ok=True)
+                    deleted += 1
+            except Exception:
+                pass
+
+        try:
+            d.rmdir()
+        except Exception:
+            pass
+
+    return jsonify({
+        "ok": True,
+        "deleted": deleted,
+    })
+
+# =========================================================
+# Sefer bitir / health
+# =========================================================
+
+# =========================================================
+# Sefer bitişinde rapor dosyası oluşturma
+# =========================================================
+
+# =========================================================
+# Sefer bitişinde rapor dosyası oluşturma
+# =========================================================
+from modules.trip_report_builder import register_trip_report_builder
+
+_trip_report_exports = register_trip_report_builder(app, {
+    "get_db": get_db,
+    "_row_dict": _row_dict,
+    "log_trip_stop_event": log_trip_stop_event,
+    "_seat_event_meta": _seat_event_meta,
+    "_walkon_event_meta": _walkon_event_meta,
+})
+
+_report_slug = _trip_report_exports["_report_slug"]
+build_trip_report_payload_for_trip = _trip_report_exports["build_trip_report_payload_for_trip"]
+finalize_remaining_trip_events = _trip_report_exports["finalize_remaining_trip_events"]
+trip_report_text = _trip_report_exports["trip_report_text"]
+trip_report_csv = _trip_report_exports["trip_report_csv"]
+save_finished_trip_report = _trip_report_exports["save_finished_trip_report"]
+
+
+@app.route("/end-trip", methods=["GET", "POST"])
+@app.route("/end_trip", methods=["GET", "POST"])
+def end_trip():
+    tid = get_active_trip()
+    db = get_db()
+
+    if tid:
+        trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+
+        finalize_remaining_trip_events(db, tid)
+        report_files = save_finished_trip_report(tid)
+        session["last_finished_trip_report"] = report_files
+
+        # Canlı runtime bilgisini temizle
+        try:
+            ensure_live_runtime_state_table()
+            db.execute("DELETE FROM live_runtime_state WHERE trip_id=?", (tid,))
+        except Exception:
+            pass
+
+        # Continue ekranının son seçili durağını temizle
+        try:
+            session.pop("continue_current_stop", None)
+        except Exception:
+            pass
+
+        # Bu sefere ait koltuk bagaj klasörünü temizle
+        try:
+            if trip:
+                import shutil
+                trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+                d = bag_root() / safe(trip_key)
+                if d.exists() and d.is_dir():
+                    shutil.rmtree(d, ignore_errors=True)
+        except Exception:
+            pass
+
+        db.execute("DELETE FROM seats WHERE trip_id=?", (tid,))
+        db.execute("DELETE FROM walk_on_sales WHERE trip_id=?", (tid,))
+        db.execute("DELETE FROM stop_logs WHERE trip_id=?", (tid,))
+        db.execute("UPDATE app_state SET active_trip_id=NULL WHERE id=1")
+        db.commit()
+    else:
+        try:
+            session.pop("continue_current_stop", None)
+        except Exception:
+            pass
+
+        db.execute("UPDATE app_state SET active_trip_id=NULL WHERE id=1")
+        db.commit()
+
+    last_report = session.get("last_finished_trip_report") or {}
+
+
+    base = last_report.get("base")
+
+
+    if base:
+
+
+        return redirect(url_for("archived_trip_report_page", base=base))
+
+
+    return redirect(url_for("index"))
+
+# =========================================================
+# Run
+# =========================================================
+
+
+
+
+
+# =========================================================
+# Yedekleme Sistemi
+# =========================================================
+from modules.backup_panel import register_backup_routes
+
+register_backup_routes(app)
+
+
+# =========================================================
+# Abonelik / Paket Sistemi
+# =========================================================
+from modules.subscription_panel import register_subscription_routes
+
+_subscription_exports = register_subscription_routes(app, {
+    "settings_get": settings_get,
+    "settings_set": settings_set,
+    "get_db": get_db,
+})
+
+parse_dt_safe = _subscription_exports["parse_dt_safe"]
+format_dt_tr = _subscription_exports["format_dt_tr"]
+subscription_defaults = _subscription_exports["subscription_defaults"]
+ensure_subscription_state = _subscription_exports["ensure_subscription_state"]
+get_subscription_info = _subscription_exports["get_subscription_info"]
+subscription_allows_access = _subscription_exports["subscription_allows_access"]
+start_trial_if_missing = _subscription_exports["start_trial_if_missing"]
+activate_subscription_manually = _subscription_exports["activate_subscription_manually"]
+force_expire_trial_for_test = _subscription_exports["force_expire_trial_for_test"]
+subscription_dev_mode = _subscription_exports["subscription_dev_mode"]
+get_effective_plan = _subscription_exports["get_effective_plan"]
+plan_level = _subscription_exports["plan_level"]
+plan_allows = _subscription_exports["plan_allows"]
+find_feature_rule_for_path = _subscription_exports["find_feature_rule_for_path"]
+google_play_plan_from_product = _subscription_exports["google_play_plan_from_product"]
+
+
+# =========================================================
+# Auth / Kurulum / Profil / Güvenlik Ayarları
+# =========================================================
+from modules.settings_panel import register_settings_routes
+
+register_settings_routes(app, {
+    "admin_profile_exists": admin_profile_exists,
+    "verify_admin_password": verify_admin_password,
+    "issue_csrf": issue_csrf,
+    "get_csrf": get_csrf,
+    "reset_admin_owner": reset_admin_owner,
+    "verify_recovery_code": verify_recovery_code,
+    "get_recovery_code_hash": get_recovery_code_hash,
+    "make_recovery_code": make_recovery_code,
+    "set_recovery_code": set_recovery_code,
+    "settings_get": settings_get,
+    "set_admin_password": set_admin_password,
+    "get_admin_profile": get_admin_profile,
+    "save_admin_profile": save_admin_profile,
+    "save_profile_photo": save_profile_photo,
+    "start_trial_if_missing": start_trial_if_missing,
+})
+
+
+# Local coords manager modules/coords_panel.py içine taşındı.
+
+
+
+
+@app.route("/rehber")
+def rehber_page():
+    return render_template("rehber.html")
+
+
+if __name__ == "__main__":
+    with app.app_context():
+        ensure_schema()
+        ensure_upload_dir()
+
+    app.run(host="0.0.0.0", port=PORT, debug=DEBUG)

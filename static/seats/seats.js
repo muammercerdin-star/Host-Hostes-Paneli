@@ -43,7 +43,8 @@ const serverStops = BOOT.serverStops || [];
 })();
 
 
-const BAG_TRIP = TRIP_KEY;
+window.TRIP_KEY = TRIP_KEY;
+const BAG_TRIP = BOOT.bagTrip || TRIP_KEY;
   window.BAG_TRIP = BAG_TRIP;
 
   let ROUTE_SCHEDULES = {

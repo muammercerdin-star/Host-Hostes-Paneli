@@ -1,0 +1,516 @@
+/* =========================================================
+   UNIFIED SEAT DECK REPORT STYLE
+   Normal mod + Sürüş modu + Sade mod aynı koltuk planını kullanır.
+   JS / HTML mantığına dokunmaz.
+========================================================= */
+
+:root{
+  --unified-seat-w:82px;
+  --unified-seat-h:58px;
+  --unified-corr-w:68px;
+  --unified-gap-x:12px;
+  --unified-gap-y:12px;
+  --unified-row-h:70px;
+}
+
+/* Tüm modlarda board alanı aynı davranır */
+.board-stage,
+body.drive-mode .board-stage,
+html.seat-simple-mode .board-stage{
+  padding:12px 10px 14px !important;
+  border-radius:24px !important;
+  overflow-x:auto !important;
+  overflow-y:visible !important;
+}
+
+/* Deck ortalansın, sağ boşluk/fab baskısı koltuk planını bozmasın */
+.deck-wrap,
+body.drive-mode .deck-wrap,
+html.seat-simple-mode .deck-wrap{
+  width:100% !important;
+  min-width:100% !important;
+  padding-right:0 !important;
+  margin:0 auto !important;
+  display:flex !important;
+  justify-content:center !important;
+}
+
+/* Ana koltuk planı: rapor ekranındaki düzen mantığı */
+.deck,
+body.drive-mode .deck,
+html.seat-simple-mode .deck{
+  width:max-content !important;
+  min-width:0 !important;
+
+  display:grid !important;
+  grid-template-columns:
+    var(--unified-seat-w)
+    var(--unified-corr-w)
+    var(--unified-seat-w)
+    var(--unified-seat-w) !important;
+
+  grid-auto-rows:var(--unified-row-h) !important;
+  column-gap:var(--unified-gap-x) !important;
+  row-gap:var(--unified-gap-y) !important;
+
+  justify-content:center !important;
+  align-items:start !important;
+
+  padding:16px 8px 18px !important;
+
+  background:
+    radial-gradient(circle at 50% 0%, rgba(59,139,255,.12), transparent 38%),
+    rgba(2,6,23,.22) !important;
+
+  border:1px solid rgba(148,163,184,.12) !important;
+  border-radius:24px !important;
+}
+
+/* Eski sağ kolon kaydırmalarını iptal et: artık label gizli, kaydırmaya gerek yok */
+.deck .cell[style*="grid-column:4"],
+.deck .cell[style*="grid-column: 4"],
+body.drive-mode .deck .cell[style*="grid-column:4"],
+body.drive-mode .deck .cell[style*="grid-column: 4"],
+html.seat-simple-mode .deck .cell[style*="grid-column:4"],
+html.seat-simple-mode .deck .cell[style*="grid-column: 4"],
+.deck .cell[style*="grid-row:14"],
+.deck .cell[style*="grid-row: 14"],
+body.drive-mode .deck .cell[style*="grid-row:14"],
+body.drive-mode .deck .cell[style*="grid-row: 14"]{
+  transform:none !important;
+}
+
+/* Hücreler artık sadece koltuğu taşır */
+.cell,
+body.drive-mode .cell,
+html.seat-simple-mode .cell{
+  width:var(--unified-seat-w) !important;
+  min-width:var(--unified-seat-w) !important;
+  max-width:var(--unified-seat-w) !important;
+  gap:0 !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+}
+
+/* Etiketler gizli: rapor ekranındaki temiz görünüm */
+.label,
+body.drive-mode .label,
+html.seat-simple-mode .label{
+  display:none !important;
+  width:0 !important;
+  min-height:0 !important;
+  height:0 !important;
+  max-height:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+}
+
+/* Koltuk görünümü: büyük, yatay, rapor ekranı stili */
+.seat,
+body.drive-mode .seat,
+html.seat-simple-mode .seat{
+  width:100% !important;
+  height:var(--unified-seat-h) !important;
+  min-height:var(--unified-seat-h) !important;
+
+  border-radius:22px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  font-size:30px !important;
+  line-height:1 !important;
+  font-weight:1000 !important;
+  color:#fff !important;
+
+  border:1px solid rgba(255,255,255,.14) !important;
+
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.20),
+    inset 0 -2px 0 rgba(0,0,0,.18),
+    0 12px 20px rgba(0,0,0,.30) !important;
+
+  text-shadow:0 1px 0 rgba(0,0,0,.18) !important;
+}
+
+/* Boş / erkek / kadın / atanmış renkleri */
+.seat:not(.isAssigned):not(.male):not(.female),
+body.drive-mode .seat:not(.isAssigned):not(.male):not(.female),
+html.seat-simple-mode .seat:not(.isAssigned):not(.male):not(.female){
+  background:linear-gradient(180deg,#22c55e,#15803d) !important;
+}
+
+.seat.male,
+body.drive-mode .seat.male,
+html.seat-simple-mode .seat.male{
+  background:linear-gradient(180deg,#3b82f6,#1d4ed8) !important;
+}
+
+.seat.female,
+body.drive-mode .seat.female,
+html.seat-simple-mode .seat.female{
+  background:linear-gradient(180deg,#f472b6,#db2777) !important;
+}
+
+.seat.isAssigned:not(.male):not(.female),
+body.drive-mode .seat.isAssigned:not(.male):not(.female),
+html.seat-simple-mode .seat.isAssigned:not(.male):not(.female){
+  background:linear-gradient(180deg,#64748b,#334155) !important;
+}
+
+/* Seçili koltuk */
+.seat.selected,
+body.drive-mode .seat.selected,
+html.seat-simple-mode .seat.selected{
+  outline:4px solid rgba(127,199,255,.72) !important;
+  outline-offset:3px !important;
+  box-shadow:
+    0 0 0 7px rgba(96,165,250,.13),
+    inset 0 2px 0 rgba(255,255,255,.20),
+    0 12px 20px rgba(0,0,0,.32) !important;
+}
+
+/* Yaklaşan durak uyarısı */
+.seat.has-stop,
+body.drive-mode .seat.has-stop,
+html.seat-simple-mode .seat.has-stop{
+  box-shadow:
+    0 0 0 3px rgba(245,158,11,.42) inset,
+    0 12px 20px rgba(0,0,0,.32) !important;
+}
+
+/* Koridor: rapor ekranındaki kırmızı blok */
+.corr,
+body.drive-mode .corr,
+html.seat-simple-mode .corr{
+  grid-column:2 !important;
+  grid-row:1 / 14 !important;
+
+  width:var(--unified-corr-w) !important;
+  min-width:var(--unified-corr-w) !important;
+  max-width:var(--unified-corr-w) !important;
+
+  justify-self:center !important;
+  align-self:stretch !important;
+
+  margin:0 !important;
+  border-radius:28px !important;
+
+  background:linear-gradient(180deg,#7f1d1d,#991b1b,#7f1d1d) !important;
+  opacity:.92 !important;
+
+  box-shadow:
+    inset 0 0 22px rgba(0,0,0,.35),
+    0 16px 32px rgba(0,0,0,.28) !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  writing-mode:vertical-rl !important;
+  letter-spacing:.34em !important;
+  font-size:13px !important;
+  font-weight:1000 !important;
+  color:#fff !important;
+}
+
+/* Kapı */
+.door,
+body.drive-mode .door,
+html.seat-simple-mode .door{
+  grid-column:3 / 5 !important;
+  grid-row:7 !important;
+
+  height:52px !important;
+  min-height:52px !important;
+
+  border-radius:18px !important;
+  background:linear-gradient(180deg,#b7791f,#8a5a12) !important;
+  color:#fff !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  font-size:19px !important;
+  font-weight:1000 !important;
+  letter-spacing:.16em !important;
+
+  transform:none !important;
+
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.16),
+    0 8px 20px rgba(0,0,0,.26) !important;
+}
+
+/* Bagaj / servis / inecek rozetleri koltuğun üstünde kalsın */
+.seat .bag-badge,
+body.drive-mode .seat .bag-badge,
+html.seat-simple-mode .seat .bag-badge{
+  right:-12px !important;
+  top:-12px !important;
+  min-width:34px !important;
+  min-height:28px !important;
+  border-radius:999px !important;
+  transform:none !important;
+  font-size:12px !important;
+  background:#0f172a !important;
+  border:1px solid rgba(147,197,253,.55) !important;
+  color:#bfdbfe !important;
+}
+
+.seat .svc-badge,
+body.drive-mode .seat .svc-badge,
+html.seat-simple-mode .seat .svc-badge{
+  left:-10px !important;
+  top:-10px !important;
+  min-width:26px !important;
+  min-height:26px !important;
+  background:#2563eb !important;
+}
+
+.seat .stop-badge,
+body.drive-mode .seat .stop-badge,
+html.seat-simple-mode .seat .stop-badge{
+  left:-10px !important;
+  bottom:-10px !important;
+  min-width:26px !important;
+  min-height:26px !important;
+}
+
+/* Sürüş modunda koltuk planı artık ayrı küçülmesin/büyümesin */
+body.drive-mode{
+  --seat-gap-x:var(--unified-gap-x) !important;
+  --seat-gap-y:var(--unified-gap-y) !important;
+}
+
+/* Mobil ayar */
+@media(max-width:430px){
+  :root{
+    --unified-seat-w:76px;
+    --unified-seat-h:56px;
+    --unified-corr-w:62px;
+    --unified-gap-x:10px;
+    --unified-gap-y:10px;
+    --unified-row-h:66px;
+  }
+
+  .board-stage,
+  body.drive-mode .board-stage,
+  html.seat-simple-mode .board-stage{
+    padding:10px 6px 12px !important;
+  }
+
+  .deck,
+  body.drive-mode .deck,
+  html.seat-simple-mode .deck{
+    padding:14px 6px 16px !important;
+    border-radius:22px !important;
+  }
+
+  .seat,
+  body.drive-mode .seat,
+  html.seat-simple-mode .seat{
+    font-size:28px !important;
+    border-radius:20px !important;
+  }
+
+  .corr,
+  body.drive-mode .corr,
+  html.seat-simple-mode .corr{
+    border-radius:25px !important;
+    font-size:12px !important;
+  }
+
+  .door,
+  body.drive-mode .door,
+  html.seat-simple-mode .door{
+    height:48px !important;
+    min-height:48px !important;
+    font-size:17px !important;
+  }
+}
+
+@media(max-width:370px){
+  :root{
+    --unified-seat-w:70px;
+    --unified-seat-h:54px;
+    --unified-corr-w:56px;
+    --unified-gap-x:8px;
+    --unified-gap-y:9px;
+    --unified-row-h:64px;
+  }
+
+  .seat,
+  body.drive-mode .seat,
+  html.seat-simple-mode .seat{
+    font-size:26px !important;
+  }
+}
+
+
+/* ===== UNIFIED_LABELS_BACK_START ===== */
+/* Etiketler geri geldi: normal + sürüş + sade mod aynı kompakt etiket düzeni */
+
+:root{
+  --unified-label-h:32px;
+  --unified-row-h:96px;
+}
+
+/* Hücre tekrar koltuk + etiket taşısın */
+.cell,
+body.drive-mode .cell,
+html.seat-simple-mode .cell{
+  gap:7px !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+}
+
+/* Etiketler görünür */
+.label,
+body.drive-mode .label,
+html.seat-simple-mode .label{
+  display:-webkit-box !important;
+  width:var(--unified-seat-w) !important;
+  max-width:var(--unified-seat-w) !important;
+  min-height:var(--unified-label-h) !important;
+  height:var(--unified-label-h) !important;
+  max-height:var(--unified-label-h) !important;
+
+  margin:0 !important;
+  padding:0 2px !important;
+
+  overflow:hidden !important;
+  -webkit-line-clamp:2 !important;
+  -webkit-box-orient:vertical !important;
+
+  text-align:center !important;
+  font-size:11.5px !important;
+  line-height:1.18 !important;
+  font-weight:800 !important;
+  color:rgba(232,237,245,.82) !important;
+
+  word-break:break-word !important;
+  text-shadow:0 1px 0 rgba(0,0,0,.25) !important;
+}
+
+/* Boş etikette alanı biraz azalt ama düzen bozulmasın */
+.label:empty,
+body.drive-mode .label:empty,
+html.seat-simple-mode .label:empty{
+  min-height:18px !important;
+  height:18px !important;
+  max-height:18px !important;
+}
+
+/* Sürüş modunda da aynı düzen kalsın */
+body.drive-mode{
+  --unified-row-h:96px !important;
+}
+
+/* Sade modda etiketler biraz daha küçük ama görünür */
+html.seat-simple-mode .label{
+  font-size:11px !important;
+  line-height:1.16 !important;
+}
+
+/* Mobilde taşmayı azalt */
+@media(max-width:430px){
+  :root{
+    --unified-label-h:31px;
+    --unified-row-h:92px;
+  }
+
+  .label,
+  body.drive-mode .label,
+  html.seat-simple-mode .label{
+    font-size:10.5px !important;
+    line-height:1.15 !important;
+    padding:0 1px !important;
+  }
+
+  .label:empty,
+  body.drive-mode .label:empty,
+  html.seat-simple-mode .label:empty{
+    min-height:14px !important;
+    height:14px !important;
+    max-height:14px !important;
+  }
+}
+
+@media(max-width:370px){
+  :root{
+    --unified-label-h:30px;
+    --unified-row-h:90px;
+  }
+
+  .label,
+  body.drive-mode .label,
+  html.seat-simple-mode .label{
+    font-size:10px !important;
+  }
+}
+/* ===== UNIFIED_LABELS_BACK_END ===== */
+
+
+
+/* ===== UNIFIED_SEAT_GAP_BALANCE_START ===== */
+/* Koltuk aralarını biraz açar; normal + sürüş + sade mod aynı kalır */
+
+:root{
+  --unified-gap-x:16px;
+  --unified-gap-y:13px;
+  --unified-row-h:98px;
+}
+
+/* Koltuklar biraz ferahlasın, etiketlere de nefes gelsin */
+.deck,
+body.drive-mode .deck,
+html.seat-simple-mode .deck{
+  column-gap:var(--unified-gap-x) !important;
+  row-gap:var(--unified-gap-y) !important;
+  grid-auto-rows:var(--unified-row-h) !important;
+}
+
+/* Koridorla koltuk arasındaki mesafe daha dengeli */
+.corr,
+body.drive-mode .corr,
+html.seat-simple-mode .corr{
+  margin-left:1px !important;
+  margin-right:1px !important;
+}
+
+/* Mobilde taşmadan ferahlık */
+@media(max-width:430px){
+  :root{
+    --unified-seat-w:74px;
+    --unified-seat-h:56px;
+    --unified-corr-w:60px;
+    --unified-gap-x:14px;
+    --unified-gap-y:12px;
+    --unified-row-h:94px;
+  }
+
+  .deck,
+  body.drive-mode .deck,
+  html.seat-simple-mode .deck{
+    padding-left:5px !important;
+    padding-right:5px !important;
+  }
+}
+
+@media(max-width:370px){
+  :root{
+    --unified-seat-w:68px;
+    --unified-seat-h:54px;
+    --unified-corr-w:54px;
+    --unified-gap-x:12px;
+    --unified-gap-y:11px;
+    --unified-row-h:90px;
+  }
+}
+/* ===== UNIFIED_SEAT_GAP_BALANCE_END ===== */
+
+

@@ -1,224 +1,622 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Profil Bilgileri</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Profil Bilgileri</title>
 
-  <style>
-    *{ box-sizing:border-box; }
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    body{
-      margin:0;
-      min-height:100vh;
-      background:
-        radial-gradient(circle at 18% 0%, rgba(59,130,246,.16), transparent 34%),
-        linear-gradient(180deg,#f8fbff,#eaf3ff);
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      color:#0f172a;
-    }
+<style>
+  :root{
+    --bg:#0d0f14;
+    --bg-row:#181c27;
+    --bg-hover:#1e2333;
+    --border:rgba(255,255,255,.07);
+    --border-act:rgba(255,255,255,.14);
+    --text:#e8edf5;
+    --text-sub:rgba(232,237,245,.54);
+    --text-dim:rgba(232,237,245,.32);
+    --accent:#3b8bff;
+    --green:#30d988;
+    --red:#ff4f4f;
+    --font-display:'Barlow Condensed',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    --font-body:'Barlow',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    --r-card:20px;
+  }
 
-    .shell{
-      width:min(94vw,720px);
-      margin:18px auto 28px;
-      padding:16px;
-      border-radius:30px;
-      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,248,255,.96));
-      border:1px solid rgba(255,255,255,.82);
-      box-shadow:0 28px 80px rgba(15,23,42,.18);
-    }
+  *,*::before,*::after{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+  }
 
+  html,body{
+    min-height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .page{
+    position:relative;
+    z-index:1;
+    max-width:480px;
+    min-height:100vh;
+    margin:0 auto;
+    padding:0 0 40px;
+  }
+
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:52px 24px 32px;
+    background:linear-gradient(160deg,#0e1624 0%,#0d0f14 62%);
+    border-bottom:1px solid var(--border);
+  }
+
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:-60px;
+    right:-40px;
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(59,139,255,.18) 0%,transparent 70%);
+    pointer-events:none;
+  }
+
+  .hero::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+    opacity:.45;
+  }
+
+  .hero-tag{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-family:var(--font-display);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:10px;
+    opacity:0;
+    animation:fadeUp .5s .05s forwards;
+  }
+
+  .hero-tag::before{
+    content:"";
+    width:24px;
+    height:1px;
+    background:var(--accent);
+    display:block;
+  }
+
+  .hero h1{
+    position:relative;
+    font-family:var(--font-display);
+    font-size:54px;
+    font-weight:800;
+    letter-spacing:-.02em;
+    line-height:.95;
+    color:var(--text);
+    opacity:0;
+    animation:fadeUp .5s .12s forwards;
+  }
+
+  .hero h1 span{
+    display:block;
+    max-width:360px;
+    font-size:20px;
+    font-weight:600;
+    color:var(--text-sub);
+    margin-top:8px;
+    line-height:1.32;
+  }
+
+  .content{
+    padding:24px 16px 0;
+    display:grid;
+    gap:12px;
+  }
+
+  .card{
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.22);
+    opacity:0;
+    animation:fadeUp .4s .16s forwards;
+  }
+
+  .status-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:18px;
+    border-bottom:1px solid var(--border);
+  }
+
+  .status-icon{
+    width:48px;
+    height:48px;
+    border-radius:14px;
+    display:grid;
+    place-items:center;
+    font-size:24px;
+    background:rgba(59,139,255,.14);
+    flex-shrink:0;
+  }
+
+  .status-title{
+    font-family:var(--font-display);
+    font-size:27px;
+    font-weight:800;
+    line-height:1;
+  }
+
+  .status-sub{
+    margin-top:4px;
+    color:var(--text-sub);
+    font-size:14px;
+    font-weight:600;
+    line-height:1.3;
+  }
+
+  .card-pad{
+    padding:18px;
+  }
+
+  .profile-top{
+    display:grid;
+    justify-items:center;
+    gap:12px;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:18px;
+  }
+
+  .avatar{
+    width:126px;
+    height:126px;
+    border-radius:34px;
+    display:grid;
+    place-items:center;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 30% 20%,rgba(59,139,255,.28),transparent 55%),
+      rgba(59,139,255,.10);
+    border:1px solid rgba(59,139,255,.20);
+    box-shadow:0 18px 55px rgba(59,139,255,.12);
+    font-size:58px;
+  }
+
+  .avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+
+  .profile-name{
+    font-family:var(--font-display);
+    font-size:30px;
+    font-weight:800;
+    line-height:1;
+    text-align:center;
+  }
+
+  .profile-phone{
+    color:var(--text-sub);
+    font-size:15px;
+    font-weight:650;
+    text-align:center;
+    margin-top:3px;
+  }
+
+  .alert{
+    margin-bottom:12px;
+    padding:14px 15px;
+    border-radius:16px;
+    font-size:15px;
+    font-weight:750;
+    line-height:1.35;
+  }
+
+  .alert.ok{
+    background:rgba(48,217,136,.12);
+    color:#9af2c8;
+    border:1px solid rgba(48,217,136,.24);
+  }
+
+  .alert.err{
+    background:rgba(255,79,79,.12);
+    color:#ffb1b1;
+    border:1px solid rgba(255,79,79,.24);
+  }
+
+  .field{
+    margin-bottom:15px;
+  }
+
+  label{
+    display:block;
+    font-family:var(--font-display);
+    font-size:19px;
+    font-weight:800;
+    letter-spacing:.02em;
+    color:var(--text);
+    margin:0 0 7px 2px;
+  }
+
+  input{
+    width:100%;
+    min-height:60px;
+    border-radius:18px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.035);
+    color:var(--text);
+    padding:0 16px;
+    outline:none;
+    font-size:20px;
+    font-weight:700;
+    font-family:var(--font-body);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  }
+
+  input:focus{
+    border-color:rgba(59,139,255,.55);
+    background:rgba(255,255,255,.055);
+    box-shadow:
+      0 0 0 4px rgba(59,139,255,.10),
+      inset 0 1px 0 rgba(255,255,255,.05);
+  }
+
+  .file-wrap{
+    display:grid;
+    gap:9px;
+  }
+
+  input[type="file"]{
+    display:none;
+  }
+
+  .file-btn{
+    min-height:60px;
+    border-radius:18px;
+    border:1px dashed rgba(59,139,255,.32);
+    background:linear-gradient(160deg,rgba(59,139,255,.10),rgba(255,255,255,.025));
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:0 15px;
+    cursor:pointer;
+  }
+
+  .file-main{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+
+  .file-ico{
+    width:38px;
+    height:38px;
+    border-radius:13px;
+    display:grid;
+    place-items:center;
+    background:rgba(59,139,255,.14);
+    flex-shrink:0;
+  }
+
+  .file-text{
+    min-width:0;
+  }
+
+  .file-title{
+    font-family:var(--font-display);
+    font-size:20px;
+    font-weight:800;
+    line-height:1;
+  }
+
+  .file-name{
+    margin-top:3px;
+    color:var(--text-sub);
+    font-size:13px;
+    font-weight:650;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:260px;
+  }
+
+  .file-arrow{
+    color:var(--accent);
+    font-family:var(--font-display);
+    font-size:17px;
+    font-weight:800;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+
+  .hint-card{
+    margin:2px 0 16px;
+    padding:14px;
+    border-radius:16px;
+    background:rgba(59,139,255,.08);
+    border:1px solid rgba(59,139,255,.18);
+  }
+
+  .hint-title{
+    font-family:var(--font-display);
+    font-size:19px;
+    font-weight:800;
+    line-height:1;
+  }
+
+  .hint-sub{
+    color:var(--text-sub);
+    font-size:14px;
+    font-weight:600;
+    line-height:1.35;
+    margin-top:5px;
+  }
+
+  .actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:17px;
+  }
+
+  .btn{
+    min-height:58px;
+    border:0;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    cursor:pointer;
+    font-family:var(--font-display);
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:.02em;
+    color:var(--text);
+  }
+
+  .btn.primary{
+    background:linear-gradient(145deg,#38bdf8,#2563eb);
+    box-shadow:0 16px 34px rgba(37,99,235,.24);
+  }
+
+  .btn.secondary{
+    background:rgba(255,255,255,.035);
+    color:var(--accent);
+    border:1px solid var(--border);
+  }
+
+  .back-btn{
+    min-height:58px;
+    margin:10px 16px 0;
+    border-radius:var(--r-card);
+    background:var(--bg-row);
+    border:1px solid var(--border);
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    font-family:var(--font-display);
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:.04em;
+    opacity:0;
+    animation:fadeUp .4s .32s forwards;
+  }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(12px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  @media(max-width:390px){
     .hero{
-      padding:24px 20px;
-      border-radius:26px;
-      background:linear-gradient(145deg,#2563eb,#06b6d4);
-      color:#fff;
-      box-shadow:0 18px 38px rgba(37,99,235,.22);
-      margin-bottom:14px;
+      padding:46px 20px 28px;
     }
 
     .hero h1{
-      margin:0;
-      font-size:34px;
-      line-height:1;
-      font-weight:950;
+      font-size:48px;
     }
 
-    .hero p{
-      margin:8px 0 0;
-      font-size:15px;
-      font-weight:700;
-      color:rgba(255,255,255,.88);
-    }
-
-    .card{
-      border-radius:26px;
-      background:#fff;
-      border:1px solid #e5edf6;
-      box-shadow:0 14px 34px rgba(15,23,42,.10);
-      padding:18px;
-    }
-
-    .photo-preview{
-      width:104px;
-      height:104px;
-      margin:0 auto 16px;
-      border-radius:34px;
-      display:grid;
-      place-items:center;
-      overflow:hidden;
-      background:#eff6ff;
-      font-size:46px;
-      box-shadow:0 12px 28px rgba(37,99,235,.14);
-    }
-
-    .photo-preview img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .alert{
-      padding:13px 14px;
-      border-radius:18px;
-      margin-bottom:14px;
-      font-size:15px;
-      font-weight:850;
-    }
-
-    .ok{
-      background:#ecfdf5;
-      color:#047857;
-      border:1px solid #a7f3d0;
-    }
-
-    .err{
-      background:#fef2f2;
-      color:#b91c1c;
-      border:1px solid #fecaca;
-    }
-
-    label{
-      display:block;
-      margin:0 0 7px 4px;
-      color:#334155;
-      font-size:15px;
-      font-weight:900;
-    }
-
-    .field{ margin-bottom:14px; }
-
-    input{
-      width:100%;
-      min-height:58px;
-      border-radius:20px;
-      border:1px solid rgba(148,163,184,.26);
-      background:#f8fbff;
-      color:#0f172a;
-      padding:0 16px;
-      outline:none;
+    .hero h1 span{
       font-size:18px;
-      font-weight:750;
-      box-shadow:
-        0 10px 22px rgba(15,23,42,.06),
-        inset 0 1px 0 rgba(255,255,255,.92);
     }
 
-    input[type="file"]{
-      padding:15px;
-      min-height:auto;
+    .content{
+      padding-left:12px;
+      padding-right:12px;
     }
 
     .actions{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-top:16px;
+      grid-template-columns:1fr;
     }
 
-    .btn{
-      min-height:58px;
-      border:0;
-      border-radius:21px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-decoration:none;
-      font-size:17px;
-      font-weight:950;
-      font-family:inherit;
+    input{
+      font-size:18px;
     }
 
-    .primary{
-      color:#fff;
-      background:linear-gradient(145deg,#38bdf8,#2563eb);
-      box-shadow:0 16px 34px rgba(37,99,235,.26);
+    .file-name{
+      max-width:190px;
     }
-
-    .secondary{
-      color:#2563eb;
-      background:#f8fbff;
-      border:1px solid #e5edf6;
-    }
-
-    @media(max-width:420px){
-      .actions{
-        grid-template-columns:1fr;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 
 <body>
-  <main class="shell">
-    <section class="hero">
-      <h1>👤 Profil Bilgileri</h1>
-      <p>Panel sahibinin adı, telefonu ve fotoğrafı.</p>
-    </section>
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-tag">Hesap</div>
+    <h1>Profil
+      <span>Panel sahibinin adı, telefonu ve fotoğrafı</span>
+    </h1>
+  </div>
+
+  <div class="content">
 
     <section class="card">
-      <div class="photo-preview">
-        {% if profile and profile.photo_path %}
-          <img src="{{ profile.photo_path }}" alt="Profil">
-        {% else %}
-          👤
-        {% endif %}
+      <div class="status-head">
+        <div class="status-icon">👤</div>
+        <div>
+          <div class="status-title">Profil Bilgileri</div>
+          <div class="status-sub">Bu bilgiler panel üst alanında ve kayıt ekranlarında kullanılır.</div>
+        </div>
       </div>
 
-      {% if msg %}
-        <div class="alert ok">{{ msg }}</div>
-      {% endif %}
+      <div class="card-pad">
+        <div class="profile-top">
+          <div class="avatar" id="avatarPreview">
+            {% if profile and profile.photo_path %}
+              <img src="{{ profile.photo_path }}" alt="Profil">
+            {% else %}
+              👤
+            {% endif %}
+          </div>
 
-      {% if error %}
-        <div class="alert err">{{ error }}</div>
-      {% endif %}
+          <div>
+            <div class="profile-name">
+              {% if profile and profile.full_name %}
+                {{ profile.full_name }}
+              {% else %}
+                Profil Sahibi
+              {% endif %}
+            </div>
+            <div class="profile-phone">
+              {% if profile and profile.phone %}
+                {{ profile.phone }}
+              {% else %}
+                Telefon bilgisi yok
+              {% endif %}
+            </div>
+          </div>
+        </div>
 
-      <form method="post" enctype="multipart/form-data">
-        {% if csrf_token is defined %}
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% if msg %}
+          <div class="alert ok">{{ msg }}</div>
         {% endif %}
 
-        <div class="field">
-          <label>Ad Soyad</label>
-          <input name="full_name" type="text" value="{{ profile.full_name if profile else '' }}" required>
+        {% if error %}
+          <div class="alert err">{{ error }}</div>
+        {% endif %}
+
+        <div class="hint-card">
+          <div class="hint-title">Profil ekranı</div>
+          <div class="hint-sub">Ad soyad ve telefon bilgisi giriş, rapor ve panel kimliği için kullanılır.</div>
         </div>
 
-        <div class="field">
-          <label>Cep Telefonu</label>
-          <input name="phone" type="tel" value="{{ profile.phone if profile else '' }}" required>
-        </div>
+        <form method="post" enctype="multipart/form-data">
+          {% if csrf_token is defined %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          {% endif %}
 
-        <div class="field">
-          <label>Profil Fotoğrafı Değiştir</label>
-          <input name="profile_photo" type="file" accept="image/*">
-        </div>
+          <div class="field">
+            <label>Ad Soyad</label>
+            <input name="full_name" type="text" value="{{ profile.full_name if profile else '' }}" autocomplete="name" required>
+          </div>
 
-        <div class="actions">
-          <button class="btn primary" type="submit">Kaydet</button>
-          <a class="btn secondary" href="/ayarlar">← Geri</a>
-        </div>
-      </form>
+          <div class="field">
+            <label>Cep Telefonu</label>
+            <input name="phone" type="tel" value="{{ profile.phone if profile else '' }}" autocomplete="tel" required>
+          </div>
+
+          <div class="field">
+            <label>Profil Fotoğrafı</label>
+
+            <div class="file-wrap">
+              <input id="profilePhotoInput" name="profile_photo" type="file" accept="image/*">
+
+              <label class="file-btn" for="profilePhotoInput">
+                <span class="file-main">
+                  <span class="file-ico">🖼️</span>
+                  <span class="file-text">
+                    <span class="file-title">Fotoğraf Seç</span>
+                    <span class="file-name" id="fileName">Dosya seçilmedi</span>
+                  </span>
+                </span>
+                <span class="file-arrow">Değiştir</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary" type="submit">Kaydet</button>
+            <a class="btn secondary" href="/ayarlar">← Geri</a>
+          </div>
+        </form>
+      </div>
     </section>
-  </main>
+
+  </div>
+
+  <a class="back-btn" href="/ayarlar">← Ayarlara dön</a>
+
+</div>
+
+<script>
+  const fileInput = document.getElementById("profilePhotoInput");
+  const fileName = document.getElementById("fileName");
+  const avatarPreview = document.getElementById("avatarPreview");
+
+  fileInput?.addEventListener("change", function(){
+    const file = this.files && this.files[0];
+
+    if(!file){
+      if(fileName) fileName.textContent = "Dosya seçilmedi";
+      return;
+    }
+
+    if(fileName) fileName.textContent = file.name;
+
+    if(file.type && file.type.startsWith("image/")){
+      const reader = new FileReader();
+
+      reader.onload = function(ev){
+        if(!avatarPreview) return;
+        avatarPreview.innerHTML = "";
+        const img = document.createElement("img");
+        img.src = ev.target.result;
+        img.alt = "Profil önizleme";
+        avatarPreview.appendChild(img);
+      };
+
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
 </body>
 </html>

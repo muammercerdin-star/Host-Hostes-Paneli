@@ -1,0 +1,907 @@
+
+
+===== static/seats/bags.js =====
+
+--- windowExport ---
+176: window.SeatsBags = {
+
+--- fetch ---
+89:     const j = await safeJsonFetch(u);
+158:     await safeJsonFetch(u, {
+
+
+===== static/seats/voice-commands.js =====
+
+--- liveStop ---
+67:     if(!selected && speedState && speedState.liveStop){
+68:       selected = speedState.liveStop || "";
+298:   const stop = getSelectedStopName() || speedState.liveStop || "";
+511:   if(/(hangi duraktayiz|hangi duraktayız|neredeyiz)/.test(t)) return { type:"ask_live_stop" };
+612:     Çünkü liveStop localStorage'dan eski Sarıgöl gibi bir değeri geri getirebilir.
+644:     Böylece eski liveStop hafızası seçili durağı ezmez.
+647:     if(!stop && typeof getDisplayLiveStop === "function"){
+648:       stop = voiceCleanStopValue(getDisplayLiveStop());
+653:     if(!stop && speedState && speedState.liveStop){
+654:       stop = voiceCleanStopValue(speedState.liveStop);
+1067:     const stop = getSelectedStopName() || speedState.liveStop || "";
+1076:     const stop = getSelectedStopName() || speedState.liveStop || "";
+1085:     const stop = cmd.stop || getSelectedStopName() || speedState.liveStop || "";
+1106:   if(cmd.type === "ask_live_stop"){
+1107:     const live = speedState.liveStop || getSelectedStopName() || "henüz belli değil";
+
+--- selectedStop ---
+61:     if(typeof getSelectedStopName === "function"){
+62:       selected = getSelectedStopName() || "";
+298:   const stop = getSelectedStopName() || speedState.liveStop || "";
+623:     if(!stop && typeof getSelectedStopName === "function"){
+624:       stop = voiceCleanStopValue(getSelectedStopName());
+630:       const badge = document.querySelector("#selectedStopBadge");
+821:   const selectedStop = getSelectedStopName() || "";
+833:   const selectedStop = getSelectedStopName() || "";
+857:   const selectedStop = getSelectedStopName() || "";
+1067:     const stop = getSelectedStopName() || speedState.liveStop || "";
+1076:     const stop = getSelectedStopName() || speedState.liveStop || "";
+1085:     const stop = cmd.stop || getSelectedStopName() || speedState.liveStop || "";
+1107:     const live = speedState.liveStop || getSelectedStopName() || "henüz belli değil";
+1145:     const ok = setSelectedStop(cmd.stop, { silent:true, voiceReply:false });
+1152:     const stop = getSelectedStopName();
+
+--- innerHTML ---
+1230:       btn.innerHTML = on
+1238:     btn.innerHTML = on
+
+--- windowExport ---
+367:     if(typeof window.SeatsSpeak === "function"){
+1251:   window.__deckAIListening = true;
+1257:     window.__deckAIListening = false;
+1288:     window.__deckAIListening = false;
+1294:     window.__deckAIListening = false;
+1303:     window.__deckAIListening = false;
+1311: window.SeatsVoice = {
+
+--- fetch ---
+465:   const j = await safeJsonFetch("/api/seats/gender", {
+578:   const j = await safeJsonFetch("/api/ai/resolve", {
+740:       return await safeJsonFetch("/api/seat", opts);
+743:     const r = await fetch("/api/seat", opts);
+880:   const j = await safeJsonFetch("/api/seats/service", {
+
+
+===== static/seats/standing.js =====
+
+--- liveStop ---
+9:     const live = getDisplayLiveStop();
+27:   const from = $("#cashFrom")?.value || speedState.liveStop || getSelectedStopName() || serverStops?.[0] || "";
+
+--- selectedStop ---
+8:     const selected = getSelectedStopName() || "";
+27:   const from = $("#cashFrom")?.value || speedState.liveStop || getSelectedStopName() || serverStops?.[0] || "";
+
+--- localStorage ---
+79:     const x = JSON.parse(localStorage.getItem("standingTotals:" + TRIP_KEY) || "null");
+99:     const x = JSON.parse(localStorage.getItem("standingItems:" + TRIP_KEY) || "[]");
+
+--- innerHTML ---
+126:   list.innerHTML = "";
+153:     d.innerHTML = `
+
+--- windowExport ---
+233: window.SeatsStanding = {
+
+--- fetch ---
+37:     const j = await safeJsonFetch("/api/standing", {
+69:     const j = await safeJsonFetch("/api/standing");
+90:     const j = await safeJsonFetch("/api/standing/list");
+108:     const j = await safeJsonFetch("/api/parcels?status=bekliyor");
+182:     const j = await safeJsonFetch(`/api/standing?id=${encodeURIComponent(itemId)}`, {
+208:     const j = await safeJsonFetch("/api/standing?to=" + encodeURIComponent(stopName), {
+
+
+===== static/seats/seats.js =====
+
+--- liveStop ---
+36:       "liveStop:" + TRIP_KEY,
+154:       "liveStop:",
+217:     liveStop: "",
+277:     localStorage.setItem("liveStop:" + TRIP_KEY, speedState.liveStop || "");
+282:     speedState.liveStop = localStorage.getItem("liveStop:" + TRIP_KEY) || "";
+381: function getDisplayLiveStop(){
+382:   const live = speedState.liveStop || "";
+387:     if(typeof hasLiveStopOperation === "function" && !hasLiveStopOperation(live)){
+388:       speedState.liveStop = "";
+392:         localStorage.removeItem("liveStop:" + TRIP_KEY);
+405:       speedState.liveStop = "";
+409:         localStorage.removeItem("liveStop:" + TRIP_KEY);
+685:         "liveStop:" + TRIP_KEY,
+699:         speedState.liveStop = "";
+1089:   const live = getDisplayLiveStop();
+1218:     const live = getDisplayLiveStop();
+1221:     setText("#topLiveStop", live || selected || "—");
+1225:     setText("#routeLiveStop", live || "—");
+1226:     setText("#routeLiveStopCard", live || "—");
+1328:   function setLiveStop(name){
+1332:     speedState.liveStop = canonical;
+1579:       const live = getDisplayLiveStop();
+1593:     const from = $("#bulkFrom")?.value || speedState.liveStop || getSelectedStopName() || "";
+1873:     setLiveStop(stop);
+1914:       autoDetectLiveStop(p);
+1991:     const liveName = getDisplayLiveStop();
+2206:     const live = speedState.liveStop || "—";
+2228:     setText("#aiLiveStop", live);
+2256:   function liveStopOperationCount(stopName){
+2286:   function hasLiveStopOperation(stopName){
+2287:     return liveStopOperationCount(stopName) > 0;
+2291:     function autoDetectLiveStop(coords){
+2307:       if(!hasLiveStopOperation(canonical)) continue;
+2325:       if(speedState.liveStop && !hasLiveStopOperation(speedState.liveStop)){
+2326:         speedState.liveStop = "";
+2330:           localStorage.removeItem("liveStop:" + TRIP_KEY);
+2352:     const currentLive = speedState.liveStop || "";
+2364:     setLiveStop(best.stop);
+2566:         autoDetectLiveStop(currentCoords);
+2720:     setLiveStop(stop);
+2754:       const live = getDisplayLiveStop();
+2766:       const live = getDisplayLiveStop();
+2807:       if(speedState.liveStop){
+2811:       const next = computeNextStopName(speedState.liveStop || "", "nextWithSeats");
+2835:     // getDisplayLiveStop() içindeki 15 km fallback burada kullanılmaz.
+2836:     let liveStop =
+2837:       (speedState && speedState.liveStop) ||
+2842:       if(liveStop && typeof stopDistanceKmByName === "function"){
+2843:         const liveKmCheck = stopDistanceKmByName(liveStop);
+2845:           liveStop = "";
+2854:       if(liveStop && typeof stopDistanceKmByName === "function"){
+2855:         const km = stopDistanceKmByName(liveStop);
+2866:       `/api/live-runtime-state?write=1` +
+2868:       `&live_stop=${encodeURIComponent(liveStop)}` +
+
+--- selectedStop ---
+544:   function getSelectedStopName(){
+931:     const stop = getSelectedStopName();
+1047:     setSelectedStop(canonical, { silent:!voice, voiceReply:voice });
+1088:   const selected = getSelectedStopName();
+1190:   setSelectedStop(stop, { silent:false, voiceReply:true });
+1217:     const selected = getSelectedStopName();
+1223:     setText("#selectedStopBadge", selected || "—");
+1273:   function setSelectedStop(name, { silent=false, voiceReply=true } = {}){
+1345:     const cur = getSelectedStopName();
+1350:       setSelectedStop("", { silent:true, voiceReply:false });
+1354:     setSelectedStop(next, { silent, voiceReply: !silent });
+1361:     const stopName = getSelectedStopName();
+1394:     setValue("#pickup", boardsMap[String(seatNo)] || getSelectedStopName() || "");
+1429:     const from = $("#pickup")?.value || getSelectedStopName() || "";
+1515:     const offStop = stopsMap[String(currentSeat)] || getSelectedStopName() || "";
+1578:       const selected = getSelectedStopName() || "";
+1593:     const from = $("#bulkFrom")?.value || speedState.liveStop || getSelectedStopName() || "";
+1773:       const st = stopsMap[String(n)] || getSelectedStopName() || "";
+1825:     const stop = getSelectedStopName();
+1843:     const stop = getSelectedStopName();
+1893:     const stopName = getSelectedStopName();
+1939:       const stop = (getSelectedStopName() || $("#coordStopName")?.value || "").trim();
+1993:     const selectedIdx = indexOfStopByName(getSelectedStopName());
+2053:       const activeName = getSelectedStopName() || liveName;
+2176:       row.addEventListener("click", () => setSelectedStop(item.stop, { silent:true, voiceReply:false }));
+2182:     const stop = getSelectedStopName();
+2735:     const a = getSelectedStopName() || "";
+2767:       const selected = getSelectedStopName();
+2812:       if(next) setSelectedStop(next, { silent:true, voiceReply:false });
+2813:       else if(serverStops?.length) setSelectedStop(serverStops[0], { silent:true, voiceReply:false });
+
+--- routeStrip ---
+124:    geçildi bilgisi ve durak akışı özeti taşınmasın.
+143:     // Hem trip_id değişince hem de hafıza şeması değişince eski durak akışı silinsin.
+204:   let lastRouteStripCenteredStop = "";
+680:       // Yeni sefer açılmış ve koltuk yoksa eski durak akışı özetini taşıma.
+803:       if(typeof renderRouteStrip === "function") renderRouteStrip();
+1024: function centerRouteStripItem(item, behavior = "smooth"){
+1025:   const wrap = $("#routeStrip");
+1037: function focusRouteStripStop(stopName, { select=false, voice=false } = {}){
+1049:     renderRouteStrip();
+1054:       const wrap = $("#routeStrip");
+1061:         centerRouteStripItem(target, "smooth");
+1071: function renderRouteStrip(){
+1072:   const wrap = $("#routeStrip");
+1205:   if(lastRouteStripCenteredStop !== focusKey){
+1206:     lastRouteStripCenteredStop = focusKey;
+1210:         centerRouteStripItem(routeFocusItem, "smooth");
+1243:     renderRouteStrip();
+2334:         renderRouteStrip();
+2587:           renderRouteStrip();
+2759:       focusRouteStripStop(live, { select:true, voice:true });
+2773:       focusRouteStripStop(next, { select:true, voice:true });
+2805:       renderRouteStrip();
+2816:       renderRouteStrip();
+
+--- localStorage ---
+31:     if(localStorage.getItem(key) === version) return;
+39:     ].forEach(k => localStorage.removeItem(k));
+41:     localStorage.setItem(key, version);
+140:     const oldTripId = localStorage.getItem(activeTripMemoryKey) || "";
+141:     const oldSchema = localStorage.getItem(memorySchemaKey) || "";
+164:       localStorage.removeItem(prefix + TRIP_KEY);
+167:     localStorage.removeItem("continueTripStop:last");
+174:         localStorage.removeItem(k);
+178:     localStorage.setItem(activeTripMemoryKey, currentTripId);
+179:     localStorage.setItem(memorySchemaKey, memorySchemaVersion);
+187:     JSON.parse(localStorage.getItem("boardsMap:" + TRIP_KEY) || "{}")
+273:     localStorage.setItem("boardsMap:" + TRIP_KEY, JSON.stringify(boardsMap || {}));
+277:     localStorage.setItem("liveStop:" + TRIP_KEY, speedState.liveStop || "");
+278:     localStorage.setItem("passedStops:" + TRIP_KEY, JSON.stringify([...speedState.passedStops]));
+282:     speedState.liveStop = localStorage.getItem("liveStop:" + TRIP_KEY) || "";
+284:       speedState.passedStops = new Set(JSON.parse(localStorage.getItem("passedStops:" + TRIP_KEY) || "[]"));
+291:     localStorage.setItem("standingTotals:" + TRIP_KEY, JSON.stringify({
+298:     localStorage.setItem("standingItems:" + TRIP_KEY, JSON.stringify(standingItems || []));
+392:         localStorage.removeItem("liveStop:" + TRIP_KEY);
+393:         localStorage.removeItem("passedStops:" + TRIP_KEY);
+409:         localStorage.removeItem("liveStop:" + TRIP_KEY);
+410:         localStorage.removeItem("passedStops:" + TRIP_KEY);
+651:       const raw = localStorage.getItem(STOP_FLOW_EVENT_KEY) || "{}";
+661:       localStorage.setItem(STOP_FLOW_EVENT_KEY, JSON.stringify(obj || {}));
+667:       const raw = localStorage.getItem(STOP_FLOW_SUMMARY_KEY) || "{}";
+694:       keys.forEach(k => localStorage.removeItem(k));
+714:       localStorage.setItem(STOP_FLOW_SUMMARY_KEY, JSON.stringify(stopFlowSummary || {}));
+2330:           localStorage.removeItem("liveStop:" + TRIP_KEY);
+2331:           localStorage.removeItem("passedStops:" + TRIP_KEY);
+2401:         return (localStorage.getItem(TTS_KEY) ?? "1") === "1";
+2428:         localStorage.setItem(TTS_KEY, next ? "1" : "0");
+
+--- innerHTML ---
+589:       el.innerHTML = "";
+999:     box.innerHTML = "";
+1002:       box.innerHTML = `<div class="muted">Ayakta kayıt yok.</div>`;
+1013:       d.innerHTML = `
+1076:   wrap.innerHTML = "";
+1079:     wrap.innerHTML = `
+1174:     item.innerHTML = `
+1726:     list.innerHTML = "";
+1729:       list.innerHTML = `<div class="approach-row">Bu durakta işlem görünmüyor.</div>`;
+1735:       row.innerHTML = `<b>Koltuk ${n}</b><span>${boardsMap[String(n)] || "—"} → ${stopsMap[String(n)] || "—"}</span>`;
+1742:       row.innerHTML = `<b>Ayakta</b><span>${standingMap[stop]} kişi inecek</span>`;
+1749:       row.innerHTML = `<b>Emanet</b><span>${parcelMap[stop]} teslim var</span>`;
+2149:     list.innerHTML = "";
+2152:       list.innerHTML = `
+2166:       row.innerHTML = `
+
+--- windowExport ---
+47:   window.BAG_TRIP = BAG_TRIP;
+1487:       if(typeof window.clearBiletsizSeatBadges === "function"){
+2585:           window.__seatsLastSpeedRenderAt = nowRender;
+2883:   window.__liveRuntimeBridgeInterval = setInterval(function(){
+
+--- fetch ---
+262:   async function safeJsonFetch(url, opt){
+263:     const res = await fetch(url, opt || {});
+455:     const j = await safeJsonFetch(url);
+563:     const j = await safeJsonFetch("/api/stops");
+569:       const c = await safeJsonFetch("/api/coords");
+1440:       const j = await safeJsonFetch("/api/seat", {
+1518:       const j = await safeJsonFetch("/api/seat?seat_no=" + currentSeat, {
+1632:         const j = await safeJsonFetch("/api/seats/bulk", {
+1648:           await safeJsonFetch("/api/seat", {
+1783:         const j = await safeJsonFetch("/api/seats/offload", {
+1793:           const j = await safeJsonFetch("/api/seat?seat_no=" + n, {
+1953:       const j = await safeJsonFetch("/api/coords", {
+2518:         const r = await fetch(`/api/speedlimit?lat=${lat}&lng=${lng}`);
+2672:       const j = await safeJsonFetch("/api/standing?all=1", {
+2874:     fetch(url, {
+
+
+===== static/seats/route-marquee.js =====
+
+--- MutationObserver ---
+29:       new MutationObserver(refresh).observe(el, {
+
+--- windowExport ---
+20:   window.refreshRouteMarquee = refresh;
+
+
+===== static/seats/seats-time-prayer.js =====
+
+--- innerHTML ---
+154:     lineEl.innerHTML =
+
+--- fetch ---
+94:       const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+108:     const j = await (await fetch(url)).json();
+
+
+===== static/seats/voice-tts.js =====
+
+--- routeStrip ---
+91:       nightBtn.title = on ? "Durak akışı sesi açık" : "Durak akışı sesi kapalı";
+137:       speak("Durak akışı sesi açık.", { force:true });
+
+--- localStorage ---
+15:       return (localStorage.getItem(KEY) ?? "1") === "1";
+23:       localStorage.setItem(KEY, value ? "1" : "0");
+
+--- innerHTML ---
+92:       nightBtn.innerHTML = on
+
+--- windowExport ---
+9:   window.__SeatsVoiceUnifiedReady = true;
+111:   window.SeatsSpeak = speak;
+112:   window.SeatsStopVoice = stop;
+116:   window.SeatsVoice = Object.assign(window.SeatsVoice || {}, {
+
+
+===== static/seats/drive-eta-chip.js =====
+
+--- windowExport ---
+52:   window.syncDriveEtaChip = syncDriveEtaChip;
+
+
+===== static/seats/drive-controls.js =====
+
+--- liveStop ---
+65:   function getLiveStop(){
+67:       if(typeof getDisplayLiveStop === "function"){
+68:         return getDisplayLiveStop() || "";
+73:       return speedState?.liveStop || "";
+152:     const liveStop = getLiveStop();
+164:     const stopText = liveStop ? ` · ${liveStop}` : "";
+
+--- routeStrip ---
+22:         if(typeof renderRouteStrip === "function") renderRouteStrip();
+109:       if(typeof renderRouteStrip === "function") renderRouteStrip();
+
+--- localStorage ---
+17:     localStorage.setItem(key, "1");
+92:     return localStorage.getItem(DRIVE_MODE_KEY) === "1";
+136:       localStorage.setItem(DRIVE_MODE_KEY, next ? "1" : "0");
+183:     const saved = localStorage.getItem("ttsEnabled");
+221:           localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+225:           localStorage.setItem("ttsEnabled", enabled ? "1" : "0");
+
+--- innerHTML ---
+103:       btn.innerHTML = on ? "↩ Normal" : "🚘 Sürüş";
+166:     el.innerHTML = `
+206:     btn.innerHTML = on
+
+--- windowExport ---
+281:   window.DriveControls = {
+
+
+===== static/seats/patches/stop-selected-toast.js =====
+
+--- innerHTML ---
+21:     el.innerHTML =
+
+--- windowExport ---
+3:   window.__stopSelectedToastPatchLoaded = true;
+57:   window.showStopSelectedToast = showStopToast;
+
+
+===== static/seats/patches/stop-flow-focus-patch.js =====
+
+--- liveStop ---
+107:     ["#seatSimpleStop", "#topLiveStop"].forEach(function(sel){
+
+--- selectedStop ---
+39:     var fromWindow = cleanStopName(window.__muavinSelectedStop || "");
+48:     var badge = qs("#selectedStopBadge");
+57:     window.__muavinSelectedStop = name;
+112:     var badge = qs("#selectedStopBadge");
+135:     if(typeof window.setSelectedStop === "function" && !window.__stopFocusCallingSetSelected){
+138:         window.setSelectedStop(name, true);
+140:         console.warn("setSelectedStop çağrısı geçildi:", e);
+296:   function hookSetSelectedStop(){
+297:     if(typeof window.setSelectedStop !== "function") return;
+298:     if(window.setSelectedStop.__stopFlowFocusHooked) return;
+300:     var old = window.setSelectedStop;
+312:     window.setSelectedStop = wrapped;
+334:     hookSetSelectedStop();
+
+--- routeStrip ---
+160:       '<div class="stop-focus-panel" role="dialog" aria-modal="true" aria-label="Durak Akışı">' +
+164:             '<div class="stop-focus-badge">Sadece Durak Akışı</div>' +
+166:           '<h2 class="stop-focus-title">Durak Akışı</h2>' +
+
+--- localStorage ---
+51:     return cleanStopName(localStorage.getItem(memoryKey) || "");
+58:     try{ localStorage.setItem(memoryKey, name); }catch(e){}
+
+--- innerHTML ---
+159:     ov.innerHTML =
+201:     list.innerHTML = "";
+
+--- windowExport ---
+3:   window.__stopFlowFocusPatchLoaded = true;
+57:     window.__muavinSelectedStop = name;
+135:     if(typeof window.setSelectedStop === "function" && !window.__stopFocusCallingSetSelected){
+137:         window.__stopFocusCallingSetSelected = true;
+142:         window.__stopFocusCallingSetSelected = false;
+265:   window.openStopFlowFocus = openStopFocus;
+266:   window.closeStopFlowFocus = closeStopFocus;
+312:     window.setSelectedStop = wrapped;
+
+
+===== static/seats/patches/seat-layout-fab-pack.js =====
+
+--- MutationObserver ---
+66:   var obs = new MutationObserver(schedule);
+
+--- windowExport ---
+4:   window.__fabLeftGapMoveLoaded = true;
+103:   window.__fabDriveModeOverrideFixReady = true;
+
+
+===== static/seats/patches/modal-bottom-nav-autohide.js =====
+
+--- MutationObserver ---
+139:   var obs = new MutationObserver(scheduleApply);
+
+--- windowExport ---
+3:   window.__muavinModalBottomNavAutohideV3 = true;
+
+
+===== static/seats/patches/manual-ticket-system.js =====
+
+--- localStorage ---
+27:       const raw = localStorage.getItem(sigKey()) || "{}";
+37:       localStorage.setItem(sigKey(), JSON.stringify(obj || {}));
+43:       localStorage.setItem(legacyKey(), "[]");
+
+--- MutationObserver ---
+217:   const obs = new MutationObserver(schedule);
+
+--- windowExport ---
+3:   window.__manualTicketSystemCleanReady = true;
+126:   window.markBiletsizSeatBadges = function(seats){
+168:   window.clearBiletsizSeatBadges = function(seats){
+192:   window.refreshManualTicketBadges = applyBadges;
+
+
+===== static/seats/patches/top-sound-toggle.js =====
+
+--- localStorage ---
+13:       return (localStorage.getItem(KEY) ?? "1") === "1";
+35:         localStorage.setItem(KEY, on ? "1" : "0");
+38:       try{ localStorage.setItem(KEY, on ? "1" : "0"); }catch(e){}
+
+--- innerHTML ---
+81:     btn.innerHTML = on
+
+--- MutationObserver ---
+150:   var obs = new MutationObserver(schedule);
+
+--- windowExport ---
+3:   window.__topSoundToggleLoaded = true;
+
+
+===== static/seats/patches/seat-simple-ui-pack.js =====
+
+--- selectedStop ---
+150:     let stop = readText("#selectedStopBadge") || "—";
+
+--- routeStrip ---
+46:       if(typeof renderRouteStrip === "function") renderRouteStrip();
+
+--- localStorage ---
+20:       return localStorage.getItem(key()) || "simple";
+28:       localStorage.setItem(key(), mode);
+
+--- innerHTML ---
+39:       btn.innerHTML = simple
+104:       box.innerHTML = `
+
+--- MutationObserver ---
+245:     const observer = new MutationObserver(sync);
+
+--- windowExport ---
+4:   window.__seatSimpleOpenModeReady = true;
+89:   window.__seatSimpleSummaryPolishReady = true;
+205:   window.__seatHideBottomMenuOnModalReady = true;
+
+
+===== CSS static/style.css =====
+14: .stats-fab-wrap{ position:fixed; right:16px; bottom:16px; z-index:9999; }
+24:   transform: translateY(8px) scale(.98); opacity:0; visibility:hidden; pointer-events:none;
+29:   transform: rotate(45deg);
+36:   .stats-panel{ transition: transform .18s ease, opacity .18s ease, visibility 0s linear .18s; }
+38:     transform: translateY(0) scale(1); opacity:1; visibility:visible; pointer-events:auto;
+39:     transition: transform .18s ease, opacity .18s ease;
+
+
+===== CSS static/seats/seats.css =====
+70:     z-index:1200;
+146:     white-space:nowrap;
+183:     transform:translateY(-1px);
+218:     overflow:hidden;
+233:     white-space:nowrap;
+248:     0%,100%{ transform:scale(1); }
+249:     50%{ transform:scale(1.012); }
+268:     overflow:hidden;
+278:     pointer-events:none;
+283:     z-index:1;
+314:     text-transform:uppercase;
+361:     white-space:nowrap;
+419:   .route-strip-shell{
+428:   .route-strip-head{
+437:   .route-strip-title{
+443:   .route-strip-meta{
+464:   .route-strip{
+467:     overflow:auto;
+472:   .route-strip::-webkit-scrollbar{ display:none; }
+521:     white-space:nowrap;
+528:     white-space:nowrap;
+551:     overflow:auto;
+552:     overflow-x:auto;
+553:     overflow-y:visible;
+614:     z-index:1;
+623:     z-index:1;
+688:     display:none;
+734:     z-index:40;
+774:     overflow:hidden;
+778:     display:none;
+814:   .tab-pane{ display:none; }
+1139:     overflow:auto;
+1221:     display:none;
+1222:     position:fixed;
+1225:     z-index:3000;
+1230:     display:none;
+1231:     position:fixed;
+1234:     transform:translate(-50%,-50%);
+1237:     overflow:auto;
+1238:     z-index:3010;
+1245:     transform:translateX(-50%);
+1300:     display:none;
+1301:     position:fixed;
+1304:     z-index:5000;
+1334:       z-index:20;
+1378:       position:fixed;
+1381:       z-index:1300;
+1445:       overflow:auto;
+1450:     .status-row::-webkit-scrollbar{ display:none; }
+1498:     .route-strip-shell{
+1615:     transform:scale(1);
+1619:     transform:scale(1.025);
+1720:     overflow:visible;
+1742:     display:none;
+1758:     display:none;
+1766:     display:none;
+1805:   .route-strip-shell{
+1812:   .route-strip-head{
+1816:   .route-strip-title{
+1876:   position:fixed;
+1879:   z-index:7000;
+1899:   display:none !important;
+1930:   display:none !important;
+1958:   display:none !important;
+1961: body.drive-mode .route-strip-shell{
+1968: body.drive-mode .route-strip-head{
+1972: body.drive-mode .route-strip-title{
+2038:   body.drive-mode .route-strip-shell{
+2083:   overflow:hidden;
+2101:   white-space:nowrap;
+2102:   overflow:hidden;
+2103:   text-overflow:ellipsis;
+2124: body.drive-mode .route-strip-shell{
+2134: body.drive-mode .route-strip-head{
+2142: body.drive-mode .route-strip-title{
+2148: body.drive-mode .route-strip-meta{
+2150:   overflow:hidden;
+2157:   white-space:nowrap;
+2161: body.drive-mode .route-strip{
+2166:   -webkit-overflow-scrolling:touch;
+2181:   white-space:nowrap;
+2182:   overflow:hidden;
+2183:   text-overflow:ellipsis;
+2189:   white-space:nowrap;
+2190:   overflow:hidden;
+2191:   text-overflow:ellipsis;
+2199:   transform:translateY(-1px);
+2222:   overflow:hidden;
+2292:   body.drive-mode .route-strip-title{
+2375:   z-index:8;
+2389:   transform:rotate(45deg);
+2400:   overflow:hidden;
+2401:   white-space:nowrap;
+2479:   overflow-x:hidden !important;
+2504:   overflow:hidden;
+2519:   transform:scale(.96);
+2577:   transform:translateX(-50%) !important;
+2595:   z-index:80 !important;
+2730:   transform:translateY(-1px);
+2735:   transform:scale(.98);
+2764:   display:none;
+2770:   position:fixed;
+2773:   z-index:1600;
+2792:   pointer-events:none;
+2825:   white-space:nowrap;
+2826:   overflow:hidden;
+2827:   text-overflow:ellipsis;
+2892:   position:fixed !important;
+2895:   z-index:1900 !important;
+2909:   position:fixed !important;
+2912:   z-index:1890 !important;
+2924:   transform:none !important;
+2925:   pointer-events:none !important;
+2950:   white-space:nowrap !important;
+2951:   overflow:hidden !important;
+2952:   text-overflow:ellipsis !important;
+2992:   display:none;
+2998:   position:fixed !important;
+3001:   z-index:99999 !important;
+3008:   transform:translate3d(0,0,0) !important;
+3009:   pointer-events:none !important;
+3019:   transform:none !important;
+3029:   pointer-events:auto !important;
+3039:   transform:none !important;
+3047:   pointer-events:none !important;
+3077:   white-space:nowrap !important;
+3078:   overflow:hidden !important;
+3079:   text-overflow:ellipsis !important;
+3118:   display:none !important;
+3123:   display:none;
+3131:   z-index:90 !important;
+3152:   transform:none !important;
+3162:   pointer-events:auto !important;
+3173:   transform:none !important;
+3180:   pointer-events:none !important;
+3201:   white-space:nowrap !important;
+3202:   overflow:hidden !important;
+3203:   text-overflow:ellipsis !important;
+3250:   z-index:120 !important;
+3311:   white-space:nowrap !important;
+3312:   overflow:hidden !important;
+3313:   text-overflow:ellipsis !important;
+3372:   z-index:120 !important;
+3382:   display:none !important;
+3393:   transform:none !important;
+3407:   pointer-events:auto !important;
+3465:   z-index:160 !important;
+3469:   pointer-events:none !important;
+3474:   display:none !important;
+3485:   transform:none !important;
+3511:   pointer-events:auto !important;
+3569:   overflow:hidden !important;
+3597:   transform:translateZ(0) !important;
+3626:   z-index:-1;
+3637:   transform:translateX(-40%) rotate(8deg);
+3649:   transform:translateY(-1px) scale(1.01) !important;
+3654:   transform:scale(.98) !important;
+3678:     transform:translateX(-45%) rotate(8deg);
+3685:     transform:translateX(45%) rotate(8deg);
+3790:   white-space:nowrap !important;
+... 76 satır daha var
+
+
+===== CSS static/seats/seats-final.css =====
+45:   z-index:20 !important;
+119:   overflow:hidden !important;
+120:   white-space:nowrap !important;
+121:   text-overflow:ellipsis !important;
+131:   overflow:hidden !important;
+132:   text-overflow:ellipsis !important;
+167:   overflow:visible !important;
+198:   display:none !important;
+237:   overflow:hidden !important;
+258:   transform:none !important;
+271:   z-index:1 !important;
+272:   overflow:hidden !important;
+273:   pointer-events:auto !important;
+287:   transform:none !important;
+299:   overflow:hidden !important;
+310:   white-space:nowrap !important;
+327:   white-space:nowrap !important;
+328:   overflow:hidden !important;
+329:   text-overflow:ellipsis !important;
+339:   overflow:hidden !important;
+340:   text-overflow:ellipsis !important;
+341:   white-space:nowrap !important;
+350:   white-space:nowrap !important;
+351:   overflow:hidden !important;
+352:   text-overflow:ellipsis !important;
+396:   display:none !important;
+449:   display:none !important;
+454:   overflow:hidden !important;
+455:   text-overflow:ellipsis !important;
+456:   white-space:nowrap !important;
+488:   overflow:hidden !important;
+489:   white-space:nowrap !important;
+490:   text-overflow:ellipsis !important;
+497: .route-strip-shell{
+506: .route-strip-head{
+512: .route-strip-title{
+518: .route-strip-meta{
+539:   overflow:hidden !important;
+540:   white-space:nowrap !important;
+541:   text-overflow:ellipsis !important;
+546:   overflow:hidden !important;
+547:   text-overflow:ellipsis !important;
+548:   white-space:nowrap !important;
+566: .route-strip{
+569:   overflow-x:auto !important;
+574: .route-strip::-webkit-scrollbar{
+575:   display:none !important;
+604:   overflow-x:auto !important;
+605:   overflow-y:visible !important;
+654:   overflow:visible !important;
+660:   overflow-x:auto !important;
+666:   display:none !important;
+798:   .route-strip-meta{
+911:   display:none !important;
+1490: .route-strip-meta{
+1496:   overflow:hidden !important;
+1504:   overflow:hidden !important;
+1531:   white-space:nowrap !important;
+1540:   overflow:hidden !important;
+1541:   white-space:nowrap !important;
+1547: .route-strip-meta .route-pill b{
+1552:   overflow:visible !important;
+1553:   text-overflow:clip !important;
+1554:   white-space:nowrap !important;
+1558:   will-change:transform !important;
+1571:     transform:translateX(0);
+1574:     transform:translateX(-50%);
+1583:   display:none !important;
+1594: body.drive-mode .route-strip:has(.route-stop.live-danger) ~ *,
+1595: body:not(.drive-mode) .route-strip:has(.route-stop.live-danger) ~ *{
+1599: .route-strip-shell:has(.route-stop.live-danger) .route-pill-live{
+1610: .route-strip-shell:has(.route-stop.live-danger) .route-pill-live .route-mini-label,
+1611: .route-strip-shell:has(.route-stop.live-danger) .route-pill-live #routeMiniLive{
+1618: .route-strip-shell:has(.route-stop.live-danger) .route-mini-dot{
+1631: .route-strip-shell:has(.route-stop.next-warning) .route-pill-next{
+1642: .route-strip-shell:has(.route-stop.next-warning) .route-pill-next .route-mini-label,
+1643: .route-strip-shell:has(.route-stop.next-warning) .route-pill-next #routeMiniNext{
+1663:   display:none !important;
+1668:   position:fixed !important;
+1673:   transform:translateX(-50%) !important;
+1679:   z-index:99999 !important;
+1724:   white-space:nowrap !important;
+1725:   overflow:hidden !important;
+1726:   text-overflow:ellipsis !important;
+1776:   display:none !important;
+1781:   position:fixed !important;
+1786:   transform:translateX(-50%) !important;
+1788:   z-index:99998 !important;
+1854: body.drive-mode .route-strip-shell{
+1876:   body.drive-mode .route-strip-shell{
+1890:   display:none !important;
+1900:   transform:none !important;
+1929:   z-index:20 !important;
+1970:   transform:scale(.96) !important;
+1974: body.drive-mode .route-strip-shell{
+2013:   display:none !important;
+2041:   overflow:hidden !important;
+2046:   display:none !important;
+2053:   overflow:hidden !important;
+2054:   text-overflow:ellipsis !important;
+2055:   white-space:nowrap !important;
+2110:   display:none !important;
+2223:   display:none !important;
+2268:   overflow:hidden !important;
+2269:   text-overflow:ellipsis !important;
+2270:   white-space:nowrap !important;
+2373:   display:none !important;
+2389:   display:none !important;
+2430:   overflow:hidden !important;
+2435:   overflow:hidden !important;
+2436:   text-overflow:ellipsis !important;
+2437:   white-space:nowrap !important;
+
+
+===== CSS static/seats/patches/stop-selected-toast.css =====
+2:     position:fixed;
+5:     transform:translateX(-50%) translateY(22px) scale(.96);
+6:     z-index:2147483600;
+10:     pointer-events:none;
+11:     transition:opacity .22s ease, transform .22s ease;
+16:     transform:translateX(-50%) translateY(0) scale(1);
+57:     white-space:nowrap;
+58:     overflow:hidden;
+59:     text-overflow:ellipsis;
+
+
+===== CSS static/seats/patches/stop-flow-focus-patch.css =====
+3:     overflow:hidden !important;
+8:     position:fixed;
+10:     z-index:2147483000;
+21:     display:none !important;
+33:     overflow:hidden;
+71:     white-space:nowrap;
+96:     overflow:auto;
+100:     -webkit-overflow-scrolling:touch;
+119:     transform:scale(.985);
+150:     overflow:hidden;
+151:     text-overflow:ellipsis;
+152:     white-space:nowrap;
+
+
+===== CSS static/seats/patches/stop-flow-compact-mobile.css =====
+33:     overflow:hidden !important;
+34:     text-overflow:ellipsis !important;
+84:     overflow:hidden !important;
+85:     text-overflow:ellipsis !important;
+
+
+===== CSS static/seats/patches/seat-layout-fab-pack.css =====
+18:     transform:translateX(var(--right-seat-column-shift)) !important;
+26:     transform:translateX(calc(var(--right-seat-column-shift) * .35)) !important;
+62:     transform:none !important;
+67:     transform:none !important;
+73:     BOTTOM_ROW_51_54_EQUAL_SPACING yaması 14. satırın transformunu sıfırladığı için
+82:     transform:translateX(var(--right-seat-column-shift, 16px)) !important;
+89:     transform:translateX(var(--right-seat-column-shift, 18px)) !important;
+103:     z-index:45 !important;
+109:     pointer-events:auto !important;
+170:     transform:translateX(-50%);
+177:     pointer-events:none;
+202:     pointer-events:none;
+224:     transform:scale(.94) !important;
+311:     transform:none !important;
+340:     overflow:visible !important;
+341:     z-index:90 !important;
+350:     transform:translateX(-50%) !important;
+358:     pointer-events:none !important;
+
+
+===== CSS static/seats/patches/bottom-voice-command.css =====
+1: #seatSimpleVoiceBtn{
+8:   #seatSimpleVoiceBtn .ico{
+12:   #seatSimpleVoiceBtn .voice-bottom-text{
+20: #seatSimpleVoiceBtn.listening{
+
+
+===== CSS static/seats/patches/modal-bottom-nav-autohide.css =====
+2:     display:none !important;
+4:     visibility:hidden !important;
+5:     pointer-events:none !important;
+
+
+===== CSS static/seats/patches/manual-ticket-system.css =====
+19:     display:none;
+31:     z-index:12;
+32:     pointer-events:none;
+
+
+===== CSS static/seats/patches/top-sound-toggle.css =====
+1: #seatSimpleTopSoundRow{
+10:   #seatSimpleTopSoundRow #seatSimpleModeToggle{
+15:   #seatSimpleSoundToggle{
+28:     white-space:nowrap;
+36:   #seatSimpleSoundToggle.is-off{
+44:   #seatSimpleSoundToggle:active{
+45:     transform:scale(.985);
+49:     #seatSimpleTopSoundRow{
+53:     #seatSimpleSoundToggle{
+
+
+===== CSS static/seats/patches/seat-simple-ui-pack.css =====
+10:   z-index:9999;
+35:   display:none !important;
+44:   display:none !important;
+60:   display:none !important;
+68:   display:none !important;
+83:   display:none !important;
+104: html.seat-simple-mode .route-strip-shell,
+105: html.seat-simple-mode .route-flow-shell,
+106: html.seat-simple-mode .route-flow,
+107: html.seat-simple-mode #routeStrip,
+110:   display:none !important;
+145:   display:none;
+178:   overflow:hidden;
+179:   text-overflow:ellipsis;
+180:   white-space:nowrap;
+197:   white-space:nowrap;
+213:   overflow:hidden;
+222:   text-transform:uppercase;
+224:   white-space:nowrap;
+233:   overflow:hidden;
+234:   text-overflow:ellipsis;
+235:   white-space:nowrap;
+288:   display:none;
+289:   position:fixed;
+293:   z-index:99999;
+364:   transform:scale(.96);
+396:   display:none !important;
+
+
+===== CSS static/seats/patches/fab-sheet-solid-fix.css =====
+61:     pointer-events:none !important;
+
+
+===== CSS static/seats/patches/seat-label-ghost-clean.css =====
+13:     display:none !important;
+23:     overflow:hidden !important;

@@ -1,0 +1,377 @@
+(function(){
+  function esc(v){
+    return String(v == null ? "" : v)
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#39;");
+  }
+
+  function nrm(v){
+    try{
+      if(typeof norm === "function") return norm(v);
+    }catch(_){}
+    return String(v || "").trim().toLocaleLowerCase("tr-TR");
+  }
+
+  function safeNumber(v){
+    var n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function safeMap(fnName){
+    try{
+      if(typeof window[fnName] === "function") return window[fnName]() || {};
+    }catch(_){}
+    try{
+      if(typeof eval(fnName) === "function") return eval(fnName)() || {};
+    }catch(_){}
+    return {};
+  }
+
+  function mapValue(map, stop){
+    if(!map || !stop) return 0;
+    if(map[stop] !== undefined) return safeNumber(map[stop]);
+    var target = nrm(stop);
+    for(var k in map){
+      if(nrm(k) === target) return safeNumber(map[k]);
+    }
+    return 0;
+  }
+
+  function parseFlowNumber(stop, word){
+    try{
+      if(typeof stopFlowSummaryLine !== "function") return 0;
+      var line = String(stopFlowSummaryLine(stop) || "");
+      var rx = new RegExp("(\\d+)\\s+" + word, "i");
+      var m = line.match(rx);
+      return m ? safeNumber(m[1]) : 0;
+    }catch(_){
+      return 0;
+    }
+  }
+
+  function bagCountForStopV2(stop){
+    var count = 0;
+
+    try{
+      if(window.SeatsBags && typeof window.SeatsBags.bagSeatsForStop === "function"){
+        var arr = window.SeatsBags.bagSeatsForStop(stop);
+        if(Array.isArray(arr)) count = Math.max(count, arr.length);
+      }
+    }catch(_){}
+
+    count = Math.max(count, parseFlowNumber(stop, "bagaj"));
+    return count;
+  }
+
+  function operationInfo(stop){
+    var seatMap = safeMap("computeSeatCountsByStop");
+    var standingMap = safeMap("computeStandingCountsByStop");
+    var parcelMap = safeMap("computeParcelCountsByStop");
+
+    var off = mapValue(seatMap, stop);
+    var standing = mapValue(standingMap, stop);
+    var parcel = mapValue(parcelMap, stop);
+    var bag = bagCountForStopV2(stop);
+
+    off = Math.max(off, parseFlowNumber(stop, "kişi indi"));
+    standing = Math.max(standing, parseFlowNumber(stop, "ayakta indi"));
+
+    var passengerTotal = off + standing;
+
+    var bits = [];
+    if(passengerTotal > 0) bits.push(passengerTotal + " inecek");
+    if(bag > 0) bits.push(bag + " bagaj");
+    if(parcel > 0) bits.push(parcel + " emanet");
+
+    return {
+      passenger: passengerTotal,
+      bag: bag,
+      parcel: parcel,
+      detail: bits.length ? bits.join(" · ") : "İşlem yok"
+    };
+  }
+
+  function getPlanMap(){
+    try{
+      if(typeof buildActualSchedule !== "function") return new Map();
+      return new Map(buildActualSchedule().map(function(x){
+        return [nrm(x.stop), x.plan || ""];
+      }));
+    }catch(_){
+      return new Map();
+    }
+  }
+
+  function getEtaMap(){
+    try{
+      return new Map((speedState.etaItems || []).map(function(x){
+        return [nrm(x.stop), x];
+      }));
+    }catch(_){
+      return new Map();
+    }
+  }
+
+  function kmTextFor(stop, etaItem){
+    try{
+      if(typeof stopDistanceKmByName === "function"){
+        var km = stopDistanceKmByName(stop);
+        if(Number.isFinite(km)) return km.toFixed(2) + " km";
+      }
+    }catch(_){}
+
+    try{
+      if(etaItem && Number.isFinite(etaItem.km)) return etaItem.km.toFixed(1) + " km";
+    }catch(_){}
+
+    return "—";
+  }
+
+  function isPassed(stop){
+    try{
+      return !!(speedState && speedState.passedStops && speedState.passedStops.has(stop));
+    }catch(_){
+      return false;
+    }
+  }
+
+  function allStops(){
+    try{
+      if(typeof allStopsList === "function") return allStopsList() || [];
+    }catch(_){}
+    return [];
+  }
+
+  function selectedStop(){
+    try{
+      if(typeof getSelectedStopName === "function") return getSelectedStopName() || "";
+    }catch(_){}
+    return "";
+  }
+
+  function liveStop(){
+    try{
+      if(typeof getDisplayLiveStop === "function") return getDisplayLiveStop() || "";
+    }catch(_){}
+    try{
+      return speedState.liveStop || "";
+    }catch(_){}
+    return "";
+  }
+
+  function nextStopStrict(current){
+    try{
+      if(typeof computeNextStopName === "function"){
+        return computeNextStopName(current || "", "strictNext") || "";
+      }
+    }catch(_){}
+    return "";
+  }
+
+  function nextStopOps(current){
+    try{
+      if(typeof computeNextStopName === "function"){
+        return computeNextStopName(current || "", "nextWithSeats") || "";
+      }
+    }catch(_){}
+    return "";
+  }
+
+  function fmtEtaDate(d){
+    try{
+      if(typeof fmtHour === "function") return fmtHour(d);
+    }catch(_){}
+    try{
+      return new Date(d).toLocaleTimeString("tr-TR", {hour:"2-digit", minute:"2-digit"});
+    }catch(_){}
+    return "";
+  }
+
+  function renderCurrentCard(stop, statusLabel, kmText, timeText, info){
+    return `
+      <div class="v2-current-top">
+        <div class="v2-current-tag">
+          <span class="v2-tag-dot"></span>
+          ${esc(statusLabel)}
+        </div>
+        <div class="v2-current-eta">${esc(timeText)}</div>
+      </div>
+
+      <div class="v2-current-name">${esc(stop)}</div>
+      <div class="v2-current-dist">Kalan mesafe: <span>${esc(kmText)}</span></div>
+
+      <div class="v2-tiles">
+        <div class="v2-tile ${info.passenger > 0 ? "v2-hot" : ""}">
+          <div class="v2-tile-icon">👤</div>
+          <div class="v2-tile-count ${info.passenger > 0 ? "red" : ""}">${info.passenger}</div>
+          <div class="v2-tile-label">İnecek Yolcu</div>
+          <div class="v2-tile-cta">LİSTE →</div>
+        </div>
+
+        <div class="v2-tile ${info.bag > 0 ? "v2-hot" : ""}">
+          <div class="v2-tile-icon">🧳</div>
+          <div class="v2-tile-count ${info.bag > 0 ? "red" : ""}">${info.bag}</div>
+          <div class="v2-tile-label">Bagaj</div>
+          <div class="v2-tile-cta ${info.bag > 0 ? "" : "grey"}">DETAY →</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderCompactCard(stop, tag, kmText, rightText, info){
+    return `
+      <div class="v2-next-info">
+        <div class="v2-next-tag">${esc(tag)}</div>
+        <div class="v2-next-name">${esc(stop)}</div>
+        <div class="v2-next-detail">${esc(info.detail)}</div>
+      </div>
+      <div class="v2-next-right">
+        <div class="v2-next-distance">${esc(rightText)}</div>
+        <span class="v2-next-small">${esc(kmText)}</span>
+      </div>
+    `;
+  }
+
+  function renderRouteStripV2(){
+    var wrap = document.getElementById("routeStrip");
+    if(!wrap) return;
+
+    var shell = wrap.closest(".route-strip-shell");
+    if(shell) shell.classList.add("live-flow-v2");
+
+    var list = allStops();
+    wrap.innerHTML = "";
+
+    if(!list.length){
+      wrap.innerHTML = `
+        <button type="button" class="route-stop v2-current">
+          ${renderCurrentCard("Rota hazırlanıyor", "Hazır", "—", "Durak yok", {passenger:0, bag:0, parcel:0, detail:"Duraklar yüklenecek"})}
+        </button>
+      `;
+      return;
+    }
+
+    var selected = selectedStop();
+    var live = liveStop();
+    var activeBase = live || selected || "";
+    var strictNext = nextStopStrict(activeBase);
+    var opsNext = nextStopOps(activeBase);
+
+    var selectedNorm = nrm(selected);
+    var liveNorm = nrm(live);
+    var strictNextNorm = nrm(strictNext);
+    var opsNextNorm = nrm(opsNext);
+
+    var planMap = getPlanMap();
+    var etaMap = getEtaMap();
+    var focusItem = null;
+
+    list.forEach(function(stop){
+      var stopNorm = nrm(stop);
+
+      var isLive = !!liveNorm && stopNorm === liveNorm;
+      var isSelected = !!selectedNorm && stopNorm === selectedNorm;
+      var isCurrent = isLive || (!liveNorm && isSelected);
+      var isNext = !isCurrent && !!strictNextNorm && stopNorm === strictNextNorm;
+      var isOpsNext = !isCurrent && !isNext && !!opsNextNorm && stopNorm === opsNextNorm;
+      var done = isPassed(stop) && !isCurrent;
+
+      var etaItem = etaMap.get(stopNorm);
+      var plan = planMap.get(stopNorm) || "";
+      var kmText = kmTextFor(stop, etaItem);
+      var etaText = etaItem && plan ? fmtEtaDate(etaItem.etaDate) : "";
+      var delayText = etaItem && plan ? (etaItem.badgeText || "") : "";
+
+      var timeText = delayText || (plan ? "Planında" : "Plan dışı");
+      if(etaText && plan) timeText = plan + " → " + etaText;
+
+      var info = operationInfo(stop);
+
+      var item = document.createElement("button");
+      item.type = "button";
+      item.dataset.stop = stop;
+
+      var cls = ["route-stop"];
+      if(isCurrent) cls.push("v2-current", "active");
+      else cls.push("v2-compact");
+
+      if(isLive) cls.push("v2-live", "live-danger");
+      if(isNext) cls.push("v2-next", "next-warning");
+      if(isOpsNext) cls.push("v2-ops-next", "flow-green");
+      if(done) cls.push("v2-done", "done");
+      if(!isCurrent && !isNext && !isOpsNext && !done) cls.push("v2-waiting");
+
+      item.className = cls.join(" ");
+
+      if(isCurrent){
+        item.innerHTML = renderCurrentCard(
+          stop,
+          isLive ? "Canlı" : "Seçili",
+          kmText,
+          timeText,
+          info
+        );
+        focusItem = item;
+      }else{
+        var tag = done ? "Geçildi" : (isNext ? "⬡ Sıradaki" : (isOpsNext ? "İşlem var" : "Bekliyor"));
+        var rightText = isNext ? "1 durak" : (isOpsNext ? "Hazır" : "—");
+        item.innerHTML = renderCompactCard(stop, tag, kmText, rightText, info);
+      }
+
+      item.addEventListener("click", function(){
+        try{
+          if(typeof setSelectedStop === "function"){
+            setSelectedStop(stop, { silent:false, voiceReply:true });
+          }
+        }catch(_){}
+
+        try{
+          if(typeof stopHumanVoiceSummary === "function" && typeof speakOnce === "function"){
+            speakOnce(stopHumanVoiceSummary(stop));
+          }
+        }catch(_){}
+      });
+
+      wrap.appendChild(item);
+    });
+
+    if(focusItem){
+      try{
+        requestAnimationFrame(function(){
+          setTimeout(function(){
+            if(typeof centerRouteStripItem === "function"){
+              centerRouteStripItem(focusItem, "smooth");
+            }else{
+              focusItem.scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
+            }
+          }, 80);
+        });
+      }catch(_){}
+    }
+  }
+
+  try{
+    window.renderRouteStrip = renderRouteStripV2;
+    renderRouteStrip = renderRouteStripV2;
+  }catch(_){
+    window.renderRouteStrip = renderRouteStripV2;
+  }
+
+  window.LiveFlowV2Render = renderRouteStripV2;
+
+  function boot(){
+    try{ renderRouteStripV2(); }catch(e){ console.warn("live-flow-v2 render error", e); }
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
+
+  setTimeout(boot, 250);
+  setTimeout(boot, 900);
+})();
