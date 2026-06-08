@@ -1,0 +1,437 @@
+
+/* =========================================================
+   IOS_DRIVE_CLEAN_V24
+   Sadece sürüş modunda kalabalığı azaltan görünüm yaması.
+   Mantığa, kayıt sistemine, JS akışına dokunmaz.
+========================================================= */
+
+@media (max-width: 900px){
+
+  body.drive-mode .seats-shell{
+    padding-top:8px !important;
+    padding-bottom:66px !important;
+  }
+
+  /* Üst ana kart daha sakin */
+  body.drive-mode .topbar{
+    margin:0 0 8px 0 !important;
+    padding:12px 14px !important;
+    border-radius:28px !important;
+    background:
+      linear-gradient(180deg, rgba(17,35,62,.92), rgba(5,14,28,.92)) !important;
+    border:1px solid rgba(148,163,184,.16) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.08),
+      0 14px 32px rgba(0,0,0,.28) !important;
+    overflow:hidden !important;
+  }
+
+  body.drive-mode .topbar h1,
+  body.drive-mode .topbar .title,
+  body.drive-mode .topbar .route-title,
+  body.drive-mode .topbar .brand-title{
+    font-size:20px !important;
+    line-height:1.12 !important;
+    letter-spacing:-.03em !important;
+    margin:0 0 5px 0 !important;
+  }
+
+  body.drive-mode .topbar small,
+  body.drive-mode .topbar .sub,
+  body.drive-mode .topbar .muted{
+    font-size:12px !important;
+    line-height:1.25 !important;
+    opacity:.78 !important;
+  }
+
+  body.drive-mode .topbar .mini-chip{
+    min-height:38px !important;
+    height:38px !important;
+    border-radius:17px !important;
+    padding:7px 10px !important;
+    font-size:12px !important;
+    background:rgba(255,255,255,.06) !important;
+  }
+
+  /* Ana koltuk kartı */
+  body.drive-mode .board-card{
+    margin-top:8px !important;
+    border-radius:28px !important;
+  }
+
+  body.drive-mode .board-inner{
+    gap:10px !important;
+  }
+
+  /* Sade koltuk / sessiz satırı daha az bağırsın */
+  body.drive-mode #seatSimpleModeToggle{
+    height:44px !important;
+    min-height:44px !important;
+    border-radius:19px !important;
+    padding:0 14px !important;
+    font-size:14px !important;
+    font-weight:900 !important;
+    box-shadow:0 10px 22px rgba(37,99,235,.22) !important;
+  }
+
+  body.drive-mode #ttsToggle,
+  body.drive-mode #topSoundToggle,
+  body.drive-mode .top-sound-toggle,
+  body.drive-mode .sound-toggle-btn{
+    height:44px !important;
+    min-height:44px !important;
+    border-radius:19px !important;
+    padding:0 14px !important;
+    font-size:14px !important;
+    font-weight:900 !important;
+    background:rgba(255,255,255,.10) !important;
+    box-shadow:none !important;
+  }
+
+  /* Sürüş / hız / rötar dock daha kompakt */
+  body.drive-mode #driveInlineDock{
+    display:grid !important;
+    grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr) !important;
+    gap:8px !important;
+
+    min-height:42px !important;
+    height:auto !important;
+    margin:0 0 8px 0 !important;
+    padding:0 !important;
+
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+    overflow:visible !important;
+  }
+
+  body.drive-mode #driveModeToggle{
+    grid-column:1 !important;
+    width:100% !important;
+    height:42px !important;
+    min-height:42px !important;
+    border-radius:18px !important;
+    padding:0 12px !important;
+
+    font-size:14px !important;
+    font-weight:950 !important;
+    letter-spacing:-.02em !important;
+
+    background:linear-gradient(180deg,#2f7cff,#1855d8) !important;
+    border:1px solid rgba(147,197,253,.22) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.20),
+      0 10px 22px rgba(37,99,235,.24) !important;
+  }
+
+  /* Hız zaten üstte var; sürüş panelinde tekrar kalabalık yapmasın */
+  body.drive-mode #driveSpeedChip{
+    display:none !important;
+  }
+
+  body.drive-mode #driveEtaChip{
+    grid-column:2 !important;
+    width:100% !important;
+    height:42px !important;
+    min-height:42px !important;
+    border-radius:18px !important;
+    padding:7px 11px !important;
+
+    background:rgba(255,255,255,.08) !important;
+    border:1px solid rgba(148,163,184,.16) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08) !important;
+  }
+
+  body.drive-mode .drive-eta-top,
+  body.drive-mode .drive-speed-top{
+    font-size:13px !important;
+    line-height:1 !important;
+  }
+
+  body.drive-mode .drive-eta-sub,
+  body.drive-mode .drive-speed-sub{
+    margin-top:3px !important;
+    font-size:10.5px !important;
+    opacity:.72 !important;
+  }
+
+  /* Başlık alanı: gereksiz metinleri azalt */
+  body.drive-mode .board-head{
+    margin:0 !important;
+    padding:0 !important;
+    gap:8px !important;
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+  }
+
+  body.drive-mode .board-kicker,
+  body.drive-mode .board-title small{
+    display:none !important;
+  }
+
+  body.drive-mode .board-title h2{
+    margin:0 0 8px 0 !important;
+    font-size:34px !important;
+    line-height:1 !important;
+    letter-spacing:-.06em !important;
+  }
+
+  body.drive-mode .selected-stop-chip{
+    min-height:42px !important;
+    height:42px !important;
+    padding:0 14px !important;
+    border-radius:18px !important;
+
+    display:flex !important;
+    align-items:center !important;
+    gap:8px !important;
+
+    font-size:14px !important;
+    font-weight:850 !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+
+    background:rgba(15,23,42,.55) !important;
+    border:1px solid rgba(244,114,182,.28) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06) !important;
+  }
+
+  body.drive-mode .selected-stop-chip b{
+    min-width:0 !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+  }
+
+  /* Eski ses satırı sürüşte gizli; yeni satır ana aksiyon */
+  body.drive-mode .voice-row{
+    display:none !important;
+  }
+
+  body.drive-mode #driveVoiceRow{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) 112px !important;
+    gap:8px !important;
+    margin:0 !important;
+  }
+
+  body.drive-mode .drive-voice-btn{
+    width:100% !important;
+    height:56px !important;
+    min-height:56px !important;
+    border-radius:22px !important;
+    padding:0 16px !important;
+
+    font-size:20px !important;
+    font-weight:1000 !important;
+    letter-spacing:-.035em !important;
+
+    background:linear-gradient(135deg,#8b5cf6,#2563eb) !important;
+    border:1px solid rgba(216,180,254,.28) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.20),
+      0 14px 28px rgba(79,70,229,.28) !important;
+  }
+
+  body.drive-mode .drive-voice-seat{
+    height:56px !important;
+    min-height:56px !important;
+    border-radius:22px !important;
+    padding:0 10px !important;
+
+    background:rgba(255,255,255,.08) !important;
+    border:1px solid rgba(148,163,184,.16) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08) !important;
+  }
+
+  body.drive-mode .drive-voice-seat-values{
+    font-size:22px !important;
+    font-weight:1000 !important;
+  }
+
+  /* Durak akışı daha sade */
+  body.drive-mode .route-strip-shell,
+  body.drive-mode #routeStrip{
+    margin-top:2px !important;
+    padding:12px 12px 14px !important;
+    border-radius:26px !important;
+    background:rgba(255,255,255,.055) !important;
+    border:1px solid rgba(148,163,184,.14) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.07),
+      0 12px 28px rgba(0,0,0,.20) !important;
+  }
+
+  body.drive-mode .route-strip-title{
+    margin:0 0 9px 0 !important;
+    font-size:22px !important;
+    line-height:1 !important;
+    letter-spacing:-.04em !important;
+  }
+
+  body.drive-mode .route-live-row{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px !important;
+    gap:8px !important;
+    margin:0 0 10px 0 !important;
+  }
+
+  body.drive-mode .route-live-row .mini-chip{
+    min-height:42px !important;
+    height:42px !important;
+    padding:0 10px !important;
+    border-radius:18px !important;
+    font-size:13px !important;
+    font-weight:850 !important;
+    overflow:hidden !important;
+  }
+
+  body.drive-mode .route-live-row .mini-chip b,
+  body.drive-mode .route-live-row .mini-chip span{
+    min-width:0 !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+
+  body.drive-mode .route-stop,
+  body.drive-mode .route-stop-card,
+  body.drive-mode .stop-card{
+    min-height:96px !important;
+    padding:12px !important;
+    border-radius:22px !important;
+    background:rgba(15,23,42,.55) !important;
+  }
+
+  body.drive-mode .route-stop h3,
+  body.drive-mode .route-stop-card h3,
+  body.drive-mode .stop-card h3{
+    font-size:19px !important;
+    line-height:1.05 !important;
+    margin-bottom:6px !important;
+  }
+
+  body.drive-mode .route-stop small,
+  body.drive-mode .route-stop-card small,
+  body.drive-mode .stop-card small{
+    font-size:12px !important;
+    line-height:1.25 !important;
+    opacity:.78 !important;
+  }
+
+  /* Koltuk planı yukarı yaklaşsın */
+  body.drive-mode .board-stage{
+    margin-top:8px !important;
+  }
+
+  /* Alt legend ince bar */
+  body.drive-mode .board-head-right .legend,
+  body.drive-mode .legend{
+    min-height:42px !important;
+    height:42px !important;
+    padding:6px 10px !important;
+    border-radius:20px !important;
+
+    background:rgba(8,18,34,.88) !important;
+    border:1px solid rgba(148,163,184,.18) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.08),
+      0 10px 24px rgba(0,0,0,.26) !important;
+
+    gap:8px !important;
+  }
+
+  body.drive-mode .legend .mini-chip{
+    min-height:28px !important;
+    height:28px !important;
+    padding:0 4px !important;
+    border-radius:12px !important;
+
+    font-size:12px !important;
+    font-weight:850 !important;
+    white-space:nowrap !important;
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+  }
+
+  /* Panel kartı sürüşte biraz aşağıda ve sakin */
+  body.drive-mode .panel-card{
+    margin-top:10px !important;
+    border-radius:28px !important;
+  }
+
+  body.drive-mode .panel-tabs{
+    gap:8px !important;
+  }
+
+  body.drive-mode .tab-btn{
+    height:42px !important;
+    border-radius:17px !important;
+    font-size:13px !important;
+  }
+}
+
+@media (max-width:430px){
+
+  body.drive-mode .board-card{
+    border-radius:26px !important;
+  }
+
+  body.drive-mode .board-inner{
+    gap:9px !important;
+  }
+
+  body.drive-mode .board-title h2{
+    font-size:31px !important;
+  }
+
+  body.drive-mode #driveInlineDock{
+    gap:7px !important;
+  }
+
+  body.drive-mode #driveModeToggle,
+  body.drive-mode #driveEtaChip{
+    height:40px !important;
+    min-height:40px !important;
+    border-radius:17px !important;
+  }
+
+  body.drive-mode #driveVoiceRow{
+    grid-template-columns:minmax(0,1fr) 106px !important;
+    gap:7px !important;
+  }
+
+  body.drive-mode .drive-voice-btn,
+  body.drive-mode .drive-voice-seat{
+    height:54px !important;
+    min-height:54px !important;
+    border-radius:21px !important;
+  }
+
+  body.drive-mode .drive-voice-btn{
+    font-size:19px !important;
+  }
+
+  body.drive-mode .route-strip-title{
+    font-size:21px !important;
+  }
+
+  body.drive-mode .route-live-row{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) 42px !important;
+    gap:7px !important;
+  }
+
+  body.drive-mode .route-live-row .mini-chip{
+    height:40px !important;
+    min-height:40px !important;
+    font-size:12.5px !important;
+  }
+
+  body.drive-mode .legend .mini-chip{
+    font-size:11.5px !important;
+  }
+}
+
+/* IOS_DRIVE_CLEAN_V24 END */

@@ -1,0 +1,83 @@
+
+/* =========================================================
+   RESTORE_TOP_ACTIONS_V30
+   Amaç:
+   - V26/V27 kompakt yamalarının gizlediği üst ikonları geri getirir.
+   - Ana Sayfa / Hesap / Emanet / AI Console ikonları görünür olur.
+   - Sadece topbar action alanına dokunur.
+========================================================= */
+
+.topbar .top-actions,
+.seats-shell > .topbar .top-actions,
+body.drive-mode .topbar .top-actions{
+  display:flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+
+  height:auto !important;
+  min-height:42px !important;
+  max-height:none !important;
+
+  overflow:visible !important;
+  pointer-events:auto !important;
+
+  align-items:center !important;
+  justify-content:center !important;
+  gap:10px !important;
+
+  margin-top:10px !important;
+  padding:0 !important;
+}
+
+.topbar .top-actions > *,
+.topbar .top-actions .icon-btn,
+.seats-shell > .topbar .top-actions > *,
+body.drive-mode .topbar .top-actions > *{
+  display:flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  pointer-events:auto !important;
+}
+
+.topbar .top-actions .icon-btn{
+  width:44px !important;
+  height:44px !important;
+  min-width:44px !important;
+  min-height:44px !important;
+
+  border-radius:17px !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  font-size:21px !important;
+  text-decoration:none !important;
+
+  background:rgba(255,255,255,.075) !important;
+  border:1px solid rgba(148,163,184,.20) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 10px 22px rgba(0,0,0,.22) !important;
+}
+
+.topbar .top-actions .icon-btn:active{
+  transform:scale(.94) !important;
+}
+
+@media(max-width:430px){
+  .topbar .top-actions,
+  .seats-shell > .topbar .top-actions,
+  body.drive-mode .topbar .top-actions{
+    gap:8px !important;
+    min-height:40px !important;
+    margin-top:8px !important;
+  }
+
+  .topbar .top-actions .icon-btn{
+    width:40px !important;
+    height:40px !important;
+    min-width:40px !important;
+    min-height:40px !important;
+    border-radius:15px !important;
+    font-size:20px !important;
+  }
+}

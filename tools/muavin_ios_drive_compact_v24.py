@@ -1,0 +1,392 @@
+from pathlib import Path
+from datetime import datetime
+import shutil
+
+ROOT = Path(".").resolve()
+STAMP = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+CSS_REL = "static/seats/patches/ios-drive-panel-compact-v24.css"
+ANDROID_CSS_REL = "android_app/app/src/main/python/static/seats/patches/ios-drive-panel-compact-v24.css"
+
+TPLS = [
+    ROOT / "templates/seats.html",
+    ROOT / "android_app/app/src/main/python/templates/seats.html",
+]
+
+CSS_TARGETS = [
+    ROOT / CSS_REL,
+    ROOT / ANDROID_CSS_REL,
+]
+
+CSS = r'''
+/* =========================================================
+   IOS_DRIVE_PANEL_COMPACT_V24
+   Amaç: Sürüş ekranında kalabalığı azaltmak.
+   Sadece tasarım katmanıdır. JS/mantık değiştirmez.
+========================================================= */
+
+@media(max-width: 700px){
+
+  body.drive-mode .board-card{
+    border-radius:26px !important;
+    margin-top:8px !important;
+  }
+
+  body.drive-mode .board-inner{
+    padding:14px 14px 16px !important;
+  }
+
+  /* Sürüşte tekrar eden başlık/açıklama kalabalığını kaldır */
+  body.drive-mode .board-kicker,
+  body.drive-mode .board-title small,
+  body.drive-mode .board-title h2{
+    display:none !important;
+  }
+
+  body.drive-mode .board-head{
+    display:block !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+
+  body.drive-mode .board-title{
+    margin:0 !important;
+    padding:0 !important;
+  }
+
+  /* Üst sürüş dock: sadece gereken iki ana bilgi */
+  body.drive-mode #driveInlineDock{
+    display:grid !important;
+    grid-template-columns: 1fr .78fr !important;
+    gap:10px !important;
+    min-height:0 !important;
+    margin:0 0 12px 0 !important;
+    overflow:visible !important;
+  }
+
+  /* Hız bilgisi üst sefer kartında zaten var: burada gizle */
+  body.drive-mode #driveSpeedChip{
+    display:none !important;
+  }
+
+  body.drive-mode #driveModeToggle,
+  body.drive-mode #driveEtaChip{
+    height:52px !important;
+    min-height:52px !important;
+    border-radius:22px !important;
+    padding:8px 12px !important;
+  }
+
+  body.drive-mode #driveModeToggle{
+    flex:unset !important;
+    width:100% !important;
+    font-size:16px !important;
+    font-weight:1000 !important;
+    letter-spacing:.01em !important;
+    background:linear-gradient(180deg,#3b82f6,#1d4ed8) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.22),
+      0 12px 26px rgba(37,99,235,.24) !important;
+  }
+
+  body.drive-mode #driveEtaChip{
+    width:100% !important;
+    min-width:0 !important;
+    background:rgba(255,255,255,.075) !important;
+    border:1px solid rgba(148,163,184,.18) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.09) !important;
+  }
+
+  body.drive-mode #driveEtaChip .drive-eta-top{
+    font-size:15px !important;
+  }
+
+  body.drive-mode #driveEtaChip .drive-eta-sub{
+    font-size:11px !important;
+    opacity:.74 !important;
+  }
+
+  /* Seçili durak: tek ince iOS kapsülü */
+  body.drive-mode .selected-stop-chip{
+    height:auto !important;
+    min-height:44px !important;
+    margin:0 0 12px 0 !important;
+    padding:10px 14px !important;
+    border-radius:18px !important;
+    font-size:15px !important;
+    line-height:1.2 !important;
+
+    display:flex !important;
+    align-items:center !important;
+    gap:8px !important;
+
+    background:rgba(15,23,42,.56) !important;
+    border:1px solid rgba(236,72,153,.28) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06) !important;
+  }
+
+  body.drive-mode .selected-stop-chip b{
+    min-width:0 !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+
+  /* Sesli komut satırı: ana aksiyon + doluluk */
+  body.drive-mode .board-head-right{
+    width:100% !important;
+    display:block !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+
+  body.drive-mode .voice-row{
+    display:none !important;
+  }
+
+  body.drive-mode #driveVoiceRow{
+    display:grid !important;
+    grid-template-columns: 1fr .56fr !important;
+    gap:12px !important;
+    margin:0 0 14px 0 !important;
+  }
+
+  body.drive-mode #btnDeckAIDrive{
+    height:62px !important;
+    min-height:62px !important;
+    border-radius:24px !important;
+    padding:0 18px !important;
+    font-size:20px !important;
+    font-weight:1000 !important;
+    justify-content:flex-start !important;
+    background:linear-gradient(135deg,#8b5cf6,#2563eb 58%,#1d4ed8) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.24),
+      0 16px 32px rgba(37,99,235,.25) !important;
+  }
+
+  body.drive-mode #driveVoiceSeatCard{
+    height:62px !important;
+    min-height:62px !important;
+    border-radius:24px !important;
+    padding:0 12px !important;
+    background:rgba(255,255,255,.075) !important;
+    border:1px solid rgba(148,163,184,.18) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08) !important;
+  }
+
+  body.drive-mode .drive-voice-seat-ico{
+    width:36px !important;
+    height:36px !important;
+    min-width:36px !important;
+    border-radius:16px !important;
+  }
+
+  body.drive-mode .drive-voice-seat-values{
+    font-size:22px !important;
+    font-weight:1000 !important;
+  }
+
+  /* Bu legend sürüşte gereksiz kalabalık yapıyor */
+  body.drive-mode .board-head-right > .legend{
+    display:none !important;
+  }
+
+  /* Durak akışı kartı: daha kompakt */
+  body.drive-mode .route-strip-shell,
+  body.drive-mode .route-flow-shell{
+    margin-top:0 !important;
+    padding:14px 14px 12px !important;
+    border-radius:24px !important;
+    background:rgba(255,255,255,.055) !important;
+    border:1px solid rgba(148,163,184,.13) !important;
+  }
+
+  body.drive-mode .route-strip-title{
+    font-size:20px !important;
+    line-height:1.1 !important;
+    margin-bottom:12px !important;
+    font-weight:1000 !important;
+  }
+
+  body.drive-mode .route-live-row{
+    display:grid !important;
+    grid-template-columns: 1fr 1.28fr 48px !important;
+    gap:8px !important;
+    align-items:center !important;
+    margin-bottom:12px !important;
+  }
+
+  body.drive-mode .route-live-row .mini-chip{
+    height:46px !important;
+    min-height:46px !important;
+    border-radius:18px !important;
+    padding:0 10px !important;
+    font-size:14px !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+  }
+
+  body.drive-mode .route-live-row .mini-chip b,
+  body.drive-mode .route-live-row .mini-chip span{
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+
+  body.drive-mode .route-live-row button,
+  body.drive-mode .route-live-row .tts-btn{
+    width:48px !important;
+    height:46px !important;
+    min-width:48px !important;
+    border-radius:18px !important;
+    padding:0 !important;
+  }
+
+  body.drive-mode .route-strip{
+    gap:10px !important;
+    padding-bottom:2px !important;
+  }
+
+  body.drive-mode .route-stop{
+    min-width:154px !important;
+    max-width:174px !important;
+    padding:12px 12px !important;
+    border-radius:20px !important;
+  }
+
+  body.drive-mode .route-stop .stop-name,
+  body.drive-mode .route-stop h3,
+  body.drive-mode .route-stop b{
+    font-size:16px !important;
+    line-height:1.15 !important;
+  }
+
+  body.drive-mode .route-stop small,
+  body.drive-mode .route-stop .muted{
+    font-size:12px !important;
+    line-height:1.25 !important;
+  }
+
+  /* Alt sabit legend biraz daha az bağırsın */
+  body.drive-mode .deck .legend,
+  body.drive-mode .board-stage .legend{
+    transform:scale(.94) !important;
+    transform-origin:center bottom !important;
+    opacity:.92 !important;
+  }
+
+  /* Çok dar ekranda daha da sıkıştır */
+  @media(max-width:380px){
+    body.drive-mode .board-inner{
+      padding:12px 12px 14px !important;
+    }
+
+    body.drive-mode #driveInlineDock{
+      gap:8px !important;
+    }
+
+    body.drive-mode #driveModeToggle,
+    body.drive-mode #driveEtaChip{
+      height:48px !important;
+      min-height:48px !important;
+      border-radius:20px !important;
+    }
+
+    body.drive-mode #driveVoiceRow{
+      grid-template-columns: 1fr .52fr !important;
+      gap:9px !important;
+    }
+
+    body.drive-mode #btnDeckAIDrive,
+    body.drive-mode #driveVoiceSeatCard{
+      height:58px !important;
+      min-height:58px !important;
+      border-radius:22px !important;
+    }
+
+    body.drive-mode #btnDeckAIDrive{
+      font-size:18px !important;
+      padding:0 14px !important;
+    }
+
+    body.drive-mode .route-live-row{
+      grid-template-columns: 1fr 1.1fr 44px !important;
+      gap:7px !important;
+    }
+
+    body.drive-mode .route-live-row .mini-chip{
+      height:43px !important;
+      min-height:43px !important;
+      font-size:13px !important;
+      border-radius:16px !important;
+    }
+  }
+}
+'''
+
+LINK = '<link rel="stylesheet" href="/static/seats/patches/ios-drive-panel-compact-v24.css?v=1">'
+
+print("===== IOS DRIVE PANEL COMPACT V24 =====")
+
+for p in CSS_TARGETS:
+    p.parent.mkdir(parents=True, exist_ok=True)
+    if p.exists():
+        backup = p.with_name(p.name + f".bak-ios-drive-compact-v24-{STAMP}")
+        shutil.copy2(p, backup)
+        print("✅ CSS yedeklendi:", backup.relative_to(ROOT))
+    p.write_text(CSS, encoding="utf-8")
+    print("✅ CSS yazıldı:", p.relative_to(ROOT))
+
+for tpl in TPLS:
+    if not tpl.exists():
+        print("⚠️ Template yok:", tpl.relative_to(ROOT))
+        continue
+
+    s = tpl.read_text(encoding="utf-8", errors="ignore")
+
+    if "ios-drive-panel-compact-v24.css" in s:
+        print("ℹ️ Link zaten var:", tpl.relative_to(ROOT))
+        continue
+
+    backup = tpl.with_name(tpl.name + f".bak-ios-drive-compact-v24-{STAMP}")
+    shutil.copy2(tpl, backup)
+
+    lines = s.splitlines()
+    insert_at = None
+
+    for i, line in enumerate(lines):
+      if "hide-quick-fab-v22.css" in line:
+        insert_at = i + 1
+
+    if insert_at is None:
+      for i, line in enumerate(lines):
+        if "seat-label-ghost-clean.css" in line:
+          insert_at = i + 1
+
+    if insert_at is None:
+      for i, line in enumerate(lines):
+        if "</head>" in line.lower():
+          insert_at = i
+
+    if insert_at is None:
+      insert_at = 0
+
+    lines.insert(insert_at, LINK)
+    tpl.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    print("✅ Link eklendi:", tpl.relative_to(ROOT))
+    print("   Yedek:", backup.relative_to(ROOT))
+
+print()
+print("===== KONTROL =====")
+for p in CSS_TARGETS:
+    txt = p.read_text(encoding="utf-8", errors="ignore") if p.exists() else ""
+    print(p.relative_to(ROOT), "IOS_DRIVE_PANEL_COMPACT_V24:", txt.count("IOS_DRIVE_PANEL_COMPACT_V24"))
+
+for tpl in TPLS:
+    txt = tpl.read_text(encoding="utf-8", errors="ignore") if tpl.exists() else ""
+    print(tpl.relative_to(ROOT), "ios-drive-panel-compact-v24:", txt.count("ios-drive-panel-compact-v24.css"))
+
+print()
+print("✅ V24 tamamlandı. Chrome’da sayfayı yenile; olmazsa adres sonuna ?v=24 ekleyip aç.")
