@@ -1698,6 +1698,264 @@
     });
   }
 
+
+  /* ===== CONTINUE_SEAT_MAP_SHEET_V43_START ===== */
+  let v43SeatMapData = null;
+  let v43SeatMapFilter = "";
+
+  function v43Norm(v){
+    return text(v).trim().toLocaleLowerCase("tr-TR")
+      .replace(/[–\-_/\\.,()[\]]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function v43Short(v, maxLen){
+    const s = text(v).trim();
+    if(!s) return "—";
+    return s.length > maxLen ? s.slice(0, maxLen - 1) + "…" : s;
+  }
+
+  function v43GenderClass(g){
+    const x = v43Norm(g);
+    if(x.includes("kad") || x.includes("bayan") || x === "k" || x === "female") return "is-female";
+    if(x.includes("erk") || x === "e" || x === "male") return "is-male";
+    return "";
+  }
+
+  function v43SeatByNo(seatNo){
+    const list = v43SeatMapData && Array.isArray(v43SeatMapData.seats) ? v43SeatMapData.seats : [];
+    return list.find(x => text(x.seat_no) === text(seatNo)) || null;
+  }
+
+  async function openSeatMapV43(){
+    lastKind = "seatmap";
+    openSheet();
+
+    kickerEl.textContent = "Koltuklar";
+    titleEl.textContent = "Koltuk Planı";
+    subEl.textContent = "Canlı takipten çıkmadan koltuk kontrolü";
+    bodyEl.innerHTML = '<div class="continue-seat-map-loading">Koltuklar yükleniyor...</div>';
+
+    try{
+      const res = await fetch(`/api/live-seat-map?_=${Date.now()}`, {
+        method:"GET",
+        credentials:"same-origin",
+        cache:"no-store"
+      });
+
+      const data = await res.json();
+
+      if(!data || !data.ok){
+        renderEmpty((data && (data.error || data.msg)) || "Koltuk planı alınamadı.");
+        return;
+      }
+
+      v43SeatMapData = data;
+      if(!v43SeatMapFilter){
+        v43SeatMapFilter = currentStopName() || data.live_stop || "";
+      }
+
+      renderSeatMapV43();
+
+    }catch(err){
+      console.error("seat map v43 error", err);
+      renderEmpty("Bağlantı hatası. Koltuk planı yüklenemedi.");
+    }
+  }
+
+  function renderSeatMapV43(){
+    const data = v43SeatMapData || {};
+    const seats = Array.isArray(data.seats) ? data.seats : [];
+    const positions = data.seat_positions || {};
+    const routeStopsForMap = Array.isArray(data.route_stops) && data.route_stops.length ? data.route_stops : routeStops;
+    const counts = data.counts_by_stop || {};
+    const liveStop = currentStopName() || data.live_stop || "";
+    const filter = v43SeatMapFilter || "";
+
+    const byNo = {};
+    seats.forEach(s => { byNo[text(s.seat_no)] = s; });
+
+    const seatNumbers = Object.keys(positions).sort((a,b) => Number(a) - Number(b));
+
+    const stopStrip = routeStopsForMap.map(stop => {
+      const c = Number(counts[stop] || 0);
+      const liveCls = v43Norm(stop) === v43Norm(liveStop) ? " is-live" : "";
+      const activeCls = filter && v43Norm(stop) === v43Norm(filter) ? " is-active" : "";
+      return `
+        <button class="v43-seatmap-stop${liveCls}${activeCls}" type="button" data-v43-stop-filter="${escapeHtml(stop)}">
+          ${escapeHtml(v43Short(stop, 22))}<b>${c}</b>
+        </button>
+      `;
+    }).join("");
+
+    const filterNote = filter ? `
+      <div class="v43-seatmap-filter-note">
+        <span>Filtre: <b>${escapeHtml(filter)}</b> durağında inecek koltuklar vurgulu</span>
+        <button class="v43-seatmap-clear" type="button" data-v43-clear-filter="1">Tümü</button>
+      </div>
+    ` : `
+      <div class="v43-seatmap-filter-note">
+        <span>Tüm koltuklar gösteriliyor</span>
+      </div>
+    `;
+
+    const seatHtml = seatNumbers.map(no => {
+      const pos = positions[no] || [1,1];
+      const row = Number(pos[0] || 1);
+      const col = Number(pos[1] || 1);
+      const s = byNo[no] || { seat_no:no, occupied:false };
+      const occupied = !!s.occupied;
+      const due = occupied && filter && v43Norm(s.to_stop || "") === v43Norm(filter);
+      const dim = filter && occupied && !due;
+      const cls = [
+        "v43-seat",
+        occupied ? "is-occupied" : "",
+        occupied ? v43GenderClass(s.gender || "") : "",
+        Number(s.service || 0) ? "is-service" : "",
+        due ? "is-due" : "",
+        dim ? "is-dim" : ""
+      ].filter(Boolean).join(" ");
+
+      const routeLabel = occupied ? v43Short(s.to_stop || "İniş yok", 12) : "Boş";
+      const bag = Number(s.bag_count || 0);
+
+      return `
+        <button class="${cls}" type="button"
+          style="grid-row:${row};grid-column:${col};"
+          data-v43-seat-no="${escapeHtml(no)}"
+          aria-label="Koltuk ${escapeHtml(no)}">
+          <b>${escapeHtml(no)}</b>
+          <small>${escapeHtml(routeLabel)}</small>
+          ${bag > 0 ? `<em>🧳${bag}</em>` : ""}
+        </button>
+      `;
+    }).join("");
+
+    bodyEl.innerHTML = `
+      <div class="v43-seatmap-wrap">
+        <div class="v43-seatmap-summary">
+          <div class="v43-seatmap-stat"><small>Toplam</small><b>${Number(data.total_seats || seatNumbers.length || 0)}</b></div>
+          <div class="v43-seatmap-stat"><small>Dolu</small><b>${Number(data.occupied_count || 0)}</b></div>
+          <div class="v43-seatmap-stat"><small>Boş</small><b>${Number(data.empty_count || 0)}</b></div>
+        </div>
+
+        <div class="v43-seatmap-stop-strip">
+          ${stopStrip || '<button class="v43-seatmap-stop" type="button">Durak yok</button>'}
+        </div>
+
+        ${filterNote}
+
+        <div class="v43-seatmap-board">
+          <div class="v43-seatmap-corridor">KORİDOR</div>
+          ${seatHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSeatDetailV43(seatNo){
+    const s = v43SeatByNo(seatNo);
+
+    if(!s || !s.occupied){
+      kickerEl.textContent = "Boş koltuk";
+      titleEl.textContent = `Koltuk ${seatNo}`;
+      subEl.textContent = "Bu koltukta kayıt görünmüyor.";
+      bodyEl.innerHTML = `
+        <div class="v43-seat-detail">
+          <div class="v43-seat-detail-card">
+            <div class="v43-seat-detail-title">
+              <b>Koltuk ${escapeHtml(seatNo)}</b>
+              <span>Boş</span>
+            </div>
+            <div class="v43-seat-detail-line">Bu koltuk şu an boş görünüyor.</div>
+          </div>
+          <div class="v43-seat-detail-actions">
+            <button type="button" data-v43-seatmap-back="1">Geri</button>
+            <a href="/seats">Koltuk ekranı</a>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const bag = Number(s.bag_count || 0);
+
+    kickerEl.textContent = "Koltuk detayı";
+    titleEl.textContent = `Koltuk ${s.seat_no}`;
+    subEl.textContent = `${s.from_stop || "Biniş yok"} → ${s.to_stop || "İniş yok"}`;
+
+    bodyEl.innerHTML = `
+      <div class="v43-seat-detail">
+        <div class="v43-seat-detail-card">
+          <div class="v43-seat-detail-title">
+            <b>Koltuk ${escapeHtml(s.seat_no)}</b>
+            <span>${escapeHtml(s.gender || "Yolcu")}</span>
+          </div>
+
+          <div class="v43-seat-detail-line">
+            <b>Yolcu:</b> ${escapeHtml(s.passenger_name || "İsim yok")}<br>
+            <b>Güzergâh:</b> ${escapeHtml(s.from_stop || "Biniş yok")} → ${escapeHtml(s.to_stop || "İniş yok")}<br>
+            <b>Ödeme:</b> ${escapeHtml(s.payment || "-")} ${Number(s.amount || 0) ? "• " + Number(s.amount || 0).toLocaleString("tr-TR") + " ₺" : ""}<br>
+            <b>Bagaj:</b> ${bag} adet
+          </div>
+        </div>
+
+        <div class="v43-seat-detail-actions">
+          <button type="button" data-v43-seatmap-back="1">Geri</button>
+          <button class="sheet-bag-detail-btn" type="button" data-bag-seat="${escapeHtml(s.seat_no)}">🧳 Bagaj</button>
+          <button class="sheet-action-btn" type="button" data-change-seat="${escapeHtml(s.seat_no)}">İniş Değiştir</button>
+          <button class="sheet-offload-btn danger" type="button" data-offload-seat="${escapeHtml(s.seat_no)}">İndir</button>
+        </div>
+      </div>
+    `;
+  }
+
+  const seatMapBtnV43 = document.getElementById("continueSeatMapBtn");
+  if(seatMapBtnV43){
+    seatMapBtnV43.addEventListener("click", function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      openSeatMapV43();
+    });
+  }
+
+  if(bodyEl){
+    bodyEl.addEventListener("click", function(e){
+      const seatBtn = e.target.closest("[data-v43-seat-no]");
+      if(seatBtn){
+        e.preventDefault();
+        renderSeatDetailV43(seatBtn.getAttribute("data-v43-seat-no"));
+        return;
+      }
+
+      const stopBtn = e.target.closest("[data-v43-stop-filter]");
+      if(stopBtn){
+        e.preventDefault();
+        v43SeatMapFilter = stopBtn.getAttribute("data-v43-stop-filter") || "";
+        renderSeatMapV43();
+        return;
+      }
+
+      const clearBtn = e.target.closest("[data-v43-clear-filter]");
+      if(clearBtn){
+        e.preventDefault();
+        v43SeatMapFilter = "";
+        renderSeatMapV43();
+        return;
+      }
+
+      const backBtn = e.target.closest("[data-v43-seatmap-back]");
+      if(backBtn){
+        e.preventDefault();
+        renderSeatMapV43();
+        return;
+      }
+    });
+  }
+  /* ===== CONTINUE_SEAT_MAP_SHEET_V43_END ===== */
+
+
   if(closeBtn) closeBtn.addEventListener("click", closeSheet);
   if(overlay) overlay.addEventListener("click", closeSheet);
 

@@ -1909,6 +1909,138 @@ def continue_trip():
     )
 
 
+
+# ===== CONTINUE_SEAT_MAP_SHEET_V43_API_START =====
+@app.route("/api/live-seat-map")
+def api_live_seat_map_v43():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    db = get_db()
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+    route_stops = get_stops(trip["route"])
+
+    try:
+        live_runtime = fetch_live_runtime_state(tid)
+    except Exception:
+        live_runtime = {}
+
+    def _bag_count_for_seat(seat_no):
+        try:
+            meta = get_counts(trip_key, str(seat_no))
+        except Exception:
+            meta = ()
+
+        total = 0
+
+        if isinstance(meta, (tuple, list)):
+            for x in meta[:3]:
+                try:
+                    total += int(x or 0)
+                except Exception:
+                    pass
+
+        elif isinstance(meta, dict):
+            counts = meta.get("counts")
+            if isinstance(counts, dict):
+                for k in ("R", "LF", "LB"):
+                    try:
+                        total += int(counts.get(k) or 0)
+                    except Exception:
+                        pass
+
+        return int(total or 0)
+
+    rows = db.execute(
+        """
+        SELECT seat_no,
+               COALESCE(from_stop,'') AS from_stop,
+               COALESCE(to_stop,'') AS to_stop,
+               COALESCE(passenger_name,'') AS passenger_name,
+               COALESCE(passenger_phone,'') AS passenger_phone,
+               COALESCE(gender,'') AS gender,
+               COALESCE(payment,'') AS payment,
+               COALESCE(amount,0) AS amount,
+               COALESCE(service,0) AS service
+        FROM seats
+        WHERE trip_id=?
+        ORDER BY CAST(seat_no AS INTEGER), seat_no
+        """,
+        (tid,),
+    ).fetchall()
+
+    occupied = {}
+    counts_by_stop = {}
+
+    for r in rows:
+        seat_no = str(r["seat_no"])
+        to_stop = (r["to_stop"] or "").strip()
+        bag_count = _bag_count_for_seat(seat_no)
+
+        item = {
+            "seat_no": seat_no,
+            "occupied": True,
+            "from_stop": r["from_stop"] or "",
+            "to_stop": to_stop,
+            "passenger_name": r["passenger_name"] or "",
+            "passenger_phone": r["passenger_phone"] or "",
+            "gender": r["gender"] or "",
+            "payment": r["payment"] or "",
+            "amount": float(r["amount"] or 0),
+            "service": int(r["service"] or 0),
+            "bag_count": int(bag_count or 0),
+        }
+
+        occupied[seat_no] = item
+
+        if to_stop:
+            counts_by_stop[to_stop] = int(counts_by_stop.get(to_stop, 0) or 0) + 1
+
+    seats = []
+    for n in SEAT_NUMBERS:
+        key = str(n)
+        if key in occupied:
+            seats.append(occupied[key])
+        else:
+            seats.append({
+                "seat_no": key,
+                "occupied": False,
+                "from_stop": "",
+                "to_stop": "",
+                "passenger_name": "",
+                "passenger_phone": "",
+                "gender": "",
+                "payment": "",
+                "amount": 0,
+                "service": 0,
+                "bag_count": 0,
+            })
+
+    return jsonify({
+        "ok": True,
+        "trip_id": tid,
+        "route": trip["route"] or "",
+        "plate": trip["plate"] or "",
+        "live_stop": (live_runtime or {}).get("live_stop", "") or "",
+        "route_stops": route_stops,
+        "seat_positions": {
+            str(k): [int(v[0]), int(v[1])]
+            for k, v in SEAT_POSITIONS.items()
+        },
+        "seats": seats,
+        "total_seats": len(SEAT_NUMBERS),
+        "occupied_count": len(occupied),
+        "empty_count": max(len(SEAT_NUMBERS) - len(occupied), 0),
+        "counts_by_stop": counts_by_stop,
+    })
+# ===== CONTINUE_SEAT_MAP_SHEET_V43_API_END =====
+
+
 @app.route("/api/live-seat-bag-detail")
 def api_live_seat_bag_detail():
     tid = get_active_trip()
