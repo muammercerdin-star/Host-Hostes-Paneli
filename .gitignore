@@ -111,3 +111,10 @@ android_app/build/
 android_app/app/build/
 android_app/local.properties
 local.properties
+
+# APK build / download outputs
+apk_out/
+*.apk
+
+# local audit reports
+muavin_*_audit_*.txt
