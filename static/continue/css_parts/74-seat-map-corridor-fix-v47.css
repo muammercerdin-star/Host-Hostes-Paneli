@@ -1,0 +1,21 @@
+/* =========================================================
+   CONTINUE_SEAT_MAP_CORRIDOR_FIX_V47
+   Koridor çizgisi koltukların içine girdiği için kaldırıldı.
+   Sadece görsel düzeltme.
+========================================================= */
+
+#continueSeatMapFullscreenV45 .v45-seatmap-corridor{
+  display:none !important;
+}
+
+#continueSeatMapFullscreenV45 .v45-seatmap-board{
+  background:
+    radial-gradient(circle at 50% 0%, rgba(37,99,235,.18), transparent 32%),
+    linear-gradient(180deg, rgba(15,23,42,.72), rgba(2,6,23,.74)) !important;
+}
+
+/* Koltukların daha temiz görünmesi için orta boşluğa hayalet çizgi ekleme yok.
+   Bu modalda çizgisiz düzen daha düzgün duruyor. */
+#continueSeatMapFullscreenV45 .v45-seat{
+  z-index:2 !important;
+}
