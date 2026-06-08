@@ -81,7 +81,7 @@
 
 
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip.css') }}?v=seat-map-v43">
+  <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip.css') }}?v=css-parts-1">
 </head>
 
 <body>
@@ -260,9 +260,9 @@
     </section>
 
     <nav class="dock">
-      <a class="dock-item" id="continueSeatMapBtn" data-seat-map-sheet="1" href="{{ url_for('seats_page') }}">
+      <a class="dock-item" href="{{ url_for('seats_page') }}">
         <i>💺</i>
-        <span>Koltuklar</span>
+        <span>Koltuk</span>
       </a>
 
       <a class="dock-item" href="{{ url_for('passenger_control') }}">
@@ -500,7 +500,7 @@
     liveEmanetCount: {{ (live_current.emanet_count if live_current and live_current.emanet_count is defined else (live_current.consignment_count if live_current and live_current.consignment_count is defined else 0)) | tojson | safe }}
   };
   </script>
-  <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=seat-map-v43"></script>
+  <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=core-split-1"></script>
   <script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
   <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
   <script src="{{ url_for('static', filename='continue/continue_live_diagnostics.js') }}?v=live-diag-1"></script>
