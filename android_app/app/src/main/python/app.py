@@ -1907,6 +1907,102 @@ def continue_trip():
 
 
 
+
+# ===== CONTINUE_SEAT_MAP_FULLSCREEN_V45_API_START =====
+@app.route("/api/live-seat-map")
+def api_live_seat_map_v45():
+    tid = get_active_trip()
+    if not tid:
+        return jsonify({"ok": False, "error": "Aktif sefer yok."}), 400
+
+    db = get_db()
+    trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+    if not trip:
+        return jsonify({"ok": False, "error": "Sefer bulunamadı."}), 404
+
+    trip_key = ((trip["route"] or "") + "|" + (trip["plate"] or "")).replace(" ", "_")
+
+    def bag_count_for(seat_no):
+        total = 0
+        try:
+            meta = get_counts(trip_key, str(seat_no))
+        except Exception:
+            meta = ()
+
+        if isinstance(meta, (tuple, list)):
+            for x in meta[:3]:
+                try:
+                    total += int(x or 0)
+                except Exception:
+                    pass
+        elif isinstance(meta, dict):
+            counts = meta.get("counts")
+            if isinstance(counts, dict):
+                for k in ("R", "LF", "LB"):
+                    try:
+                        total += int(counts.get(k) or 0)
+                    except Exception:
+                        pass
+        return int(total or 0)
+
+    rows = db.execute(
+        """
+        SELECT seat_no,
+               COALESCE(from_stop,'') AS from_stop,
+               COALESCE(to_stop,'') AS to_stop,
+               COALESCE(passenger_name,'') AS passenger_name,
+               COALESCE(gender,'') AS gender,
+               COALESCE(service,0) AS service
+        FROM seats
+        WHERE trip_id=?
+        ORDER BY CAST(seat_no AS INTEGER), seat_no
+        """,
+        (tid,),
+    ).fetchall()
+
+    by_seat = {}
+    for r in rows:
+        no = str(r["seat_no"])
+        by_seat[no] = {
+            "seat_no": no,
+            "occupied": True,
+            "from_stop": r["from_stop"] or "",
+            "to_stop": r["to_stop"] or "",
+            "passenger_name": r["passenger_name"] or "",
+            "gender": r["gender"] or "",
+            "service": int(r["service"] or 0),
+            "bag_count": bag_count_for(no),
+        }
+
+    seats = []
+    for n in SEAT_NUMBERS:
+        key = str(n)
+        if key in by_seat:
+            seats.append(by_seat[key])
+        else:
+            seats.append({
+                "seat_no": key,
+                "occupied": False,
+                "from_stop": "",
+                "to_stop": "",
+                "passenger_name": "",
+                "gender": "",
+                "service": 0,
+                "bag_count": 0,
+            })
+
+    return jsonify({
+        "ok": True,
+        "seats": seats,
+        "seat_positions": {
+            str(k): [int(v[0]), int(v[1])]
+            for k, v in SEAT_POSITIONS.items()
+        },
+        "total_seats": len(SEAT_NUMBERS),
+    })
+# ===== CONTINUE_SEAT_MAP_FULLSCREEN_V45_API_END =====
+
+
 @app.route("/api/live-seat-bag-detail")
 def api_live_seat_bag_detail():
     tid = get_active_trip()

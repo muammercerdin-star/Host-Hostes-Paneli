@@ -2110,7 +2110,7 @@
 /* ===== END SCRIPT BLOCK: continue-live-eta-engine ===== */
 
 
-/* ===== CONTINUE_SEAT_MAP_MINIMAL_V44_START ===== */
+/* ===== CONTINUE_SEAT_MAP_FULLSCREEN_V45_START ===== */
 (function(){
   const btn = document.getElementById("continueSeatMapBtn");
   if(!btn) return;
@@ -2126,7 +2126,7 @@
 
   function norm(v){
     return String(v || "")
-      .toLowerCase()
+      .toLocaleLowerCase("tr-TR")
       .replace(/[–\-_\/\\\.,()\[\]]/g, " ")
       .replace(/\s+/g, " ")
       .trim();
@@ -2137,80 +2137,131 @@
     return (el && el.textContent ? el.textContent : "").trim();
   }
 
-  function closeSeatMap(){
-    document.getElementById("continueSeatMapFullscreen")?.remove();
+  function short(v, n){
+    const s = String(v || "").trim();
+    if(!s) return "Boş";
+    return s.length > n ? s.slice(0, n - 1) + "…" : s;
+  }
+
+  function close(){
+    const old = document.getElementById("continueSeatMapFullscreenV45");
+    if(old) old.remove();
     document.body.style.overflow = "";
   }
 
-  function seatCard(seat){
-    const seatNo = seat.seat_no || seat.no || seat.number || "";
-    const fromStop = seat.from_stop || "";
-    const toStop = seat.to_stop || seat.stop || "";
-    const occupied = !!(seat.occupied || seat.full || toStop || fromStop || seat.passenger_name);
-    const cls = occupied ? "occupied" : "empty";
-    const hi = toStop && currentStop() && norm(toStop) === norm(currentStop()) ? "highlight" : "";
-    const label = occupied ? (toStop || fromStop || "Dolu") : "Boş";
-
-    return `
-      <div class="csm-seat ${cls} ${hi}">
-        <b>${esc(seatNo)}</b>
-        <small>${esc(label)}</small>
-      </div>
-    `;
+  function genderClass(g){
+    const x = norm(g);
+    if(x.includes("kad") || x.includes("bayan") || x === "k" || x === "female") return "is-female";
+    if(x.includes("erk") || x === "e" || x === "male") return "is-male";
+    return "";
   }
 
-  function renderSheet(data){
-    closeSeatMap();
-
-    const seats = Array.isArray(data?.seats) ? data.seats : [];
+  function render(data){
+    close();
 
     const host = document.createElement("div");
-    host.id = "continueSeatMapFullscreen";
+    host.id = "continueSeatMapFullscreenV45";
     host.innerHTML = `
-      <div class="csm-backdrop"></div>
-      <div class="csm-panel">
-        <button class="csm-close" type="button" aria-label="Kapat">×</button>
-        <div class="csm-onlywrap">
-          <div class="csm-deck">
-            ${seats.map(seatCard).join("") || '<div class="csm-seat empty"><b>—</b><small>Koltuk verisi yok</small></div>'}
-          </div>
-        </div>
+      <button class="v45-seatmap-close" type="button" aria-label="Kapat">×</button>
+      <div class="v45-seatmap-page">
+        <div class="v45-seatmap-loading">Koltuklar yükleniyor...</div>
       </div>
     `;
 
     document.body.appendChild(host);
     document.body.style.overflow = "hidden";
 
-    host.querySelector(".csm-close")?.addEventListener("click", closeSeatMap);
-    host.querySelector(".csm-backdrop")?.addEventListener("click", closeSeatMap);
+    host.querySelector(".v45-seatmap-close").addEventListener("click", close);
+
+    const page = host.querySelector(".v45-seatmap-page");
+    const positions = data.seat_positions || {};
+    const seats = Array.isArray(data.seats) ? data.seats : [];
+    const live = currentStop();
+
+    const byNo = {};
+    seats.forEach(s => byNo[String(s.seat_no)] = s);
+
+    const nums = Object.keys(positions).length
+      ? Object.keys(positions).sort((a,b) => Number(a) - Number(b))
+      : seats.map(s => String(s.seat_no)).sort((a,b) => Number(a) - Number(b));
+
+    const cards = nums.map((no, idx) => {
+      const s = byNo[no] || { seat_no:no, occupied:false };
+      const pos = positions[no] || [Math.floor(idx / 4) + 1, (idx % 4) + 1];
+      const row = Number(pos[0] || 1);
+      const col = Number(pos[1] || 1);
+      const full = !!s.occupied;
+      const due = full && live && norm(s.to_stop || "") === norm(live);
+      const bag = Number(s.bag_count || 0);
+
+      const cls = [
+        "v45-seat",
+        full ? "is-full" : "is-empty",
+        full ? genderClass(s.gender || "") : "",
+        due ? "is-due" : ""
+      ].filter(Boolean).join(" ");
+
+      const label = full ? short(s.to_stop || s.from_stop || "Dolu", 12) : "Boş";
+
+      return `
+        <div class="${cls}" style="grid-row:${row};grid-column:${col};">
+          <b>${esc(no)}</b>
+          <small>${esc(label)}</small>
+          ${bag > 0 ? `<span class="bag">🧳${bag}</span>` : ""}
+        </div>
+      `;
+    }).join("");
+
+    page.innerHTML = `
+      <div class="v45-seatmap-board">
+        <div class="v45-seatmap-corridor">KORİDOR</div>
+        ${cards}
+      </div>
+    `;
   }
 
-  async function openSeatMap(e){
+  async function open(e){
     e.preventDefault();
+    e.stopPropagation();
+
+    close();
+
+    const loading = document.createElement("div");
+    loading.id = "continueSeatMapFullscreenV45";
+    loading.innerHTML = `
+      <button class="v45-seatmap-close" type="button" aria-label="Kapat">×</button>
+      <div class="v45-seatmap-loading">Koltuklar yükleniyor...</div>
+    `;
+    document.body.appendChild(loading);
+    document.body.style.overflow = "hidden";
+    loading.querySelector(".v45-seatmap-close").addEventListener("click", close);
 
     try{
-      const stop = currentStop();
-      const res = await fetch(`/api/live-seat-map?stop=${encodeURIComponent(stop)}&_=${Date.now()}`, {
-        method: "GET",
-        credentials: "same-origin",
-        cache: "no-store"
+      const res = await fetch(`/api/live-seat-map?_=${Date.now()}`, {
+        method:"GET",
+        credentials:"same-origin",
+        cache:"no-store"
       });
-      const j = await res.json();
-      if(!j || !j.ok) throw new Error((j && (j.error || j.msg)) || "Koltuk planı alınamadı");
-      renderSheet(j);
+
+      const data = await res.json();
+
+      if(!data || !data.ok){
+        throw new Error((data && (data.error || data.msg)) || "Koltuk planı alınamadı");
+      }
+
+      render(data);
     }catch(err){
-      console.error("continue seat map minimal v44 error", err);
+      console.error("V45 seat map error", err);
+      close();
       alert("Koltuk planı açılamadı.");
     }
   }
 
-  btn.addEventListener("click", openSeatMap);
+  btn.addEventListener("click", open, true);
 
   document.addEventListener("keydown", function(e){
-    if(e.key === "Escape"){
-      closeSeatMap();
-    }
+    if(e.key === "Escape") close();
   });
 })();
-/* ===== CONTINUE_SEAT_MAP_MINIMAL_V44_END ===== */
+/* ===== CONTINUE_SEAT_MAP_FULLSCREEN_V45_END ===== */
 
