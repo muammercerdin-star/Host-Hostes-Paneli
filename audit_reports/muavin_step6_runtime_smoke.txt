@@ -1,0 +1,749 @@
+===== MUAVİN ASİSTANI STEP-6 RUNTIME SMOKE TEST =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+✅ Flask app import edildi
+
+===== 1) app.py LOGIN / SESSION İZLERİ =====
+
+--- arama: def login ---
+
+--- arama: session[ ---
+### satır 1105
+    1102: 
+    1103: def issue_csrf() -> str:
+    1104:     token = secrets.token_urlsafe(32)
+>>  1105:     session["csrf_token"] = token
+    1106:     return token
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+
+### satır 1356
+    1353:     if route not in set(all_route_names()):
+    1354:         return jsonify({"ok": False, "msg": "Geçersiz hat"}), 400
+    1355: 
+>>  1356:     session["route"] = route
+    1357:     return jsonify({"ok": True, "route": route})
+    1358: 
+    1359: 
+    1360: @app.route("/sefer-baslat", methods=["GET", "POST"])
+    1361: def trip_start():
+
+### satır 1374
+    1371:     if selected_route not in set(routes):
+    1372:         selected_route = routes[0] if routes else "Denizli – İstanbul"
+    1373: 
+>>  1374:     session["route"] = selected_route
+    1375: 
+    1376:     if request.method == "POST":
+    1377:         db = get_db()
+    1378:         date_val = request.form.get("date") or datetime.now().strftime("%Y-%m-%d")
+    1379:         time_val = request.form.get("departure_time") or datetime.now().strftime("%H:%M")
+
+### satır 1752
+    1749: 
+    1750:     if matched_requested_stop:
+    1751:         current_stop = matched_requested_stop
+>>  1752:         session["continue_current_stop"] = current_stop
+    1753:     elif matched_runtime_stop:
+    1754:         current_stop = matched_runtime_stop
+    1755:         session["continue_current_stop"] = current_stop
+    1756:     elif matched_session_stop:
+    1757:         current_stop = matched_session_stop
+
+### satır 1755
+    1752:         session["continue_current_stop"] = current_stop
+    1753:     elif matched_runtime_stop:
+    1754:         current_stop = matched_runtime_stop
+>>  1755:         session["continue_current_stop"] = current_stop
+    1756:     elif matched_session_stop:
+    1757:         current_stop = matched_session_stop
+    1758:     else:
+    1759:         # Rotadaki sıraya göre, iniş/biniş/bagaj/servis işlemi olan ilk durağı seç.
+    1760:         operation_keys = set()
+
+### satır 4375
+    4372: 
+    4373:         finalize_remaining_trip_events(db, tid)
+    4374:         report_files = save_finished_trip_report(tid)
+>>  4375:         session["last_finished_trip_report"] = report_files
+    4376: 
+    4377:         # Canlı runtime bilgisini temizle
+    4378:         try:
+    4379:             ensure_live_runtime_state_table()
+    4380:             db.execute("DELETE FROM live_runtime_state WHERE trip_id=?", (tid,))
+
+
+--- arama: session.get ---
+### satır 1110
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+>>  1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+
+### satır 1124
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+>>  1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+
+### satır 1150
+    1147:     # =====================================================
+    1148:     try:
+    1149:         rule = find_feature_rule_for_path(request.path)
+>>  1150:         if rule and admin_profile_exists() and session.get("auth_ok"):
+    1151:             if not plan_allows(rule["required_plan"]):
+    1152:                 return redirect(url_for(
+    1153:                     "package_required_page",
+    1154:                     feature=rule["feature_name"],
+    1155:                     required=rule["required_plan"],
+
+### satır 1177
+    1174: 
+    1175:     if not any(request.path.startswith(x) for x in sub_free_paths):
+    1176:         try:
+>>  1177:             if admin_profile_exists() and session.get("auth_ok") and not subscription_allows_access():
+    1178:                 return redirect(url_for("subscription_required_page"))
+    1179:         except Exception:
+    1180:             pass
+    1181: 
+    1182:     if request.path.startswith("/kurulum"):
+
+### satır 1198
+    1195: 
+    1196:     p = request.path
+    1197:     if any(p.startswith(pref) for pref in PROTECTED_PREFIXES) and not is_excluded_path(p):
+>>  1198:         if not session.get("auth_ok"):
+    1199:             return redirect(url_for("login", next=p))
+    1200:         if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+    1201:             check_csrf()
+    1202: 
+    1203: 
+
+### satır 1342
+    1339: @app.route("/")
+    1340: def index():
+    1341:     routes = all_route_names()
+>>  1342:     current_route = session.get("route", routes[0] if routes else "Denizli – İstanbul")
+    1343:     return render_template("index.html", current_route=current_route, all_routes=routes)
+    1344: 
+    1345: 
+    1346: @app.route("/set-route", methods=["POST"])
+    1347: def set_route():
+
+### satır 1367
+    1364:     selected_route = (
+    1365:         request.args.get("route")
+    1366:         or request.form.get("route")
+>>  1367:         or session.get("route")
+    1368:         or (routes[0] if routes else "Denizli – İstanbul")
+    1369:     ).strip()
+    1370: 
+    1371:     if selected_route not in set(routes):
+    1372:         selected_route = routes[0] if routes else "Denizli – İstanbul"
+
+### satır 1743
+    1740:     # 4) Route sırasına göre ilk işlem olan durak
+    1741:     # 5) İlk durak
+    1742:     requested_stop = (request.args.get("stop") or "").strip()
+>>  1743:     session_stop = (session.get("continue_current_stop") or "").strip()
+    1744:     current_stop = ""
+    1745: 
+    1746:     matched_requested_stop = find_route_stop(requested_stop)
+    1747:     matched_runtime_stop = find_route_stop(runtime_live_stop)
+    1748:     matched_session_stop = find_route_stop(session_stop)
+
+### satır 4415
+    4412:         db.execute("UPDATE app_state SET active_trip_id=NULL WHERE id=1")
+    4413:         db.commit()
+    4414: 
+>>  4415:     last_report = session.get("last_finished_trip_report") or {}
+    4416: 
+    4417: 
+    4418:     base = last_report.get("base")
+    4419: 
+    4420: 
+
+
+--- arama: csrf_token ---
+### satır 1105
+    1102: 
+    1103: def issue_csrf() -> str:
+    1104:     token = secrets.token_urlsafe(32)
+>>  1105:     session["csrf_token"] = token
+    1106:     return token
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+
+### satır 1110
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+>>  1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+
+### satır 1117
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+>>  1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+
+### satır 1122
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+>>  1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+
+### satır 1124
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+>>  1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+
+### satır 1209
+    1206:     try:
+    1207:         return {
+    1208:             "active_trip": get_active_trip_row(),
+>>  1209:             "csrf_token": get_csrf(),
+    1210:         }
+    1211:     except Exception:
+    1212:         return {
+    1213:             "active_trip": None,
+    1214:             "csrf_token": get_csrf(),
+
+### satır 1214
+    1211:     except Exception:
+    1212:         return {
+    1213:             "active_trip": None,
+>>  1214:             "csrf_token": get_csrf(),
+    1215:         }
+    1216: 
+    1217: 
+    1218: # =========================================================
+    1219: # AI yardımcıları
+
+
+--- arama: admin ---
+### satır 60
+      57: # =========================================================
+      58: # Admin Profil / İlk Kurulum
+      59: # =========================================================
+>>    60: def ensure_admin_profile_table(db):
+      61:     db.execute("""
+      62:         CREATE TABLE IF NOT EXISTS admin_profile(
+      63:             id INTEGER PRIMARY KEY CHECK(id=1),
+      64:             full_name TEXT NOT NULL DEFAULT '',
+      65:             phone TEXT NOT NULL DEFAULT '',
+
+### satır 62
+      59: # =========================================================
+      60: def ensure_admin_profile_table(db):
+      61:     db.execute("""
+>>    62:         CREATE TABLE IF NOT EXISTS admin_profile(
+      63:             id INTEGER PRIMARY KEY CHECK(id=1),
+      64:             full_name TEXT NOT NULL DEFAULT '',
+      65:             phone TEXT NOT NULL DEFAULT '',
+      66:             photo_path TEXT NOT NULL DEFAULT '',
+      67:             created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+
+### satır 73
+      70:     """)
+      71: 
+      72: 
+>>    73: def get_admin_profile():
+      74:     db = get_db()
+      75:     ensure_admin_profile_table(db)
+      76:     row = db.execute("""
+      77:         SELECT id, full_name, phone, photo_path, created_at, updated_at
+      78:         FROM admin_profile
+
+### satır 75
+      72: 
+      73: def get_admin_profile():
+      74:     db = get_db()
+>>    75:     ensure_admin_profile_table(db)
+      76:     row = db.execute("""
+      77:         SELECT id, full_name, phone, photo_path, created_at, updated_at
+      78:         FROM admin_profile
+      79:         WHERE id=1
+      80:     """).fetchone()
+
+### satır 78
+      75:     ensure_admin_profile_table(db)
+      76:     row = db.execute("""
+      77:         SELECT id, full_name, phone, photo_path, created_at, updated_at
+>>    78:         FROM admin_profile
+      79:         WHERE id=1
+      80:     """).fetchone()
+      81: 
+      82:     if not row:
+      83:         return None
+
+### satır 95
+      92:     }
+      93: 
+      94: 
+>>    95: def admin_profile_exists():
+      96:     prof = get_admin_profile()
+      97:     return bool(prof and prof.get("full_name"))
+      98: 
+      99: 
+     100: def save_admin_profile(full_name, phone, photo_path=""):
+
+### satır 96
+      93: 
+      94: 
+      95: def admin_profile_exists():
+>>    96:     prof = get_admin_profile()
+      97:     return bool(prof and prof.get("full_name"))
+      98: 
+      99: 
+     100: def save_admin_profile(full_name, phone, photo_path=""):
+     101:     full_name = (full_name or "").strip()
+
+### satır 100
+      97:     return bool(prof and prof.get("full_name"))
+      98: 
+      99: 
+>>   100: def save_admin_profile(full_name, phone, photo_path=""):
+     101:     full_name = (full_name or "").strip()
+     102:     phone = (phone or "").strip()
+     103:     photo_path = (photo_path or "").strip()
+     104: 
+     105:     db = get_db()
+
+### satır 106
+     103:     photo_path = (photo_path or "").strip()
+     104: 
+     105:     db = get_db()
+>>   106:     ensure_admin_profile_table(db)
+     107: 
+     108:     old = get_admin_profile()
+     109:     if not photo_path and old:
+     110:         photo_path = old.get("photo_path", "")
+     111: 
+
+### satır 108
+     105:     db = get_db()
+     106:     ensure_admin_profile_table(db)
+     107: 
+>>   108:     old = get_admin_profile()
+     109:     if not photo_path and old:
+     110:         photo_path = old.get("photo_path", "")
+     111: 
+     112:     db.execute("""
+     113:         INSERT INTO admin_profile(id, full_name, phone, photo_path, created_at, updated_at)
+
+### satır 113
+     110:         photo_path = old.get("photo_path", "")
+     111: 
+     112:     db.execute("""
+>>   113:         INSERT INTO admin_profile(id, full_name, phone, photo_path, created_at, updated_at)
+     114:         VALUES(1, ?, ?, ?, datetime('now','localtime'), datetime('now','localtime'))
+     115:         ON CONFLICT(id) DO UPDATE SET
+     116:             full_name=excluded.full_name,
+     117:             phone=excluded.phone,
+     118:             photo_path=excluded.photo_path,
+
+### satır 139
+     136:     folder = Path(app.root_path) / "static" / "profile"
+     137:     folder.mkdir(parents=True, exist_ok=True)
+     138: 
+>>   139:     new_name = f"admin_profile_{secrets.token_hex(6)}.{ext}"
+     140:     target = folder / new_name
+     141:     file_storage.save(str(target))
+     142: 
+     143:     return f"/static/profile/{new_name}"
+     144: 
+
+### satır 147
+     144: 
+     145: 
+     146: @app.context_processor
+>>   147: def inject_admin_profile():
+     148:     try:
+     149:         return {"admin_profile": get_admin_profile()}
+     150:     except Exception:
+     151:         return {"admin_profile": None}
+     152: 
+
+### satır 149
+     146: @app.context_processor
+     147: def inject_admin_profile():
+     148:     try:
+>>   149:         return {"admin_profile": get_admin_profile()}
+     150:     except Exception:
+     151:         return {"admin_profile": None}
+     152: 
+     153: # =========================================================
+     154: # Admin Şifre Yönetimi
+
+### satır 151
+     148:     try:
+     149:         return {"admin_profile": get_admin_profile()}
+     150:     except Exception:
+>>   151:         return {"admin_profile": None}
+     152: 
+     153: # =========================================================
+     154: # Admin Şifre Yönetimi
+     155: # =========================================================
+     156: def ensure_security_table(db):
+
+### satır 158
+     155: # =========================================================
+     156: def ensure_security_table(db):
+     157:     db.execute("""
+>>   158:         CREATE TABLE IF NOT EXISTS admin_security(
+     159:             id INTEGER PRIMARY KEY CHECK(id=1),
+     160:             password_hash TEXT NOT NULL,
+     161:             updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+     162:         )
+     163:     """)
+
+### satır 166
+     163:     """)
+     164: 
+     165: 
+>>   166: def get_admin_password_hash(db):
+     167:     ensure_security_table(db)
+     168:     row = db.execute("SELECT password_hash FROM admin_security WHERE id=1").fetchone()
+     169:     return row["password_hash"] if row else ""
+     170: 
+     171: 
+
+### satır 168
+     165: 
+     166: def get_admin_password_hash(db):
+     167:     ensure_security_table(db)
+>>   168:     row = db.execute("SELECT password_hash FROM admin_security WHERE id=1").fetchone()
+     169:     return row["password_hash"] if row else ""
+     170: 
+     171: 
+     172: def verify_admin_password(password):
+     173:     password = (password or "").strip()
+
+### satır 172
+     169:     return row["password_hash"] if row else ""
+     170: 
+     171: 
+>>   172: def verify_admin_password(password):
+     173:     password = (password or "").strip()
+     174:     if not password:
+     175:         return False
+     176: 
+     177:     db = get_db()
+
+### satır 178
+     175:         return False
+     176: 
+     177:     db = get_db()
+>>   178:     saved_hash = get_admin_password_hash(db)
+     179: 
+     180:     # Veritabanında yeni şifre varsa onu kontrol et
+     181:     if saved_hash:
+     182:         try:
+     183:             return check_password_hash(saved_hash, password)
+
+### satır 191
+     188:     return password == ADMIN_PASSWORD
+     189: 
+     190: 
+>>   191: def set_admin_password(new_password):
+     192:     new_password = (new_password or "").strip()
+     193:     if len(new_password) < 4:
+     194:         return False, "Yeni şifre en az 4 karakter olmalı."
+     195: 
+     196:     db = get_db()
+
+### satır 202
+     199:     password_hash = generate_password_hash(new_password)
+     200: 
+     201:     db.execute("""
+>>   202:         INSERT INTO admin_security(id, password_hash, updated_at)
+     203:         VALUES(1, ?, datetime('now','localtime'))
+     204:         ON CONFLICT(id) DO UPDATE SET
+     205:             password_hash=excluded.password_hash,
+     206:             updated_at=datetime('now','localtime')
+     207:     """, (password_hash,))
+
+### satır 1150
+    1147:     # =====================================================
+    1148:     try:
+    1149:         rule = find_feature_rule_for_path(request.path)
+>>  1150:         if rule and admin_profile_exists() and session.get("auth_ok"):
+    1151:             if not plan_allows(rule["required_plan"]):
+    1152:                 return redirect(url_for(
+    1153:                     "package_required_page",
+    1154:                     feature=rule["feature_name"],
+    1155:                     required=rule["required_plan"],
+
+### satır 1177
+    1174: 
+    1175:     if not any(request.path.startswith(x) for x in sub_free_paths):
+    1176:         try:
+>>  1177:             if admin_profile_exists() and session.get("auth_ok") and not subscription_allows_access():
+    1178:                 return redirect(url_for("subscription_required_page"))
+    1179:         except Exception:
+    1180:             pass
+    1181: 
+    1182:     if request.path.startswith("/kurulum"):
+
+### satır 1293
+    1290: # =========================================================
+    1291: # Kullanıcı / Panel Sahibi Sıfırlama
+    1292: # =========================================================
+>>  1293: def reset_admin_owner():
+    1294:     db = get_db()
+    1295: 
+    1296:     try:
+    1297:         ensure_admin_profile_table(db)
+    1298:         ensure_security_table(db)
+
+### satır 1297
+    1294:     db = get_db()
+    1295: 
+    1296:     try:
+>>  1297:         ensure_admin_profile_table(db)
+    1298:         ensure_security_table(db)
+    1299: 
+    1300:         prof = get_admin_profile()
+    1301:         photo_path = (prof or {}).get("photo_path", "")
+    1302: 
+
+### satır 1300
+    1297:         ensure_admin_profile_table(db)
+    1298:         ensure_security_table(db)
+    1299: 
+>>  1300:         prof = get_admin_profile()
+    1301:         photo_path = (prof or {}).get("photo_path", "")
+    1302: 
+    1303:         # Profil fotoğrafını mümkünse sil
+    1304:         if photo_path and photo_path.startswith("/static/profile/"):
+    1305:             try:
+
+### satır 1312
+    1309:             except Exception:
+    1310:                 pass
+    1311: 
+>>  1312:         db.execute("DELETE FROM admin_profile WHERE id=1")
+    1313:         db.execute("DELETE FROM admin_security WHERE id=1")
+    1314: 
+    1315:         # Kurtarma kodunu da temizle
+    1316:         try:
+    1317:             db.execute("DELETE FROM settings WHERE key IN (?, ?)", (
+
+### satır 1313
+    1310:                 pass
+    1311: 
+    1312:         db.execute("DELETE FROM admin_profile WHERE id=1")
+>>  1313:         db.execute("DELETE FROM admin_security WHERE id=1")
+    1314: 
+    1315:         # Kurtarma kodunu da temizle
+    1316:         try:
+    1317:             db.execute("DELETE FROM settings WHERE key IN (?, ?)", (
+    1318:                 "recovery_code_hash",
+
+### satır 4479
+    4476: from modules.settings_panel import register_settings_routes
+    4477: 
+    4478: register_settings_routes(app, {
+>>  4479:     "admin_profile_exists": admin_profile_exists,
+    4480:     "verify_admin_password": verify_admin_password,
+    4481:     "issue_csrf": issue_csrf,
+    4482:     "get_csrf": get_csrf,
+    4483:     "reset_admin_owner": reset_admin_owner,
+    4484:     "verify_recovery_code": verify_recovery_code,
+
+### satır 4480
+    4477: 
+    4478: register_settings_routes(app, {
+    4479:     "admin_profile_exists": admin_profile_exists,
+>>  4480:     "verify_admin_password": verify_admin_password,
+    4481:     "issue_csrf": issue_csrf,
+    4482:     "get_csrf": get_csrf,
+    4483:     "reset_admin_owner": reset_admin_owner,
+    4484:     "verify_recovery_code": verify_recovery_code,
+    4485:     "get_recovery_code_hash": get_recovery_code_hash,
+
+### satır 4483
+    4480:     "verify_admin_password": verify_admin_password,
+    4481:     "issue_csrf": issue_csrf,
+    4482:     "get_csrf": get_csrf,
+>>  4483:     "reset_admin_owner": reset_admin_owner,
+    4484:     "verify_recovery_code": verify_recovery_code,
+    4485:     "get_recovery_code_hash": get_recovery_code_hash,
+    4486:     "make_recovery_code": make_recovery_code,
+    4487:     "set_recovery_code": set_recovery_code,
+    4488:     "settings_get": settings_get,
+
+### satır 4489
+    4486:     "make_recovery_code": make_recovery_code,
+    4487:     "set_recovery_code": set_recovery_code,
+    4488:     "settings_get": settings_get,
+>>  4489:     "set_admin_password": set_admin_password,
+    4490:     "get_admin_profile": get_admin_profile,
+    4491:     "save_admin_profile": save_admin_profile,
+    4492:     "save_profile_photo": save_profile_photo,
+    4493:     "start_trial_if_missing": start_trial_if_missing,
+    4494: })
+
+### satır 4490
+    4487:     "set_recovery_code": set_recovery_code,
+    4488:     "settings_get": settings_get,
+    4489:     "set_admin_password": set_admin_password,
+>>  4490:     "get_admin_profile": get_admin_profile,
+    4491:     "save_admin_profile": save_admin_profile,
+    4492:     "save_profile_photo": save_profile_photo,
+    4493:     "start_trial_if_missing": start_trial_if_missing,
+    4494: })
+    4495: 
+
+### satır 4491
+    4488:     "settings_get": settings_get,
+    4489:     "set_admin_password": set_admin_password,
+    4490:     "get_admin_profile": get_admin_profile,
+>>  4491:     "save_admin_profile": save_admin_profile,
+    4492:     "save_profile_photo": save_profile_photo,
+    4493:     "start_trial_if_missing": start_trial_if_missing,
+    4494: })
+    4495: 
+    4496: 
+
+
+--- arama: logged ---
+
+===== 2) TEST CLIENT SESSION HAZIRLIĞI =====
+✅ Test session hazırlandı
+
+===== 3) KRİTİK SAYFALAR GET TESTİ =====
+❌ /                            -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /seats                       -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /continue-trip               -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /emanetler                   -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /raporlar                    -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /sefer-raporu                -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /rapor-arsiv                 -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /hatlar                      -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /hat-ekle                    -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /hesap                       -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /olaylar                     -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /canli-harita                -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /ayarlar                     -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /ayarlar/abonelik            -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /ayarlar/profil              -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /ayarlar/sifre               -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /ayarlar/yedekleme           -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /rehber                      -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /yolcu-kontrol               -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /fiyat                       -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /fiyat-g                     -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /tanitim                     -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /kurulum                     -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+
+===== 4) KRİTİK GET API TESTİ =====
+❌ /api/stats                          -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /api/stops                          -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /api/seats/list                     -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /api/standing/list                  -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /api/events                         -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /api/report/seat-stats              -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /api/report/seat-detail             -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /api/report-archive                 -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /api/trip-report                    -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /api/live-runtime-state             -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /api/speedlimit?lat=38.35&lng=28.52 -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /api/route-stop                     -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+❌ /api/seats                          -> EXCEPTION TypeError: Response.get_data() got an unexpected keyword argument 'errors'
+
+===== 5) STATIC DOSYA HTTP TESTİ =====
+✅ /static/vendor/bootstrap/bootstrap.min.css                     -> 200 len=232803
+⚠️ /static/vendor/icons.css                                       -> 404 len=207
+⚠️ /static/css/style.css                                          -> 404 len=207
+⚠️ /static/vendor/jquery.min.js                                   -> 404 len=207
+✅ /static/vendor/bootstrap/bootstrap.bundle.min.js               -> 200 len=80721
+✅ /static/app.js                                                 -> 200 len=3100
+✅ /static/seats/seats.js                                         -> 200 len=86274
+✅ /static/seats/patches/unified-seat-deck-report-style.css       -> 200 len=12695
+⚠️ /static/img/rehber-koltuk-yonetimi-card.png                    -> 404 len=207
+⚠️ /static/img/rehber-durak-akisi.png                             -> 404 len=207
+⚠️ /static/img/rehber-voice-command.png                           -> 404 len=207
+
+===== 6) base.html EXTEND EDEN TEMPLATE LİSTESİ =====
+
+--- templates ---
+templates/add_route.html
+templates/ai_console.html
+templates/consignments.html
+templates/fare_admin.html
+templates/fare_query.html
+templates/home.html
+templates/passenger_control.html
+templates/rehber.html
+templates/reports.html
+templates/route_edit.html
+templates/route_schedule_edit.html
+templates/route_stops.html
+templates/routes_list.html
+templates/seats.html
+templates/start_trip.html
+templates/trip_new.html
+templates/trip_report.html
+
+--- android_app/app/src/main/python/templates ---
+android_app/app/src/main/python/templates/add_route.html
+android_app/app/src/main/python/templates/ai_console.html
+android_app/app/src/main/python/templates/consignments.html
+android_app/app/src/main/python/templates/fare_admin.html
+android_app/app/src/main/python/templates/fare_query.html
+android_app/app/src/main/python/templates/home.html
+android_app/app/src/main/python/templates/passenger_control.html
+android_app/app/src/main/python/templates/rehber.html
+android_app/app/src/main/python/templates/report_archive.html
+android_app/app/src/main/python/templates/reports.html
+android_app/app/src/main/python/templates/route_edit.html
+android_app/app/src/main/python/templates/route_schedule_edit.html
+android_app/app/src/main/python/templates/route_stops.html
+android_app/app/src/main/python/templates/routes_list.html
+android_app/app/src/main/python/templates/seats.html
+android_app/app/src/main/python/templates/start_trip.html
+android_app/app/src/main/python/templates/trip_new.html
+android_app/app/src/main/python/templates/trip_report.html
+
+===== 7) STEP-6 ÖZET =====
+500 veren sayfa sayısı: 0
+
+400 veren sayfa sayısı: 0
+
+===== STEP-6 BİTTİ =====

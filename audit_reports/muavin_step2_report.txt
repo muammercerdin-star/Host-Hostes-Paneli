@@ -1,0 +1,398 @@
+===== MUAVİN ASİSTANI STEP-2 DERİN DENETİM =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+
+===== 1) JAVASCRIPT SYNTAX KONTROLÜ =====
+JS dosya sayısı: 46
+✅ Harici JS dosyalarında syntax hatası görünmüyor
+
+===== 1B) HTML İÇİ SCRIPT BLOKLARI KABA KONTROL =====
+Kontrol edilen script bloğu: 93
+Jinja içerdiği için atlanan script bloğu: 58
+✅ Kontrol edilen HTML içi script bloklarında syntax hatası görünmüyor
+
+===== 2) CSS / STYLE PARANTEZ KONTROLÜ =====
+✅ CSS/style kaba parantez kontrolü temiz
+
+===== 3) FLASK ROUTE / URL_FOR / TEMPLATE REFERANS KONTROLÜ =====
+Route decorator sayısı: 149
+Route path sayısı: 39
+Route function sayısı: 38
+url_for endpoint sayısı: 491
+⚠️ url_for endpoint şüpheli / route fonksiyonu bulunamadı
+templates/add_route.html:294 -> url_for('add_route')
+templates/consignments.html:731 -> url_for('seats_page')
+templates/consignments.html:963 -> url_for('api_consignments')
+templates/events.html:49 -> url_for('hesap_devir')
+templates/events.html:65 -> url_for('hesap_giris')
+templates/events.html:86 -> url_for('hesap_cikis')
+templates/events.html:108 -> url_for('hesap_kategoriler_kaydet')
+templates/events.html:150 -> url_for('seats_page')
+templates/events.html:151 -> url_for('consignments_page')
+templates/events.html:152 -> url_for('hesap_page')
+templates/fare_admin.html:27 -> url_for('fare_query')
+templates/fare_admin.html:34 -> url_for('fare_admin')
+templates/fare_query.html:27 -> url_for('fare_admin')
+templates/fare_query.html:34 -> url_for('fare_query')
+templates/hesap.html:1975 -> url_for('hesap_giris')
+templates/hesap.html:2006 -> url_for('hesap_cikis')
+templates/hesap.html:2037 -> url_for('hesap_devir')
+templates/hesap.html:2064 -> url_for('hesap_kategoriler_kaydet')
+templates/hesap.html:2103 -> url_for('hesap_moves_csv')
+templates/hesap.html:2162 -> url_for('seats_page')
+templates/hesap.html:2163 -> url_for('consignments_page')
+templates/hesap.html:2164 -> url_for('hesap_page')
+templates/home.html:28 -> url_for('seats_page')
+templates/home.html:33 -> url_for('seats_page')
+templates/home.html:54 -> url_for('api_stops')
+templates/index.html:1123 -> url_for('seats_page')
+templates/index.html:1132 -> url_for('passenger_control')
+templates/index.html:1141 -> url_for('hesap_page')
+templates/index.html:1150 -> url_for('consignments_page')
+templates/index.html:1159 -> url_for('add_route')
+templates/index.html:1168 -> url_for('routes_list')
+templates/index.html:1201 -> url_for('logout')
+templates/passenger_control.html:698 -> url_for('seats_page')
+templates/route_edit.html:347 -> url_for('routes_list')
+templates/route_edit.html:361 -> url_for('route_edit')
+templates/route_edit.html:397 -> url_for('routes_list')
+templates/route_edit.html:715 -> url_for('api_route_coord_status')
+templates/route_edit.html:765 -> url_for('api_route_coord_save_manual')
+templates/routes_list.html:364 -> url_for('add_route')
+templates/routes_list.html:401 -> url_for('route_edit')
+templates/routes_list.html:403 -> url_for('route_schedule_edit')
+templates/routes_list.html:405 -> url_for('route_delete')
+templates/seats.html:358 -> url_for('hesap_page')
+templates/seats.html:359 -> url_for('consignments_page')
+templates/seats.html:493 -> url_for('hesap_page')
+templates/seats.html:494 -> url_for('consignments_page')
+templates/seats.html:1030 -> url_for('hesap_page')
+templates/seats.html:1035 -> url_for('consignments_page')
+templates/ai_console.html:1020 -> url_for('seats_page')
+templates/route_schedule_edit.html:1102 -> url_for('routes_list')
+templates/route_schedule_edit.html:1103 -> url_for('route_edit')
+templates/route_schedule_edit.html:1116 -> url_for('route_schedule_edit')
+templates/route_schedule_edit.html:1148 -> url_for('route_schedule_edit')
+templates/route_schedule_edit.html:1174 -> url_for('route_schedule_edit')
+templates/route_schedule_edit.html:1184 -> url_for('route_schedule_edit')
+templates/route_schedule_edit.html:1312 -> url_for('routes_list')
+templates/live_map.html:2088 -> url_for('seats_page')
+templates/continue_trip.html:99 -> url_for('seats_page')
+templates/continue_trip.html:263 -> url_for('seats_page')
+templates/continue_trip.html:268 -> url_for('passenger_control')
+backups/apk_sync_20260520_234501/seats.html:357 -> url_for('hesap_page')
+backups/apk_sync_20260520_234501/seats.html:358 -> url_for('consignments_page')
+backups/apk_sync_20260520_234501/seats.html:492 -> url_for('hesap_page')
+backups/apk_sync_20260520_234501/seats.html:493 -> url_for('consignments_page')
+backups/apk_sync_20260520_234501/seats.html:1029 -> url_for('hesap_page')
+backups/apk_sync_20260520_234501/seats.html:1034 -> url_for('consignments_page')
+android_app/app/src/main/python/templates/add_route.html:294 -> url_for('add_route')
+android_app/app/src/main/python/templates/consignments.html:731 -> url_for('seats_page')
+android_app/app/src/main/python/templates/consignments.html:963 -> url_for('api_consignments')
+android_app/app/src/main/python/templates/events.html:49 -> url_for('hesap_devir')
+android_app/app/src/main/python/templates/events.html:65 -> url_for('hesap_giris')
+android_app/app/src/main/python/templates/events.html:86 -> url_for('hesap_cikis')
+android_app/app/src/main/python/templates/events.html:108 -> url_for('hesap_kategoriler_kaydet')
+android_app/app/src/main/python/templates/events.html:150 -> url_for('seats_page')
+android_app/app/src/main/python/templates/events.html:151 -> url_for('consignments_page')
+android_app/app/src/main/python/templates/events.html:152 -> url_for('hesap_page')
+android_app/app/src/main/python/templates/fare_admin.html:27 -> url_for('fare_query')
+android_app/app/src/main/python/templates/fare_admin.html:34 -> url_for('fare_admin')
+android_app/app/src/main/python/templates/fare_query.html:27 -> url_for('fare_admin')
+android_app/app/src/main/python/templates/fare_query.html:34 -> url_for('fare_query')
+android_app/app/src/main/python/templates/hesap.html:1975 -> url_for('hesap_giris')
+android_app/app/src/main/python/templates/hesap.html:2006 -> url_for('hesap_cikis')
+android_app/app/src/main/python/templates/hesap.html:2037 -> url_for('hesap_devir')
+android_app/app/src/main/python/templates/hesap.html:2064 -> url_for('hesap_kategoriler_kaydet')
+android_app/app/src/main/python/templates/hesap.html:2103 -> url_for('hesap_moves_csv')
+android_app/app/src/main/python/templates/hesap.html:2162 -> url_for('seats_page')
+android_app/app/src/main/python/templates/hesap.html:2163 -> url_for('consignments_page')
+android_app/app/src/main/python/templates/hesap.html:2164 -> url_for('hesap_page')
+android_app/app/src/main/python/templates/home.html:28 -> url_for('seats_page')
+android_app/app/src/main/python/templates/home.html:33 -> url_for('seats_page')
+android_app/app/src/main/python/templates/home.html:54 -> url_for('api_stops')
+android_app/app/src/main/python/templates/index.html:1029 -> url_for('seats_page')
+android_app/app/src/main/python/templates/index.html:1038 -> url_for('passenger_control')
+android_app/app/src/main/python/templates/index.html:1047 -> url_for('hesap_page')
+android_app/app/src/main/python/templates/index.html:1056 -> url_for('consignments_page')
+android_app/app/src/main/python/templates/index.html:1065 -> url_for('add_route')
+android_app/app/src/main/python/templates/index.html:1074 -> url_for('routes_list')
+android_app/app/src/main/python/templates/index.html:1107 -> url_for('logout')
+android_app/app/src/main/python/templates/passenger_control.html:698 -> url_for('seats_page')
+android_app/app/src/main/python/templates/route_edit.html:347 -> url_for('routes_list')
+render_template referans sayısı: 130
+❌ render_template ile çağrılan ama bulunamayan template var
+tools/audit_files.py:51 -> x.html
+
+===== 4) FRONTEND FETCH/API YOLU KONTROLÜ =====
+fetch çağrısı sayısı: 59
+fetch path çeşidi: 23
+⚠️ fetch/API yolu şüpheli olabilir
+templates/consignments.html:974 -> /api/consignments/${id}/status  [app route listesinde birebir görünmedi]
+templates/consignments.html:987 -> /api/consignments/${id}  [app route listesinde birebir görünmedi]
+templates/consignments.html:1038 -> /api/consignments/${cid}/photos  [app route listesinde birebir görünmedi]
+templates/consignments.html:1077 -> /api/consignments/${currentConsId}/photos  [app route listesinde birebir görünmedi]
+templates/passenger_control.html:934 -> /api/seats/list  [app route listesinde birebir görünmedi]
+templates/reports.html:482 -> /api/report/seat-detail?  [app route listesinde birebir görünmedi]
+templates/route_stops.html:44 -> /api/stops  [app route listesinde birebir görünmedi]
+templates/route_stops.html:57 -> /api/route-stop  [app route listesinde birebir görünmedi]
+static/app.js:5 -> /api/seat  [app route listesinde birebir görünmedi]
+static/app.js:12 -> /api/seat/clear  [app route listesinde birebir görünmedi]
+static/app.js:19 -> /api/seats  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/static/app.js:5 -> /api/seat  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/static/app.js:12 -> /api/seat/clear  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/static/app.js:19 -> /api/seats  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/templates/consignments.html:974 -> /api/consignments/${id}/status  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/templates/consignments.html:987 -> /api/consignments/${id}  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/templates/consignments.html:1038 -> /api/consignments/${cid}/photos  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/templates/consignments.html:1077 -> /api/consignments/${currentConsId}/photos  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/templates/passenger_control.html:934 -> /api/seats/list  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/templates/reports.html:482 -> /api/report/seat-detail?  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/templates/route_stops.html:44 -> /api/stops  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/templates/route_stops.html:57 -> /api/route-stop  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/static/seats/seats.js:2586 -> /api/speedlimit?lat=${lat}&lng=${lng}  [app route listesinde birebir görünmedi]
+android_app/app/src/main/python/static/seats/seats-time-prayer.js:94 -> https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}  [absolute URL / APK içinde risk olabilir]
+android_app/app/src/main/python/static/seats/voice-commands.js:743 -> /api/seat  [app route listesinde birebir görünmedi]
+static/seats/seats.js:2586 -> /api/speedlimit?lat=${lat}&lng=${lng}  [app route listesinde birebir görünmedi]
+static/seats/seats-time-prayer.js:94 -> https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}  [absolute URL / APK içinde risk olabilir]
+static/seats/voice-commands.js:743 -> /api/seat  [app route listesinde birebir görünmedi]
+
+===== 5) CSRF FORM / FETCH KONTROLÜ =====
+⚠️ POST form içinde CSRF izi yok
+templates/trip_new.html:4 -> action=/sefer-baslat
+android_app/app/src/main/python/templates/trip_new.html:4 -> action=/sefer-baslat
+apk_payload/templates/trip_new.html:4 -> action=/sefer-baslat
+
+⚠️ fetch POST/PUT/PATCH/DELETE içinde CSRF izi yok gibi
+android_app/app/src/main/python/templates/settings_subscription.html:1557 -> url, {           method: "POST",           headers: {"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+apk_payload/templates/settings_subscription.html:1557 -> url, {           method: "POST",           headers: {"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+apk_payload/templates/continue_trip.html:3908 -> "/api/live-seat-destination", {         method: "POST",         headers,         body: JSON.stringify({           seat_n
+apk_payload/templates/continue_trip.html:4030 -> "/api/live-seat-offload", {         method: "POST",         headers,         body: JSON.stringify({           seat_no: s
+apk_payload/templates/continue_trip.html:4154 -> "/api/live-stop-offload", {         method: "POST",         headers,         body: JSON.stringify({           stop: data
+apk_payload/templates/continue_trip.html:4401 -> `/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {         method: "POST",         headers,         body: JSO
+apk_payload/templates/continue_trip.html:4872 -> "/api/live-stop-complete", {         method:"POST",         headers,         body:JSON.stringify({ stop })       }
+static/app.js:5 -> "/api/seat", {     method:"POST",     headers:{"Content-Type":"application/json"},     body: JSON.stringify({seat_no, ..
+static/app.js:12 -> "/api/seat/clear", {     method:"POST",     headers:{"Content-Type":"application/json"},     body: JSON.stringify({seat_
+android_app/app/src/main/python/static/app.js:5 -> "/api/seat", {     method:"POST",     headers:{"Content-Type":"application/json"},     body: JSON.stringify({seat_no, ..
+android_app/app/src/main/python/static/app.js:12 -> "/api/seat/clear", {     method:"POST",     headers:{"Content-Type":"application/json"},     body: JSON.stringify({seat_
+android_app/app/src/main/python/static/continue/continue_trip_core.js:271 -> "/api/live-seat-destination", {         method: "POST",         headers,         body: JSON.stringify({           seat_n
+android_app/app/src/main/python/static/continue/continue_trip_core.js:393 -> "/api/live-seat-offload", {         method: "POST",         headers,         body: JSON.stringify({           seat_no: s
+android_app/app/src/main/python/static/continue/continue_trip_core.js:517 -> "/api/live-stop-offload", {         method: "POST",         headers,         body: JSON.stringify({           stop: data
+android_app/app/src/main/python/static/continue/continue_trip_core.js:764 -> `/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {         method: "POST",         headers,         body: JSO
+android_app/app/src/main/python/static/continue/continue_trip_core.js:1293 -> "/api/live-stop-complete", {         method:"POST",         headers,         body:JSON.stringify({ stop })       }
+static/continue/continue_trip_core.js:271 -> "/api/live-seat-destination", {         method: "POST",         headers,         body: JSON.stringify({           seat_n
+static/continue/continue_trip_core.js:393 -> "/api/live-seat-offload", {         method: "POST",         headers,         body: JSON.stringify({           seat_no: s
+static/continue/continue_trip_core.js:517 -> "/api/live-stop-offload", {         method: "POST",         headers,         body: JSON.stringify({           stop: data
+static/continue/continue_trip_core.js:764 -> `/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {         method: "POST",         headers,         body: JSO
+static/continue/continue_trip_core.js:1293 -> "/api/live-stop-complete", {         method:"POST",         headers,         body:JSON.stringify({ stop })       }
+
+===== 6) DUPLICATE ID DETAYLI KONTROL =====
+⚠️ Duplicate id bulundu
+
+DOSYA: templates/index.html
+  id='tripGuardBackdrop' tekrar=2 satırlar=[1806, 1929]
+  id='tripGuardGo' tekrar=2 satırlar=[1817, 1940]
+  id='tripGuardModal' tekrar=2 satırlar=[1810, 1933]
+  id='tripGuardOk' tekrar=2 satırlar=[1818, 1941]
+
+===== 7) WEB / ANDROID FARK DETAYI =====
+⚠️ farklı: app.py
+   web:     138948 karakter, 4513 satır
+   android: 138895 karakter, 4508 satır
+   ilk fark yaklaşık: web satır 1411, android satır 1411
+✅ aynı: templates/base.html
+⚠️ farklı: templates/index.html
+   web:     47113 karakter, 2003 satır
+   android: 41503 karakter, 1779 satır
+   ilk fark yaklaşık: web satır 951, android satır 951
+⚠️ farklı: templates/seats.html
+   web:     33020 karakter, 1091 satır
+   android: 32907 karakter, 1090 satır
+   ilk fark yaklaşık: web satır 16, android satır 16
+✅ aynı: templates/continue_trip.html
+✅ aynı: templates/reports.html
+✅ aynı: static/seats/seats.js
+✅ aynı: static/seats/voice-commands.js
+✅ aynı: static/continue/continue_trip_core.js
+
+===== 8) HARDCODED URL / CDN / LOCALHOST RİSKLERİ =====
+⚠️ Hardcoded/offline risk izi bulundu
+speedlimit.py:7 [http-url] "https://overpass-api.de/api/interpreter",
+speedlimit.py:8 [http-url] "https://overpass.kumi.systems/api/interpreter",
+speedlimit.py:9 [http-url] "https://overpass.openstreetmap.ru/api/interpreter",
+tools/build_route_segments.py:16 [http-url] OSRM_BASE = "https://router.project-osrm.org/route/v1/driving"
+tools/audit_live_patches.py:44 [http-url] if v.startswith("http://") or v.startswith("https://") or v.startswith("//"):
+tools/audit_live_patches.py:44 [http-url] if v.startswith("http://") or v.startswith("https://") or v.startswith("//"):
+tools/muavin_audit_step2.py:496 [localhost] section("8) HARDCODED URL / CDN / LOCALHOST RİSKLERİ")
+tools/muavin_audit_step2.py:499 [localhost] ("localhost", re.compile(r"localhost|127\.0\.0\.1", re.I)),
+tools/muavin_audit_step2.py:499 [localhost] ("localhost", re.compile(r"localhost|127\.0\.0\.1", re.I)),
+tools/muavin_audit_step2.py:525 [localhost] print("✅ Hardcoded localhost/http/CDN izi görünmüyor")
+tools/muavin_audit_step2.py:501 [cdn] ("cdn", re.compile(r"unpkg\.com|cdn\.jsdelivr|cdnjs|googleapis|gstatic", re.I)),
+tools/muavin_audit_step2.py:501 [cdn] ("cdn", re.compile(r"unpkg\.com|cdn\.jsdelivr|cdnjs|googleapis|gstatic", re.I)),
+tools/muavin_audit_step2.py:501 [cdn] ("cdn", re.compile(r"unpkg\.com|cdn\.jsdelivr|cdnjs|googleapis|gstatic", re.I)),
+templates/hesap.html:2415 [http-url] window.location.href = "https://wa.me/?text=" + text;
+templates/index.html:951 [http-url] <link id="home-font-barlow-settings" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/index.html:951 [cdn] <link id="home-font-barlow-settings" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/settings.html:8 [http-url] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/settings.html:54 [http-url] background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3
+templates/settings.html:8 [cdn] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/trip_report.html:968 [http-url] window.location.href = `https://wa.me/?text=${text}`;
+templates/trip_report.html:1154 [http-url] @import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap");
+templates/trip_report.html:1154 [cdn] @import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap");
+templates/report_archive.html:8 [http-url] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/report_archive.html:47 [http-url] background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3
+templates/report_archive.html:8 [cdn] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/settings_password.html:8 [http-url] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/settings_password.html:47 [http-url] background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3
+templates/settings_password.html:8 [cdn] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/live_map.html:8 [http-url] <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+templates/live_map.html:1817 [http-url] <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+templates/live_map.html:1841 [http-url] L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+templates/live_map.html:1871 [http-url] <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg" aria-label="Canlı otobüs">
+templates/live_map.html:2090 [http-url] <a class="dark" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stop.lat + "," + stop.lng)}" target="_blank" rel="noopener">Yol</a>
+templates/live_map.html:8 [cdn] <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+templates/live_map.html:1817 [cdn] <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+templates/settings_recovery.html:8 [http-url] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/settings_recovery.html:47 [http-url] background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3
+templates/settings_recovery.html:8 [cdn] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/settings_profile.html:8 [http-url] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/settings_profile.html:46 [http-url] background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3
+templates/settings_profile.html:8 [cdn] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/settings_backup.html:8 [http-url] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/settings_backup.html:43 [http-url] background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3
+templates/settings_backup.html:8 [cdn] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/settings_subscription.html:8 [http-url] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+templates/settings_subscription.html:44 [http-url] background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3
+templates/settings_subscription.html:8 [cdn] <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+backups/apk_sync_20260520_234501/trip_report.html:968 [http-url] window.location.href = `https://wa.me/?text=${text}`;
+android_app/app/src/main/python/speedlimit.py:7 [http-url] "https://overpass-api.de/api/interpreter",
+android_app/app/src/main/python/speedlimit.py:8 [http-url] "https://overpass.kumi.systems/api/interpreter",
+android_app/app/src/main/python/speedlimit.py:9 [http-url] "https://overpass.openstreetmap.ru/api/interpreter",
+android_app/app/src/main/python/android_server.py:12 [localhost] HOST = "127.0.0.1"
+android_app/app/src/main/python/android_server.py:21 [http-url] url = f"http://{host}:{port}{PING_PATH}"
+android_app/app/src/main/python/templates/hesap.html:2415 [http-url] window.location.href = "https://wa.me/?text=" + text;
+android_app/app/src/main/python/templates/trip_report.html:968 [http-url] window.location.href = `https://wa.me/?text=${text}`;
+android_app/app/src/main/python/templates/live_map.html:8 [http-url] <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+android_app/app/src/main/python/templates/live_map.html:1817 [http-url] <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+android_app/app/src/main/python/templates/live_map.html:1841 [http-url] L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+android_app/app/src/main/python/templates/live_map.html:1871 [http-url] <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg" aria-label="Canlı otobüs">
+android_app/app/src/main/python/templates/live_map.html:2090 [http-url] <a class="dark" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stop.lat + "," + stop.lng)}" target="_blank" rel="noopener">Yol</a>
+android_app/app/src/main/python/templates/live_map.html:8 [cdn] <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+android_app/app/src/main/python/templates/live_map.html:1817 [cdn] <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+android_app/app/src/main/python/static/seats/seats-time-prayer.js:94 [http-url] const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+android_app/app/src/main/python/static/seats/seats-time-prayer.js:107 [http-url] const url = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=${METHOD}&school=${SCHOOL}&iso8601=true`;
+android_app/app/src/main/python/static/seats/seats-final.css:1020 [http-url] url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0
+android_app/app/src/main/python/static/seats/seats-final.css:1024 [http-url] url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0
+android_app/app/src/main/python/static/seats/seats-final.css:1216 [http-url] url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0
+android_app/app/src/main/python/static/seats/seats-final.css:1220 [http-url] url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0
+static/seats/seats-time-prayer.js:94 [http-url] const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+static/seats/seats-time-prayer.js:107 [http-url] const url = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=${METHOD}&school=${SCHOOL}&iso8601=true`;
+static/seats/seats-final.css:1020 [http-url] url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0
+static/seats/seats-final.css:1024 [http-url] url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0
+static/seats/seats-final.css:1216 [http-url] url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0
+static/seats/seats-final.css:1220 [http-url] url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0
+
+===== 9) BİLİNEN KRİTİK BUG İZLERİ =====
+⚠️ 'filled + standingCount' izi: 4
+   tools/muavin_audit_step1.py:208
+   tools/muavin_audit_step2.py:533
+   android_app/app/src/main/python/static/seats/seats.js:977
+   static/seats/seats.js:977
+⚠️ 'tripGuardGo' izi: 7
+   tools/muavin_audit_step2.py:534
+   templates/index.html:1817
+   templates/index.html:1833
+   templates/index.html:1940
+   templates/index.html:1956
+   android_app/app/src/main/python/templates/index.html:1723
+   android_app/app/src/main/python/templates/index.html:1739
+⚠️ 'tripGuardOk' izi: 7
+   tools/muavin_audit_step2.py:535
+   templates/index.html:1818
+   templates/index.html:1831
+   templates/index.html:1941
+   templates/index.html:1954
+   android_app/app/src/main/python/templates/index.html:1724
+   android_app/app/src/main/python/templates/index.html:1737
+⚠️ 'confirm(' izi: 19
+   tools/muavin_audit_step2.py:536
+   templates/consignments.html:985
+   templates/routes_list.html:406
+   templates/route_schedule_edit.html:1174
+   _unused_review/seats_aktif_harita.py:59
+   android_app/app/src/main/python/templates/consignments.html:985
+   android_app/app/src/main/python/templates/routes_list.html:406
+   android_app/app/src/main/python/templates/route_schedule_edit.html:1174
+   android_app/app/src/main/python/templates/settings_recovery.html:216
+   android_app/app/src/main/python/templates/settings_backup.html:305
+   android_app/app/src/main/python/templates/settings_backup.html:325
+   android_app/app/src/main/python/templates/settings_subscription.html:1203
+   android_app/app/src/main/python/templates/settings_subscription.html:1211
+   android_app/app/src/main/python/templates/seats_parts/topbar.html:34
+   android_app/app/src/main/python/static/seats/seats.js:1860
+   android_app/app/src/main/python/modules/bags/__init__.py:878
+   static/seats/seats.js:1860
+   modules/bags/__init__.py:878
+   templates/seats_parts/topbar.html:34
+⚠️ 'alert(' izi: 57
+   tools/muavin_audit_step2.py:537
+   templates/add_route.html:376
+   templates/consignments.html:970
+   templates/consignments.html:981
+   templates/consignments.html:993
+   templates/hesap.html:1910
+   templates/hesap.html:1913
+   templates/hesap.html:1920
+   templates/hesap.html:2386
+   templates/route_edit.html:699
+   templates/route_edit.html:704
+   templates/route_edit.html:760
+   templates/route_edit.html:782
+   templates/route_edit.html:790
+   templates/route_stops.html:46
+   templates/route_stops.html:55
+   templates/route_stops.html:69
+   templates/route_stops.html:70
+   templates/routes_list.html:444
+   templates/routes_list.html:447
+   templates/trip_report.html:503
+   templates/trip_report.html:506
+   templates/trip_report.html:513
+   templates/settings_backup.html:738
+   backups/apk_sync_20260520_234501/trip_report.html:503
+   backups/apk_sync_20260520_234501/trip_report.html:506
+   backups/apk_sync_20260520_234501/trip_report.html:513
+   android_app/app/src/main/python/templates/add_route.html:376
+   android_app/app/src/main/python/templates/consignments.html:970
+   android_app/app/src/main/python/templates/consignments.html:981
+   android_app/app/src/main/python/templates/consignments.html:993
+   android_app/app/src/main/python/templates/hesap.html:1910
+   android_app/app/src/main/python/templates/hesap.html:1913
+   android_app/app/src/main/python/templates/hesap.html:1920
+   android_app/app/src/main/python/templates/hesap.html:2386
+   android_app/app/src/main/python/templates/route_edit.html:699
+   android_app/app/src/main/python/templates/route_edit.html:704
+   android_app/app/src/main/python/templates/route_edit.html:760
+   android_app/app/src/main/python/templates/route_edit.html:782
+   android_app/app/src/main/python/templates/route_edit.html:790
+⚠️ 'debugger' izi: 3
+   tools/muavin_audit_step1.py:278
+   tools/muavin_audit_step1.py:300
+   tools/muavin_audit_step2.py:538
+⚠️ 'TODO' izi: 4
+   tools/muavin_audit_step1.py:273
+   tools/muavin_audit_step1.py:278
+   tools/muavin_audit_step1.py:300
+   tools/muavin_audit_step2.py:539
+⚠️ 'FIXME' izi: 4
+   tools/muavin_audit_step1.py:273
+   tools/muavin_audit_step1.py:278
+   tools/muavin_audit_step1.py:300
+   tools/muavin_audit_step2.py:540
+⚠️ 'HACK' izi: 4
+   tools/muavin_audit_step1.py:273
+   tools/muavin_audit_step1.py:278
+   tools/muavin_audit_step1.py:300
+   tools/muavin_audit_step2.py:541
+
+===== STEP-2 DERİN DENETİM BİTTİ =====

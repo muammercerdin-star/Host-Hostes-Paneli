@@ -1,0 +1,236 @@
+===== MUAVİN ASİSTANI STEP-9 WEB/ANDROID SENKRON PLANI =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+
+===== 1) ANA WEB / ANDROID DOSYA EŞLEŞMELERİ =====
+⚠️ FARKLI: app.py
+   web     sha=7d03ec46f6c0 satır=4513
+   android sha=cf451e1df53e satır=4508
+✅ AYNI: templates/base.html
+⚠️ FARKLI: templates/index.html
+   web     sha=e35932eeab6b satır=2003
+   android sha=25f6b94cbb7b satır=1779
+⚠️ FARKLI: templates/seats.html
+   web     sha=ed8d71df17a4 satır=1091
+   android sha=144cb05b9f9e satır=1090
+✅ AYNI: templates/continue_trip.html
+✅ AYNI: templates/consignments.html
+✅ AYNI: templates/reports.html
+✅ AYNI: templates/rehber.html
+✅ AYNI: static/app.js
+✅ AYNI: static/seats/seats.js
+✅ AYNI: static/seats/voice-commands.js
+✅ AYNI: static/continue/continue_trip_core.js
+
+===== 2) BİLİNEN YAMA İZLERİ WEB/ANDROID =====
+
+--- templates/index.html ---
+ACTIVE_ROUTE_LOCK_FINAL_START: 1
+route-sheet-no-flash-fix: 1
+home-font-barlow-settings: 1
+
+--- android_app/app/src/main/python/templates/index.html ---
+
+--- templates/seats.html ---
+unified-seat-deck-report-style.css: 1
+
+--- android_app/app/src/main/python/templates/seats.html ---
+
+--- static/seats/seats.js ---
+filled + standingCount: 1
+
+--- android_app/app/src/main/python/static/seats/seats.js ---
+filled + standingCount: 1
+
+--- templates/reports.html ---
+/api/report/seat-detail: 1
+
+--- android_app/app/src/main/python/templates/reports.html ---
+/api/report/seat-detail: 1
+
+--- templates/consignments.html ---
+/api/consignments/${id}/status: 1
+
+--- android_app/app/src/main/python/templates/consignments.html ---
+/api/consignments/${id}/status: 1
+
+--- templates/base.html ---
+vendor/jquery.min.js: 1
+
+--- android_app/app/src/main/python/templates/base.html ---
+vendor/jquery.min.js: 1
+
+===== 3) MINI DIFF ÖZETİ =====
+
+--- DIFF ÖZET: app.py ---
+--- app.py
++++ android_app/app/src/main/python/app.py
+@@ -1409,9 +1409,4 @@
+     )
+ 
+-
+-
+-# ===== CONTINUE_LIVE_FLOW_STATE_API_START =====
+-
+-
+ @app.route("/continue-trip")
+ def continue_trip():
+
+--- DIFF ÖZET: templates/index.html ---
+--- templates/index.html
++++ android_app/app/src/main/python/templates/index.html
+@@ -949,98 +949,4 @@
+ 
+ 
+-<link id="home-font-barlow-settings" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+-
+-<style id="home-font-match-settings">
+-  :root{
+-    --font-display:'Barlow Condensed',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+-    --font-body:'Barlow',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+-  }
+-
+-  html,
+-  body{
+-    font-family:var(--font-body) !important;
+-    -webkit-font-smoothing:antialiased;
+-    text-rendering:geometricPrecision;
+-  }
+-
+-  body,
+-  button,
+-  input,
+-  select,
+-  textarea,
+-  a{
+-    font-family:var(--font-body) !important;
+-  }
+-
+-  h1,
+-  h2,
+-  h3,
+-  h4,
+-  .hero-title,
+-  .brand-title,
+-  .app-title,
+-  .page-title,
+-  .section-title,
+-  .menu-title,
+-  .quick-title,
+-  .quick-card-title,
+-  .card-title,
+-  .tile-title,
+-  .status-title,
+-  .route-title,
+-  .action-title,
+-  .panel-title,
+-  .title,
+-  .big-title{
+-    font-family:var(--font-display) !important;
+-    font-weight:800;
+-    letter-spacing:.01em;
+-  }
+-
+-  .menu-item,
+-  .quick-card,
+-  .quick-item,
+-  .btn,
+-  .button,
+-  .primary-btn,
+-  .secondary-btn,
+-  .back-btn{
+-    font-family:var(--font-display) !important;
+-    font-weight:800;
+-    letter-spacing:.02em;
+-  }
+-
+-  p,
+-  .muted,
+-  .sub,
+-  .desc,
+-  .menu-desc,
+-  .quick-desc,
+-  .card-desc,
+-  .tile-desc,
+-  .status-desc,
+-  .small,
+-  .label,
+-  .meta,
+-  .hint{
+-    font-family:var(--font-body) !important;
+-  }
+-</style>
+-
+-
+-<style id="route-sheet-no-flash-fix">
+-  /* Route picker ilk render parlamasını engeller */
+-  #routeSheet[hidden],
+-  #routeSheetBackdrop[hidden]{
+-    display:none !important;
+-  }
+-
+-  #routeSheet:not(.show),
+-  #routeSheetBackdrop:not(.show){
+-    display:none !important;
+-  }
+-</style>
+-
+-
+ </head>
+ 
+@@ -1070,7 +976,7 @@
+     </div>
+ 
+-    <div class="route-sheet-backdrop" id="routeSheetBackdrop" hidden aria-hidden="true"></div>
+-
+-    <section class="route-sheet" id="routeSheet" hidden aria-hidden="true">
++    <div class="route-sheet-backdrop" id="routeSheetBackdrop"></div>
++
++    <section class="route-sheet" id="routeSheet" aria-hidden="true">
+       <div class="route-sheet-handle"></div>
+ 
+@@ -1869,134 +1775,4 @@
+ </script>
+ 
+-
+-
+-<!-- ACTIVE_ROUTE_LOCK_FINAL_START -->
+-<script id="active-route-lock-final">
+-(function(){
+... diff kesildi, toplam diff satırı: 247
+
+--- DIFF ÖZET: templates/seats.html ---
+--- templates/seats.html
++++ android_app/app/src/main/python/templates/seats.html
+@@ -14,5 +14,4 @@
+ <link rel="stylesheet" href="/static/seats/patches/top-sound-toggle.css?v=1">
+ <link rel="stylesheet" href="/static/seats/patches/seat-simple-ui-pack.css?v=1">
+-<link rel="stylesheet" href="/static/seats/patches/unified-seat-deck-report-style.css?v=seat-smaller-removed-2">
+ <link rel="stylesheet" href="/static/seats/patches/mobile-performance-fix.css?v=2">
+ <link rel="stylesheet" href="/static/seats/patches/fab-sheet-solid-fix.css?v=1">
+
+===== 4) SENKRON ADAYLARI - NOT =====
+
+Düzeltme yapmıyoruz. Sadece aday notu:
+
+A) Web -> Android kopyalanması muhtemel dosyalar:
+   - templates/index.html
+   - templates/seats.html
+
+B) İki tarafta beraber değişmesi gereken dosyalar:
+   - static/app.js
+   - android_app/app/src/main/python/static/app.js
+   - static/seats/seats.js
+   - android_app/app/src/main/python/static/seats/seats.js
+   - templates/base.html
+   - android_app/app/src/main/python/templates/base.html
+   - templates/reports.html
+   - android_app/app/src/main/python/templates/reports.html
+   - templates/consignments.html
+   - android_app/app/src/main/python/templates/consignments.html
+
+C) Dikkat:
+   app.py farklı ama fark küçük görünüyor. Kör kopyalama yapmadan önce route/fonksiyon farkı ayrıca okunmalı.
+
+
+===== STEP-9 BİTTİ =====

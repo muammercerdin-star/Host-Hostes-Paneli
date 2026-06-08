@@ -16,7 +16,6 @@
 <link rel="stylesheet" href="/static/seats/patches/mobile-performance-fix.css?v=2">
 <link rel="stylesheet" href="/static/seats/patches/fab-sheet-solid-fix.css?v=1">
 <link rel="stylesheet" href="/static/seats/patches/seat-label-ghost-clean.css?v=1">
-<link rel="stylesheet" href="/static/seats/patches/hide-quick-fab-v22.css?v=1">
 <div class="seats-shell">
   {% include "seats_parts/topbar.html" %}
   {# {% include "seats_parts/stats.html" %} #}
@@ -372,7 +371,7 @@
 <script src="/static/seats/drive-controls.js?v=drive-toggle-fix-1"></script>
 <script src="/static/seats/patches/stop-selected-toast.js?v=1"></script>
 <script src="/static/seats/patches/stop-flow-focus-patch.js?v=simple-scope-1"></script>
-<script src="/static/seats/patches/seat-layout-fab-pack.js?v=1"></script>
+<script src="/static/seats/patches/seat-layout-fab-pack.js?v=fab-overlap-v16b"></script>
 <script src="/static/seats/patches/modal-bottom-nav-autohide.js?v=1"></script>
 <script src="/static/seats/patches/manual-ticket-system.js?v=1"></script>
 <script src="/static/seats/patches/top-sound-toggle.js?v=1"></script>
@@ -906,139 +905,6 @@
 })();
 </script>
 <!-- DRIVE MODE FORCE TOGGLE END -->
-
-<!-- DRIVE_MODE_MANUAL_NORMAL_GUARD_V20_START -->
-<script id="drive-mode-manual-normal-guard-v20">
-(function(){
-  if(window.__DRIVE_MODE_MANUAL_NORMAL_GUARD_V20__) return;
-  window.__DRIVE_MODE_MANUAL_NORMAL_GUARD_V20__ = true;
-
-  const MANUAL_KEY = "driveModeManualNormalGuard:v20";
-  let lastUserSwitchOnAt = 0;
-  let lastUserSwitchOffAt = 0;
-
-  function btn(){
-    return document.getElementById("driveModeToggle");
-  }
-
-  function isDriveOn(){
-    const b = btn();
-    const txt = (b ? b.textContent : "").toLowerCase();
-    return document.body.classList.contains("drive-mode") ||
-           document.documentElement.classList.contains("drive-mode") ||
-           txt.includes("normal");
-  }
-
-  function driveKeys(){
-    const out = [];
-    try{
-      for(let i = 0; i < localStorage.length; i++){
-        const k = localStorage.key(i);
-        if(k && k.indexOf("driveMode:") === 0) out.push(k);
-      }
-    }catch(_){}
-    return out;
-  }
-
-  function setAllDriveStorage(v){
-    try{
-      driveKeys().forEach(k => localStorage.setItem(k, v));
-    }catch(_){}
-  }
-
-  function hasManualOff(){
-    try{
-      return localStorage.getItem(MANUAL_KEY) === "1";
-    }catch(_){
-      return false;
-    }
-  }
-
-  function markManualOff(){
-    try{
-      localStorage.setItem(MANUAL_KEY, "1");
-      setAllDriveStorage("0");
-    }catch(_){}
-  }
-
-  function clearManualOff(){
-    try{
-      localStorage.removeItem(MANUAL_KEY);
-    }catch(_){}
-  }
-
-  function forceNormal(){
-    document.body.classList.remove("drive-mode");
-    document.documentElement.classList.remove("drive-mode");
-
-    const b = btn();
-    if(b){
-      b.innerHTML = "🚘 Sürüş";
-      b.title = "Sürüş moduna geç";
-    }
-
-    setAllDriveStorage("0");
-
-    try{
-      window.dispatchEvent(new CustomEvent("driveModeChanged", {
-        detail:{ on:false, source:"manual-normal-guard-v20" }
-      }));
-    }catch(_){}
-  }
-
-  function rememberIntent(e){
-    const hit = e.target && e.target.closest && e.target.closest("#driveModeToggle");
-    if(!hit) return;
-
-    if(isDriveOn()){
-      lastUserSwitchOffAt = Date.now();
-
-      setTimeout(function(){
-        if(!isDriveOn()) markManualOff();
-      }, 80);
-
-      setTimeout(function(){
-        if(!isDriveOn()) markManualOff();
-      }, 350);
-    }else{
-      lastUserSwitchOnAt = Date.now();
-      clearManualOff();
-    }
-  }
-
-  document.addEventListener("pointerdown", rememberIntent, true);
-  document.addEventListener("touchstart", rememberIntent, true);
-  document.addEventListener("mousedown", rememberIntent, true);
-
-  function tick(){
-    const now = Date.now();
-    const on = isDriveOn();
-
-    if(!on){
-      if(hasManualOff() || now - lastUserSwitchOffAt < 20000){
-        markManualOff();
-      }
-      return;
-    }
-
-    if(hasManualOff()){
-      if(now - lastUserSwitchOnAt < 2500){
-        clearManualOff();
-        return;
-      }
-
-      forceNormal();
-    }
-  }
-
-  setInterval(tick, 700);
-  setTimeout(tick, 300);
-  setTimeout(tick, 1500);
-  setTimeout(tick, 5000);
-})();
-</script>
-<!-- DRIVE_MODE_MANUAL_NORMAL_GUARD_V20_END -->
-
 
 <!-- DRIVE VOICE MIRROR SCRIPT START -->
 <script id="drive-voice-mirror-script">

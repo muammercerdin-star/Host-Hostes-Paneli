@@ -1,0 +1,74 @@
+===== MUAVİN ASİSTANI STEP-6B RUNTIME SMOKE TEST FIXED =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+✅ Flask app import edildi
+✅ Test session hazırlandı: auth_ok=True
+
+===== 1) KRİTİK SAYFALAR GET TESTİ =====
+✅ /                            -> 200  <!doctype html> <html lang="tr"> <head>   <meta charset="utf-8">   <meta name="viewport" c
+✅ /seats                       -> 200  <!doctype html> <html lang="tr"> <head>   <meta name="viewport" content="width=device-widt
+✅ /continue-trip               -> 200  <!doctype html> <html lang="tr"> <head>   <meta charset="utf-8">   <meta name="viewport" c
+✅ /emanetler                   -> 200  <!doctype html> <html lang="tr"> <head>   <meta name="viewport" content="width=device-widt
+✅ /raporlar                    -> 200  <!doctype html> <html lang="tr"> <head>   <meta name="viewport" content="width=device-widt
+✅ /sefer-raporu                -> 200  <!doctype html> <html lang="tr"> <head>   <meta name="viewport" content="width=device-widt
+✅ /rapor-arsiv                 -> 200  <!doctype html> <html lang="tr"> <head> <meta charset="utf-8"> <meta name="viewport" conte
+✅ /hatlar                      -> 200   <!doctype html> <html lang="tr"> <head>   <meta name="viewport" content="width=device-wid
+✅ /hat-ekle                    -> 200  <!doctype html> <html lang="tr"> <head>   <meta name="viewport" content="width=device-widt
+✅ /hesap                       -> 200  <!doctype html> <html lang="tr"> <head>   <meta charset="utf-8">   <meta name="viewport" c
+✅ /olaylar                     -> 200  <!doctype html> <html lang="tr"> <head> <meta charset="utf-8"> <meta name="viewport" conte
+✅ /canli-harita                -> 200  <!doctype html> <html lang="tr"> <head>   <meta charset="utf-8">   <meta name="viewport" c
+✅ /ayarlar                     -> 200  <!DOCTYPE html> <html lang="tr"> <head> <meta charset="UTF-8"> <meta name="viewport" conte
+✅ /ayarlar/abonelik            -> 200  <!doctype html> <html lang="tr"> <head> <meta charset="utf-8"> <meta name="viewport" conte
+✅ /ayarlar/profil              -> 200  <!doctype html> <html lang="tr"> <head> <meta charset="utf-8"> <meta name="viewport" conte
+✅ /ayarlar/sifre               -> 200  <!doctype html> <html lang="tr"> <head> <meta charset="utf-8"> <meta name="viewport" conte
+✅ /ayarlar/yedekleme           -> 200  <!doctype html> <html lang="tr"> <head> <meta charset="utf-8"> <meta name="viewport" conte
+✅ /rehber                      -> 200  <!doctype html> <html lang="tr"> <head>   <meta name="viewport" content="width=device-widt
+✅ /yolcu-kontrol               -> 200  <!doctype html> <html lang="tr"> <head>   <meta name="viewport" content="width=device-widt
+✅ /fiyat                       -> 200  <!doctype html> <html lang="tr"> <head>   <meta name="viewport" content="width=device-widt
+✅ /fiyat-g                     -> 200  <!doctype html> <html lang="tr"> <head>   <meta name="viewport" content="width=device-widt
+✅ /tanitim                     -> 200  <!doctype html> <html lang="tr"> <head>   <meta charset="utf-8">   <meta name="viewport" c
+↪️ /kurulum                     -> 302 Location=/tanitim <!doctype html> <html lang=en> <title>Redirecting...</title> <h1>Redirecting...</h1> <p>Yo
+
+===== 2) KRİTİK GET API TESTİ =====
+✅ /api/stats                          -> 200  {"by_payment":{"nakit":0.0},"ok":true,"seats_reserved":1,"seats_revenue":0.0,"service_count":0,"total_revenue":0.0,"walkon_pax":0,"walkon_revenue":0.0
+✅ /api/stops                          -> 200  {"items":[{"lat":37.78553,"lng":29.091607,"name":"Denizli otogar","route":"Denizli \u2013 \u0130stanbul","stop":"Denizli otogar"},{"lat":37.925274,"ln
+✅ /api/seats/list                     -> 200  {"items":[{"amount":0.0,"from_stop":"Denizli otogar","gender":"bay","payment":"nakit","seat_no":4,"service":0,"service_note":"","stop":"Turgutlu Garaj
+✅ /api/standing/list                  -> 200  {"items":[],"ok":true} 
+✅ /api/events                         -> 200  {"items":[{"date":"2026-05-31","distance_km":null,"event":"board","id":23,"meta":{"action":"board_single","amount":0.0,"from_stop":"Denizli otogar","g
+✅ /api/report/seat-stats              -> 200  {"filters":{"date_from":null,"date_to":null,"route":null},"never_sold":[],"ok":true,"per_seat":[{"revenue":0.0,"seat_no":1,"times":31},{"revenue":0.0,
+⚠️ /api/report/seat-detail             -> 404  <!doctype html> <html lang=en> <title>404 Not Found</title> <h1>Not Found</h1> <p>The requested URL was not found on the server. If you entered the UR
+✅ /api/report-archive                 -> 200  {"items":[{"base":"sefer_307_2026-05-31_45_KH_999","csv":"/rapor-dosya/sefer_307_2026-05-31_45_KH_999/csv","date":"2026-05-31","json":"/api/trip-repor
+✅ /api/trip-report                    -> 200  {"ok":true,"stops":[{"board":[{"event":"board","id":23,"meta":{"action":"board_single","amount":0.0,"from_stop":"Denizli otogar","gender":"bay","passe
+✅ /api/live-runtime-state             -> 200  {"ok":true,"state":{"eta_main":"112 dk r\u00f6tar","eta_sub":"Denizli otogar \u00b7 plan 19:15 \u00b7 ETA 21:07 \u00b7 Saat kayd\u0131rma","gps_km":""
+✅ /api/speedlimit?lat=38.35&lng=28.52 -> 200  {"from_cache":false,"highway":"","limit":90,"ok":true,"source":"fallback","ttl":600} 
+⚠️ /api/route-stop                     -> 404  <!doctype html> <html lang=en> <title>404 Not Found</title> <h1>Not Found</h1> <p>The requested URL was not found on the server. If you entered the UR
+⚠️ /api/seats                          -> 404  <!doctype html> <html lang=en> <title>404 Not Found</title> <h1>Not Found</h1> <p>The requested URL was not found on the server. If you entered the UR
+
+===== 3) CSRF POST HIZLI KONTROL =====
+CSRF YOK  /set-route         -> 403
+CSRF VAR  /set-route         -> 200 {"ok":true,"route":"Denizli \u2013 \u0130stanbul"} 
+CSRF YOK  /api/seat          -> 403
+CSRF VAR  /api/seat          -> 400 {"msg":"Durak hat \u00fczerinde de\u011fil: Ala\u015fehir","ok":false} 
+
+===== 4) STATIC HTTP TESTİ =====
+✅ /static/vendor/bootstrap/bootstrap.min.css                     -> 200 len=232803
+⚠️ /static/vendor/icons.css                                       -> 404 len=207
+⚠️ /static/css/style.css                                          -> 404 len=207
+⚠️ /static/vendor/jquery.min.js                                   -> 404 len=207
+✅ /static/vendor/bootstrap/bootstrap.bundle.min.js               -> 200 len=80721
+✅ /static/app.js                                                 -> 200 len=3100
+✅ /static/seats/seats.js                                         -> 200 len=86274
+✅ /static/seats/patches/unified-seat-deck-report-style.css       -> 200 len=12695
+⚠️ /static/img/rehber-koltuk-yonetimi-card.png                    -> 404 len=207
+⚠️ /static/img/rehber-durak-akisi.png                             -> 404 len=207
+⚠️ /static/img/rehber-voice-command.png                           -> 404 len=207
+
+===== 5) ÖZET =====
+500 veren sayfa: 0
+
+400 veren sayfa: 0
+
+Redirect veren sayfa: 1
+↪️ /kurulum -> 302 Location=/tanitim
+
+===== STEP-6B BİTTİ =====

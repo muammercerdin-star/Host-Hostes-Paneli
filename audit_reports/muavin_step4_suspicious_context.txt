@@ -1,0 +1,4665 @@
+===== MUAVİN ASİSTANI STEP-4 ŞÜPHELİ NOKTA BAĞLAM DENETİMİ =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+
+===== 1) GERÇEK FLASK ROUTE HARİTASINDA ŞÜPHELİ KONULAR =====
+
+--- keyword: consignment ---
+GET,POST         /api/consignments                             -> api_consignments
+DELETE           /api/consignments/<int:cid>                   -> api_consignment_delete
+GET,POST         /api/consignments/<int:cid>/photos            -> api_consignment_photos
+POST             /api/live-consignment-deliver/<int:cid>       -> api_live_consignment_deliver
+GET              /api/live-consignment-detail/<int:cid>        -> api_live_consignment_detail
+GET              /emanetler                                    -> consignments_page
+
+--- keyword: report ---
+GET              /api/report-archive                           -> api_report_archive
+GET              /api/report/seat-stats                        -> api_report_seat_stats
+GET              /api/trip-report                              -> api_trip_report
+GET              /api/trip-report/archive/<base>               -> api_archived_trip_report
+GET              /rapor-arsiv                                  -> report_archive_page
+GET              /rapor-dosya/<base>/<kind>                    -> report_file_download
+GET              /raporlar                                     -> reports_page
+GET              /sefer-raporu                                 -> trip_report_page
+GET              /sefer-raporu-son                             -> latest_trip_report_redirect
+GET              /sefer-raporu/arsiv/<base>                    -> archived_trip_report_page
+
+--- keyword: route ---
+GET              /api/route-schedule                           -> api_route_schedule
+POST             /api/routes/<int:rid>/coord-save-manual       -> api_route_coord_save_manual
+POST             /api/routes/<int:rid>/coord-status            -> api_route_coord_status
+GET,POST         /hat-ekle                                     -> add_route
+GET,POST         /hat/<int:rid>/duzenle                        -> route_edit
+GET,POST         /hat/<int:rid>/saatler                        -> route_schedule_edit
+POST             /hat/<int:rid>/sil                            -> route_delete
+GET              /hat/builtin/duzenle                          -> builtin_route_edit
+GET              /hatlar                                       -> routes_list
+POST             /set-route                                    -> set_route
+
+--- keyword: seat ---
+GET              /api/live-seat-bag-detail                     -> api_live_seat_bag_detail
+POST             /api/live-seat-destination                    -> api_live_seat_destination
+POST             /api/live-seat-offload                        -> api_live_seat_offload
+GET              /api/report/seat-stats                        -> api_report_seat_stats
+DELETE,POST      /api/seat                                     -> api_seat
+DELETE,POST      /api/seats/bulk                               -> api_seats_bulk
+POST             /api/seats/gender                             -> api_seats_gender
+GET              /api/seats/list                               -> api_seats_list
+POST             /api/seats/offload                            -> api_seats_offload
+POST             /api/seats/service                            -> api_seats_service
+GET              /bags/raw/<trip>/<seat>/<path:filename>       -> bags.raw
+GET              /bags/thumb/<trip>/<seat>/<path:filename>     -> bags.thumb
+GET              /seats                                        -> seats_page
+
+--- keyword: stop ---
+POST             /api/live-stop-complete                       -> api_live_stop_complete
+GET              /api/live-stop-detail                         -> api_live_stop_detail
+POST             /api/live-stop-offload                        -> api_live_stop_offload
+GET,POST         /api/stoplog                                  -> api_stoplog
+GET              /api/stops                                    -> api_stops
+
+--- keyword: csrf ---
+eşleşme yok
+
+--- keyword: trip ---
+GET              /api/trip-report                              -> api_trip_report
+GET              /api/trip-report/archive/<base>               -> api_archived_trip_report
+GET              /bags/raw/<trip>/<seat>/<path:filename>       -> bags.raw
+GET              /bags/thumb/<trip>/<seat>/<path:filename>     -> bags.thumb
+GET              /continue-trip                                -> continue_trip
+GET,POST         /end-trip                                     -> end_trip
+GET,POST         /end_trip                                     -> end_trip
+GET,POST         /sefer-baslat                                 -> trip_start
+GET              /sefer-raporu                                 -> trip_report_page
+GET              /sefer-raporu-son                             -> latest_trip_report_redirect
+GET              /sefer-raporu/arsiv/<base>                    -> archived_trip_report_page
+
+===== 2) ŞÜPHELİ FETCH KOD BAĞLAMLARI =====
+
+--- templates/consignments.html içinde arama: /api/consignments/${id}/status ---
+
+### Eşleşme satır 974
+     964:     method:'POST',
+     965:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     966:     body:JSON.stringify(payload)
+     967:   });
+     968: 
+     969:   const j = await res.json();
+     970:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     971: }
+     972: 
+     973: async function setStatus(id, status){
+>>   974:   const res = await fetch(`/api/consignments/${id}/status`, {
+     975:     method:'POST',
+     976:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     977:     body:JSON.stringify({status})
+     978:   });
+     979: 
+     980:   const j = await res.json();
+     981:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     982: }
+     983: 
+     984: async function delCons(id){
+     985:   if(!confirm('Silinsin mi?')) return;
+     986: 
+     987:   const res = await fetch(`/api/consignments/${id}`, {
+     988:     method:'DELETE',
+     989:     headers:{'X-CSRF-Token':csrf}
+     990:   });
+
+--- templates/reports.html içinde arama: /api/report/seat-detail ---
+
+### Eşleşme satır 482
+     472: 
+     473:   // Modal
+     474:   function openModal(){ $('#mdBack').style.display='block'; $('#mdSeat').style.display='block'; }
+     475:   function closeModal(){ $('#mdBack').style.display='none'; $('#mdSeat').style.display='none'; }
+     476:   $('#mdBack').addEventListener('click', closeModal);
+     477: 
+     478:   async function openSeatDetail(seatNo){
+     479:     try{
+     480:       showBusy(true);
+     481:       const p = new URLSearchParams(filtersQS()); p.set('seat_no', seatNo);
+>>   482:       const r = await fetch('/api/report/seat-detail?'+p.toString(), {cache:'no-store'});
+     483:       if(!r.ok) throw new Error('Ağ hatası');
+     484:       const j = await r.json(); if(!j.ok) throw new Error('Detay alınamadı');
+     485: 
+     486:       $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
+     487:       $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     488: 
+     489:       const tb = $('#mdTable tbody'); tb.innerHTML='';
+     490:       (j.items||[]).forEach(it=>{
+     491:         const tr = document.createElement('tr');
+     492:         tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
+     493:         tb.appendChild(tr);
+     494:       });
+     495:       $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     496:       openModal();
+     497:     }catch(e){
+     498:       console.error(e); showToast('Detay alınamadı.');
+
+--- templates/route_stops.html içinde arama: /api/route-stop ---
+
+### Eşleşme satır 57
+      47:   const tbody = document.querySelector('#tbl tbody');
+      48:   tbody.innerHTML = '';
+      49:   (j.stops||[]).sort((a,b)=> (a.seq||0)-(b.seq||0)).forEach((s,idx)=>{
+      50:     const tr = el('tr');
+      51:     const lat = el('input', {type:'number', step:'0.000001', value: (s.lat ?? ''), placeholder:'36.8'});
+      52:     const lng = el('input', {type:'number', step:'0.000001', value: (s.lng ?? ''), placeholder:'30.7'});
+      53:     const btn = el('button', {className:'btn', innerText:'Kaydet'});
+      54:     btn.addEventListener('click', async ()=>{
+      55:       if(lat.value==='' || lng.value===''){ alert('Lat/Lng gir'); return; }
+      56:       try{
+>>    57:         const res = await fetch('/api/route-stop', {
+      58:           method:'POST',
+      59:           headers:{'Content-Type':'application/json','X-CSRF-Token': csrf},
+      60:           body: JSON.stringify({
+      61:             route: routeName,
+      62:             stop_name: s.name,
+      63:             lat: parseFloat(lat.value),
+      64:             lng: parseFloat(lng.value)
+      65:           })
+      66:         });
+      67:         const jj = await res.json();
+      68:         if(jj.ok){ btn.innerText='Kaydedildi'; setTimeout(()=>btn.innerText='Kaydet', 1000); }
+      69:         else { alert(jj.msg || 'Hata'); }
+      70:       }catch(e){ alert('Bağlantı hatası'); }
+      71:     });
+      72: 
+      73:     tr.append(
+
+--- static/app.js içinde arama: /api/seat/clear ---
+
+### Eşleşme satır 12
+       2: 
+       3: // --- API yardımcıları ---
+       4: async function apiSave(seat_no, payload){
+       5:   await fetch("/api/seat", {
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+>>    12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+      19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+
+--- static/app.js içinde arama: /api/seats ---
+
+### Eşleşme satır 19
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+>>    19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+      29:   if (!seatEl.classList.contains("seat")) return;
+      30: 
+      31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+      32:   const labelEl = seatEl.parentElement.querySelector(".label");
+      33: 
+      34:   // BOŞ → KAYDET
+      35:   if (!seatEl.classList.contains("occupied")) {
+
+--- static/seats/seats-time-prayer.js içinde arama: nominatim.openstreetmap.org ---
+
+### Eşleşme satır 94
+      84: 
+      85:   function humanLeft(ms){
+      86:     const sec = Math.max(0, Math.floor(ms / 1000));
+      87:     const h = Math.floor(sec / 3600);
+      88:     const m = Math.floor((sec % 3600) / 60);
+      89:     return (h ? `${h} saat ` : "") + `${m} dk`;
+      90:   }
+      91: 
+      92:   async function reverseGeocode(lat, lng){
+      93:     try{
+>>    94:       const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+      95:       const a = (await r.json()).address || {};
+      96:       const town = a.village || a.town || a.hamlet || a.suburb || "";
+      97:       const dist = a.county || a.district || "";
+      98:       const prov = a.province || a.state || "";
+      99:       const right = dist && dist !== town ? dist : prov;
+     100:       return [town || right, right && right !== town ? right : ""].filter(Boolean).join(", ");
+     101:     }catch(_){
+     102:       return "";
+     103:     }
+     104:   }
+     105: 
+     106:   async function fetchTimings(lat, lng){
+     107:     const url = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=${METHOD}&school=${SCHOOL}&iso8601=true`;
+     108:     const j = await (await fetch(url)).json();
+     109: 
+     110:     if(!j?.data?.timings){
+
+===== 3) ANDROID KOPYASINDA AYNI ŞÜPHELİ BAĞLAMLAR =====
+
+--- android_app/app/src/main/python/templates/consignments.html içinde arama: /api/consignments/${id}/status ---
+
+### Eşleşme satır 974
+     966:     body:JSON.stringify(payload)
+     967:   });
+     968: 
+     969:   const j = await res.json();
+     970:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     971: }
+     972: 
+     973: async function setStatus(id, status){
+>>   974:   const res = await fetch(`/api/consignments/${id}/status`, {
+     975:     method:'POST',
+     976:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     977:     body:JSON.stringify({status})
+     978:   });
+     979: 
+     980:   const j = await res.json();
+     981:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     982: }
+     983: 
+     984: async function delCons(id){
+     985:   if(!confirm('Silinsin mi?')) return;
+     986: 
+
+--- android_app/app/src/main/python/templates/reports.html içinde arama: /api/report/seat-detail ---
+
+### Eşleşme satır 482
+     474:   function openModal(){ $('#mdBack').style.display='block'; $('#mdSeat').style.display='block'; }
+     475:   function closeModal(){ $('#mdBack').style.display='none'; $('#mdSeat').style.display='none'; }
+     476:   $('#mdBack').addEventListener('click', closeModal);
+     477: 
+     478:   async function openSeatDetail(seatNo){
+     479:     try{
+     480:       showBusy(true);
+     481:       const p = new URLSearchParams(filtersQS()); p.set('seat_no', seatNo);
+>>   482:       const r = await fetch('/api/report/seat-detail?'+p.toString(), {cache:'no-store'});
+     483:       if(!r.ok) throw new Error('Ağ hatası');
+     484:       const j = await r.json(); if(!j.ok) throw new Error('Detay alınamadı');
+     485: 
+     486:       $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
+     487:       $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     488: 
+     489:       const tb = $('#mdTable tbody'); tb.innerHTML='';
+     490:       (j.items||[]).forEach(it=>{
+     491:         const tr = document.createElement('tr');
+     492:         tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
+     493:         tb.appendChild(tr);
+     494:       });
+
+--- android_app/app/src/main/python/templates/route_stops.html içinde arama: /api/route-stop ---
+
+### Eşleşme satır 57
+      49:   (j.stops||[]).sort((a,b)=> (a.seq||0)-(b.seq||0)).forEach((s,idx)=>{
+      50:     const tr = el('tr');
+      51:     const lat = el('input', {type:'number', step:'0.000001', value: (s.lat ?? ''), placeholder:'36.8'});
+      52:     const lng = el('input', {type:'number', step:'0.000001', value: (s.lng ?? ''), placeholder:'30.7'});
+      53:     const btn = el('button', {className:'btn', innerText:'Kaydet'});
+      54:     btn.addEventListener('click', async ()=>{
+      55:       if(lat.value==='' || lng.value===''){ alert('Lat/Lng gir'); return; }
+      56:       try{
+>>    57:         const res = await fetch('/api/route-stop', {
+      58:           method:'POST',
+      59:           headers:{'Content-Type':'application/json','X-CSRF-Token': csrf},
+      60:           body: JSON.stringify({
+      61:             route: routeName,
+      62:             stop_name: s.name,
+      63:             lat: parseFloat(lat.value),
+      64:             lng: parseFloat(lng.value)
+      65:           })
+      66:         });
+      67:         const jj = await res.json();
+      68:         if(jj.ok){ btn.innerText='Kaydedildi'; setTimeout(()=>btn.innerText='Kaydet', 1000); }
+      69:         else { alert(jj.msg || 'Hata'); }
+
+--- android_app/app/src/main/python/static/app.js içinde arama: /api/seat/clear ---
+
+### Eşleşme satır 12
+       4: async function apiSave(seat_no, payload){
+       5:   await fetch("/api/seat", {
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+>>    12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+      19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+
+--- android_app/app/src/main/python/static/app.js içinde arama: /api/seats ---
+
+### Eşleşme satır 19
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+>>    19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+      29:   if (!seatEl.classList.contains("seat")) return;
+      30: 
+      31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+
+--- android_app/app/src/main/python/static/seats/seats-time-prayer.js içinde arama: nominatim.openstreetmap.org ---
+
+### Eşleşme satır 94
+      86:     const sec = Math.max(0, Math.floor(ms / 1000));
+      87:     const h = Math.floor(sec / 3600);
+      88:     const m = Math.floor((sec % 3600) / 60);
+      89:     return (h ? `${h} saat ` : "") + `${m} dk`;
+      90:   }
+      91: 
+      92:   async function reverseGeocode(lat, lng){
+      93:     try{
+>>    94:       const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+      95:       const a = (await r.json()).address || {};
+      96:       const town = a.village || a.town || a.hamlet || a.suburb || "";
+      97:       const dist = a.county || a.district || "";
+      98:       const prov = a.province || a.state || "";
+      99:       const right = dist && dist !== town ? dist : prov;
+     100:       return [town || right, right && right !== town ? right : ""].filter(Boolean).join(", ");
+     101:     }catch(_){
+     102:       return "";
+     103:     }
+     104:   }
+     105: 
+     106:   async function fetchTimings(lat, lng){
+
+===== 4) static/app.js GLOBAL BAĞLANTI VE İÇERİK =====
+
+--- templates/base.html içinde arama: app.js ---
+
+### Eşleşme satır 22
+      14: 
+      15: <body>
+      16: 
+      17:   {% block content %}{% endblock %}
+      18: 
+      19:   <!-- ✅ Yerel JS (sırası önemli) -->
+      20:   <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
+      21:   <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+>>    22:   <script src="{{ url_for('static', filename='app.js') }}"></script>
+      23: 
+      24:   <!-- Sayfa bazlı ek script alanı -->
+      25:   {% block scripts %}{% endblock %}
+      26: 
+      27: </body>
+      28: </html>
+
+--- android_app/app/src/main/python/templates/base.html içinde arama: app.js ---
+
+### Eşleşme satır 22
+      14: 
+      15: <body>
+      16: 
+      17:   {% block content %}{% endblock %}
+      18: 
+      19:   <!-- ✅ Yerel JS (sırası önemli) -->
+      20:   <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
+      21:   <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+>>    22:   <script src="{{ url_for('static', filename='app.js') }}"></script>
+      23: 
+      24:   <!-- Sayfa bazlı ek script alanı -->
+      25:   {% block scripts %}{% endblock %}
+      26: 
+      27: </body>
+      28: </html>
+
+--- static/app.js:1-120 ---
+    1: // static/app.js  — koltuk kayıtları (DB ile)
+    2: 
+    3: // --- API yardımcıları ---
+    4: async function apiSave(seat_no, payload){
+    5:   await fetch("/api/seat", {
+    6:     method:"POST",
+    7:     headers:{"Content-Type":"application/json"},
+    8:     body: JSON.stringify({seat_no, ...payload})
+    9:   });
+   10: }
+   11: async function apiClear(seat_no){
+   12:   await fetch("/api/seat/clear", {
+   13:     method:"POST",
+   14:     headers:{"Content-Type":"application/json"},
+   15:     body: JSON.stringify({seat_no})
+   16:   });
+   17: }
+   18: async function apiLoad(){
+   19:   const r = await fetch("/api/seats");
+   20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+   21: }
+   22: 
+   23: // --- sayfa içi durum ---
+   24: window.seatStates = {}; // num -> {stop, pay, price}
+   25: 
+   26: // --- koltuk tıklama ---
+   27: async function onSeatClick(ev) {
+   28:   const seatEl  = ev.currentTarget;
+   29:   if (!seatEl.classList.contains("seat")) return;
+   30: 
+   31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+   32:   const labelEl = seatEl.parentElement.querySelector(".label");
+   33: 
+   34:   // BOŞ → KAYDET
+   35:   if (!seatEl.classList.contains("occupied")) {
+   36:     const stop = prompt("Nerede ineceksiniz? (durak adı)", "");
+   37:     if (!stop) return;
+   38: 
+   39:     const pay = prompt("Ödeme türü (Biletli/Nakit/IBAN/Online/Ücretsiz)", "Nakit") || "";
+   40:     let price = "";
+   41:     if (pay.toLowerCase() !== "biletli" && pay.toLowerCase() !== "ücretsiz") {
+   42:       price = prompt("Tutar (₺)", "") || "";
+   43:     }
+   44: 
+   45:     // ekrana yansıt
+   46:     seatEl.classList.add("occupied");
+   47:     labelEl.textContent = stop;
+   48:     window.seatStates[num] = { stop, pay, price };
+   49: 
+   50:     // DB'ye yaz
+   51:     await apiSave(num, { stop, pay, price });
+   52: 
+   53:   } else {
+   54:     // DOLU → İNDİR / DÜZENLE
+   55:     const act = prompt("Seçim: indir / düzenle / iptal", "indir");
+   56:     if (!act) return;
+   57: 
+   58:     if (act.toLowerCase() === "indir") {
+   59:       seatEl.classList.remove("occupied");
+   60:       labelEl.textContent = "";
+   61:       delete window.seatStates[num];
+   62:       await apiClear(num); // DB'den sil
+   63: 
+   64:     } else if (act.toLowerCase() === "düzenle") {
+   65:       const old  = window.seatStates[num] || {};
+   66:       const stop = prompt("İniş yeri", old.stop || "")   || old.stop || "";
+   67:       const pay  = prompt("Ödeme türü", old.pay || "Nakit") || old.pay || "";
+   68:       const price= prompt("Tutar (₺)", old.price || "")  || old.price || "";
+   69:       window.seatStates[num] = { stop, pay, price };
+   70:       labelEl.textContent = stop;
+   71:       await apiSave(num, { stop, pay, price }); // DB'de güncelle
+   72:     }
+   73:   }
+   74: }
+   75: 
+   76: // --- bağlama ve ilk yük ---
+   77: function bindSeats(){
+   78:   document.querySelectorAll(".seat[data-num]").forEach(el=>{
+   79:     el.style.cursor = "pointer";
+   80:     el.addEventListener("click", onSeatClick);
+   81:   });
+   82: }
+   83: 
+   84: document.addEventListener("DOMContentLoaded", async () => {
+   85:   bindSeats();
+   86:   // DB'deki mevcut koltukları ekrana bas
+   87:   const data = await apiLoad();
+   88:   for (const [num, v] of Object.entries(data)){
+   89:     const s   = document.querySelector(`.seat[data-num='${num}']`);
+   90:     const lbl = s?.parentElement.querySelector(".label");
+   91:     if (s && lbl){
+   92:       s.classList.add("occupied");
+   93:       lbl.textContent = v.stop || "";
+   94:       window.seatStates[num] = v;
+   95:     }
+   96:   }
+   97: });
+
+--- android_app/app/src/main/python/static/app.js:1-120 ---
+    1: // static/app.js  — koltuk kayıtları (DB ile)
+    2: 
+    3: // --- API yardımcıları ---
+    4: async function apiSave(seat_no, payload){
+    5:   await fetch("/api/seat", {
+    6:     method:"POST",
+    7:     headers:{"Content-Type":"application/json"},
+    8:     body: JSON.stringify({seat_no, ...payload})
+    9:   });
+   10: }
+   11: async function apiClear(seat_no){
+   12:   await fetch("/api/seat/clear", {
+   13:     method:"POST",
+   14:     headers:{"Content-Type":"application/json"},
+   15:     body: JSON.stringify({seat_no})
+   16:   });
+   17: }
+   18: async function apiLoad(){
+   19:   const r = await fetch("/api/seats");
+   20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+   21: }
+   22: 
+   23: // --- sayfa içi durum ---
+   24: window.seatStates = {}; // num -> {stop, pay, price}
+   25: 
+   26: // --- koltuk tıklama ---
+   27: async function onSeatClick(ev) {
+   28:   const seatEl  = ev.currentTarget;
+   29:   if (!seatEl.classList.contains("seat")) return;
+   30: 
+   31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+   32:   const labelEl = seatEl.parentElement.querySelector(".label");
+   33: 
+   34:   // BOŞ → KAYDET
+   35:   if (!seatEl.classList.contains("occupied")) {
+   36:     const stop = prompt("Nerede ineceksiniz? (durak adı)", "");
+   37:     if (!stop) return;
+   38: 
+   39:     const pay = prompt("Ödeme türü (Biletli/Nakit/IBAN/Online/Ücretsiz)", "Nakit") || "";
+   40:     let price = "";
+   41:     if (pay.toLowerCase() !== "biletli" && pay.toLowerCase() !== "ücretsiz") {
+   42:       price = prompt("Tutar (₺)", "") || "";
+   43:     }
+   44: 
+   45:     // ekrana yansıt
+   46:     seatEl.classList.add("occupied");
+   47:     labelEl.textContent = stop;
+   48:     window.seatStates[num] = { stop, pay, price };
+   49: 
+   50:     // DB'ye yaz
+   51:     await apiSave(num, { stop, pay, price });
+   52: 
+   53:   } else {
+   54:     // DOLU → İNDİR / DÜZENLE
+   55:     const act = prompt("Seçim: indir / düzenle / iptal", "indir");
+   56:     if (!act) return;
+   57: 
+   58:     if (act.toLowerCase() === "indir") {
+   59:       seatEl.classList.remove("occupied");
+   60:       labelEl.textContent = "";
+   61:       delete window.seatStates[num];
+   62:       await apiClear(num); // DB'den sil
+   63: 
+   64:     } else if (act.toLowerCase() === "düzenle") {
+   65:       const old  = window.seatStates[num] || {};
+   66:       const stop = prompt("İniş yeri", old.stop || "")   || old.stop || "";
+   67:       const pay  = prompt("Ödeme türü", old.pay || "Nakit") || old.pay || "";
+   68:       const price= prompt("Tutar (₺)", old.price || "")  || old.price || "";
+   69:       window.seatStates[num] = { stop, pay, price };
+   70:       labelEl.textContent = stop;
+   71:       await apiSave(num, { stop, pay, price }); // DB'de güncelle
+   72:     }
+   73:   }
+   74: }
+   75: 
+   76: // --- bağlama ve ilk yük ---
+   77: function bindSeats(){
+   78:   document.querySelectorAll(".seat[data-num]").forEach(el=>{
+   79:     el.style.cursor = "pointer";
+   80:     el.addEventListener("click", onSeatClick);
+   81:   });
+   82: }
+   83: 
+   84: document.addEventListener("DOMContentLoaded", async () => {
+   85:   bindSeats();
+   86:   // DB'deki mevcut koltukları ekrana bas
+   87:   const data = await apiLoad();
+   88:   for (const [num, v] of Object.entries(data)){
+   89:     const s   = document.querySelector(`.seat[data-num='${num}']`);
+   90:     const lbl = s?.parentElement.querySelector(".label");
+   91:     if (s && lbl){
+   92:       s.classList.add("occupied");
+   93:       lbl.textContent = v.stop || "";
+   94:       window.seatStates[num] = v;
+   95:     }
+   96:   }
+   97: });
+
+===== 5) CSRF TOKEN SUNUMU VE BEFORE_REQUEST KONTROLÜ =====
+
+--- templates/base.html içinde arama: csrf ---
+Bulunamadı
+
+--- templates/base.html içinde arama: csrf_token ---
+Bulunamadı
+
+--- templates/base.html içinde arama: X-CSRF ---
+Bulunamadı
+
+--- templates/seats.html içinde arama: csrf ---
+
+### Eşleşme satır 340
+     332:     </aside>
+     333:   </div>
+     334: </div>
+     335: 
+     336: {% include "seats_parts/modals.html" %}
+     337: 
+     338: <script>
+     339:   window.SEATS_BOOT = {
+>>   340:     csrf: {{ csrf_token | tojson | safe }},
+     341:     routeName: {{ trip['route'] | tojson | safe }},
+     342:     tripId: {{ trip['id'] | tojson | safe }},
+     343:     tripDate: {{ trip['date'] | tojson | safe }},
+     344:     departureTime: {{ trip['departure_time'] | tojson | safe }},
+     345:     tripKey: {{ ('trip:' ~ trip['id']) | tojson | safe }},
+     346:     bagTrip: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
+     347: 
+     348:     seatPositions: {{ seat_positions | tojson | safe }},
+     349:     assigned: {{ assigned | tojson | safe }},
+     350:     stopsMap: {{ stops_map | tojson | safe }},
+     351:     boardsMapServer: {{ boards_map | tojson | safe }},
+     352:     genders: {{ genders | tojson | safe }},
+
+--- templates/seats.html içinde arama: csrf_token ---
+
+### Eşleşme satır 340
+     332:     </aside>
+     333:   </div>
+     334: </div>
+     335: 
+     336: {% include "seats_parts/modals.html" %}
+     337: 
+     338: <script>
+     339:   window.SEATS_BOOT = {
+>>   340:     csrf: {{ csrf_token | tojson | safe }},
+     341:     routeName: {{ trip['route'] | tojson | safe }},
+     342:     tripId: {{ trip['id'] | tojson | safe }},
+     343:     tripDate: {{ trip['date'] | tojson | safe }},
+     344:     departureTime: {{ trip['departure_time'] | tojson | safe }},
+     345:     tripKey: {{ ('trip:' ~ trip['id']) | tojson | safe }},
+     346:     bagTrip: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
+     347: 
+     348:     seatPositions: {{ seat_positions | tojson | safe }},
+     349:     assigned: {{ assigned | tojson | safe }},
+     350:     stopsMap: {{ stops_map | tojson | safe }},
+     351:     boardsMapServer: {{ boards_map | tojson | safe }},
+     352:     genders: {{ genders | tojson | safe }},
+
+--- templates/seats.html içinde arama: X-CSRF ---
+Bulunamadı
+
+--- templates/continue_trip.html içinde arama: csrf ---
+
+### Eşleşme satır 286
+     278:       <button class="dock-item" type="button">
+     279:         <i>📣</i>
+     280:         <span>Anons</span>
+     281:       </button>
+     282:     </nav>
+     283: 
+     284:     <section class="danger-zone">
+     285:       <form id="endTripForm" method="post" action="{{ url_for('end_trip') }}">
+>>   286:         {% if csrf_token is defined %}
+     287:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     288:         {% endif %}
+     289:         <button class="danger-btn" type="submit">⛔ Seferi Bitir</button>
+     290:       </form>
+     291:     </section>
+     292: 
+     293:     <a class="bottom-home" href="/">← Ana ekrana dön</a>
+     294:   </main>
+     295: 
+     296:   <div class="end-trip-overlay" id="endTripOverlay" aria-hidden="true">
+     297:     <div class="end-trip-box" role="dialog" aria-modal="true" aria-labelledby="endTripTitle">
+     298:       <div class="end-trip-top">
+
+### Eşleşme satır 287
+     279:         <i>📣</i>
+     280:         <span>Anons</span>
+     281:       </button>
+     282:     </nav>
+     283: 
+     284:     <section class="danger-zone">
+     285:       <form id="endTripForm" method="post" action="{{ url_for('end_trip') }}">
+     286:         {% if csrf_token is defined %}
+>>   287:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     288:         {% endif %}
+     289:         <button class="danger-btn" type="submit">⛔ Seferi Bitir</button>
+     290:       </form>
+     291:     </section>
+     292: 
+     293:     <a class="bottom-home" href="/">← Ana ekrana dön</a>
+     294:   </main>
+     295: 
+     296:   <div class="end-trip-overlay" id="endTripOverlay" aria-hidden="true">
+     297:     <div class="end-trip-box" role="dialog" aria-modal="true" aria-labelledby="endTripTitle">
+     298:       <div class="end-trip-top">
+     299:         <div class="end-trip-mark">⛔</div>
+
+### Eşleşme satır 494
+     486:     tripKey: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
+     487: 
+     488:     runtimeGpsKm: {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }},
+     489:     runtimeSpeed: {{ (live_runtime.speed if live_runtime else 0) | tojson | safe }},
+     490:     runtimeStop: {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }},
+     491:     runtimeEta: {{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else "") | tojson | safe }},
+     492: 
+     493:     routeStops: {{ stops | tojson | safe }},
+>>   494:     csrfToken: {{ (csrf_token if csrf_token is defined else "") | tojson | safe }},
+     495: 
+     496:     routeCoords: {{ continue_route_coords | default([]) | tojson | safe }},
+     497:     scheduleItems: {{ continue_schedule_items | default([]) | tojson | safe }},
+     498: 
+     499:     liveBagajCount: {{ (live_current.bagaj_count if live_current and live_current.bagaj_count is defined else 0) | tojson | safe }},
+     500:     liveEmanetCount: {{ (live_current.emanet_count if live_current and live_current.emanet_count is defined else (live_current.consignment_count if live_current and live_current.consignment_count is defined else 0)) | tojson | safe }}
+     501:   };
+     502:   </script>
+     503:   <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=core-split-1"></script>
+     504:   <script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
+     505:   <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
+     506:   <script src="{{ url_for('static', filename='continue/continue_live_diagnostics.js') }}?v=live-diag-1"></script>
+
+--- templates/continue_trip.html içinde arama: csrf_token ---
+
+### Eşleşme satır 286
+     278:       <button class="dock-item" type="button">
+     279:         <i>📣</i>
+     280:         <span>Anons</span>
+     281:       </button>
+     282:     </nav>
+     283: 
+     284:     <section class="danger-zone">
+     285:       <form id="endTripForm" method="post" action="{{ url_for('end_trip') }}">
+>>   286:         {% if csrf_token is defined %}
+     287:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     288:         {% endif %}
+     289:         <button class="danger-btn" type="submit">⛔ Seferi Bitir</button>
+     290:       </form>
+     291:     </section>
+     292: 
+     293:     <a class="bottom-home" href="/">← Ana ekrana dön</a>
+     294:   </main>
+     295: 
+     296:   <div class="end-trip-overlay" id="endTripOverlay" aria-hidden="true">
+     297:     <div class="end-trip-box" role="dialog" aria-modal="true" aria-labelledby="endTripTitle">
+     298:       <div class="end-trip-top">
+
+### Eşleşme satır 287
+     279:         <i>📣</i>
+     280:         <span>Anons</span>
+     281:       </button>
+     282:     </nav>
+     283: 
+     284:     <section class="danger-zone">
+     285:       <form id="endTripForm" method="post" action="{{ url_for('end_trip') }}">
+     286:         {% if csrf_token is defined %}
+>>   287:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     288:         {% endif %}
+     289:         <button class="danger-btn" type="submit">⛔ Seferi Bitir</button>
+     290:       </form>
+     291:     </section>
+     292: 
+     293:     <a class="bottom-home" href="/">← Ana ekrana dön</a>
+     294:   </main>
+     295: 
+     296:   <div class="end-trip-overlay" id="endTripOverlay" aria-hidden="true">
+     297:     <div class="end-trip-box" role="dialog" aria-modal="true" aria-labelledby="endTripTitle">
+     298:       <div class="end-trip-top">
+     299:         <div class="end-trip-mark">⛔</div>
+
+### Eşleşme satır 494
+     486:     tripKey: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
+     487: 
+     488:     runtimeGpsKm: {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }},
+     489:     runtimeSpeed: {{ (live_runtime.speed if live_runtime else 0) | tojson | safe }},
+     490:     runtimeStop: {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }},
+     491:     runtimeEta: {{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else "") | tojson | safe }},
+     492: 
+     493:     routeStops: {{ stops | tojson | safe }},
+>>   494:     csrfToken: {{ (csrf_token if csrf_token is defined else "") | tojson | safe }},
+     495: 
+     496:     routeCoords: {{ continue_route_coords | default([]) | tojson | safe }},
+     497:     scheduleItems: {{ continue_schedule_items | default([]) | tojson | safe }},
+     498: 
+     499:     liveBagajCount: {{ (live_current.bagaj_count if live_current and live_current.bagaj_count is defined else 0) | tojson | safe }},
+     500:     liveEmanetCount: {{ (live_current.emanet_count if live_current and live_current.emanet_count is defined else (live_current.consignment_count if live_current and live_current.consignment_count is defined else 0)) | tojson | safe }}
+     501:   };
+     502:   </script>
+     503:   <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=core-split-1"></script>
+     504:   <script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
+     505:   <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
+     506:   <script src="{{ url_for('static', filename='continue/continue_live_diagnostics.js') }}?v=live-diag-1"></script>
+
+--- templates/continue_trip.html içinde arama: X-CSRF ---
+Bulunamadı
+
+--- templates/trip_new.html içinde arama: csrf ---
+Bulunamadı
+
+--- templates/trip_new.html içinde arama: csrf_token ---
+Bulunamadı
+
+--- templates/trip_new.html içinde arama: X-CSRF ---
+Bulunamadı
+
+--- android_app/app/src/main/python/templates/base.html içinde arama: csrf ---
+Bulunamadı
+
+--- android_app/app/src/main/python/templates/base.html içinde arama: csrf_token ---
+Bulunamadı
+
+--- android_app/app/src/main/python/templates/base.html içinde arama: X-CSRF ---
+Bulunamadı
+
+--- android_app/app/src/main/python/templates/trip_new.html içinde arama: csrf ---
+Bulunamadı
+
+--- android_app/app/src/main/python/templates/trip_new.html içinde arama: csrf_token ---
+Bulunamadı
+
+--- android_app/app/src/main/python/templates/trip_new.html içinde arama: X-CSRF ---
+Bulunamadı
+
+--- app.py içinde arama: PROTECTED_PREFIXES ---
+
+### Eşleşme satır 1128
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+>>  1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+    1136: @app.before_request
+    1137: def bootstrap_and_guard():
+    1138:     if request.path == "/kullanici-sifirla" or request.path == "/tanitim":
+    1139:         return None
+    1140: 
+    1141:     if request.path == "/tanitim" or request.path.startswith("/static/"):
+    1142:         return None
+    1143: 
+    1144:     # =====================================================
+    1145:     # Paket özellik kilidi
+    1146:     # Örn: Standart kullanıcı Pro özelliğe girerse paket ekranına yönlenir.
+    1147:     # =====================================================
+    1148:     try:
+
+### Eşleşme satır 1197
+    1189:         return None
+    1190: 
+    1191:     if not app.config.get("_schema_ready"):
+    1192:         ensure_schema()
+    1193:         ensure_upload_dir()
+    1194:         app.config["_schema_ready"] = True
+    1195: 
+    1196:     p = request.path
+>>  1197:     if any(p.startswith(pref) for pref in PROTECTED_PREFIXES) and not is_excluded_path(p):
+    1198:         if not session.get("auth_ok"):
+    1199:             return redirect(url_for("login", next=p))
+    1200:         if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+    1201:             check_csrf()
+    1202: 
+    1203: 
+    1204: @app.context_processor
+    1205: def inject_globals():
+    1206:     try:
+    1207:         return {
+    1208:             "active_trip": get_active_trip_row(),
+    1209:             "csrf_token": get_csrf(),
+    1210:         }
+    1211:     except Exception:
+    1212:         return {
+    1213:             "active_trip": None,
+    1214:             "csrf_token": get_csrf(),
+    1215:         }
+    1216: 
+    1217: 
+
+--- app.py içinde arama: EXCLUDE_PREFIXES ---
+
+### Eşleşme satır 1129
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+>>  1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+    1136: @app.before_request
+    1137: def bootstrap_and_guard():
+    1138:     if request.path == "/kullanici-sifirla" or request.path == "/tanitim":
+    1139:         return None
+    1140: 
+    1141:     if request.path == "/tanitim" or request.path.startswith("/static/"):
+    1142:         return None
+    1143: 
+    1144:     # =====================================================
+    1145:     # Paket özellik kilidi
+    1146:     # Örn: Standart kullanıcı Pro özelliğe girerse paket ekranına yönlenir.
+    1147:     # =====================================================
+    1148:     try:
+    1149:         rule = find_feature_rule_for_path(request.path)
+
+### Eşleşme satır 1133
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+>>  1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+    1136: @app.before_request
+    1137: def bootstrap_and_guard():
+    1138:     if request.path == "/kullanici-sifirla" or request.path == "/tanitim":
+    1139:         return None
+    1140: 
+    1141:     if request.path == "/tanitim" or request.path.startswith("/static/"):
+    1142:         return None
+    1143: 
+    1144:     # =====================================================
+    1145:     # Paket özellik kilidi
+    1146:     # Örn: Standart kullanıcı Pro özelliğe girerse paket ekranına yönlenir.
+    1147:     # =====================================================
+    1148:     try:
+    1149:         rule = find_feature_rule_for_path(request.path)
+    1150:         if rule and admin_profile_exists() and session.get("auth_ok"):
+    1151:             if not plan_allows(rule["required_plan"]):
+    1152:                 return redirect(url_for(
+    1153:                     "package_required_page",
+
+--- app.py içinde arama: csrf ---
+
+### Eşleşme satır 1103
+    1093:         if gender != nb_gender and not (pair_ok or nb_pair_ok):
+    1094:             return False, f"Yan koltuk {nb} '{nb_gender}' kayıtlı. İstisna olmadan farklı cins yan yana olmaz."
+    1095: 
+    1096:     return True, ""
+    1097: 
+    1098: 
+    1099: # =========================================================
+    1100: # CSRF / Auth
+    1101: # =========================================================
+    1102: 
+>>  1103: def issue_csrf() -> str:
+    1104:     token = secrets.token_urlsafe(32)
+    1105:     session["csrf_token"] = token
+    1106:     return token
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+
+### Eşleşme satır 1105
+    1095: 
+    1096:     return True, ""
+    1097: 
+    1098: 
+    1099: # =========================================================
+    1100: # CSRF / Auth
+    1101: # =========================================================
+    1102: 
+    1103: def issue_csrf() -> str:
+    1104:     token = secrets.token_urlsafe(32)
+>>  1105:     session["csrf_token"] = token
+    1106:     return token
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+
+### Eşleşme satır 1109
+    1099: # =========================================================
+    1100: # CSRF / Auth
+    1101: # =========================================================
+    1102: 
+    1103: def issue_csrf() -> str:
+    1104:     token = secrets.token_urlsafe(32)
+    1105:     session["csrf_token"] = token
+    1106:     return token
+    1107: 
+    1108: 
+>>  1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+
+### Eşleşme satır 1110
+    1100: # CSRF / Auth
+    1101: # =========================================================
+    1102: 
+    1103: def issue_csrf() -> str:
+    1104:     token = secrets.token_urlsafe(32)
+    1105:     session["csrf_token"] = token
+    1106:     return token
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+>>  1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+
+### Eşleşme satır 1112
+    1102: 
+    1103: def issue_csrf() -> str:
+    1104:     token = secrets.token_urlsafe(32)
+    1105:     session["csrf_token"] = token
+    1106:     return token
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+>>  1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+
+### Eşleşme satır 1116
+    1106:     return token
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+>>  1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+
+### Eşleşme satır 1117
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+>>  1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+
+### Eşleşme satır 1122
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+>>  1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+    1136: @app.before_request
+    1137: def bootstrap_and_guard():
+    1138:     if request.path == "/kullanici-sifirla" or request.path == "/tanitim":
+    1139:         return None
+    1140: 
+
+### Eşleşme satır 1124
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+>>  1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+    1136: @app.before_request
+    1137: def bootstrap_and_guard():
+    1138:     if request.path == "/kullanici-sifirla" or request.path == "/tanitim":
+    1139:         return None
+    1140: 
+    1141:     if request.path == "/tanitim" or request.path.startswith("/static/"):
+    1142:         return None
+
+### Eşleşme satır 1201
+    1191:     if not app.config.get("_schema_ready"):
+    1192:         ensure_schema()
+    1193:         ensure_upload_dir()
+    1194:         app.config["_schema_ready"] = True
+    1195: 
+    1196:     p = request.path
+    1197:     if any(p.startswith(pref) for pref in PROTECTED_PREFIXES) and not is_excluded_path(p):
+    1198:         if not session.get("auth_ok"):
+    1199:             return redirect(url_for("login", next=p))
+    1200:         if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+>>  1201:             check_csrf()
+    1202: 
+    1203: 
+    1204: @app.context_processor
+    1205: def inject_globals():
+    1206:     try:
+    1207:         return {
+    1208:             "active_trip": get_active_trip_row(),
+    1209:             "csrf_token": get_csrf(),
+    1210:         }
+    1211:     except Exception:
+    1212:         return {
+    1213:             "active_trip": None,
+    1214:             "csrf_token": get_csrf(),
+    1215:         }
+    1216: 
+    1217: 
+    1218: # =========================================================
+    1219: # AI yardımcıları
+
+### Eşleşme satır 1209
+    1199:             return redirect(url_for("login", next=p))
+    1200:         if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+    1201:             check_csrf()
+    1202: 
+    1203: 
+    1204: @app.context_processor
+    1205: def inject_globals():
+    1206:     try:
+    1207:         return {
+    1208:             "active_trip": get_active_trip_row(),
+>>  1209:             "csrf_token": get_csrf(),
+    1210:         }
+    1211:     except Exception:
+    1212:         return {
+    1213:             "active_trip": None,
+    1214:             "csrf_token": get_csrf(),
+    1215:         }
+    1216: 
+    1217: 
+    1218: # =========================================================
+    1219: # AI yardımcıları
+    1220: # =========================================================
+    1221: 
+    1222: def normalize_ai_text(text: str) -> str:
+    1223:     text = (text or "").strip().lower()
+    1224:     text = text.replace("’", "").replace("'", "").replace("`", "")
+    1225:     text = re.sub(r"[^0-9a-zçğıöşü\s-]", " ", text, flags=re.IGNORECASE)
+    1226:     text = re.sub(r"\s+", " ", text).strip()
+    1227:     return text
+
+### Eşleşme satır 1214
+    1204: @app.context_processor
+    1205: def inject_globals():
+    1206:     try:
+    1207:         return {
+    1208:             "active_trip": get_active_trip_row(),
+    1209:             "csrf_token": get_csrf(),
+    1210:         }
+    1211:     except Exception:
+    1212:         return {
+    1213:             "active_trip": None,
+>>  1214:             "csrf_token": get_csrf(),
+    1215:         }
+    1216: 
+    1217: 
+    1218: # =========================================================
+    1219: # AI yardımcıları
+    1220: # =========================================================
+    1221: 
+    1222: def normalize_ai_text(text: str) -> str:
+    1223:     text = (text or "").strip().lower()
+    1224:     text = text.replace("’", "").replace("'", "").replace("`", "")
+    1225:     text = re.sub(r"[^0-9a-zçğıöşü\s-]", " ", text, flags=re.IGNORECASE)
+    1226:     text = re.sub(r"\s+", " ", text).strip()
+    1227:     return text
+    1228: 
+    1229: 
+    1230: def ai_extract_seat_list(text: str):
+    1231:     text = text or ""
+    1232:     text = re.sub(r"(\d+)\s*-\s*(\d+)", r"\1 \2", text)
+
+### Eşleşme satır 3283
+    3273:     "get_db": get_db,
+    3274:     "get_active_trip_row": get_active_trip_row,
+    3275:     "get_stops": get_stops,
+    3276:     "all_route_names": all_route_names,
+    3277:     "parse_stops": parse_stops,
+    3278:     "ROUTE_STOPS": ROUTE_STOPS,
+    3279:     "norm_bool": norm_bool,
+    3280:     "parse_int": parse_int,
+    3281:     "parse_float": parse_float,
+    3282:     "normalize_hhmm": normalize_hhmm,
+>>  3283:     "get_csrf": get_csrf,
+    3284:     "schedule_profiles_for_route": schedule_profiles_for_route,
+    3285:     "schedule_profile_get": schedule_profile_get,
+    3286:     "schedule_editor_rows": schedule_editor_rows,
+    3287:     "schedule_default_profile_for_route": schedule_default_profile_for_route,
+    3288: })
+    3289: 
+    3290: 
+    3291: # =========================================================
+    3292: # Hesap / kasa
+    3293: # =========================================================
+    3294: from modules.cash_panel import register_cash_routes
+    3295: 
+    3296: register_cash_routes(app, {
+    3297:     "get_active_trip": get_active_trip,
+    3298:     "get_db": get_db,
+    3299:     "get_cash_categories": get_cash_categories,
+    3300:     "save_cash_categories": save_cash_categories,
+    3301:     "parse_int": parse_int,
+
+### Eşleşme satır 3302
+    3292: # Hesap / kasa
+    3293: # =========================================================
+    3294: from modules.cash_panel import register_cash_routes
+    3295: 
+    3296: register_cash_routes(app, {
+    3297:     "get_active_trip": get_active_trip,
+    3298:     "get_db": get_db,
+    3299:     "get_cash_categories": get_cash_categories,
+    3300:     "save_cash_categories": save_cash_categories,
+    3301:     "parse_int": parse_int,
+>>  3302:     "get_csrf": get_csrf,
+    3303: })
+    3304: 
+    3305: 
+    3306: # =========================================================
+    3307: # AI Console v2
+    3308: # =========================================================
+    3309: from modules.ai_panel import register_ai_routes
+    3310: 
+    3311: _ai_exports = register_ai_routes(app, {
+    3312:     "get_db": get_db,
+    3313:     "get_active_trip_row": get_active_trip_row,
+    3314:     "get_stops": get_stops,
+    3315:     "parse_int": parse_int,
+    3316:     "parse_float": parse_float,
+    3317:     "norm_payment": norm_payment,
+    3318:     "norm_ticket_type": norm_ticket_type,
+    3319:     "norm_gender": norm_gender,
+    3320:     "validate_seat_no": validate_seat_no,
+
+### Eşleşme satır 4481
+    4471: 
+    4472: 
+    4473: # =========================================================
+    4474: # Auth / Kurulum / Profil / Güvenlik Ayarları
+    4475: # =========================================================
+    4476: from modules.settings_panel import register_settings_routes
+    4477: 
+    4478: register_settings_routes(app, {
+    4479:     "admin_profile_exists": admin_profile_exists,
+    4480:     "verify_admin_password": verify_admin_password,
+>>  4481:     "issue_csrf": issue_csrf,
+    4482:     "get_csrf": get_csrf,
+    4483:     "reset_admin_owner": reset_admin_owner,
+    4484:     "verify_recovery_code": verify_recovery_code,
+    4485:     "get_recovery_code_hash": get_recovery_code_hash,
+    4486:     "make_recovery_code": make_recovery_code,
+    4487:     "set_recovery_code": set_recovery_code,
+    4488:     "settings_get": settings_get,
+    4489:     "set_admin_password": set_admin_password,
+    4490:     "get_admin_profile": get_admin_profile,
+    4491:     "save_admin_profile": save_admin_profile,
+    4492:     "save_profile_photo": save_profile_photo,
+    4493:     "start_trial_if_missing": start_trial_if_missing,
+    4494: })
+    4495: 
+    4496: 
+    4497: # Local coords manager modules/coords_panel.py içine taşındı.
+    4498: 
+    4499: 
+
+### Eşleşme satır 4482
+    4472: 
+    4473: # =========================================================
+    4474: # Auth / Kurulum / Profil / Güvenlik Ayarları
+    4475: # =========================================================
+    4476: from modules.settings_panel import register_settings_routes
+    4477: 
+    4478: register_settings_routes(app, {
+    4479:     "admin_profile_exists": admin_profile_exists,
+    4480:     "verify_admin_password": verify_admin_password,
+    4481:     "issue_csrf": issue_csrf,
+>>  4482:     "get_csrf": get_csrf,
+    4483:     "reset_admin_owner": reset_admin_owner,
+    4484:     "verify_recovery_code": verify_recovery_code,
+    4485:     "get_recovery_code_hash": get_recovery_code_hash,
+    4486:     "make_recovery_code": make_recovery_code,
+    4487:     "set_recovery_code": set_recovery_code,
+    4488:     "settings_get": settings_get,
+    4489:     "set_admin_password": set_admin_password,
+    4490:     "get_admin_profile": get_admin_profile,
+    4491:     "save_admin_profile": save_admin_profile,
+    4492:     "save_profile_photo": save_profile_photo,
+    4493:     "start_trial_if_missing": start_trial_if_missing,
+    4494: })
+    4495: 
+    4496: 
+    4497: # Local coords manager modules/coords_panel.py içine taşındı.
+    4498: 
+    4499: 
+    4500: 
+
+--- app.py içinde arama: X-CSRF ---
+
+### Eşleşme satır 1118
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+>>  1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+    1136: @app.before_request
+
+--- android_app/app/src/main/python/app.py içinde arama: PROTECTED_PREFIXES ---
+
+### Eşleşme satır 1128
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+>>  1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+    1136: @app.before_request
+    1137: def bootstrap_and_guard():
+    1138:     if request.path == "/kullanici-sifirla" or request.path == "/tanitim":
+    1139:         return None
+    1140: 
+    1141:     if request.path == "/tanitim" or request.path.startswith("/static/"):
+    1142:         return None
+    1143: 
+    1144:     # =====================================================
+    1145:     # Paket özellik kilidi
+    1146:     # Örn: Standart kullanıcı Pro özelliğe girerse paket ekranına yönlenir.
+    1147:     # =====================================================
+    1148:     try:
+
+### Eşleşme satır 1197
+    1189:         return None
+    1190: 
+    1191:     if not app.config.get("_schema_ready"):
+    1192:         ensure_schema()
+    1193:         ensure_upload_dir()
+    1194:         app.config["_schema_ready"] = True
+    1195: 
+    1196:     p = request.path
+>>  1197:     if any(p.startswith(pref) for pref in PROTECTED_PREFIXES) and not is_excluded_path(p):
+    1198:         if not session.get("auth_ok"):
+    1199:             return redirect(url_for("login", next=p))
+    1200:         if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+    1201:             check_csrf()
+    1202: 
+    1203: 
+    1204: @app.context_processor
+    1205: def inject_globals():
+    1206:     try:
+    1207:         return {
+    1208:             "active_trip": get_active_trip_row(),
+    1209:             "csrf_token": get_csrf(),
+    1210:         }
+    1211:     except Exception:
+    1212:         return {
+    1213:             "active_trip": None,
+    1214:             "csrf_token": get_csrf(),
+    1215:         }
+    1216: 
+    1217: 
+
+--- android_app/app/src/main/python/app.py içinde arama: EXCLUDE_PREFIXES ---
+
+### Eşleşme satır 1129
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+>>  1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+    1136: @app.before_request
+    1137: def bootstrap_and_guard():
+    1138:     if request.path == "/kullanici-sifirla" or request.path == "/tanitim":
+    1139:         return None
+    1140: 
+    1141:     if request.path == "/tanitim" or request.path.startswith("/static/"):
+    1142:         return None
+    1143: 
+    1144:     # =====================================================
+    1145:     # Paket özellik kilidi
+    1146:     # Örn: Standart kullanıcı Pro özelliğe girerse paket ekranına yönlenir.
+    1147:     # =====================================================
+    1148:     try:
+    1149:         rule = find_feature_rule_for_path(request.path)
+
+### Eşleşme satır 1133
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+>>  1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+    1136: @app.before_request
+    1137: def bootstrap_and_guard():
+    1138:     if request.path == "/kullanici-sifirla" or request.path == "/tanitim":
+    1139:         return None
+    1140: 
+    1141:     if request.path == "/tanitim" or request.path.startswith("/static/"):
+    1142:         return None
+    1143: 
+    1144:     # =====================================================
+    1145:     # Paket özellik kilidi
+    1146:     # Örn: Standart kullanıcı Pro özelliğe girerse paket ekranına yönlenir.
+    1147:     # =====================================================
+    1148:     try:
+    1149:         rule = find_feature_rule_for_path(request.path)
+    1150:         if rule and admin_profile_exists() and session.get("auth_ok"):
+    1151:             if not plan_allows(rule["required_plan"]):
+    1152:                 return redirect(url_for(
+    1153:                     "package_required_page",
+
+--- android_app/app/src/main/python/app.py içinde arama: csrf ---
+
+### Eşleşme satır 1103
+    1093:         if gender != nb_gender and not (pair_ok or nb_pair_ok):
+    1094:             return False, f"Yan koltuk {nb} '{nb_gender}' kayıtlı. İstisna olmadan farklı cins yan yana olmaz."
+    1095: 
+    1096:     return True, ""
+    1097: 
+    1098: 
+    1099: # =========================================================
+    1100: # CSRF / Auth
+    1101: # =========================================================
+    1102: 
+>>  1103: def issue_csrf() -> str:
+    1104:     token = secrets.token_urlsafe(32)
+    1105:     session["csrf_token"] = token
+    1106:     return token
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+
+### Eşleşme satır 1105
+    1095: 
+    1096:     return True, ""
+    1097: 
+    1098: 
+    1099: # =========================================================
+    1100: # CSRF / Auth
+    1101: # =========================================================
+    1102: 
+    1103: def issue_csrf() -> str:
+    1104:     token = secrets.token_urlsafe(32)
+>>  1105:     session["csrf_token"] = token
+    1106:     return token
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+
+### Eşleşme satır 1109
+    1099: # =========================================================
+    1100: # CSRF / Auth
+    1101: # =========================================================
+    1102: 
+    1103: def issue_csrf() -> str:
+    1104:     token = secrets.token_urlsafe(32)
+    1105:     session["csrf_token"] = token
+    1106:     return token
+    1107: 
+    1108: 
+>>  1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+
+### Eşleşme satır 1110
+    1100: # CSRF / Auth
+    1101: # =========================================================
+    1102: 
+    1103: def issue_csrf() -> str:
+    1104:     token = secrets.token_urlsafe(32)
+    1105:     session["csrf_token"] = token
+    1106:     return token
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+>>  1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+
+### Eşleşme satır 1112
+    1102: 
+    1103: def issue_csrf() -> str:
+    1104:     token = secrets.token_urlsafe(32)
+    1105:     session["csrf_token"] = token
+    1106:     return token
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+>>  1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+
+### Eşleşme satır 1116
+    1106:     return token
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+>>  1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+
+### Eşleşme satır 1117
+    1107: 
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+>>  1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+
+### Eşleşme satır 1122
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+>>  1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+    1136: @app.before_request
+    1137: def bootstrap_and_guard():
+    1138:     if request.path == "/kullanici-sifirla" or request.path == "/tanitim":
+    1139:         return None
+    1140: 
+
+### Eşleşme satır 1124
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+    1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+>>  1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+    1136: @app.before_request
+    1137: def bootstrap_and_guard():
+    1138:     if request.path == "/kullanici-sifirla" or request.path == "/tanitim":
+    1139:         return None
+    1140: 
+    1141:     if request.path == "/tanitim" or request.path.startswith("/static/"):
+    1142:         return None
+
+### Eşleşme satır 1201
+    1191:     if not app.config.get("_schema_ready"):
+    1192:         ensure_schema()
+    1193:         ensure_upload_dir()
+    1194:         app.config["_schema_ready"] = True
+    1195: 
+    1196:     p = request.path
+    1197:     if any(p.startswith(pref) for pref in PROTECTED_PREFIXES) and not is_excluded_path(p):
+    1198:         if not session.get("auth_ok"):
+    1199:             return redirect(url_for("login", next=p))
+    1200:         if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+>>  1201:             check_csrf()
+    1202: 
+    1203: 
+    1204: @app.context_processor
+    1205: def inject_globals():
+    1206:     try:
+    1207:         return {
+    1208:             "active_trip": get_active_trip_row(),
+    1209:             "csrf_token": get_csrf(),
+    1210:         }
+    1211:     except Exception:
+    1212:         return {
+    1213:             "active_trip": None,
+    1214:             "csrf_token": get_csrf(),
+    1215:         }
+    1216: 
+    1217: 
+    1218: # =========================================================
+    1219: # AI yardımcıları
+
+### Eşleşme satır 1209
+    1199:             return redirect(url_for("login", next=p))
+    1200:         if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+    1201:             check_csrf()
+    1202: 
+    1203: 
+    1204: @app.context_processor
+    1205: def inject_globals():
+    1206:     try:
+    1207:         return {
+    1208:             "active_trip": get_active_trip_row(),
+>>  1209:             "csrf_token": get_csrf(),
+    1210:         }
+    1211:     except Exception:
+    1212:         return {
+    1213:             "active_trip": None,
+    1214:             "csrf_token": get_csrf(),
+    1215:         }
+    1216: 
+    1217: 
+    1218: # =========================================================
+    1219: # AI yardımcıları
+    1220: # =========================================================
+    1221: 
+    1222: def normalize_ai_text(text: str) -> str:
+    1223:     text = (text or "").strip().lower()
+    1224:     text = text.replace("’", "").replace("'", "").replace("`", "")
+    1225:     text = re.sub(r"[^0-9a-zçğıöşü\s-]", " ", text, flags=re.IGNORECASE)
+    1226:     text = re.sub(r"\s+", " ", text).strip()
+    1227:     return text
+
+### Eşleşme satır 1214
+    1204: @app.context_processor
+    1205: def inject_globals():
+    1206:     try:
+    1207:         return {
+    1208:             "active_trip": get_active_trip_row(),
+    1209:             "csrf_token": get_csrf(),
+    1210:         }
+    1211:     except Exception:
+    1212:         return {
+    1213:             "active_trip": None,
+>>  1214:             "csrf_token": get_csrf(),
+    1215:         }
+    1216: 
+    1217: 
+    1218: # =========================================================
+    1219: # AI yardımcıları
+    1220: # =========================================================
+    1221: 
+    1222: def normalize_ai_text(text: str) -> str:
+    1223:     text = (text or "").strip().lower()
+    1224:     text = text.replace("’", "").replace("'", "").replace("`", "")
+    1225:     text = re.sub(r"[^0-9a-zçğıöşü\s-]", " ", text, flags=re.IGNORECASE)
+    1226:     text = re.sub(r"\s+", " ", text).strip()
+    1227:     return text
+    1228: 
+    1229: 
+    1230: def ai_extract_seat_list(text: str):
+    1231:     text = text or ""
+    1232:     text = re.sub(r"(\d+)\s*-\s*(\d+)", r"\1 \2", text)
+
+### Eşleşme satır 3278
+    3268:     "get_db": get_db,
+    3269:     "get_active_trip_row": get_active_trip_row,
+    3270:     "get_stops": get_stops,
+    3271:     "all_route_names": all_route_names,
+    3272:     "parse_stops": parse_stops,
+    3273:     "ROUTE_STOPS": ROUTE_STOPS,
+    3274:     "norm_bool": norm_bool,
+    3275:     "parse_int": parse_int,
+    3276:     "parse_float": parse_float,
+    3277:     "normalize_hhmm": normalize_hhmm,
+>>  3278:     "get_csrf": get_csrf,
+    3279:     "schedule_profiles_for_route": schedule_profiles_for_route,
+    3280:     "schedule_profile_get": schedule_profile_get,
+    3281:     "schedule_editor_rows": schedule_editor_rows,
+    3282:     "schedule_default_profile_for_route": schedule_default_profile_for_route,
+    3283: })
+    3284: 
+    3285: 
+    3286: # =========================================================
+    3287: # Hesap / kasa
+    3288: # =========================================================
+    3289: from modules.cash_panel import register_cash_routes
+    3290: 
+    3291: register_cash_routes(app, {
+    3292:     "get_active_trip": get_active_trip,
+    3293:     "get_db": get_db,
+    3294:     "get_cash_categories": get_cash_categories,
+    3295:     "save_cash_categories": save_cash_categories,
+    3296:     "parse_int": parse_int,
+
+### Eşleşme satır 3297
+    3287: # Hesap / kasa
+    3288: # =========================================================
+    3289: from modules.cash_panel import register_cash_routes
+    3290: 
+    3291: register_cash_routes(app, {
+    3292:     "get_active_trip": get_active_trip,
+    3293:     "get_db": get_db,
+    3294:     "get_cash_categories": get_cash_categories,
+    3295:     "save_cash_categories": save_cash_categories,
+    3296:     "parse_int": parse_int,
+>>  3297:     "get_csrf": get_csrf,
+    3298: })
+    3299: 
+    3300: 
+    3301: # =========================================================
+    3302: # AI Console v2
+    3303: # =========================================================
+    3304: from modules.ai_panel import register_ai_routes
+    3305: 
+    3306: _ai_exports = register_ai_routes(app, {
+    3307:     "get_db": get_db,
+    3308:     "get_active_trip_row": get_active_trip_row,
+    3309:     "get_stops": get_stops,
+    3310:     "parse_int": parse_int,
+    3311:     "parse_float": parse_float,
+    3312:     "norm_payment": norm_payment,
+    3313:     "norm_ticket_type": norm_ticket_type,
+    3314:     "norm_gender": norm_gender,
+    3315:     "validate_seat_no": validate_seat_no,
+
+### Eşleşme satır 4476
+    4466: 
+    4467: 
+    4468: # =========================================================
+    4469: # Auth / Kurulum / Profil / Güvenlik Ayarları
+    4470: # =========================================================
+    4471: from modules.settings_panel import register_settings_routes
+    4472: 
+    4473: register_settings_routes(app, {
+    4474:     "admin_profile_exists": admin_profile_exists,
+    4475:     "verify_admin_password": verify_admin_password,
+>>  4476:     "issue_csrf": issue_csrf,
+    4477:     "get_csrf": get_csrf,
+    4478:     "reset_admin_owner": reset_admin_owner,
+    4479:     "verify_recovery_code": verify_recovery_code,
+    4480:     "get_recovery_code_hash": get_recovery_code_hash,
+    4481:     "make_recovery_code": make_recovery_code,
+    4482:     "set_recovery_code": set_recovery_code,
+    4483:     "settings_get": settings_get,
+    4484:     "set_admin_password": set_admin_password,
+    4485:     "get_admin_profile": get_admin_profile,
+    4486:     "save_admin_profile": save_admin_profile,
+    4487:     "save_profile_photo": save_profile_photo,
+    4488:     "start_trial_if_missing": start_trial_if_missing,
+    4489: })
+    4490: 
+    4491: 
+    4492: # Local coords manager modules/coords_panel.py içine taşındı.
+    4493: 
+    4494: 
+
+### Eşleşme satır 4477
+    4467: 
+    4468: # =========================================================
+    4469: # Auth / Kurulum / Profil / Güvenlik Ayarları
+    4470: # =========================================================
+    4471: from modules.settings_panel import register_settings_routes
+    4472: 
+    4473: register_settings_routes(app, {
+    4474:     "admin_profile_exists": admin_profile_exists,
+    4475:     "verify_admin_password": verify_admin_password,
+    4476:     "issue_csrf": issue_csrf,
+>>  4477:     "get_csrf": get_csrf,
+    4478:     "reset_admin_owner": reset_admin_owner,
+    4479:     "verify_recovery_code": verify_recovery_code,
+    4480:     "get_recovery_code_hash": get_recovery_code_hash,
+    4481:     "make_recovery_code": make_recovery_code,
+    4482:     "set_recovery_code": set_recovery_code,
+    4483:     "settings_get": settings_get,
+    4484:     "set_admin_password": set_admin_password,
+    4485:     "get_admin_profile": get_admin_profile,
+    4486:     "save_admin_profile": save_admin_profile,
+    4487:     "save_profile_photo": save_profile_photo,
+    4488:     "start_trial_if_missing": start_trial_if_missing,
+    4489: })
+    4490: 
+    4491: 
+    4492: # Local coords manager modules/coords_panel.py içine taşındı.
+    4493: 
+    4494: 
+    4495: 
+
+--- android_app/app/src/main/python/app.py içinde arama: X-CSRF ---
+
+### Eşleşme satır 1118
+    1108: 
+    1109: def get_csrf() -> str:
+    1110:     tok = session.get("csrf_token")
+    1111:     if not tok:
+    1112:         tok = issue_csrf()
+    1113:     return tok
+    1114: 
+    1115: 
+    1116: def check_csrf() -> None:
+    1117:     form_tok = request.form.get("csrf_token")
+>>  1118:     header_tok = request.headers.get("X-CSRF-Token")
+    1119:     json_tok = None
+    1120:     if request.is_json:
+    1121:         data = request.get_json(silent=True) or {}
+    1122:         json_tok = data.get("csrf_token")
+    1123:     supplied = form_tok or header_tok or json_tok
+    1124:     if not supplied or supplied != session.get("csrf_token"):
+    1125:         abort(403, description="CSRF doğrulaması başarısız")
+    1126: 
+    1127: 
+    1128: PROTECTED_PREFIXES = ("/",)
+    1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+    1130: 
+    1131: 
+    1132: def is_excluded_path(path: str) -> bool:
+    1133:     return any(path == x or path.startswith(x + "/") for x in EXCLUDE_PREFIXES)
+    1134: 
+    1135: 
+    1136: @app.before_request
+
+===== 6) continue_trip_core.js HEADERS DEĞİŞKENİ =====
+
+--- static/continue/continue_trip_core.js içinde arama: const headers ---
+
+### Eşleşme satır 261
+     251: 
+     252:     if(!seatNo || !toStop){
+     253:       renderEmpty("Koltuk veya durak bilgisi eksik.");
+     254:       return;
+     255:     }
+     256: 
+     257:     this.disabled = true;
+     258:     this.textContent = "Kaydediliyor...";
+     259: 
+     260:     try{
+>>   261:       const headers = {
+     262:         "Content-Type": "application/json",
+     263:         "Accept": "application/json"
+     264:       };
+     265: 
+     266:       if(csrfToken){
+     267:         headers["X-CSRFToken"] = csrfToken;
+     268:         headers["X-CSRF-Token"] = csrfToken;
+     269:       }
+     270: 
+     271:       const res = await fetch("/api/live-seat-destination", {
+     272:         method: "POST",
+     273:         headers,
+     274:         body: JSON.stringify({
+     275:           seat_no: seatNo,
+     276:           to_stop: toStop
+     277:         })
+     278:       });
+     279: 
+     280:       const data = await res.json();
+     281: 
+
+### Eşleşme satır 378
+     368: 
+     369:     if(!passenger){
+     370:       alert("Koltuk bilgisi bulunamadı.");
+     371:       return;
+     372:     }
+     373: 
+     374:     const okConfirm = await askLiveOffloadConfirm(passenger);
+     375:     if(!okConfirm) return;
+     376: 
+     377:     try{
+>>   378:       const headers = {
+     379:         "Content-Type": "application/json",
+     380:         "Accept": "application/json"
+     381:       };
+     382: 
+     383:       if(csrfToken){
+     384:         headers["X-CSRFToken"] = csrfToken;
+     385:         headers["X-CSRF-Token"] = csrfToken;
+     386:       }
+     387: 
+     388:       kickerEl.textContent = "Yolcu indiriliyor";
+     389:       titleEl.textContent = `Koltuk ${seatNo}`;
+     390:       subEl.textContent = "İşlem yapılıyor...";
+     391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+     392: 
+     393:       const res = await fetch("/api/live-seat-offload", {
+     394:         method: "POST",
+     395:         headers,
+     396:         body: JSON.stringify({
+     397:           seat_no: seatNo,
+     398:           stop: currentStopName()
+
+### Eşleşme satır 502
+     492: 
+     493:     if(!passengers.length){
+     494:       renderEmpty("Bu durakta indirilecek yolcu bulunmuyor.");
+     495:       return;
+     496:     }
+     497: 
+     498:     const okConfirm = await askBulkOffloadConfirm(data);
+     499:     if(!okConfirm) return;
+     500: 
+     501:     try{
+>>   502:       const headers = {
+     503:         "Content-Type": "application/json",
+     504:         "Accept": "application/json"
+     505:       };
+     506: 
+     507:       if(csrfToken){
+     508:         headers["X-CSRFToken"] = csrfToken;
+     509:         headers["X-CSRF-Token"] = csrfToken;
+     510:       }
+     511: 
+     512:       kickerEl.textContent = "Toplu indirme";
+     513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+     514:       subEl.textContent = "İşlem yapılıyor...";
+     515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+     516: 
+     517:       const res = await fetch("/api/live-stop-offload", {
+     518:         method: "POST",
+     519:         headers,
+     520:         body: JSON.stringify({
+     521:           stop: data.stop || currentStopName()
+     522:         })
+
+### Eşleşme satır 749
+     739:   async function deliverConsignmentFromSheet(cid){
+     740:     if(!cid){
+     741:       renderEmpty("Emanet bilgisi bulunamadı.");
+     742:       return;
+     743:     }
+     744: 
+     745:     const okConfirm = await askConsignmentDeliverConfirm(cid);
+     746:     if(!okConfirm) return;
+     747: 
+     748:     try{
+>>   749:       const headers = {
+     750:         "Content-Type": "application/json",
+     751:         "Accept": "application/json"
+     752:       };
+     753: 
+     754:       if(csrfToken){
+     755:         headers["X-CSRFToken"] = csrfToken;
+     756:         headers["X-CSRF-Token"] = csrfToken;
+     757:       }
+     758: 
+     759:       kickerEl.textContent = "Emanet teslimi";
+     760:       titleEl.textContent = "Teslim ediliyor...";
+     761:       subEl.textContent = "İşlem yapılıyor...";
+     762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+     763: 
+     764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+     765:         method: "POST",
+     766:         headers,
+     767:         body: JSON.stringify({})
+     768:       });
+     769: 
+
+### Eşleşme satır 1283
+    1273:       renderEmpty("Durak bilgisi bulunamadı.");
+    1274:       return;
+    1275:     }
+    1276: 
+    1277:     kickerEl.textContent = "Durak kontrolü";
+    1278:     titleEl.textContent = `${stop} durağı`;
+    1279:     subEl.textContent = "Eksik işlem kontrol ediliyor...";
+    1280:     bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+    1281: 
+    1282:     try{
+>>  1283:       const headers = {
+    1284:         "Content-Type": "application/json",
+    1285:         "Accept": "application/json"
+    1286:       };
+    1287: 
+    1288:       if(csrfToken){
+    1289:         headers["X-CSRFToken"] = csrfToken;
+    1290:         headers["X-CSRF-Token"] = csrfToken;
+    1291:       }
+    1292: 
+    1293:       const res = await fetch("/api/live-stop-complete", {
+    1294:         method:"POST",
+    1295:         headers,
+    1296:         body:JSON.stringify({ stop })
+    1297:       });
+    1298: 
+    1299:       const j = await res.json();
+    1300: 
+    1301:       if(!j.ok){
+    1302:         subEl.textContent = "Kontrol yapılamadı.";
+    1303:         renderEmpty(j.error || "Bir hata oluştu.");
+
+--- static/continue/continue_trip_core.js içinde arama: X-CSRF ---
+
+### Eşleşme satır 267
+     257:     this.disabled = true;
+     258:     this.textContent = "Kaydediliyor...";
+     259: 
+     260:     try{
+     261:       const headers = {
+     262:         "Content-Type": "application/json",
+     263:         "Accept": "application/json"
+     264:       };
+     265: 
+     266:       if(csrfToken){
+>>   267:         headers["X-CSRFToken"] = csrfToken;
+     268:         headers["X-CSRF-Token"] = csrfToken;
+     269:       }
+     270: 
+     271:       const res = await fetch("/api/live-seat-destination", {
+     272:         method: "POST",
+     273:         headers,
+     274:         body: JSON.stringify({
+     275:           seat_no: seatNo,
+     276:           to_stop: toStop
+     277:         })
+     278:       });
+     279: 
+     280:       const data = await res.json();
+     281: 
+     282:       if(!data.ok){
+     283:         this.disabled = false;
+     284:         this.textContent = "Kaydet";
+     285:         alert(data.error || "İniş durağı değiştirilemedi.");
+     286:         return;
+     287:       }
+
+### Eşleşme satır 268
+     258:     this.textContent = "Kaydediliyor...";
+     259: 
+     260:     try{
+     261:       const headers = {
+     262:         "Content-Type": "application/json",
+     263:         "Accept": "application/json"
+     264:       };
+     265: 
+     266:       if(csrfToken){
+     267:         headers["X-CSRFToken"] = csrfToken;
+>>   268:         headers["X-CSRF-Token"] = csrfToken;
+     269:       }
+     270: 
+     271:       const res = await fetch("/api/live-seat-destination", {
+     272:         method: "POST",
+     273:         headers,
+     274:         body: JSON.stringify({
+     275:           seat_no: seatNo,
+     276:           to_stop: toStop
+     277:         })
+     278:       });
+     279: 
+     280:       const data = await res.json();
+     281: 
+     282:       if(!data.ok){
+     283:         this.disabled = false;
+     284:         this.textContent = "Kaydet";
+     285:         alert(data.error || "İniş durağı değiştirilemedi.");
+     286:         return;
+     287:       }
+     288: 
+
+### Eşleşme satır 384
+     374:     const okConfirm = await askLiveOffloadConfirm(passenger);
+     375:     if(!okConfirm) return;
+     376: 
+     377:     try{
+     378:       const headers = {
+     379:         "Content-Type": "application/json",
+     380:         "Accept": "application/json"
+     381:       };
+     382: 
+     383:       if(csrfToken){
+>>   384:         headers["X-CSRFToken"] = csrfToken;
+     385:         headers["X-CSRF-Token"] = csrfToken;
+     386:       }
+     387: 
+     388:       kickerEl.textContent = "Yolcu indiriliyor";
+     389:       titleEl.textContent = `Koltuk ${seatNo}`;
+     390:       subEl.textContent = "İşlem yapılıyor...";
+     391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+     392: 
+     393:       const res = await fetch("/api/live-seat-offload", {
+     394:         method: "POST",
+     395:         headers,
+     396:         body: JSON.stringify({
+     397:           seat_no: seatNo,
+     398:           stop: currentStopName()
+     399:         })
+     400:       });
+     401: 
+     402:       const data = await res.json();
+     403: 
+     404:       if(!data.ok){
+
+### Eşleşme satır 385
+     375:     if(!okConfirm) return;
+     376: 
+     377:     try{
+     378:       const headers = {
+     379:         "Content-Type": "application/json",
+     380:         "Accept": "application/json"
+     381:       };
+     382: 
+     383:       if(csrfToken){
+     384:         headers["X-CSRFToken"] = csrfToken;
+>>   385:         headers["X-CSRF-Token"] = csrfToken;
+     386:       }
+     387: 
+     388:       kickerEl.textContent = "Yolcu indiriliyor";
+     389:       titleEl.textContent = `Koltuk ${seatNo}`;
+     390:       subEl.textContent = "İşlem yapılıyor...";
+     391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+     392: 
+     393:       const res = await fetch("/api/live-seat-offload", {
+     394:         method: "POST",
+     395:         headers,
+     396:         body: JSON.stringify({
+     397:           seat_no: seatNo,
+     398:           stop: currentStopName()
+     399:         })
+     400:       });
+     401: 
+     402:       const data = await res.json();
+     403: 
+     404:       if(!data.ok){
+     405:         titleEl.textContent = "İşlem yapılamadı";
+
+### Eşleşme satır 508
+     498:     const okConfirm = await askBulkOffloadConfirm(data);
+     499:     if(!okConfirm) return;
+     500: 
+     501:     try{
+     502:       const headers = {
+     503:         "Content-Type": "application/json",
+     504:         "Accept": "application/json"
+     505:       };
+     506: 
+     507:       if(csrfToken){
+>>   508:         headers["X-CSRFToken"] = csrfToken;
+     509:         headers["X-CSRF-Token"] = csrfToken;
+     510:       }
+     511: 
+     512:       kickerEl.textContent = "Toplu indirme";
+     513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+     514:       subEl.textContent = "İşlem yapılıyor...";
+     515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+     516: 
+     517:       const res = await fetch("/api/live-stop-offload", {
+     518:         method: "POST",
+     519:         headers,
+     520:         body: JSON.stringify({
+     521:           stop: data.stop || currentStopName()
+     522:         })
+     523:       });
+     524: 
+     525:       const j = await res.json();
+     526: 
+     527:       if(!j.ok){
+     528:         titleEl.textContent = "İşlem yapılamadı";
+
+### Eşleşme satır 509
+     499:     if(!okConfirm) return;
+     500: 
+     501:     try{
+     502:       const headers = {
+     503:         "Content-Type": "application/json",
+     504:         "Accept": "application/json"
+     505:       };
+     506: 
+     507:       if(csrfToken){
+     508:         headers["X-CSRFToken"] = csrfToken;
+>>   509:         headers["X-CSRF-Token"] = csrfToken;
+     510:       }
+     511: 
+     512:       kickerEl.textContent = "Toplu indirme";
+     513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+     514:       subEl.textContent = "İşlem yapılıyor...";
+     515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+     516: 
+     517:       const res = await fetch("/api/live-stop-offload", {
+     518:         method: "POST",
+     519:         headers,
+     520:         body: JSON.stringify({
+     521:           stop: data.stop || currentStopName()
+     522:         })
+     523:       });
+     524: 
+     525:       const j = await res.json();
+     526: 
+     527:       if(!j.ok){
+     528:         titleEl.textContent = "İşlem yapılamadı";
+     529:         subEl.textContent = "Toplu indirme başarısız.";
+
+### Eşleşme satır 755
+     745:     const okConfirm = await askConsignmentDeliverConfirm(cid);
+     746:     if(!okConfirm) return;
+     747: 
+     748:     try{
+     749:       const headers = {
+     750:         "Content-Type": "application/json",
+     751:         "Accept": "application/json"
+     752:       };
+     753: 
+     754:       if(csrfToken){
+>>   755:         headers["X-CSRFToken"] = csrfToken;
+     756:         headers["X-CSRF-Token"] = csrfToken;
+     757:       }
+     758: 
+     759:       kickerEl.textContent = "Emanet teslimi";
+     760:       titleEl.textContent = "Teslim ediliyor...";
+     761:       subEl.textContent = "İşlem yapılıyor...";
+     762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+     763: 
+     764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+     765:         method: "POST",
+     766:         headers,
+     767:         body: JSON.stringify({})
+     768:       });
+     769: 
+     770:       const data = await res.json();
+     771: 
+     772:       if(!data.ok){
+     773:         titleEl.textContent = "Teslim edilemedi";
+     774:         subEl.textContent = "İşlem başarısız.";
+     775:         renderEmpty(data.error || "Bir hata oluştu.");
+
+### Eşleşme satır 756
+     746:     if(!okConfirm) return;
+     747: 
+     748:     try{
+     749:       const headers = {
+     750:         "Content-Type": "application/json",
+     751:         "Accept": "application/json"
+     752:       };
+     753: 
+     754:       if(csrfToken){
+     755:         headers["X-CSRFToken"] = csrfToken;
+>>   756:         headers["X-CSRF-Token"] = csrfToken;
+     757:       }
+     758: 
+     759:       kickerEl.textContent = "Emanet teslimi";
+     760:       titleEl.textContent = "Teslim ediliyor...";
+     761:       subEl.textContent = "İşlem yapılıyor...";
+     762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+     763: 
+     764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+     765:         method: "POST",
+     766:         headers,
+     767:         body: JSON.stringify({})
+     768:       });
+     769: 
+     770:       const data = await res.json();
+     771: 
+     772:       if(!data.ok){
+     773:         titleEl.textContent = "Teslim edilemedi";
+     774:         subEl.textContent = "İşlem başarısız.";
+     775:         renderEmpty(data.error || "Bir hata oluştu.");
+     776:         return;
+
+### Eşleşme satır 1289
+    1279:     subEl.textContent = "Eksik işlem kontrol ediliyor...";
+    1280:     bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+    1281: 
+    1282:     try{
+    1283:       const headers = {
+    1284:         "Content-Type": "application/json",
+    1285:         "Accept": "application/json"
+    1286:       };
+    1287: 
+    1288:       if(csrfToken){
+>>  1289:         headers["X-CSRFToken"] = csrfToken;
+    1290:         headers["X-CSRF-Token"] = csrfToken;
+    1291:       }
+    1292: 
+    1293:       const res = await fetch("/api/live-stop-complete", {
+    1294:         method:"POST",
+    1295:         headers,
+    1296:         body:JSON.stringify({ stop })
+    1297:       });
+    1298: 
+    1299:       const j = await res.json();
+    1300: 
+    1301:       if(!j.ok){
+    1302:         subEl.textContent = "Kontrol yapılamadı.";
+    1303:         renderEmpty(j.error || "Bir hata oluştu.");
+    1304:         return;
+    1305:       }
+    1306: 
+    1307:       if(j.completed){
+    1308:         kickerEl.textContent = "Durak tamamlandı";
+    1309:         titleEl.textContent = `${j.stop || stop}`;
+
+### Eşleşme satır 1290
+    1280:     bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+    1281: 
+    1282:     try{
+    1283:       const headers = {
+    1284:         "Content-Type": "application/json",
+    1285:         "Accept": "application/json"
+    1286:       };
+    1287: 
+    1288:       if(csrfToken){
+    1289:         headers["X-CSRFToken"] = csrfToken;
+>>  1290:         headers["X-CSRF-Token"] = csrfToken;
+    1291:       }
+    1292: 
+    1293:       const res = await fetch("/api/live-stop-complete", {
+    1294:         method:"POST",
+    1295:         headers,
+    1296:         body:JSON.stringify({ stop })
+    1297:       });
+    1298: 
+    1299:       const j = await res.json();
+    1300: 
+    1301:       if(!j.ok){
+    1302:         subEl.textContent = "Kontrol yapılamadı.";
+    1303:         renderEmpty(j.error || "Bir hata oluştu.");
+    1304:         return;
+    1305:       }
+    1306: 
+    1307:       if(j.completed){
+    1308:         kickerEl.textContent = "Durak tamamlandı";
+    1309:         titleEl.textContent = `${j.stop || stop}`;
+    1310:         subEl.textContent = "Bu durakta bekleyen işlem kalmadı.";
+
+--- static/continue/continue_trip_core.js içinde arama: csrf ---
+
+### Eşleşme satır 134
+     124:   const overlay = document.getElementById("liveStopSheetOverlay");
+     125:   const sheet = document.getElementById("liveStopSheet");
+     126:   const closeBtn = document.getElementById("liveStopSheetClose");
+     127:   const titleEl = document.getElementById("liveStopSheetTitle");
+     128:   const subEl = document.getElementById("liveStopSheetSub");
+     129:   const bodyEl = document.getElementById("liveStopSheetBody");
+     130:   const kickerEl = document.getElementById("liveStopSheetKicker");
+     131: 
+     132:   const BOOT = window.CONTINUE_BOOT || {};
+     133:     const routeStops = BOOT.routeStops || [];
+>>   134:     const csrfToken = BOOT.csrfToken || "";
+     135: 
+     136:   let lastDetailData = null;
+     137:   let lastKind = "offload";
+     138: 
+     139:   function text(v){
+     140:     return String(v == null ? "" : v);
+     141:   }
+     142: 
+     143:   function escapeHtml(v){
+     144:     return text(v)
+     145:       .replaceAll("&","&amp;")
+     146:       .replaceAll("<","&lt;")
+     147:       .replaceAll(">","&gt;")
+     148:       .replaceAll('"',"&quot;")
+     149:       .replaceAll("'","&#039;");
+     150:   }
+     151: 
+     152:   function currentStopName(){
+     153:     return (stopNameEl && stopNameEl.textContent ? stopNameEl.textContent : "").trim();
+     154:   }
+
+### Eşleşme satır 266
+     256: 
+     257:     this.disabled = true;
+     258:     this.textContent = "Kaydediliyor...";
+     259: 
+     260:     try{
+     261:       const headers = {
+     262:         "Content-Type": "application/json",
+     263:         "Accept": "application/json"
+     264:       };
+     265: 
+>>   266:       if(csrfToken){
+     267:         headers["X-CSRFToken"] = csrfToken;
+     268:         headers["X-CSRF-Token"] = csrfToken;
+     269:       }
+     270: 
+     271:       const res = await fetch("/api/live-seat-destination", {
+     272:         method: "POST",
+     273:         headers,
+     274:         body: JSON.stringify({
+     275:           seat_no: seatNo,
+     276:           to_stop: toStop
+     277:         })
+     278:       });
+     279: 
+     280:       const data = await res.json();
+     281: 
+     282:       if(!data.ok){
+     283:         this.disabled = false;
+     284:         this.textContent = "Kaydet";
+     285:         alert(data.error || "İniş durağı değiştirilemedi.");
+     286:         return;
+
+### Eşleşme satır 267
+     257:     this.disabled = true;
+     258:     this.textContent = "Kaydediliyor...";
+     259: 
+     260:     try{
+     261:       const headers = {
+     262:         "Content-Type": "application/json",
+     263:         "Accept": "application/json"
+     264:       };
+     265: 
+     266:       if(csrfToken){
+>>   267:         headers["X-CSRFToken"] = csrfToken;
+     268:         headers["X-CSRF-Token"] = csrfToken;
+     269:       }
+     270: 
+     271:       const res = await fetch("/api/live-seat-destination", {
+     272:         method: "POST",
+     273:         headers,
+     274:         body: JSON.stringify({
+     275:           seat_no: seatNo,
+     276:           to_stop: toStop
+     277:         })
+     278:       });
+     279: 
+     280:       const data = await res.json();
+     281: 
+     282:       if(!data.ok){
+     283:         this.disabled = false;
+     284:         this.textContent = "Kaydet";
+     285:         alert(data.error || "İniş durağı değiştirilemedi.");
+     286:         return;
+     287:       }
+
+### Eşleşme satır 268
+     258:     this.textContent = "Kaydediliyor...";
+     259: 
+     260:     try{
+     261:       const headers = {
+     262:         "Content-Type": "application/json",
+     263:         "Accept": "application/json"
+     264:       };
+     265: 
+     266:       if(csrfToken){
+     267:         headers["X-CSRFToken"] = csrfToken;
+>>   268:         headers["X-CSRF-Token"] = csrfToken;
+     269:       }
+     270: 
+     271:       const res = await fetch("/api/live-seat-destination", {
+     272:         method: "POST",
+     273:         headers,
+     274:         body: JSON.stringify({
+     275:           seat_no: seatNo,
+     276:           to_stop: toStop
+     277:         })
+     278:       });
+     279: 
+     280:       const data = await res.json();
+     281: 
+     282:       if(!data.ok){
+     283:         this.disabled = false;
+     284:         this.textContent = "Kaydet";
+     285:         alert(data.error || "İniş durağı değiştirilemedi.");
+     286:         return;
+     287:       }
+     288: 
+
+### Eşleşme satır 383
+     373: 
+     374:     const okConfirm = await askLiveOffloadConfirm(passenger);
+     375:     if(!okConfirm) return;
+     376: 
+     377:     try{
+     378:       const headers = {
+     379:         "Content-Type": "application/json",
+     380:         "Accept": "application/json"
+     381:       };
+     382: 
+>>   383:       if(csrfToken){
+     384:         headers["X-CSRFToken"] = csrfToken;
+     385:         headers["X-CSRF-Token"] = csrfToken;
+     386:       }
+     387: 
+     388:       kickerEl.textContent = "Yolcu indiriliyor";
+     389:       titleEl.textContent = `Koltuk ${seatNo}`;
+     390:       subEl.textContent = "İşlem yapılıyor...";
+     391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+     392: 
+     393:       const res = await fetch("/api/live-seat-offload", {
+     394:         method: "POST",
+     395:         headers,
+     396:         body: JSON.stringify({
+     397:           seat_no: seatNo,
+     398:           stop: currentStopName()
+     399:         })
+     400:       });
+     401: 
+     402:       const data = await res.json();
+     403: 
+
+### Eşleşme satır 384
+     374:     const okConfirm = await askLiveOffloadConfirm(passenger);
+     375:     if(!okConfirm) return;
+     376: 
+     377:     try{
+     378:       const headers = {
+     379:         "Content-Type": "application/json",
+     380:         "Accept": "application/json"
+     381:       };
+     382: 
+     383:       if(csrfToken){
+>>   384:         headers["X-CSRFToken"] = csrfToken;
+     385:         headers["X-CSRF-Token"] = csrfToken;
+     386:       }
+     387: 
+     388:       kickerEl.textContent = "Yolcu indiriliyor";
+     389:       titleEl.textContent = `Koltuk ${seatNo}`;
+     390:       subEl.textContent = "İşlem yapılıyor...";
+     391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+     392: 
+     393:       const res = await fetch("/api/live-seat-offload", {
+     394:         method: "POST",
+     395:         headers,
+     396:         body: JSON.stringify({
+     397:           seat_no: seatNo,
+     398:           stop: currentStopName()
+     399:         })
+     400:       });
+     401: 
+     402:       const data = await res.json();
+     403: 
+     404:       if(!data.ok){
+
+### Eşleşme satır 385
+     375:     if(!okConfirm) return;
+     376: 
+     377:     try{
+     378:       const headers = {
+     379:         "Content-Type": "application/json",
+     380:         "Accept": "application/json"
+     381:       };
+     382: 
+     383:       if(csrfToken){
+     384:         headers["X-CSRFToken"] = csrfToken;
+>>   385:         headers["X-CSRF-Token"] = csrfToken;
+     386:       }
+     387: 
+     388:       kickerEl.textContent = "Yolcu indiriliyor";
+     389:       titleEl.textContent = `Koltuk ${seatNo}`;
+     390:       subEl.textContent = "İşlem yapılıyor...";
+     391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+     392: 
+     393:       const res = await fetch("/api/live-seat-offload", {
+     394:         method: "POST",
+     395:         headers,
+     396:         body: JSON.stringify({
+     397:           seat_no: seatNo,
+     398:           stop: currentStopName()
+     399:         })
+     400:       });
+     401: 
+     402:       const data = await res.json();
+     403: 
+     404:       if(!data.ok){
+     405:         titleEl.textContent = "İşlem yapılamadı";
+
+### Eşleşme satır 507
+     497: 
+     498:     const okConfirm = await askBulkOffloadConfirm(data);
+     499:     if(!okConfirm) return;
+     500: 
+     501:     try{
+     502:       const headers = {
+     503:         "Content-Type": "application/json",
+     504:         "Accept": "application/json"
+     505:       };
+     506: 
+>>   507:       if(csrfToken){
+     508:         headers["X-CSRFToken"] = csrfToken;
+     509:         headers["X-CSRF-Token"] = csrfToken;
+     510:       }
+     511: 
+     512:       kickerEl.textContent = "Toplu indirme";
+     513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+     514:       subEl.textContent = "İşlem yapılıyor...";
+     515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+     516: 
+     517:       const res = await fetch("/api/live-stop-offload", {
+     518:         method: "POST",
+     519:         headers,
+     520:         body: JSON.stringify({
+     521:           stop: data.stop || currentStopName()
+     522:         })
+     523:       });
+     524: 
+     525:       const j = await res.json();
+     526: 
+     527:       if(!j.ok){
+
+### Eşleşme satır 508
+     498:     const okConfirm = await askBulkOffloadConfirm(data);
+     499:     if(!okConfirm) return;
+     500: 
+     501:     try{
+     502:       const headers = {
+     503:         "Content-Type": "application/json",
+     504:         "Accept": "application/json"
+     505:       };
+     506: 
+     507:       if(csrfToken){
+>>   508:         headers["X-CSRFToken"] = csrfToken;
+     509:         headers["X-CSRF-Token"] = csrfToken;
+     510:       }
+     511: 
+     512:       kickerEl.textContent = "Toplu indirme";
+     513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+     514:       subEl.textContent = "İşlem yapılıyor...";
+     515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+     516: 
+     517:       const res = await fetch("/api/live-stop-offload", {
+     518:         method: "POST",
+     519:         headers,
+     520:         body: JSON.stringify({
+     521:           stop: data.stop || currentStopName()
+     522:         })
+     523:       });
+     524: 
+     525:       const j = await res.json();
+     526: 
+     527:       if(!j.ok){
+     528:         titleEl.textContent = "İşlem yapılamadı";
+
+### Eşleşme satır 509
+     499:     if(!okConfirm) return;
+     500: 
+     501:     try{
+     502:       const headers = {
+     503:         "Content-Type": "application/json",
+     504:         "Accept": "application/json"
+     505:       };
+     506: 
+     507:       if(csrfToken){
+     508:         headers["X-CSRFToken"] = csrfToken;
+>>   509:         headers["X-CSRF-Token"] = csrfToken;
+     510:       }
+     511: 
+     512:       kickerEl.textContent = "Toplu indirme";
+     513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+     514:       subEl.textContent = "İşlem yapılıyor...";
+     515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+     516: 
+     517:       const res = await fetch("/api/live-stop-offload", {
+     518:         method: "POST",
+     519:         headers,
+     520:         body: JSON.stringify({
+     521:           stop: data.stop || currentStopName()
+     522:         })
+     523:       });
+     524: 
+     525:       const j = await res.json();
+     526: 
+     527:       if(!j.ok){
+     528:         titleEl.textContent = "İşlem yapılamadı";
+     529:         subEl.textContent = "Toplu indirme başarısız.";
+
+### Eşleşme satır 754
+     744: 
+     745:     const okConfirm = await askConsignmentDeliverConfirm(cid);
+     746:     if(!okConfirm) return;
+     747: 
+     748:     try{
+     749:       const headers = {
+     750:         "Content-Type": "application/json",
+     751:         "Accept": "application/json"
+     752:       };
+     753: 
+>>   754:       if(csrfToken){
+     755:         headers["X-CSRFToken"] = csrfToken;
+     756:         headers["X-CSRF-Token"] = csrfToken;
+     757:       }
+     758: 
+     759:       kickerEl.textContent = "Emanet teslimi";
+     760:       titleEl.textContent = "Teslim ediliyor...";
+     761:       subEl.textContent = "İşlem yapılıyor...";
+     762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+     763: 
+     764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+     765:         method: "POST",
+     766:         headers,
+     767:         body: JSON.stringify({})
+     768:       });
+     769: 
+     770:       const data = await res.json();
+     771: 
+     772:       if(!data.ok){
+     773:         titleEl.textContent = "Teslim edilemedi";
+     774:         subEl.textContent = "İşlem başarısız.";
+
+### Eşleşme satır 755
+     745:     const okConfirm = await askConsignmentDeliverConfirm(cid);
+     746:     if(!okConfirm) return;
+     747: 
+     748:     try{
+     749:       const headers = {
+     750:         "Content-Type": "application/json",
+     751:         "Accept": "application/json"
+     752:       };
+     753: 
+     754:       if(csrfToken){
+>>   755:         headers["X-CSRFToken"] = csrfToken;
+     756:         headers["X-CSRF-Token"] = csrfToken;
+     757:       }
+     758: 
+     759:       kickerEl.textContent = "Emanet teslimi";
+     760:       titleEl.textContent = "Teslim ediliyor...";
+     761:       subEl.textContent = "İşlem yapılıyor...";
+     762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+     763: 
+     764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+     765:         method: "POST",
+     766:         headers,
+     767:         body: JSON.stringify({})
+     768:       });
+     769: 
+     770:       const data = await res.json();
+     771: 
+     772:       if(!data.ok){
+     773:         titleEl.textContent = "Teslim edilemedi";
+     774:         subEl.textContent = "İşlem başarısız.";
+     775:         renderEmpty(data.error || "Bir hata oluştu.");
+
+### Eşleşme satır 756
+     746:     if(!okConfirm) return;
+     747: 
+     748:     try{
+     749:       const headers = {
+     750:         "Content-Type": "application/json",
+     751:         "Accept": "application/json"
+     752:       };
+     753: 
+     754:       if(csrfToken){
+     755:         headers["X-CSRFToken"] = csrfToken;
+>>   756:         headers["X-CSRF-Token"] = csrfToken;
+     757:       }
+     758: 
+     759:       kickerEl.textContent = "Emanet teslimi";
+     760:       titleEl.textContent = "Teslim ediliyor...";
+     761:       subEl.textContent = "İşlem yapılıyor...";
+     762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+     763: 
+     764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+     765:         method: "POST",
+     766:         headers,
+     767:         body: JSON.stringify({})
+     768:       });
+     769: 
+     770:       const data = await res.json();
+     771: 
+     772:       if(!data.ok){
+     773:         titleEl.textContent = "Teslim edilemedi";
+     774:         subEl.textContent = "İşlem başarısız.";
+     775:         renderEmpty(data.error || "Bir hata oluştu.");
+     776:         return;
+
+### Eşleşme satır 1288
+    1278:     titleEl.textContent = `${stop} durağı`;
+    1279:     subEl.textContent = "Eksik işlem kontrol ediliyor...";
+    1280:     bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+    1281: 
+    1282:     try{
+    1283:       const headers = {
+    1284:         "Content-Type": "application/json",
+    1285:         "Accept": "application/json"
+    1286:       };
+    1287: 
+>>  1288:       if(csrfToken){
+    1289:         headers["X-CSRFToken"] = csrfToken;
+    1290:         headers["X-CSRF-Token"] = csrfToken;
+    1291:       }
+    1292: 
+    1293:       const res = await fetch("/api/live-stop-complete", {
+    1294:         method:"POST",
+    1295:         headers,
+    1296:         body:JSON.stringify({ stop })
+    1297:       });
+    1298: 
+    1299:       const j = await res.json();
+    1300: 
+    1301:       if(!j.ok){
+    1302:         subEl.textContent = "Kontrol yapılamadı.";
+    1303:         renderEmpty(j.error || "Bir hata oluştu.");
+    1304:         return;
+    1305:       }
+    1306: 
+    1307:       if(j.completed){
+    1308:         kickerEl.textContent = "Durak tamamlandı";
+
+### Eşleşme satır 1289
+    1279:     subEl.textContent = "Eksik işlem kontrol ediliyor...";
+    1280:     bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+    1281: 
+    1282:     try{
+    1283:       const headers = {
+    1284:         "Content-Type": "application/json",
+    1285:         "Accept": "application/json"
+    1286:       };
+    1287: 
+    1288:       if(csrfToken){
+>>  1289:         headers["X-CSRFToken"] = csrfToken;
+    1290:         headers["X-CSRF-Token"] = csrfToken;
+    1291:       }
+    1292: 
+    1293:       const res = await fetch("/api/live-stop-complete", {
+    1294:         method:"POST",
+    1295:         headers,
+    1296:         body:JSON.stringify({ stop })
+    1297:       });
+    1298: 
+    1299:       const j = await res.json();
+    1300: 
+    1301:       if(!j.ok){
+    1302:         subEl.textContent = "Kontrol yapılamadı.";
+    1303:         renderEmpty(j.error || "Bir hata oluştu.");
+    1304:         return;
+    1305:       }
+    1306: 
+    1307:       if(j.completed){
+    1308:         kickerEl.textContent = "Durak tamamlandı";
+    1309:         titleEl.textContent = `${j.stop || stop}`;
+
+### Eşleşme satır 1290
+    1280:     bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+    1281: 
+    1282:     try{
+    1283:       const headers = {
+    1284:         "Content-Type": "application/json",
+    1285:         "Accept": "application/json"
+    1286:       };
+    1287: 
+    1288:       if(csrfToken){
+    1289:         headers["X-CSRFToken"] = csrfToken;
+>>  1290:         headers["X-CSRF-Token"] = csrfToken;
+    1291:       }
+    1292: 
+    1293:       const res = await fetch("/api/live-stop-complete", {
+    1294:         method:"POST",
+    1295:         headers,
+    1296:         body:JSON.stringify({ stop })
+    1297:       });
+    1298: 
+    1299:       const j = await res.json();
+    1300: 
+    1301:       if(!j.ok){
+    1302:         subEl.textContent = "Kontrol yapılamadı.";
+    1303:         renderEmpty(j.error || "Bir hata oluştu.");
+    1304:         return;
+    1305:       }
+    1306: 
+    1307:       if(j.completed){
+    1308:         kickerEl.textContent = "Durak tamamlandı";
+    1309:         titleEl.textContent = `${j.stop || stop}`;
+    1310:         subEl.textContent = "Bu durakta bekleyen işlem kalmadı.";
+
+--- android_app/app/src/main/python/static/continue/continue_trip_core.js içinde arama: const headers ---
+
+### Eşleşme satır 261
+     251: 
+     252:     if(!seatNo || !toStop){
+     253:       renderEmpty("Koltuk veya durak bilgisi eksik.");
+     254:       return;
+     255:     }
+     256: 
+     257:     this.disabled = true;
+     258:     this.textContent = "Kaydediliyor...";
+     259: 
+     260:     try{
+>>   261:       const headers = {
+     262:         "Content-Type": "application/json",
+     263:         "Accept": "application/json"
+     264:       };
+     265: 
+     266:       if(csrfToken){
+     267:         headers["X-CSRFToken"] = csrfToken;
+     268:         headers["X-CSRF-Token"] = csrfToken;
+     269:       }
+     270: 
+     271:       const res = await fetch("/api/live-seat-destination", {
+     272:         method: "POST",
+     273:         headers,
+     274:         body: JSON.stringify({
+     275:           seat_no: seatNo,
+     276:           to_stop: toStop
+     277:         })
+     278:       });
+     279: 
+     280:       const data = await res.json();
+     281: 
+
+### Eşleşme satır 378
+     368: 
+     369:     if(!passenger){
+     370:       alert("Koltuk bilgisi bulunamadı.");
+     371:       return;
+     372:     }
+     373: 
+     374:     const okConfirm = await askLiveOffloadConfirm(passenger);
+     375:     if(!okConfirm) return;
+     376: 
+     377:     try{
+>>   378:       const headers = {
+     379:         "Content-Type": "application/json",
+     380:         "Accept": "application/json"
+     381:       };
+     382: 
+     383:       if(csrfToken){
+     384:         headers["X-CSRFToken"] = csrfToken;
+     385:         headers["X-CSRF-Token"] = csrfToken;
+     386:       }
+     387: 
+     388:       kickerEl.textContent = "Yolcu indiriliyor";
+     389:       titleEl.textContent = `Koltuk ${seatNo}`;
+     390:       subEl.textContent = "İşlem yapılıyor...";
+     391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+     392: 
+     393:       const res = await fetch("/api/live-seat-offload", {
+     394:         method: "POST",
+     395:         headers,
+     396:         body: JSON.stringify({
+     397:           seat_no: seatNo,
+     398:           stop: currentStopName()
+
+### Eşleşme satır 502
+     492: 
+     493:     if(!passengers.length){
+     494:       renderEmpty("Bu durakta indirilecek yolcu bulunmuyor.");
+     495:       return;
+     496:     }
+     497: 
+     498:     const okConfirm = await askBulkOffloadConfirm(data);
+     499:     if(!okConfirm) return;
+     500: 
+     501:     try{
+>>   502:       const headers = {
+     503:         "Content-Type": "application/json",
+     504:         "Accept": "application/json"
+     505:       };
+     506: 
+     507:       if(csrfToken){
+     508:         headers["X-CSRFToken"] = csrfToken;
+     509:         headers["X-CSRF-Token"] = csrfToken;
+     510:       }
+     511: 
+     512:       kickerEl.textContent = "Toplu indirme";
+     513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+     514:       subEl.textContent = "İşlem yapılıyor...";
+     515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+     516: 
+     517:       const res = await fetch("/api/live-stop-offload", {
+     518:         method: "POST",
+     519:         headers,
+     520:         body: JSON.stringify({
+     521:           stop: data.stop || currentStopName()
+     522:         })
+
+### Eşleşme satır 749
+     739:   async function deliverConsignmentFromSheet(cid){
+     740:     if(!cid){
+     741:       renderEmpty("Emanet bilgisi bulunamadı.");
+     742:       return;
+     743:     }
+     744: 
+     745:     const okConfirm = await askConsignmentDeliverConfirm(cid);
+     746:     if(!okConfirm) return;
+     747: 
+     748:     try{
+>>   749:       const headers = {
+     750:         "Content-Type": "application/json",
+     751:         "Accept": "application/json"
+     752:       };
+     753: 
+     754:       if(csrfToken){
+     755:         headers["X-CSRFToken"] = csrfToken;
+     756:         headers["X-CSRF-Token"] = csrfToken;
+     757:       }
+     758: 
+     759:       kickerEl.textContent = "Emanet teslimi";
+     760:       titleEl.textContent = "Teslim ediliyor...";
+     761:       subEl.textContent = "İşlem yapılıyor...";
+     762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+     763: 
+     764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+     765:         method: "POST",
+     766:         headers,
+     767:         body: JSON.stringify({})
+     768:       });
+     769: 
+
+### Eşleşme satır 1283
+    1273:       renderEmpty("Durak bilgisi bulunamadı.");
+    1274:       return;
+    1275:     }
+    1276: 
+    1277:     kickerEl.textContent = "Durak kontrolü";
+    1278:     titleEl.textContent = `${stop} durağı`;
+    1279:     subEl.textContent = "Eksik işlem kontrol ediliyor...";
+    1280:     bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+    1281: 
+    1282:     try{
+>>  1283:       const headers = {
+    1284:         "Content-Type": "application/json",
+    1285:         "Accept": "application/json"
+    1286:       };
+    1287: 
+    1288:       if(csrfToken){
+    1289:         headers["X-CSRFToken"] = csrfToken;
+    1290:         headers["X-CSRF-Token"] = csrfToken;
+    1291:       }
+    1292: 
+    1293:       const res = await fetch("/api/live-stop-complete", {
+    1294:         method:"POST",
+    1295:         headers,
+    1296:         body:JSON.stringify({ stop })
+    1297:       });
+    1298: 
+    1299:       const j = await res.json();
+    1300: 
+    1301:       if(!j.ok){
+    1302:         subEl.textContent = "Kontrol yapılamadı.";
+    1303:         renderEmpty(j.error || "Bir hata oluştu.");
+
+--- android_app/app/src/main/python/static/continue/continue_trip_core.js içinde arama: X-CSRF ---
+
+### Eşleşme satır 267
+     257:     this.disabled = true;
+     258:     this.textContent = "Kaydediliyor...";
+     259: 
+     260:     try{
+     261:       const headers = {
+     262:         "Content-Type": "application/json",
+     263:         "Accept": "application/json"
+     264:       };
+     265: 
+     266:       if(csrfToken){
+>>   267:         headers["X-CSRFToken"] = csrfToken;
+     268:         headers["X-CSRF-Token"] = csrfToken;
+     269:       }
+     270: 
+     271:       const res = await fetch("/api/live-seat-destination", {
+     272:         method: "POST",
+     273:         headers,
+     274:         body: JSON.stringify({
+     275:           seat_no: seatNo,
+     276:           to_stop: toStop
+     277:         })
+     278:       });
+     279: 
+     280:       const data = await res.json();
+     281: 
+     282:       if(!data.ok){
+     283:         this.disabled = false;
+     284:         this.textContent = "Kaydet";
+     285:         alert(data.error || "İniş durağı değiştirilemedi.");
+     286:         return;
+     287:       }
+
+### Eşleşme satır 268
+     258:     this.textContent = "Kaydediliyor...";
+     259: 
+     260:     try{
+     261:       const headers = {
+     262:         "Content-Type": "application/json",
+     263:         "Accept": "application/json"
+     264:       };
+     265: 
+     266:       if(csrfToken){
+     267:         headers["X-CSRFToken"] = csrfToken;
+>>   268:         headers["X-CSRF-Token"] = csrfToken;
+     269:       }
+     270: 
+     271:       const res = await fetch("/api/live-seat-destination", {
+     272:         method: "POST",
+     273:         headers,
+     274:         body: JSON.stringify({
+     275:           seat_no: seatNo,
+     276:           to_stop: toStop
+     277:         })
+     278:       });
+     279: 
+     280:       const data = await res.json();
+     281: 
+     282:       if(!data.ok){
+     283:         this.disabled = false;
+     284:         this.textContent = "Kaydet";
+     285:         alert(data.error || "İniş durağı değiştirilemedi.");
+     286:         return;
+     287:       }
+     288: 
+
+### Eşleşme satır 384
+     374:     const okConfirm = await askLiveOffloadConfirm(passenger);
+     375:     if(!okConfirm) return;
+     376: 
+     377:     try{
+     378:       const headers = {
+     379:         "Content-Type": "application/json",
+     380:         "Accept": "application/json"
+     381:       };
+     382: 
+     383:       if(csrfToken){
+>>   384:         headers["X-CSRFToken"] = csrfToken;
+     385:         headers["X-CSRF-Token"] = csrfToken;
+     386:       }
+     387: 
+     388:       kickerEl.textContent = "Yolcu indiriliyor";
+     389:       titleEl.textContent = `Koltuk ${seatNo}`;
+     390:       subEl.textContent = "İşlem yapılıyor...";
+     391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+     392: 
+     393:       const res = await fetch("/api/live-seat-offload", {
+     394:         method: "POST",
+     395:         headers,
+     396:         body: JSON.stringify({
+     397:           seat_no: seatNo,
+     398:           stop: currentStopName()
+     399:         })
+     400:       });
+     401: 
+     402:       const data = await res.json();
+     403: 
+     404:       if(!data.ok){
+
+### Eşleşme satır 385
+     375:     if(!okConfirm) return;
+     376: 
+     377:     try{
+     378:       const headers = {
+     379:         "Content-Type": "application/json",
+     380:         "Accept": "application/json"
+     381:       };
+     382: 
+     383:       if(csrfToken){
+     384:         headers["X-CSRFToken"] = csrfToken;
+>>   385:         headers["X-CSRF-Token"] = csrfToken;
+     386:       }
+     387: 
+     388:       kickerEl.textContent = "Yolcu indiriliyor";
+     389:       titleEl.textContent = `Koltuk ${seatNo}`;
+     390:       subEl.textContent = "İşlem yapılıyor...";
+     391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+     392: 
+     393:       const res = await fetch("/api/live-seat-offload", {
+     394:         method: "POST",
+     395:         headers,
+     396:         body: JSON.stringify({
+     397:           seat_no: seatNo,
+     398:           stop: currentStopName()
+     399:         })
+     400:       });
+     401: 
+     402:       const data = await res.json();
+     403: 
+     404:       if(!data.ok){
+     405:         titleEl.textContent = "İşlem yapılamadı";
+
+### Eşleşme satır 508
+     498:     const okConfirm = await askBulkOffloadConfirm(data);
+     499:     if(!okConfirm) return;
+     500: 
+     501:     try{
+     502:       const headers = {
+     503:         "Content-Type": "application/json",
+     504:         "Accept": "application/json"
+     505:       };
+     506: 
+     507:       if(csrfToken){
+>>   508:         headers["X-CSRFToken"] = csrfToken;
+     509:         headers["X-CSRF-Token"] = csrfToken;
+     510:       }
+     511: 
+     512:       kickerEl.textContent = "Toplu indirme";
+     513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+     514:       subEl.textContent = "İşlem yapılıyor...";
+     515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+     516: 
+     517:       const res = await fetch("/api/live-stop-offload", {
+     518:         method: "POST",
+     519:         headers,
+     520:         body: JSON.stringify({
+     521:           stop: data.stop || currentStopName()
+     522:         })
+     523:       });
+     524: 
+     525:       const j = await res.json();
+     526: 
+     527:       if(!j.ok){
+     528:         titleEl.textContent = "İşlem yapılamadı";
+
+### Eşleşme satır 509
+     499:     if(!okConfirm) return;
+     500: 
+     501:     try{
+     502:       const headers = {
+     503:         "Content-Type": "application/json",
+     504:         "Accept": "application/json"
+     505:       };
+     506: 
+     507:       if(csrfToken){
+     508:         headers["X-CSRFToken"] = csrfToken;
+>>   509:         headers["X-CSRF-Token"] = csrfToken;
+     510:       }
+     511: 
+     512:       kickerEl.textContent = "Toplu indirme";
+     513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+     514:       subEl.textContent = "İşlem yapılıyor...";
+     515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+     516: 
+     517:       const res = await fetch("/api/live-stop-offload", {
+     518:         method: "POST",
+     519:         headers,
+     520:         body: JSON.stringify({
+     521:           stop: data.stop || currentStopName()
+     522:         })
+     523:       });
+     524: 
+     525:       const j = await res.json();
+     526: 
+     527:       if(!j.ok){
+     528:         titleEl.textContent = "İşlem yapılamadı";
+     529:         subEl.textContent = "Toplu indirme başarısız.";
+
+### Eşleşme satır 755
+     745:     const okConfirm = await askConsignmentDeliverConfirm(cid);
+     746:     if(!okConfirm) return;
+     747: 
+     748:     try{
+     749:       const headers = {
+     750:         "Content-Type": "application/json",
+     751:         "Accept": "application/json"
+     752:       };
+     753: 
+     754:       if(csrfToken){
+>>   755:         headers["X-CSRFToken"] = csrfToken;
+     756:         headers["X-CSRF-Token"] = csrfToken;
+     757:       }
+     758: 
+     759:       kickerEl.textContent = "Emanet teslimi";
+     760:       titleEl.textContent = "Teslim ediliyor...";
+     761:       subEl.textContent = "İşlem yapılıyor...";
+     762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+     763: 
+     764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+     765:         method: "POST",
+     766:         headers,
+     767:         body: JSON.stringify({})
+     768:       });
+     769: 
+     770:       const data = await res.json();
+     771: 
+     772:       if(!data.ok){
+     773:         titleEl.textContent = "Teslim edilemedi";
+     774:         subEl.textContent = "İşlem başarısız.";
+     775:         renderEmpty(data.error || "Bir hata oluştu.");
+
+### Eşleşme satır 756
+     746:     if(!okConfirm) return;
+     747: 
+     748:     try{
+     749:       const headers = {
+     750:         "Content-Type": "application/json",
+     751:         "Accept": "application/json"
+     752:       };
+     753: 
+     754:       if(csrfToken){
+     755:         headers["X-CSRFToken"] = csrfToken;
+>>   756:         headers["X-CSRF-Token"] = csrfToken;
+     757:       }
+     758: 
+     759:       kickerEl.textContent = "Emanet teslimi";
+     760:       titleEl.textContent = "Teslim ediliyor...";
+     761:       subEl.textContent = "İşlem yapılıyor...";
+     762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+     763: 
+     764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+     765:         method: "POST",
+     766:         headers,
+     767:         body: JSON.stringify({})
+     768:       });
+     769: 
+     770:       const data = await res.json();
+     771: 
+     772:       if(!data.ok){
+     773:         titleEl.textContent = "Teslim edilemedi";
+     774:         subEl.textContent = "İşlem başarısız.";
+     775:         renderEmpty(data.error || "Bir hata oluştu.");
+     776:         return;
+
+### Eşleşme satır 1289
+    1279:     subEl.textContent = "Eksik işlem kontrol ediliyor...";
+    1280:     bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+    1281: 
+    1282:     try{
+    1283:       const headers = {
+    1284:         "Content-Type": "application/json",
+    1285:         "Accept": "application/json"
+    1286:       };
+    1287: 
+    1288:       if(csrfToken){
+>>  1289:         headers["X-CSRFToken"] = csrfToken;
+    1290:         headers["X-CSRF-Token"] = csrfToken;
+    1291:       }
+    1292: 
+    1293:       const res = await fetch("/api/live-stop-complete", {
+    1294:         method:"POST",
+    1295:         headers,
+    1296:         body:JSON.stringify({ stop })
+    1297:       });
+    1298: 
+    1299:       const j = await res.json();
+    1300: 
+    1301:       if(!j.ok){
+    1302:         subEl.textContent = "Kontrol yapılamadı.";
+    1303:         renderEmpty(j.error || "Bir hata oluştu.");
+    1304:         return;
+    1305:       }
+    1306: 
+    1307:       if(j.completed){
+    1308:         kickerEl.textContent = "Durak tamamlandı";
+    1309:         titleEl.textContent = `${j.stop || stop}`;
+
+### Eşleşme satır 1290
+    1280:     bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+    1281: 
+    1282:     try{
+    1283:       const headers = {
+    1284:         "Content-Type": "application/json",
+    1285:         "Accept": "application/json"
+    1286:       };
+    1287: 
+    1288:       if(csrfToken){
+    1289:         headers["X-CSRFToken"] = csrfToken;
+>>  1290:         headers["X-CSRF-Token"] = csrfToken;
+    1291:       }
+    1292: 
+    1293:       const res = await fetch("/api/live-stop-complete", {
+    1294:         method:"POST",
+    1295:         headers,
+    1296:         body:JSON.stringify({ stop })
+    1297:       });
+    1298: 
+    1299:       const j = await res.json();
+    1300: 
+    1301:       if(!j.ok){
+    1302:         subEl.textContent = "Kontrol yapılamadı.";
+    1303:         renderEmpty(j.error || "Bir hata oluştu.");
+    1304:         return;
+    1305:       }
+    1306: 
+    1307:       if(j.completed){
+    1308:         kickerEl.textContent = "Durak tamamlandı";
+    1309:         titleEl.textContent = `${j.stop || stop}`;
+    1310:         subEl.textContent = "Bu durakta bekleyen işlem kalmadı.";
+
+--- android_app/app/src/main/python/static/continue/continue_trip_core.js içinde arama: csrf ---
+
+### Eşleşme satır 134
+     124:   const overlay = document.getElementById("liveStopSheetOverlay");
+     125:   const sheet = document.getElementById("liveStopSheet");
+     126:   const closeBtn = document.getElementById("liveStopSheetClose");
+     127:   const titleEl = document.getElementById("liveStopSheetTitle");
+     128:   const subEl = document.getElementById("liveStopSheetSub");
+     129:   const bodyEl = document.getElementById("liveStopSheetBody");
+     130:   const kickerEl = document.getElementById("liveStopSheetKicker");
+     131: 
+     132:   const BOOT = window.CONTINUE_BOOT || {};
+     133:     const routeStops = BOOT.routeStops || [];
+>>   134:     const csrfToken = BOOT.csrfToken || "";
+     135: 
+     136:   let lastDetailData = null;
+     137:   let lastKind = "offload";
+     138: 
+     139:   function text(v){
+     140:     return String(v == null ? "" : v);
+     141:   }
+     142: 
+     143:   function escapeHtml(v){
+     144:     return text(v)
+     145:       .replaceAll("&","&amp;")
+     146:       .replaceAll("<","&lt;")
+     147:       .replaceAll(">","&gt;")
+     148:       .replaceAll('"',"&quot;")
+     149:       .replaceAll("'","&#039;");
+     150:   }
+     151: 
+     152:   function currentStopName(){
+     153:     return (stopNameEl && stopNameEl.textContent ? stopNameEl.textContent : "").trim();
+     154:   }
+
+### Eşleşme satır 266
+     256: 
+     257:     this.disabled = true;
+     258:     this.textContent = "Kaydediliyor...";
+     259: 
+     260:     try{
+     261:       const headers = {
+     262:         "Content-Type": "application/json",
+     263:         "Accept": "application/json"
+     264:       };
+     265: 
+>>   266:       if(csrfToken){
+     267:         headers["X-CSRFToken"] = csrfToken;
+     268:         headers["X-CSRF-Token"] = csrfToken;
+     269:       }
+     270: 
+     271:       const res = await fetch("/api/live-seat-destination", {
+     272:         method: "POST",
+     273:         headers,
+     274:         body: JSON.stringify({
+     275:           seat_no: seatNo,
+     276:           to_stop: toStop
+     277:         })
+     278:       });
+     279: 
+     280:       const data = await res.json();
+     281: 
+     282:       if(!data.ok){
+     283:         this.disabled = false;
+     284:         this.textContent = "Kaydet";
+     285:         alert(data.error || "İniş durağı değiştirilemedi.");
+     286:         return;
+
+### Eşleşme satır 267
+     257:     this.disabled = true;
+     258:     this.textContent = "Kaydediliyor...";
+     259: 
+     260:     try{
+     261:       const headers = {
+     262:         "Content-Type": "application/json",
+     263:         "Accept": "application/json"
+     264:       };
+     265: 
+     266:       if(csrfToken){
+>>   267:         headers["X-CSRFToken"] = csrfToken;
+     268:         headers["X-CSRF-Token"] = csrfToken;
+     269:       }
+     270: 
+     271:       const res = await fetch("/api/live-seat-destination", {
+     272:         method: "POST",
+     273:         headers,
+     274:         body: JSON.stringify({
+     275:           seat_no: seatNo,
+     276:           to_stop: toStop
+     277:         })
+     278:       });
+     279: 
+     280:       const data = await res.json();
+     281: 
+     282:       if(!data.ok){
+     283:         this.disabled = false;
+     284:         this.textContent = "Kaydet";
+     285:         alert(data.error || "İniş durağı değiştirilemedi.");
+     286:         return;
+     287:       }
+
+### Eşleşme satır 268
+     258:     this.textContent = "Kaydediliyor...";
+     259: 
+     260:     try{
+     261:       const headers = {
+     262:         "Content-Type": "application/json",
+     263:         "Accept": "application/json"
+     264:       };
+     265: 
+     266:       if(csrfToken){
+     267:         headers["X-CSRFToken"] = csrfToken;
+>>   268:         headers["X-CSRF-Token"] = csrfToken;
+     269:       }
+     270: 
+     271:       const res = await fetch("/api/live-seat-destination", {
+     272:         method: "POST",
+     273:         headers,
+     274:         body: JSON.stringify({
+     275:           seat_no: seatNo,
+     276:           to_stop: toStop
+     277:         })
+     278:       });
+     279: 
+     280:       const data = await res.json();
+     281: 
+     282:       if(!data.ok){
+     283:         this.disabled = false;
+     284:         this.textContent = "Kaydet";
+     285:         alert(data.error || "İniş durağı değiştirilemedi.");
+     286:         return;
+     287:       }
+     288: 
+
+### Eşleşme satır 383
+     373: 
+     374:     const okConfirm = await askLiveOffloadConfirm(passenger);
+     375:     if(!okConfirm) return;
+     376: 
+     377:     try{
+     378:       const headers = {
+     379:         "Content-Type": "application/json",
+     380:         "Accept": "application/json"
+     381:       };
+     382: 
+>>   383:       if(csrfToken){
+     384:         headers["X-CSRFToken"] = csrfToken;
+     385:         headers["X-CSRF-Token"] = csrfToken;
+     386:       }
+     387: 
+     388:       kickerEl.textContent = "Yolcu indiriliyor";
+     389:       titleEl.textContent = `Koltuk ${seatNo}`;
+     390:       subEl.textContent = "İşlem yapılıyor...";
+     391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+     392: 
+     393:       const res = await fetch("/api/live-seat-offload", {
+     394:         method: "POST",
+     395:         headers,
+     396:         body: JSON.stringify({
+     397:           seat_no: seatNo,
+     398:           stop: currentStopName()
+     399:         })
+     400:       });
+     401: 
+     402:       const data = await res.json();
+     403: 
+
+### Eşleşme satır 384
+     374:     const okConfirm = await askLiveOffloadConfirm(passenger);
+     375:     if(!okConfirm) return;
+     376: 
+     377:     try{
+     378:       const headers = {
+     379:         "Content-Type": "application/json",
+     380:         "Accept": "application/json"
+     381:       };
+     382: 
+     383:       if(csrfToken){
+>>   384:         headers["X-CSRFToken"] = csrfToken;
+     385:         headers["X-CSRF-Token"] = csrfToken;
+     386:       }
+     387: 
+     388:       kickerEl.textContent = "Yolcu indiriliyor";
+     389:       titleEl.textContent = `Koltuk ${seatNo}`;
+     390:       subEl.textContent = "İşlem yapılıyor...";
+     391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+     392: 
+     393:       const res = await fetch("/api/live-seat-offload", {
+     394:         method: "POST",
+     395:         headers,
+     396:         body: JSON.stringify({
+     397:           seat_no: seatNo,
+     398:           stop: currentStopName()
+     399:         })
+     400:       });
+     401: 
+     402:       const data = await res.json();
+     403: 
+     404:       if(!data.ok){
+
+### Eşleşme satır 385
+     375:     if(!okConfirm) return;
+     376: 
+     377:     try{
+     378:       const headers = {
+     379:         "Content-Type": "application/json",
+     380:         "Accept": "application/json"
+     381:       };
+     382: 
+     383:       if(csrfToken){
+     384:         headers["X-CSRFToken"] = csrfToken;
+>>   385:         headers["X-CSRF-Token"] = csrfToken;
+     386:       }
+     387: 
+     388:       kickerEl.textContent = "Yolcu indiriliyor";
+     389:       titleEl.textContent = `Koltuk ${seatNo}`;
+     390:       subEl.textContent = "İşlem yapılıyor...";
+     391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+     392: 
+     393:       const res = await fetch("/api/live-seat-offload", {
+     394:         method: "POST",
+     395:         headers,
+     396:         body: JSON.stringify({
+     397:           seat_no: seatNo,
+     398:           stop: currentStopName()
+     399:         })
+     400:       });
+     401: 
+     402:       const data = await res.json();
+     403: 
+     404:       if(!data.ok){
+     405:         titleEl.textContent = "İşlem yapılamadı";
+
+### Eşleşme satır 507
+     497: 
+     498:     const okConfirm = await askBulkOffloadConfirm(data);
+     499:     if(!okConfirm) return;
+     500: 
+     501:     try{
+     502:       const headers = {
+     503:         "Content-Type": "application/json",
+     504:         "Accept": "application/json"
+     505:       };
+     506: 
+>>   507:       if(csrfToken){
+     508:         headers["X-CSRFToken"] = csrfToken;
+     509:         headers["X-CSRF-Token"] = csrfToken;
+     510:       }
+     511: 
+     512:       kickerEl.textContent = "Toplu indirme";
+     513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+     514:       subEl.textContent = "İşlem yapılıyor...";
+     515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+     516: 
+     517:       const res = await fetch("/api/live-stop-offload", {
+     518:         method: "POST",
+     519:         headers,
+     520:         body: JSON.stringify({
+     521:           stop: data.stop || currentStopName()
+     522:         })
+     523:       });
+     524: 
+     525:       const j = await res.json();
+     526: 
+     527:       if(!j.ok){
+
+### Eşleşme satır 508
+     498:     const okConfirm = await askBulkOffloadConfirm(data);
+     499:     if(!okConfirm) return;
+     500: 
+     501:     try{
+     502:       const headers = {
+     503:         "Content-Type": "application/json",
+     504:         "Accept": "application/json"
+     505:       };
+     506: 
+     507:       if(csrfToken){
+>>   508:         headers["X-CSRFToken"] = csrfToken;
+     509:         headers["X-CSRF-Token"] = csrfToken;
+     510:       }
+     511: 
+     512:       kickerEl.textContent = "Toplu indirme";
+     513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+     514:       subEl.textContent = "İşlem yapılıyor...";
+     515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+     516: 
+     517:       const res = await fetch("/api/live-stop-offload", {
+     518:         method: "POST",
+     519:         headers,
+     520:         body: JSON.stringify({
+     521:           stop: data.stop || currentStopName()
+     522:         })
+     523:       });
+     524: 
+     525:       const j = await res.json();
+     526: 
+     527:       if(!j.ok){
+     528:         titleEl.textContent = "İşlem yapılamadı";
+
+### Eşleşme satır 509
+     499:     if(!okConfirm) return;
+     500: 
+     501:     try{
+     502:       const headers = {
+     503:         "Content-Type": "application/json",
+     504:         "Accept": "application/json"
+     505:       };
+     506: 
+     507:       if(csrfToken){
+     508:         headers["X-CSRFToken"] = csrfToken;
+>>   509:         headers["X-CSRF-Token"] = csrfToken;
+     510:       }
+     511: 
+     512:       kickerEl.textContent = "Toplu indirme";
+     513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+     514:       subEl.textContent = "İşlem yapılıyor...";
+     515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+     516: 
+     517:       const res = await fetch("/api/live-stop-offload", {
+     518:         method: "POST",
+     519:         headers,
+     520:         body: JSON.stringify({
+     521:           stop: data.stop || currentStopName()
+     522:         })
+     523:       });
+     524: 
+     525:       const j = await res.json();
+     526: 
+     527:       if(!j.ok){
+     528:         titleEl.textContent = "İşlem yapılamadı";
+     529:         subEl.textContent = "Toplu indirme başarısız.";
+
+### Eşleşme satır 754
+     744: 
+     745:     const okConfirm = await askConsignmentDeliverConfirm(cid);
+     746:     if(!okConfirm) return;
+     747: 
+     748:     try{
+     749:       const headers = {
+     750:         "Content-Type": "application/json",
+     751:         "Accept": "application/json"
+     752:       };
+     753: 
+>>   754:       if(csrfToken){
+     755:         headers["X-CSRFToken"] = csrfToken;
+     756:         headers["X-CSRF-Token"] = csrfToken;
+     757:       }
+     758: 
+     759:       kickerEl.textContent = "Emanet teslimi";
+     760:       titleEl.textContent = "Teslim ediliyor...";
+     761:       subEl.textContent = "İşlem yapılıyor...";
+     762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+     763: 
+     764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+     765:         method: "POST",
+     766:         headers,
+     767:         body: JSON.stringify({})
+     768:       });
+     769: 
+     770:       const data = await res.json();
+     771: 
+     772:       if(!data.ok){
+     773:         titleEl.textContent = "Teslim edilemedi";
+     774:         subEl.textContent = "İşlem başarısız.";
+
+### Eşleşme satır 755
+     745:     const okConfirm = await askConsignmentDeliverConfirm(cid);
+     746:     if(!okConfirm) return;
+     747: 
+     748:     try{
+     749:       const headers = {
+     750:         "Content-Type": "application/json",
+     751:         "Accept": "application/json"
+     752:       };
+     753: 
+     754:       if(csrfToken){
+>>   755:         headers["X-CSRFToken"] = csrfToken;
+     756:         headers["X-CSRF-Token"] = csrfToken;
+     757:       }
+     758: 
+     759:       kickerEl.textContent = "Emanet teslimi";
+     760:       titleEl.textContent = "Teslim ediliyor...";
+     761:       subEl.textContent = "İşlem yapılıyor...";
+     762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+     763: 
+     764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+     765:         method: "POST",
+     766:         headers,
+     767:         body: JSON.stringify({})
+     768:       });
+     769: 
+     770:       const data = await res.json();
+     771: 
+     772:       if(!data.ok){
+     773:         titleEl.textContent = "Teslim edilemedi";
+     774:         subEl.textContent = "İşlem başarısız.";
+     775:         renderEmpty(data.error || "Bir hata oluştu.");
+
+### Eşleşme satır 756
+     746:     if(!okConfirm) return;
+     747: 
+     748:     try{
+     749:       const headers = {
+     750:         "Content-Type": "application/json",
+     751:         "Accept": "application/json"
+     752:       };
+     753: 
+     754:       if(csrfToken){
+     755:         headers["X-CSRFToken"] = csrfToken;
+>>   756:         headers["X-CSRF-Token"] = csrfToken;
+     757:       }
+     758: 
+     759:       kickerEl.textContent = "Emanet teslimi";
+     760:       titleEl.textContent = "Teslim ediliyor...";
+     761:       subEl.textContent = "İşlem yapılıyor...";
+     762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+     763: 
+     764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+     765:         method: "POST",
+     766:         headers,
+     767:         body: JSON.stringify({})
+     768:       });
+     769: 
+     770:       const data = await res.json();
+     771: 
+     772:       if(!data.ok){
+     773:         titleEl.textContent = "Teslim edilemedi";
+     774:         subEl.textContent = "İşlem başarısız.";
+     775:         renderEmpty(data.error || "Bir hata oluştu.");
+     776:         return;
+
+### Eşleşme satır 1288
+    1278:     titleEl.textContent = `${stop} durağı`;
+    1279:     subEl.textContent = "Eksik işlem kontrol ediliyor...";
+    1280:     bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+    1281: 
+    1282:     try{
+    1283:       const headers = {
+    1284:         "Content-Type": "application/json",
+    1285:         "Accept": "application/json"
+    1286:       };
+    1287: 
+>>  1288:       if(csrfToken){
+    1289:         headers["X-CSRFToken"] = csrfToken;
+    1290:         headers["X-CSRF-Token"] = csrfToken;
+    1291:       }
+    1292: 
+    1293:       const res = await fetch("/api/live-stop-complete", {
+    1294:         method:"POST",
+    1295:         headers,
+    1296:         body:JSON.stringify({ stop })
+    1297:       });
+    1298: 
+    1299:       const j = await res.json();
+    1300: 
+    1301:       if(!j.ok){
+    1302:         subEl.textContent = "Kontrol yapılamadı.";
+    1303:         renderEmpty(j.error || "Bir hata oluştu.");
+    1304:         return;
+    1305:       }
+    1306: 
+    1307:       if(j.completed){
+    1308:         kickerEl.textContent = "Durak tamamlandı";
+
+### Eşleşme satır 1289
+    1279:     subEl.textContent = "Eksik işlem kontrol ediliyor...";
+    1280:     bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+    1281: 
+    1282:     try{
+    1283:       const headers = {
+    1284:         "Content-Type": "application/json",
+    1285:         "Accept": "application/json"
+    1286:       };
+    1287: 
+    1288:       if(csrfToken){
+>>  1289:         headers["X-CSRFToken"] = csrfToken;
+    1290:         headers["X-CSRF-Token"] = csrfToken;
+    1291:       }
+    1292: 
+    1293:       const res = await fetch("/api/live-stop-complete", {
+    1294:         method:"POST",
+    1295:         headers,
+    1296:         body:JSON.stringify({ stop })
+    1297:       });
+    1298: 
+    1299:       const j = await res.json();
+    1300: 
+    1301:       if(!j.ok){
+    1302:         subEl.textContent = "Kontrol yapılamadı.";
+    1303:         renderEmpty(j.error || "Bir hata oluştu.");
+    1304:         return;
+    1305:       }
+    1306: 
+    1307:       if(j.completed){
+    1308:         kickerEl.textContent = "Durak tamamlandı";
+    1309:         titleEl.textContent = `${j.stop || stop}`;
+
+### Eşleşme satır 1290
+    1280:     bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+    1281: 
+    1282:     try{
+    1283:       const headers = {
+    1284:         "Content-Type": "application/json",
+    1285:         "Accept": "application/json"
+    1286:       };
+    1287: 
+    1288:       if(csrfToken){
+    1289:         headers["X-CSRFToken"] = csrfToken;
+>>  1290:         headers["X-CSRF-Token"] = csrfToken;
+    1291:       }
+    1292: 
+    1293:       const res = await fetch("/api/live-stop-complete", {
+    1294:         method:"POST",
+    1295:         headers,
+    1296:         body:JSON.stringify({ stop })
+    1297:       });
+    1298: 
+    1299:       const j = await res.json();
+    1300: 
+    1301:       if(!j.ok){
+    1302:         subEl.textContent = "Kontrol yapılamadı.";
+    1303:         renderEmpty(j.error || "Bir hata oluştu.");
+    1304:         return;
+    1305:       }
+    1306: 
+    1307:       if(j.completed){
+    1308:         kickerEl.textContent = "Durak tamamlandı";
+    1309:         titleEl.textContent = `${j.stop || stop}`;
+    1310:         subEl.textContent = "Bu durakta bekleyen işlem kalmadı.";
+
+===== 7) settings_subscription.html POST CSRF BAĞLAMI =====
+
+--- templates/settings_subscription.html içinde arama: method: "POST" ---
+Bulunamadı
+
+--- templates/settings_subscription.html içinde arama: csrf ---
+
+### Eşleşme satır 667
+     659: 
+     660:     {% if dev_mode %}
+     661:       <section class="card">
+     662:         <div class="card-pad">
+     663:           <div class="section-title">Test Kontrolleri</div>
+     664:           <div class="section-sub">Bu alan sadece geliştirici modunda görünür.</div>
+     665: 
+     666:           <form method="post">
+>>   667:             {% if csrf_token is defined %}
+     668:               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     669:             {% endif %}
+     670:             <input type="hidden" name="action" value="activate_manual">
+     671:             <select name="plan">
+     672:               <option value="Standart">Standart</option>
+     673:               <option value="Pro" selected>Pro</option>
+     674:               <option value="Sınırsız">Sınırsız</option>
+     675:             </select>
+     676:             <button class="btn primary" type="submit">Manuel Aktif Et</button>
+     677:           </form>
+     678: 
+     679:           <form method="post" class="actions">
+
+### Eşleşme satır 668
+     660:     {% if dev_mode %}
+     661:       <section class="card">
+     662:         <div class="card-pad">
+     663:           <div class="section-title">Test Kontrolleri</div>
+     664:           <div class="section-sub">Bu alan sadece geliştirici modunda görünür.</div>
+     665: 
+     666:           <form method="post">
+     667:             {% if csrf_token is defined %}
+>>   668:               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     669:             {% endif %}
+     670:             <input type="hidden" name="action" value="activate_manual">
+     671:             <select name="plan">
+     672:               <option value="Standart">Standart</option>
+     673:               <option value="Pro" selected>Pro</option>
+     674:               <option value="Sınırsız">Sınırsız</option>
+     675:             </select>
+     676:             <button class="btn primary" type="submit">Manuel Aktif Et</button>
+     677:           </form>
+     678: 
+     679:           <form method="post" class="actions">
+     680:             {% if csrf_token is defined %}
+
+### Eşleşme satır 680
+     672:               <option value="Standart">Standart</option>
+     673:               <option value="Pro" selected>Pro</option>
+     674:               <option value="Sınırsız">Sınırsız</option>
+     675:             </select>
+     676:             <button class="btn primary" type="submit">Manuel Aktif Et</button>
+     677:           </form>
+     678: 
+     679:           <form method="post" class="actions">
+>>   680:             {% if csrf_token is defined %}
+     681:               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     682:             {% endif %}
+     683:             <input type="hidden" name="action" value="restart_trial">
+     684:             <button class="btn secondary" type="submit">Denemeyi Yeniden Başlat</button>
+     685:           </form>
+     686: 
+     687:           <form method="post" class="actions">
+     688:             {% if csrf_token is defined %}
+     689:               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     690:             {% endif %}
+     691:             <input type="hidden" name="action" value="expire_test">
+     692:             <button class="btn danger" type="submit">Denemeyi Bitmiş Yap</button>
+
+### Eşleşme satır 681
+     673:               <option value="Pro" selected>Pro</option>
+     674:               <option value="Sınırsız">Sınırsız</option>
+     675:             </select>
+     676:             <button class="btn primary" type="submit">Manuel Aktif Et</button>
+     677:           </form>
+     678: 
+     679:           <form method="post" class="actions">
+     680:             {% if csrf_token is defined %}
+>>   681:               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     682:             {% endif %}
+     683:             <input type="hidden" name="action" value="restart_trial">
+     684:             <button class="btn secondary" type="submit">Denemeyi Yeniden Başlat</button>
+     685:           </form>
+     686: 
+     687:           <form method="post" class="actions">
+     688:             {% if csrf_token is defined %}
+     689:               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     690:             {% endif %}
+     691:             <input type="hidden" name="action" value="expire_test">
+     692:             <button class="btn danger" type="submit">Denemeyi Bitmiş Yap</button>
+     693:           </form>
+
+### Eşleşme satır 688
+     680:             {% if csrf_token is defined %}
+     681:               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     682:             {% endif %}
+     683:             <input type="hidden" name="action" value="restart_trial">
+     684:             <button class="btn secondary" type="submit">Denemeyi Yeniden Başlat</button>
+     685:           </form>
+     686: 
+     687:           <form method="post" class="actions">
+>>   688:             {% if csrf_token is defined %}
+     689:               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     690:             {% endif %}
+     691:             <input type="hidden" name="action" value="expire_test">
+     692:             <button class="btn danger" type="submit">Denemeyi Bitmiş Yap</button>
+     693:           </form>
+     694: 
+     695:           <div class="actions">
+     696:             <a class="btn ghost" href="/ayarlar/paket-talepleri">Paket Taleplerini Aç</a>
+     697:           </div>
+     698:         </div>
+     699:       </section>
+     700:     {% endif %}
+
+### Eşleşme satır 689
+     681:               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     682:             {% endif %}
+     683:             <input type="hidden" name="action" value="restart_trial">
+     684:             <button class="btn secondary" type="submit">Denemeyi Yeniden Başlat</button>
+     685:           </form>
+     686: 
+     687:           <form method="post" class="actions">
+     688:             {% if csrf_token is defined %}
+>>   689:               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+     690:             {% endif %}
+     691:             <input type="hidden" name="action" value="expire_test">
+     692:             <button class="btn danger" type="submit">Denemeyi Bitmiş Yap</button>
+     693:           </form>
+     694: 
+     695:           <div class="actions">
+     696:             <a class="btn ghost" href="/ayarlar/paket-talepleri">Paket Taleplerini Aç</a>
+     697:           </div>
+     698:         </div>
+     699:       </section>
+     700:     {% endif %}
+     701: 
+
+--- android_app/app/src/main/python/templates/settings_subscription.html içinde arama: method: "POST" ---
+
+### Eşleşme satır 1558
+    1546:       async function postPlayPurchase(url, payload){
+    1547:         const formData = new URLSearchParams();
+    1548: 
+    1549:         Object.keys(payload || {}).forEach(function(k){
+    1550:           formData.set(k, payload[k] || "");
+    1551:         });
+    1552: 
+    1553:         {% if csrf_token is defined %}
+    1554:         formData.set("csrf_token", {{ csrf_token|tojson }});
+    1555:         {% endif %}
+    1556: 
+    1557:         const res = await fetch(url, {
+>>  1558:           method: "POST",
+    1559:           headers: {"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+    1560:           body: formData.toString(),
+    1561:           credentials: "same-origin"
+    1562:         });
+    1563: 
+    1564:         const data = await res.json().catch(() => ({}));
+    1565: 
+    1566:         if(!res.ok || !data.ok){
+    1567:           throw new Error(data.error || "Google Play işlem bilgisi kaydedilemedi.");
+    1568:         }
+    1569: 
+    1570:         return data;
+    1571:       }
+    1572: 
+    1573:       window.onGooglePlayPurchaseSuccess = async function(productId, purchaseToken){
+    1574:         const success = document.getElementById("paymentSuccessBox");
+    1575:         const requestBtn = document.getElementById("paymentRequestBtn");
+    1576: 
+    1577:         try{
+    1578:           if(success){
+
+--- android_app/app/src/main/python/templates/settings_subscription.html içinde arama: csrf ---
+
+### Eşleşme satır 1178
+    1170: 
+    1171: {% if dev_mode %}
+    1172: <section class="card">
+    1173:       <div class="alert info">
+    1174:         Ödeme altyapısı bağlandığında kullanıcı burada “30 gün ücretsiz başla” ekranından kartını ekleyerek deneme üyeliğini başlatacak. Şimdilik test için manuel işlem butonları aktiftir.
+    1175:       </div>
+    1176: 
+    1177:       <form method="post">
+>>  1178:         {% if csrf_token is defined %}
+    1179:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    1180:         {% endif %}
+    1181:         <input type="hidden" name="action" value="activate_manual">
+    1182: 
+    1183:         <div class="premium-plan-picker">
+    1184:           <label>Paket</label>
+    1185: 
+    1186:           <input type="hidden" name="plan" id="selectedPlanInput" value="Standart">
+    1187: 
+    1188:           <button class="plan-open-btn" type="button" id="openPlanPicker">
+    1189:             <span class="plan-open-left">
+    1190:               <span class="plan-open-icon" id="selectedPlanIcon">📦</span>
+
+### Eşleşme satır 1179
+    1171: {% if dev_mode %}
+    1172: <section class="card">
+    1173:       <div class="alert info">
+    1174:         Ödeme altyapısı bağlandığında kullanıcı burada “30 gün ücretsiz başla” ekranından kartını ekleyerek deneme üyeliğini başlatacak. Şimdilik test için manuel işlem butonları aktiftir.
+    1175:       </div>
+    1176: 
+    1177:       <form method="post">
+    1178:         {% if csrf_token is defined %}
+>>  1179:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    1180:         {% endif %}
+    1181:         <input type="hidden" name="action" value="activate_manual">
+    1182: 
+    1183:         <div class="premium-plan-picker">
+    1184:           <label>Paket</label>
+    1185: 
+    1186:           <input type="hidden" name="plan" id="selectedPlanInput" value="Standart">
+    1187: 
+    1188:           <button class="plan-open-btn" type="button" id="openPlanPicker">
+    1189:             <span class="plan-open-left">
+    1190:               <span class="plan-open-icon" id="selectedPlanIcon">📦</span>
+    1191:               <span>
+
+### Eşleşme satır 1204
+    1196:             <span class="plan-open-arrow">›</span>
+    1197:           </button>
+    1198:         </div>
+    1199: 
+    1200:         <button class="btn primary" type="submit">Test: Aboneliği Aktif Et</button>
+    1201:       </form>
+    1202: 
+    1203:       <form method="post" onsubmit="return confirm('Test için deneme süresi bitmiş hale getirilsin mi?');">
+>>  1204:         {% if csrf_token is defined %}
+    1205:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    1206:         {% endif %}
+    1207:         <input type="hidden" name="action" value="expire_test">
+    1208:         <button class="btn danger" type="submit">Test: Deneme Süresini Bitir</button>
+    1209:       </form>
+    1210: 
+    1211:       <form method="post" onsubmit="return confirm('Deneme süresi yeniden başlatılsın mı?');">
+    1212:         {% if csrf_token is defined %}
+    1213:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    1214:         {% endif %}
+    1215:         <input type="hidden" name="action" value="restart_trial">
+    1216:         <button class="btn secondary" type="submit">Test: Denemeyi Yeniden Başlat</button>
+
+### Eşleşme satır 1205
+    1197:           </button>
+    1198:         </div>
+    1199: 
+    1200:         <button class="btn primary" type="submit">Test: Aboneliği Aktif Et</button>
+    1201:       </form>
+    1202: 
+    1203:       <form method="post" onsubmit="return confirm('Test için deneme süresi bitmiş hale getirilsin mi?');">
+    1204:         {% if csrf_token is defined %}
+>>  1205:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    1206:         {% endif %}
+    1207:         <input type="hidden" name="action" value="expire_test">
+    1208:         <button class="btn danger" type="submit">Test: Deneme Süresini Bitir</button>
+    1209:       </form>
+    1210: 
+    1211:       <form method="post" onsubmit="return confirm('Deneme süresi yeniden başlatılsın mı?');">
+    1212:         {% if csrf_token is defined %}
+    1213:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    1214:         {% endif %}
+    1215:         <input type="hidden" name="action" value="restart_trial">
+    1216:         <button class="btn secondary" type="submit">Test: Denemeyi Yeniden Başlat</button>
+    1217:       </form>
+
+### Eşleşme satır 1212
+    1204:         {% if csrf_token is defined %}
+    1205:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    1206:         {% endif %}
+    1207:         <input type="hidden" name="action" value="expire_test">
+    1208:         <button class="btn danger" type="submit">Test: Deneme Süresini Bitir</button>
+    1209:       </form>
+    1210: 
+    1211:       <form method="post" onsubmit="return confirm('Deneme süresi yeniden başlatılsın mı?');">
+>>  1212:         {% if csrf_token is defined %}
+    1213:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    1214:         {% endif %}
+    1215:         <input type="hidden" name="action" value="restart_trial">
+    1216:         <button class="btn secondary" type="submit">Test: Denemeyi Yeniden Başlat</button>
+    1217:       </form>
+    1218:     </section>
+    1219: {% endif %}
+    1220: 
+    1221:     <a class="btn secondary" href="/ayarlar">← Ayarlara dön</a>
+    1222:   
+    1223:     {% if dev_mode %}
+    1224:       <section class="gp-dev-card">
+
+### Eşleşme satır 1213
+    1205:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    1206:         {% endif %}
+    1207:         <input type="hidden" name="action" value="expire_test">
+    1208:         <button class="btn danger" type="submit">Test: Deneme Süresini Bitir</button>
+    1209:       </form>
+    1210: 
+    1211:       <form method="post" onsubmit="return confirm('Deneme süresi yeniden başlatılsın mı?');">
+    1212:         {% if csrf_token is defined %}
+>>  1213:           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    1214:         {% endif %}
+    1215:         <input type="hidden" name="action" value="restart_trial">
+    1216:         <button class="btn secondary" type="submit">Test: Denemeyi Yeniden Başlat</button>
+    1217:       </form>
+    1218:     </section>
+    1219: {% endif %}
+    1220: 
+    1221:     <a class="btn secondary" href="/ayarlar">← Ayarlara dön</a>
+    1222:   
+    1223:     {% if dev_mode %}
+    1224:       <section class="gp-dev-card">
+    1225:         <h2>🧪 Google Play Test</h2>
+
+### Eşleşme satır 1553
+    1545:     (function(){
+    1546:       async function postPlayPurchase(url, payload){
+    1547:         const formData = new URLSearchParams();
+    1548: 
+    1549:         Object.keys(payload || {}).forEach(function(k){
+    1550:           formData.set(k, payload[k] || "");
+    1551:         });
+    1552: 
+>>  1553:         {% if csrf_token is defined %}
+    1554:         formData.set("csrf_token", {{ csrf_token|tojson }});
+    1555:         {% endif %}
+    1556: 
+    1557:         const res = await fetch(url, {
+    1558:           method: "POST",
+    1559:           headers: {"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+    1560:           body: formData.toString(),
+    1561:           credentials: "same-origin"
+    1562:         });
+    1563: 
+    1564:         const data = await res.json().catch(() => ({}));
+    1565: 
+
+### Eşleşme satır 1554
+    1546:       async function postPlayPurchase(url, payload){
+    1547:         const formData = new URLSearchParams();
+    1548: 
+    1549:         Object.keys(payload || {}).forEach(function(k){
+    1550:           formData.set(k, payload[k] || "");
+    1551:         });
+    1552: 
+    1553:         {% if csrf_token is defined %}
+>>  1554:         formData.set("csrf_token", {{ csrf_token|tojson }});
+    1555:         {% endif %}
+    1556: 
+    1557:         const res = await fetch(url, {
+    1558:           method: "POST",
+    1559:           headers: {"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+    1560:           body: formData.toString(),
+    1561:           credentials: "same-origin"
+    1562:         });
+    1563: 
+    1564:         const data = await res.json().catch(() => ({}));
+    1565: 
+    1566:         if(!res.ok || !data.ok){
+
+===== 8) route_stops.html GERÇEKTEN KULLANILIYOR MU? =====
+
+--- tools/muavin_audit_step4_suspicious_context.py ---
+  124:     ("templates/route_stops.html", "/api/route-stop"),
+  141:     ("android_app/app/src/main/python/templates/route_stops.html", "/api/route-stop"),
+  210: # 8) route_stops.html SAYFASI RENDER EDİLİYOR MU?
+  212: section("8) route_stops.html GERÇEKTEN KULLANILIYOR MU?")
+  220:     if "route_stops.html" in txt or "route_stops" in txt or "/api/route-stop" in txt:
+  224:             if "route_stops.html" in line or "route_stops" in line or "/api/route-stop" in line:
+
+--- templates/route_stops.html ---
+   57:         const res = await fetch('/api/route-stop', {
+
+--- modules/ai_panel.py ---
+  239:     def ai_extract_stop_mentions(command: str, route_stops: list[str]) -> list[str]:
+  243:         for stop in route_stops:
+  325:         route_stops = get_stops(trip_row["route"]) if trip_row else []
+  326:         stop_hits = ai_extract_stop_mentions(command, route_stops)
+
+--- android_app/app/src/main/python/modules/ai_panel.py ---
+  239:     def ai_extract_stop_mentions(command: str, route_stops: list[str]) -> list[str]:
+  243:         for stop in route_stops:
+  325:         route_stops = get_stops(trip_row["route"]) if trip_row else []
+  326:         stop_hits = ai_extract_stop_mentions(command, route_stops)
+
+--- android_app/app/src/main/python/templates/route_stops.html ---
+   57:         const res = await fetch('/api/route-stop', {
+
+===== STEP-4 BİTTİ =====

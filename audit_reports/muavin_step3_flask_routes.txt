@@ -1,0 +1,218 @@
+===== MUAVİN ASİSTANI STEP-3 FLASK GERÇEK ROUTE DENETİMİ =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+
+===== 1) FLASK APP IMPORT / URL MAP =====
+✅ Flask app import edildi
+Endpoint sayısı: 108
+Rule sayısı: 109
+
+İlk 120 route:
+GET                /                                             -> index
+GET                /abonelik-gerekli                             -> subscription_required_page
+GET                /ai-console                                   -> ai_console_page
+GET                /api/ai/bootstrap                             -> api_ai_bootstrap
+POST               /api/ai/execute                               -> api_ai_execute
+GET                /api/ai/intents                               -> api_ai_intents
+POST               /api/ai/learn                                 -> api_ai_learn
+GET                /api/ai/learned                               -> api_ai_learned
+DELETE             /api/ai/learned/<int:item_id>                 -> api_ai_learned_delete
+PUT                /api/ai/learned/<int:item_id>                 -> api_ai_learned_update
+POST               /api/ai/resolve                               -> api_ai_resolve
+GET                /api/bags/meta                                -> api_bags_meta
+GET,POST           /api/consignments                             -> api_consignments
+DELETE             /api/consignments/<int:cid>                   -> api_consignment_delete
+GET,POST           /api/consignments/<int:cid>/photos            -> api_consignment_photos
+DELETE,GET,POST    /api/coords                                   -> api_coords
+GET                /api/events                                   -> api_events
+POST               /api/google-play/purchase-cancelled           -> api_google_play_purchase_cancelled
+POST               /api/google-play/purchase-success             -> api_google_play_purchase_success
+POST               /api/live-consignment-deliver/<int:cid>       -> api_live_consignment_deliver
+GET                /api/live-consignment-detail/<int:cid>        -> api_live_consignment_detail
+GET                /api/live-runtime-state                       -> api_live_runtime_state
+GET                /api/live-seat-bag-detail                     -> api_live_seat_bag_detail
+POST               /api/live-seat-destination                    -> api_live_seat_destination
+POST               /api/live-seat-offload                        -> api_live_seat_offload
+POST               /api/live-stop-complete                       -> api_live_stop_complete
+GET                /api/live-stop-detail                         -> api_live_stop_detail
+POST               /api/live-stop-offload                        -> api_live_stop_offload
+POST               /api/package-request                          -> api_package_request
+GET                /api/parcels                                  -> api_parcels
+GET                /api/report-archive                           -> api_report_archive
+GET                /api/report/seat-stats                        -> api_report_seat_stats
+GET                /api/route-schedule                           -> api_route_schedule
+POST               /api/routes/<int:rid>/coord-save-manual       -> api_route_coord_save_manual
+POST               /api/routes/<int:rid>/coord-status            -> api_route_coord_status
+DELETE,POST        /api/seat                                     -> api_seat
+DELETE,POST        /api/seats/bulk                               -> api_seats_bulk
+POST               /api/seats/gender                             -> api_seats_gender
+GET                /api/seats/list                               -> api_seats_list
+POST               /api/seats/offload                            -> api_seats_offload
+POST               /api/seats/service                            -> api_seats_service
+GET                /api/speedlimit                               -> speed.api_speedlimit
+DELETE,GET,POST    /api/standing                                 -> api_standing
+GET                /api/standing/list                            -> api_standing_list
+GET                /api/stats                                    -> api_stats
+GET,POST           /api/stoplog                                  -> api_stoplog
+GET                /api/stops                                    -> api_stops
+GET                /api/trip-report                              -> api_trip_report
+GET                /api/trip-report/archive/<base>               -> api_archived_trip_report
+DELETE,GET,POST    /api/walkon                                   -> api_walkon
+GET                /ayarlar                                      -> settings_page
+GET,POST           /ayarlar/abonelik                             -> settings_subscription_page
+GET,POST           /ayarlar/kurtarma-kodu                        -> settings_recovery_code_page
+GET                /ayarlar/paket-talepleri                      -> settings_package_requests_page
+POST               /ayarlar/paket-talepleri/<int:req_id>/tamamla -> settings_package_request_done
+GET,POST           /ayarlar/profil                               -> settings_profile_page
+GET,POST           /ayarlar/sifre                                -> settings_password_page
+GET                /ayarlar/yedekleme                            -> settings_backup_page
+POST               /ayarlar/yedekleme/geri-yukle                 -> settings_backup_restore
+GET                /ayarlar/yedekleme/indir/<filename>           -> settings_backup_download
+POST               /ayarlar/yedekleme/olustur                    -> settings_backup_create
+POST               /ayarlar/yedekleme/sil/<filename>             -> settings_backup_delete
+GET,POST           /bags                                         -> bags.gallery
+GET,POST           /bags/capture                                 -> bags.capture
+DELETE             /bags/clear                                   -> bags.clear_bags
+DELETE             /bags/clear                                   -> bags_clear_alias
+POST               /bags/delete-one                              -> bags.delete_one
+GET                /bags/raw/<trip>/<seat>/<path:filename>       -> bags.raw
+GET                /bags/thumb/<trip>/<seat>/<path:filename>     -> bags.thumb
+GET                /canli-harita                                 -> live_map_page
+GET                /continue-trip                                -> continue_trip
+GET                /emanetler                                    -> consignments_page
+GET,POST           /end-trip                                     -> end_trip
+GET,POST           /end_trip                                     -> end_trip
+GET                /fiyat                                        -> fare_query
+GET,POST           /fiyat-g                                      -> fare_admin
+GET,POST           /hat-ekle                                     -> add_route
+GET,POST           /hat/<int:rid>/duzenle                        -> route_edit
+GET,POST           /hat/<int:rid>/saatler                        -> route_schedule_edit
+POST               /hat/<int:rid>/sil                            -> route_delete
+GET                /hat/builtin/duzenle                          -> builtin_route_edit
+GET                /hatlar                                       -> routes_list
+GET                /hesap                                        -> hesap_page
+POST               /hesap/cikis                                  -> hesap_cikis
+POST               /hesap/devir                                  -> hesap_devir
+POST               /hesap/giris                                  -> hesap_giris
+POST               /hesap/kategoriler                            -> hesap_kategoriler_kaydet
+GET                /hesap/moves.csv                              -> hesap_moves_csv
+GET,POST           /kullanici-sifirla                            -> reset_user_page
+GET,POST           /kurulum                                      -> setup_page
+GET,POST           /login                                        -> login
+GET,POST           /logout                                       -> logout
+GET                /olaylar                                      -> events_page
+GET                /paket-gerekli                                -> package_required_page
+GET                /rapor-arsiv                                  -> report_archive_page
+GET                /rapor-dosya/<base>/<kind>                    -> report_file_download
+GET                /raporlar                                     -> reports_page
+GET                /rehber                                       -> rehber_page
+GET                /seats                                        -> seats_page
+GET,POST           /sefer-baslat                                 -> trip_start
+GET                /sefer-raporu                                 -> trip_report_page
+GET                /sefer-raporu-son                             -> latest_trip_report_redirect
+GET                /sefer-raporu/arsiv/<base>                    -> archived_trip_report_page
+POST               /set-route                                    -> set_route
+GET,POST           /sifre-unuttum                                -> forgot_password_page
+GET                /static/<path:filename>                       -> static
+GET                /tanitim                                      -> onboarding_page
+GET                /u/<path:filename>                            -> serve_uploaded
+GET                /yolcu-kontrol                                -> passenger_control
+
+===== 2) url_for GERÇEK ENDPOINT KONTROLÜ =====
+url_for kullanımı: 492
+❌ Gerçek Flask endpoint içinde bulunamayan url_for var
+tools/muavin_audit_step2.py:247 -> url_for('{endpoint}')
+tools/muavin_audit_step3_flask_routes.py:108 -> url_for('{endpoint}')
+
+===== 3) fetch/API GERÇEK ROUTE KONTROLÜ =====
+fetch çağrısı: 59
+eşleşen/relative: 47
+şüpheli: 12
+
+⚠️ Şüpheli fetch/API:
+templates/consignments.html:974 -> /api/consignments/__VAR__/status  [Flask url_map içinde eşleşmedi]
+templates/reports.html:482 -> /api/report/seat-detail  [Flask url_map içinde eşleşmedi]
+templates/route_stops.html:57 -> /api/route-stop  [Flask url_map içinde eşleşmedi]
+static/app.js:12 -> /api/seat/clear  [Flask url_map içinde eşleşmedi]
+static/app.js:19 -> /api/seats  [Flask url_map içinde eşleşmedi]
+android_app/app/src/main/python/static/app.js:12 -> /api/seat/clear  [Flask url_map içinde eşleşmedi]
+android_app/app/src/main/python/static/app.js:19 -> /api/seats  [Flask url_map içinde eşleşmedi]
+android_app/app/src/main/python/templates/consignments.html:974 -> /api/consignments/__VAR__/status  [Flask url_map içinde eşleşmedi]
+android_app/app/src/main/python/templates/reports.html:482 -> /api/report/seat-detail  [Flask url_map içinde eşleşmedi]
+android_app/app/src/main/python/templates/route_stops.html:57 -> /api/route-stop  [Flask url_map içinde eşleşmedi]
+android_app/app/src/main/python/static/seats/seats-time-prayer.js:94 -> https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}  [Dış URL / APK internet bağımlılığı]
+static/seats/seats-time-prayer.js:94 -> https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}  [Dış URL / APK internet bağımlılığı]
+
+===== 4) CSRF KORUMALI YAZMA ROUTE'LARI =====
+PROTECTED_PREFIXES: ('/',)
+EXCLUDE_PREFIXES: ('/login', '/logout', '/health', '/api/speedlimit', '/static')
+
+Yazma route sayısı: 58
+POST               /api/ai/execute                               -> api_ai_execute
+POST               /api/ai/learn                                 -> api_ai_learn
+DELETE             /api/ai/learned/<int:item_id>                 -> api_ai_learned_delete
+PUT                /api/ai/learned/<int:item_id>                 -> api_ai_learned_update
+POST               /api/ai/resolve                               -> api_ai_resolve
+GET,POST           /api/consignments                             -> api_consignments
+DELETE             /api/consignments/<int:cid>                   -> api_consignment_delete
+GET,POST           /api/consignments/<int:cid>/photos            -> api_consignment_photos
+DELETE,GET,POST    /api/coords                                   -> api_coords
+POST               /api/google-play/purchase-cancelled           -> api_google_play_purchase_cancelled
+POST               /api/google-play/purchase-success             -> api_google_play_purchase_success
+POST               /api/live-consignment-deliver/<int:cid>       -> api_live_consignment_deliver
+POST               /api/live-seat-destination                    -> api_live_seat_destination
+POST               /api/live-seat-offload                        -> api_live_seat_offload
+POST               /api/live-stop-complete                       -> api_live_stop_complete
+POST               /api/live-stop-offload                        -> api_live_stop_offload
+POST               /api/package-request                          -> api_package_request
+POST               /api/routes/<int:rid>/coord-save-manual       -> api_route_coord_save_manual
+POST               /api/routes/<int:rid>/coord-status            -> api_route_coord_status
+DELETE,POST        /api/seat                                     -> api_seat
+DELETE,POST        /api/seats/bulk                               -> api_seats_bulk
+POST               /api/seats/gender                             -> api_seats_gender
+POST               /api/seats/offload                            -> api_seats_offload
+POST               /api/seats/service                            -> api_seats_service
+DELETE,GET,POST    /api/standing                                 -> api_standing
+GET,POST           /api/stoplog                                  -> api_stoplog
+DELETE,GET,POST    /api/walkon                                   -> api_walkon
+GET,POST           /ayarlar/abonelik                             -> settings_subscription_page
+GET,POST           /ayarlar/kurtarma-kodu                        -> settings_recovery_code_page
+POST               /ayarlar/paket-talepleri/<int:req_id>/tamamla -> settings_package_request_done
+GET,POST           /ayarlar/profil                               -> settings_profile_page
+GET,POST           /ayarlar/sifre                                -> settings_password_page
+POST               /ayarlar/yedekleme/geri-yukle                 -> settings_backup_restore
+POST               /ayarlar/yedekleme/olustur                    -> settings_backup_create
+POST               /ayarlar/yedekleme/sil/<filename>             -> settings_backup_delete
+GET,POST           /bags                                         -> bags.gallery
+GET,POST           /bags/capture                                 -> bags.capture
+DELETE             /bags/clear                                   -> bags.clear_bags
+DELETE             /bags/clear                                   -> bags_clear_alias
+POST               /bags/delete-one                              -> bags.delete_one
+GET,POST           /end-trip                                     -> end_trip
+GET,POST           /end_trip                                     -> end_trip
+GET,POST           /fiyat-g                                      -> fare_admin
+GET,POST           /hat-ekle                                     -> add_route
+GET,POST           /hat/<int:rid>/duzenle                        -> route_edit
+GET,POST           /hat/<int:rid>/saatler                        -> route_schedule_edit
+POST               /hat/<int:rid>/sil                            -> route_delete
+POST               /hesap/cikis                                  -> hesap_cikis
+POST               /hesap/devir                                  -> hesap_devir
+POST               /hesap/giris                                  -> hesap_giris
+POST               /hesap/kategoriler                            -> hesap_kategoriler_kaydet
+GET,POST           /kullanici-sifirla                            -> reset_user_page
+GET,POST           /kurulum                                      -> setup_page
+GET,POST           /login                                        -> login
+GET,POST           /logout                                       -> logout
+GET,POST           /sefer-baslat                                 -> trip_start
+POST               /set-route                                    -> set_route
+GET,POST           /sifre-unuttum                                -> forgot_password_page
+
+===== 5) static/app.js GERÇEKTEN SAYFALARA BAĞLI MI? =====
+'static/app.js' izi yok
+'/static/app.js' izi yok
+'app.js' izi:
+  templates/base.html:22
+  android_app/app/src/main/python/templates/base.html:22
+  apk_payload/templates/base.html:22
+
+===== STEP-3 BİTTİ =====

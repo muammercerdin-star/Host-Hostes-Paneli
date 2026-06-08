@@ -1,0 +1,16 @@
+/* =========================================================
+   HIDE_QUICK_FAB_V22
+   Sol alttaki + / ₺ / indir hızlı işlem FAB butonlarını gizler.
+   İşlem sekmesindeki normal Hızlı İşlemler ekranına dokunmaz.
+========================================================= */
+
+.fab-column,
+.fab-column.fab-left-gap-moved,
+body.drive-mode .fab-column,
+body.drive-mode .fab-column.fab-left-gap-moved,
+html.seat-simple-mode .fab-column,
+html.seat-simple-mode .fab-column.fab-left-gap-moved{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}

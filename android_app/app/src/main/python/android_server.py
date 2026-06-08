@@ -1,15 +1,32 @@
 import os
-import socket
 import shutil
+import sys
 import threading
 import time
 import traceback
+import urllib.request
 from pathlib import Path
 
 SERVER_ERROR = None
 
+HOST = "127.0.0.1"
+PORT = 8765
 
-def wait_for_port(host="127.0.0.1", port=5000, timeout=25):
+PING_PATH = "/__apk_ping__"
+PING_TEXT = "MUAVIN_APK_OK"
+
+
+def _http_ping(host=HOST, port=PORT, timeout=1.2):
+    try:
+        url = f"http://{host}:{port}{PING_PATH}"
+        with urllib.request.urlopen(url, timeout=timeout) as r:
+            data = r.read(128).decode("utf-8", errors="ignore")
+            return PING_TEXT in data
+    except Exception:
+        return False
+
+
+def wait_for_port(host=HOST, port=PORT, timeout=35):
     start = time.time()
 
     while time.time() - start < timeout:
@@ -18,17 +35,23 @@ def wait_for_port(host="127.0.0.1", port=5000, timeout=25):
         if SERVER_ERROR:
             raise RuntimeError("Flask başlatılamadı:\n" + SERVER_ERROR)
 
-        try:
-            with socket.create_connection((host, port), timeout=1):
-                return True
-        except OSError:
-            time.sleep(0.4)
+        # Sadece port açık mı diye bakmıyoruz.
+        # Muavin Flask gerçekten açıldı mı diye özel ping kontrolü yapıyoruz.
+        if _http_ping(host, port):
+            return True
 
-    raise RuntimeError("Flask 25 saniye içinde 127.0.0.1:5000 üzerinde başlamadı.")
+        time.sleep(0.35)
+
+    raise RuntimeError(
+        f"Flask {timeout} saniye içinde {host}:{port} üzerinde başlamadı."
+    )
 
 
 def prepare_android_data_dir(app_files_dir=None):
     base_dir = Path(__file__).resolve().parent
+
+    if str(base_dir) not in sys.path:
+        sys.path.insert(0, str(base_dir))
 
     if app_files_dir:
         data_dir = Path(str(app_files_dir))
@@ -53,6 +76,8 @@ def prepare_android_data_dir(app_files_dir=None):
 
     os.environ["DB_PATH"] = str(db_path)
     os.environ["UPLOAD_DIR"] = str(uploads_dir)
+    os.environ["MUAVIN_ANDROID"] = "1"
+    os.environ["MUAVIN_APK_PORT"] = str(PORT)
 
     os.chdir(str(data_dir))
 
@@ -65,11 +90,26 @@ def start_flask_server(app_files_dir=None):
     try:
         base_dir, data_dir = prepare_android_data_dir(app_files_dir)
 
-        from app import app
+        import app as webapp
 
-        app.run(
-            host="127.0.0.1",
-            port=5000,
+        flask_app = webapp.app
+
+        if "__apk_ping__" not in flask_app.view_functions:
+            @flask_app.get(PING_PATH, endpoint="__apk_ping__")
+            def __apk_ping__():
+                return PING_TEXT, 200, {
+                    "Content-Type": "text/plain; charset=utf-8"
+                }
+
+        with flask_app.app_context():
+            if hasattr(webapp, "ensure_schema"):
+                webapp.ensure_schema()
+            if hasattr(webapp, "ensure_upload_dir"):
+                webapp.ensure_upload_dir()
+
+        flask_app.run(
+            host=HOST,
+            port=PORT,
             debug=False,
             use_reloader=False,
             threaded=True,
@@ -81,8 +121,12 @@ def start_flask_server(app_files_dir=None):
 
 
 def start_in_background(app_files_dir=None):
-    t = threading.Thread(target=start_flask_server, args=(app_files_dir,), daemon=True)
+    t = threading.Thread(
+        target=start_flask_server,
+        args=(app_files_dir,),
+        daemon=True,
+    )
     t.start()
 
-    wait_for_port("127.0.0.1", 5000, timeout=25)
+    wait_for_port(HOST, PORT, timeout=35)
     return True

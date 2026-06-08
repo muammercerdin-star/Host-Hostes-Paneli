@@ -1555,16 +1555,36 @@ body::before{
   if(!btn || !select || !sheet || !backdrop) return;
 
   function openSheet(){
-    backdrop.classList.add("show");
-    sheet.classList.add("show");
-    sheet.setAttribute("aria-hidden", "false");
-  }
+      // ROUTE_PICKER_UNLOCK_FIX_V14B
+      if(backdrop){
+        backdrop.hidden = false;
+        backdrop.removeAttribute("hidden");
+        backdrop.classList.add("show");
+        backdrop.setAttribute("aria-hidden", "false");
+      }
+
+      if(sheet){
+        sheet.hidden = false;
+        sheet.removeAttribute("hidden");
+        sheet.classList.add("show");
+        sheet.setAttribute("aria-hidden", "false");
+      }
+    }
 
   function closeSheet(){
-    sheet.classList.remove("show");
-    backdrop.classList.remove("show");
-    sheet.setAttribute("aria-hidden", "true");
-  }
+      // ROUTE_PICKER_UNLOCK_FIX_V14B
+      if(sheet){
+        sheet.classList.remove("show");
+        sheet.hidden = true;
+        sheet.setAttribute("aria-hidden", "true");
+      }
+
+      if(backdrop){
+        backdrop.classList.remove("show");
+        backdrop.hidden = true;
+        backdrop.setAttribute("aria-hidden", "true");
+      }
+    }
 
   function syncStartLink(route){
     if(!startLink) return;
@@ -1854,149 +1874,28 @@ body::before{
       return false;
     }, true);
   }
+    /* ROUTE_PICKER_ACTIVE_TRIP_LOCK_V15
+       Aktif sefer varken hat değiştirilemez.
+       Aktif sefer yoksa premium route picker normal açılır.
+    */
+    if(routeBtn){
+      routeBtn.setAttribute("aria-disabled", "true");
+      routeBtn.setAttribute("title", "Aktif sefer varken hat değiştirilemez");
 
-  /* Aktif sefer varken rota listesini de açtırma */
-  if(routeBtn){
-    routeBtn.addEventListener("click", function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      showGuard();
-      return false;
-    }, true);
-  }
+      routeBtn.addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+        showGuard();
+        return false;
+      }, true);
+    }
 })();
 </script>
 
 
 
-<!-- ACTIVE_ROUTE_LOCK_FINAL_START -->
-<script id="active-route-lock-final">
-(function(){
-  const HAS_ACTIVE_TRIP = {% if active_trip is defined and active_trip %}true{% else %}false{% endif %};
-  const ACTIVE_TRIP_ROUTE = {% if active_trip is defined and active_trip %}{{ active_trip.route|tojson }}{% else %}""{% endif %};
-
-  if(!HAS_ACTIVE_TRIP) return;
-
-  const routeBtn = document.getElementById("routePickerBtn");
-  const routeText = document.getElementById("routePickerText");
-  const routeSelect = document.getElementById("homeRouteSelect");
-  const startLink = document.getElementById("homeTripStart");
-
-  const continueLink =
-    Array.from(document.querySelectorAll(".hero-link"))[1] ||
-    document.querySelector('a[href*="continue"]') ||
-    document.querySelector('a[href*="seats"]');
-
-  const sheet = document.getElementById("routeSheet");
-  const backdrop = document.getElementById("routeSheetBackdrop");
-
-  function hardCloseRouteSheet(){
-    if(sheet){
-      sheet.classList.remove("show");
-      sheet.hidden = true;
-      sheet.setAttribute("aria-hidden", "true");
-    }
-    if(backdrop){
-      backdrop.classList.remove("show");
-      backdrop.hidden = true;
-      backdrop.setAttribute("aria-hidden", "true");
-    }
-  }
-
-  function forceActiveRouteText(){
-    if(!ACTIVE_TRIP_ROUTE) return;
-
-    if(routeText) routeText.textContent = ACTIVE_TRIP_ROUTE;
-
-    if(routeSelect){
-      const opt = Array.from(routeSelect.options || []).find(o => o.value === ACTIVE_TRIP_ROUTE);
-      if(opt) routeSelect.value = ACTIVE_TRIP_ROUTE;
-    }
-
-    try{
-      localStorage.setItem("homeSelectedRoute", ACTIVE_TRIP_ROUTE);
-    }catch(_){}
-  }
-
-  function ensureModal(){
-    let bd = document.getElementById("tripGuardBackdrop");
-    let modal = document.getElementById("tripGuardModal");
-
-    if(bd && modal) return {bd, modal};
-
-    bd = document.createElement("div");
-    bd.id = "tripGuardBackdrop";
-    bd.className = "trip-guard-backdrop";
-
-    modal = document.createElement("section");
-    modal.id = "tripGuardModal";
-    modal.className = "trip-guard-modal";
-    modal.innerHTML = `
-      <div class="trip-guard-icon">⚠️</div>
-      <h2>Aktif sefer var</h2>
-      <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
-      <div class="trip-guard-actions">
-        <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
-        <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
-      </div>
-    `;
-
-    document.body.appendChild(bd);
-    document.body.appendChild(modal);
-
-    function close(){
-      bd.classList.remove("show");
-      modal.classList.remove("show");
-    }
-
-    bd.addEventListener("click", close);
-    modal.querySelector("#tripGuardOk")?.addEventListener("click", close);
-
-    const go = modal.querySelector("#tripGuardGo");
-    if(go && continueLink){
-      go.href = continueLink.getAttribute("href") || "/continue-trip";
-    }
-
-    return {bd, modal};
-  }
-
-  function showGuard(){
-    hardCloseRouteSheet();
-    forceActiveRouteText();
-
-    const {bd, modal} = ensureModal();
-    bd.classList.add("show");
-    modal.classList.add("show");
-  }
-
-  forceActiveRouteText();
-  hardCloseRouteSheet();
-
-  if(startLink){
-    startLink.classList.add("active-trip-locked");
-    startLink.setAttribute("aria-disabled", "true");
-  }
-
-  /*
-    En son kilit:
-    Aktif sefer varken üstteki hat seçici AÇILMAYACAK.
-    Tıklanınca 2. fotoğraftaki aktif sefer uyarısı açılacak.
-  */
-  document.addEventListener("click", function(e){
-    const hitRoute = e.target.closest && e.target.closest("#routePickerBtn");
-
-    if(hitRoute){
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      showGuard();
-      return false;
-    }
-  }, true);
-})();
-</script>
-<!-- ACTIVE_ROUTE_LOCK_FINAL_END -->
+<!-- ACTIVE_ROUTE_LOCK_FINAL_REMOVED_BY_ROUTE_PICKER_UNLOCK_FIX_V14 -->
 
 </body>
 </html>

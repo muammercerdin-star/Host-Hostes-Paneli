@@ -1,0 +1,495 @@
+===== MUAVİN ASİSTANI STEP-7 GLOBAL app.js DENETİMİ =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+
+===== 1) static/app.js TAM İÇERİK =====
+
+--- static/app.js ---
+    1: // static/app.js  — koltuk kayıtları (DB ile)
+    2: 
+    3: // --- API yardımcıları ---
+    4: async function apiSave(seat_no, payload){
+    5:   await fetch("/api/seat", {
+    6:     method:"POST",
+    7:     headers:{"Content-Type":"application/json"},
+    8:     body: JSON.stringify({seat_no, ...payload})
+    9:   });
+   10: }
+   11: async function apiClear(seat_no){
+   12:   await fetch("/api/seat/clear", {
+   13:     method:"POST",
+   14:     headers:{"Content-Type":"application/json"},
+   15:     body: JSON.stringify({seat_no})
+   16:   });
+   17: }
+   18: async function apiLoad(){
+   19:   const r = await fetch("/api/seats");
+   20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+   21: }
+   22: 
+   23: // --- sayfa içi durum ---
+   24: window.seatStates = {}; // num -> {stop, pay, price}
+   25: 
+   26: // --- koltuk tıklama ---
+   27: async function onSeatClick(ev) {
+   28:   const seatEl  = ev.currentTarget;
+   29:   if (!seatEl.classList.contains("seat")) return;
+   30: 
+   31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+   32:   const labelEl = seatEl.parentElement.querySelector(".label");
+   33: 
+   34:   // BOŞ → KAYDET
+   35:   if (!seatEl.classList.contains("occupied")) {
+   36:     const stop = prompt("Nerede ineceksiniz? (durak adı)", "");
+   37:     if (!stop) return;
+   38: 
+   39:     const pay = prompt("Ödeme türü (Biletli/Nakit/IBAN/Online/Ücretsiz)", "Nakit") || "";
+   40:     let price = "";
+   41:     if (pay.toLowerCase() !== "biletli" && pay.toLowerCase() !== "ücretsiz") {
+   42:       price = prompt("Tutar (₺)", "") || "";
+   43:     }
+   44: 
+   45:     // ekrana yansıt
+   46:     seatEl.classList.add("occupied");
+   47:     labelEl.textContent = stop;
+   48:     window.seatStates[num] = { stop, pay, price };
+   49: 
+   50:     // DB'ye yaz
+   51:     await apiSave(num, { stop, pay, price });
+   52: 
+   53:   } else {
+   54:     // DOLU → İNDİR / DÜZENLE
+   55:     const act = prompt("Seçim: indir / düzenle / iptal", "indir");
+   56:     if (!act) return;
+   57: 
+   58:     if (act.toLowerCase() === "indir") {
+   59:       seatEl.classList.remove("occupied");
+   60:       labelEl.textContent = "";
+   61:       delete window.seatStates[num];
+   62:       await apiClear(num); // DB'den sil
+   63: 
+   64:     } else if (act.toLowerCase() === "düzenle") {
+   65:       const old  = window.seatStates[num] || {};
+   66:       const stop = prompt("İniş yeri", old.stop || "")   || old.stop || "";
+   67:       const pay  = prompt("Ödeme türü", old.pay || "Nakit") || old.pay || "";
+   68:       const price= prompt("Tutar (₺)", old.price || "")  || old.price || "";
+   69:       window.seatStates[num] = { stop, pay, price };
+   70:       labelEl.textContent = stop;
+   71:       await apiSave(num, { stop, pay, price }); // DB'de güncelle
+   72:     }
+   73:   }
+   74: }
+   75: 
+   76: // --- bağlama ve ilk yük ---
+   77: function bindSeats(){
+   78:   document.querySelectorAll(".seat[data-num]").forEach(el=>{
+   79:     el.style.cursor = "pointer";
+   80:     el.addEventListener("click", onSeatClick);
+   81:   });
+   82: }
+   83: 
+   84: document.addEventListener("DOMContentLoaded", async () => {
+   85:   bindSeats();
+   86:   // DB'deki mevcut koltukları ekrana bas
+   87:   const data = await apiLoad();
+   88:   for (const [num, v] of Object.entries(data)){
+   89:     const s   = document.querySelector(`.seat[data-num='${num}']`);
+   90:     const lbl = s?.parentElement.querySelector(".label");
+   91:     if (s && lbl){
+   92:       s.classList.add("occupied");
+   93:       lbl.textContent = v.stop || "";
+   94:       window.seatStates[num] = v;
+   95:     }
+   96:   }
+   97: });
+
+===== 2) Android static/app.js TAM İÇERİK =====
+
+--- android_app/app/src/main/python/static/app.js ---
+    1: // static/app.js  — koltuk kayıtları (DB ile)
+    2: 
+    3: // --- API yardımcıları ---
+    4: async function apiSave(seat_no, payload){
+    5:   await fetch("/api/seat", {
+    6:     method:"POST",
+    7:     headers:{"Content-Type":"application/json"},
+    8:     body: JSON.stringify({seat_no, ...payload})
+    9:   });
+   10: }
+   11: async function apiClear(seat_no){
+   12:   await fetch("/api/seat/clear", {
+   13:     method:"POST",
+   14:     headers:{"Content-Type":"application/json"},
+   15:     body: JSON.stringify({seat_no})
+   16:   });
+   17: }
+   18: async function apiLoad(){
+   19:   const r = await fetch("/api/seats");
+   20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+   21: }
+   22: 
+   23: // --- sayfa içi durum ---
+   24: window.seatStates = {}; // num -> {stop, pay, price}
+   25: 
+   26: // --- koltuk tıklama ---
+   27: async function onSeatClick(ev) {
+   28:   const seatEl  = ev.currentTarget;
+   29:   if (!seatEl.classList.contains("seat")) return;
+   30: 
+   31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+   32:   const labelEl = seatEl.parentElement.querySelector(".label");
+   33: 
+   34:   // BOŞ → KAYDET
+   35:   if (!seatEl.classList.contains("occupied")) {
+   36:     const stop = prompt("Nerede ineceksiniz? (durak adı)", "");
+   37:     if (!stop) return;
+   38: 
+   39:     const pay = prompt("Ödeme türü (Biletli/Nakit/IBAN/Online/Ücretsiz)", "Nakit") || "";
+   40:     let price = "";
+   41:     if (pay.toLowerCase() !== "biletli" && pay.toLowerCase() !== "ücretsiz") {
+   42:       price = prompt("Tutar (₺)", "") || "";
+   43:     }
+   44: 
+   45:     // ekrana yansıt
+   46:     seatEl.classList.add("occupied");
+   47:     labelEl.textContent = stop;
+   48:     window.seatStates[num] = { stop, pay, price };
+   49: 
+   50:     // DB'ye yaz
+   51:     await apiSave(num, { stop, pay, price });
+   52: 
+   53:   } else {
+   54:     // DOLU → İNDİR / DÜZENLE
+   55:     const act = prompt("Seçim: indir / düzenle / iptal", "indir");
+   56:     if (!act) return;
+   57: 
+   58:     if (act.toLowerCase() === "indir") {
+   59:       seatEl.classList.remove("occupied");
+   60:       labelEl.textContent = "";
+   61:       delete window.seatStates[num];
+   62:       await apiClear(num); // DB'den sil
+   63: 
+   64:     } else if (act.toLowerCase() === "düzenle") {
+   65:       const old  = window.seatStates[num] || {};
+   66:       const stop = prompt("İniş yeri", old.stop || "")   || old.stop || "";
+   67:       const pay  = prompt("Ödeme türü", old.pay || "Nakit") || old.pay || "";
+   68:       const price= prompt("Tutar (₺)", old.price || "")  || old.price || "";
+   69:       window.seatStates[num] = { stop, pay, price };
+   70:       labelEl.textContent = stop;
+   71:       await apiSave(num, { stop, pay, price }); // DB'de güncelle
+   72:     }
+   73:   }
+   74: }
+   75: 
+   76: // --- bağlama ve ilk yük ---
+   77: function bindSeats(){
+   78:   document.querySelectorAll(".seat[data-num]").forEach(el=>{
+   79:     el.style.cursor = "pointer";
+   80:     el.addEventListener("click", onSeatClick);
+   81:   });
+   82: }
+   83: 
+   84: document.addEventListener("DOMContentLoaded", async () => {
+   85:   bindSeats();
+   86:   // DB'deki mevcut koltukları ekrana bas
+   87:   const data = await apiLoad();
+   88:   for (const [num, v] of Object.entries(data)){
+   89:     const s   = document.querySelector(`.seat[data-num='${num}']`);
+   90:     const lbl = s?.parentElement.querySelector(".label");
+   91:     if (s && lbl){
+   92:       s.classList.add("occupied");
+   93:       lbl.textContent = v.stop || "";
+   94:       window.seatStates[num] = v;
+   95:     }
+   96:   }
+   97: });
+
+===== 3) base.html app.js/jQuery bağlamı =====
+
+--- templates/base.html ---
+   10:   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}">
+   20:   <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
+   21:   <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+   22:   <script src="{{ url_for('static', filename='app.js') }}"></script>
+
+--- android_app/app/src/main/python/templates/base.html ---
+   10:   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}">
+   20:   <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
+   21:   <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+   22:   <script src="{{ url_for('static', filename='app.js') }}"></script>
+
+===== 4) app.js içindeki fonksiyon isimleri =====
+
+--- static/app.js ---
+FUNC: apiClear
+FUNC: apiLoad
+FUNC: apiSave
+FUNC: bindSeats
+FUNC: onSeatClick
+FUNC: seatStates
+
+--- android_app/app/src/main/python/static/app.js ---
+FUNC: apiClear
+FUNC: apiLoad
+FUNC: apiSave
+FUNC: bindSeats
+FUNC: onSeatClick
+FUNC: seatStates
+
+===== 5) app.js fonksiyonları template/JS içinde kullanılıyor mu? =====
+
+--- kullanım araması: apiClear ---
+Kullanım bulunamadı
+
+--- kullanım araması: apiLoad ---
+Kullanım bulunamadı
+
+--- kullanım araması: apiSave ---
+Kullanım bulunamadı
+
+--- kullanım araması: bindSeats ---
+Kullanım bulunamadı
+
+--- kullanım araması: onSeatClick ---
+Kullanım bulunamadı
+
+--- kullanım araması: seatStates ---
+Kullanım bulunamadı
+
+===== 6) Eski endpoint kullanım araması =====
+tools/muavin_audit_step4_suspicious_context.py:122: [/api/consignments/${id}/status] ("templates/consignments.html", "/api/consignments/${id}/status"),
+tools/muavin_audit_step4_suspicious_context.py:123: [/api/report/seat-detail] ("templates/reports.html", "/api/report/seat-detail"),
+tools/muavin_audit_step4_suspicious_context.py:124: [/api/route-stop] ("templates/route_stops.html", "/api/route-stop"),
+tools/muavin_audit_step4_suspicious_context.py:125: [/api/seat/clear] ("static/app.js", "/api/seat/clear"),
+tools/muavin_audit_step4_suspicious_context.py:126: [/api/seats] ("static/app.js", "/api/seats"),
+tools/muavin_audit_step4_suspicious_context.py:139: [/api/consignments/${id}/status] ("android_app/app/src/main/python/templates/consignments.html", "/api/consignments/${id}/status"),
+tools/muavin_audit_step4_suspicious_context.py:140: [/api/report/seat-detail] ("android_app/app/src/main/python/templates/reports.html", "/api/report/seat-detail"),
+tools/muavin_audit_step4_suspicious_context.py:141: [/api/route-stop] ("android_app/app/src/main/python/templates/route_stops.html", "/api/route-stop"),
+tools/muavin_audit_step4_suspicious_context.py:142: [/api/seat/clear] ("android_app/app/src/main/python/static/app.js", "/api/seat/clear"),
+tools/muavin_audit_step4_suspicious_context.py:143: [/api/seats] ("android_app/app/src/main/python/static/app.js", "/api/seats"),
+tools/muavin_audit_step4_suspicious_context.py:220: [/api/route-stop] if "route_stops.html" in txt or "route_stops" in txt or "/api/route-stop" in txt:
+tools/muavin_audit_step4_suspicious_context.py:224: [/api/route-stop] if "route_stops.html" in line or "route_stops" in line or "/api/route-stop" in line:
+tools/muavin_audit_step5_active_bug_context.py:81: [/api/seats] grep_context(path, "/api/seats", before=8, after=12)
+tools/muavin_audit_step5_active_bug_context.py:93: [/api/consignments/${id}/status] grep_context(path, "/api/consignments/${id}/status", before=18, after=26)
+tools/muavin_audit_step5_active_bug_context.py:114: [/api/report/seat-detail] grep_context(path, "/api/report/seat-detail", before=18, after=30)
+tools/muavin_audit_step6_runtime_smoke.py:132: [/api/seats] "/api/seats/list",
+tools/muavin_audit_step6_runtime_smoke.py:136: [/api/report/seat-detail] "/api/report/seat-detail",
+tools/muavin_audit_step6_runtime_smoke.py:141: [/api/route-stop] "/api/route-stop",
+tools/muavin_audit_step6_runtime_smoke.py:142: [/api/seats] "/api/seats",
+tools/muavin_audit_step6b_runtime_smoke_fixed.py:101: [/api/seats] "/api/seats/list",
+tools/muavin_audit_step6b_runtime_smoke_fixed.py:105: [/api/report/seat-detail] "/api/report/seat-detail",
+tools/muavin_audit_step6b_runtime_smoke_fixed.py:110: [/api/route-stop] "/api/route-stop",
+tools/muavin_audit_step6b_runtime_smoke_fixed.py:111: [/api/seats] "/api/seats",
+tools/muavin_audit_step7_global_appjs.py:138: [/api/seat/clear] "/api/seat/clear",
+tools/muavin_audit_step7_global_appjs.py:139: [/api/seats] "/api/seats",
+tools/muavin_audit_step7_global_appjs.py:140: [/api/report/seat-detail] "/api/report/seat-detail",
+tools/muavin_audit_step7_global_appjs.py:141: [/api/route-stop] "/api/route-stop",
+tools/muavin_audit_step7_global_appjs.py:142: [/api/consignments/${id}/status] "/api/consignments/${id}/status",
+templates/consignments.html:974: [/api/consignments/${id}/status] const res = await fetch(`/api/consignments/${id}/status`, {
+templates/passenger_control.html:934: [/api/seats] const r = await fetch('/api/seats/list');
+templates/reports.html:482: [/api/report/seat-detail] const r = await fetch('/api/report/seat-detail?'+p.toString(), {cache:'no-store'});
+templates/route_stops.html:57: [/api/route-stop] const res = await fetch('/api/route-stop', {
+templates/ai_console.html:1715: [/api/seats] api('/api/seats/list', { method:'GET' }).catch(() => ({ items:[] })),
+templates/ai_console.html:2166: [/api/seats] const data = await api('/api/seats/offload', {
+templates/ai_console.html:2189: [/api/seats] const data = await api('/api/seats/service', {
+templates/ai_console.html:2254: [/api/seats] await api('/api/seats/bulk', {
+modules/seats_panel.py:624: [/api/seats] app.add_url_rule("/api/seats/list", endpoint="api_seats_list", view_func=api_seats_list, methods=["GET"])
+modules/seats_panel.py:626: [/api/seats] app.add_url_rule("/api/seats/bulk", endpoint="api_seats_bulk", view_func=api_seats_bulk, methods=["POST", "DELETE"])
+modules/seats_panel.py:627: [/api/seats] app.add_url_rule("/api/seats/offload", endpoint="api_seats_offload", view_func=api_seats_offload, methods=["POST"])
+modules/seats_panel.py:628: [/api/seats] app.add_url_rule("/api/seats/service", endpoint="api_seats_service", view_func=api_seats_service, methods=["POST"])
+modules/seats_panel.py:629: [/api/seats] app.add_url_rule("/api/seats/gender", endpoint="api_seats_gender", view_func=api_seats_gender, methods=["POST"])
+static/app.js:12: [/api/seat/clear] await fetch("/api/seat/clear", {
+static/app.js:19: [/api/seats] const r = await fetch("/api/seats");
+backups/apk_sync_20260520_234501/seats_panel.py:624: [/api/seats] app.add_url_rule("/api/seats/list", endpoint="api_seats_list", view_func=api_seats_list, methods=["GET"])
+backups/apk_sync_20260520_234501/seats_panel.py:626: [/api/seats] app.add_url_rule("/api/seats/bulk", endpoint="api_seats_bulk", view_func=api_seats_bulk, methods=["POST", "DELETE"])
+backups/apk_sync_20260520_234501/seats_panel.py:627: [/api/seats] app.add_url_rule("/api/seats/offload", endpoint="api_seats_offload", view_func=api_seats_offload, methods=["POST"])
+backups/apk_sync_20260520_234501/seats_panel.py:628: [/api/seats] app.add_url_rule("/api/seats/service", endpoint="api_seats_service", view_func=api_seats_service, methods=["POST"])
+backups/apk_sync_20260520_234501/seats_panel.py:629: [/api/seats] app.add_url_rule("/api/seats/gender", endpoint="api_seats_gender", view_func=api_seats_gender, methods=["POST"])
+android_app/app/src/main/python/modules/seats_panel.py:624: [/api/seats] app.add_url_rule("/api/seats/list", endpoint="api_seats_list", view_func=api_seats_list, methods=["GET"])
+android_app/app/src/main/python/modules/seats_panel.py:626: [/api/seats] app.add_url_rule("/api/seats/bulk", endpoint="api_seats_bulk", view_func=api_seats_bulk, methods=["POST", "DELETE"])
+android_app/app/src/main/python/modules/seats_panel.py:627: [/api/seats] app.add_url_rule("/api/seats/offload", endpoint="api_seats_offload", view_func=api_seats_offload, methods=["POST"])
+android_app/app/src/main/python/modules/seats_panel.py:628: [/api/seats] app.add_url_rule("/api/seats/service", endpoint="api_seats_service", view_func=api_seats_service, methods=["POST"])
+android_app/app/src/main/python/modules/seats_panel.py:629: [/api/seats] app.add_url_rule("/api/seats/gender", endpoint="api_seats_gender", view_func=api_seats_gender, methods=["POST"])
+android_app/app/src/main/python/static/app.js:12: [/api/seat/clear] await fetch("/api/seat/clear", {
+android_app/app/src/main/python/static/app.js:19: [/api/seats] const r = await fetch("/api/seats");
+android_app/app/src/main/python/templates/consignments.html:974: [/api/consignments/${id}/status] const res = await fetch(`/api/consignments/${id}/status`, {
+android_app/app/src/main/python/templates/passenger_control.html:934: [/api/seats] const r = await fetch('/api/seats/list');
+android_app/app/src/main/python/templates/reports.html:482: [/api/report/seat-detail] const r = await fetch('/api/report/seat-detail?'+p.toString(), {cache:'no-store'});
+android_app/app/src/main/python/templates/route_stops.html:57: [/api/route-stop] const res = await fetch('/api/route-stop', {
+android_app/app/src/main/python/templates/ai_console.html:1715: [/api/seats] api('/api/seats/list', { method:'GET' }).catch(() => ({ items:[] })),
+android_app/app/src/main/python/templates/ai_console.html:2166: [/api/seats] const data = await api('/api/seats/offload', {
+android_app/app/src/main/python/templates/ai_console.html:2189: [/api/seats] const data = await api('/api/seats/service', {
+android_app/app/src/main/python/templates/ai_console.html:2254: [/api/seats] await api('/api/seats/bulk', {
+android_app/app/src/main/python/static/seats/seats.js:1633: [/api/seats] const j = await safeJsonFetch("/api/seats/bulk", {
+android_app/app/src/main/python/static/seats/seats.js:1784: [/api/seats] const j = await safeJsonFetch("/api/seats/offload", {
+android_app/app/src/main/python/static/seats/voice-commands.js:465: [/api/seats] const j = await safeJsonFetch("/api/seats/gender", {
+android_app/app/src/main/python/static/seats/voice-commands.js:880: [/api/seats] const j = await safeJsonFetch("/api/seats/service", {
+static/seats/seats.js:1633: [/api/seats] const j = await safeJsonFetch("/api/seats/bulk", {
+static/seats/seats.js:1784: [/api/seats] const j = await safeJsonFetch("/api/seats/offload", {
+static/seats/voice-commands.js:465: [/api/seats] const j = await safeJsonFetch("/api/seats/gender", {
+static/seats/voice-commands.js:880: [/api/seats] const j = await safeJsonFetch("/api/seats/service", {
+
+===== 7) jQuery kullanımı var mı? =====
+templates/reports.html:300: [$(] $('#themeToggle').checked = isDark;
+templates/reports.html:301: [$(] $('#iconSun').style.opacity = isDark ? .5 : 1;
+templates/reports.html:302: [$(] $('#iconMoon').style.opacity = isDark ? 1 : .5;
+templates/reports.html:307: [$(] $('#iconSun').style.opacity = dark ? .5 : 1;
+templates/reports.html:308: [$(] $('#iconMoon').style.opacity = dark ? 1 : .5;
+templates/reports.html:312: [$(] $('#themeToggle').addEventListener('change', e => setTheme(e.target.checked));
+templates/reports.html:326: [$(] const r = $('#fRoute').value || '';
+templates/reports.html:327: [$(] const d1 = $('#fStart').value || '';
+templates/reports.html:328: [$(] const d2 = $('#fEnd').value || '';
+templates/reports.html:340: [$(] if (!$('#fStart').value) $('#fStart').value = d1;
+templates/reports.html:341: [$(] if (!$('#fEnd').value)   $('#fEnd').value   = d2;
+templates/reports.html:346: [$(] function showBusy(on=true){ $('#busy').style.display = on ? 'block' : 'none'; }
+templates/reports.html:347: [$(] function showToast(msg){ const t=$('#toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none', 2800); }
+templates/reports.html:365: [$(] $('#mPax').textContent = String(pax);
+templates/reports.html:366: [$(] $('#mRev').textContent = fmtTL(rev);
+templates/reports.html:367: [$(] $('#mAvg').textContent = fmtTL(avg);
+templates/reports.html:368: [$(] $('#mUnsold').textContent = (j.never_sold||[]).length;
+templates/reports.html:369: [$(] $('#unsoldMini').innerHTML = (j.never_sold||[]).slice(0,6).map(n=>`<span class="tag">${n}</span>`).join('') || '—';
+templates/reports.html:384: [$(] const tbody = $('#seatTable tbody'); tbody.innerHTML = '';
+templates/reports.html:448: [$(] drawBar($('#chartTimes'), topTimes.map(x=>String(x.seat_no)), topTimes.map(x=>x.times));
+templates/reports.html:450: [$(] drawBar($('#chartRevenue'), topRev.map(x=>String(x.seat_no)), topRev.map(x=>x.revenue));
+templates/reports.html:458: [$(] const cont = $('#heat'); cont.innerHTML='';
+templates/reports.html:474: [$(] function openModal(){ $('#mdBack').style.display='block'; $('#mdSeat').style.display='block'; }
+templates/reports.html:475: [$(] function closeModal(){ $('#mdBack').style.display='none'; $('#mdSeat').style.display='none'; }
+templates/reports.html:476: [$(] $('#mdBack').addEventListener('click', closeModal);
+templates/reports.html:486: [$(] $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
+templates/reports.html:487: [$(] $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+templates/reports.html:489: [$(] const tb = $('#mdTable tbody'); tb.innerHTML='';
+templates/reports.html:495: [$(] $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+templates/reports.html:531: [$(] $('#btnFetch').addEventListener('click', fetchData);
+templates/reports.html:532: [$(] $('#btnDownload').addEventListener('click', downloadCSV);
+templates/reports.html:533: [$(] $('#btnReset').addEventListener('click', ()=>{
+templates/reports.html:534: [$(] $('#fRoute').value=''; $('#fStart').value=''; $('#fEnd').value='';
+templates/reports.html:536: [$(] $('#mPax').textContent='0'; $('#mRev').textContent='₺0.00'; $('#mAvg').textContent='₺0.00';
+templates/reports.html:537: [$(] $('#mUnsold').textContent='0'; $('#unsoldMini').textContent='—';
+templates/reports.html:538: [$(] $('#seatTable tbody').innerHTML=''; $('#heat').innerHTML='';
+templates/ai_console.html:1443: [$(] modeSwitch: $('#modeSwitch'),
+templates/ai_console.html:1444: [$(] statMode: $('#statMode'),
+templates/ai_console.html:1445: [$(] statConfidence: $('#statConfidence'),
+templates/ai_console.html:1446: [$(] statIntent: $('#statIntent'),
+templates/ai_console.html:1447: [$(] statLearned: $('#statLearned'),
+templates/ai_console.html:1448: [$(] statRoute: $('#statRoute'),
+templates/ai_console.html:1449: [$(] statPending: $('#statPending'),
+templates/ai_console.html:1451: [$(] sideModeBadge: $('#sideModeBadge'),
+templates/ai_console.html:1452: [$(] sideCountBadge: $('#sideCountBadge'),
+templates/ai_console.html:1454: [$(] routeMiniRoute: $('#routeMiniRoute'),
+templates/ai_console.html:1455: [$(] routeMiniSeats: $('#routeMiniSeats'),
+templates/ai_console.html:1456: [$(] routeMiniStanding: $('#routeMiniStanding'),
+templates/ai_console.html:1457: [$(] routeMiniParcel: $('#routeMiniParcel'),
+templates/ai_console.html:1459: [$(] liveSeatCount: $('#liveSeatCount'),
+templates/ai_console.html:1460: [$(] liveStandingCount: $('#liveStandingCount'),
+templates/ai_console.html:1461: [$(] liveParcelCount: $('#liveParcelCount'),
+templates/ai_console.html:1462: [$(] liveTotalPax: $('#liveTotalPax'),
+templates/ai_console.html:1463: [$(] liveEmptySeats: $('#liveEmptySeats'),
+templates/ai_console.html:1465: [$(] btnScrollLearned: $('#btnScrollLearned'),
+templates/ai_console.html:1466: [$(] commandInput: $('#commandInput'),
+templates/ai_console.html:1467: [$(] sendBtn: $('#sendBtn'),
+templates/ai_console.html:1468: [$(] micBtn: $('#micBtn'),
+templates/ai_console.html:1469: [$(] btnClearLog: $('#btnClearLog'),
+templates/ai_console.html:1470: [$(] btnOpenTeach: $('#btnOpenTeach'),
+templates/ai_console.html:1471: [$(] consoleLog: $('#consoleLog'),
+templates/ai_console.html:1473: [$(] voicePreview: $('#voicePreview'),
+templates/ai_console.html:1474: [$(] voicePreviewText: $('#voicePreviewText'),
+templates/ai_console.html:1475: [$(] btnVoiceUseRun: $('#btnVoiceUseRun'),
+templates/ai_console.html:1476: [$(] btnVoiceUseOnly: $('#btnVoiceUseOnly'),
+templates/ai_console.html:1477: [$(] btnVoiceRetry: $('#btnVoiceRetry'),
+templates/ai_console.html:1478: [$(] btnVoiceCancel: $('#btnVoiceCancel'),
+templates/ai_console.html:1480: [$(] resolverCard: $('#resolverCard'),
+templates/ai_console.html:1481: [$(] badgeStatus: $('#badgeStatus'),
+templates/ai_console.html:1482: [$(] badgeConfidence: $('#badgeConfidence'),
+templates/ai_console.html:1483: [$(] rvCommand: $('#rvCommand'),
+templates/ai_console.html:1484: [$(] rvIntent: $('#rvIntent'),
+templates/ai_console.html:1485: [$(] rvSource: $('#rvSource'),
+templates/ai_console.html:1486: [$(] rvPattern: $('#rvPattern'),
+templates/ai_console.html:1487: [$(] rvSeats: $('#rvSeats'),
+templates/ai_console.html:1489: [$(] suggestCard: $('#suggestCard'),
+templates/ai_console.html:1490: [$(] suggestSub: $('#suggestSub'),
+templates/ai_console.html:1491: [$(] btnAcceptSuggestion: $('#btnAcceptSuggestion'),
+templates/ai_console.html:1492: [$(] btnRejectSuggestion: $('#btnRejectSuggestion'),
+templates/ai_console.html:1494: [$(] previewCard: $('#previewCard'),
+templates/ai_console.html:1495: [$(] previewTitle: $('#previewTitle'),
+templates/ai_console.html:1496: [$(] previewSub: $('#previewSub'),
+templates/ai_console.html:1497: [$(] previewBadges: $('#previewBadges'),
+templates/ai_console.html:1498: [$(] previewList: $('#previewList'),
+templates/ai_console.html:1499: [$(] btnPreviewConfirm: $('#btnPreviewConfirm'),
+templates/ai_console.html:1500: [$(] btnPreviewCancel: $('#btnPreviewCancel'),
+templates/ai_console.html:1502: [$(] teachCard: $('#teachCard'),
+templates/ai_console.html:1503: [$(] teachTitle: $('#teachTitle'),
+templates/ai_console.html:1504: [$(] teachPhrase: $('#teachPhrase'),
+templates/ai_console.html:1505: [$(] teachIntentGrid: $('#teachIntentGrid'),
+templates/ai_console.html:1506: [$(] btnTeachOnly: $('#btnTeachOnly'),
+templates/ai_console.html:1507: [$(] btnTeachAndRun: $('#btnTeachAndRun'),
+templates/ai_console.html:1508: [$(] btnTeachCancel: $('#btnTeachCancel'),
+templates/ai_console.html:1510: [$(] actionCard: $('#actionCard'),
+templates/ai_console.html:1511: [$(] actionTitle: $('#actionTitle'),
+templates/ai_console.html:1512: [$(] actionSub: $('#actionSub'),
+templates/ai_console.html:1513: [$(] actionIntentBadge: $('#actionIntentBadge'),
+templates/ai_console.html:1514: [$(] routeStopsList: $('#routeStopsList'),
+templates/ai_console.html:1515: [$(] acSeats: $('#acSeats'),
+templates/ai_console.html:1516: [$(] acFrom: $('#acFrom'),
+templates/ai_console.html:1517: [$(] acTo: $('#acTo'),
+templates/ai_console.html:1518: [$(] acPayment: $('#acPayment'),
+templates/ai_console.html:1519: [$(] acAmount: $('#acAmount'),
+templates/ai_console.html:1520: [$(] acTicketType: $('#acTicketType'),
+templates/ai_console.html:1521: [$(] acService: $('#acService'),
+templates/ai_console.html:1522: [$(] acGender: $('#acGender'),
+templates/ai_console.html:1523: [$(] acPairOk: $('#acPairOk'),
+templates/ai_console.html:1524: [$(] acNote: $('#acNote'),
+templates/ai_console.html:1525: [$(] seatExtras: $('#seatExtras'),
+templates/ai_console.html:1526: [$(] btnRunAction: $('#btnRunAction'),
+templates/ai_console.html:1527: [$(] btnRunActionAndLearn: $('#btnRunActionAndLearn'),
+templates/ai_console.html:1528: [$(] btnActionCancel: $('#btnActionCancel'),
+templates/ai_console.html:1530: [$(] intentLegend: $('#intentLegend'),
+templates/ai_console.html:1531: [$(] learnedSearch: $('#learnedSearch'),
+templates/ai_console.html:1532: [$(] learnedEmpty: $('#learnedEmpty'),
+templates/ai_console.html:1533: [$(] learnedWrap: $('#learnedWrap'),
+templates/ai_console.html:1534: [$(] learnedTbody: $('#learnedTbody'),
+templates/ai_console.html:1535: [$(] learnedCountText: $('#learnedCountText'),
+templates/ai_console.html:1537: [$(] undoBox: $('#undoBox'),
+templates/ai_console.html:1538: [$(] undoTitle: $('#undoTitle'),
+templates/ai_console.html:1539: [$(] undoSub: $('#undoSub'),
+templates/ai_console.html:1540: [$(] btnUndoLast: $('#btnUndoLast')
+templates/ai_console.html:1588: [$(] $$('.chip').forEach(btn => {
+templates/ai_console.html:1657: [$(] $$('#modeSwitch .mode-btn').forEach(btn => {
+templates/ai_console.html:1833: [$(] $$('[data-edit]').forEach(btn => {
+templates/ai_console.html:1837: [$(] $$('[data-del]').forEach(btn => {
+templates/ai_console.html:2607: [$(] $$('#pipeline .pipe-step').forEach(el => {
+android_app/app/src/main/python/templates/reports.html:300: [$(] $('#themeToggle').checked = isDark;
+android_app/app/src/main/python/templates/reports.html:301: [$(] $('#iconSun').style.opacity = isDark ? .5 : 1;
+android_app/app/src/main/python/templates/reports.html:302: [$(] $('#iconMoon').style.opacity = isDark ? 1 : .5;
+android_app/app/src/main/python/templates/reports.html:307: [$(] $('#iconSun').style.opacity = dark ? .5 : 1;
+android_app/app/src/main/python/templates/reports.html:308: [$(] $('#iconMoon').style.opacity = dark ? 1 : .5;
+android_app/app/src/main/python/templates/reports.html:312: [$(] $('#themeToggle').addEventListener('change', e => setTheme(e.target.checked));
+android_app/app/src/main/python/templates/reports.html:326: [$(] const r = $('#fRoute').value || '';
+android_app/app/src/main/python/templates/reports.html:327: [$(] const d1 = $('#fStart').value || '';
+android_app/app/src/main/python/templates/reports.html:328: [$(] const d2 = $('#fEnd').value || '';
+android_app/app/src/main/python/templates/reports.html:340: [$(] if (!$('#fStart').value) $('#fStart').value = d1;
+android_app/app/src/main/python/templates/reports.html:341: [$(] if (!$('#fEnd').value)   $('#fEnd').value   = d2;
+android_app/app/src/main/python/templates/reports.html:346: [$(] function showBusy(on=true){ $('#busy').style.display = on ? 'block' : 'none'; }
+android_app/app/src/main/python/templates/reports.html:347: [$(] function showToast(msg){ const t=$('#toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none', 2800); }
+android_app/app/src/main/python/templates/reports.html:365: [$(] $('#mPax').textContent = String(pax);
+android_app/app/src/main/python/templates/reports.html:366: [$(] $('#mRev').textContent = fmtTL(rev);
+android_app/app/src/main/python/templates/reports.html:367: [$(] $('#mAvg').textContent = fmtTL(avg);
+android_app/app/src/main/python/templates/reports.html:368: [$(] $('#mUnsold').textContent = (j.never_sold||[]).length;
+android_app/app/src/main/python/templates/reports.html:369: [$(] $('#unsoldMini').innerHTML = (j.never_sold||[]).slice(0,6).map(n=>`<span class="tag">${n}</span>`).join('') || '—';
+android_app/app/src/main/python/templates/reports.html:384: [$(] const tbody = $('#seatTable tbody'); tbody.innerHTML = '';
+android_app/app/src/main/python/templates/reports.html:448: [$(] drawBar($('#chartTimes'), topTimes.map(x=>String(x.seat_no)), topTimes.map(x=>x.times));
+android_app/app/src/main/python/templates/reports.html:450: [$(] drawBar($('#chartRevenue'), topRev.map(x=>String(x.seat_no)), topRev.map(x=>x.revenue));
+android_app/app/src/main/python/templates/reports.html:458: [$(] const cont = $('#heat'); cont.innerHTML='';
+android_app/app/src/main/python/templates/reports.html:474: [$(] function openModal(){ $('#mdBack').style.display='block'; $('#mdSeat').style.display='block'; }
+android_app/app/src/main/python/templates/reports.html:475: [$(] function closeModal(){ $('#mdBack').style.display='none'; $('#mdSeat').style.display='none'; }
+android_app/app/src/main/python/templates/reports.html:476: [$(] $('#mdBack').addEventListener('click', closeModal);
+android_app/app/src/main/python/templates/reports.html:486: [$(] $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
+android_app/app/src/main/python/templates/reports.html:487: [$(] $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+android_app/app/src/main/python/templates/reports.html:489: [$(] const tb = $('#mdTable tbody'); tb.innerHTML='';
+android_app/app/src/main/python/templates/reports.html:495: [$(] $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+android_app/app/src/main/python/templates/reports.html:531: [$(] $('#btnFetch').addEventListener('click', fetchData);
+android_app/app/src/main/python/templates/reports.html:532: [$(] $('#btnDownload').addEventListener('click', downloadCSV);
+android_app/app/src/main/python/templates/reports.html:533: [$(] $('#btnReset').addEventListener('click', ()=>{
+android_app/app/src/main/python/templates/reports.html:534: [$(] $('#fRoute').value=''; $('#fStart').value=''; $('#fEnd').value='';
+... ilk 160 kayıt gösterildi
+
+===== STEP-7 BİTTİ =====

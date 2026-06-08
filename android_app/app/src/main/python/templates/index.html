@@ -1461,16 +1461,36 @@ body::before{
   if(!btn || !select || !sheet || !backdrop) return;
 
   function openSheet(){
-    backdrop.classList.add("show");
-    sheet.classList.add("show");
-    sheet.setAttribute("aria-hidden", "false");
-  }
+      // ROUTE_PICKER_UNLOCK_FIX_V14B
+      if(backdrop){
+        backdrop.hidden = false;
+        backdrop.removeAttribute("hidden");
+        backdrop.classList.add("show");
+        backdrop.setAttribute("aria-hidden", "false");
+      }
+
+      if(sheet){
+        sheet.hidden = false;
+        sheet.removeAttribute("hidden");
+        sheet.classList.add("show");
+        sheet.setAttribute("aria-hidden", "false");
+      }
+    }
 
   function closeSheet(){
-    sheet.classList.remove("show");
-    backdrop.classList.remove("show");
-    sheet.setAttribute("aria-hidden", "true");
-  }
+      // ROUTE_PICKER_UNLOCK_FIX_V14B
+      if(sheet){
+        sheet.classList.remove("show");
+        sheet.hidden = true;
+        sheet.setAttribute("aria-hidden", "true");
+      }
+
+      if(backdrop){
+        backdrop.classList.remove("show");
+        backdrop.hidden = true;
+        backdrop.setAttribute("aria-hidden", "true");
+      }
+    }
 
   function syncStartLink(route){
     if(!startLink) return;
@@ -1760,17 +1780,22 @@ body::before{
       return false;
     }, true);
   }
+    /* ROUTE_PICKER_ACTIVE_TRIP_LOCK_V15
+       Aktif sefer varken hat değiştirilemez.
+       Aktif sefer yoksa premium route picker normal açılır.
+    */
+    if(routeBtn){
+      routeBtn.setAttribute("aria-disabled", "true");
+      routeBtn.setAttribute("title", "Aktif sefer varken hat değiştirilemez");
 
-  /* Aktif sefer varken rota listesini de açtırma */
-  if(routeBtn){
-    routeBtn.addEventListener("click", function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      showGuard();
-      return false;
-    }, true);
-  }
+      routeBtn.addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+        showGuard();
+        return false;
+      }, true);
+    }
 })();
 </script>
 

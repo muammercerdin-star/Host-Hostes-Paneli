@@ -219,7 +219,7 @@ public class MainActivity extends Activity {
                 }
                 py.getModule("android_server").callAttr("start_in_background", pyDataDir.getAbsolutePath());
 
-                runOnUiThread(() -> webView.loadUrl("http://127.0.0.1:5000/"));
+                runOnUiThread(() -> webView.loadUrl("http://127.0.0.1:8765/"));
 
             } catch (Exception e) {
                 showError("Flask sunucusu başlatılamadı:\n" + e.toString());

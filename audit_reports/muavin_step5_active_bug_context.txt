@@ -1,0 +1,4726 @@
+===== MUAVİN ASİSTANI STEP-5 AKTİF BUG BAĞLAM DENETİMİ =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+
+===== 1) GLOBAL static/app.js BAĞLAMI =====
+
+--- templates/base.html içinde arama: app.js ---
+
+### Eşleşme satır 22
+      12:   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='3') }}">
+      13: </head>
+      14: 
+      15: <body>
+      16: 
+      17:   {% block content %}{% endblock %}
+      18: 
+      19:   <!-- ✅ Yerel JS (sırası önemli) -->
+      20:   <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
+      21:   <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+>>    22:   <script src="{{ url_for('static', filename='app.js') }}"></script>
+      23: 
+      24:   <!-- Sayfa bazlı ek script alanı -->
+      25:   {% block scripts %}{% endblock %}
+      26: 
+      27: </body>
+      28: </html>
+
+--- android_app/app/src/main/python/templates/base.html içinde arama: app.js ---
+
+### Eşleşme satır 22
+      12:   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='3') }}">
+      13: </head>
+      14: 
+      15: <body>
+      16: 
+      17:   {% block content %}{% endblock %}
+      18: 
+      19:   <!-- ✅ Yerel JS (sırası önemli) -->
+      20:   <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
+      21:   <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+>>    22:   <script src="{{ url_for('static', filename='app.js') }}"></script>
+      23: 
+      24:   <!-- Sayfa bazlı ek script alanı -->
+      25:   {% block scripts %}{% endblock %}
+      26: 
+      27: </body>
+      28: </html>
+
+--- apk_payload/templates/base.html içinde arama: app.js ---
+
+### Eşleşme satır 22
+      12:   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='3') }}">
+      13: </head>
+      14: 
+      15: <body>
+      16: 
+      17:   {% block content %}{% endblock %}
+      18: 
+      19:   <!-- ✅ Yerel JS (sırası önemli) -->
+      20:   <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
+      21:   <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+>>    22:   <script src="{{ url_for('static', filename='app.js') }}"></script>
+      23: 
+      24:   <!-- Sayfa bazlı ek script alanı -->
+      25:   {% block scripts %}{% endblock %}
+      26: 
+      27: </body>
+      28: </html>
+
+--- static/app.js:1-160 ---
+    1: // static/app.js  — koltuk kayıtları (DB ile)
+    2: 
+    3: // --- API yardımcıları ---
+    4: async function apiSave(seat_no, payload){
+    5:   await fetch("/api/seat", {
+    6:     method:"POST",
+    7:     headers:{"Content-Type":"application/json"},
+    8:     body: JSON.stringify({seat_no, ...payload})
+    9:   });
+   10: }
+   11: async function apiClear(seat_no){
+   12:   await fetch("/api/seat/clear", {
+   13:     method:"POST",
+   14:     headers:{"Content-Type":"application/json"},
+   15:     body: JSON.stringify({seat_no})
+   16:   });
+   17: }
+   18: async function apiLoad(){
+   19:   const r = await fetch("/api/seats");
+   20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+   21: }
+   22: 
+   23: // --- sayfa içi durum ---
+   24: window.seatStates = {}; // num -> {stop, pay, price}
+   25: 
+   26: // --- koltuk tıklama ---
+   27: async function onSeatClick(ev) {
+   28:   const seatEl  = ev.currentTarget;
+   29:   if (!seatEl.classList.contains("seat")) return;
+   30: 
+   31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+   32:   const labelEl = seatEl.parentElement.querySelector(".label");
+   33: 
+   34:   // BOŞ → KAYDET
+   35:   if (!seatEl.classList.contains("occupied")) {
+   36:     const stop = prompt("Nerede ineceksiniz? (durak adı)", "");
+   37:     if (!stop) return;
+   38: 
+   39:     const pay = prompt("Ödeme türü (Biletli/Nakit/IBAN/Online/Ücretsiz)", "Nakit") || "";
+   40:     let price = "";
+   41:     if (pay.toLowerCase() !== "biletli" && pay.toLowerCase() !== "ücretsiz") {
+   42:       price = prompt("Tutar (₺)", "") || "";
+   43:     }
+   44: 
+   45:     // ekrana yansıt
+   46:     seatEl.classList.add("occupied");
+   47:     labelEl.textContent = stop;
+   48:     window.seatStates[num] = { stop, pay, price };
+   49: 
+   50:     // DB'ye yaz
+   51:     await apiSave(num, { stop, pay, price });
+   52: 
+   53:   } else {
+   54:     // DOLU → İNDİR / DÜZENLE
+   55:     const act = prompt("Seçim: indir / düzenle / iptal", "indir");
+   56:     if (!act) return;
+   57: 
+   58:     if (act.toLowerCase() === "indir") {
+   59:       seatEl.classList.remove("occupied");
+   60:       labelEl.textContent = "";
+   61:       delete window.seatStates[num];
+   62:       await apiClear(num); // DB'den sil
+   63: 
+   64:     } else if (act.toLowerCase() === "düzenle") {
+   65:       const old  = window.seatStates[num] || {};
+   66:       const stop = prompt("İniş yeri", old.stop || "")   || old.stop || "";
+   67:       const pay  = prompt("Ödeme türü", old.pay || "Nakit") || old.pay || "";
+   68:       const price= prompt("Tutar (₺)", old.price || "")  || old.price || "";
+   69:       window.seatStates[num] = { stop, pay, price };
+   70:       labelEl.textContent = stop;
+   71:       await apiSave(num, { stop, pay, price }); // DB'de güncelle
+   72:     }
+   73:   }
+   74: }
+   75: 
+   76: // --- bağlama ve ilk yük ---
+   77: function bindSeats(){
+   78:   document.querySelectorAll(".seat[data-num]").forEach(el=>{
+   79:     el.style.cursor = "pointer";
+   80:     el.addEventListener("click", onSeatClick);
+   81:   });
+   82: }
+   83: 
+   84: document.addEventListener("DOMContentLoaded", async () => {
+   85:   bindSeats();
+   86:   // DB'deki mevcut koltukları ekrana bas
+   87:   const data = await apiLoad();
+   88:   for (const [num, v] of Object.entries(data)){
+   89:     const s   = document.querySelector(`.seat[data-num='${num}']`);
+   90:     const lbl = s?.parentElement.querySelector(".label");
+   91:     if (s && lbl){
+   92:       s.classList.add("occupied");
+   93:       lbl.textContent = v.stop || "";
+   94:       window.seatStates[num] = v;
+   95:     }
+   96:   }
+   97: });
+
+--- static/app.js içinde arama: fetch ---
+
+### Eşleşme satır 5
+       1: // static/app.js  — koltuk kayıtları (DB ile)
+       2: 
+       3: // --- API yardımcıları ---
+       4: async function apiSave(seat_no, payload){
+>>     5:   await fetch("/api/seat", {
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+      19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+
+### Eşleşme satır 12
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+>>    12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+      19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+
+### Eşleşme satır 19
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+>>    19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+      29:   if (!seatEl.classList.contains("seat")) return;
+      30: 
+      31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+      32:   const labelEl = seatEl.parentElement.querySelector(".label");
+      33: 
+      34:   // BOŞ → KAYDET
+      35:   if (!seatEl.classList.contains("occupied")) {
+
+--- static/app.js içinde arama: /api/seat ---
+
+### Eşleşme satır 5
+       1: // static/app.js  — koltuk kayıtları (DB ile)
+       2: 
+       3: // --- API yardımcıları ---
+       4: async function apiSave(seat_no, payload){
+>>     5:   await fetch("/api/seat", {
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+
+### Eşleşme satır 12
+       4: async function apiSave(seat_no, payload){
+       5:   await fetch("/api/seat", {
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+>>    12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+      19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+
+### Eşleşme satır 19
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+>>    19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+      29:   if (!seatEl.classList.contains("seat")) return;
+      30: 
+      31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+
+--- static/app.js içinde arama: /api/seats ---
+
+### Eşleşme satır 19
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+>>    19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+      29:   if (!seatEl.classList.contains("seat")) return;
+      30: 
+      31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+
+--- static/app.js içinde arama: csrf ---
+Bulunamadı
+
+--- android_app/app/src/main/python/static/app.js:1-160 ---
+    1: // static/app.js  — koltuk kayıtları (DB ile)
+    2: 
+    3: // --- API yardımcıları ---
+    4: async function apiSave(seat_no, payload){
+    5:   await fetch("/api/seat", {
+    6:     method:"POST",
+    7:     headers:{"Content-Type":"application/json"},
+    8:     body: JSON.stringify({seat_no, ...payload})
+    9:   });
+   10: }
+   11: async function apiClear(seat_no){
+   12:   await fetch("/api/seat/clear", {
+   13:     method:"POST",
+   14:     headers:{"Content-Type":"application/json"},
+   15:     body: JSON.stringify({seat_no})
+   16:   });
+   17: }
+   18: async function apiLoad(){
+   19:   const r = await fetch("/api/seats");
+   20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+   21: }
+   22: 
+   23: // --- sayfa içi durum ---
+   24: window.seatStates = {}; // num -> {stop, pay, price}
+   25: 
+   26: // --- koltuk tıklama ---
+   27: async function onSeatClick(ev) {
+   28:   const seatEl  = ev.currentTarget;
+   29:   if (!seatEl.classList.contains("seat")) return;
+   30: 
+   31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+   32:   const labelEl = seatEl.parentElement.querySelector(".label");
+   33: 
+   34:   // BOŞ → KAYDET
+   35:   if (!seatEl.classList.contains("occupied")) {
+   36:     const stop = prompt("Nerede ineceksiniz? (durak adı)", "");
+   37:     if (!stop) return;
+   38: 
+   39:     const pay = prompt("Ödeme türü (Biletli/Nakit/IBAN/Online/Ücretsiz)", "Nakit") || "";
+   40:     let price = "";
+   41:     if (pay.toLowerCase() !== "biletli" && pay.toLowerCase() !== "ücretsiz") {
+   42:       price = prompt("Tutar (₺)", "") || "";
+   43:     }
+   44: 
+   45:     // ekrana yansıt
+   46:     seatEl.classList.add("occupied");
+   47:     labelEl.textContent = stop;
+   48:     window.seatStates[num] = { stop, pay, price };
+   49: 
+   50:     // DB'ye yaz
+   51:     await apiSave(num, { stop, pay, price });
+   52: 
+   53:   } else {
+   54:     // DOLU → İNDİR / DÜZENLE
+   55:     const act = prompt("Seçim: indir / düzenle / iptal", "indir");
+   56:     if (!act) return;
+   57: 
+   58:     if (act.toLowerCase() === "indir") {
+   59:       seatEl.classList.remove("occupied");
+   60:       labelEl.textContent = "";
+   61:       delete window.seatStates[num];
+   62:       await apiClear(num); // DB'den sil
+   63: 
+   64:     } else if (act.toLowerCase() === "düzenle") {
+   65:       const old  = window.seatStates[num] || {};
+   66:       const stop = prompt("İniş yeri", old.stop || "")   || old.stop || "";
+   67:       const pay  = prompt("Ödeme türü", old.pay || "Nakit") || old.pay || "";
+   68:       const price= prompt("Tutar (₺)", old.price || "")  || old.price || "";
+   69:       window.seatStates[num] = { stop, pay, price };
+   70:       labelEl.textContent = stop;
+   71:       await apiSave(num, { stop, pay, price }); // DB'de güncelle
+   72:     }
+   73:   }
+   74: }
+   75: 
+   76: // --- bağlama ve ilk yük ---
+   77: function bindSeats(){
+   78:   document.querySelectorAll(".seat[data-num]").forEach(el=>{
+   79:     el.style.cursor = "pointer";
+   80:     el.addEventListener("click", onSeatClick);
+   81:   });
+   82: }
+   83: 
+   84: document.addEventListener("DOMContentLoaded", async () => {
+   85:   bindSeats();
+   86:   // DB'deki mevcut koltukları ekrana bas
+   87:   const data = await apiLoad();
+   88:   for (const [num, v] of Object.entries(data)){
+   89:     const s   = document.querySelector(`.seat[data-num='${num}']`);
+   90:     const lbl = s?.parentElement.querySelector(".label");
+   91:     if (s && lbl){
+   92:       s.classList.add("occupied");
+   93:       lbl.textContent = v.stop || "";
+   94:       window.seatStates[num] = v;
+   95:     }
+   96:   }
+   97: });
+
+--- android_app/app/src/main/python/static/app.js içinde arama: fetch ---
+
+### Eşleşme satır 5
+       1: // static/app.js  — koltuk kayıtları (DB ile)
+       2: 
+       3: // --- API yardımcıları ---
+       4: async function apiSave(seat_no, payload){
+>>     5:   await fetch("/api/seat", {
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+      19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+
+### Eşleşme satır 12
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+>>    12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+      19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+
+### Eşleşme satır 19
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+>>    19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+      29:   if (!seatEl.classList.contains("seat")) return;
+      30: 
+      31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+      32:   const labelEl = seatEl.parentElement.querySelector(".label");
+      33: 
+      34:   // BOŞ → KAYDET
+      35:   if (!seatEl.classList.contains("occupied")) {
+
+--- android_app/app/src/main/python/static/app.js içinde arama: /api/seat ---
+
+### Eşleşme satır 5
+       1: // static/app.js  — koltuk kayıtları (DB ile)
+       2: 
+       3: // --- API yardımcıları ---
+       4: async function apiSave(seat_no, payload){
+>>     5:   await fetch("/api/seat", {
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+
+### Eşleşme satır 12
+       4: async function apiSave(seat_no, payload){
+       5:   await fetch("/api/seat", {
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+>>    12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+      19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+
+### Eşleşme satır 19
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+>>    19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+      29:   if (!seatEl.classList.contains("seat")) return;
+      30: 
+      31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+
+--- android_app/app/src/main/python/static/app.js içinde arama: /api/seats ---
+
+### Eşleşme satır 19
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+>>    19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+      29:   if (!seatEl.classList.contains("seat")) return;
+      30: 
+      31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+
+--- android_app/app/src/main/python/static/app.js içinde arama: csrf ---
+Bulunamadı
+
+--- apk_payload/static/app.js:1-160 ---
+    1: // static/app.js  — koltuk kayıtları (DB ile)
+    2: 
+    3: // --- API yardımcıları ---
+    4: async function apiSave(seat_no, payload){
+    5:   await fetch("/api/seat", {
+    6:     method:"POST",
+    7:     headers:{"Content-Type":"application/json"},
+    8:     body: JSON.stringify({seat_no, ...payload})
+    9:   });
+   10: }
+   11: async function apiClear(seat_no){
+   12:   await fetch("/api/seat/clear", {
+   13:     method:"POST",
+   14:     headers:{"Content-Type":"application/json"},
+   15:     body: JSON.stringify({seat_no})
+   16:   });
+   17: }
+   18: async function apiLoad(){
+   19:   const r = await fetch("/api/seats");
+   20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+   21: }
+   22: 
+   23: // --- sayfa içi durum ---
+   24: window.seatStates = {}; // num -> {stop, pay, price}
+   25: 
+   26: // --- koltuk tıklama ---
+   27: async function onSeatClick(ev) {
+   28:   const seatEl  = ev.currentTarget;
+   29:   if (!seatEl.classList.contains("seat")) return;
+   30: 
+   31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+   32:   const labelEl = seatEl.parentElement.querySelector(".label");
+   33: 
+   34:   // BOŞ → KAYDET
+   35:   if (!seatEl.classList.contains("occupied")) {
+   36:     const stop = prompt("Nerede ineceksiniz? (durak adı)", "");
+   37:     if (!stop) return;
+   38: 
+   39:     const pay = prompt("Ödeme türü (Biletli/Nakit/IBAN/Online/Ücretsiz)", "Nakit") || "";
+   40:     let price = "";
+   41:     if (pay.toLowerCase() !== "biletli" && pay.toLowerCase() !== "ücretsiz") {
+   42:       price = prompt("Tutar (₺)", "") || "";
+   43:     }
+   44: 
+   45:     // ekrana yansıt
+   46:     seatEl.classList.add("occupied");
+   47:     labelEl.textContent = stop;
+   48:     window.seatStates[num] = { stop, pay, price };
+   49: 
+   50:     // DB'ye yaz
+   51:     await apiSave(num, { stop, pay, price });
+   52: 
+   53:   } else {
+   54:     // DOLU → İNDİR / DÜZENLE
+   55:     const act = prompt("Seçim: indir / düzenle / iptal", "indir");
+   56:     if (!act) return;
+   57: 
+   58:     if (act.toLowerCase() === "indir") {
+   59:       seatEl.classList.remove("occupied");
+   60:       labelEl.textContent = "";
+   61:       delete window.seatStates[num];
+   62:       await apiClear(num); // DB'den sil
+   63: 
+   64:     } else if (act.toLowerCase() === "düzenle") {
+   65:       const old  = window.seatStates[num] || {};
+   66:       const stop = prompt("İniş yeri", old.stop || "")   || old.stop || "";
+   67:       const pay  = prompt("Ödeme türü", old.pay || "Nakit") || old.pay || "";
+   68:       const price= prompt("Tutar (₺)", old.price || "")  || old.price || "";
+   69:       window.seatStates[num] = { stop, pay, price };
+   70:       labelEl.textContent = stop;
+   71:       await apiSave(num, { stop, pay, price }); // DB'de güncelle
+   72:     }
+   73:   }
+   74: }
+   75: 
+   76: // --- bağlama ve ilk yük ---
+   77: function bindSeats(){
+   78:   document.querySelectorAll(".seat[data-num]").forEach(el=>{
+   79:     el.style.cursor = "pointer";
+   80:     el.addEventListener("click", onSeatClick);
+   81:   });
+   82: }
+   83: 
+   84: document.addEventListener("DOMContentLoaded", async () => {
+   85:   bindSeats();
+   86:   // DB'deki mevcut koltukları ekrana bas
+   87:   const data = await apiLoad();
+   88:   for (const [num, v] of Object.entries(data)){
+   89:     const s   = document.querySelector(`.seat[data-num='${num}']`);
+   90:     const lbl = s?.parentElement.querySelector(".label");
+   91:     if (s && lbl){
+   92:       s.classList.add("occupied");
+   93:       lbl.textContent = v.stop || "";
+   94:       window.seatStates[num] = v;
+   95:     }
+   96:   }
+   97: });
+
+--- apk_payload/static/app.js içinde arama: fetch ---
+
+### Eşleşme satır 5
+       1: // static/app.js  — koltuk kayıtları (DB ile)
+       2: 
+       3: // --- API yardımcıları ---
+       4: async function apiSave(seat_no, payload){
+>>     5:   await fetch("/api/seat", {
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+      19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+
+### Eşleşme satır 12
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+>>    12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+      19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+
+### Eşleşme satır 19
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+>>    19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+      29:   if (!seatEl.classList.contains("seat")) return;
+      30: 
+      31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+      32:   const labelEl = seatEl.parentElement.querySelector(".label");
+      33: 
+      34:   // BOŞ → KAYDET
+      35:   if (!seatEl.classList.contains("occupied")) {
+
+--- apk_payload/static/app.js içinde arama: /api/seat ---
+
+### Eşleşme satır 5
+       1: // static/app.js  — koltuk kayıtları (DB ile)
+       2: 
+       3: // --- API yardımcıları ---
+       4: async function apiSave(seat_no, payload){
+>>     5:   await fetch("/api/seat", {
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+
+### Eşleşme satır 12
+       4: async function apiSave(seat_no, payload){
+       5:   await fetch("/api/seat", {
+       6:     method:"POST",
+       7:     headers:{"Content-Type":"application/json"},
+       8:     body: JSON.stringify({seat_no, ...payload})
+       9:   });
+      10: }
+      11: async function apiClear(seat_no){
+>>    12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+      19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+
+### Eşleşme satır 19
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+>>    19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+      29:   if (!seatEl.classList.contains("seat")) return;
+      30: 
+      31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+
+--- apk_payload/static/app.js içinde arama: /api/seats ---
+
+### Eşleşme satır 19
+      11: async function apiClear(seat_no){
+      12:   await fetch("/api/seat/clear", {
+      13:     method:"POST",
+      14:     headers:{"Content-Type":"application/json"},
+      15:     body: JSON.stringify({seat_no})
+      16:   });
+      17: }
+      18: async function apiLoad(){
+>>    19:   const r = await fetch("/api/seats");
+      20:   return await r.json(); // {"3": {stop:"Balıkesir", pay:"Nakit", price:150}, ...}
+      21: }
+      22: 
+      23: // --- sayfa içi durum ---
+      24: window.seatStates = {}; // num -> {stop, pay, price}
+      25: 
+      26: // --- koltuk tıklama ---
+      27: async function onSeatClick(ev) {
+      28:   const seatEl  = ev.currentTarget;
+      29:   if (!seatEl.classList.contains("seat")) return;
+      30: 
+      31:   const num     = seatEl.dataset.num;                 // koltuk no (string)
+
+--- apk_payload/static/app.js içinde arama: csrf ---
+Bulunamadı
+
+===== 2) EMANETLER STATUS ENDPOINT BAĞLAMI =====
+
+--- templates/consignments.html içinde arama: /api/consignments/${id}/status ---
+
+### Eşleşme satır 974
+     956:     to_name:    document.getElementById('f_to').value.trim(),
+     957:     from_stop:  document.getElementById('f_from_stop').value,
+     958:     to_stop:    document.getElementById('f_to_stop').value,
+     959:     amount:     document.getElementById('f_amount').value,
+     960:     payment:    document.getElementById('f_payment').value
+     961:   };
+     962: 
+     963:   const res = await fetch('{{ url_for("api_consignments") }}', {
+     964:     method:'POST',
+     965:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     966:     body:JSON.stringify(payload)
+     967:   });
+     968: 
+     969:   const j = await res.json();
+     970:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     971: }
+     972: 
+     973: async function setStatus(id, status){
+>>   974:   const res = await fetch(`/api/consignments/${id}/status`, {
+     975:     method:'POST',
+     976:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     977:     body:JSON.stringify({status})
+     978:   });
+     979: 
+     980:   const j = await res.json();
+     981:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     982: }
+     983: 
+     984: async function delCons(id){
+     985:   if(!confirm('Silinsin mi?')) return;
+     986: 
+     987:   const res = await fetch(`/api/consignments/${id}`, {
+     988:     method:'DELETE',
+     989:     headers:{'X-CSRF-Token':csrf}
+     990:   });
+     991: 
+     992:   const j = await res.json();
+     993:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     994: }
+     995: 
+     996: /* -------- Photos Modal -------- */
+     997: function showModal(){
+     998:   const back = document.getElementById('mback');
+     999:   if(!back) return;
+    1000: 
+
+--- templates/consignments.html içinde arama: setStatus ---
+
+### Eşleşme satır 836
+     818:           <div class="cons-line">
+     819:             <div class="cons-key">💵</div>
+     820:             <div class="cons-val">
+     821:               <small>Tutar</small>
+     822:               ₺{{ '%.2f'|format(r.amount or 0) }}
+     823:             </div>
+     824:           </div>
+     825: 
+     826:           <div class="cons-line">
+     827:             <div class="cons-key">✅</div>
+     828:             <div class="cons-val">
+     829:               <small>Durum</small>
+     830:               <span class="status-badge {{ r.status }}">{{ r.status }}</span>
+     831:             </div>
+     832:           </div>
+     833:         </div>
+     834: 
+     835:         <div class="actions">
+>>   836:           <button class="btn action-btn blue"  onclick="setStatus({{ r.id }}, 'yüklendi')">Yüklendi</button>
+     837:           <button class="btn action-btn green" onclick="setStatus({{ r.id }}, 'teslim')">Teslim</button>
+     838:           <button class="btn action-btn gray"  onclick="setStatus({{ r.id }}, 'bekliyor')">Bekliyor</button>
+     839:           <button class="btn action-btn red"   onclick="delCons({{ r.id }})">Sil</button>
+     840:         </div>
+     841:       </article>
+     842:     {% endfor %}
+     843:   {% else %}
+     844:     <div class="empty-card">
+     845:       Henüz emanet kaydı yok. İlk kaydı yukarıdaki formdan ekleyebilirsin.
+     846:     </div>
+     847:   {% endif %}
+     848: 
+     849: </main>
+     850: 
+     851: 
+     852: <style id="consignment-photo-modal-fix">
+     853: /* Emanet fotoğraf modalı görünürlük/z-index düzeltmesi */
+     854: #mback.mback{
+     855:   position:fixed !important;
+     856:   inset:0 !important;
+     857:   z-index:999999 !important;
+     858:   display:none;
+     859:   align-items:center !important;
+     860:   justify-content:center !important;
+     861:   padding:18px !important;
+     862:   background:
+     863:     radial-gradient(circle at 50% 20%, rgba(59,130,246,.18), transparent 34%),
+     864:     rgba(2,6,23,.72) !important;
+     865:   backdrop-filter:blur(14px) saturate(1.08) !important;
+     866:   -webkit-backdrop-filter:blur(14px) saturate(1.08) !important;
+
+### Eşleşme satır 837
+     819:             <div class="cons-key">💵</div>
+     820:             <div class="cons-val">
+     821:               <small>Tutar</small>
+     822:               ₺{{ '%.2f'|format(r.amount or 0) }}
+     823:             </div>
+     824:           </div>
+     825: 
+     826:           <div class="cons-line">
+     827:             <div class="cons-key">✅</div>
+     828:             <div class="cons-val">
+     829:               <small>Durum</small>
+     830:               <span class="status-badge {{ r.status }}">{{ r.status }}</span>
+     831:             </div>
+     832:           </div>
+     833:         </div>
+     834: 
+     835:         <div class="actions">
+     836:           <button class="btn action-btn blue"  onclick="setStatus({{ r.id }}, 'yüklendi')">Yüklendi</button>
+>>   837:           <button class="btn action-btn green" onclick="setStatus({{ r.id }}, 'teslim')">Teslim</button>
+     838:           <button class="btn action-btn gray"  onclick="setStatus({{ r.id }}, 'bekliyor')">Bekliyor</button>
+     839:           <button class="btn action-btn red"   onclick="delCons({{ r.id }})">Sil</button>
+     840:         </div>
+     841:       </article>
+     842:     {% endfor %}
+     843:   {% else %}
+     844:     <div class="empty-card">
+     845:       Henüz emanet kaydı yok. İlk kaydı yukarıdaki formdan ekleyebilirsin.
+     846:     </div>
+     847:   {% endif %}
+     848: 
+     849: </main>
+     850: 
+     851: 
+     852: <style id="consignment-photo-modal-fix">
+     853: /* Emanet fotoğraf modalı görünürlük/z-index düzeltmesi */
+     854: #mback.mback{
+     855:   position:fixed !important;
+     856:   inset:0 !important;
+     857:   z-index:999999 !important;
+     858:   display:none;
+     859:   align-items:center !important;
+     860:   justify-content:center !important;
+     861:   padding:18px !important;
+     862:   background:
+     863:     radial-gradient(circle at 50% 20%, rgba(59,130,246,.18), transparent 34%),
+     864:     rgba(2,6,23,.72) !important;
+     865:   backdrop-filter:blur(14px) saturate(1.08) !important;
+     866:   -webkit-backdrop-filter:blur(14px) saturate(1.08) !important;
+     867: }
+
+### Eşleşme satır 838
+     820:             <div class="cons-val">
+     821:               <small>Tutar</small>
+     822:               ₺{{ '%.2f'|format(r.amount or 0) }}
+     823:             </div>
+     824:           </div>
+     825: 
+     826:           <div class="cons-line">
+     827:             <div class="cons-key">✅</div>
+     828:             <div class="cons-val">
+     829:               <small>Durum</small>
+     830:               <span class="status-badge {{ r.status }}">{{ r.status }}</span>
+     831:             </div>
+     832:           </div>
+     833:         </div>
+     834: 
+     835:         <div class="actions">
+     836:           <button class="btn action-btn blue"  onclick="setStatus({{ r.id }}, 'yüklendi')">Yüklendi</button>
+     837:           <button class="btn action-btn green" onclick="setStatus({{ r.id }}, 'teslim')">Teslim</button>
+>>   838:           <button class="btn action-btn gray"  onclick="setStatus({{ r.id }}, 'bekliyor')">Bekliyor</button>
+     839:           <button class="btn action-btn red"   onclick="delCons({{ r.id }})">Sil</button>
+     840:         </div>
+     841:       </article>
+     842:     {% endfor %}
+     843:   {% else %}
+     844:     <div class="empty-card">
+     845:       Henüz emanet kaydı yok. İlk kaydı yukarıdaki formdan ekleyebilirsin.
+     846:     </div>
+     847:   {% endif %}
+     848: 
+     849: </main>
+     850: 
+     851: 
+     852: <style id="consignment-photo-modal-fix">
+     853: /* Emanet fotoğraf modalı görünürlük/z-index düzeltmesi */
+     854: #mback.mback{
+     855:   position:fixed !important;
+     856:   inset:0 !important;
+     857:   z-index:999999 !important;
+     858:   display:none;
+     859:   align-items:center !important;
+     860:   justify-content:center !important;
+     861:   padding:18px !important;
+     862:   background:
+     863:     radial-gradient(circle at 50% 20%, rgba(59,130,246,.18), transparent 34%),
+     864:     rgba(2,6,23,.72) !important;
+     865:   backdrop-filter:blur(14px) saturate(1.08) !important;
+     866:   -webkit-backdrop-filter:blur(14px) saturate(1.08) !important;
+     867: }
+     868: 
+
+### Eşleşme satır 973
+     955:     from_name:  document.getElementById('f_from').value.trim(),
+     956:     to_name:    document.getElementById('f_to').value.trim(),
+     957:     from_stop:  document.getElementById('f_from_stop').value,
+     958:     to_stop:    document.getElementById('f_to_stop').value,
+     959:     amount:     document.getElementById('f_amount').value,
+     960:     payment:    document.getElementById('f_payment').value
+     961:   };
+     962: 
+     963:   const res = await fetch('{{ url_for("api_consignments") }}', {
+     964:     method:'POST',
+     965:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     966:     body:JSON.stringify(payload)
+     967:   });
+     968: 
+     969:   const j = await res.json();
+     970:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     971: }
+     972: 
+>>   973: async function setStatus(id, status){
+     974:   const res = await fetch(`/api/consignments/${id}/status`, {
+     975:     method:'POST',
+     976:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     977:     body:JSON.stringify({status})
+     978:   });
+     979: 
+     980:   const j = await res.json();
+     981:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     982: }
+     983: 
+     984: async function delCons(id){
+     985:   if(!confirm('Silinsin mi?')) return;
+     986: 
+     987:   const res = await fetch(`/api/consignments/${id}`, {
+     988:     method:'DELETE',
+     989:     headers:{'X-CSRF-Token':csrf}
+     990:   });
+     991: 
+     992:   const j = await res.json();
+     993:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     994: }
+     995: 
+     996: /* -------- Photos Modal -------- */
+     997: function showModal(){
+     998:   const back = document.getElementById('mback');
+     999:   if(!back) return;
+    1000: 
+    1001:   back.style.display = 'flex';
+    1002:   back.classList.add('is-open');
+    1003:   back.setAttribute('aria-hidden', 'false');
+
+--- templates/consignments.html içinde arama: status ---
+
+### Eşleşme satır 351
+     345:   font-size:12px;
+     346:   font-weight:950;
+     347:   letter-spacing:.25px;
+     348:   text-transform:uppercase;
+     349: }
+     350: 
+>>   351: .status-badge{
+     352:   display:inline-flex;
+     353:   align-items:center;
+     354:   gap:6px;
+     355:   padding:8px 10px;
+     356:   border-radius:999px;
+     357:   font-size:13px;
+     358:   font-weight:950;
+     359:   background:#f1f5f9;
+
+### Eşleşme satır 363
+     357:   font-size:13px;
+     358:   font-weight:950;
+     359:   background:#f1f5f9;
+     360:   color:#475569;
+     361: }
+     362: 
+>>   363: .status-badge.yüklendi{
+     364:   background:#eff6ff;
+     365:   color:#1d4ed8;
+     366: }
+     367: 
+     368: .status-badge.teslim{
+     369:   background:#ecfdf5;
+     370:   color:#047857;
+     371: }
+
+### Eşleşme satır 368
+     362: 
+     363: .status-badge.yüklendi{
+     364:   background:#eff6ff;
+     365:   color:#1d4ed8;
+     366: }
+     367: 
+>>   368: .status-badge.teslim{
+     369:   background:#ecfdf5;
+     370:   color:#047857;
+     371: }
+     372: 
+     373: .status-badge.bekliyor{
+     374:   background:#fff7ed;
+     375:   color:#c2410c;
+     376: }
+
+### Eşleşme satır 373
+     367: 
+     368: .status-badge.teslim{
+     369:   background:#ecfdf5;
+     370:   color:#047857;
+     371: }
+     372: 
+>>   373: .status-badge.bekliyor{
+     374:   background:#fff7ed;
+     375:   color:#c2410c;
+     376: }
+     377: 
+     378: .actions{
+     379:   display:grid;
+     380:   grid-template-columns:1fr 1fr;
+     381:   gap:9px;
+
+### Eşleşme satır 675
+     669: .photo-btn{
+     670:   background:#0a1624 !important;
+     671:   border:1px solid rgba(148,163,184,.22) !important;
+     672:   color:#93c5fd !important;
+     673: }
+     674: 
+>>   675: .status-badge{
+     676:   background:#17283e !important;
+     677:   color:#cbd5e1 !important;
+     678: }
+     679: 
+     680: .status-badge.yüklendi{
+     681:   background:rgba(37,99,235,.18) !important;
+     682:   color:#93c5fd !important;
+     683: }
+
+### Eşleşme satır 680
+     674: 
+     675: .status-badge{
+     676:   background:#17283e !important;
+     677:   color:#cbd5e1 !important;
+     678: }
+     679: 
+>>   680: .status-badge.yüklendi{
+     681:   background:rgba(37,99,235,.18) !important;
+     682:   color:#93c5fd !important;
+     683: }
+     684: 
+     685: .status-badge.teslim{
+     686:   background:rgba(16,185,129,.16) !important;
+     687:   color:#86efac !important;
+     688: }
+
+### Eşleşme satır 685
+     679: 
+     680: .status-badge.yüklendi{
+     681:   background:rgba(37,99,235,.18) !important;
+     682:   color:#93c5fd !important;
+     683: }
+     684: 
+>>   685: .status-badge.teslim{
+     686:   background:rgba(16,185,129,.16) !important;
+     687:   color:#86efac !important;
+     688: }
+     689: 
+     690: .status-badge.bekliyor{
+     691:   background:rgba(249,115,22,.16) !important;
+     692:   color:#fdba74 !important;
+     693: }
+
+### Eşleşme satır 690
+     684: 
+     685: .status-badge.teslim{
+     686:   background:rgba(16,185,129,.16) !important;
+     687:   color:#86efac !important;
+     688: }
+     689: 
+>>   690: .status-badge.bekliyor{
+     691:   background:rgba(249,115,22,.16) !important;
+     692:   color:#fdba74 !important;
+     693: }
+     694: 
+     695: .mback{
+     696:   background:rgba(2,6,23,.72) !important;
+     697: }
+     698: 
+
+### Eşleşme satır 830
+     824:           </div>
+     825: 
+     826:           <div class="cons-line">
+     827:             <div class="cons-key">✅</div>
+     828:             <div class="cons-val">
+     829:               <small>Durum</small>
+>>   830:               <span class="status-badge {{ r.status }}">{{ r.status }}</span>
+     831:             </div>
+     832:           </div>
+     833:         </div>
+     834: 
+     835:         <div class="actions">
+     836:           <button class="btn action-btn blue"  onclick="setStatus({{ r.id }}, 'yüklendi')">Yüklendi</button>
+     837:           <button class="btn action-btn green" onclick="setStatus({{ r.id }}, 'teslim')">Teslim</button>
+     838:           <button class="btn action-btn gray"  onclick="setStatus({{ r.id }}, 'bekliyor')">Bekliyor</button>
+
+### Eşleşme satır 973
+     967:   });
+     968: 
+     969:   const j = await res.json();
+     970:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     971: }
+     972: 
+>>   973: async function setStatus(id, status){
+     974:   const res = await fetch(`/api/consignments/${id}/status`, {
+     975:     method:'POST',
+     976:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     977:     body:JSON.stringify({status})
+     978:   });
+     979: 
+     980:   const j = await res.json();
+     981:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+
+### Eşleşme satır 974
+     968: 
+     969:   const j = await res.json();
+     970:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     971: }
+     972: 
+     973: async function setStatus(id, status){
+>>   974:   const res = await fetch(`/api/consignments/${id}/status`, {
+     975:     method:'POST',
+     976:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     977:     body:JSON.stringify({status})
+     978:   });
+     979: 
+     980:   const j = await res.json();
+     981:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     982: }
+
+### Eşleşme satır 977
+     971: }
+     972: 
+     973: async function setStatus(id, status){
+     974:   const res = await fetch(`/api/consignments/${id}/status`, {
+     975:     method:'POST',
+     976:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+>>   977:     body:JSON.stringify({status})
+     978:   });
+     979: 
+     980:   const j = await res.json();
+     981:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     982: }
+     983: 
+     984: async function delCons(id){
+     985:   if(!confirm('Silinsin mi?')) return;
+
+--- android_app/app/src/main/python/templates/consignments.html içinde arama: /api/consignments/${id}/status ---
+
+### Eşleşme satır 974
+     956:     to_name:    document.getElementById('f_to').value.trim(),
+     957:     from_stop:  document.getElementById('f_from_stop').value,
+     958:     to_stop:    document.getElementById('f_to_stop').value,
+     959:     amount:     document.getElementById('f_amount').value,
+     960:     payment:    document.getElementById('f_payment').value
+     961:   };
+     962: 
+     963:   const res = await fetch('{{ url_for("api_consignments") }}', {
+     964:     method:'POST',
+     965:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     966:     body:JSON.stringify(payload)
+     967:   });
+     968: 
+     969:   const j = await res.json();
+     970:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     971: }
+     972: 
+     973: async function setStatus(id, status){
+>>   974:   const res = await fetch(`/api/consignments/${id}/status`, {
+     975:     method:'POST',
+     976:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     977:     body:JSON.stringify({status})
+     978:   });
+     979: 
+     980:   const j = await res.json();
+     981:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     982: }
+     983: 
+     984: async function delCons(id){
+     985:   if(!confirm('Silinsin mi?')) return;
+     986: 
+     987:   const res = await fetch(`/api/consignments/${id}`, {
+     988:     method:'DELETE',
+     989:     headers:{'X-CSRF-Token':csrf}
+     990:   });
+     991: 
+     992:   const j = await res.json();
+     993:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     994: }
+     995: 
+     996: /* -------- Photos Modal -------- */
+     997: function showModal(){
+     998:   const back = document.getElementById('mback');
+     999:   if(!back) return;
+    1000: 
+
+--- android_app/app/src/main/python/templates/consignments.html içinde arama: setStatus ---
+
+### Eşleşme satır 836
+     818:           <div class="cons-line">
+     819:             <div class="cons-key">💵</div>
+     820:             <div class="cons-val">
+     821:               <small>Tutar</small>
+     822:               ₺{{ '%.2f'|format(r.amount or 0) }}
+     823:             </div>
+     824:           </div>
+     825: 
+     826:           <div class="cons-line">
+     827:             <div class="cons-key">✅</div>
+     828:             <div class="cons-val">
+     829:               <small>Durum</small>
+     830:               <span class="status-badge {{ r.status }}">{{ r.status }}</span>
+     831:             </div>
+     832:           </div>
+     833:         </div>
+     834: 
+     835:         <div class="actions">
+>>   836:           <button class="btn action-btn blue"  onclick="setStatus({{ r.id }}, 'yüklendi')">Yüklendi</button>
+     837:           <button class="btn action-btn green" onclick="setStatus({{ r.id }}, 'teslim')">Teslim</button>
+     838:           <button class="btn action-btn gray"  onclick="setStatus({{ r.id }}, 'bekliyor')">Bekliyor</button>
+     839:           <button class="btn action-btn red"   onclick="delCons({{ r.id }})">Sil</button>
+     840:         </div>
+     841:       </article>
+     842:     {% endfor %}
+     843:   {% else %}
+     844:     <div class="empty-card">
+     845:       Henüz emanet kaydı yok. İlk kaydı yukarıdaki formdan ekleyebilirsin.
+     846:     </div>
+     847:   {% endif %}
+     848: 
+     849: </main>
+     850: 
+     851: 
+     852: <style id="consignment-photo-modal-fix">
+     853: /* Emanet fotoğraf modalı görünürlük/z-index düzeltmesi */
+     854: #mback.mback{
+     855:   position:fixed !important;
+     856:   inset:0 !important;
+     857:   z-index:999999 !important;
+     858:   display:none;
+     859:   align-items:center !important;
+     860:   justify-content:center !important;
+     861:   padding:18px !important;
+     862:   background:
+     863:     radial-gradient(circle at 50% 20%, rgba(59,130,246,.18), transparent 34%),
+     864:     rgba(2,6,23,.72) !important;
+     865:   backdrop-filter:blur(14px) saturate(1.08) !important;
+     866:   -webkit-backdrop-filter:blur(14px) saturate(1.08) !important;
+
+### Eşleşme satır 837
+     819:             <div class="cons-key">💵</div>
+     820:             <div class="cons-val">
+     821:               <small>Tutar</small>
+     822:               ₺{{ '%.2f'|format(r.amount or 0) }}
+     823:             </div>
+     824:           </div>
+     825: 
+     826:           <div class="cons-line">
+     827:             <div class="cons-key">✅</div>
+     828:             <div class="cons-val">
+     829:               <small>Durum</small>
+     830:               <span class="status-badge {{ r.status }}">{{ r.status }}</span>
+     831:             </div>
+     832:           </div>
+     833:         </div>
+     834: 
+     835:         <div class="actions">
+     836:           <button class="btn action-btn blue"  onclick="setStatus({{ r.id }}, 'yüklendi')">Yüklendi</button>
+>>   837:           <button class="btn action-btn green" onclick="setStatus({{ r.id }}, 'teslim')">Teslim</button>
+     838:           <button class="btn action-btn gray"  onclick="setStatus({{ r.id }}, 'bekliyor')">Bekliyor</button>
+     839:           <button class="btn action-btn red"   onclick="delCons({{ r.id }})">Sil</button>
+     840:         </div>
+     841:       </article>
+     842:     {% endfor %}
+     843:   {% else %}
+     844:     <div class="empty-card">
+     845:       Henüz emanet kaydı yok. İlk kaydı yukarıdaki formdan ekleyebilirsin.
+     846:     </div>
+     847:   {% endif %}
+     848: 
+     849: </main>
+     850: 
+     851: 
+     852: <style id="consignment-photo-modal-fix">
+     853: /* Emanet fotoğraf modalı görünürlük/z-index düzeltmesi */
+     854: #mback.mback{
+     855:   position:fixed !important;
+     856:   inset:0 !important;
+     857:   z-index:999999 !important;
+     858:   display:none;
+     859:   align-items:center !important;
+     860:   justify-content:center !important;
+     861:   padding:18px !important;
+     862:   background:
+     863:     radial-gradient(circle at 50% 20%, rgba(59,130,246,.18), transparent 34%),
+     864:     rgba(2,6,23,.72) !important;
+     865:   backdrop-filter:blur(14px) saturate(1.08) !important;
+     866:   -webkit-backdrop-filter:blur(14px) saturate(1.08) !important;
+     867: }
+
+### Eşleşme satır 838
+     820:             <div class="cons-val">
+     821:               <small>Tutar</small>
+     822:               ₺{{ '%.2f'|format(r.amount or 0) }}
+     823:             </div>
+     824:           </div>
+     825: 
+     826:           <div class="cons-line">
+     827:             <div class="cons-key">✅</div>
+     828:             <div class="cons-val">
+     829:               <small>Durum</small>
+     830:               <span class="status-badge {{ r.status }}">{{ r.status }}</span>
+     831:             </div>
+     832:           </div>
+     833:         </div>
+     834: 
+     835:         <div class="actions">
+     836:           <button class="btn action-btn blue"  onclick="setStatus({{ r.id }}, 'yüklendi')">Yüklendi</button>
+     837:           <button class="btn action-btn green" onclick="setStatus({{ r.id }}, 'teslim')">Teslim</button>
+>>   838:           <button class="btn action-btn gray"  onclick="setStatus({{ r.id }}, 'bekliyor')">Bekliyor</button>
+     839:           <button class="btn action-btn red"   onclick="delCons({{ r.id }})">Sil</button>
+     840:         </div>
+     841:       </article>
+     842:     {% endfor %}
+     843:   {% else %}
+     844:     <div class="empty-card">
+     845:       Henüz emanet kaydı yok. İlk kaydı yukarıdaki formdan ekleyebilirsin.
+     846:     </div>
+     847:   {% endif %}
+     848: 
+     849: </main>
+     850: 
+     851: 
+     852: <style id="consignment-photo-modal-fix">
+     853: /* Emanet fotoğraf modalı görünürlük/z-index düzeltmesi */
+     854: #mback.mback{
+     855:   position:fixed !important;
+     856:   inset:0 !important;
+     857:   z-index:999999 !important;
+     858:   display:none;
+     859:   align-items:center !important;
+     860:   justify-content:center !important;
+     861:   padding:18px !important;
+     862:   background:
+     863:     radial-gradient(circle at 50% 20%, rgba(59,130,246,.18), transparent 34%),
+     864:     rgba(2,6,23,.72) !important;
+     865:   backdrop-filter:blur(14px) saturate(1.08) !important;
+     866:   -webkit-backdrop-filter:blur(14px) saturate(1.08) !important;
+     867: }
+     868: 
+
+### Eşleşme satır 973
+     955:     from_name:  document.getElementById('f_from').value.trim(),
+     956:     to_name:    document.getElementById('f_to').value.trim(),
+     957:     from_stop:  document.getElementById('f_from_stop').value,
+     958:     to_stop:    document.getElementById('f_to_stop').value,
+     959:     amount:     document.getElementById('f_amount').value,
+     960:     payment:    document.getElementById('f_payment').value
+     961:   };
+     962: 
+     963:   const res = await fetch('{{ url_for("api_consignments") }}', {
+     964:     method:'POST',
+     965:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     966:     body:JSON.stringify(payload)
+     967:   });
+     968: 
+     969:   const j = await res.json();
+     970:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     971: }
+     972: 
+>>   973: async function setStatus(id, status){
+     974:   const res = await fetch(`/api/consignments/${id}/status`, {
+     975:     method:'POST',
+     976:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     977:     body:JSON.stringify({status})
+     978:   });
+     979: 
+     980:   const j = await res.json();
+     981:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     982: }
+     983: 
+     984: async function delCons(id){
+     985:   if(!confirm('Silinsin mi?')) return;
+     986: 
+     987:   const res = await fetch(`/api/consignments/${id}`, {
+     988:     method:'DELETE',
+     989:     headers:{'X-CSRF-Token':csrf}
+     990:   });
+     991: 
+     992:   const j = await res.json();
+     993:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     994: }
+     995: 
+     996: /* -------- Photos Modal -------- */
+     997: function showModal(){
+     998:   const back = document.getElementById('mback');
+     999:   if(!back) return;
+    1000: 
+    1001:   back.style.display = 'flex';
+    1002:   back.classList.add('is-open');
+    1003:   back.setAttribute('aria-hidden', 'false');
+
+--- android_app/app/src/main/python/templates/consignments.html içinde arama: status ---
+
+### Eşleşme satır 351
+     345:   font-size:12px;
+     346:   font-weight:950;
+     347:   letter-spacing:.25px;
+     348:   text-transform:uppercase;
+     349: }
+     350: 
+>>   351: .status-badge{
+     352:   display:inline-flex;
+     353:   align-items:center;
+     354:   gap:6px;
+     355:   padding:8px 10px;
+     356:   border-radius:999px;
+     357:   font-size:13px;
+     358:   font-weight:950;
+     359:   background:#f1f5f9;
+
+### Eşleşme satır 363
+     357:   font-size:13px;
+     358:   font-weight:950;
+     359:   background:#f1f5f9;
+     360:   color:#475569;
+     361: }
+     362: 
+>>   363: .status-badge.yüklendi{
+     364:   background:#eff6ff;
+     365:   color:#1d4ed8;
+     366: }
+     367: 
+     368: .status-badge.teslim{
+     369:   background:#ecfdf5;
+     370:   color:#047857;
+     371: }
+
+### Eşleşme satır 368
+     362: 
+     363: .status-badge.yüklendi{
+     364:   background:#eff6ff;
+     365:   color:#1d4ed8;
+     366: }
+     367: 
+>>   368: .status-badge.teslim{
+     369:   background:#ecfdf5;
+     370:   color:#047857;
+     371: }
+     372: 
+     373: .status-badge.bekliyor{
+     374:   background:#fff7ed;
+     375:   color:#c2410c;
+     376: }
+
+### Eşleşme satır 373
+     367: 
+     368: .status-badge.teslim{
+     369:   background:#ecfdf5;
+     370:   color:#047857;
+     371: }
+     372: 
+>>   373: .status-badge.bekliyor{
+     374:   background:#fff7ed;
+     375:   color:#c2410c;
+     376: }
+     377: 
+     378: .actions{
+     379:   display:grid;
+     380:   grid-template-columns:1fr 1fr;
+     381:   gap:9px;
+
+### Eşleşme satır 675
+     669: .photo-btn{
+     670:   background:#0a1624 !important;
+     671:   border:1px solid rgba(148,163,184,.22) !important;
+     672:   color:#93c5fd !important;
+     673: }
+     674: 
+>>   675: .status-badge{
+     676:   background:#17283e !important;
+     677:   color:#cbd5e1 !important;
+     678: }
+     679: 
+     680: .status-badge.yüklendi{
+     681:   background:rgba(37,99,235,.18) !important;
+     682:   color:#93c5fd !important;
+     683: }
+
+### Eşleşme satır 680
+     674: 
+     675: .status-badge{
+     676:   background:#17283e !important;
+     677:   color:#cbd5e1 !important;
+     678: }
+     679: 
+>>   680: .status-badge.yüklendi{
+     681:   background:rgba(37,99,235,.18) !important;
+     682:   color:#93c5fd !important;
+     683: }
+     684: 
+     685: .status-badge.teslim{
+     686:   background:rgba(16,185,129,.16) !important;
+     687:   color:#86efac !important;
+     688: }
+
+### Eşleşme satır 685
+     679: 
+     680: .status-badge.yüklendi{
+     681:   background:rgba(37,99,235,.18) !important;
+     682:   color:#93c5fd !important;
+     683: }
+     684: 
+>>   685: .status-badge.teslim{
+     686:   background:rgba(16,185,129,.16) !important;
+     687:   color:#86efac !important;
+     688: }
+     689: 
+     690: .status-badge.bekliyor{
+     691:   background:rgba(249,115,22,.16) !important;
+     692:   color:#fdba74 !important;
+     693: }
+
+### Eşleşme satır 690
+     684: 
+     685: .status-badge.teslim{
+     686:   background:rgba(16,185,129,.16) !important;
+     687:   color:#86efac !important;
+     688: }
+     689: 
+>>   690: .status-badge.bekliyor{
+     691:   background:rgba(249,115,22,.16) !important;
+     692:   color:#fdba74 !important;
+     693: }
+     694: 
+     695: .mback{
+     696:   background:rgba(2,6,23,.72) !important;
+     697: }
+     698: 
+
+### Eşleşme satır 830
+     824:           </div>
+     825: 
+     826:           <div class="cons-line">
+     827:             <div class="cons-key">✅</div>
+     828:             <div class="cons-val">
+     829:               <small>Durum</small>
+>>   830:               <span class="status-badge {{ r.status }}">{{ r.status }}</span>
+     831:             </div>
+     832:           </div>
+     833:         </div>
+     834: 
+     835:         <div class="actions">
+     836:           <button class="btn action-btn blue"  onclick="setStatus({{ r.id }}, 'yüklendi')">Yüklendi</button>
+     837:           <button class="btn action-btn green" onclick="setStatus({{ r.id }}, 'teslim')">Teslim</button>
+     838:           <button class="btn action-btn gray"  onclick="setStatus({{ r.id }}, 'bekliyor')">Bekliyor</button>
+
+### Eşleşme satır 973
+     967:   });
+     968: 
+     969:   const j = await res.json();
+     970:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     971: }
+     972: 
+>>   973: async function setStatus(id, status){
+     974:   const res = await fetch(`/api/consignments/${id}/status`, {
+     975:     method:'POST',
+     976:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     977:     body:JSON.stringify({status})
+     978:   });
+     979: 
+     980:   const j = await res.json();
+     981:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+
+### Eşleşme satır 974
+     968: 
+     969:   const j = await res.json();
+     970:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     971: }
+     972: 
+     973: async function setStatus(id, status){
+>>   974:   const res = await fetch(`/api/consignments/${id}/status`, {
+     975:     method:'POST',
+     976:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+     977:     body:JSON.stringify({status})
+     978:   });
+     979: 
+     980:   const j = await res.json();
+     981:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     982: }
+
+### Eşleşme satır 977
+     971: }
+     972: 
+     973: async function setStatus(id, status){
+     974:   const res = await fetch(`/api/consignments/${id}/status`, {
+     975:     method:'POST',
+     976:     headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},
+>>   977:     body:JSON.stringify({status})
+     978:   });
+     979: 
+     980:   const j = await res.json();
+     981:   if(j.ok) location.reload(); else alert(j.msg || 'Hata');
+     982: }
+     983: 
+     984: async function delCons(id){
+     985:   if(!confirm('Silinsin mi?')) return;
+
+--- app.py içinde consignment route/function araması ---
+
+--- app.py içinde arama: api_consignments ---
+Bulunamadı
+
+--- app.py içinde arama: api_consignment_delete ---
+Bulunamadı
+
+--- app.py içinde arama: api_consignment_photos ---
+Bulunamadı
+
+--- app.py içinde arama: status ---
+
+### Eşleşme satır 546
+     542:             from_stop TEXT,
+     543:             to_stop TEXT,
+     544:             amount REAL DEFAULT 0,
+     545:             payment TEXT DEFAULT 'nakit',
+>>   546:             status TEXT DEFAULT 'bekliyor',
+     547:             notes TEXT,
+     548:             created_at TEXT DEFAULT (datetime('now','localtime')),
+     549:             updated_at TEXT,
+     550:             delivered_at TEXT,
+     551:             FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE
+     552:         );
+
+### Eşleşme satır 555
+     551:             FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE
+     552:         );
+     553: 
+     554:         CREATE INDEX IF NOT EXISTS idx_cons_trip ON consignments(trip_id);
+>>   555:         CREATE INDEX IF NOT EXISTS idx_cons_status ON consignments(status);
+     556: 
+     557:         CREATE TABLE IF NOT EXISTS consignment_photos(
+     558:             id INTEGER PRIMARY KEY,
+     559:             consignment_id INTEGER NOT NULL,
+     560:             role TEXT,
+     561:             file_path TEXT NOT NULL,
+
+### Eşleşme satır 1666
+    1662:                        COUNT(*) AS c
+    1663:                 FROM consignments
+    1664:                 WHERE trip_id=?
+    1665:                   AND (
+>>  1666:                     status IS NULL
+    1667:                     OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+    1668:                   )
+    1669:                 GROUP BY {stop_col}
+    1670:                 """,
+    1671:                 (tid,),
+    1672:             ).fetchall()
+
+### Eşleşme satır 1667
+    1663:                 FROM consignments
+    1664:                 WHERE trip_id=?
+    1665:                   AND (
+    1666:                     status IS NULL
+>>  1667:                     OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+    1668:                   )
+    1669:                 GROUP BY {stop_col}
+    1670:                 """,
+    1671:                 (tid,),
+    1672:             ).fetchall()
+    1673: 
+
+### Eşleşme satır 1790
+    1786:         service_count = int(stop_service_counts.get(key, 0) or 0)
+    1787: 
+    1788:         if idx == current_index:
+    1789:             kind = "live"
+>>  1790:             status = "Canlı"
+    1791:             eta = "Şimdi"
+    1792:         elif idx == current_index + 1:
+    1793:             kind = "next"
+    1794:             status = "Sıradaki"
+    1795:             eta = "Sırada"
+    1796:         elif idx > current_index:
+
+### Eşleşme satır 1794
+    1790:             status = "Canlı"
+    1791:             eta = "Şimdi"
+    1792:         elif idx == current_index + 1:
+    1793:             kind = "next"
+>>  1794:             status = "Sıradaki"
+    1795:             eta = "Sırada"
+    1796:         elif idx > current_index:
+    1797:             kind = "upcoming"
+    1798:             status = "Bekliyor"
+    1799:             eta = f"{idx - current_index} durak sonra"
+    1800:         else:
+
+### Eşleşme satır 1798
+    1794:             status = "Sıradaki"
+    1795:             eta = "Sırada"
+    1796:         elif idx > current_index:
+    1797:             kind = "upcoming"
+>>  1798:             status = "Bekliyor"
+    1799:             eta = f"{idx - current_index} durak sonra"
+    1800:         else:
+    1801:             kind = "passed"
+    1802:             status = "Geçildi"
+    1803:             eta = "Geçildi"
+    1804: 
+
+### Eşleşme satır 1802
+    1798:             status = "Bekliyor"
+    1799:             eta = f"{idx - current_index} durak sonra"
+    1800:         else:
+    1801:             kind = "passed"
+>>  1802:             status = "Geçildi"
+    1803:             eta = "Geçildi"
+    1804: 
+    1805:         # mesafe gerçek canlı konum yoksa sıra bazlı gösterim
+    1806:         if idx == current_index:
+    1807:             distance = "0 km"
+    1808:         elif idx > current_index:
+
+### Eşleşme satır 1816
+    1812: 
+    1813:         return {
+    1814:             "name": stop_name,
+    1815:             "kind": kind,
+>>  1816:             "status": status,
+    1817:             "eta": eta,
+    1818:             "distance": distance,
+    1819:             "off_count": off_count,
+    1820:             "board_count": board_count + walkon_count,
+    1821:             "bagaj_count": bagaj_count,
+    1822:             "emanet_count": emanet_count,
+
+### Eşleşme satır 1842
+    1838: 
+    1839:     live_current = make_stop_payload(current_stop, current_index) if current_stop else {
+    1840:         "name": "Durak seçilmedi",
+    1841:         "kind": "live",
+>>  1842:         "status": "Canlı",
+    1843:         "eta": "-",
+    1844:         "distance": "-",
+    1845:         "off_count": 0,
+    1846:         "board_count": 0,
+    1847:         "bagaj_count": 0,
+    1848:         "emanet_count": 0,
+
+### Eşleşme satır 2418
+    2414:             "from_stop": row["from_stop"] or "",
+    2415:             "to_stop": row["to_stop"] or "",
+    2416:             "amount": float(row["amount"] or 0),
+    2417:             "payment": row["payment"] or "",
+>>  2418:             "status": row["status"] or "",
+    2419:             "notes": row["notes"] or "",
+    2420:             "created_at": row["created_at"] or "",
+    2421:             "updated_at": row["updated_at"] or "",
+    2422:             "delivered_at": row["delivered_at"] or "",
+    2423:             "photos": photos,
+    2424:             "photo_count": len(photos),
+
+### Eşleşme satır 2445
+    2441: 
+    2442:     if not row:
+    2443:         return jsonify({"ok": False, "error": "Emanet bulunamadı."}), 404
+    2444: 
+>>  2445:     current_status = (row["status"] or "").strip().lower()
+    2446:     if current_status in {"teslim", "teslim_edildi", "delivered"}:
+    2447:         return jsonify({
+    2448:             "ok": True,
+    2449:             "already": True,
+    2450:             "message": "Bu emanet zaten teslim edilmiş.",
+    2451:             "id": cid,
+
+### Eşleşme satır 2446
+    2442:     if not row:
+    2443:         return jsonify({"ok": False, "error": "Emanet bulunamadı."}), 404
+    2444: 
+    2445:     current_status = (row["status"] or "").strip().lower()
+>>  2446:     if current_status in {"teslim", "teslim_edildi", "delivered"}:
+    2447:         return jsonify({
+    2448:             "ok": True,
+    2449:             "already": True,
+    2450:             "message": "Bu emanet zaten teslim edilmiş.",
+    2451:             "id": cid,
+    2452:             "code": row["code"] or "",
+
+### Eşleşme satır 2458
+    2454: 
+    2455:     db.execute(
+    2456:         """
+    2457:         UPDATE consignments
+>>  2458:         SET status='teslim_edildi',
+    2459:             delivered_at=datetime('now','localtime'),
+    2460:             updated_at=datetime('now','localtime')
+    2461:         WHERE id=? AND trip_id=?
+    2462:         """,
+    2463:         (cid, tid),
+    2464:     )
+
+### Eşleşme satır 2633
+    2629:                    COALESCE(code,'') AS code,
+    2630:                    COALESCE(item_name,'') AS item_name,
+    2631:                    COALESCE(to_name,'') AS to_name,
+    2632:                    COALESCE(to_stop,'') AS to_stop,
+>>  2633:                    COALESCE(status,'') AS status
+    2634:             FROM consignments
+    2635:             WHERE trip_id=?
+    2636:               AND lower(COALESCE(to_stop,''))=lower(?)
+    2637:               AND (
+    2638:                 status IS NULL
+    2639:                 OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+
+### Eşleşme satır 2638
+    2634:             FROM consignments
+    2635:             WHERE trip_id=?
+    2636:               AND lower(COALESCE(to_stop,''))=lower(?)
+    2637:               AND (
+>>  2638:                 status IS NULL
+    2639:                 OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+    2640:               )
+    2641:             ORDER BY id DESC
+    2642:             """,
+    2643:             (tid, stop_name),
+    2644:         ).fetchall()
+
+### Eşleşme satır 2639
+    2635:             WHERE trip_id=?
+    2636:               AND lower(COALESCE(to_stop,''))=lower(?)
+    2637:               AND (
+    2638:                 status IS NULL
+>>  2639:                 OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+    2640:               )
+    2641:             ORDER BY id DESC
+    2642:             """,
+    2643:             (tid, stop_name),
+    2644:         ).fetchall()
+    2645: 
+
+### Eşleşme satır 2653
+    2649:                 "code": r["code"] or "",
+    2650:                 "item_name": r["item_name"] or "",
+    2651:                 "to_name": r["to_name"] or "",
+    2652:                 "to_stop": r["to_stop"] or "",
+>>  2653:                 "status": r["status"] or "",
+    2654:             })
+    2655: 
+    2656:     except Exception:
+    2657:         pending_consignments = []
+    2658: 
+    2659:     pending = {
+
+### Eşleşme satır 2866
+    2862:             for c in [
+    2863:                 "code", "item_name", "item_type", "item", "title",
+    2864:                 "from_name", "from_phone", "to_name", "to_phone",
+    2865:                 "note", "notes", "receiver_name", "amount", "payment",
+>>  2866:                 "status", "created_at", "updated_at", "delivered_at"
+    2867:             ]:
+    2868:                 if c in cols and c not in select_cols:
+    2869:                     select_cols.append(c)
+    2870: 
+    2871:             status_filter = ""
+    2872:             if "status" in cols:
+
+### Eşleşme satır 2871
+    2867:             ]:
+    2868:                 if c in cols and c not in select_cols:
+    2869:                     select_cols.append(c)
+    2870: 
+>>  2871:             status_filter = ""
+    2872:             if "status" in cols:
+    2873:                 status_filter = " AND (status IS NULL OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered'))"
+    2874: 
+    2875:             q = f"SELECT {', '.join(select_cols)} FROM consignments WHERE trip_id=?{status_filter}"
+    2876:             rows = db.execute(q, (tid,)).fetchall()
+    2877: 
+
+### Eşleşme satır 2872
+    2868:                 if c in cols and c not in select_cols:
+    2869:                     select_cols.append(c)
+    2870: 
+    2871:             status_filter = ""
+>>  2872:             if "status" in cols:
+    2873:                 status_filter = " AND (status IS NULL OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered'))"
+    2874: 
+    2875:             q = f"SELECT {', '.join(select_cols)} FROM consignments WHERE trip_id=?{status_filter}"
+    2876:             rows = db.execute(q, (tid,)).fetchall()
+    2877: 
+    2878:             for r in rows:
+
+### Eşleşme satır 2873
+    2869:                     select_cols.append(c)
+    2870: 
+    2871:             status_filter = ""
+    2872:             if "status" in cols:
+>>  2873:                 status_filter = " AND (status IS NULL OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered'))"
+    2874: 
+    2875:             q = f"SELECT {', '.join(select_cols)} FROM consignments WHERE trip_id=?{status_filter}"
+    2876:             rows = db.execute(q, (tid,)).fetchall()
+    2877: 
+    2878:             for r in rows:
+    2879:                 sname = (r[stop_col] or "").strip()
+
+### Eşleşme satır 2875
+    2871:             status_filter = ""
+    2872:             if "status" in cols:
+    2873:                 status_filter = " AND (status IS NULL OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered'))"
+    2874: 
+>>  2875:             q = f"SELECT {', '.join(select_cols)} FROM consignments WHERE trip_id=?{status_filter}"
+    2876:             rows = db.execute(q, (tid,)).fetchall()
+    2877: 
+    2878:             for r in rows:
+    2879:                 sname = (r[stop_col] or "").strip()
+    2880:                 if norm_stop(sname) != stop_key:
+    2881:                     continue
+
+### Eşleşme satır 2934
+    2930:                     "from_phone": _rv("from_phone", "") or "",
+    2931:                     "stop_name": sname,
+    2932:                     "amount": float(_rv("amount", 0) or 0),
+    2933:                     "payment": _rv("payment", "") or "",
+>>  2934:                     "status": _rv("status", "") or "",
+    2935:                     "notes": _rv("notes", "") or _rv("note", "") or "",
+    2936:                     "delivered_at": _rv("delivered_at", "") or "",
+    2937:                 })
+    2938:     except Exception:
+    2939:         consignments = []
+    2940: 
+
+### Eşleşme satır 3120
+    3116:                    COUNT(*) AS c
+    3117:             FROM consignments
+    3118:             WHERE trip_id=?
+    3119:               AND (
+>>  3120:                 status IS NULL
+    3121:                 OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+    3122:               )
+    3123:             GROUP BY to_stop
+    3124:             """,
+    3125:             (tid,),
+    3126:         ).fetchall()
+
+### Eşleşme satır 3121
+    3117:             FROM consignments
+    3118:             WHERE trip_id=?
+    3119:               AND (
+    3120:                 status IS NULL
+>>  3121:                 OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+    3122:               )
+    3123:             GROUP BY to_stop
+    3124:             """,
+    3125:             (tid,),
+    3126:         ).fetchall()
+    3127: 
+
+--- android_app/app/src/main/python/app.py içinde arama: api_consignments ---
+Bulunamadı
+
+--- android_app/app/src/main/python/app.py içinde arama: api_consignment_delete ---
+Bulunamadı
+
+--- android_app/app/src/main/python/app.py içinde arama: api_consignment_photos ---
+Bulunamadı
+
+--- android_app/app/src/main/python/app.py içinde arama: status ---
+
+### Eşleşme satır 546
+     542:             from_stop TEXT,
+     543:             to_stop TEXT,
+     544:             amount REAL DEFAULT 0,
+     545:             payment TEXT DEFAULT 'nakit',
+>>   546:             status TEXT DEFAULT 'bekliyor',
+     547:             notes TEXT,
+     548:             created_at TEXT DEFAULT (datetime('now','localtime')),
+     549:             updated_at TEXT,
+     550:             delivered_at TEXT,
+     551:             FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE
+     552:         );
+
+### Eşleşme satır 555
+     551:             FOREIGN KEY(trip_id) REFERENCES trips(id) ON DELETE CASCADE
+     552:         );
+     553: 
+     554:         CREATE INDEX IF NOT EXISTS idx_cons_trip ON consignments(trip_id);
+>>   555:         CREATE INDEX IF NOT EXISTS idx_cons_status ON consignments(status);
+     556: 
+     557:         CREATE TABLE IF NOT EXISTS consignment_photos(
+     558:             id INTEGER PRIMARY KEY,
+     559:             consignment_id INTEGER NOT NULL,
+     560:             role TEXT,
+     561:             file_path TEXT NOT NULL,
+
+### Eşleşme satır 1661
+    1657:                        COUNT(*) AS c
+    1658:                 FROM consignments
+    1659:                 WHERE trip_id=?
+    1660:                   AND (
+>>  1661:                     status IS NULL
+    1662:                     OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+    1663:                   )
+    1664:                 GROUP BY {stop_col}
+    1665:                 """,
+    1666:                 (tid,),
+    1667:             ).fetchall()
+
+### Eşleşme satır 1662
+    1658:                 FROM consignments
+    1659:                 WHERE trip_id=?
+    1660:                   AND (
+    1661:                     status IS NULL
+>>  1662:                     OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+    1663:                   )
+    1664:                 GROUP BY {stop_col}
+    1665:                 """,
+    1666:                 (tid,),
+    1667:             ).fetchall()
+    1668: 
+
+### Eşleşme satır 1785
+    1781:         service_count = int(stop_service_counts.get(key, 0) or 0)
+    1782: 
+    1783:         if idx == current_index:
+    1784:             kind = "live"
+>>  1785:             status = "Canlı"
+    1786:             eta = "Şimdi"
+    1787:         elif idx == current_index + 1:
+    1788:             kind = "next"
+    1789:             status = "Sıradaki"
+    1790:             eta = "Sırada"
+    1791:         elif idx > current_index:
+
+### Eşleşme satır 1789
+    1785:             status = "Canlı"
+    1786:             eta = "Şimdi"
+    1787:         elif idx == current_index + 1:
+    1788:             kind = "next"
+>>  1789:             status = "Sıradaki"
+    1790:             eta = "Sırada"
+    1791:         elif idx > current_index:
+    1792:             kind = "upcoming"
+    1793:             status = "Bekliyor"
+    1794:             eta = f"{idx - current_index} durak sonra"
+    1795:         else:
+
+### Eşleşme satır 1793
+    1789:             status = "Sıradaki"
+    1790:             eta = "Sırada"
+    1791:         elif idx > current_index:
+    1792:             kind = "upcoming"
+>>  1793:             status = "Bekliyor"
+    1794:             eta = f"{idx - current_index} durak sonra"
+    1795:         else:
+    1796:             kind = "passed"
+    1797:             status = "Geçildi"
+    1798:             eta = "Geçildi"
+    1799: 
+
+### Eşleşme satır 1797
+    1793:             status = "Bekliyor"
+    1794:             eta = f"{idx - current_index} durak sonra"
+    1795:         else:
+    1796:             kind = "passed"
+>>  1797:             status = "Geçildi"
+    1798:             eta = "Geçildi"
+    1799: 
+    1800:         # mesafe gerçek canlı konum yoksa sıra bazlı gösterim
+    1801:         if idx == current_index:
+    1802:             distance = "0 km"
+    1803:         elif idx > current_index:
+
+### Eşleşme satır 1811
+    1807: 
+    1808:         return {
+    1809:             "name": stop_name,
+    1810:             "kind": kind,
+>>  1811:             "status": status,
+    1812:             "eta": eta,
+    1813:             "distance": distance,
+    1814:             "off_count": off_count,
+    1815:             "board_count": board_count + walkon_count,
+    1816:             "bagaj_count": bagaj_count,
+    1817:             "emanet_count": emanet_count,
+
+### Eşleşme satır 1837
+    1833: 
+    1834:     live_current = make_stop_payload(current_stop, current_index) if current_stop else {
+    1835:         "name": "Durak seçilmedi",
+    1836:         "kind": "live",
+>>  1837:         "status": "Canlı",
+    1838:         "eta": "-",
+    1839:         "distance": "-",
+    1840:         "off_count": 0,
+    1841:         "board_count": 0,
+    1842:         "bagaj_count": 0,
+    1843:         "emanet_count": 0,
+
+### Eşleşme satır 2413
+    2409:             "from_stop": row["from_stop"] or "",
+    2410:             "to_stop": row["to_stop"] or "",
+    2411:             "amount": float(row["amount"] or 0),
+    2412:             "payment": row["payment"] or "",
+>>  2413:             "status": row["status"] or "",
+    2414:             "notes": row["notes"] or "",
+    2415:             "created_at": row["created_at"] or "",
+    2416:             "updated_at": row["updated_at"] or "",
+    2417:             "delivered_at": row["delivered_at"] or "",
+    2418:             "photos": photos,
+    2419:             "photo_count": len(photos),
+
+### Eşleşme satır 2440
+    2436: 
+    2437:     if not row:
+    2438:         return jsonify({"ok": False, "error": "Emanet bulunamadı."}), 404
+    2439: 
+>>  2440:     current_status = (row["status"] or "").strip().lower()
+    2441:     if current_status in {"teslim", "teslim_edildi", "delivered"}:
+    2442:         return jsonify({
+    2443:             "ok": True,
+    2444:             "already": True,
+    2445:             "message": "Bu emanet zaten teslim edilmiş.",
+    2446:             "id": cid,
+
+### Eşleşme satır 2441
+    2437:     if not row:
+    2438:         return jsonify({"ok": False, "error": "Emanet bulunamadı."}), 404
+    2439: 
+    2440:     current_status = (row["status"] or "").strip().lower()
+>>  2441:     if current_status in {"teslim", "teslim_edildi", "delivered"}:
+    2442:         return jsonify({
+    2443:             "ok": True,
+    2444:             "already": True,
+    2445:             "message": "Bu emanet zaten teslim edilmiş.",
+    2446:             "id": cid,
+    2447:             "code": row["code"] or "",
+
+### Eşleşme satır 2453
+    2449: 
+    2450:     db.execute(
+    2451:         """
+    2452:         UPDATE consignments
+>>  2453:         SET status='teslim_edildi',
+    2454:             delivered_at=datetime('now','localtime'),
+    2455:             updated_at=datetime('now','localtime')
+    2456:         WHERE id=? AND trip_id=?
+    2457:         """,
+    2458:         (cid, tid),
+    2459:     )
+
+### Eşleşme satır 2628
+    2624:                    COALESCE(code,'') AS code,
+    2625:                    COALESCE(item_name,'') AS item_name,
+    2626:                    COALESCE(to_name,'') AS to_name,
+    2627:                    COALESCE(to_stop,'') AS to_stop,
+>>  2628:                    COALESCE(status,'') AS status
+    2629:             FROM consignments
+    2630:             WHERE trip_id=?
+    2631:               AND lower(COALESCE(to_stop,''))=lower(?)
+    2632:               AND (
+    2633:                 status IS NULL
+    2634:                 OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+
+### Eşleşme satır 2633
+    2629:             FROM consignments
+    2630:             WHERE trip_id=?
+    2631:               AND lower(COALESCE(to_stop,''))=lower(?)
+    2632:               AND (
+>>  2633:                 status IS NULL
+    2634:                 OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+    2635:               )
+    2636:             ORDER BY id DESC
+    2637:             """,
+    2638:             (tid, stop_name),
+    2639:         ).fetchall()
+
+### Eşleşme satır 2634
+    2630:             WHERE trip_id=?
+    2631:               AND lower(COALESCE(to_stop,''))=lower(?)
+    2632:               AND (
+    2633:                 status IS NULL
+>>  2634:                 OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+    2635:               )
+    2636:             ORDER BY id DESC
+    2637:             """,
+    2638:             (tid, stop_name),
+    2639:         ).fetchall()
+    2640: 
+
+### Eşleşme satır 2648
+    2644:                 "code": r["code"] or "",
+    2645:                 "item_name": r["item_name"] or "",
+    2646:                 "to_name": r["to_name"] or "",
+    2647:                 "to_stop": r["to_stop"] or "",
+>>  2648:                 "status": r["status"] or "",
+    2649:             })
+    2650: 
+    2651:     except Exception:
+    2652:         pending_consignments = []
+    2653: 
+    2654:     pending = {
+
+### Eşleşme satır 2861
+    2857:             for c in [
+    2858:                 "code", "item_name", "item_type", "item", "title",
+    2859:                 "from_name", "from_phone", "to_name", "to_phone",
+    2860:                 "note", "notes", "receiver_name", "amount", "payment",
+>>  2861:                 "status", "created_at", "updated_at", "delivered_at"
+    2862:             ]:
+    2863:                 if c in cols and c not in select_cols:
+    2864:                     select_cols.append(c)
+    2865: 
+    2866:             status_filter = ""
+    2867:             if "status" in cols:
+
+### Eşleşme satır 2866
+    2862:             ]:
+    2863:                 if c in cols and c not in select_cols:
+    2864:                     select_cols.append(c)
+    2865: 
+>>  2866:             status_filter = ""
+    2867:             if "status" in cols:
+    2868:                 status_filter = " AND (status IS NULL OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered'))"
+    2869: 
+    2870:             q = f"SELECT {', '.join(select_cols)} FROM consignments WHERE trip_id=?{status_filter}"
+    2871:             rows = db.execute(q, (tid,)).fetchall()
+    2872: 
+
+### Eşleşme satır 2867
+    2863:                 if c in cols and c not in select_cols:
+    2864:                     select_cols.append(c)
+    2865: 
+    2866:             status_filter = ""
+>>  2867:             if "status" in cols:
+    2868:                 status_filter = " AND (status IS NULL OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered'))"
+    2869: 
+    2870:             q = f"SELECT {', '.join(select_cols)} FROM consignments WHERE trip_id=?{status_filter}"
+    2871:             rows = db.execute(q, (tid,)).fetchall()
+    2872: 
+    2873:             for r in rows:
+
+### Eşleşme satır 2868
+    2864:                     select_cols.append(c)
+    2865: 
+    2866:             status_filter = ""
+    2867:             if "status" in cols:
+>>  2868:                 status_filter = " AND (status IS NULL OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered'))"
+    2869: 
+    2870:             q = f"SELECT {', '.join(select_cols)} FROM consignments WHERE trip_id=?{status_filter}"
+    2871:             rows = db.execute(q, (tid,)).fetchall()
+    2872: 
+    2873:             for r in rows:
+    2874:                 sname = (r[stop_col] or "").strip()
+
+### Eşleşme satır 2870
+    2866:             status_filter = ""
+    2867:             if "status" in cols:
+    2868:                 status_filter = " AND (status IS NULL OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered'))"
+    2869: 
+>>  2870:             q = f"SELECT {', '.join(select_cols)} FROM consignments WHERE trip_id=?{status_filter}"
+    2871:             rows = db.execute(q, (tid,)).fetchall()
+    2872: 
+    2873:             for r in rows:
+    2874:                 sname = (r[stop_col] or "").strip()
+    2875:                 if norm_stop(sname) != stop_key:
+    2876:                     continue
+
+### Eşleşme satır 2929
+    2925:                     "from_phone": _rv("from_phone", "") or "",
+    2926:                     "stop_name": sname,
+    2927:                     "amount": float(_rv("amount", 0) or 0),
+    2928:                     "payment": _rv("payment", "") or "",
+>>  2929:                     "status": _rv("status", "") or "",
+    2930:                     "notes": _rv("notes", "") or _rv("note", "") or "",
+    2931:                     "delivered_at": _rv("delivered_at", "") or "",
+    2932:                 })
+    2933:     except Exception:
+    2934:         consignments = []
+    2935: 
+
+### Eşleşme satır 3115
+    3111:                    COUNT(*) AS c
+    3112:             FROM consignments
+    3113:             WHERE trip_id=?
+    3114:               AND (
+>>  3115:                 status IS NULL
+    3116:                 OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+    3117:               )
+    3118:             GROUP BY to_stop
+    3119:             """,
+    3120:             (tid,),
+    3121:         ).fetchall()
+
+### Eşleşme satır 3116
+    3112:             FROM consignments
+    3113:             WHERE trip_id=?
+    3114:               AND (
+    3115:                 status IS NULL
+>>  3116:                 OR lower(COALESCE(status,'')) NOT IN ('teslim', 'teslim_edildi', 'delivered')
+    3117:               )
+    3118:             GROUP BY to_stop
+    3119:             """,
+    3120:             (tid,),
+    3121:         ).fetchall()
+    3122: 
+
+===== 3) RAPORLAR seat-detail ENDPOINT BAĞLAMI =====
+
+--- templates/reports.html içinde arama: /api/report/seat-detail ---
+
+### Eşleşme satır 482
+     464:       div.style.background = (v===0) ? getComputedStyle(document.documentElement).getPropertyValue('--seat-zero').trim() : colorFromGreenToRed(v/max);
+     465:       div.title = `${n}. koltuk — satış: ${v}`;
+     466:       // rozet her zaman göster: (istersen v>0 koşulu ile gizleyebilirsin)
+     467:       div.innerHTML = `<span class="label">${n}</span><span class="cnt">${v}</span>`;
+     468:       div.addEventListener('click', ()=> openSeatDetail(n));
+     469:       cont.appendChild(div);
+     470:     });
+     471:   }
+     472: 
+     473:   // Modal
+     474:   function openModal(){ $('#mdBack').style.display='block'; $('#mdSeat').style.display='block'; }
+     475:   function closeModal(){ $('#mdBack').style.display='none'; $('#mdSeat').style.display='none'; }
+     476:   $('#mdBack').addEventListener('click', closeModal);
+     477: 
+     478:   async function openSeatDetail(seatNo){
+     479:     try{
+     480:       showBusy(true);
+     481:       const p = new URLSearchParams(filtersQS()); p.set('seat_no', seatNo);
+>>   482:       const r = await fetch('/api/report/seat-detail?'+p.toString(), {cache:'no-store'});
+     483:       if(!r.ok) throw new Error('Ağ hatası');
+     484:       const j = await r.json(); if(!j.ok) throw new Error('Detay alınamadı');
+     485: 
+     486:       $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
+     487:       $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     488: 
+     489:       const tb = $('#mdTable tbody'); tb.innerHTML='';
+     490:       (j.items||[]).forEach(it=>{
+     491:         const tr = document.createElement('tr');
+     492:         tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
+     493:         tb.appendChild(tr);
+     494:       });
+     495:       $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     496:       openModal();
+     497:     }catch(e){
+     498:       console.error(e); showToast('Detay alınamadı.');
+     499:     }finally{
+     500:       showBusy(false);
+     501:     }
+     502:   }
+     503: 
+     504:   // CSV
+     505:   function makeCSV(j){
+     506:     const L=[]; const qs = new URLSearchParams(filtersQS());
+     507:     L.push(`Hat;${qs.get('route')||'Hepsi'}`);
+     508:     L.push(`Başlangıç;${qs.get('date_from')||'-'}`);
+     509:     L.push(`Bitiş;${qs.get('date_to')||'-'}`);
+     510:     L.push('');
+     511:     const t=j.totals||{}; const pax=(Number(t.seated_count||0)+Number(t.walk_pax||0));
+     512:     L.push('Toplamlar');
+
+--- templates/reports.html içinde arama: seat-detail ---
+
+### Eşleşme satır 482
+     464:       div.style.background = (v===0) ? getComputedStyle(document.documentElement).getPropertyValue('--seat-zero').trim() : colorFromGreenToRed(v/max);
+     465:       div.title = `${n}. koltuk — satış: ${v}`;
+     466:       // rozet her zaman göster: (istersen v>0 koşulu ile gizleyebilirsin)
+     467:       div.innerHTML = `<span class="label">${n}</span><span class="cnt">${v}</span>`;
+     468:       div.addEventListener('click', ()=> openSeatDetail(n));
+     469:       cont.appendChild(div);
+     470:     });
+     471:   }
+     472: 
+     473:   // Modal
+     474:   function openModal(){ $('#mdBack').style.display='block'; $('#mdSeat').style.display='block'; }
+     475:   function closeModal(){ $('#mdBack').style.display='none'; $('#mdSeat').style.display='none'; }
+     476:   $('#mdBack').addEventListener('click', closeModal);
+     477: 
+     478:   async function openSeatDetail(seatNo){
+     479:     try{
+     480:       showBusy(true);
+     481:       const p = new URLSearchParams(filtersQS()); p.set('seat_no', seatNo);
+>>   482:       const r = await fetch('/api/report/seat-detail?'+p.toString(), {cache:'no-store'});
+     483:       if(!r.ok) throw new Error('Ağ hatası');
+     484:       const j = await r.json(); if(!j.ok) throw new Error('Detay alınamadı');
+     485: 
+     486:       $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
+     487:       $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     488: 
+     489:       const tb = $('#mdTable tbody'); tb.innerHTML='';
+     490:       (j.items||[]).forEach(it=>{
+     491:         const tr = document.createElement('tr');
+     492:         tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
+     493:         tb.appendChild(tr);
+     494:       });
+     495:       $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     496:       openModal();
+     497:     }catch(e){
+     498:       console.error(e); showToast('Detay alınamadı.');
+     499:     }finally{
+     500:       showBusy(false);
+     501:     }
+     502:   }
+     503: 
+     504:   // CSV
+     505:   function makeCSV(j){
+     506:     const L=[]; const qs = new URLSearchParams(filtersQS());
+     507:     L.push(`Hat;${qs.get('route')||'Hepsi'}`);
+     508:     L.push(`Başlangıç;${qs.get('date_from')||'-'}`);
+     509:     L.push(`Bitiş;${qs.get('date_to')||'-'}`);
+     510:     L.push('');
+     511:     const t=j.totals||{}; const pax=(Number(t.seated_count||0)+Number(t.walk_pax||0));
+     512:     L.push('Toplamlar');
+
+--- templates/reports.html içinde arama: Detay ---
+
+### Eşleşme satır 484
+     474:   function openModal(){ $('#mdBack').style.display='block'; $('#mdSeat').style.display='block'; }
+     475:   function closeModal(){ $('#mdBack').style.display='none'; $('#mdSeat').style.display='none'; }
+     476:   $('#mdBack').addEventListener('click', closeModal);
+     477: 
+     478:   async function openSeatDetail(seatNo){
+     479:     try{
+     480:       showBusy(true);
+     481:       const p = new URLSearchParams(filtersQS()); p.set('seat_no', seatNo);
+     482:       const r = await fetch('/api/report/seat-detail?'+p.toString(), {cache:'no-store'});
+     483:       if(!r.ok) throw new Error('Ağ hatası');
+>>   484:       const j = await r.json(); if(!j.ok) throw new Error('Detay alınamadı');
+     485: 
+     486:       $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
+     487:       $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     488: 
+     489:       const tb = $('#mdTable tbody'); tb.innerHTML='';
+     490:       (j.items||[]).forEach(it=>{
+     491:         const tr = document.createElement('tr');
+     492:         tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
+     493:         tb.appendChild(tr);
+     494:       });
+     495:       $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     496:       openModal();
+     497:     }catch(e){
+     498:       console.error(e); showToast('Detay alınamadı.');
+     499:     }finally{
+     500:       showBusy(false);
+
+### Eşleşme satır 498
+     488: 
+     489:       const tb = $('#mdTable tbody'); tb.innerHTML='';
+     490:       (j.items||[]).forEach(it=>{
+     491:         const tr = document.createElement('tr');
+     492:         tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
+     493:         tb.appendChild(tr);
+     494:       });
+     495:       $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     496:       openModal();
+     497:     }catch(e){
+>>   498:       console.error(e); showToast('Detay alınamadı.');
+     499:     }finally{
+     500:       showBusy(false);
+     501:     }
+     502:   }
+     503: 
+     504:   // CSV
+     505:   function makeCSV(j){
+     506:     const L=[]; const qs = new URLSearchParams(filtersQS());
+     507:     L.push(`Hat;${qs.get('route')||'Hepsi'}`);
+     508:     L.push(`Başlangıç;${qs.get('date_from')||'-'}`);
+     509:     L.push(`Bitiş;${qs.get('date_to')||'-'}`);
+     510:     L.push('');
+     511:     const t=j.totals||{}; const pax=(Number(t.seated_count||0)+Number(t.walk_pax||0));
+     512:     L.push('Toplamlar');
+     513:     L.push(`Toplam Yolcu;${pax}`);
+     514:     L.push(`Toplam Gelir;${Number(t.overall_revenue||0).toFixed(2)}`);
+
+--- android_app/app/src/main/python/templates/reports.html içinde arama: /api/report/seat-detail ---
+
+### Eşleşme satır 482
+     464:       div.style.background = (v===0) ? getComputedStyle(document.documentElement).getPropertyValue('--seat-zero').trim() : colorFromGreenToRed(v/max);
+     465:       div.title = `${n}. koltuk — satış: ${v}`;
+     466:       // rozet her zaman göster: (istersen v>0 koşulu ile gizleyebilirsin)
+     467:       div.innerHTML = `<span class="label">${n}</span><span class="cnt">${v}</span>`;
+     468:       div.addEventListener('click', ()=> openSeatDetail(n));
+     469:       cont.appendChild(div);
+     470:     });
+     471:   }
+     472: 
+     473:   // Modal
+     474:   function openModal(){ $('#mdBack').style.display='block'; $('#mdSeat').style.display='block'; }
+     475:   function closeModal(){ $('#mdBack').style.display='none'; $('#mdSeat').style.display='none'; }
+     476:   $('#mdBack').addEventListener('click', closeModal);
+     477: 
+     478:   async function openSeatDetail(seatNo){
+     479:     try{
+     480:       showBusy(true);
+     481:       const p = new URLSearchParams(filtersQS()); p.set('seat_no', seatNo);
+>>   482:       const r = await fetch('/api/report/seat-detail?'+p.toString(), {cache:'no-store'});
+     483:       if(!r.ok) throw new Error('Ağ hatası');
+     484:       const j = await r.json(); if(!j.ok) throw new Error('Detay alınamadı');
+     485: 
+     486:       $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
+     487:       $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     488: 
+     489:       const tb = $('#mdTable tbody'); tb.innerHTML='';
+     490:       (j.items||[]).forEach(it=>{
+     491:         const tr = document.createElement('tr');
+     492:         tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
+     493:         tb.appendChild(tr);
+     494:       });
+     495:       $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     496:       openModal();
+     497:     }catch(e){
+     498:       console.error(e); showToast('Detay alınamadı.');
+     499:     }finally{
+     500:       showBusy(false);
+     501:     }
+     502:   }
+     503: 
+     504:   // CSV
+     505:   function makeCSV(j){
+     506:     const L=[]; const qs = new URLSearchParams(filtersQS());
+     507:     L.push(`Hat;${qs.get('route')||'Hepsi'}`);
+     508:     L.push(`Başlangıç;${qs.get('date_from')||'-'}`);
+     509:     L.push(`Bitiş;${qs.get('date_to')||'-'}`);
+     510:     L.push('');
+     511:     const t=j.totals||{}; const pax=(Number(t.seated_count||0)+Number(t.walk_pax||0));
+     512:     L.push('Toplamlar');
+
+--- android_app/app/src/main/python/templates/reports.html içinde arama: seat-detail ---
+
+### Eşleşme satır 482
+     464:       div.style.background = (v===0) ? getComputedStyle(document.documentElement).getPropertyValue('--seat-zero').trim() : colorFromGreenToRed(v/max);
+     465:       div.title = `${n}. koltuk — satış: ${v}`;
+     466:       // rozet her zaman göster: (istersen v>0 koşulu ile gizleyebilirsin)
+     467:       div.innerHTML = `<span class="label">${n}</span><span class="cnt">${v}</span>`;
+     468:       div.addEventListener('click', ()=> openSeatDetail(n));
+     469:       cont.appendChild(div);
+     470:     });
+     471:   }
+     472: 
+     473:   // Modal
+     474:   function openModal(){ $('#mdBack').style.display='block'; $('#mdSeat').style.display='block'; }
+     475:   function closeModal(){ $('#mdBack').style.display='none'; $('#mdSeat').style.display='none'; }
+     476:   $('#mdBack').addEventListener('click', closeModal);
+     477: 
+     478:   async function openSeatDetail(seatNo){
+     479:     try{
+     480:       showBusy(true);
+     481:       const p = new URLSearchParams(filtersQS()); p.set('seat_no', seatNo);
+>>   482:       const r = await fetch('/api/report/seat-detail?'+p.toString(), {cache:'no-store'});
+     483:       if(!r.ok) throw new Error('Ağ hatası');
+     484:       const j = await r.json(); if(!j.ok) throw new Error('Detay alınamadı');
+     485: 
+     486:       $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
+     487:       $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     488: 
+     489:       const tb = $('#mdTable tbody'); tb.innerHTML='';
+     490:       (j.items||[]).forEach(it=>{
+     491:         const tr = document.createElement('tr');
+     492:         tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
+     493:         tb.appendChild(tr);
+     494:       });
+     495:       $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     496:       openModal();
+     497:     }catch(e){
+     498:       console.error(e); showToast('Detay alınamadı.');
+     499:     }finally{
+     500:       showBusy(false);
+     501:     }
+     502:   }
+     503: 
+     504:   // CSV
+     505:   function makeCSV(j){
+     506:     const L=[]; const qs = new URLSearchParams(filtersQS());
+     507:     L.push(`Hat;${qs.get('route')||'Hepsi'}`);
+     508:     L.push(`Başlangıç;${qs.get('date_from')||'-'}`);
+     509:     L.push(`Bitiş;${qs.get('date_to')||'-'}`);
+     510:     L.push('');
+     511:     const t=j.totals||{}; const pax=(Number(t.seated_count||0)+Number(t.walk_pax||0));
+     512:     L.push('Toplamlar');
+
+--- android_app/app/src/main/python/templates/reports.html içinde arama: Detay ---
+
+### Eşleşme satır 484
+     474:   function openModal(){ $('#mdBack').style.display='block'; $('#mdSeat').style.display='block'; }
+     475:   function closeModal(){ $('#mdBack').style.display='none'; $('#mdSeat').style.display='none'; }
+     476:   $('#mdBack').addEventListener('click', closeModal);
+     477: 
+     478:   async function openSeatDetail(seatNo){
+     479:     try{
+     480:       showBusy(true);
+     481:       const p = new URLSearchParams(filtersQS()); p.set('seat_no', seatNo);
+     482:       const r = await fetch('/api/report/seat-detail?'+p.toString(), {cache:'no-store'});
+     483:       if(!r.ok) throw new Error('Ağ hatası');
+>>   484:       const j = await r.json(); if(!j.ok) throw new Error('Detay alınamadı');
+     485: 
+     486:       $('#mdTitle').textContent = `Koltuk ${j.seat_no}`;
+     487:       $('#mdInfo').textContent  = `Seçilen aralıkta ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     488: 
+     489:       const tb = $('#mdTable tbody'); tb.innerHTML='';
+     490:       (j.items||[]).forEach(it=>{
+     491:         const tr = document.createElement('tr');
+     492:         tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
+     493:         tb.appendChild(tr);
+     494:       });
+     495:       $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     496:       openModal();
+     497:     }catch(e){
+     498:       console.error(e); showToast('Detay alınamadı.');
+     499:     }finally{
+     500:       showBusy(false);
+
+### Eşleşme satır 498
+     488: 
+     489:       const tb = $('#mdTable tbody'); tb.innerHTML='';
+     490:       (j.items||[]).forEach(it=>{
+     491:         const tr = document.createElement('tr');
+     492:         tr.innerHTML = `<td>${it.stop||'—'}</td><td class="right">${it.times}</td><td class="right">${fmtTL(it.revenue)}</td>`;
+     493:         tb.appendChild(tr);
+     494:       });
+     495:       $('#mdTotal').textContent = `Toplam: ${j.total_times} satış • ${fmtTL(j.total_revenue)}`;
+     496:       openModal();
+     497:     }catch(e){
+>>   498:       console.error(e); showToast('Detay alınamadı.');
+     499:     }finally{
+     500:       showBusy(false);
+     501:     }
+     502:   }
+     503: 
+     504:   // CSV
+     505:   function makeCSV(j){
+     506:     const L=[]; const qs = new URLSearchParams(filtersQS());
+     507:     L.push(`Hat;${qs.get('route')||'Hepsi'}`);
+     508:     L.push(`Başlangıç;${qs.get('date_from')||'-'}`);
+     509:     L.push(`Bitiş;${qs.get('date_to')||'-'}`);
+     510:     L.push('');
+     511:     const t=j.totals||{}; const pax=(Number(t.seated_count||0)+Number(t.walk_pax||0));
+     512:     L.push('Toplamlar');
+     513:     L.push(`Toplam Yolcu;${pax}`);
+     514:     L.push(`Toplam Gelir;${Number(t.overall_revenue||0).toFixed(2)}`);
+
+--- app.py içinde arama: api_report ---
+
+### Eşleşme satır 4123
+    4115:         return jsonify({"ok": False, "msg": f"Rapor okunamadı: {e}"}), 500
+    4116: 
+    4117:     return jsonify(data)
+    4118: 
+    4119: 
+    4120: 
+    4121: 
+    4122: @app.route("/api/report-archive")
+>>  4123: def api_report_archive():
+    4124:     items = []
+    4125: 
+    4126:     for f in sorted(reports_dir_path().glob("*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+    4127:         base = f.stem
+    4128:         title = base
+    4129:         route = ""
+    4130:         plate = ""
+    4131:         date = ""
+    4132: 
+    4133:         try:
+    4134:             data = json.loads(f.read_text(encoding="utf-8"))
+    4135:             trip = data.get("trip") or {}
+    4136:             date = trip.get("date") or ""
+    4137:             route = trip.get("route") or ""
+    4138:             plate = trip.get("plate") or ""
+    4139:             title = f"{date or '-'} · {route or '-'} · {plate or '-'}"
+    4140:         except Exception:
+    4141:             pass
+    4142: 
+    4143:         items.append({
+    4144:             "base": base,
+    4145:             "title": title,
+    4146:             "date": date,
+    4147:             "route": route,
+    4148:             "plate": plate,
+    4149:             "view": f"/sefer-raporu/arsiv/{base}",
+    4150:             "txt": f"/rapor-dosya/{base}/txt",
+    4151:             "csv": f"/rapor-dosya/{base}/csv",
+    4152:             "json": f"/api/trip-report/archive/{base}",
+    4153:         })
+    4154: 
+    4155:     return jsonify({"ok": True, "items": items})
+    4156: 
+    4157: 
+    4158: 
+    4159: 
+    4160: @app.route("/sefer-raporu-son")
+    4161: def latest_trip_report_redirect():
+    4162:     """
+    4163:     Ana ekrandaki SEFER RAPORLARI kartı buraya gelir.
+    4164:     Aktif sefer varsa canlı sefer raporunu açar.
+    4165:     Aktif sefer yoksa en son arşivlenen raporu açar.
+    4166:     """
+    4167:     tid = get_active_trip()
+    4168: 
+    4169:     if tid:
+    4170:         return redirect("/sefer-raporu")
+    4171: 
+    4172:     files = sorted(
+    4173:         reports_dir_path().glob("*.json"),
+
+--- app.py içinde arama: seat_detail ---
+Bulunamadı
+
+--- app.py içinde arama: seat-detail ---
+Bulunamadı
+
+--- android_app/app/src/main/python/app.py içinde arama: api_report ---
+
+### Eşleşme satır 4118
+    4110:         return jsonify({"ok": False, "msg": f"Rapor okunamadı: {e}"}), 500
+    4111: 
+    4112:     return jsonify(data)
+    4113: 
+    4114: 
+    4115: 
+    4116: 
+    4117: @app.route("/api/report-archive")
+>>  4118: def api_report_archive():
+    4119:     items = []
+    4120: 
+    4121:     for f in sorted(reports_dir_path().glob("*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+    4122:         base = f.stem
+    4123:         title = base
+    4124:         route = ""
+    4125:         plate = ""
+    4126:         date = ""
+    4127: 
+    4128:         try:
+    4129:             data = json.loads(f.read_text(encoding="utf-8"))
+    4130:             trip = data.get("trip") or {}
+    4131:             date = trip.get("date") or ""
+    4132:             route = trip.get("route") or ""
+    4133:             plate = trip.get("plate") or ""
+    4134:             title = f"{date or '-'} · {route or '-'} · {plate or '-'}"
+    4135:         except Exception:
+    4136:             pass
+    4137: 
+    4138:         items.append({
+    4139:             "base": base,
+    4140:             "title": title,
+    4141:             "date": date,
+    4142:             "route": route,
+    4143:             "plate": plate,
+    4144:             "view": f"/sefer-raporu/arsiv/{base}",
+    4145:             "txt": f"/rapor-dosya/{base}/txt",
+    4146:             "csv": f"/rapor-dosya/{base}/csv",
+    4147:             "json": f"/api/trip-report/archive/{base}",
+    4148:         })
+    4149: 
+    4150:     return jsonify({"ok": True, "items": items})
+    4151: 
+    4152: 
+    4153: 
+    4154: 
+    4155: @app.route("/sefer-raporu-son")
+    4156: def latest_trip_report_redirect():
+    4157:     """
+    4158:     Ana ekrandaki SEFER RAPORLARI kartı buraya gelir.
+    4159:     Aktif sefer varsa canlı sefer raporunu açar.
+    4160:     Aktif sefer yoksa en son arşivlenen raporu açar.
+    4161:     """
+    4162:     tid = get_active_trip()
+    4163: 
+    4164:     if tid:
+    4165:         return redirect("/sefer-raporu")
+    4166: 
+    4167:     files = sorted(
+    4168:         reports_dir_path().glob("*.json"),
+
+--- android_app/app/src/main/python/app.py içinde arama: seat_detail ---
+Bulunamadı
+
+--- android_app/app/src/main/python/app.py içinde arama: seat-detail ---
+Bulunamadı
+
+===== 4) index.html DUPLICATE TRIP GUARD BLOKLARI =====
+
+--- templates/index.html içinde arama: tripGuardBackdrop ---
+
+### Eşleşme satır 1800
+    1792:   }
+    1793: 
+    1794:   if(startLink){
+    1795:     startLink.classList.add("active-trip-locked");
+    1796:     startLink.setAttribute("aria-disabled", "true");
+    1797:   }
+    1798: 
+    1799:   function ensureModal(){
+>>  1800:     let backdrop = document.getElementById("tripGuardBackdrop");
+    1801:     let modal = document.getElementById("tripGuardModal");
+    1802: 
+    1803:     if(backdrop && modal) return {backdrop, modal};
+    1804: 
+    1805:     backdrop = document.createElement("div");
+    1806:     backdrop.id = "tripGuardBackdrop";
+    1807:     backdrop.className = "trip-guard-backdrop";
+    1808: 
+    1809:     modal = document.createElement("section");
+    1810:     modal.id = "tripGuardModal";
+    1811:     modal.className = "trip-guard-modal";
+    1812:     modal.innerHTML = `
+    1813:       <div class="trip-guard-icon">⚠️</div>
+    1814:       <h2>Aktif sefer var</h2>
+    1815:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1816:       <div class="trip-guard-actions">
+    1817:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1818:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+
+### Eşleşme satır 1806
+    1798: 
+    1799:   function ensureModal(){
+    1800:     let backdrop = document.getElementById("tripGuardBackdrop");
+    1801:     let modal = document.getElementById("tripGuardModal");
+    1802: 
+    1803:     if(backdrop && modal) return {backdrop, modal};
+    1804: 
+    1805:     backdrop = document.createElement("div");
+>>  1806:     backdrop.id = "tripGuardBackdrop";
+    1807:     backdrop.className = "trip-guard-backdrop";
+    1808: 
+    1809:     modal = document.createElement("section");
+    1810:     modal.id = "tripGuardModal";
+    1811:     modal.className = "trip-guard-modal";
+    1812:     modal.innerHTML = `
+    1813:       <div class="trip-guard-icon">⚠️</div>
+    1814:       <h2>Aktif sefer var</h2>
+    1815:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1816:       <div class="trip-guard-actions">
+    1817:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1818:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1819:       </div>
+    1820:     `;
+    1821: 
+    1822:     document.body.appendChild(backdrop);
+    1823:     document.body.appendChild(modal);
+    1824: 
+
+### Eşleşme satır 1923
+    1915:     }
+    1916: 
+    1917:     try{
+    1918:       localStorage.setItem("homeSelectedRoute", ACTIVE_TRIP_ROUTE);
+    1919:     }catch(_){}
+    1920:   }
+    1921: 
+    1922:   function ensureModal(){
+>>  1923:     let bd = document.getElementById("tripGuardBackdrop");
+    1924:     let modal = document.getElementById("tripGuardModal");
+    1925: 
+    1926:     if(bd && modal) return {bd, modal};
+    1927: 
+    1928:     bd = document.createElement("div");
+    1929:     bd.id = "tripGuardBackdrop";
+    1930:     bd.className = "trip-guard-backdrop";
+    1931: 
+    1932:     modal = document.createElement("section");
+    1933:     modal.id = "tripGuardModal";
+    1934:     modal.className = "trip-guard-modal";
+    1935:     modal.innerHTML = `
+    1936:       <div class="trip-guard-icon">⚠️</div>
+    1937:       <h2>Aktif sefer var</h2>
+    1938:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1939:       <div class="trip-guard-actions">
+    1940:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1941:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+
+### Eşleşme satır 1929
+    1921: 
+    1922:   function ensureModal(){
+    1923:     let bd = document.getElementById("tripGuardBackdrop");
+    1924:     let modal = document.getElementById("tripGuardModal");
+    1925: 
+    1926:     if(bd && modal) return {bd, modal};
+    1927: 
+    1928:     bd = document.createElement("div");
+>>  1929:     bd.id = "tripGuardBackdrop";
+    1930:     bd.className = "trip-guard-backdrop";
+    1931: 
+    1932:     modal = document.createElement("section");
+    1933:     modal.id = "tripGuardModal";
+    1934:     modal.className = "trip-guard-modal";
+    1935:     modal.innerHTML = `
+    1936:       <div class="trip-guard-icon">⚠️</div>
+    1937:       <h2>Aktif sefer var</h2>
+    1938:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1939:       <div class="trip-guard-actions">
+    1940:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1941:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1942:       </div>
+    1943:     `;
+    1944: 
+    1945:     document.body.appendChild(bd);
+    1946:     document.body.appendChild(modal);
+    1947: 
+
+--- templates/index.html içinde arama: tripGuardModal ---
+
+### Eşleşme satır 1801
+    1793: 
+    1794:   if(startLink){
+    1795:     startLink.classList.add("active-trip-locked");
+    1796:     startLink.setAttribute("aria-disabled", "true");
+    1797:   }
+    1798: 
+    1799:   function ensureModal(){
+    1800:     let backdrop = document.getElementById("tripGuardBackdrop");
+>>  1801:     let modal = document.getElementById("tripGuardModal");
+    1802: 
+    1803:     if(backdrop && modal) return {backdrop, modal};
+    1804: 
+    1805:     backdrop = document.createElement("div");
+    1806:     backdrop.id = "tripGuardBackdrop";
+    1807:     backdrop.className = "trip-guard-backdrop";
+    1808: 
+    1809:     modal = document.createElement("section");
+    1810:     modal.id = "tripGuardModal";
+    1811:     modal.className = "trip-guard-modal";
+    1812:     modal.innerHTML = `
+    1813:       <div class="trip-guard-icon">⚠️</div>
+    1814:       <h2>Aktif sefer var</h2>
+    1815:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1816:       <div class="trip-guard-actions">
+    1817:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1818:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1819:       </div>
+
+### Eşleşme satır 1810
+    1802: 
+    1803:     if(backdrop && modal) return {backdrop, modal};
+    1804: 
+    1805:     backdrop = document.createElement("div");
+    1806:     backdrop.id = "tripGuardBackdrop";
+    1807:     backdrop.className = "trip-guard-backdrop";
+    1808: 
+    1809:     modal = document.createElement("section");
+>>  1810:     modal.id = "tripGuardModal";
+    1811:     modal.className = "trip-guard-modal";
+    1812:     modal.innerHTML = `
+    1813:       <div class="trip-guard-icon">⚠️</div>
+    1814:       <h2>Aktif sefer var</h2>
+    1815:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1816:       <div class="trip-guard-actions">
+    1817:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1818:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1819:       </div>
+    1820:     `;
+    1821: 
+    1822:     document.body.appendChild(backdrop);
+    1823:     document.body.appendChild(modal);
+    1824: 
+    1825:     const close = () => {
+    1826:       backdrop.classList.remove("show");
+    1827:       modal.classList.remove("show");
+    1828:     };
+
+### Eşleşme satır 1924
+    1916: 
+    1917:     try{
+    1918:       localStorage.setItem("homeSelectedRoute", ACTIVE_TRIP_ROUTE);
+    1919:     }catch(_){}
+    1920:   }
+    1921: 
+    1922:   function ensureModal(){
+    1923:     let bd = document.getElementById("tripGuardBackdrop");
+>>  1924:     let modal = document.getElementById("tripGuardModal");
+    1925: 
+    1926:     if(bd && modal) return {bd, modal};
+    1927: 
+    1928:     bd = document.createElement("div");
+    1929:     bd.id = "tripGuardBackdrop";
+    1930:     bd.className = "trip-guard-backdrop";
+    1931: 
+    1932:     modal = document.createElement("section");
+    1933:     modal.id = "tripGuardModal";
+    1934:     modal.className = "trip-guard-modal";
+    1935:     modal.innerHTML = `
+    1936:       <div class="trip-guard-icon">⚠️</div>
+    1937:       <h2>Aktif sefer var</h2>
+    1938:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1939:       <div class="trip-guard-actions">
+    1940:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1941:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1942:       </div>
+
+### Eşleşme satır 1933
+    1925: 
+    1926:     if(bd && modal) return {bd, modal};
+    1927: 
+    1928:     bd = document.createElement("div");
+    1929:     bd.id = "tripGuardBackdrop";
+    1930:     bd.className = "trip-guard-backdrop";
+    1931: 
+    1932:     modal = document.createElement("section");
+>>  1933:     modal.id = "tripGuardModal";
+    1934:     modal.className = "trip-guard-modal";
+    1935:     modal.innerHTML = `
+    1936:       <div class="trip-guard-icon">⚠️</div>
+    1937:       <h2>Aktif sefer var</h2>
+    1938:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1939:       <div class="trip-guard-actions">
+    1940:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1941:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1942:       </div>
+    1943:     `;
+    1944: 
+    1945:     document.body.appendChild(bd);
+    1946:     document.body.appendChild(modal);
+    1947: 
+    1948:     function close(){
+    1949:       bd.classList.remove("show");
+    1950:       modal.classList.remove("show");
+    1951:     }
+
+--- templates/index.html içinde arama: tripGuardGo ---
+
+### Eşleşme satır 1817
+    1809:     modal = document.createElement("section");
+    1810:     modal.id = "tripGuardModal";
+    1811:     modal.className = "trip-guard-modal";
+    1812:     modal.innerHTML = `
+    1813:       <div class="trip-guard-icon">⚠️</div>
+    1814:       <h2>Aktif sefer var</h2>
+    1815:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1816:       <div class="trip-guard-actions">
+>>  1817:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1818:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1819:       </div>
+    1820:     `;
+    1821: 
+    1822:     document.body.appendChild(backdrop);
+    1823:     document.body.appendChild(modal);
+    1824: 
+    1825:     const close = () => {
+    1826:       backdrop.classList.remove("show");
+    1827:       modal.classList.remove("show");
+    1828:     };
+    1829: 
+    1830:     backdrop.addEventListener("click", close);
+    1831:     modal.querySelector("#tripGuardOk").addEventListener("click", close);
+    1832: 
+    1833:     const go = modal.querySelector("#tripGuardGo");
+    1834:     if(go && continueLink){
+    1835:       go.href = continueLink.getAttribute("href") || "/seats";
+
+### Eşleşme satır 1833
+    1825:     const close = () => {
+    1826:       backdrop.classList.remove("show");
+    1827:       modal.classList.remove("show");
+    1828:     };
+    1829: 
+    1830:     backdrop.addEventListener("click", close);
+    1831:     modal.querySelector("#tripGuardOk").addEventListener("click", close);
+    1832: 
+>>  1833:     const go = modal.querySelector("#tripGuardGo");
+    1834:     if(go && continueLink){
+    1835:       go.href = continueLink.getAttribute("href") || "/seats";
+    1836:     }
+    1837: 
+    1838:     return {backdrop, modal};
+    1839:   }
+    1840: 
+    1841:   function showGuard(){
+    1842:     const {backdrop, modal} = ensureModal();
+    1843:     backdrop.classList.add("show");
+    1844:     modal.classList.add("show");
+    1845:   }
+    1846: 
+    1847:   /* Sefer başlatı engelle */
+    1848:   if(startLink){
+    1849:     startLink.addEventListener("click", function(e){
+    1850:       e.preventDefault();
+    1851:       e.stopPropagation();
+
+### Eşleşme satır 1940
+    1932:     modal = document.createElement("section");
+    1933:     modal.id = "tripGuardModal";
+    1934:     modal.className = "trip-guard-modal";
+    1935:     modal.innerHTML = `
+    1936:       <div class="trip-guard-icon">⚠️</div>
+    1937:       <h2>Aktif sefer var</h2>
+    1938:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1939:       <div class="trip-guard-actions">
+>>  1940:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1941:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1942:       </div>
+    1943:     `;
+    1944: 
+    1945:     document.body.appendChild(bd);
+    1946:     document.body.appendChild(modal);
+    1947: 
+    1948:     function close(){
+    1949:       bd.classList.remove("show");
+    1950:       modal.classList.remove("show");
+    1951:     }
+    1952: 
+    1953:     bd.addEventListener("click", close);
+    1954:     modal.querySelector("#tripGuardOk")?.addEventListener("click", close);
+    1955: 
+    1956:     const go = modal.querySelector("#tripGuardGo");
+    1957:     if(go && continueLink){
+    1958:       go.href = continueLink.getAttribute("href") || "/continue-trip";
+
+### Eşleşme satır 1956
+    1948:     function close(){
+    1949:       bd.classList.remove("show");
+    1950:       modal.classList.remove("show");
+    1951:     }
+    1952: 
+    1953:     bd.addEventListener("click", close);
+    1954:     modal.querySelector("#tripGuardOk")?.addEventListener("click", close);
+    1955: 
+>>  1956:     const go = modal.querySelector("#tripGuardGo");
+    1957:     if(go && continueLink){
+    1958:       go.href = continueLink.getAttribute("href") || "/continue-trip";
+    1959:     }
+    1960: 
+    1961:     return {bd, modal};
+    1962:   }
+    1963: 
+    1964:   function showGuard(){
+    1965:     hardCloseRouteSheet();
+    1966:     forceActiveRouteText();
+    1967: 
+    1968:     const {bd, modal} = ensureModal();
+    1969:     bd.classList.add("show");
+    1970:     modal.classList.add("show");
+    1971:   }
+    1972: 
+    1973:   forceActiveRouteText();
+    1974:   hardCloseRouteSheet();
+
+--- templates/index.html içinde arama: tripGuardOk ---
+
+### Eşleşme satır 1818
+    1810:     modal.id = "tripGuardModal";
+    1811:     modal.className = "trip-guard-modal";
+    1812:     modal.innerHTML = `
+    1813:       <div class="trip-guard-icon">⚠️</div>
+    1814:       <h2>Aktif sefer var</h2>
+    1815:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1816:       <div class="trip-guard-actions">
+    1817:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+>>  1818:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1819:       </div>
+    1820:     `;
+    1821: 
+    1822:     document.body.appendChild(backdrop);
+    1823:     document.body.appendChild(modal);
+    1824: 
+    1825:     const close = () => {
+    1826:       backdrop.classList.remove("show");
+    1827:       modal.classList.remove("show");
+    1828:     };
+    1829: 
+    1830:     backdrop.addEventListener("click", close);
+    1831:     modal.querySelector("#tripGuardOk").addEventListener("click", close);
+    1832: 
+    1833:     const go = modal.querySelector("#tripGuardGo");
+    1834:     if(go && continueLink){
+    1835:       go.href = continueLink.getAttribute("href") || "/seats";
+    1836:     }
+
+### Eşleşme satır 1831
+    1823:     document.body.appendChild(modal);
+    1824: 
+    1825:     const close = () => {
+    1826:       backdrop.classList.remove("show");
+    1827:       modal.classList.remove("show");
+    1828:     };
+    1829: 
+    1830:     backdrop.addEventListener("click", close);
+>>  1831:     modal.querySelector("#tripGuardOk").addEventListener("click", close);
+    1832: 
+    1833:     const go = modal.querySelector("#tripGuardGo");
+    1834:     if(go && continueLink){
+    1835:       go.href = continueLink.getAttribute("href") || "/seats";
+    1836:     }
+    1837: 
+    1838:     return {backdrop, modal};
+    1839:   }
+    1840: 
+    1841:   function showGuard(){
+    1842:     const {backdrop, modal} = ensureModal();
+    1843:     backdrop.classList.add("show");
+    1844:     modal.classList.add("show");
+    1845:   }
+    1846: 
+    1847:   /* Sefer başlatı engelle */
+    1848:   if(startLink){
+    1849:     startLink.addEventListener("click", function(e){
+
+### Eşleşme satır 1941
+    1933:     modal.id = "tripGuardModal";
+    1934:     modal.className = "trip-guard-modal";
+    1935:     modal.innerHTML = `
+    1936:       <div class="trip-guard-icon">⚠️</div>
+    1937:       <h2>Aktif sefer var</h2>
+    1938:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1939:       <div class="trip-guard-actions">
+    1940:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+>>  1941:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1942:       </div>
+    1943:     `;
+    1944: 
+    1945:     document.body.appendChild(bd);
+    1946:     document.body.appendChild(modal);
+    1947: 
+    1948:     function close(){
+    1949:       bd.classList.remove("show");
+    1950:       modal.classList.remove("show");
+    1951:     }
+    1952: 
+    1953:     bd.addEventListener("click", close);
+    1954:     modal.querySelector("#tripGuardOk")?.addEventListener("click", close);
+    1955: 
+    1956:     const go = modal.querySelector("#tripGuardGo");
+    1957:     if(go && continueLink){
+    1958:       go.href = continueLink.getAttribute("href") || "/continue-trip";
+    1959:     }
+
+### Eşleşme satır 1954
+    1946:     document.body.appendChild(modal);
+    1947: 
+    1948:     function close(){
+    1949:       bd.classList.remove("show");
+    1950:       modal.classList.remove("show");
+    1951:     }
+    1952: 
+    1953:     bd.addEventListener("click", close);
+>>  1954:     modal.querySelector("#tripGuardOk")?.addEventListener("click", close);
+    1955: 
+    1956:     const go = modal.querySelector("#tripGuardGo");
+    1957:     if(go && continueLink){
+    1958:       go.href = continueLink.getAttribute("href") || "/continue-trip";
+    1959:     }
+    1960: 
+    1961:     return {bd, modal};
+    1962:   }
+    1963: 
+    1964:   function showGuard(){
+    1965:     hardCloseRouteSheet();
+    1966:     forceActiveRouteText();
+    1967: 
+    1968:     const {bd, modal} = ensureModal();
+    1969:     bd.classList.add("show");
+    1970:     modal.classList.add("show");
+    1971:   }
+    1972: 
+
+--- android_app/app/src/main/python/templates/index.html içinde arama: tripGuardBackdrop ---
+
+### Eşleşme satır 1706
+    1698:   }
+    1699: 
+    1700:   if(startLink){
+    1701:     startLink.classList.add("active-trip-locked");
+    1702:     startLink.setAttribute("aria-disabled", "true");
+    1703:   }
+    1704: 
+    1705:   function ensureModal(){
+>>  1706:     let backdrop = document.getElementById("tripGuardBackdrop");
+    1707:     let modal = document.getElementById("tripGuardModal");
+    1708: 
+    1709:     if(backdrop && modal) return {backdrop, modal};
+    1710: 
+    1711:     backdrop = document.createElement("div");
+    1712:     backdrop.id = "tripGuardBackdrop";
+    1713:     backdrop.className = "trip-guard-backdrop";
+    1714: 
+    1715:     modal = document.createElement("section");
+    1716:     modal.id = "tripGuardModal";
+    1717:     modal.className = "trip-guard-modal";
+    1718:     modal.innerHTML = `
+    1719:       <div class="trip-guard-icon">⚠️</div>
+    1720:       <h2>Aktif sefer var</h2>
+    1721:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1722:       <div class="trip-guard-actions">
+    1723:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1724:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+
+### Eşleşme satır 1712
+    1704: 
+    1705:   function ensureModal(){
+    1706:     let backdrop = document.getElementById("tripGuardBackdrop");
+    1707:     let modal = document.getElementById("tripGuardModal");
+    1708: 
+    1709:     if(backdrop && modal) return {backdrop, modal};
+    1710: 
+    1711:     backdrop = document.createElement("div");
+>>  1712:     backdrop.id = "tripGuardBackdrop";
+    1713:     backdrop.className = "trip-guard-backdrop";
+    1714: 
+    1715:     modal = document.createElement("section");
+    1716:     modal.id = "tripGuardModal";
+    1717:     modal.className = "trip-guard-modal";
+    1718:     modal.innerHTML = `
+    1719:       <div class="trip-guard-icon">⚠️</div>
+    1720:       <h2>Aktif sefer var</h2>
+    1721:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1722:       <div class="trip-guard-actions">
+    1723:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1724:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1725:       </div>
+    1726:     `;
+    1727: 
+    1728:     document.body.appendChild(backdrop);
+    1729:     document.body.appendChild(modal);
+    1730: 
+
+--- android_app/app/src/main/python/templates/index.html içinde arama: tripGuardModal ---
+
+### Eşleşme satır 1707
+    1699: 
+    1700:   if(startLink){
+    1701:     startLink.classList.add("active-trip-locked");
+    1702:     startLink.setAttribute("aria-disabled", "true");
+    1703:   }
+    1704: 
+    1705:   function ensureModal(){
+    1706:     let backdrop = document.getElementById("tripGuardBackdrop");
+>>  1707:     let modal = document.getElementById("tripGuardModal");
+    1708: 
+    1709:     if(backdrop && modal) return {backdrop, modal};
+    1710: 
+    1711:     backdrop = document.createElement("div");
+    1712:     backdrop.id = "tripGuardBackdrop";
+    1713:     backdrop.className = "trip-guard-backdrop";
+    1714: 
+    1715:     modal = document.createElement("section");
+    1716:     modal.id = "tripGuardModal";
+    1717:     modal.className = "trip-guard-modal";
+    1718:     modal.innerHTML = `
+    1719:       <div class="trip-guard-icon">⚠️</div>
+    1720:       <h2>Aktif sefer var</h2>
+    1721:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1722:       <div class="trip-guard-actions">
+    1723:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1724:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1725:       </div>
+
+### Eşleşme satır 1716
+    1708: 
+    1709:     if(backdrop && modal) return {backdrop, modal};
+    1710: 
+    1711:     backdrop = document.createElement("div");
+    1712:     backdrop.id = "tripGuardBackdrop";
+    1713:     backdrop.className = "trip-guard-backdrop";
+    1714: 
+    1715:     modal = document.createElement("section");
+>>  1716:     modal.id = "tripGuardModal";
+    1717:     modal.className = "trip-guard-modal";
+    1718:     modal.innerHTML = `
+    1719:       <div class="trip-guard-icon">⚠️</div>
+    1720:       <h2>Aktif sefer var</h2>
+    1721:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1722:       <div class="trip-guard-actions">
+    1723:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1724:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1725:       </div>
+    1726:     `;
+    1727: 
+    1728:     document.body.appendChild(backdrop);
+    1729:     document.body.appendChild(modal);
+    1730: 
+    1731:     const close = () => {
+    1732:       backdrop.classList.remove("show");
+    1733:       modal.classList.remove("show");
+    1734:     };
+
+--- android_app/app/src/main/python/templates/index.html içinde arama: tripGuardGo ---
+
+### Eşleşme satır 1723
+    1715:     modal = document.createElement("section");
+    1716:     modal.id = "tripGuardModal";
+    1717:     modal.className = "trip-guard-modal";
+    1718:     modal.innerHTML = `
+    1719:       <div class="trip-guard-icon">⚠️</div>
+    1720:       <h2>Aktif sefer var</h2>
+    1721:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1722:       <div class="trip-guard-actions">
+>>  1723:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+    1724:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1725:       </div>
+    1726:     `;
+    1727: 
+    1728:     document.body.appendChild(backdrop);
+    1729:     document.body.appendChild(modal);
+    1730: 
+    1731:     const close = () => {
+    1732:       backdrop.classList.remove("show");
+    1733:       modal.classList.remove("show");
+    1734:     };
+    1735: 
+    1736:     backdrop.addEventListener("click", close);
+    1737:     modal.querySelector("#tripGuardOk").addEventListener("click", close);
+    1738: 
+    1739:     const go = modal.querySelector("#tripGuardGo");
+    1740:     if(go && continueLink){
+    1741:       go.href = continueLink.getAttribute("href") || "/seats";
+
+### Eşleşme satır 1739
+    1731:     const close = () => {
+    1732:       backdrop.classList.remove("show");
+    1733:       modal.classList.remove("show");
+    1734:     };
+    1735: 
+    1736:     backdrop.addEventListener("click", close);
+    1737:     modal.querySelector("#tripGuardOk").addEventListener("click", close);
+    1738: 
+>>  1739:     const go = modal.querySelector("#tripGuardGo");
+    1740:     if(go && continueLink){
+    1741:       go.href = continueLink.getAttribute("href") || "/seats";
+    1742:     }
+    1743: 
+    1744:     return {backdrop, modal};
+    1745:   }
+    1746: 
+    1747:   function showGuard(){
+    1748:     const {backdrop, modal} = ensureModal();
+    1749:     backdrop.classList.add("show");
+    1750:     modal.classList.add("show");
+    1751:   }
+    1752: 
+    1753:   /* Sefer başlatı engelle */
+    1754:   if(startLink){
+    1755:     startLink.addEventListener("click", function(e){
+    1756:       e.preventDefault();
+    1757:       e.stopPropagation();
+
+--- android_app/app/src/main/python/templates/index.html içinde arama: tripGuardOk ---
+
+### Eşleşme satır 1724
+    1716:     modal.id = "tripGuardModal";
+    1717:     modal.className = "trip-guard-modal";
+    1718:     modal.innerHTML = `
+    1719:       <div class="trip-guard-icon">⚠️</div>
+    1720:       <h2>Aktif sefer var</h2>
+    1721:       <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+    1722:       <div class="trip-guard-actions">
+    1723:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+>>  1724:         <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+    1725:       </div>
+    1726:     `;
+    1727: 
+    1728:     document.body.appendChild(backdrop);
+    1729:     document.body.appendChild(modal);
+    1730: 
+    1731:     const close = () => {
+    1732:       backdrop.classList.remove("show");
+    1733:       modal.classList.remove("show");
+    1734:     };
+    1735: 
+    1736:     backdrop.addEventListener("click", close);
+    1737:     modal.querySelector("#tripGuardOk").addEventListener("click", close);
+    1738: 
+    1739:     const go = modal.querySelector("#tripGuardGo");
+    1740:     if(go && continueLink){
+    1741:       go.href = continueLink.getAttribute("href") || "/seats";
+    1742:     }
+
+### Eşleşme satır 1737
+    1729:     document.body.appendChild(modal);
+    1730: 
+    1731:     const close = () => {
+    1732:       backdrop.classList.remove("show");
+    1733:       modal.classList.remove("show");
+    1734:     };
+    1735: 
+    1736:     backdrop.addEventListener("click", close);
+>>  1737:     modal.querySelector("#tripGuardOk").addEventListener("click", close);
+    1738: 
+    1739:     const go = modal.querySelector("#tripGuardGo");
+    1740:     if(go && continueLink){
+    1741:       go.href = continueLink.getAttribute("href") || "/seats";
+    1742:     }
+    1743: 
+    1744:     return {backdrop, modal};
+    1745:   }
+    1746: 
+    1747:   function showGuard(){
+    1748:     const {backdrop, modal} = ensureModal();
+    1749:     backdrop.classList.add("show");
+    1750:     modal.classList.add("show");
+    1751:   }
+    1752: 
+    1753:   /* Sefer başlatı engelle */
+    1754:   if(startLink){
+    1755:     startLink.addEventListener("click", function(e){
+
+===== 5) seats.js pillTotal / standingCount BAĞLAMI =====
+
+--- static/seats/seats.js içinde arama: filled + standingCount ---
+
+### Eşleşme satır 977
+     957:     const label = $("#label-" + seatNo);
+     958:     if(label){
+     959:         const from = boardsMap[key] || "";
+     960:         const to = stopsMap[key] || "";
+     961:         label.textContent = isAssigned ? (from ? `${from} → ${to}` : to) : "";
+     962:       }
+     963: 
+     964:     const svc = el.querySelector(".svc-badge");
+     965:     if(svc){
+     966:       const note = (serviceNotes[key] || "").trim();
+     967:       svc.title = note ? `Servis: ${note}` : "Servis";
+     968:     }
+     969:   }
+     970: 
+     971:   function updateStats(){
+     972:     const totalSeats = Object.keys(seatPositions || {}).length;
+     973:     const filled = Object.values(assigned || {}).filter(Boolean).length;
+     974:     const empty = totalSeats - filled;
+     975:     const occ = totalSeats ? Math.round((filled / totalSeats) * 100) : 0;
+     976: 
+>>   977:     setText("#pillTotal", String(filled + standingCount));
+     978:     setText("#pillEmpty", String(empty));
+     979:     setText("#voiceSeatFilled", String(filled));
+     980:     setText("#voiceSeatEmpty", String(empty));
+     981:     setText("#driveVoiceFilled", String(filled));
+     982:     setText("#driveVoiceEmpty", String(empty));
+     983:     setText("#pillStanding", String(standingCount));
+     984:     setText("#pillCash", fmtTL(standingRevenue));
+     985:     setText("#pillService", String(totalServiceCount()));
+     986:     setText("#pillParcel", String(totalParcelCount()));
+     987:     setText("#topOcc", occ + "%");
+     988: 
+     989:     const standingCard = $("#standingCard");
+     990:     if(standingCard){
+     991:       standingCount > 0 ? standingCard.classList.add("pulse") : standingCard.classList.remove("pulse");
+     992:     }
+     993: 
+     994:     setText("#quickStandingMeta", `${standingCount} kişi · ${fmtTL(standingRevenue)}`);
+     995:   }
+     996: 
+     997:   function renderQuickStandingList(){
+
+--- static/seats/seats.js içinde arama: pillTotal ---
+
+### Eşleşme satır 977
+     965:     if(svc){
+     966:       const note = (serviceNotes[key] || "").trim();
+     967:       svc.title = note ? `Servis: ${note}` : "Servis";
+     968:     }
+     969:   }
+     970: 
+     971:   function updateStats(){
+     972:     const totalSeats = Object.keys(seatPositions || {}).length;
+     973:     const filled = Object.values(assigned || {}).filter(Boolean).length;
+     974:     const empty = totalSeats - filled;
+     975:     const occ = totalSeats ? Math.round((filled / totalSeats) * 100) : 0;
+     976: 
+>>   977:     setText("#pillTotal", String(filled + standingCount));
+     978:     setText("#pillEmpty", String(empty));
+     979:     setText("#voiceSeatFilled", String(filled));
+     980:     setText("#voiceSeatEmpty", String(empty));
+     981:     setText("#driveVoiceFilled", String(filled));
+     982:     setText("#driveVoiceEmpty", String(empty));
+     983:     setText("#pillStanding", String(standingCount));
+     984:     setText("#pillCash", fmtTL(standingRevenue));
+     985:     setText("#pillService", String(totalServiceCount()));
+     986:     setText("#pillParcel", String(totalParcelCount()));
+     987:     setText("#topOcc", occ + "%");
+     988: 
+     989:     const standingCard = $("#standingCard");
+
+--- static/seats/seats.js içinde arama: standingCount ---
+
+### Eşleşme satır 194
+     186:     {},
+     187:     boardsMapServer || {},
+     188:     JSON.parse(localStorage.getItem("boardsMap:" + TRIP_KEY) || "{}")
+     189:   );
+     190: 
+     191:   let cachedStops = null;
+     192:   let currentSeat = null;
+     193:   let multiMode = false;
+>>   194:   let standingCount = 0;
+     195:   let standingRevenue = 0;
+     196:   let standingItems = [];
+     197:   let parcelItems = [];
+     198:   let geoWatchId = null;
+     199:   let speedWatchId = null;
+     200:   let lastAlertAt = 0;
+     201:   let snoozeUntil = 0;
+     202:   let lastApproach = { stop:null, seats:[] };
+     203:   let currentCoords = null;
+     204:   let lastApproachVoiceStop = "";
+
+### Eşleşme satır 293
+     285:       speedState.passedStops = new Set(JSON.parse(localStorage.getItem("passedStops:" + TRIP_KEY) || "[]"));
+     286:     }catch(_){
+     287:       speedState.passedStops = new Set();
+     288:     }
+     289:   }
+     290: 
+     291:   function persistStandingTotals(){
+     292:     localStorage.setItem("standingTotals:" + TRIP_KEY, JSON.stringify({
+>>   293:       count: standingCount,
+     294:       revenue: standingRevenue
+     295:     }));
+     296:   }
+     297: 
+     298:   function persistStandingItems(){
+     299:     localStorage.setItem("standingItems:" + TRIP_KEY, JSON.stringify(standingItems || []));
+     300:   }
+     301: 
+     302:   function sampleRandom(arr, count){
+     303:     const a = arr.slice();
+
+### Eşleşme satır 911
+     903:     setText("#voiceStateBadge", text || "Hazır");
+     904:   }
+     905: 
+     906:   function refreshStopBadges(){
+     907:     const sel = $("#alertStop");
+     908:     if(!sel) return;
+     909: 
+     910:     const seatCounts = computeSeatCountsByStop();
+>>   911:     const standingCounts = computeStandingCountsByStop();
+     912:     const parcelCounts = computeParcelCountsByStop();
+     913: 
+     914:     [...sel.options].forEach(opt => {
+     915:       if(!opt.value){
+     916:         opt.textContent = "—";
+     917:         return;
+     918:       }
+     919: 
+     920:       const base = opt.dataset.label || opt.value;
+     921:       const stop = findStopByName(base);
+
+### Eşleşme satır 924
+     916:         opt.textContent = "—";
+     917:         return;
+     918:       }
+     919: 
+     920:       const base = opt.dataset.label || opt.value;
+     921:       const stop = findStopByName(base);
+     922:       const dot = hasCoord(stop) ? " •" : "";
+     923:       const seatTxt = seatCounts[base] ? ` (${seatCounts[base]} koltuk)` : "";
+>>   924:       const standTxt = standingCounts[base] ? ` + Ayakta ${standingCounts[base]}` : "";
+     925:       const parcelTxt = parcelCounts[base] ? ` 📦 ${parcelCounts[base]}` : "";
+     926: 
+     927:       opt.textContent = base + dot + seatTxt + standTxt + parcelTxt;
+     928:     });
+     929:   }
+     930: 
+     931:   function updateStopSeatBadges(){
+     932:     const stop = getSelectedStopName();
+     933:     $$(".seat").forEach(el => el.classList.remove("has-stop"));
+     934:     if(!stop) return;
+
+### Eşleşme satır 977
+     969:   }
+     970: 
+     971:   function updateStats(){
+     972:     const totalSeats = Object.keys(seatPositions || {}).length;
+     973:     const filled = Object.values(assigned || {}).filter(Boolean).length;
+     974:     const empty = totalSeats - filled;
+     975:     const occ = totalSeats ? Math.round((filled / totalSeats) * 100) : 0;
+     976: 
+>>   977:     setText("#pillTotal", String(filled + standingCount));
+     978:     setText("#pillEmpty", String(empty));
+     979:     setText("#voiceSeatFilled", String(filled));
+     980:     setText("#voiceSeatEmpty", String(empty));
+     981:     setText("#driveVoiceFilled", String(filled));
+     982:     setText("#driveVoiceEmpty", String(empty));
+     983:     setText("#pillStanding", String(standingCount));
+     984:     setText("#pillCash", fmtTL(standingRevenue));
+     985:     setText("#pillService", String(totalServiceCount()));
+     986:     setText("#pillParcel", String(totalParcelCount()));
+     987:     setText("#topOcc", occ + "%");
+
+### Eşleşme satır 983
+     975:     const occ = totalSeats ? Math.round((filled / totalSeats) * 100) : 0;
+     976: 
+     977:     setText("#pillTotal", String(filled + standingCount));
+     978:     setText("#pillEmpty", String(empty));
+     979:     setText("#voiceSeatFilled", String(filled));
+     980:     setText("#voiceSeatEmpty", String(empty));
+     981:     setText("#driveVoiceFilled", String(filled));
+     982:     setText("#driveVoiceEmpty", String(empty));
+>>   983:     setText("#pillStanding", String(standingCount));
+     984:     setText("#pillCash", fmtTL(standingRevenue));
+     985:     setText("#pillService", String(totalServiceCount()));
+     986:     setText("#pillParcel", String(totalParcelCount()));
+     987:     setText("#topOcc", occ + "%");
+     988: 
+     989:     const standingCard = $("#standingCard");
+     990:     if(standingCard){
+     991:       standingCount > 0 ? standingCard.classList.add("pulse") : standingCard.classList.remove("pulse");
+     992:     }
+     993: 
+
+### Eşleşme satır 991
+     983:     setText("#pillStanding", String(standingCount));
+     984:     setText("#pillCash", fmtTL(standingRevenue));
+     985:     setText("#pillService", String(totalServiceCount()));
+     986:     setText("#pillParcel", String(totalParcelCount()));
+     987:     setText("#topOcc", occ + "%");
+     988: 
+     989:     const standingCard = $("#standingCard");
+     990:     if(standingCard){
+>>   991:       standingCount > 0 ? standingCard.classList.add("pulse") : standingCard.classList.remove("pulse");
+     992:     }
+     993: 
+     994:     setText("#quickStandingMeta", `${standingCount} kişi · ${fmtTL(standingRevenue)}`);
+     995:   }
+     996: 
+     997:   function renderQuickStandingList(){
+     998:     const box = $("#quickStandingList");
+     999:     if(!box) return;
+    1000:     box.innerHTML = "";
+    1001: 
+
+### Eşleşme satır 994
+     986:     setText("#pillParcel", String(totalParcelCount()));
+     987:     setText("#topOcc", occ + "%");
+     988: 
+     989:     const standingCard = $("#standingCard");
+     990:     if(standingCard){
+     991:       standingCount > 0 ? standingCard.classList.add("pulse") : standingCard.classList.remove("pulse");
+     992:     }
+     993: 
+>>   994:     setText("#quickStandingMeta", `${standingCount} kişi · ${fmtTL(standingRevenue)}`);
+     995:   }
+     996: 
+     997:   function renderQuickStandingList(){
+     998:     const box = $("#quickStandingList");
+     999:     if(!box) return;
+    1000:     box.innerHTML = "";
+    1001: 
+    1002:     if(!standingItems.length){
+    1003:       box.innerHTML = `<div class="muted">Ayakta kayıt yok.</div>`;
+    1004:       return;
+
+### Eşleşme satır 1103
+    1095:   const liveDangerOn = Number.isFinite(liveKm) && liveKm <= 5;
+    1096:   // if(liveDangerOn){maybeSpeakApproachStop(live, liveKm);}
+    1097:   const nextWarnStop = liveDangerOn? computeNextStopName(live || selected || "", "nextWithSeats"): "";
+    1098:   const greenStop = liveDangerOn && nextWarnStop? computeNextStopName(nextWarnStop, "nextWithSeats"): "";
+    1099: 
+    1100:   const nextWarnNorm = norm(nextWarnStop);
+    1101:   const greenNorm = norm(greenStop);
+    1102:   const seatCounts = computeSeatCountsByStop();
+>>  1103:   const standingCounts = computeStandingCountsByStop();
+    1104:   const parcelCounts = computeParcelCountsByStop();
+    1105: 
+    1106:   const actualSchedule = buildActualSchedule();
+    1107:   const planMap = new Map(
+    1108:     actualSchedule.map(x => [norm(x.stop), x.plan || ""])
+    1109:   );
+    1110: 
+    1111:   const etaMap = new Map(
+    1112:     (speedState.etaItems || []).map(x => [norm(x.stop), x])
+    1113:   );
+
+### Eşleşme satır 1117
+    1109:   );
+    1110: 
+    1111:   const etaMap = new Map(
+    1112:     (speedState.etaItems || []).map(x => [norm(x.stop), x])
+    1113:   );
+    1114: 
+    1115:   list.forEach(stop => {
+    1116:     const seatCt = seatCounts[stop] || 0;
+>>  1117:     const standingCt = standingCounts[stop] || 0;
+    1118:     const parcelCt = parcelCounts[stop] || 0;
+    1119: 
+    1120:     const isActive = !!selectedNorm && norm(stop) === selectedNorm;
+    1121:     const isLive = !!liveNorm && norm(stop) === liveNorm;
+    1122:     const isDone = speedState.passedStops.has(stop) && !isActive && !isLive;
+    1123:     const isNextWarn = liveDangerOn && !!nextWarnNorm && norm(stop) === nextWarnNorm;
+    1124:     const isFlowGreen = liveDangerOn && !!greenNorm && norm(stop) === greenNorm;
+    1125: 
+    1126:     const stopObj = findStopByName(stop);
+    1127:     const plan = planMap.get(norm(stop)) || "";
+
+### Eşleşme satır 2185
+    2177:       row.addEventListener("click", () => setSelectedStop(item.stop, { silent:true, voiceReply:false }));
+    2178:       list.appendChild(row);
+    2179:     });
+    2180:   }
+    2181: 
+    2182:   function renderAI(){
+    2183:     const stop = getSelectedStopName();
+    2184:     const seatCounts = computeSeatCountsByStop();
+>>  2185:     const standingCounts = computeStandingCountsByStop();
+    2186:     const parcelCounts = computeParcelCountsByStop();
+    2187: 
+    2188:     const selectedSeatCount = stop ? (seatCounts[stop] || 0) : 0;
+    2189:     const selectedStanding = stop ? (standingCounts[stop] || 0) : 0;
+    2190:     const selectedParcel = stop ? (parcelCounts[stop] || 0) : 0;
+    2191: 
+    2192:     let unserved = 0;
+    2193:     Object.keys(assigned || {}).forEach(k => {
+    2194:       if(assigned[k] && !serviceMap[k]) unserved++;
+    2195:     });
+
+### Eşleşme satır 2189
+    2181: 
+    2182:   function renderAI(){
+    2183:     const stop = getSelectedStopName();
+    2184:     const seatCounts = computeSeatCountsByStop();
+    2185:     const standingCounts = computeStandingCountsByStop();
+    2186:     const parcelCounts = computeParcelCountsByStop();
+    2187: 
+    2188:     const selectedSeatCount = stop ? (seatCounts[stop] || 0) : 0;
+>>  2189:     const selectedStanding = stop ? (standingCounts[stop] || 0) : 0;
+    2190:     const selectedParcel = stop ? (parcelCounts[stop] || 0) : 0;
+    2191: 
+    2192:     let unserved = 0;
+    2193:     Object.keys(assigned || {}).forEach(k => {
+    2194:       if(assigned[k] && !serviceMap[k]) unserved++;
+    2195:     });
+    2196: 
+    2197:     let busiestStop = "—";
+    2198:     let busiestCount = 0;
+    2199:     Object.entries(seatCounts).forEach(([k,v]) => {
+
+--- android_app/app/src/main/python/static/seats/seats.js içinde arama: filled + standingCount ---
+
+### Eşleşme satır 977
+     957:     const label = $("#label-" + seatNo);
+     958:     if(label){
+     959:         const from = boardsMap[key] || "";
+     960:         const to = stopsMap[key] || "";
+     961:         label.textContent = isAssigned ? (from ? `${from} → ${to}` : to) : "";
+     962:       }
+     963: 
+     964:     const svc = el.querySelector(".svc-badge");
+     965:     if(svc){
+     966:       const note = (serviceNotes[key] || "").trim();
+     967:       svc.title = note ? `Servis: ${note}` : "Servis";
+     968:     }
+     969:   }
+     970: 
+     971:   function updateStats(){
+     972:     const totalSeats = Object.keys(seatPositions || {}).length;
+     973:     const filled = Object.values(assigned || {}).filter(Boolean).length;
+     974:     const empty = totalSeats - filled;
+     975:     const occ = totalSeats ? Math.round((filled / totalSeats) * 100) : 0;
+     976: 
+>>   977:     setText("#pillTotal", String(filled + standingCount));
+     978:     setText("#pillEmpty", String(empty));
+     979:     setText("#voiceSeatFilled", String(filled));
+     980:     setText("#voiceSeatEmpty", String(empty));
+     981:     setText("#driveVoiceFilled", String(filled));
+     982:     setText("#driveVoiceEmpty", String(empty));
+     983:     setText("#pillStanding", String(standingCount));
+     984:     setText("#pillCash", fmtTL(standingRevenue));
+     985:     setText("#pillService", String(totalServiceCount()));
+     986:     setText("#pillParcel", String(totalParcelCount()));
+     987:     setText("#topOcc", occ + "%");
+     988: 
+     989:     const standingCard = $("#standingCard");
+     990:     if(standingCard){
+     991:       standingCount > 0 ? standingCard.classList.add("pulse") : standingCard.classList.remove("pulse");
+     992:     }
+     993: 
+     994:     setText("#quickStandingMeta", `${standingCount} kişi · ${fmtTL(standingRevenue)}`);
+     995:   }
+     996: 
+     997:   function renderQuickStandingList(){
+
+--- android_app/app/src/main/python/static/seats/seats.js içinde arama: pillTotal ---
+
+### Eşleşme satır 977
+     965:     if(svc){
+     966:       const note = (serviceNotes[key] || "").trim();
+     967:       svc.title = note ? `Servis: ${note}` : "Servis";
+     968:     }
+     969:   }
+     970: 
+     971:   function updateStats(){
+     972:     const totalSeats = Object.keys(seatPositions || {}).length;
+     973:     const filled = Object.values(assigned || {}).filter(Boolean).length;
+     974:     const empty = totalSeats - filled;
+     975:     const occ = totalSeats ? Math.round((filled / totalSeats) * 100) : 0;
+     976: 
+>>   977:     setText("#pillTotal", String(filled + standingCount));
+     978:     setText("#pillEmpty", String(empty));
+     979:     setText("#voiceSeatFilled", String(filled));
+     980:     setText("#voiceSeatEmpty", String(empty));
+     981:     setText("#driveVoiceFilled", String(filled));
+     982:     setText("#driveVoiceEmpty", String(empty));
+     983:     setText("#pillStanding", String(standingCount));
+     984:     setText("#pillCash", fmtTL(standingRevenue));
+     985:     setText("#pillService", String(totalServiceCount()));
+     986:     setText("#pillParcel", String(totalParcelCount()));
+     987:     setText("#topOcc", occ + "%");
+     988: 
+     989:     const standingCard = $("#standingCard");
+
+--- android_app/app/src/main/python/static/seats/seats.js içinde arama: standingCount ---
+
+### Eşleşme satır 194
+     186:     {},
+     187:     boardsMapServer || {},
+     188:     JSON.parse(localStorage.getItem("boardsMap:" + TRIP_KEY) || "{}")
+     189:   );
+     190: 
+     191:   let cachedStops = null;
+     192:   let currentSeat = null;
+     193:   let multiMode = false;
+>>   194:   let standingCount = 0;
+     195:   let standingRevenue = 0;
+     196:   let standingItems = [];
+     197:   let parcelItems = [];
+     198:   let geoWatchId = null;
+     199:   let speedWatchId = null;
+     200:   let lastAlertAt = 0;
+     201:   let snoozeUntil = 0;
+     202:   let lastApproach = { stop:null, seats:[] };
+     203:   let currentCoords = null;
+     204:   let lastApproachVoiceStop = "";
+
+### Eşleşme satır 293
+     285:       speedState.passedStops = new Set(JSON.parse(localStorage.getItem("passedStops:" + TRIP_KEY) || "[]"));
+     286:     }catch(_){
+     287:       speedState.passedStops = new Set();
+     288:     }
+     289:   }
+     290: 
+     291:   function persistStandingTotals(){
+     292:     localStorage.setItem("standingTotals:" + TRIP_KEY, JSON.stringify({
+>>   293:       count: standingCount,
+     294:       revenue: standingRevenue
+     295:     }));
+     296:   }
+     297: 
+     298:   function persistStandingItems(){
+     299:     localStorage.setItem("standingItems:" + TRIP_KEY, JSON.stringify(standingItems || []));
+     300:   }
+     301: 
+     302:   function sampleRandom(arr, count){
+     303:     const a = arr.slice();
+
+### Eşleşme satır 911
+     903:     setText("#voiceStateBadge", text || "Hazır");
+     904:   }
+     905: 
+     906:   function refreshStopBadges(){
+     907:     const sel = $("#alertStop");
+     908:     if(!sel) return;
+     909: 
+     910:     const seatCounts = computeSeatCountsByStop();
+>>   911:     const standingCounts = computeStandingCountsByStop();
+     912:     const parcelCounts = computeParcelCountsByStop();
+     913: 
+     914:     [...sel.options].forEach(opt => {
+     915:       if(!opt.value){
+     916:         opt.textContent = "—";
+     917:         return;
+     918:       }
+     919: 
+     920:       const base = opt.dataset.label || opt.value;
+     921:       const stop = findStopByName(base);
+
+### Eşleşme satır 924
+     916:         opt.textContent = "—";
+     917:         return;
+     918:       }
+     919: 
+     920:       const base = opt.dataset.label || opt.value;
+     921:       const stop = findStopByName(base);
+     922:       const dot = hasCoord(stop) ? " •" : "";
+     923:       const seatTxt = seatCounts[base] ? ` (${seatCounts[base]} koltuk)` : "";
+>>   924:       const standTxt = standingCounts[base] ? ` + Ayakta ${standingCounts[base]}` : "";
+     925:       const parcelTxt = parcelCounts[base] ? ` 📦 ${parcelCounts[base]}` : "";
+     926: 
+     927:       opt.textContent = base + dot + seatTxt + standTxt + parcelTxt;
+     928:     });
+     929:   }
+     930: 
+     931:   function updateStopSeatBadges(){
+     932:     const stop = getSelectedStopName();
+     933:     $$(".seat").forEach(el => el.classList.remove("has-stop"));
+     934:     if(!stop) return;
+
+### Eşleşme satır 977
+     969:   }
+     970: 
+     971:   function updateStats(){
+     972:     const totalSeats = Object.keys(seatPositions || {}).length;
+     973:     const filled = Object.values(assigned || {}).filter(Boolean).length;
+     974:     const empty = totalSeats - filled;
+     975:     const occ = totalSeats ? Math.round((filled / totalSeats) * 100) : 0;
+     976: 
+>>   977:     setText("#pillTotal", String(filled + standingCount));
+     978:     setText("#pillEmpty", String(empty));
+     979:     setText("#voiceSeatFilled", String(filled));
+     980:     setText("#voiceSeatEmpty", String(empty));
+     981:     setText("#driveVoiceFilled", String(filled));
+     982:     setText("#driveVoiceEmpty", String(empty));
+     983:     setText("#pillStanding", String(standingCount));
+     984:     setText("#pillCash", fmtTL(standingRevenue));
+     985:     setText("#pillService", String(totalServiceCount()));
+     986:     setText("#pillParcel", String(totalParcelCount()));
+     987:     setText("#topOcc", occ + "%");
+
+### Eşleşme satır 983
+     975:     const occ = totalSeats ? Math.round((filled / totalSeats) * 100) : 0;
+     976: 
+     977:     setText("#pillTotal", String(filled + standingCount));
+     978:     setText("#pillEmpty", String(empty));
+     979:     setText("#voiceSeatFilled", String(filled));
+     980:     setText("#voiceSeatEmpty", String(empty));
+     981:     setText("#driveVoiceFilled", String(filled));
+     982:     setText("#driveVoiceEmpty", String(empty));
+>>   983:     setText("#pillStanding", String(standingCount));
+     984:     setText("#pillCash", fmtTL(standingRevenue));
+     985:     setText("#pillService", String(totalServiceCount()));
+     986:     setText("#pillParcel", String(totalParcelCount()));
+     987:     setText("#topOcc", occ + "%");
+     988: 
+     989:     const standingCard = $("#standingCard");
+     990:     if(standingCard){
+     991:       standingCount > 0 ? standingCard.classList.add("pulse") : standingCard.classList.remove("pulse");
+     992:     }
+     993: 
+
+### Eşleşme satır 991
+     983:     setText("#pillStanding", String(standingCount));
+     984:     setText("#pillCash", fmtTL(standingRevenue));
+     985:     setText("#pillService", String(totalServiceCount()));
+     986:     setText("#pillParcel", String(totalParcelCount()));
+     987:     setText("#topOcc", occ + "%");
+     988: 
+     989:     const standingCard = $("#standingCard");
+     990:     if(standingCard){
+>>   991:       standingCount > 0 ? standingCard.classList.add("pulse") : standingCard.classList.remove("pulse");
+     992:     }
+     993: 
+     994:     setText("#quickStandingMeta", `${standingCount} kişi · ${fmtTL(standingRevenue)}`);
+     995:   }
+     996: 
+     997:   function renderQuickStandingList(){
+     998:     const box = $("#quickStandingList");
+     999:     if(!box) return;
+    1000:     box.innerHTML = "";
+    1001: 
+
+### Eşleşme satır 994
+     986:     setText("#pillParcel", String(totalParcelCount()));
+     987:     setText("#topOcc", occ + "%");
+     988: 
+     989:     const standingCard = $("#standingCard");
+     990:     if(standingCard){
+     991:       standingCount > 0 ? standingCard.classList.add("pulse") : standingCard.classList.remove("pulse");
+     992:     }
+     993: 
+>>   994:     setText("#quickStandingMeta", `${standingCount} kişi · ${fmtTL(standingRevenue)}`);
+     995:   }
+     996: 
+     997:   function renderQuickStandingList(){
+     998:     const box = $("#quickStandingList");
+     999:     if(!box) return;
+    1000:     box.innerHTML = "";
+    1001: 
+    1002:     if(!standingItems.length){
+    1003:       box.innerHTML = `<div class="muted">Ayakta kayıt yok.</div>`;
+    1004:       return;
+
+### Eşleşme satır 1103
+    1095:   const liveDangerOn = Number.isFinite(liveKm) && liveKm <= 5;
+    1096:   // if(liveDangerOn){maybeSpeakApproachStop(live, liveKm);}
+    1097:   const nextWarnStop = liveDangerOn? computeNextStopName(live || selected || "", "nextWithSeats"): "";
+    1098:   const greenStop = liveDangerOn && nextWarnStop? computeNextStopName(nextWarnStop, "nextWithSeats"): "";
+    1099: 
+    1100:   const nextWarnNorm = norm(nextWarnStop);
+    1101:   const greenNorm = norm(greenStop);
+    1102:   const seatCounts = computeSeatCountsByStop();
+>>  1103:   const standingCounts = computeStandingCountsByStop();
+    1104:   const parcelCounts = computeParcelCountsByStop();
+    1105: 
+    1106:   const actualSchedule = buildActualSchedule();
+    1107:   const planMap = new Map(
+    1108:     actualSchedule.map(x => [norm(x.stop), x.plan || ""])
+    1109:   );
+    1110: 
+    1111:   const etaMap = new Map(
+    1112:     (speedState.etaItems || []).map(x => [norm(x.stop), x])
+    1113:   );
+
+### Eşleşme satır 1117
+    1109:   );
+    1110: 
+    1111:   const etaMap = new Map(
+    1112:     (speedState.etaItems || []).map(x => [norm(x.stop), x])
+    1113:   );
+    1114: 
+    1115:   list.forEach(stop => {
+    1116:     const seatCt = seatCounts[stop] || 0;
+>>  1117:     const standingCt = standingCounts[stop] || 0;
+    1118:     const parcelCt = parcelCounts[stop] || 0;
+    1119: 
+    1120:     const isActive = !!selectedNorm && norm(stop) === selectedNorm;
+    1121:     const isLive = !!liveNorm && norm(stop) === liveNorm;
+    1122:     const isDone = speedState.passedStops.has(stop) && !isActive && !isLive;
+    1123:     const isNextWarn = liveDangerOn && !!nextWarnNorm && norm(stop) === nextWarnNorm;
+    1124:     const isFlowGreen = liveDangerOn && !!greenNorm && norm(stop) === greenNorm;
+    1125: 
+    1126:     const stopObj = findStopByName(stop);
+    1127:     const plan = planMap.get(norm(stop)) || "";
+
+### Eşleşme satır 2185
+    2177:       row.addEventListener("click", () => setSelectedStop(item.stop, { silent:true, voiceReply:false }));
+    2178:       list.appendChild(row);
+    2179:     });
+    2180:   }
+    2181: 
+    2182:   function renderAI(){
+    2183:     const stop = getSelectedStopName();
+    2184:     const seatCounts = computeSeatCountsByStop();
+>>  2185:     const standingCounts = computeStandingCountsByStop();
+    2186:     const parcelCounts = computeParcelCountsByStop();
+    2187: 
+    2188:     const selectedSeatCount = stop ? (seatCounts[stop] || 0) : 0;
+    2189:     const selectedStanding = stop ? (standingCounts[stop] || 0) : 0;
+    2190:     const selectedParcel = stop ? (parcelCounts[stop] || 0) : 0;
+    2191: 
+    2192:     let unserved = 0;
+    2193:     Object.keys(assigned || {}).forEach(k => {
+    2194:       if(assigned[k] && !serviceMap[k]) unserved++;
+    2195:     });
+
+### Eşleşme satır 2189
+    2181: 
+    2182:   function renderAI(){
+    2183:     const stop = getSelectedStopName();
+    2184:     const seatCounts = computeSeatCountsByStop();
+    2185:     const standingCounts = computeStandingCountsByStop();
+    2186:     const parcelCounts = computeParcelCountsByStop();
+    2187: 
+    2188:     const selectedSeatCount = stop ? (seatCounts[stop] || 0) : 0;
+>>  2189:     const selectedStanding = stop ? (standingCounts[stop] || 0) : 0;
+    2190:     const selectedParcel = stop ? (parcelCounts[stop] || 0) : 0;
+    2191: 
+    2192:     let unserved = 0;
+    2193:     Object.keys(assigned || {}).forEach(k => {
+    2194:       if(assigned[k] && !serviceMap[k]) unserved++;
+    2195:     });
+    2196: 
+    2197:     let busiestStop = "—";
+    2198:     let busiestCount = 0;
+    2199:     Object.entries(seatCounts).forEach(([k,v]) => {
+
+===== 6) WEB / ANDROID FARKLARI MİNİ DIFF =====
+
+--- DIFF: app.py  <->  android_app/app/src/main/python/app.py ---
+--- app.py
++++ android_app/app/src/main/python/app.py
+@@ -1408,11 +1408,6 @@
+         all_routes=routes,
+     )
+ 
+-
+-
+-# ===== CONTINUE_LIVE_FLOW_STATE_API_START =====
+-
+-
+ @app.route("/continue-trip")
+ def continue_trip():
+     tid = get_active_trip()
+
+--- DIFF: templates/index.html  <->  android_app/app/src/main/python/templates/index.html ---
+--- templates/index.html
++++ android_app/app/src/main/python/templates/index.html
+@@ -948,100 +948,6 @@
+ </style>
+ 
+ 
+-<link id="home-font-barlow-settings" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+-
+-<style id="home-font-match-settings">
+-  :root{
+-    --font-display:'Barlow Condensed',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+-    --font-body:'Barlow',system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+-  }
+-
+-  html,
+-  body{
+-    font-family:var(--font-body) !important;
+-    -webkit-font-smoothing:antialiased;
+-    text-rendering:geometricPrecision;
+-  }
+-
+-  body,
+-  button,
+-  input,
+-  select,
+-  textarea,
+-  a{
+-    font-family:var(--font-body) !important;
+-  }
+-
+-  h1,
+-  h2,
+-  h3,
+-  h4,
+-  .hero-title,
+-  .brand-title,
+-  .app-title,
+-  .page-title,
+-  .section-title,
+-  .menu-title,
+-  .quick-title,
+-  .quick-card-title,
+-  .card-title,
+-  .tile-title,
+-  .status-title,
+-  .route-title,
+-  .action-title,
+-  .panel-title,
+-  .title,
+-  .big-title{
+-    font-family:var(--font-display) !important;
+-    font-weight:800;
+-    letter-spacing:.01em;
+-  }
+-
+-  .menu-item,
+-  .quick-card,
+-  .quick-item,
+-  .btn,
+-  .button,
+-  .primary-btn,
+-  .secondary-btn,
+-  .back-btn{
+-    font-family:var(--font-display) !important;
+-    font-weight:800;
+-    letter-spacing:.02em;
+-  }
+-
+-  p,
+-  .muted,
+-  .sub,
+-  .desc,
+-  .menu-desc,
+-  .quick-desc,
+-  .card-desc,
+-  .tile-desc,
+-  .status-desc,
+-  .small,
+-  .label,
+-  .meta,
+-  .hint{
+-    font-family:var(--font-body) !important;
+-  }
+-</style>
+-
+-
+-<style id="route-sheet-no-flash-fix">
+-  /* Route picker ilk render parlamasını engeller */
+-  #routeSheet[hidden],
+-  #routeSheetBackdrop[hidden]{
+-    display:none !important;
+-  }
+-
+-  #routeSheet:not(.show),
+-  #routeSheetBackdrop:not(.show){
+-    display:none !important;
+-  }
+-</style>
+-
+-
+ </head>
+ 
+ <body>
+@@ -1069,9 +975,9 @@
+       </select>
+     </div>
+ 
+-    <div class="route-sheet-backdrop" id="routeSheetBackdrop" hidden aria-hidden="true"></div>
+-
+-    <section class="route-sheet" id="routeSheet" hidden aria-hidden="true">
++    <div class="route-sheet-backdrop" id="routeSheetBackdrop"></div>
++
++    <section class="route-sheet" id="routeSheet" aria-hidden="true">
+       <div class="route-sheet-handle"></div>
+ 
+       <div class="route-sheet-head">
+@@ -1868,135 +1774,5 @@
+ })();
+ </script>
+ 
+-
+-
+-<!-- ACTIVE_ROUTE_LOCK_FINAL_START -->
+-<script id="active-route-lock-final">
+-(function(){
+-  const HAS_ACTIVE_TRIP = {% if active_trip is defined and active_trip %}true{% else %}false{% endif %};
+-  const ACTIVE_TRIP_ROUTE = {% if active_trip is defined and active_trip %}{{ active_trip.route|tojson }}{% else %}""{% endif %};
+-
+-  if(!HAS_ACTIVE_TRIP) return;
+-
+-  const routeBtn = document.getElementById("routePickerBtn");
+-  const routeText = document.getElementById("routePickerText");
+-  const routeSelect = document.getElementById("homeRouteSelect");
+-  const startLink = document.getElementById("homeTripStart");
+-
+-  const continueLink =
+-    Array.from(document.querySelectorAll(".hero-link"))[1] ||
+-    document.querySelector('a[href*="continue"]') ||
+-    document.querySelector('a[href*="seats"]');
+-
+-  const sheet = document.getElementById("routeSheet");
+-  const backdrop = document.getElementById("routeSheetBackdrop");
+-
+-  function hardCloseRouteSheet(){
+-    if(sheet){
+-      sheet.classList.remove("show");
+-      sheet.hidden = true;
+-      sheet.setAttribute("aria-hidden", "true");
+-    }
+-    if(backdrop){
+-      backdrop.classList.remove("show");
+-      backdrop.hidden = true;
+-      backdrop.setAttribute("aria-hidden", "true");
+-    }
+-  }
+-
+-  function forceActiveRouteText(){
+-    if(!ACTIVE_TRIP_ROUTE) return;
+-
+-    if(routeText) routeText.textContent = ACTIVE_TRIP_ROUTE;
+-
+-    if(routeSelect){
+-      const opt = Array.from(routeSelect.options || []).find(o => o.value === ACTIVE_TRIP_ROUTE);
+-      if(opt) routeSelect.value = ACTIVE_TRIP_ROUTE;
+-    }
+-
+-    try{
+-      localStorage.setItem("homeSelectedRoute", ACTIVE_TRIP_ROUTE);
+-    }catch(_){}
+-  }
+-
+-  function ensureModal(){
+-    let bd = document.getElementById("tripGuardBackdrop");
+-    let modal = document.getElementById("tripGuardModal");
+-
+-    if(bd && modal) return {bd, modal};
+-
+-    bd = document.createElement("div");
+-    bd.id = "tripGuardBackdrop";
+-    bd.className = "trip-guard-backdrop";
+-
+-    modal = document.createElement("section");
+-    modal.id = "tripGuardModal";
+-    modal.className = "trip-guard-modal";
+-    modal.innerHTML = `
+-      <div class="trip-guard-icon">⚠️</div>
+-      <h2>Aktif sefer var</h2>
+-      <p>Yeni sefer başlatmadan önce mevcut seferi devam ettirmen veya seferi sonlandırman gerekir.</p>
+-      <div class="trip-guard-actions">
+-        <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+-        <button class="trip-guard-ok" id="tripGuardOk" type="button">Tamam</button>
+-      </div>
+-    `;
+-
+-    document.body.appendChild(bd);
+-    document.body.appendChild(modal);
+-
+-    function close(){
+-      bd.classList.remove("show");
+-      modal.classList.remove("show");
+-    }
+-
+-    bd.addEventListener("click", close);
+-    modal.querySelector("#tripGuardOk")?.addEventListener("click", close);
+-
+-    const go = modal.querySelector("#tripGuardGo");
+-    if(go && continueLink){
+-      go.href = continueLink.getAttribute("href") || "/continue-trip";
+-    }
+-
+-    return {bd, modal};
+-  }
+-
+-  function showGuard(){
+-    hardCloseRouteSheet();
+-    forceActiveRouteText();
+-
+-    const {bd, modal} = ensureModal();
+-    bd.classList.add("show");
+-    modal.classList.add("show");
+... diff devam ediyor, toplam diff satırı: 252
+
+--- DIFF: templates/seats.html  <->  android_app/app/src/main/python/templates/seats.html ---
+--- templates/seats.html
++++ android_app/app/src/main/python/templates/seats.html
+@@ -13,7 +13,6 @@
+ <link rel="stylesheet" href="/static/seats/patches/manual-ticket-system.css?v=1">
+ <link rel="stylesheet" href="/static/seats/patches/top-sound-toggle.css?v=1">
+ <link rel="stylesheet" href="/static/seats/patches/seat-simple-ui-pack.css?v=1">
+-<link rel="stylesheet" href="/static/seats/patches/unified-seat-deck-report-style.css?v=seat-smaller-removed-2">
+ <link rel="stylesheet" href="/static/seats/patches/mobile-performance-fix.css?v=2">
+ <link rel="stylesheet" href="/static/seats/patches/fab-sheet-solid-fix.css?v=1">
+ <link rel="stylesheet" href="/static/seats/patches/seat-label-ghost-clean.css?v=1">
+
+===== 7) EKSİK STATIC REFERANS BAĞLAMI =====
+
+--- templates/base.html içinde arama: vendor/icons.css ---
+
+### Eşleşme satır 11
+       3: <head>
+       4:   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+       5:   <meta charset="utf-8" />
+       6:   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+       7:   <title>{{ title or "Muavin Asistanı" }}</title>
+       8: 
+       9:   <!-- ✅ Yerel CSS -->
+      10:   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}">
+>>    11:   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/icons.css') }}">
+      12:   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='3') }}">
+      13: </head>
+      14: 
+      15: <body>
+      16: 
+      17:   {% block content %}{% endblock %}
+      18: 
+      19:   <!-- ✅ Yerel JS (sırası önemli) -->
+
+--- templates/base.html içinde arama: css/style.css ---
+
+### Eşleşme satır 12
+       4:   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+       5:   <meta charset="utf-8" />
+       6:   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+       7:   <title>{{ title or "Muavin Asistanı" }}</title>
+       8: 
+       9:   <!-- ✅ Yerel CSS -->
+      10:   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}">
+      11:   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/icons.css') }}">
+>>    12:   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='3') }}">
+      13: </head>
+      14: 
+      15: <body>
+      16: 
+      17:   {% block content %}{% endblock %}
+      18: 
+      19:   <!-- ✅ Yerel JS (sırası önemli) -->
+      20:   <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
+
+--- templates/base.html içinde arama: vendor/jquery.min.js ---
+
+### Eşleşme satır 20
+      12:   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='3') }}">
+      13: </head>
+      14: 
+      15: <body>
+      16: 
+      17:   {% block content %}{% endblock %}
+      18: 
+      19:   <!-- ✅ Yerel JS (sırası önemli) -->
+>>    20:   <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
+      21:   <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+      22:   <script src="{{ url_for('static', filename='app.js') }}"></script>
+      23: 
+      24:   <!-- Sayfa bazlı ek script alanı -->
+      25:   {% block scripts %}{% endblock %}
+      26: 
+      27: </body>
+      28: </html>
+
+--- templates/rehber.html içinde arama: rehber-koltuk-yonetimi-card.png ---
+
+### Eşleşme satır 2419
+    2411:             <div class="scene-chips">
+    2412:               <span>Yolcu ekle</span>
+    2413:               <span>İndir</span>
+    2414:               <span>Servis işle</span>
+    2415:               <span>Bagaj gör</span>
+    2416:             </div>
+    2417:           </div>
+    2418:           <div class="scene-media">
+>>  2419:             <img src="{{ url_for('static', filename='img/rehber-koltuk-yonetimi-card.png') }}" alt="Koltuk yönetimi">
+    2420:           </div>
+    2421:         </article>
+    2422: 
+    2423:         <article class="scene-card reveal">
+    2424:           <div class="scene-copy">
+    2425:             <small>Canlı Durak</small>
+    2426:             <h3>Sıradaki nokta hep belli.</h3>
+    2427:             <p>Canlı durak, yaklaşan durak, rötar ve iniş yoğunluğu daha görünür olur.</p>
+
+--- templates/rehber.html içinde arama: rehber-durak-akisi.png ---
+
+### Eşleşme satır 2436
+    2428:             <div class="scene-chips">
+    2429:               <span>Canlı durak</span>
+    2430:               <span>Sıradaki durak</span>
+    2431:               <span>Rötar</span>
+    2432:               <span>İniş özeti</span>
+    2433:             </div>
+    2434:           </div>
+    2435:           <div class="scene-media">
+>>  2436:             <img src="{{ url_for('static', filename='img/rehber-durak-akisi.png') }}" alt="Canlı durak takibi">
+    2437:           </div>
+    2438:         </article>
+    2439: 
+    2440:         <article class="scene-card reveal">
+    2441:           <div class="scene-copy">
+    2442:             <small>Sesli Komut</small>
+    2443:             <h3>Konuş. Sistem cevaplasın.</h3>
+    2444:             <p>Muavin kısa komutlarla bilgi alır; ekranla boğuşmadan sahadaki akışını sürdürür.</p>
+
+--- templates/rehber.html içinde arama: rehber-voice-command.png ---
+
+### Eşleşme satır 2453
+    2445:             <div class="scene-chips">
+    2446:               <span>Kaç yolcu var</span>
+    2447:               <span>Rötar kaç</span>
+    2448:               <span>Bagaj var mı</span>
+    2449:               <span>Hesap aç</span>
+    2450:             </div>
+    2451:           </div>
+    2452:           <div class="scene-media">
+>>  2453:             <img src="{{ url_for('static', filename='img/rehber-voice-command.png') }}" alt="Sesli komut">
+    2454:           </div>
+    2455:         </article>
+    2456:       </div>
+    2457:     </section>
+    2458: 
+    2459:     <section class="guide-detail" id="guideDetail">
+    2460:       <div class="guide-detail-wrap">
+    2461:         <div class="guide-detail-head">
+
+===== STEP-5 BİTTİ =====
