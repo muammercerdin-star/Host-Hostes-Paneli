@@ -53,6 +53,50 @@ def _log(msg):
         pass
 
 
+
+def _read_startup_log_tail_v39(limit=12000):
+    try:
+        global STARTUP_LOG
+
+        candidates = []
+
+        if STARTUP_LOG:
+            candidates.append(Path(STARTUP_LOG))
+
+        try:
+            candidates.append(Path(__file__).resolve().parent / "_android_data" / "muavin_startup.log")
+        except Exception:
+            pass
+
+        seen = set()
+        parts = []
+
+        for p in candidates:
+            try:
+                key = str(p)
+                if key in seen:
+                    continue
+                seen.add(key)
+
+                if p.exists():
+                    txt = p.read_text(encoding="utf-8", errors="ignore")
+                    if len(txt) > limit:
+                        txt = txt[-limit:]
+                    parts.append("LOG PATH: " + str(p) + "\n" + txt)
+                else:
+                    parts.append("LOG YOK: " + str(p))
+            except Exception as e:
+                parts.append("LOG OKUMA HATASI: " + str(p) + " => " + repr(e))
+
+        if not parts:
+            return "Startup log adayı yok."
+
+        return "\n\n".join(parts)
+
+    except Exception as e:
+        return "Startup log tail okunamadı: " + repr(e)
+
+
 def _http_ping(host=HOST, port=PORT, timeout=1.2):
     try:
         url = f"http://{host}:{port}{PING_PATH}"
@@ -84,8 +128,10 @@ def wait_for_port(host=HOST, port=PORT, timeout=60):
 
         time.sleep(0.35)
 
+    log_tail = _read_startup_log_tail_v39()
     raise RuntimeError(
-        f"Flask {timeout} saniye içinde {host}:{port} üzerinde başlamadı."
+        f"Flask {timeout} saniye içinde {host}:{port} üzerinde başlamadı.\n\n"
+        f"===== APK STARTUP LOG V39 =====\n{log_tail}"
     )
 
 
