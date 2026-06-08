@@ -30,7 +30,7 @@ jobs:
           ln -sf "$(which python)" "$RUNNER_TEMP/pybin/python3.11"
           echo "$RUNNER_TEMP/pybin" >> "$GITHUB_PATH"
           python --version
-          "$RUNNER_TEMP/pybin/python3.11" --version
+          python3.11 --version
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -46,19 +46,36 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           yes | sdkmanager --licenses || true
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" || true
-          echo "===== local.properties ====="
           cat local.properties
-          echo "===== python check ====="
-          which python || true
-          which python3.11 || true
+          which python3.11
           python3.11 --version
 
       - name: Build debug APK
         working-directory: android_app
         run: gradle assembleDebug --no-daemon --stacktrace
 
+      - name: Collect APK
+        run: |
+          echo "===== APK ARANIYOR ====="
+          find android_app/app/build/outputs -type f -name "*.apk" -print -exec ls -lh {} \;
+
+          mkdir -p artifact_apk
+
+          APK_FILE="$(find android_app/app/build/outputs -type f -name "*.apk" | head -1)"
+
+          if [ -z "$APK_FILE" ]; then
+            echo "❌ APK dosyası bulunamadı"
+            exit 1
+          fi
+
+          cp "$APK_FILE" artifact_apk/Muavin-Asistani-debug.apk
+
+          echo "===== ARTIFACT KLASÖRÜ ====="
+          ls -lh artifact_apk
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Muavin-Asistani-debug-apk
-          path: android_app/app/build/outputs/apk/debug/*.apk
+          path: artifact_apk/Muavin-Asistani-debug.apk
+          if-no-files-found: error
