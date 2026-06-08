@@ -1,4 +1,23 @@
-import os
+from pathlib import Path
+from datetime import datetime
+import shutil
+
+ROOT = Path(".").resolve()
+STAMP = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+SERVER = ROOT / "android_app/app/src/main/python/android_server.py"
+
+print("===== APK SOCKET READY FIX V40 =====")
+
+if not SERVER.exists():
+    print("❌ android_server.py yok")
+    raise SystemExit
+
+bak = SERVER.with_name(SERVER.name + f".bak-apk-socket-ready-v40-{STAMP}")
+shutil.copy2(SERVER, bak)
+print("📦 Yedek:", bak.relative_to(ROOT))
+
+CODE = r'''import os
 import shutil
 import sys
 import threading
@@ -202,3 +221,16 @@ def start_in_background(app_files_dir=None):
     wait_for_port(HOST, PORT, timeout=60)
     _log("start_in_background başarılı döndü")
     return True
+'''
+
+SERVER.write_text(CODE, encoding="utf-8")
+print("✅ android_server.py V40 socket port kontrolüne alındı")
+
+print()
+print("===== KONTROL =====")
+txt = SERVER.read_text(encoding="utf-8", errors="ignore")
+for key in ["MUAVIN_APK_SOCKET_READY_V40", "_port_open", "PORT AÇILDI", "__apk_ping__", "PING_TEXT"]:
+    print(key, "=", txt.count(key))
+
+print()
+print("✅ V40 tamam.")
