@@ -230,10 +230,10 @@ public class MainActivity extends Activity {
             if (!pageLoaded) {
                 showError(
                         "Uygulama zamanında açılmadı.\n\n" +
-                        "Flask sunucusu APK içinde 180 saniye içinde başlamamış olabilir."
+                        "Flask sunucusu APK içinde 60 saniye içinde başlamamış olabilir."
                 );
             }
-        }, 180000);
+        }, 60000);
     }
 
     private File createImageFile() throws IOException {

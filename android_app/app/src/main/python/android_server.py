@@ -1,5 +1,6 @@
 import os
 import shutil
+import socket
 import sys
 import threading
 import time
@@ -16,17 +17,15 @@ PING_PATH = "/__apk_ping__"
 PING_TEXT = "MUAVIN_APK_OK"
 
 
-def _http_ping(host=HOST, port=PORT, timeout=1.2):
+def _port_open(host=HOST, port=PORT, timeout=1.2):
     try:
-        url = f"http://{host}:{port}{PING_PATH}"
-        with urllib.request.urlopen(url, timeout=timeout) as r:
-            data = r.read(128).decode("utf-8", errors="ignore")
-            return PING_TEXT in data
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
     except Exception:
         return False
 
 
-def wait_for_port(host=HOST, port=PORT, timeout=180):
+def wait_for_port(host=HOST, port=PORT, timeout=60):
     start = time.time()
 
     while time.time() - start < timeout:
@@ -37,13 +36,13 @@ def wait_for_port(host=HOST, port=PORT, timeout=180):
 
         # Sadece port açık mı diye bakmıyoruz.
         # Muavin Flask gerçekten açıldı mı diye özel ping kontrolü yapıyoruz.
-        if _http_ping(host, port):
+        if _port_open(host, port):
             return True
 
         time.sleep(0.35)
 
     raise RuntimeError(
-        f"Flask {timeout} saniye içinde {host}:{port} üzerinde başlamadı."
+        f"Flask portu {timeout} saniye içinde {host}:{port} üzerinde açılmadı."
     )
 
 
@@ -134,5 +133,5 @@ def start_in_background(app_files_dir=None):
     )
     t.start()
 
-    wait_for_port(HOST, PORT, timeout=180)
+    wait_for_port(HOST, PORT, timeout=60)
     return True
