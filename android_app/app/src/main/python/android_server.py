@@ -26,7 +26,7 @@ def _http_ping(host=HOST, port=PORT, timeout=1.2):
         return False
 
 
-def wait_for_port(host=HOST, port=PORT, timeout=35):
+def wait_for_port(host=HOST, port=PORT, timeout=180):
     start = time.time()
 
     while time.time() - start < timeout:
@@ -88,9 +88,13 @@ def start_flask_server(app_files_dir=None):
     global SERVER_ERROR
 
     try:
+        print('MUAVIN_APK_V36_START_LOG: Flask thread başladı', flush=True)
+        print('MUAVIN_APK_V36_START_LOG: data klasörü hazırlanıyor', flush=True)
         base_dir, data_dir = prepare_android_data_dir(app_files_dir)
+        print('MUAVIN_APK_V36_START_LOG: app.py import başlıyor', flush=True)
 
         import app as webapp
+        print('MUAVIN_APK_V36_START_LOG: app.py import tamam', flush=True)
 
         flask_app = webapp.app
 
@@ -106,6 +110,8 @@ def start_flask_server(app_files_dir=None):
                 webapp.ensure_schema()
             if hasattr(webapp, "ensure_upload_dir"):
                 webapp.ensure_upload_dir()
+
+        print('MUAVIN_APK_V36_START_LOG: Flask run başlıyor', HOST, PORT, flush=True)
 
         flask_app.run(
             host=HOST,
@@ -128,5 +134,5 @@ def start_in_background(app_files_dir=None):
     )
     t.start()
 
-    wait_for_port(HOST, PORT, timeout=35)
+    wait_for_port(HOST, PORT, timeout=180)
     return True
