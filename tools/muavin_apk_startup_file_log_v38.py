@@ -1,4 +1,32 @@
-import os
+from pathlib import Path
+from datetime import datetime
+import shutil
+import re
+
+ROOT = Path(".").resolve()
+STAMP = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+SERVER = ROOT / "android_app/app/src/main/python/android_server.py"
+MAIN = ROOT / "android_app/app/src/main/java/com/muavinasistani/app/MainActivity.java"
+
+print("===== APK STARTUP FILE LOG V38 =====")
+
+def backup(p):
+    bak = p.with_name(p.name + f".bak-apk-startup-file-log-v38-{STAMP}")
+    shutil.copy2(p, bak)
+    print("📦 Yedek:", bak.relative_to(ROOT))
+
+if not SERVER.exists():
+    print("❌ android_server.py yok")
+    raise SystemExit
+
+if not MAIN.exists():
+    print("❌ MainActivity.java yok")
+    raise SystemExit
+
+backup(SERVER)
+
+SERVER_CODE = r'''import os
 import shutil
 import sys
 import threading
@@ -216,3 +244,80 @@ def start_in_background(app_files_dir=None):
     wait_for_port(HOST, PORT, timeout=60)
     _log("start_in_background başarılı döndü")
     return True
+'''
+
+SERVER.write_text(SERVER_CODE, encoding="utf-8")
+print("✅ android_server.py komple güvenli loglu sürüme alındı")
+
+backup(MAIN)
+m = MAIN.read_text(encoding="utf-8", errors="ignore")
+
+# Java içine log okuma metodu ekle
+if "readMuavinStartupLogV38" not in m:
+    method = r'''
+    private String readMuavinStartupLogV38() {
+        try {
+            java.io.File f = new java.io.File(getFilesDir(), "muavin_startup.log");
+            if (!f.exists()) {
+                return "\n\nAPK STARTUP LOG:\nLog dosyası oluşmamış.";
+            }
+
+            byte[] data = java.nio.file.Files.readAllBytes(f.toPath());
+            String text = new String(data, java.nio.charset.StandardCharsets.UTF_8);
+
+            if (text.length() > 12000) {
+                text = text.substring(text.length() - 12000);
+            }
+
+            return "\n\nAPK STARTUP LOG:\n" + text;
+        } catch (Exception ex) {
+            return "\n\nAPK STARTUP LOG okunamadı:\n" + ex.toString();
+        }
+    }
+
+'''
+    if "private void showError(" in m:
+        m = m.replace("    private void showError(", method + "    private void showError(", 1)
+        print("✅ Java log okuma metodu eklendi")
+    else:
+        print("⚠️ showError metodu bulunamadı, log metodu eklenemedi")
+
+# Catch içindeki hata mesajına startup log ekle
+old = 'showError("Flask sunucusu başlatılamadı:\\n" + e.toString());'
+new = 'showError("Flask sunucusu başlatılamadı:\\n" + e.toString() + readMuavinStartupLogV38());'
+
+if old in m:
+    m = m.replace(old, new, 1)
+    print("✅ catch hata ekranına startup log eklendi")
+elif "readMuavinStartupLogV38()" in m and "Flask sunucusu başlatılamadı" in m:
+    print("ℹ️ catch kısmı zaten değiştirilmiş olabilir")
+else:
+    print("⚠️ catch showError satırı otomatik bulunamadı")
+
+# Bekleme ekranındaki eski timeout mesajını da sadeleştir
+m = m.replace("Flask sunucusu APK içinde 180 saniye içinde başlamamış olabilir.", "Flask sunucusu APK içinde başlamamış olabilir.")
+m = m.replace("}, 180000);", "}, 70000);")
+m = m.replace("}, 35000);", "}, 70000);")
+
+MAIN.write_text(m, encoding="utf-8")
+print("✅ MainActivity.java güncellendi")
+
+print()
+print("===== KONTROL =====")
+for p in [SERVER, MAIN]:
+    txt = p.read_text(encoding="utf-8", errors="ignore")
+    print()
+    print(p.relative_to(ROOT))
+    for key in [
+        "MUAVIN_APK_STARTUP_FILE_LOG_V38",
+        "muavin_startup.log",
+        "readMuavinStartupLogV38",
+        "timeout=60",
+        "timeout=180",
+        "180000",
+        "70000",
+    ]:
+        print(key, "=", txt.count(key))
+
+print()
+print("✅ V38 tamam.")

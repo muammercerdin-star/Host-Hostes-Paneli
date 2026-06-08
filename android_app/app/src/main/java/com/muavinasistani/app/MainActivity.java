@@ -222,7 +222,7 @@ public class MainActivity extends Activity {
                 runOnUiThread(() -> webView.loadUrl("http://127.0.0.1:8765/"));
 
             } catch (Exception e) {
-                showError("Flask sunucusu başlatılamadı:\n" + e.toString());
+                showError("Flask sunucusu başlatılamadı:\n" + e.toString() + readMuavinStartupLogV38());
             }
         }).start();
 
@@ -411,6 +411,27 @@ public class MainActivity extends Activity {
                 "UTF-8",
                 null
         ));
+    }
+
+
+    private String readMuavinStartupLogV38() {
+        try {
+            java.io.File f = new java.io.File(getFilesDir(), "muavin_startup.log");
+            if (!f.exists()) {
+                return "\n\nAPK STARTUP LOG:\nLog dosyası oluşmamış.";
+            }
+
+            byte[] data = java.nio.file.Files.readAllBytes(f.toPath());
+            String text = new String(data, java.nio.charset.StandardCharsets.UTF_8);
+
+            if (text.length() > 12000) {
+                text = text.substring(text.length() - 12000);
+            }
+
+            return "\n\nAPK STARTUP LOG:\n" + text;
+        } catch (Exception ex) {
+            return "\n\nAPK STARTUP LOG okunamadı:\n" + ex.toString();
+        }
     }
 
     private void showError(String message) {
