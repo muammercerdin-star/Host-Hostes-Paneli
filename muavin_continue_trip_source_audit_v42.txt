@@ -1,0 +1,1543 @@
+===== CONTINUE TRIP SOURCE AUDIT V42 =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+===== 1) DOĞRU EKRAN DOSYALARI =====
+
+----- templates/continue_trip.html -----
+Satır: 509 Boyut: 14.2 KB Hit: 72
+    6:   <title>Canlı Durak Akışı</title>
+   84:   <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip.css') }}?v=css-parts-1">
+   99:       <a class="brand-action" href="{{ url_for('seats_page') }}?drive=1" aria-label="Sesli komut">
+  105:       <img class="hero-bus-img" src="{{ url_for('static', filename='img/live-hero-bus.png', v='1') }}" alt="Canlı durak otobüs görseli">
+  108:       <h1 class="hero-title">Canlı Durak Akışı</h1>
+  113:           <span>{{ trip["route"] or "Denizli–İstanbul (Vardön)" }}</span>
+  135:         <b>{{ live_summary.passenger_count }} / {{ live_summary.total_seats }}</b>
+  157:         <div class="card live live-summary-trigger" id="liveCurrentCard" role="button" tabindex="0" aria-label="Canlı durak özetini aç">
+  160:               <span class="card-label">Şu anki durak</span>
+  161:               <h2 class="card-title" id="liveCurrentStopName">{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or "Durak seçilmedi" }}</h2>
+  175:               <b id="liveDistanceValue" class="stop-distance-value" data-stop-name="{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or '' }}">{{ (live_runtime.gps_km if live_runtime and live_run
+  178:             <button class="metric metric-action" type="button" id="liveOffloadMetric" data-kind="offload" aria-label="Bu durakta inecek koltukları göster">
+  180:               <b id="liveOffloadCount">{{ live_current.off_count or 0 }} yolcu</b>
+  184:             <button class="metric metric-action" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
+  185:               <small>Bagaj</small>
+  186:               <b id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</b>
+  194:       {% for stop in live_stops[1:] %}
+  196:         <div class="node {{ stop.kind }}"></div>
+  198:         <div class="card regular {% if stop.kind == "next" %}next-card{% endif %}">
+  201:               <h3 class="card-title">{{ stop.name }}</h3>
+  204:             {% if stop.kind == "next" %}
+  205:               <span class="status-pill next">{{ stop.status }}</span>
+  206:             {% elif stop.kind == "upcoming" %}
+  207:               <span class="status-pill upcoming">{{ stop.status }}</span>
+  208:             {% elif stop.kind == "passed" %}
+  209:               <span class="status-pill passed">{{ stop.status }}</span>
+  211:               <span class="status-pill live">{{ stop.status }}</span>
+  218:               <b>{{ stop.eta }}</b>
+  223:               <b class="stop-distance-value" data-stop-name="{{ stop.name }}">{{ stop.distance }}</b>
+  228:               <b>{{ stop.off_count }}</b>
+  232:               <small>Bagaj</small>
+  233:               <b>{{ stop.bagaj_label }}</b>
+  242:     <div class="live-sheet-overlay" id="liveStopSheetOverlay"></div>
+  244:     <section class="live-stop-sheet" id="liveStopSheet" aria-hidden="true">
+  249:           <div class="sheet-kicker" id="liveStopSheetKicker">Canlı durak</div>
+  250:           <h2 class="sheet-title" id="liveStopSheetTitle">Durak detayı</h2>
+  251:           <p class="sheet-sub" id="liveStopSheetSub">Yükleniyor...</p>
+  254:         <button class="sheet-close" type="button" id="liveStopSheetClose" aria-label="Kapat">×</button>
+  257:       <div class="sheet-body" id="liveStopSheetBody">
+  263:       <a class="dock-item" href="{{ url_for('seats_page') }}">
+  265:         <span>Koltuk</span>
+  270:         <span>Yolcular</span>
+  336:         document.body.style.overflow = "hidden";
+  342:         document.body.style.overflow = "";
+  345:       form.addEventListener("submit", function(e){
+  351:       cancel.addEventListener("click", closeModal);
+  353:       overlay.addEventListener("click", function(e){
+  357:       document.addEventListener("keydown", function(e){
+  366:           const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
+  369:             "liveStop:" + tripKey,
+  370:             "passedStops:" + tripKey,
+  374:             "continueTripStop:" + tripKey,
+  375:             "continueTripStop:last",
+  376:             "stopFlowSummary:" + tripKey,
+  377:             "stopFlowLiveEvents:" + tripKey
+  386:                 k.startsWith("liveStop:") ||
+  387:                 k.startsWith("passedStops:") ||
+  391:                 k.startsWith("continueTripStop:") ||
+  392:                 k.startsWith("stopFlowSummary:") ||
+  393:                 k.startsWith("stopFlowLiveEvents:")
+  403:       ok.addEventListener("click", function(){
+  439: <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+  447:       <div class="bag-viewer-kicker">Bagaj fotoğrafı</div>
+  456:       <img class="bag-viewer-img" id="bagViewerImg" src="" alt="Bagaj fotoğrafı">
+  486:     tripKey: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
+  490:     runtimeStop: {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }},
+  493:     routeStops: {{ stops | tojson | safe }},
+  496:     routeCoords: {{ continue_route_coords | default([]) | tojson | safe }},
+  499:     liveBagajCount: {{ (live_current.bagaj_count if live_current and live_current.bagaj_count is defined else 0) | tojson | safe }},
+  503:   <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=core-split-1"></script>
+  505:   <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
+  507:   <script src="{{ url_for('static', filename='continue/continue_trip_ui.js') }}?v=js-safe-split-1"></script>
+
+----- android_app/app/src/main/python/templates/continue_trip.html -----
+Satır: 509 Boyut: 14.2 KB Hit: 72
+    6:   <title>Canlı Durak Akışı</title>
+   84:   <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip.css') }}?v=css-parts-1">
+   99:       <a class="brand-action" href="{{ url_for('seats_page') }}?drive=1" aria-label="Sesli komut">
+  105:       <img class="hero-bus-img" src="{{ url_for('static', filename='img/live-hero-bus.png', v='1') }}" alt="Canlı durak otobüs görseli">
+  108:       <h1 class="hero-title">Canlı Durak Akışı</h1>
+  113:           <span>{{ trip["route"] or "Denizli–İstanbul (Vardön)" }}</span>
+  135:         <b>{{ live_summary.passenger_count }} / {{ live_summary.total_seats }}</b>
+  157:         <div class="card live live-summary-trigger" id="liveCurrentCard" role="button" tabindex="0" aria-label="Canlı durak özetini aç">
+  160:               <span class="card-label">Şu anki durak</span>
+  161:               <h2 class="card-title" id="liveCurrentStopName">{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or "Durak seçilmedi" }}</h2>
+  175:               <b id="liveDistanceValue" class="stop-distance-value" data-stop-name="{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or '' }}">{{ (live_runtime.gps_km if live_runtime and live_run
+  178:             <button class="metric metric-action" type="button" id="liveOffloadMetric" data-kind="offload" aria-label="Bu durakta inecek koltukları göster">
+  180:               <b id="liveOffloadCount">{{ live_current.off_count or 0 }} yolcu</b>
+  184:             <button class="metric metric-action" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
+  185:               <small>Bagaj</small>
+  186:               <b id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</b>
+  194:       {% for stop in live_stops[1:] %}
+  196:         <div class="node {{ stop.kind }}"></div>
+  198:         <div class="card regular {% if stop.kind == "next" %}next-card{% endif %}">
+  201:               <h3 class="card-title">{{ stop.name }}</h3>
+  204:             {% if stop.kind == "next" %}
+  205:               <span class="status-pill next">{{ stop.status }}</span>
+  206:             {% elif stop.kind == "upcoming" %}
+  207:               <span class="status-pill upcoming">{{ stop.status }}</span>
+  208:             {% elif stop.kind == "passed" %}
+  209:               <span class="status-pill passed">{{ stop.status }}</span>
+  211:               <span class="status-pill live">{{ stop.status }}</span>
+  218:               <b>{{ stop.eta }}</b>
+  223:               <b class="stop-distance-value" data-stop-name="{{ stop.name }}">{{ stop.distance }}</b>
+  228:               <b>{{ stop.off_count }}</b>
+  232:               <small>Bagaj</small>
+  233:               <b>{{ stop.bagaj_label }}</b>
+  242:     <div class="live-sheet-overlay" id="liveStopSheetOverlay"></div>
+  244:     <section class="live-stop-sheet" id="liveStopSheet" aria-hidden="true">
+  249:           <div class="sheet-kicker" id="liveStopSheetKicker">Canlı durak</div>
+  250:           <h2 class="sheet-title" id="liveStopSheetTitle">Durak detayı</h2>
+  251:           <p class="sheet-sub" id="liveStopSheetSub">Yükleniyor...</p>
+  254:         <button class="sheet-close" type="button" id="liveStopSheetClose" aria-label="Kapat">×</button>
+  257:       <div class="sheet-body" id="liveStopSheetBody">
+  263:       <a class="dock-item" href="{{ url_for('seats_page') }}">
+  265:         <span>Koltuk</span>
+  270:         <span>Yolcular</span>
+  336:         document.body.style.overflow = "hidden";
+  342:         document.body.style.overflow = "";
+  345:       form.addEventListener("submit", function(e){
+  351:       cancel.addEventListener("click", closeModal);
+  353:       overlay.addEventListener("click", function(e){
+  357:       document.addEventListener("keydown", function(e){
+  366:           const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
+  369:             "liveStop:" + tripKey,
+  370:             "passedStops:" + tripKey,
+  374:             "continueTripStop:" + tripKey,
+  375:             "continueTripStop:last",
+  376:             "stopFlowSummary:" + tripKey,
+  377:             "stopFlowLiveEvents:" + tripKey
+  386:                 k.startsWith("liveStop:") ||
+  387:                 k.startsWith("passedStops:") ||
+  391:                 k.startsWith("continueTripStop:") ||
+  392:                 k.startsWith("stopFlowSummary:") ||
+  393:                 k.startsWith("stopFlowLiveEvents:")
+  403:       ok.addEventListener("click", function(){
+  439: <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+  447:       <div class="bag-viewer-kicker">Bagaj fotoğrafı</div>
+  456:       <img class="bag-viewer-img" id="bagViewerImg" src="" alt="Bagaj fotoğrafı">
+  486:     tripKey: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
+  490:     runtimeStop: {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }},
+  493:     routeStops: {{ stops | tojson | safe }},
+  496:     routeCoords: {{ continue_route_coords | default([]) | tojson | safe }},
+  499:     liveBagajCount: {{ (live_current.bagaj_count if live_current and live_current.bagaj_count is defined else 0) | tojson | safe }},
+  503:   <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=core-split-1"></script>
+  505:   <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
+  507:   <script src="{{ url_for('static', filename='continue/continue_trip_ui.js') }}?v=js-safe-split-1"></script>
+
+----- static/continue/continue_trip.css -----
+Satır: 13 Boyut: 0.6 KB Hit: 1
+    9: @import url("./css_parts/20-live-stop-sheet-base.css");
+
+----- android_app/app/src/main/python/static/continue/continue_trip.css -----
+Satır: 13 Boyut: 0.6 KB Hit: 1
+    9: @import url("./css_parts/20-live-stop-sheet-base.css");
+
+----- static/continue/continue_trip_core.js -----
+Satır: 2111 Boyut: 63.9 KB Hit: 336
+    2:    continue_trip_core.js
+    3:    Otomatik çıkarıldı: continue_trip.html
+   14:     const runtimeStop = BOOT.runtimeStop || "";
+   45:     const stopEl  = document.getElementById("liveCurrentStopName");
+   54:     if(stopEl && runtimeStop){
+   55:       stopEl.textContent = runtimeStop;
+   68:     fetch(`/api/live-runtime-state?trip_id=${encodeURIComponent(tripId)}&_=${Date.now()}`, {
+   79:       const stopEl  = document.getElementById("liveCurrentStopName");
+   88:       if(stopEl && s.live_stop){
+   89:         stopEl.textContent = s.live_stop;
+  104:     document.addEventListener("DOMContentLoaded", function(){
+  118: /* ===== SCRIPT BLOCK: live-stop-sheet-script ===== */
+  121:   const bagBtn = document.getElementById("liveBagajMetric");
+  122:   const stopNameEl = document.getElementById("liveCurrentStopName");
+  124:   const overlay = document.getElementById("liveStopSheetOverlay");
+  125:   const sheet = document.getElementById("liveStopSheet");
+  126:   const closeBtn = document.getElementById("liveStopSheetClose");
+  127:   const titleEl = document.getElementById("liveStopSheetTitle");
+  128:   const subEl = document.getElementById("liveStopSheetSub");
+  129:   const bodyEl = document.getElementById("liveStopSheetBody");
+  130:   const kickerEl = document.getElementById("liveStopSheetKicker");
+  133:     const routeStops = BOOT.routeStops || [];
+  152:   function currentStopName(){
+  153:     return (stopNameEl && stopNameEl.textContent ? stopNameEl.textContent : "").trim();
+  162:     document.body.style.overflow = "hidden";
+  171:     document.body.style.overflow = "";
+  175:     bodyEl.innerHTML = `<div class="sheet-empty">${escapeHtml(message)}</div>`;
+  178:   function routeOptions(currentToStop){
+  179:     const current = text(currentToStop || "").trim();
+  181:     return (Array.isArray(routeStops) ? routeStops : []).map(stop => {
+  182:       const selected = stop === current ? "selected" : "";
+  183:       return `<option value="${escapeHtml(stop)}" ${selected}>${escapeHtml(stop)}</option>`;
+  187:   function findPassenger(seatNo){
+  192:     return passengers.find(p => text(p.seat_no) === text(seatNo));
+  197:       renderEmpty("Koltuk bilgisi bulunamadı.");
+  202:     titleEl.textContent = `Koltuk ${passenger.seat_no}`;
+  205:     bodyEl.innerHTML = `
+  208:           <div class="sheet-change-title">Koltuk ${escapeHtml(passenger.seat_no)}</div>
+  210:             Mevcut: ${escapeHtml(passenger.from_stop || "Biniş yok")} → ${escapeHtml(passenger.to_stop || "İniş yok")}
+  216:           <select class="sheet-select" id="sheetNewToStop">
+  217:             ${routeOptions(passenger.to_stop)}
+  222:           Kaydedince koltuğun iniş durağı değişir. Koltuğa bağlı bagaj bilgisi de yeni durağın bagaj listesinde görünür.
+  227:           <button class="sheet-save-btn" type="button" id="sheetSaveChange" data-seat-no="${escapeHtml(passenger.seat_no)}">Kaydet</button>
+  236:       cancelBtn.addEventListener("click", function(){
+  237:         if(lastKind === "bagaj") renderBags(lastDetailData || {});
+  243:       saveBtn.addEventListener("click", saveDestinationChange);
+  248:     const seatNo = this.getAttribute("data-seat-no") || "";
+  249:     const select = document.getElementById("sheetNewToStop");
+  250:     const toStop = select ? select.value : "";
+  252:     if(!seatNo || !toStop){
+  253:       renderEmpty("Koltuk veya durak bilgisi eksik.");
+  271:       const res = await fetch("/api/live-seat-destination", {
+  275:           seat_no: seatNo,
+  276:           to_stop: toStop
+  291:       bodyEl.innerHTML = `
+  316:       const seatNo = passenger.seat_no || "-";
+  317:       const routeText = `${passenger.from_stop || "Biniş yok"} → ${passenger.to_stop || currentStopName() || "İniş yok"}`;
+  320:       titleEl.textContent = `Koltuk ${seatNo}`;
+  321:       subEl.textContent = "Yolcu indirilsin mi?";
+  323:       bodyEl.innerHTML = `
+  326:             <div class="sheet-confirm-title">Koltuk ${escapeHtml(seatNo)} indirilsin mi?</div>
+  328:               ${escapeHtml(routeText)}
+  330:               ${bag > 0 ? `🧳 ${bag} bagaj teslim edildi sayılıp temizlenecek.` : "🧳 Bagaj yok."}
+  336:             <span>Bu işlem koltuğu boşaltır. Yolcu artık canlı durak listesinde görünmez.</span>
+  350:         cancelBtn.addEventListener("click", function(){
+  351:           if(lastKind === "bagaj") renderBags(lastDetailData || {});
+  358:         okBtn.addEventListener("click", function(){
+  366:   async function offloadSeatFromSheet(seatNo){
+  367:     const passenger = findPassenger(seatNo);
+  370:       alert("Koltuk bilgisi bulunamadı.");
+  388:       kickerEl.textContent = "Yolcu indiriliyor";
+  389:       titleEl.textContent = `Koltuk ${seatNo}`;
+  391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+  393:       const res = await fetch("/api/live-seat-offload", {
+  397:           seat_no: seatNo,
+  398:           stop: currentStopName()
+  406:         subEl.textContent = "Koltuk indirilemedi.";
+  412:       subEl.textContent = data.message || `Koltuk ${seatNo} indirildi.`;
+  414:       bodyEl.innerHTML = `
+  416:           ${escapeHtml(data.message || `Koltuk ${seatNo} indirildi.`)}
+  417:           ${Number(data.bag_deleted || 0) > 0 ? `<br><br>🧳 ${Number(data.bag_deleted || 0)} bagaj kaydı temizlendi.` : ""}
+  428:       console.error("live seat offload error", err);
+  431:       renderEmpty("Bağlantı hatası. Koltuk indirilemedi.");
+  440:       const stop = data.stop || currentStopName() || "seçili durak";
+  441:       const seats = passengers.map(p => p.seat_no).join(", ");
+  445:       titleEl.textContent = `${stop} durağı`;
+  446:       subEl.textContent = `${passengers.length} yolcu indirilsin mi?`;
+  448:       bodyEl.innerHTML = `
+  451:             <div class="sheet-confirm-title">${escapeHtml(stop)} durağındaki yolcular indirilsin mi?</div>
+  453:               Koltuklar: ${escapeHtml(seats || "-")}
+  455:               ${bagTotal > 0 ? `🧳 Toplam ${bagTotal} bagaj teslim edildi sayılıp temizlenecek.` : "🧳 Bagaj görünmüyor."}
+  461:             <span>Bu işlem listedeki tüm yolcuları indirir ve koltukları boşaltır.</span>
+  475:         cancelBtn.addEventListener("click", function(){
+  482:         okBtn.addEventListener("click", function(){
+  489:   async function bulkOffloadCurrentStop(){
+  494:       renderEmpty("Bu durakta indirilecek yolcu bulunmuyor.");
+  513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+  515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+  517:       const res = await fetch("/api/live-stop-offload", {
+  521:           stop: data.stop || currentStopName()
+  535:       subEl.textContent = j.message || "Yolcular indirildi.";
+  537:       bodyEl.innerHTML = `
+  539:           ${escapeHtml(j.message || "Yolcular indirildi.")}
+  541:           Koltuklar: ${escapeHtml((j.deleted || []).join(", "))}
+  542:           ${Number(j.bag_deleted || 0) > 0 ? `<br><br>🧳 ${Number(j.bag_deleted || 0)} bagaj kaydı temizlendi.` : ""}
+  553:       console.error("bulk stop offload error", err);
+  556:       renderEmpty("Bağlantı hatası. Yolcular indirilemedi.");
+  569:           Bu koltuk için görünür bagaj fotoğrafı bulunamadı.
+  577:           <div class="sheet-bag-gallery-title">Bagaj Fotoğrafları</div>
+  588:               <img src="${escapeHtml(photo.thumb_url || photo.url || "")}" alt="Bagaj fotoğrafı ${idx + 1}" loading="lazy">
+  590:               <span class="sheet-bag-photo-side">${escapeHtml(photo.side_label || "Bagaj")}</span>
+  610:     bodyEl.innerHTML = '<div class="sheet-empty">Yükleniyor...</div>';
+  613:       const res = await fetch(`/api/live-consignment-detail/${encodeURIComponent(cid)}?_=${Date.now()}`, {
+  633:       bodyEl.innerHTML = `
+  639:             <div class="sheet-cargo-line"><span>Teslim durağı</span><b>${escapeHtml(item.to_stop || "-")}</b></div>
+  672:         backBtn.addEventListener("click", function(){
+  697:       bodyEl.innerHTML = `
+  704:               Teslim durağı: ${escapeHtml(item.stop_name || currentStopName() || "-")}
+  725:         cancelBtn.addEventListener("click", function(){
+  732:         okBtn.addEventListener("click", function(){
+  762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+  764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+  781:       bodyEl.innerHTML = `
+  802:   async function renderSeatBagDetail(seatNo){
+  803:     if(!seatNo){
+  804:       renderEmpty("Koltuk bilgisi bulunamadı.");
+  809:     titleEl.textContent = `Koltuk ${seatNo}`;
+  810:     subEl.textContent = "Bagaj konumu yükleniyor...";
+  811:     bodyEl.innerHTML = '<div class="sheet-empty">Bagaj bilgisi alınıyor...</div>';
+  814:       const res = await fetch(`/api/live-seat-bag-detail?seat_no=${encodeURIComponent(seatNo)}&_=${Date.now()}`, {
+  821:         subEl.textContent = "Bagaj bilgisi alınamadı.";
+  827:       subEl.textContent = `${Number(data.total || 0)} bagaj`;
+  829:       bodyEl.innerHTML = `
+  831:           <div class="sheet-change-title">Koltuk ${escapeHtml(data.seat_no || seatNo)}</div>
+  833:             ${escapeHtml((data.from_stop || "Biniş yok") + " → " + (data.to_stop || "İniş yok"))}
+  834:             ${data.passenger_name ? "<br>Yolcu: " + escapeHtml(data.passenger_name) : ""}
+  848:           Toplam: <b>${Number(data.total || 0)}</b> bagaj.
+  860:         backBtn.addEventListener("click", function(){
+  861:           if(lastKind === "bagaj") renderBags(lastDetailData || {});
+  867:       console.error("seat bag detail error", err);
+  914:       renderEmpty("Bu durakta inecek yolcu bulunmuyor.");
+  918:     bodyEl.innerHTML = `
+  927:           const route = `${p.from_stop || "Biniş yok"} → ${p.to_stop || data.stop || "İniş yok"}`;
+  930:             <div class="sheet-seat-row ${sheetGenderClass(p)}">
+  931:               <div class="sheet-seat-no">${escapeHtml(p.seat_no || "-")}</div>
+  933:               <div class="sheet-seat-main">
+  934:                 <div class="sheet-seat-title">
+  935:                   Koltuk ${escapeHtml(p.seat_no || "-")}${sheetGenderChip(p)}${name ? " • " + escapeHtml(name) : ""}
+  937:                 <div class="sheet-seat-route">${escapeHtml(route)}</div>
+  940:               <div class="sheet-seat-extra">
+  941:                 ${bag ? `<button class="sheet-bag-detail-btn" type="button" data-bag-seat="${escapeHtml(p.seat_no || "")}">🧳 ${bag} bagaj</button>` : `<span class="sheet-badge">🧳 Bagaj yok</span>`}
+  943:                 <button class="sheet-action-btn" type="button" data-change-seat="${escapeHtml(p.seat_no || "")}">
+  946:                 <button class="sheet-offload-btn ${bag ? "danger" : ""}" type="button" data-offload-seat="${escapeHtml(p.seat_no || "")}">
+  961:     const bagSeats = passengers.filter(p => Number(p.bag_count || 0) > 0);
+  964:     if(!bagSeats.length && !consignments.length){
+  965:       renderEmpty("Bu durakta indirilecek bagaj veya emanet görünmüyor.");
+  969:     const rightTotal = bagSeats.reduce((sum, p) => sum + Number(p.bag_right || 0), 0);
+  970:     const leftFrontTotal = bagSeats.reduce((sum, p) => sum + Number(p.bag_left_front || 0), 0);
+  971:     const leftBackTotal = bagSeats.reduce((sum, p) => sum + Number(p.bag_left_back || 0), 0);
+  974:     subEl.textContent = `${bagTotal} bagaj • ${consignments.length} emanet`;
+... devamı: 176
+
+----- android_app/app/src/main/python/static/continue/continue_trip_core.js -----
+Satır: 2111 Boyut: 63.9 KB Hit: 336
+    2:    continue_trip_core.js
+    3:    Otomatik çıkarıldı: continue_trip.html
+   14:     const runtimeStop = BOOT.runtimeStop || "";
+   45:     const stopEl  = document.getElementById("liveCurrentStopName");
+   54:     if(stopEl && runtimeStop){
+   55:       stopEl.textContent = runtimeStop;
+   68:     fetch(`/api/live-runtime-state?trip_id=${encodeURIComponent(tripId)}&_=${Date.now()}`, {
+   79:       const stopEl  = document.getElementById("liveCurrentStopName");
+   88:       if(stopEl && s.live_stop){
+   89:         stopEl.textContent = s.live_stop;
+  104:     document.addEventListener("DOMContentLoaded", function(){
+  118: /* ===== SCRIPT BLOCK: live-stop-sheet-script ===== */
+  121:   const bagBtn = document.getElementById("liveBagajMetric");
+  122:   const stopNameEl = document.getElementById("liveCurrentStopName");
+  124:   const overlay = document.getElementById("liveStopSheetOverlay");
+  125:   const sheet = document.getElementById("liveStopSheet");
+  126:   const closeBtn = document.getElementById("liveStopSheetClose");
+  127:   const titleEl = document.getElementById("liveStopSheetTitle");
+  128:   const subEl = document.getElementById("liveStopSheetSub");
+  129:   const bodyEl = document.getElementById("liveStopSheetBody");
+  130:   const kickerEl = document.getElementById("liveStopSheetKicker");
+  133:     const routeStops = BOOT.routeStops || [];
+  152:   function currentStopName(){
+  153:     return (stopNameEl && stopNameEl.textContent ? stopNameEl.textContent : "").trim();
+  162:     document.body.style.overflow = "hidden";
+  171:     document.body.style.overflow = "";
+  175:     bodyEl.innerHTML = `<div class="sheet-empty">${escapeHtml(message)}</div>`;
+  178:   function routeOptions(currentToStop){
+  179:     const current = text(currentToStop || "").trim();
+  181:     return (Array.isArray(routeStops) ? routeStops : []).map(stop => {
+  182:       const selected = stop === current ? "selected" : "";
+  183:       return `<option value="${escapeHtml(stop)}" ${selected}>${escapeHtml(stop)}</option>`;
+  187:   function findPassenger(seatNo){
+  192:     return passengers.find(p => text(p.seat_no) === text(seatNo));
+  197:       renderEmpty("Koltuk bilgisi bulunamadı.");
+  202:     titleEl.textContent = `Koltuk ${passenger.seat_no}`;
+  205:     bodyEl.innerHTML = `
+  208:           <div class="sheet-change-title">Koltuk ${escapeHtml(passenger.seat_no)}</div>
+  210:             Mevcut: ${escapeHtml(passenger.from_stop || "Biniş yok")} → ${escapeHtml(passenger.to_stop || "İniş yok")}
+  216:           <select class="sheet-select" id="sheetNewToStop">
+  217:             ${routeOptions(passenger.to_stop)}
+  222:           Kaydedince koltuğun iniş durağı değişir. Koltuğa bağlı bagaj bilgisi de yeni durağın bagaj listesinde görünür.
+  227:           <button class="sheet-save-btn" type="button" id="sheetSaveChange" data-seat-no="${escapeHtml(passenger.seat_no)}">Kaydet</button>
+  236:       cancelBtn.addEventListener("click", function(){
+  237:         if(lastKind === "bagaj") renderBags(lastDetailData || {});
+  243:       saveBtn.addEventListener("click", saveDestinationChange);
+  248:     const seatNo = this.getAttribute("data-seat-no") || "";
+  249:     const select = document.getElementById("sheetNewToStop");
+  250:     const toStop = select ? select.value : "";
+  252:     if(!seatNo || !toStop){
+  253:       renderEmpty("Koltuk veya durak bilgisi eksik.");
+  271:       const res = await fetch("/api/live-seat-destination", {
+  275:           seat_no: seatNo,
+  276:           to_stop: toStop
+  291:       bodyEl.innerHTML = `
+  316:       const seatNo = passenger.seat_no || "-";
+  317:       const routeText = `${passenger.from_stop || "Biniş yok"} → ${passenger.to_stop || currentStopName() || "İniş yok"}`;
+  320:       titleEl.textContent = `Koltuk ${seatNo}`;
+  321:       subEl.textContent = "Yolcu indirilsin mi?";
+  323:       bodyEl.innerHTML = `
+  326:             <div class="sheet-confirm-title">Koltuk ${escapeHtml(seatNo)} indirilsin mi?</div>
+  328:               ${escapeHtml(routeText)}
+  330:               ${bag > 0 ? `🧳 ${bag} bagaj teslim edildi sayılıp temizlenecek.` : "🧳 Bagaj yok."}
+  336:             <span>Bu işlem koltuğu boşaltır. Yolcu artık canlı durak listesinde görünmez.</span>
+  350:         cancelBtn.addEventListener("click", function(){
+  351:           if(lastKind === "bagaj") renderBags(lastDetailData || {});
+  358:         okBtn.addEventListener("click", function(){
+  366:   async function offloadSeatFromSheet(seatNo){
+  367:     const passenger = findPassenger(seatNo);
+  370:       alert("Koltuk bilgisi bulunamadı.");
+  388:       kickerEl.textContent = "Yolcu indiriliyor";
+  389:       titleEl.textContent = `Koltuk ${seatNo}`;
+  391:       bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+  393:       const res = await fetch("/api/live-seat-offload", {
+  397:           seat_no: seatNo,
+  398:           stop: currentStopName()
+  406:         subEl.textContent = "Koltuk indirilemedi.";
+  412:       subEl.textContent = data.message || `Koltuk ${seatNo} indirildi.`;
+  414:       bodyEl.innerHTML = `
+  416:           ${escapeHtml(data.message || `Koltuk ${seatNo} indirildi.`)}
+  417:           ${Number(data.bag_deleted || 0) > 0 ? `<br><br>🧳 ${Number(data.bag_deleted || 0)} bagaj kaydı temizlendi.` : ""}
+  428:       console.error("live seat offload error", err);
+  431:       renderEmpty("Bağlantı hatası. Koltuk indirilemedi.");
+  440:       const stop = data.stop || currentStopName() || "seçili durak";
+  441:       const seats = passengers.map(p => p.seat_no).join(", ");
+  445:       titleEl.textContent = `${stop} durağı`;
+  446:       subEl.textContent = `${passengers.length} yolcu indirilsin mi?`;
+  448:       bodyEl.innerHTML = `
+  451:             <div class="sheet-confirm-title">${escapeHtml(stop)} durağındaki yolcular indirilsin mi?</div>
+  453:               Koltuklar: ${escapeHtml(seats || "-")}
+  455:               ${bagTotal > 0 ? `🧳 Toplam ${bagTotal} bagaj teslim edildi sayılıp temizlenecek.` : "🧳 Bagaj görünmüyor."}
+  461:             <span>Bu işlem listedeki tüm yolcuları indirir ve koltukları boşaltır.</span>
+  475:         cancelBtn.addEventListener("click", function(){
+  482:         okBtn.addEventListener("click", function(){
+  489:   async function bulkOffloadCurrentStop(){
+  494:       renderEmpty("Bu durakta indirilecek yolcu bulunmuyor.");
+  513:       titleEl.textContent = data.stop || currentStopName() || "Durak";
+  515:       bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+  517:       const res = await fetch("/api/live-stop-offload", {
+  521:           stop: data.stop || currentStopName()
+  535:       subEl.textContent = j.message || "Yolcular indirildi.";
+  537:       bodyEl.innerHTML = `
+  539:           ${escapeHtml(j.message || "Yolcular indirildi.")}
+  541:           Koltuklar: ${escapeHtml((j.deleted || []).join(", "))}
+  542:           ${Number(j.bag_deleted || 0) > 0 ? `<br><br>🧳 ${Number(j.bag_deleted || 0)} bagaj kaydı temizlendi.` : ""}
+  553:       console.error("bulk stop offload error", err);
+  556:       renderEmpty("Bağlantı hatası. Yolcular indirilemedi.");
+  569:           Bu koltuk için görünür bagaj fotoğrafı bulunamadı.
+  577:           <div class="sheet-bag-gallery-title">Bagaj Fotoğrafları</div>
+  588:               <img src="${escapeHtml(photo.thumb_url || photo.url || "")}" alt="Bagaj fotoğrafı ${idx + 1}" loading="lazy">
+  590:               <span class="sheet-bag-photo-side">${escapeHtml(photo.side_label || "Bagaj")}</span>
+  610:     bodyEl.innerHTML = '<div class="sheet-empty">Yükleniyor...</div>';
+  613:       const res = await fetch(`/api/live-consignment-detail/${encodeURIComponent(cid)}?_=${Date.now()}`, {
+  633:       bodyEl.innerHTML = `
+  639:             <div class="sheet-cargo-line"><span>Teslim durağı</span><b>${escapeHtml(item.to_stop || "-")}</b></div>
+  672:         backBtn.addEventListener("click", function(){
+  697:       bodyEl.innerHTML = `
+  704:               Teslim durağı: ${escapeHtml(item.stop_name || currentStopName() || "-")}
+  725:         cancelBtn.addEventListener("click", function(){
+  732:         okBtn.addEventListener("click", function(){
+  762:       bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+  764:       const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+  781:       bodyEl.innerHTML = `
+  802:   async function renderSeatBagDetail(seatNo){
+  803:     if(!seatNo){
+  804:       renderEmpty("Koltuk bilgisi bulunamadı.");
+  809:     titleEl.textContent = `Koltuk ${seatNo}`;
+  810:     subEl.textContent = "Bagaj konumu yükleniyor...";
+  811:     bodyEl.innerHTML = '<div class="sheet-empty">Bagaj bilgisi alınıyor...</div>';
+  814:       const res = await fetch(`/api/live-seat-bag-detail?seat_no=${encodeURIComponent(seatNo)}&_=${Date.now()}`, {
+  821:         subEl.textContent = "Bagaj bilgisi alınamadı.";
+  827:       subEl.textContent = `${Number(data.total || 0)} bagaj`;
+  829:       bodyEl.innerHTML = `
+  831:           <div class="sheet-change-title">Koltuk ${escapeHtml(data.seat_no || seatNo)}</div>
+  833:             ${escapeHtml((data.from_stop || "Biniş yok") + " → " + (data.to_stop || "İniş yok"))}
+  834:             ${data.passenger_name ? "<br>Yolcu: " + escapeHtml(data.passenger_name) : ""}
+  848:           Toplam: <b>${Number(data.total || 0)}</b> bagaj.
+  860:         backBtn.addEventListener("click", function(){
+  861:           if(lastKind === "bagaj") renderBags(lastDetailData || {});
+  867:       console.error("seat bag detail error", err);
+  914:       renderEmpty("Bu durakta inecek yolcu bulunmuyor.");
+  918:     bodyEl.innerHTML = `
+  927:           const route = `${p.from_stop || "Biniş yok"} → ${p.to_stop || data.stop || "İniş yok"}`;
+  930:             <div class="sheet-seat-row ${sheetGenderClass(p)}">
+  931:               <div class="sheet-seat-no">${escapeHtml(p.seat_no || "-")}</div>
+  933:               <div class="sheet-seat-main">
+  934:                 <div class="sheet-seat-title">
+  935:                   Koltuk ${escapeHtml(p.seat_no || "-")}${sheetGenderChip(p)}${name ? " • " + escapeHtml(name) : ""}
+  937:                 <div class="sheet-seat-route">${escapeHtml(route)}</div>
+  940:               <div class="sheet-seat-extra">
+  941:                 ${bag ? `<button class="sheet-bag-detail-btn" type="button" data-bag-seat="${escapeHtml(p.seat_no || "")}">🧳 ${bag} bagaj</button>` : `<span class="sheet-badge">🧳 Bagaj yok</span>`}
+  943:                 <button class="sheet-action-btn" type="button" data-change-seat="${escapeHtml(p.seat_no || "")}">
+  946:                 <button class="sheet-offload-btn ${bag ? "danger" : ""}" type="button" data-offload-seat="${escapeHtml(p.seat_no || "")}">
+  961:     const bagSeats = passengers.filter(p => Number(p.bag_count || 0) > 0);
+  964:     if(!bagSeats.length && !consignments.length){
+  965:       renderEmpty("Bu durakta indirilecek bagaj veya emanet görünmüyor.");
+  969:     const rightTotal = bagSeats.reduce((sum, p) => sum + Number(p.bag_right || 0), 0);
+  970:     const leftFrontTotal = bagSeats.reduce((sum, p) => sum + Number(p.bag_left_front || 0), 0);
+  971:     const leftBackTotal = bagSeats.reduce((sum, p) => sum + Number(p.bag_left_back || 0), 0);
+  974:     subEl.textContent = `${bagTotal} bagaj • ${consignments.length} emanet`;
+... devamı: 176
+
+----- static/continue/continue_trip_ui.js -----
+Satır: 250 Boyut: 7.3 KB Hit: 26
+    2:    continue_trip_ui.js
+    3:    Otomatik çıkarıldı: continue_trip.html
+   44:     return Array.from(document.querySelectorAll(".sheet-bag-photo, .sheet-cargo-photo")).map((el, i) => {
+   45:       const badge = el.querySelector(".sheet-bag-photo-badge");
+   46:       const side = el.querySelector(".sheet-bag-photo-side");
+   47:       const image = el.querySelector("img");
+   79:     document.body.style.overflow = "hidden";
+   89:     // Canlı durak sheet açıksa body kilidi kalsın; yoksa serbest bırak.
+   90:     const liveSheet = document.getElementById("liveStopSheet");
+   92:       document.body.style.overflow = "";
+   96:   document.addEventListener("click", function(e){
+  102:     const currentList = Array.from(document.querySelectorAll(".sheet-bag-photo, .sheet-cargo-photo"));
+  108:   if(closeBtn) closeBtn.addEventListener("click", closeViewer);
+  111:     prevBtn.addEventListener("click", function(){
+  117:     nextBtn.addEventListener("click", function(){
+  122:   viewer.addEventListener("click", function(e){
+  126:   document.addEventListener("keydown", function(e){
+  139:   function q(sel){ return document.querySelector(sel); }
+  147:     const label = card.querySelector(".card-label");
+  150:       label.innerHTML = '<span class="continue-v2-dot"></span> CANLI';
+  156:       line.innerHTML = 'Kalan mesafe: <span id="continueLiveV2Distance">—</span>';
+  158:       const head = card.querySelector(".card-head");
+  159:       const grid = card.querySelector(".metric-grid");
+  186:     document.addEventListener("DOMContentLoaded", ensureV2);
+  231:       top.innerHTML = html;
+  241:     document.addEventListener("DOMContentLoaded", render);
+
+----- android_app/app/src/main/python/static/continue/continue_trip_ui.js -----
+Satır: 250 Boyut: 7.3 KB Hit: 26
+    2:    continue_trip_ui.js
+    3:    Otomatik çıkarıldı: continue_trip.html
+   44:     return Array.from(document.querySelectorAll(".sheet-bag-photo, .sheet-cargo-photo")).map((el, i) => {
+   45:       const badge = el.querySelector(".sheet-bag-photo-badge");
+   46:       const side = el.querySelector(".sheet-bag-photo-side");
+   47:       const image = el.querySelector("img");
+   79:     document.body.style.overflow = "hidden";
+   89:     // Canlı durak sheet açıksa body kilidi kalsın; yoksa serbest bırak.
+   90:     const liveSheet = document.getElementById("liveStopSheet");
+   92:       document.body.style.overflow = "";
+   96:   document.addEventListener("click", function(e){
+  102:     const currentList = Array.from(document.querySelectorAll(".sheet-bag-photo, .sheet-cargo-photo"));
+  108:   if(closeBtn) closeBtn.addEventListener("click", closeViewer);
+  111:     prevBtn.addEventListener("click", function(){
+  117:     nextBtn.addEventListener("click", function(){
+  122:   viewer.addEventListener("click", function(e){
+  126:   document.addEventListener("keydown", function(e){
+  139:   function q(sel){ return document.querySelector(sel); }
+  147:     const label = card.querySelector(".card-label");
+  150:       label.innerHTML = '<span class="continue-v2-dot"></span> CANLI';
+  156:       line.innerHTML = 'Kalan mesafe: <span id="continueLiveV2Distance">—</span>';
+  158:       const head = card.querySelector(".card-head");
+  159:       const grid = card.querySelector(".metric-grid");
+  186:     document.addEventListener("DOMContentLoaded", ensureV2);
+  231:       top.innerHTML = html;
+  241:     document.addEventListener("DOMContentLoaded", render);
+
+----- static/continue/continue_flow_refresh.js -----
+Satır: 418 Boyut: 10.6 KB Hit: 71
+    2:    continue_flow_refresh.js
+    3:    Canlı durak değişince kart sırasını sayfa yenilemeden günceller.
+    4:    Alt kartlarda kalan mesafeyi GPS + durak koordinatına göre km gösterir.
+    9:   const routeStops = Array.isArray(BOOT.routeStops) ? BOOT.routeStops : [];
+   10:   const routeCoords = Array.isArray(BOOT.routeCoords) ? BOOT.routeCoords : [];
+   15:   let lastFlowSig = "";
+   50:   function coordForStop(stopName){
+   51:     const key = norm(stopName);
+   54:     const item = routeCoords.find(x => norm(x.stop || x.name) === key);
+   65:   function stopDistanceLabel(stopName){
+   68:     const target = coordForStop(stopName);
+   97:           refreshFlow();
+  107:   function routeIndex(name){
+  110:     return routeStops.findIndex(x => norm(x) === n);
+  113:   function currentStopName(){
+  114:     const el = document.getElementById("liveCurrentStopName");
+  130:       eta: offset + " durak sonra",
+  135:   function makeFlow(currentIndex){
+  136:     return routeStops
+  147:     return Array.from(document.querySelectorAll(".timeline .journey-card .card.regular"));
+  156:     const node = article ? article.querySelector(".node") : null;
+  165:     const previousStopName = card.dataset.flowStopName || "";
+  166:     const nameChanged = norm(previousStopName) !== norm(item.name || "");
+  167:     card.dataset.flowStopName = item.name || "";
+  181:     const title = card.querySelector(".card-title");
+  182:     const pill = card.querySelector(".status-pill");
+  183:     const metricValues = card.querySelectorAll(".metric b");
+  197:       const kmLabel = stopDistanceLabel(item.name);
+  199:       metricValues[1].classList.add("stop-distance-value");
+  200:       metricValues[1].dataset.stopName = item.name || "";
+  206:       Aynı durakta her 1.5 saniyede bir gerçek sayıları silme.
+  225:       Bagaj hesabında ana kaynak yolcu/koltuk bagajıdır.
+  227:       önce passengers içinden gerçek koltuk bagajını topluyoruz.
+  229:     let seatBagTotal = passengers.reduce((sum, p) => {
+  239:     let bagTotal = seatBagTotal;
+  242:     if((!passengers.length || bagTotal <= 0) && Number(data.seat_bag_count || 0) > 0){
+  243:       bagTotal = Number(data.seat_bag_count || 0);
+  261:   async function fetchStopDetail(stopName){
+  262:     if(!stopName) return null;
+  264:     const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stopName)}&_=${Date.now()}`, {
+  286:       offEl.textContent = c.offCount + " yolcu";
+  291:         seat_bag_count: c.bagTotal,
+  295:       const bagEl = document.getElementById("liveBagajCount");
+  299:     document.dispatchEvent(new CustomEvent("continueLiveFlowUpdated", {
+  302:           name: data.stop || currentStopName(),
+  304:           seat_bag_count: c.bagTotal,
+  305:           bagaj_count: c.bagTotal,
+  317:     const metricValues = card.querySelectorAll(".metric b");
+  334:   async function refreshDetails(flow){
+  336:     const sig = flow.map(x => x.name).join("|");
+  339:     if(sig === lastFlowSig && now - lastDetailAt < DETAIL_REFRESH_MS) return;
+  342:     lastFlowSig = sig;
+  349:         flow.map(x => fetchStopDetail(x.name).catch(() => null))
+  365:       console.warn("continue flow detail refresh error", err);
+  371:   function refreshFlow(){
+  372:     if(!routeStops.length) return;
+  374:     const current = currentStopName();
+  375:     let idx = routeIndex(current);
+  381:     const flow = makeFlow(idx);
+  382:     const future = flow.slice(1);
+  389:     refreshDetails(flow);
+  392:   window.ContinueFlowRefresh = {
+  393:     refresh: refreshFlow
+  397:     document.addEventListener("DOMContentLoaded", function(){
+  399:       refreshFlow();
+  403:     refreshFlow();
+  406:   setInterval(refreshFlow, POLL_MS);
+  408:   document.addEventListener("visibilitychange", function(){
+  411:       refreshFlow();
+  415:   window.addEventListener("continueEtaUpdated", function(){
+  416:     refreshFlow();
+
+----- android_app/app/src/main/python/static/continue/continue_flow_refresh.js -----
+Satır: 418 Boyut: 10.6 KB Hit: 71
+    2:    continue_flow_refresh.js
+    3:    Canlı durak değişince kart sırasını sayfa yenilemeden günceller.
+    4:    Alt kartlarda kalan mesafeyi GPS + durak koordinatına göre km gösterir.
+    9:   const routeStops = Array.isArray(BOOT.routeStops) ? BOOT.routeStops : [];
+   10:   const routeCoords = Array.isArray(BOOT.routeCoords) ? BOOT.routeCoords : [];
+   15:   let lastFlowSig = "";
+   50:   function coordForStop(stopName){
+   51:     const key = norm(stopName);
+   54:     const item = routeCoords.find(x => norm(x.stop || x.name) === key);
+   65:   function stopDistanceLabel(stopName){
+   68:     const target = coordForStop(stopName);
+   97:           refreshFlow();
+  107:   function routeIndex(name){
+  110:     return routeStops.findIndex(x => norm(x) === n);
+  113:   function currentStopName(){
+  114:     const el = document.getElementById("liveCurrentStopName");
+  130:       eta: offset + " durak sonra",
+  135:   function makeFlow(currentIndex){
+  136:     return routeStops
+  147:     return Array.from(document.querySelectorAll(".timeline .journey-card .card.regular"));
+  156:     const node = article ? article.querySelector(".node") : null;
+  165:     const previousStopName = card.dataset.flowStopName || "";
+  166:     const nameChanged = norm(previousStopName) !== norm(item.name || "");
+  167:     card.dataset.flowStopName = item.name || "";
+  181:     const title = card.querySelector(".card-title");
+  182:     const pill = card.querySelector(".status-pill");
+  183:     const metricValues = card.querySelectorAll(".metric b");
+  197:       const kmLabel = stopDistanceLabel(item.name);
+  199:       metricValues[1].classList.add("stop-distance-value");
+  200:       metricValues[1].dataset.stopName = item.name || "";
+  206:       Aynı durakta her 1.5 saniyede bir gerçek sayıları silme.
+  225:       Bagaj hesabında ana kaynak yolcu/koltuk bagajıdır.
+  227:       önce passengers içinden gerçek koltuk bagajını topluyoruz.
+  229:     let seatBagTotal = passengers.reduce((sum, p) => {
+  239:     let bagTotal = seatBagTotal;
+  242:     if((!passengers.length || bagTotal <= 0) && Number(data.seat_bag_count || 0) > 0){
+  243:       bagTotal = Number(data.seat_bag_count || 0);
+  261:   async function fetchStopDetail(stopName){
+  262:     if(!stopName) return null;
+  264:     const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stopName)}&_=${Date.now()}`, {
+  286:       offEl.textContent = c.offCount + " yolcu";
+  291:         seat_bag_count: c.bagTotal,
+  295:       const bagEl = document.getElementById("liveBagajCount");
+  299:     document.dispatchEvent(new CustomEvent("continueLiveFlowUpdated", {
+  302:           name: data.stop || currentStopName(),
+  304:           seat_bag_count: c.bagTotal,
+  305:           bagaj_count: c.bagTotal,
+  317:     const metricValues = card.querySelectorAll(".metric b");
+  334:   async function refreshDetails(flow){
+  336:     const sig = flow.map(x => x.name).join("|");
+  339:     if(sig === lastFlowSig && now - lastDetailAt < DETAIL_REFRESH_MS) return;
+  342:     lastFlowSig = sig;
+  349:         flow.map(x => fetchStopDetail(x.name).catch(() => null))
+  365:       console.warn("continue flow detail refresh error", err);
+  371:   function refreshFlow(){
+  372:     if(!routeStops.length) return;
+  374:     const current = currentStopName();
+  375:     let idx = routeIndex(current);
+  381:     const flow = makeFlow(idx);
+  382:     const future = flow.slice(1);
+  389:     refreshDetails(flow);
+  392:   window.ContinueFlowRefresh = {
+  393:     refresh: refreshFlow
+  397:     document.addEventListener("DOMContentLoaded", function(){
+  399:       refreshFlow();
+  403:     refreshFlow();
+  406:   setInterval(refreshFlow, POLL_MS);
+  408:   document.addEventListener("visibilitychange", function(){
+  411:       refreshFlow();
+  415:   window.addEventListener("continueEtaUpdated", function(){
+  416:     refreshFlow();
+
+----- app.py -----
+Satır: 4512 Boyut: 136.1 KB Hit: 896
+   16:     render_template,
+   80:     """).fetchone()
+  168:     row = db.execute("SELECT password_hash FROM admin_security WHERE id=1").fetchone()
+  232: SEAT_NUMBERS = [
+  238: SEAT_POSITIONS = {
+  255: ROUTE_STOPS = {
+  259:         "Hacıaliler", "Ortahan", "Belenyaka", "Alaşehir Otogar", "Alaşehir Stadyum",
+  266:         "Denizli otogar", "Sarayköy", "Alaşehir Otogar", "Salihli Garaj", "Turgutlu Garaj",
+  272:         "Salihli Garaj", "Alaşehir Otogar", "Denizli otogar",
+  276:         "Alaşehir Otogar", "Sarayköy", "Denizli otogar",
+  300:     "seat_add_single": {"title": "Tek koltuk ekleme", "pattern": "seat + add"},
+  301:     "seat_add_group": {"title": "Çoklu koltuk ekleme", "pattern": "seat_list + add"},
+  302:     "seat_remove_single": {"title": "Tek koltuk boşaltma", "pattern": "seat + offload"},
+  303:     "seat_remove_group": {"title": "Çoklu koltuk boşaltma", "pattern": "seat_list + offload"},
+  360: def validate_seat_no(seat_no: int) -> bool:
+  361:     return seat_no in SEAT_NUMBERS
+  381:     to_stop: Optional[str] = None,
+  390:         ).fetchall()
+  397:         ).fetchall()
+  403:         ).fetchall()
+  405:     elif to_stop:
+  407:             "SELECT id FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
+  408:             (trip_id, to_stop),
+  409:         ).fetchall()
+  450:             route TEXT,
+  465:         CREATE TABLE IF NOT EXISTS routes(
+  468:             stops TEXT
+  471:         CREATE TABLE IF NOT EXISTS seats(
+  473:             seat_no INTEGER NOT NULL,
+  474:             from_stop TEXT DEFAULT '',
+  475:             to_stop TEXT DEFAULT '',
+  485:             PRIMARY KEY(trip_id, seat_no),
+  489:         CREATE INDEX IF NOT EXISTS idx_seats_trip ON seats(trip_id);
+  490:         CREATE INDEX IF NOT EXISTS idx_seats_trip_to_stop ON seats(trip_id, to_stop);
+  491:         CREATE INDEX IF NOT EXISTS idx_seats_trip_from_stop ON seats(trip_id, from_stop);
+  492:         CREATE INDEX IF NOT EXISTS idx_seats_trip_payment ON seats(trip_id, payment);
+  497:             from_stop TEXT NOT NULL,
+  498:             to_stop TEXT NOT NULL,
+  510:         CREATE TABLE IF NOT EXISTS route_stop_coords(
+  511:             route TEXT NOT NULL,
+  512:             stop TEXT NOT NULL,
+  515:             PRIMARY KEY(route, stop)
+  518:         CREATE TABLE IF NOT EXISTS stop_logs(
+  521:             stop_name TEXT NOT NULL,
+  524:             seats_for_stop INTEGER,
+  530:         CREATE INDEX IF NOT EXISTS idx_stoplogs_trip_ts ON stop_logs(trip_id, ts);
+  542:             from_stop TEXT,
+  543:             to_stop TEXT,
+  569:             route TEXT NOT NULL,
+  570:             from_stop TEXT NOT NULL,
+  571:             to_stop TEXT NOT NULL,
+  574:             PRIMARY KEY(route, from_stop, to_stop)
+  615:         CREATE TABLE IF NOT EXISTS route_schedule_profiles(
+  617:             route_name TEXT NOT NULL,
+  626:         CREATE INDEX IF NOT EXISTS idx_route_schedule_profiles_route
+  627:         ON route_schedule_profiles(route_name);
+  629:         CREATE INDEX IF NOT EXISTS idx_route_schedule_profiles_route_direction
+  630:         ON route_schedule_profiles(route_name, direction);
+  632:         CREATE TABLE IF NOT EXISTS route_schedule_items(
+  635:             stop_name TEXT NOT NULL,
+  643:             FOREIGN KEY(profile_id) REFERENCES route_schedule_profiles(id) ON DELETE CASCADE
+  646:         CREATE INDEX IF NOT EXISTS idx_route_schedule_items_profile
+  647:         ON route_schedule_items(profile_id);
+  649:         CREATE INDEX IF NOT EXISTS idx_route_schedule_items_profile_sort
+  650:         ON route_schedule_items(profile_id, sort_order);
+  652:         CREATE UNIQUE INDEX IF NOT EXISTS idx_route_schedule_items_profile_stop
+  653:         ON route_schedule_items(profile_id, stop_name);
+  657:     seat_cols = [r["name"] for r in db.execute("PRAGMA table_info(seats)").fetchall()]
+  659:         "from_stop": "ALTER TABLE seats ADD COLUMN from_stop TEXT DEFAULT ''",
+  660:         "to_stop": "ALTER TABLE seats ADD COLUMN to_stop TEXT DEFAULT ''",
+  661:         "gender": "ALTER TABLE seats ADD COLUMN gender TEXT DEFAULT ''",
+  662:         "pair_ok": "ALTER TABLE seats ADD COLUMN pair_ok INTEGER DEFAULT 0",
+  663:         "service": "ALTER TABLE seats ADD COLUMN service INTEGER DEFAULT 0",
+  664:         "service_note": "ALTER TABLE seats ADD COLUMN service_note TEXT DEFAULT ''",
+  665:         "passenger_name": "ALTER TABLE seats ADD COLUMN passenger_name TEXT DEFAULT ''",
+  666:         "passenger_phone": "ALTER TABLE seats ADD COLUMN passenger_phone TEXT DEFAULT ''",
+  670:         if col not in seat_cols:
+  695:     row = get_db().execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+  797:     row = get_db().execute("SELECT active_trip_id FROM app_state WHERE id=1").fetchone()
+  805:     return get_db().execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+  814:             live_stop TEXT DEFAULT '',
+  826: def fetch_live_runtime_state(trip_id: int) -> dict:
+  830:         SELECT trip_id, live_stop, speed, gps_km, eta_main, eta_sub, updated_at
+  835:     ).fetchone()
+  839:             "live_stop": "",
+  848:         "live_stop": row["live_stop"] or "",
+  860:     live_stop: str = "",
+  870:         INSERT INTO live_runtime_state(trip_id, live_stop, speed, gps_km, eta_main, eta_sub, updated_at)
+  873:             live_stop=excluded.live_stop,
+  882:             (live_stop or "").strip(),
+  907: @app.route("/api/live-runtime-state")
+  908: def api_live_runtime_state():
+  921:         live_stop = (request.args.get("live_stop") or "").strip()
+  934:             live_stop=live_stop,
+  940:         return jsonify({"ok": True, "state": fetch_live_runtime_state(tid)})
+  942:     return jsonify({"ok": True, "state": fetch_live_runtime_state(tid)})
+  946: # Hat / durak yardımcıları
+  949: def parse_stops(text: str):
+  958: def get_stops(route_name: str):
+  959:     row = get_db().execute("SELECT stops FROM routes WHERE name=?", (route_name,)).fetchone()
+  962:             return json.loads(row["stops"]) or []
+  965:     return ROUTE_STOPS.get(route_name, ROUTE_STOPS.get("Denizli – İstanbul", []))
+  968: def all_route_names():
+  969:     dyn = [r["name"] for r in get_db().execute("SELECT name FROM routes ORDER BY name").fetchall()]
+  970:     return list(dict.fromkeys(list(ROUTE_STOPS.keys()) + dyn))
+  973: def validate_stop_for_trip(route_name: str, stop: str) -> bool:
+  974:     return (stop or "").strip() in set(get_stops(route_name))
+  977: def validate_stop_for_active_trip(stop: str) -> bool:
+  981:     return validate_stop_for_trip(trip["route"], stop)
+  993: def schedule_profiles_for_route(route_name: str):
+  996:         SELECT id, route_name, title, direction, is_default, note, created_at, updated_at
+  997:         FROM route_schedule_profiles
+  998:         WHERE route_name=?
+ 1001:         (route_name,),
+ 1002:     ).fetchall()
+ 1011:         SELECT id, route_name, title, direction, is_default, note, created_at, updated_at
+ 1012:         FROM route_schedule_profiles
+ 1016:     ).fetchone()
+ 1023:         SELECT id, profile_id, stop_name, planned_time, segment_km, is_timed, sort_order, note
+ 1024:         FROM route_schedule_items
+ 1029:     ).fetchall()
+ 1033: def schedule_editor_rows(route_name: str, profile_id: Optional[int] = None):
+ 1034:     stops = get_stops(route_name)
+ 1039:             items_map[r["stop_name"]] = r
+ 1042:     for idx, stop in enumerate(stops):
+ 1043:         item = items_map.get(stop, {})
+ 1045:             "stop_name": stop,
+ 1055: def schedule_default_profile_for_route(route_name: str, direction: str = "gidis"):
+ 1058:         SELECT id, route_name, title, direction, is_default, note
+ 1059:         FROM route_schedule_profiles
+ 1060:         WHERE route_name=? AND direction=?
+ 1064:         (route_name, direction),
+ 1065:     ).fetchone()
+ 1069: # Yan koltuk kuralı
+ 1072: def neighbor_rule_ok(trip_id: int, seat_no: int, gender: str, pair_ok: bool) -> Tuple[bool, str]:
+ 1073:     nb = NEIGHBORS.get(seat_no)
+ 1080:         FROM seats
+ 1081:         WHERE trip_id=? AND seat_no=?
+ 1084:     ).fetchone()
+ 1094:             return False, f"Yan koltuk {nb} '{nb_gender}' kayıtlı. İstisna olmadan farklı cins yan yana olmaz."
+ 1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+ 1230: def ai_extract_seat_list(text: str):
+ 1265:     ).fetchone()
+ 1277:     ).fetchone()
+ 1284: @app.route("/tanitim")
+ 1286:     return render_template("onboarding.html")
+ 1334: @app.route("/ai-console")
+ 1336:     return render_template("ai_console.html")
+ 1339: @app.route("/")
+ 1341:     routes = all_route_names()
+ 1342:     current_route = session.get("route", routes[0] if routes else "Denizli – İstanbul")
+ 1343:     return render_template("index.html", current_route=current_route, all_routes=routes)
+ 1346: @app.route("/set-route", methods=["POST"])
+ 1347: def set_route():
+ 1349:     route = (request.form.get("route") or payload.get("route") or "").strip()
+ 1351:     if not route:
+ 1352:         return jsonify({"ok": False, "msg": "route gerekli"}), 400
+ 1353:     if route not in set(all_route_names()):
+ 1356:     session["route"] = route
+ 1357:     return jsonify({"ok": True, "route": route})
+... devamı: 736
+
+----- android_app/app/src/main/python/app.py -----
+Satır: 4507 Boyut: 136.1 KB Hit: 895
+   16:     render_template,
+   80:     """).fetchone()
+  168:     row = db.execute("SELECT password_hash FROM admin_security WHERE id=1").fetchone()
+  232: SEAT_NUMBERS = [
+  238: SEAT_POSITIONS = {
+  255: ROUTE_STOPS = {
+  259:         "Hacıaliler", "Ortahan", "Belenyaka", "Alaşehir Otogar", "Alaşehir Stadyum",
+  266:         "Denizli otogar", "Sarayköy", "Alaşehir Otogar", "Salihli Garaj", "Turgutlu Garaj",
+  272:         "Salihli Garaj", "Alaşehir Otogar", "Denizli otogar",
+  276:         "Alaşehir Otogar", "Sarayköy", "Denizli otogar",
+  300:     "seat_add_single": {"title": "Tek koltuk ekleme", "pattern": "seat + add"},
+  301:     "seat_add_group": {"title": "Çoklu koltuk ekleme", "pattern": "seat_list + add"},
+  302:     "seat_remove_single": {"title": "Tek koltuk boşaltma", "pattern": "seat + offload"},
+  303:     "seat_remove_group": {"title": "Çoklu koltuk boşaltma", "pattern": "seat_list + offload"},
+  360: def validate_seat_no(seat_no: int) -> bool:
+  361:     return seat_no in SEAT_NUMBERS
+  381:     to_stop: Optional[str] = None,
+  390:         ).fetchall()
+  397:         ).fetchall()
+  403:         ).fetchall()
+  405:     elif to_stop:
+  407:             "SELECT id FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
+  408:             (trip_id, to_stop),
+  409:         ).fetchall()
+  450:             route TEXT,
+  465:         CREATE TABLE IF NOT EXISTS routes(
+  468:             stops TEXT
+  471:         CREATE TABLE IF NOT EXISTS seats(
+  473:             seat_no INTEGER NOT NULL,
+  474:             from_stop TEXT DEFAULT '',
+  475:             to_stop TEXT DEFAULT '',
+  485:             PRIMARY KEY(trip_id, seat_no),
+  489:         CREATE INDEX IF NOT EXISTS idx_seats_trip ON seats(trip_id);
+  490:         CREATE INDEX IF NOT EXISTS idx_seats_trip_to_stop ON seats(trip_id, to_stop);
+  491:         CREATE INDEX IF NOT EXISTS idx_seats_trip_from_stop ON seats(trip_id, from_stop);
+  492:         CREATE INDEX IF NOT EXISTS idx_seats_trip_payment ON seats(trip_id, payment);
+  497:             from_stop TEXT NOT NULL,
+  498:             to_stop TEXT NOT NULL,
+  510:         CREATE TABLE IF NOT EXISTS route_stop_coords(
+  511:             route TEXT NOT NULL,
+  512:             stop TEXT NOT NULL,
+  515:             PRIMARY KEY(route, stop)
+  518:         CREATE TABLE IF NOT EXISTS stop_logs(
+  521:             stop_name TEXT NOT NULL,
+  524:             seats_for_stop INTEGER,
+  530:         CREATE INDEX IF NOT EXISTS idx_stoplogs_trip_ts ON stop_logs(trip_id, ts);
+  542:             from_stop TEXT,
+  543:             to_stop TEXT,
+  569:             route TEXT NOT NULL,
+  570:             from_stop TEXT NOT NULL,
+  571:             to_stop TEXT NOT NULL,
+  574:             PRIMARY KEY(route, from_stop, to_stop)
+  615:         CREATE TABLE IF NOT EXISTS route_schedule_profiles(
+  617:             route_name TEXT NOT NULL,
+  626:         CREATE INDEX IF NOT EXISTS idx_route_schedule_profiles_route
+  627:         ON route_schedule_profiles(route_name);
+  629:         CREATE INDEX IF NOT EXISTS idx_route_schedule_profiles_route_direction
+  630:         ON route_schedule_profiles(route_name, direction);
+  632:         CREATE TABLE IF NOT EXISTS route_schedule_items(
+  635:             stop_name TEXT NOT NULL,
+  643:             FOREIGN KEY(profile_id) REFERENCES route_schedule_profiles(id) ON DELETE CASCADE
+  646:         CREATE INDEX IF NOT EXISTS idx_route_schedule_items_profile
+  647:         ON route_schedule_items(profile_id);
+  649:         CREATE INDEX IF NOT EXISTS idx_route_schedule_items_profile_sort
+  650:         ON route_schedule_items(profile_id, sort_order);
+  652:         CREATE UNIQUE INDEX IF NOT EXISTS idx_route_schedule_items_profile_stop
+  653:         ON route_schedule_items(profile_id, stop_name);
+  657:     seat_cols = [r["name"] for r in db.execute("PRAGMA table_info(seats)").fetchall()]
+  659:         "from_stop": "ALTER TABLE seats ADD COLUMN from_stop TEXT DEFAULT ''",
+  660:         "to_stop": "ALTER TABLE seats ADD COLUMN to_stop TEXT DEFAULT ''",
+  661:         "gender": "ALTER TABLE seats ADD COLUMN gender TEXT DEFAULT ''",
+  662:         "pair_ok": "ALTER TABLE seats ADD COLUMN pair_ok INTEGER DEFAULT 0",
+  663:         "service": "ALTER TABLE seats ADD COLUMN service INTEGER DEFAULT 0",
+  664:         "service_note": "ALTER TABLE seats ADD COLUMN service_note TEXT DEFAULT ''",
+  665:         "passenger_name": "ALTER TABLE seats ADD COLUMN passenger_name TEXT DEFAULT ''",
+  666:         "passenger_phone": "ALTER TABLE seats ADD COLUMN passenger_phone TEXT DEFAULT ''",
+  670:         if col not in seat_cols:
+  695:     row = get_db().execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+  797:     row = get_db().execute("SELECT active_trip_id FROM app_state WHERE id=1").fetchone()
+  805:     return get_db().execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+  814:             live_stop TEXT DEFAULT '',
+  826: def fetch_live_runtime_state(trip_id: int) -> dict:
+  830:         SELECT trip_id, live_stop, speed, gps_km, eta_main, eta_sub, updated_at
+  835:     ).fetchone()
+  839:             "live_stop": "",
+  848:         "live_stop": row["live_stop"] or "",
+  860:     live_stop: str = "",
+  870:         INSERT INTO live_runtime_state(trip_id, live_stop, speed, gps_km, eta_main, eta_sub, updated_at)
+  873:             live_stop=excluded.live_stop,
+  882:             (live_stop or "").strip(),
+  907: @app.route("/api/live-runtime-state")
+  908: def api_live_runtime_state():
+  921:         live_stop = (request.args.get("live_stop") or "").strip()
+  934:             live_stop=live_stop,
+  940:         return jsonify({"ok": True, "state": fetch_live_runtime_state(tid)})
+  942:     return jsonify({"ok": True, "state": fetch_live_runtime_state(tid)})
+  946: # Hat / durak yardımcıları
+  949: def parse_stops(text: str):
+  958: def get_stops(route_name: str):
+  959:     row = get_db().execute("SELECT stops FROM routes WHERE name=?", (route_name,)).fetchone()
+  962:             return json.loads(row["stops"]) or []
+  965:     return ROUTE_STOPS.get(route_name, ROUTE_STOPS.get("Denizli – İstanbul", []))
+  968: def all_route_names():
+  969:     dyn = [r["name"] for r in get_db().execute("SELECT name FROM routes ORDER BY name").fetchall()]
+  970:     return list(dict.fromkeys(list(ROUTE_STOPS.keys()) + dyn))
+  973: def validate_stop_for_trip(route_name: str, stop: str) -> bool:
+  974:     return (stop or "").strip() in set(get_stops(route_name))
+  977: def validate_stop_for_active_trip(stop: str) -> bool:
+  981:     return validate_stop_for_trip(trip["route"], stop)
+  993: def schedule_profiles_for_route(route_name: str):
+  996:         SELECT id, route_name, title, direction, is_default, note, created_at, updated_at
+  997:         FROM route_schedule_profiles
+  998:         WHERE route_name=?
+ 1001:         (route_name,),
+ 1002:     ).fetchall()
+ 1011:         SELECT id, route_name, title, direction, is_default, note, created_at, updated_at
+ 1012:         FROM route_schedule_profiles
+ 1016:     ).fetchone()
+ 1023:         SELECT id, profile_id, stop_name, planned_time, segment_km, is_timed, sort_order, note
+ 1024:         FROM route_schedule_items
+ 1029:     ).fetchall()
+ 1033: def schedule_editor_rows(route_name: str, profile_id: Optional[int] = None):
+ 1034:     stops = get_stops(route_name)
+ 1039:             items_map[r["stop_name"]] = r
+ 1042:     for idx, stop in enumerate(stops):
+ 1043:         item = items_map.get(stop, {})
+ 1045:             "stop_name": stop,
+ 1055: def schedule_default_profile_for_route(route_name: str, direction: str = "gidis"):
+ 1058:         SELECT id, route_name, title, direction, is_default, note
+ 1059:         FROM route_schedule_profiles
+ 1060:         WHERE route_name=? AND direction=?
+ 1064:         (route_name, direction),
+ 1065:     ).fetchone()
+ 1069: # Yan koltuk kuralı
+ 1072: def neighbor_rule_ok(trip_id: int, seat_no: int, gender: str, pair_ok: bool) -> Tuple[bool, str]:
+ 1073:     nb = NEIGHBORS.get(seat_no)
+ 1080:         FROM seats
+ 1081:         WHERE trip_id=? AND seat_no=?
+ 1084:     ).fetchone()
+ 1094:             return False, f"Yan koltuk {nb} '{nb_gender}' kayıtlı. İstisna olmadan farklı cins yan yana olmaz."
+ 1129: EXCLUDE_PREFIXES = ("/login", "/logout", "/health", "/api/speedlimit", "/static")
+ 1230: def ai_extract_seat_list(text: str):
+ 1265:     ).fetchone()
+ 1277:     ).fetchone()
+ 1284: @app.route("/tanitim")
+ 1286:     return render_template("onboarding.html")
+ 1334: @app.route("/ai-console")
+ 1336:     return render_template("ai_console.html")
+ 1339: @app.route("/")
+ 1341:     routes = all_route_names()
+ 1342:     current_route = session.get("route", routes[0] if routes else "Denizli – İstanbul")
+ 1343:     return render_template("index.html", current_route=current_route, all_routes=routes)
+ 1346: @app.route("/set-route", methods=["POST"])
+ 1347: def set_route():
+ 1349:     route = (request.form.get("route") or payload.get("route") or "").strip()
+ 1351:     if not route:
+ 1352:         return jsonify({"ok": False, "msg": "route gerekli"}), 400
+ 1353:     if route not in set(all_route_names()):
+ 1356:     session["route"] = route
+ 1357:     return jsonify({"ok": True, "route": route})
+... devamı: 735
+
+===== 2) TÜM PROJEDE EKRAN BAŞLIKLARI NEREDE? =====
+
+### Canlı Durak Akışı
+app.py:1489:     # Canlı Durak Akışı ekranında anlık GPS/ETA hesabı için veri
+tools/live_flow_v2_audit.py:132: print_header("3) Canlı Durak Akışı HTML kaynağı nerede?")
+tools/live_flow_v2_audit.py:161:     "Canlı Durak Akışı",
+tools/live_flow_v2_audit.py:344: print("1) Canlı Durak Akışı HTML'i templates/seats.html içinde mi, JS ile mi üretiliyor?")
+tools/muavin_live_map_source_audit_v41.py:27:     "Canlı Durak Akışı",
+tools/muavin_continue_trip_source_audit_v42.py:22:     "Canlı Durak Akışı",
+tools/muavin_continue_trip_source_audit_v42.py:95:     "Canlı Durak Akışı",
+templates/continue_trip.html:6:   <title>Canlı Durak Akışı</title>
+templates/continue_trip.html:108:       <h1 class="hero-title">Canlı Durak Akışı</h1>
+android_app/app/src/main/python/app.py:1484:     # Canlı Durak Akışı ekranında anlık GPS/ETA hesabı için veri
+android_app/app/src/main/python/templates/continue_trip.html:6:   <title>Canlı Durak Akışı</title>
+android_app/app/src/main/python/templates/continue_trip.html:108:       <h1 class="hero-title">Canlı Durak Akışı</h1>
+android_app/app/src/main/python/static/continue/css_parts/10-compact-timeline-hero.css:720: /* Canlı Durak Akışı başlığını daha kompakt yapar */
+apk_payload/templates/continue_trip.html:6:   <title>Canlı Durak Akışı</title>
+apk_payload/templates/continue_trip.html:1674: /* Canlı Durak Akışı başlığını daha kompakt yapar */
+apk_payload/templates/continue_trip.html:3315:       <h1 class="hero-title">Canlı Durak Akışı</h1>
+static/continue/css_parts/10-compact-timeline-hero.css:720: /* Canlı Durak Akışı başlığını daha kompakt yapar */
+
+### Canlı takip durumu
+tools/muavin_continue_trip_source_audit_v42.py:24:     "Canlı takip durumu",
+tools/muavin_continue_trip_source_audit_v42.py:96:     "Canlı takip durumu",
+android_app/app/src/main/python/static/continue/continue_live_diagnostics.js:124:           <b>Canlı takip durumu</b>
+static/continue/continue_live_diagnostics.js:124:           <b>Canlı takip durumu</b>
+
+### Aktif sefer var
+app.py:4164:     Aktif sefer varsa canlı sefer raporunu açar.
+tools/muavin_fix_route_picker_v14.py:59:     r'''    /\* Aktif sefer varken rota listesini de açtırma \*/\n'''
+tools/muavin_fix_route_picker_v14.py:103:        Aktif sefer varken sadece Sefer Başlat kilitli kalır.
+tools/muavin_fix_route_picker_v14.py:133:     print("  routeBtn prevent block:", txt.count("Aktif sefer varken rota listesini de açtırma"))
+tools/muavin_fix_route_picker_v14b.py:65:     r'''\n\s*/\*\s*Aktif sefer varken rota listesini de açtırma\s*\*/\s*
+tools/muavin_fix_route_picker_v14b.py:103:        Aktif sefer varken sadece Sefer Başlat kartı kilitli kalır.
+tools/muavin_fix_route_picker_v14b.py:132:     print("  Aktif sefer rota kilit yorumu:", txt.count("Aktif sefer varken rota listesini de açtırma"))
+tools/muavin_fix_route_picker_active_lock_v15.py:16: \s*Aktif sefer varken sadece Sefer Başlat kartı kilitli kalır\.\s*
+tools/muavin_fix_route_picker_active_lock_v15.py:24:        Aktif sefer varken hat değiştirilemez.
+tools/muavin_fix_route_picker_active_lock_v15.py:29:       routeBtn.setAttribute("title", "Aktif sefer varken hat değiştirilemez");
+tools/muavin_live_seats_overlay_v40.py:371:     const bad = /(koltuklar|muavin asistanı açılıyor|aktif sefer var)/i;
+tools/muavin_continue_trip_source_audit_v42.py:28:     "Aktif sefer var",
+tools/muavin_continue_trip_source_audit_v42.py:97:     "Aktif sefer var",
+templates/home.html:30:        <b>DEVAM EDEN SEFER</b><br><small>Aktif sefer varsa koltuklara git</small>
+templates/index.html:1647:   content:"Aktif sefer var";
+templates/index.html:1802:   /* Aktif sefer varsa üst rota yazısı aktif seferin rotası olsun */
+templates/index.html:1834:       <h2>Aktif sefer var</h2>
+templates/index.html:1878:        Aktif sefer varken hat değiştirilemez.
+templates/index.html:1883:       routeBtn.setAttribute("title", "Aktif sefer varken hat değiştirilemez");
+templates/route_stops.html:42:   // Aktif sefer varsa /api/stops döner (name, lat, lng, seq)
+templates/rehber.html:2497:               <div class="guide-line"><b>Devam eden sefere gir</b><span>Aktif sefer varsa Devam Eden Sefer kartından doğrudan koltuk ekranına geçebilirsin.</span></div>
+apk_payload/app.py:4060:     Aktif sefer varsa canlı sefer raporunu açar.
+backups/apk_sync_20260520_234501/app.py:4060:     Aktif sefer varsa canlı sefer raporunu açar.
+android_app/app/src/main/python/app.py:4159:     Aktif sefer varsa canlı sefer raporunu açar.
+android_app/app/src/main/python/templates/home.html:30:        <b>DEVAM EDEN SEFER</b><br><small>Aktif sefer varsa koltuklara git</small>
+android_app/app/src/main/python/templates/index.html:1553:   content:"Aktif sefer var";
+android_app/app/src/main/python/templates/index.html:1708:   /* Aktif sefer varsa üst rota yazısı aktif seferin rotası olsun */
+android_app/app/src/main/python/templates/index.html:1740:       <h2>Aktif sefer var</h2>
+android_app/app/src/main/python/templates/index.html:1784:        Aktif sefer varken hat değiştirilemez.
+android_app/app/src/main/python/templates/index.html:1789:       routeBtn.setAttribute("title", "Aktif sefer varken hat değiştirilemez");
+android_app/app/src/main/python/templates/route_stops.html:42:   // Aktif sefer varsa /api/stops döner (name, lat, lng, seq)
+android_app/app/src/main/python/templates/rehber.html:2497:               <div class="guide-line"><b>Devam eden sefere gir</b><span>Aktif sefer varsa Devam Eden Sefer kartından doğrudan koltuk ekranına geçebilirsin.</span></div>
+apk_payload/templates/home.html:30:        <b>DEVAM EDEN SEFER</b><br><small>Aktif sefer varsa koltuklara git</small>
+apk_payload/templates/index.html:1533:   content:"Aktif sefer var";
+apk_payload/templates/index.html:1688:   /* Aktif sefer varsa üst rota yazısı aktif seferin rotası olsun */
+apk_payload/templates/index.html:1720:       <h2>Aktif sefer var</h2>
+apk_payload/templates/index.html:1764:   /* Aktif sefer varken rota listesini de açtırma */
+apk_payload/templates/route_stops.html:42:   // Aktif sefer varsa /api/stops döner (name, lat, lng, seq)
+apk_payload/templates/rehber.html:2497:               <div class="guide-line"><b>Devam eden sefere gir</b><span>Aktif sefer varsa Devam Eden Sefer kartından doğrudan koltuk ekranına geçebilirsin.</span></div>
+
+### Devam eden sefere git
+tools/muavin_live_map_source_audit_v41.py:34:     "Devam eden sefere git",
+tools/muavin_continue_trip_source_audit_v42.py:29:     "Devam eden sefere git",
+tools/muavin_continue_trip_source_audit_v42.py:98:     "Devam eden sefere git",
+templates/index.html:1837:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+android_app/app/src/main/python/templates/index.html:1743:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+apk_payload/templates/index.html:1723:         <a class="trip-guard-go" id="tripGuardGo" href="#">Devam eden sefere git</a>
+
+### Ortahan
+app.py:259:         "Hacıaliler", "Ortahan", "Belenyaka", "Alaşehir Otogar", "Alaşehir Stadyum",
+tools/muavin_live_seats_overlay_v40.py:370:     const words = /(canlı|sıradaki|bekliyor|durak|otogar|ortahan|belenyaka|alaşehir|inecek|bagaj|kalan|plan\/eta|eta)/i;
+tools/muavin_live_map_source_audit_v41.py:30:     "Ortahan",
+tools/muavin_live_map_source_audit_v41.py:89:         "Canlı", "Durak", "Sıradaki", "Ortahan", "Belenyaka",
+tools/muavin_continue_trip_source_audit_v42.py:25:     "Ortahan",
+tools/muavin_continue_trip_source_audit_v42.py:99:     "Ortahan",
+apk_payload/app.py:259:         "Hacıaliler", "Ortahan", "Belenyaka", "Alaşehir Otogar", "Alaşehir Stadyum",
+backups/apk_sync_20260520_234501/app.py:259:         "Hacıaliler", "Ortahan", "Belenyaka", "Alaşehir Otogar", "Alaşehir Stadyum",
+android_app/app/src/main/python/app.py:259:         "Hacıaliler", "Ortahan", "Belenyaka", "Alaşehir Otogar", "Alaşehir Stadyum",
+
+### Belenyaka
+app.py:259:         "Hacıaliler", "Ortahan", "Belenyaka", "Alaşehir Otogar", "Alaşehir Stadyum",
+tools/muavin_live_seats_overlay_v40.py:370:     const words = /(canlı|sıradaki|bekliyor|durak|otogar|ortahan|belenyaka|alaşehir|inecek|bagaj|kalan|plan\/eta|eta)/i;
+tools/muavin_live_map_source_audit_v41.py:31:     "Belenyaka",
+tools/muavin_live_map_source_audit_v41.py:32:     "Belenyaka",
+tools/muavin_live_map_source_audit_v41.py:89:         "Canlı", "Durak", "Sıradaki", "Ortahan", "Belenyaka",
+tools/muavin_continue_trip_source_audit_v42.py:26:     "Belenyaka",
+tools/muavin_continue_trip_source_audit_v42.py:100:     "Belenyaka",
+apk_payload/app.py:259:         "Hacıaliler", "Ortahan", "Belenyaka", "Alaşehir Otogar", "Alaşehir Stadyum",
+backups/apk_sync_20260520_234501/app.py:259:         "Hacıaliler", "Ortahan", "Belenyaka", "Alaşehir Otogar", "Alaşehir Stadyum",
+android_app/app/src/main/python/app.py:259:         "Hacıaliler", "Ortahan", "Belenyaka", "Alaşehir Otogar", "Alaşehir Stadyum",
+
+===== 3) CANLI TAKİP SAYFASI HANGİ CSS/JS DOSYALARINI ÇAĞIRIYOR? =====
+
+----- templates/continue_trip.html -----
+   84:   <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip.css') }}?v=css-parts-1">
+  322:   <script>
+  439: <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+  482:   <script id="continue-boot-data">
+  503:   <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=core-split-1"></script>
+  504:   <script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
+  505:   <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
+  506:   <script src="{{ url_for('static', filename='continue/continue_live_diagnostics.js') }}?v=live-diag-1"></script>
+  507:   <script src="{{ url_for('static', filename='continue/continue_trip_ui.js') }}?v=js-safe-split-1"></script>
+
+----- android_app/app/src/main/python/templates/continue_trip.html -----
+   84:   <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip.css') }}?v=css-parts-1">
+  322:   <script>
+  439: <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+  482:   <script id="continue-boot-data">
+  503:   <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=core-split-1"></script>
+  504:   <script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
+  505:   <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
+  506:   <script src="{{ url_for('static', filename='continue/continue_live_diagnostics.js') }}?v=live-diag-1"></script>
+  507:   <script src="{{ url_for('static', filename='continue/continue_trip_ui.js') }}?v=js-safe-split-1"></script>
+
+===== 4) KOLTUK PLANI PARÇASI =====
+
+----- templates/seats_parts/deck.html -----
+Satır: 29 Boyut: 1.4 KB Hit: 5
+    2:           <div class="deck-wrap">
+    3:             <div class="deck" id="deck">
+    6:               {% for n, pos in seat_positions.items() %}
+    8:                   <div class="door">KAPI</div>
+   12:                   <div class="seat" id="seat-{{ n }}" data-seat="{{ n }}" role="button" aria-label="Koltuk {{ n }}">
+
+----- android_app/app/src/main/python/templates/seats_parts/deck.html -----
+Satır: 29 Boyut: 1.4 KB Hit: 5
+    2:           <div class="deck-wrap">
+    3:             <div class="deck" id="deck">
+    6:               {% for n, pos in seat_positions.items() %}
+    8:                   <div class="door">KAPI</div>
+   12:                   <div class="seat" id="seat-{{ n }}" data-seat="{{ n }}" role="button" aria-label="Koltuk {{ n }}">
+
+----- static/seats/seats.js -----
+Satır: 2959 Boyut: 84.3 KB Hit: 249
+    1: const BOOT = window.SEATS_BOOT || {};
+   10: const seatPositions = BOOT.seatPositions || {};
+  130:       (window.SEATS_BOOT && window.SEATS_BOOT.tripId) ||
+  192:   let currentSeat = null;
+  202:   let lastApproach = { stop:null, seats:[] };
+  214:     lastLimitFetchTs: 0,
+  263:   async function safeJsonFetch(url, opt){
+  264:     const res = await fetch(url, opt || {});
+  453: async function loadRouteScheduleFromApi(){
+  455:     const url = `/api/route-schedule?route=${encodeURIComponent(ROUTE_NAME)}&direction=gidis&_=${Date.now()}`;
+  456:     const j = await safeJsonFetch(url);
+  463:     const apiSchedule = j.items
+  472:     if(apiSchedule.length){
+  473:       ROUTE_SCHEDULES[ROUTE_NAME] = apiSchedule;
+  474:       console.log("Saat profili API'den yüklendi:", apiSchedule);
+  480:     console.warn("Saat profili API hatası:", err);
+  554:     return seatsForStop(stopName).length > 0;
+  563:   async function fetchStops(){
+  564:     const j = await safeJsonFetch("/api/stops");
+  570:       const c = await safeJsonFetch("/api/coords");
+  582:     if(!cachedStops) await fetchStops();
+  611:   function computeSeatCountsByStop(){
+  681:       // Yeni sefer açılmış ve koltuk yoksa eski durak akışı özetini taşıma.
+  729:     Object.keys(assigned || {}).forEach(seatNo => {
+  730:       if(!assigned[seatNo]) return;
+  731:       if(norm(boardsMap[String(seatNo)] || "") === key){
+  750:       total += seatsForStop(stop).length;
+  894:   function seatsForStop(stop){
+  896:     for(const [seat, st] of Object.entries(stopsMap || {})){
+  897:       if(norm(st) === norm(stop)) out.push(Number(seat));
+  910:     const seatCounts = computeSeatCountsByStop();
+  923:       const seatTxt = seatCounts[base] ? ` (${seatCounts[base]} koltuk)` : "";
+  927:       opt.textContent = base + dot + seatTxt + standTxt + parcelTxt;
+  931:   function updateStopSeatBadges(){
+  933:     $$(".seat").forEach(el => el.classList.remove("has-stop"));
+  936:     seatsForStop(stop).forEach(n => {
+  937:       const el = $("#seat-" + n);
+  942:   function setSeatVisual(seatNo){
+  943:     const key = String(seatNo);
+  944:     const el = $("#seat-" + seatNo);
+  957:     const label = $("#label-" + seatNo);
+  972:     const totalSeats = Object.keys(seatPositions || {}).length;
+  974:     const empty = totalSeats - filled;
+  975:     const occ = totalSeats ? Math.round((filled / totalSeats) * 100) : 0;
+  979:     setText("#voiceSeatFilled", String(filled));
+  980:     setText("#voiceSeatEmpty", String(empty));
+ 1097:   const nextWarnStop = liveDangerOn? computeNextStopName(live || selected || "", "nextWithSeats"): "";
+ 1098:   const greenStop = liveDangerOn && nextWarnStop? computeNextStopName(nextWarnStop, "nextWithSeats"): "";
+ 1102:   const seatCounts = computeSeatCountsByStop();
+ 1116:     const seatCt = seatCounts[stop] || 0;
+ 1149:     }else if(seatCt || standingCt || parcelCt){
+ 1150:       metaLine2 = `${seatCt}K ${standingCt}A ${parcelCt}E`;
+ 1220:     const next = computeNextStopName(live || selected || "", "nextWithSeats");
+ 1234:       const seatCt = selected ? seatsForStop(selected).length : 0;
+ 1237:       const totalOps = seatCt + standingCt + parcelCt;
+ 1247:   function computeNextStopName(currentName, mode="nextWithSeats"){
+ 1259:       if(mode === "nextWithSeats"){
+ 1281:       updateStopSeatBadges();
+ 1297:     updateStopSeatBadges();
+ 1305:       if(window.SeatsSpeak){
+ 1306:         window.SeatsSpeak(msg);
+ 1342:   function advanceToNextStop({ mode="nextWithSeats", silent=false, ignoreToggle=false } = {}){
+ 1377:   function openModal(backdropSel, modalSel){
+ 1379:     show($(modalSel));
+ 1382:   function closeModal(backdropSel, modalSel){
+ 1384:     hide($(modalSel));
+ 1387:   function openSeat(seatNo){
+ 1388:     currentSeat = seatNo;
+ 1389:     $$(".seat.selected").forEach(x => x.classList.remove("selected"));
+ 1391:     const seatEl = $("#seat-" + seatNo);
+ 1392:     if(seatEl) seatEl.classList.add("selected");
+ 1394:     setText("#seatTitle", "Koltuk " + seatNo);
+ 1395:     setValue("#pickup", boardsMap[String(seatNo)] || getSelectedStopName() || "");
+ 1396:     setValue("#dropoff", stopsMap[String(seatNo)] || "");
+ 1406:     const prevGender = genders[String(seatNo)] || "";
+ 1412:     if($("#service")) $("#service").checked = !!serviceMap[String(seatNo)];
+ 1413:     setValue("#service_note", serviceNotes[String(seatNo)] || "");
+ 1416:     openModal("#seatBackdrop", "#seatModal");
+ 1419:   function closeSeat(){
+ 1420:     currentSeat = null;
+ 1421:     closeModal("#seatBackdrop", "#seatModal");
+ 1422:     $$(".seat.selected").forEach(x => x.classList.remove("selected"));
+ 1425:   async function saveSeat(){
+ 1426:     if(!currentSeat) return;
+ 1428:     const wasAlreadyAssigned = !!assigned[String(currentSeat)];
+ 1441:       const j = await safeJsonFetch("/api/seat", {
+ 1445:           seat_no: currentSeat,
+ 1460:       assigned[String(currentSeat)] = true;
+ 1461:       stopsMap[String(currentSeat)] = stop;
+ 1462:       genders[String(currentSeat)] = gender;
+ 1463:       serviceMap[String(currentSeat)] = !!service;
+ 1464:       serviceNotes[String(currentSeat)] = service_note;
+ 1465:       boardsMap[String(currentSeat)] = from;
+ 1472:       setSeatVisual(currentSeat);
+ 1473:       closeSeat();
+ 1476:       updateStopSeatBadges();
+ 1480:       toast("Koltuk kaydedildi");
+ 1486:   function clearSeatUI(seatNo){
+ 1488:       if(typeof window.clearBiletsizSeatBadges === "function"){
+ 1489:         window.clearBiletsizSeatBadges([seatNo]);
+ 1493:     delete assigned[String(seatNo)];
+ 1494:     delete stopsMap[String(seatNo)];
+ 1495:     delete genders[String(seatNo)];
+ 1496:     delete serviceMap[String(seatNo)];
+ 1497:     delete serviceNotes[String(seatNo)];
+ 1498:     delete boardsMap[String(seatNo)];
+ 1501:     setSeatVisual(seatNo);
+ 1503:     const el = $("#seat-" + seatNo);
+ 1513:   async function offloadSeat(){
+ 1514:     if(!currentSeat) return;
+ 1516:     const offStop = stopsMap[String(currentSeat)] || getSelectedStopName() || "";
+ 1519:       const j = await safeJsonFetch("/api/seat?seat_no=" + currentSeat, {
+ 1530:       await clearBagsForSeat(currentSeat);
+ 1531:       clearSeatUI(currentSeat);
+ 1532:       closeSeat();
+ 1535:       updateStopSeatBadges();
+ 1539:       toast("Koltuk boşaltıldı");
+ 1552:   function toggleSeatPick(el){
+ 1573:       toast("Çoklu seçim açık. Koltukları seç.");
+ 1585:       openModal("#bulkBackdrop", "#bulkModal");
+ 1590:     closeModal("#bulkBackdrop", "#bulkModal");
+ 1605:     const chosen = [...multiSelected].map(el => Number(el.dataset.seat));
+ 1610:         toast("Önce koltukları seç.");
+ 1616:       $$(".seat").forEach(el => {
+ 1617:         const no = el.dataset.seat;
+ 1622:         toast("Boş koltuk yok");
+ 1633:         const j = await safeJsonFetch("/api/seats/bulk", {
+ 1637:             seats: targets,
+ 1649:           await safeJsonFetch("/api/seat", {
+ 1653:               seat_no:n,
+ 1674:         setSeatVisual(n);
+ 1684:       updateStopSeatBadges();
+ 1688:       toast(`${targets.length} koltuk eklendi`);
+ 1697:       const el = $("#seat-" + n);
+ 1703:     const arr = list || [...$$(".seat.blink-yellow")].map(el => Number(el.dataset.seat));
+ 1705:       const el = $("#seat-" + n);
+ 1716: function renderApproachPanel(stop, seats){
+ 1717:     lastApproach = { stop, seats:[...seats] };
+ 1723:     setText("#approachInfo", `${seats.length} koltuk · ${standingMap[stop] || 0} ayakta · ${parcelMap[stop] || 0} emanet`);
+ 1729:     if(!seats.length && !(standingMap[stop] || 0) && !(parcelMap[stop] || 0)){
+ 1733:     seats.forEach(n => {
+ 1736:       row.innerHTML = `<b>Koltuk ${n}</b><span>${boardsMap[String(n)] || "—"} → ${stopsMap[String(n)] || "—"}</span>`;
+ 1754:     openModal("#approachBackdrop", "#approachModal");
+ 1760:       if(window.SeatsSpeak){
+ 1761:         window.SeatsSpeak(msg);
+ 1769:   async function bulkOffload(seatNums){
+ 1770:     if(!Array.isArray(seatNums) || !seatNums.length) return;
+ 1773:     for(const n of seatNums){
+ 1784:         const j = await safeJsonFetch("/api/seats/offload", {
+ 1787:           body:JSON.stringify({ seats: seatNums })
+ 1793:         for(const n of seatNums){
+ 1794:           const j = await safeJsonFetch("/api/seat?seat_no=" + n, {
+ 1798:           if(!j.ok) throw new Error(j.msg || ("Koltuk " + n + " boşaltılamadı"));
+ 1806:       for(const n of seatNums){
+ 1807:         await clearBagsForSeat(n);
+ 1808:         clearSeatUI(n);
+ 1811:       stopBlink(seatNums);
+ 1814:       updateStopSeatBadges();
+ 1818:       lastApproach = { stop:null, seats:[] };
+ 1819:       toast(`${seatNums.length} koltuk boşaltıldı`);
+ 1832:     const seats = seatsForStop(stop);
+ 1833:     if(!seats.length && !(computeStandingCountsByStop()[stop] || 0) && !(computeParcelCountsByStop()[stop] || 0)){
+ 1835:       advanceToNextStop({ mode:"nextWithSeats" });
+ 1839:     renderApproachPanel(stop, seats);
+ 1840:     startBlink(seats);
+ 1850:     const seats = seatsForStop(stop);
+ 1851:     if(!seats.length && !(computeStandingCountsByStop()[stop] || 0)){
+ 1858:           count: seats.length + Number(computeStandingCountsByStop()[stop] || 0)
+ 1864:       offCount: seats.length + Number(computeStandingCountsByStop()[stop] || 0),
+ 1869:     if(seats.length) await bulkOffload(seats);
+ 1876:     updateStopSeatBadges();
+ 1877:     advanceToNextStop({ mode:"nextWithSeats", ignoreToggle:true });
+ 1892:     if(!cachedStops) await fetchStops();
+ 1922:           const seats = seatsForStop(stopName);
+ 1923:           renderApproachPanel(stopName, seats);
+ 1924:           startBlink(seats);
+ 1954:       const j = await safeJsonFetch("/api/coords", {
+ 1962:       await fetchStops();
+ 2184:     const seatCounts = computeSeatCountsByStop();
+ 2188:     const selectedSeatCount = stop ? (seatCounts[stop] || 0) : 0;
+... devamı: 69
+
+----- android_app/app/src/main/python/static/seats/seats.js -----
+Satır: 2959 Boyut: 84.3 KB Hit: 249
+    1: const BOOT = window.SEATS_BOOT || {};
+   10: const seatPositions = BOOT.seatPositions || {};
+  130:       (window.SEATS_BOOT && window.SEATS_BOOT.tripId) ||
+  192:   let currentSeat = null;
+  202:   let lastApproach = { stop:null, seats:[] };
+  214:     lastLimitFetchTs: 0,
+  263:   async function safeJsonFetch(url, opt){
+  264:     const res = await fetch(url, opt || {});
+  453: async function loadRouteScheduleFromApi(){
+  455:     const url = `/api/route-schedule?route=${encodeURIComponent(ROUTE_NAME)}&direction=gidis&_=${Date.now()}`;
+  456:     const j = await safeJsonFetch(url);
+  463:     const apiSchedule = j.items
+  472:     if(apiSchedule.length){
+  473:       ROUTE_SCHEDULES[ROUTE_NAME] = apiSchedule;
+  474:       console.log("Saat profili API'den yüklendi:", apiSchedule);
+  480:     console.warn("Saat profili API hatası:", err);
+  554:     return seatsForStop(stopName).length > 0;
+  563:   async function fetchStops(){
+  564:     const j = await safeJsonFetch("/api/stops");
+  570:       const c = await safeJsonFetch("/api/coords");
+  582:     if(!cachedStops) await fetchStops();
+  611:   function computeSeatCountsByStop(){
+  681:       // Yeni sefer açılmış ve koltuk yoksa eski durak akışı özetini taşıma.
+  729:     Object.keys(assigned || {}).forEach(seatNo => {
+  730:       if(!assigned[seatNo]) return;
+  731:       if(norm(boardsMap[String(seatNo)] || "") === key){
+  750:       total += seatsForStop(stop).length;
+  894:   function seatsForStop(stop){
+  896:     for(const [seat, st] of Object.entries(stopsMap || {})){
+  897:       if(norm(st) === norm(stop)) out.push(Number(seat));
+  910:     const seatCounts = computeSeatCountsByStop();
+  923:       const seatTxt = seatCounts[base] ? ` (${seatCounts[base]} koltuk)` : "";
+  927:       opt.textContent = base + dot + seatTxt + standTxt + parcelTxt;
+  931:   function updateStopSeatBadges(){
+  933:     $$(".seat").forEach(el => el.classList.remove("has-stop"));
+  936:     seatsForStop(stop).forEach(n => {
+  937:       const el = $("#seat-" + n);
+  942:   function setSeatVisual(seatNo){
+  943:     const key = String(seatNo);
+  944:     const el = $("#seat-" + seatNo);
+  957:     const label = $("#label-" + seatNo);
+  972:     const totalSeats = Object.keys(seatPositions || {}).length;
+  974:     const empty = totalSeats - filled;
+  975:     const occ = totalSeats ? Math.round((filled / totalSeats) * 100) : 0;
+  979:     setText("#voiceSeatFilled", String(filled));
+  980:     setText("#voiceSeatEmpty", String(empty));
+ 1097:   const nextWarnStop = liveDangerOn? computeNextStopName(live || selected || "", "nextWithSeats"): "";
+ 1098:   const greenStop = liveDangerOn && nextWarnStop? computeNextStopName(nextWarnStop, "nextWithSeats"): "";
+ 1102:   const seatCounts = computeSeatCountsByStop();
+ 1116:     const seatCt = seatCounts[stop] || 0;
+ 1149:     }else if(seatCt || standingCt || parcelCt){
+ 1150:       metaLine2 = `${seatCt}K ${standingCt}A ${parcelCt}E`;
+ 1220:     const next = computeNextStopName(live || selected || "", "nextWithSeats");
+ 1234:       const seatCt = selected ? seatsForStop(selected).length : 0;
+ 1237:       const totalOps = seatCt + standingCt + parcelCt;
+ 1247:   function computeNextStopName(currentName, mode="nextWithSeats"){
+ 1259:       if(mode === "nextWithSeats"){
+ 1281:       updateStopSeatBadges();
+ 1297:     updateStopSeatBadges();
+ 1305:       if(window.SeatsSpeak){
+ 1306:         window.SeatsSpeak(msg);
+ 1342:   function advanceToNextStop({ mode="nextWithSeats", silent=false, ignoreToggle=false } = {}){
+ 1377:   function openModal(backdropSel, modalSel){
+ 1379:     show($(modalSel));
+ 1382:   function closeModal(backdropSel, modalSel){
+ 1384:     hide($(modalSel));
+ 1387:   function openSeat(seatNo){
+ 1388:     currentSeat = seatNo;
+ 1389:     $$(".seat.selected").forEach(x => x.classList.remove("selected"));
+ 1391:     const seatEl = $("#seat-" + seatNo);
+ 1392:     if(seatEl) seatEl.classList.add("selected");
+ 1394:     setText("#seatTitle", "Koltuk " + seatNo);
+ 1395:     setValue("#pickup", boardsMap[String(seatNo)] || getSelectedStopName() || "");
+ 1396:     setValue("#dropoff", stopsMap[String(seatNo)] || "");
+ 1406:     const prevGender = genders[String(seatNo)] || "";
+ 1412:     if($("#service")) $("#service").checked = !!serviceMap[String(seatNo)];
+ 1413:     setValue("#service_note", serviceNotes[String(seatNo)] || "");
+ 1416:     openModal("#seatBackdrop", "#seatModal");
+ 1419:   function closeSeat(){
+ 1420:     currentSeat = null;
+ 1421:     closeModal("#seatBackdrop", "#seatModal");
+ 1422:     $$(".seat.selected").forEach(x => x.classList.remove("selected"));
+ 1425:   async function saveSeat(){
+ 1426:     if(!currentSeat) return;
+ 1428:     const wasAlreadyAssigned = !!assigned[String(currentSeat)];
+ 1441:       const j = await safeJsonFetch("/api/seat", {
+ 1445:           seat_no: currentSeat,
+ 1460:       assigned[String(currentSeat)] = true;
+ 1461:       stopsMap[String(currentSeat)] = stop;
+ 1462:       genders[String(currentSeat)] = gender;
+ 1463:       serviceMap[String(currentSeat)] = !!service;
+ 1464:       serviceNotes[String(currentSeat)] = service_note;
+ 1465:       boardsMap[String(currentSeat)] = from;
+ 1472:       setSeatVisual(currentSeat);
+ 1473:       closeSeat();
+ 1476:       updateStopSeatBadges();
+ 1480:       toast("Koltuk kaydedildi");
+ 1486:   function clearSeatUI(seatNo){
+ 1488:       if(typeof window.clearBiletsizSeatBadges === "function"){
+ 1489:         window.clearBiletsizSeatBadges([seatNo]);
+ 1493:     delete assigned[String(seatNo)];
+ 1494:     delete stopsMap[String(seatNo)];
+ 1495:     delete genders[String(seatNo)];
+ 1496:     delete serviceMap[String(seatNo)];
+ 1497:     delete serviceNotes[String(seatNo)];
+ 1498:     delete boardsMap[String(seatNo)];
+ 1501:     setSeatVisual(seatNo);
+ 1503:     const el = $("#seat-" + seatNo);
+ 1513:   async function offloadSeat(){
+ 1514:     if(!currentSeat) return;
+ 1516:     const offStop = stopsMap[String(currentSeat)] || getSelectedStopName() || "";
+ 1519:       const j = await safeJsonFetch("/api/seat?seat_no=" + currentSeat, {
+ 1530:       await clearBagsForSeat(currentSeat);
+ 1531:       clearSeatUI(currentSeat);
+ 1532:       closeSeat();
+ 1535:       updateStopSeatBadges();
+ 1539:       toast("Koltuk boşaltıldı");
+ 1552:   function toggleSeatPick(el){
+ 1573:       toast("Çoklu seçim açık. Koltukları seç.");
+ 1585:       openModal("#bulkBackdrop", "#bulkModal");
+ 1590:     closeModal("#bulkBackdrop", "#bulkModal");
+ 1605:     const chosen = [...multiSelected].map(el => Number(el.dataset.seat));
+ 1610:         toast("Önce koltukları seç.");
+ 1616:       $$(".seat").forEach(el => {
+ 1617:         const no = el.dataset.seat;
+ 1622:         toast("Boş koltuk yok");
+ 1633:         const j = await safeJsonFetch("/api/seats/bulk", {
+ 1637:             seats: targets,
+ 1649:           await safeJsonFetch("/api/seat", {
+ 1653:               seat_no:n,
+ 1674:         setSeatVisual(n);
+ 1684:       updateStopSeatBadges();
+ 1688:       toast(`${targets.length} koltuk eklendi`);
+ 1697:       const el = $("#seat-" + n);
+ 1703:     const arr = list || [...$$(".seat.blink-yellow")].map(el => Number(el.dataset.seat));
+ 1705:       const el = $("#seat-" + n);
+ 1716: function renderApproachPanel(stop, seats){
+ 1717:     lastApproach = { stop, seats:[...seats] };
+ 1723:     setText("#approachInfo", `${seats.length} koltuk · ${standingMap[stop] || 0} ayakta · ${parcelMap[stop] || 0} emanet`);
+ 1729:     if(!seats.length && !(standingMap[stop] || 0) && !(parcelMap[stop] || 0)){
+ 1733:     seats.forEach(n => {
+ 1736:       row.innerHTML = `<b>Koltuk ${n}</b><span>${boardsMap[String(n)] || "—"} → ${stopsMap[String(n)] || "—"}</span>`;
+ 1754:     openModal("#approachBackdrop", "#approachModal");
+ 1760:       if(window.SeatsSpeak){
+ 1761:         window.SeatsSpeak(msg);
+ 1769:   async function bulkOffload(seatNums){
+ 1770:     if(!Array.isArray(seatNums) || !seatNums.length) return;
+ 1773:     for(const n of seatNums){
+ 1784:         const j = await safeJsonFetch("/api/seats/offload", {
+ 1787:           body:JSON.stringify({ seats: seatNums })
+ 1793:         for(const n of seatNums){
+ 1794:           const j = await safeJsonFetch("/api/seat?seat_no=" + n, {
+ 1798:           if(!j.ok) throw new Error(j.msg || ("Koltuk " + n + " boşaltılamadı"));
+ 1806:       for(const n of seatNums){
+ 1807:         await clearBagsForSeat(n);
+ 1808:         clearSeatUI(n);
+ 1811:       stopBlink(seatNums);
+ 1814:       updateStopSeatBadges();
+ 1818:       lastApproach = { stop:null, seats:[] };
+ 1819:       toast(`${seatNums.length} koltuk boşaltıldı`);
+ 1832:     const seats = seatsForStop(stop);
+ 1833:     if(!seats.length && !(computeStandingCountsByStop()[stop] || 0) && !(computeParcelCountsByStop()[stop] || 0)){
+ 1835:       advanceToNextStop({ mode:"nextWithSeats" });
+ 1839:     renderApproachPanel(stop, seats);
+ 1840:     startBlink(seats);
+ 1850:     const seats = seatsForStop(stop);
+ 1851:     if(!seats.length && !(computeStandingCountsByStop()[stop] || 0)){
+ 1858:           count: seats.length + Number(computeStandingCountsByStop()[stop] || 0)
+ 1864:       offCount: seats.length + Number(computeStandingCountsByStop()[stop] || 0),
+ 1869:     if(seats.length) await bulkOffload(seats);
+ 1876:     updateStopSeatBadges();
+ 1877:     advanceToNextStop({ mode:"nextWithSeats", ignoreToggle:true });
+ 1892:     if(!cachedStops) await fetchStops();
+ 1922:           const seats = seatsForStop(stopName);
+ 1923:           renderApproachPanel(stopName, seats);
+ 1924:           startBlink(seats);
+ 1954:       const j = await safeJsonFetch("/api/coords", {
+ 1962:       await fetchStops();
+ 2184:     const seatCounts = computeSeatCountsByStop();
+ 2188:     const selectedSeatCount = stop ? (seatCounts[stop] || 0) : 0;
+... devamı: 69
+
+===== 5) V40 / ÖNCEKİ KOLTUK PANELİ KALINTISI VAR MI? =====
+live-seat => ['android_app/app/src/main/python/app.py', 'android_app/app/src/main/python/static/continue/continue_trip_core.js', 'apk_payload/app.py', 'apk_payload/templates/continue_trip.html', 'app.py', 'backups/apk_sync_20260520_234501/app.py', 'static/continue/continue_trip_core.js', 'tools/muavin_continue_trip_source_audit_v42.py', 'tools/muavin_live_seats_overlay_v40.py', 'tools/muavin_rollback_live_seats_overlay_v40.py']
+koltuklar => ['android_app/app/src/main/python/modules/ai_panel.py', 'android_app/app/src/main/python/modules/seats_panel.py', 'android_app/app/src/main/python/static/app.js', 'android_app/app/src/main/python/static/continue/continue_trip_core.js', 'android_app/app/src/main/python/static/seats/bags.js', 'android_app/app/src/main/python/static/seats/patches/right-seat-column-spacing-fix.css', 'android_app/app/src/main/python/static/seats/patches/seat-layout-fab-pack.css', 'android_app/app/src/main/python/static/seats/seats-final.css', 'android_app/app/src/main/python/static/seats/seats.css', 'android_app/app/src/main/python/static/seats/seats.js', 'android_app/app/src/main/python/templates/ai_console.html', 'android_app/app/src/main/python/templates/continue_trip.html', 'android_app/app/src/main/python/templates/home.html', 'android_app/app/src/main/python/templates/passenger_control.html', 'android_app/app/src/main/python/templates/seats_parts/modals.html', 'apk_payload/modules/ai_panel.py', 'apk_payload/modules/seats_panel.py', 'apk_payload/static/app.js', 'apk_payload/static/seats/bags.js', 'apk_payload/static/seats/patches/right-seat-column-spacing-fix.css', 'apk_payload/static/seats/patches/seat-layout-fab-pack.css', 'apk_payload/static/seats/seats-final.css', 'apk_payload/static/seats/seats.css', 'apk_payload/static/seats/seats.js', 'apk_payload/templates/ai_console.html', 'apk_payload/templates/continue_trip.html', 'apk_payload/templates/home.html', 'apk_payload/templates/passenger_control.html', 'apk_payload/templates/seats_parts/modals.html', 'backups/apk_sync_20260520_234501/seats_panel.py', 'modules/ai_panel.py', 'modules/seats_panel.py', 'static/app.js', 'static/continue/continue_trip_core.js', 'static/seats/bags.js', 'static/seats/patches/right-seat-column-spacing-fix.css', 'static/seats/patches/seat-layout-fab-pack.css', 'static/seats/seats-final.css', 'static/seats/seats.css', 'static/seats/seats.js']
+Koltuklar => ['android_app/app/src/main/python/modules/ai_panel.py', 'android_app/app/src/main/python/static/continue/continue_trip_core.js', 'android_app/app/src/main/python/static/seats/seats.js', 'android_app/app/src/main/python/static/seats/voice-commands.js', 'android_app/app/src/main/python/templates/ai_console.html', 'android_app/app/src/main/python/templates/consignments.html', 'android_app/app/src/main/python/templates/hesap.html', 'android_app/app/src/main/python/templates/passenger_control.html', 'apk_payload/modules/ai_panel.py', 'apk_payload/static/seats/seats.js', 'apk_payload/static/seats/voice-commands.js', 'apk_payload/templates/ai_console.html', 'apk_payload/templates/consignments.html', 'apk_payload/templates/continue_trip.html', 'apk_payload/templates/hesap.html', 'apk_payload/templates/passenger_control.html', 'modules/ai_panel.py', 'static/continue/continue_trip_core.js', 'static/seats/patches/unified-seat-deck-report-style.css', 'static/seats/seats.js', 'static/seats/voice-commands.js', 'templates/ai_console.html', 'templates/consignments.html', 'templates/hesap.html', 'templates/passenger_control.html', 'tools/muavin_continue_trip_source_audit_v42.py', 'tools/muavin_live_seats_overlay_v40.py']
+seat-panel => ['tools/muavin_continue_trip_source_audit_v42.py']
+live-map-seat => ['tools/muavin_continue_trip_source_audit_v42.py']
+continue-seat => ['tools/muavin_continue_trip_source_audit_v42.py']
+
+✅ V42 rapor bitti. Bu rapora göre doğru dosyaya dokunacağız.

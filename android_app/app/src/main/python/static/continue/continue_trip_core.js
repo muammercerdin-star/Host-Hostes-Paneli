@@ -2110,3 +2110,107 @@
 /* ===== END SCRIPT BLOCK: continue-live-eta-engine ===== */
 
 
+/* ===== CONTINUE_SEAT_MAP_MINIMAL_V44_START ===== */
+(function(){
+  const btn = document.getElementById("continueSeatMapBtn");
+  if(!btn) return;
+
+  function esc(v){
+    return String(v == null ? "" : v)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function norm(v){
+    return String(v || "")
+      .toLowerCase()
+      .replace(/[–\-_\/\\\.,()\[\]]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function currentStop(){
+    const el = document.getElementById("liveCurrentStopName");
+    return (el && el.textContent ? el.textContent : "").trim();
+  }
+
+  function closeSeatMap(){
+    document.getElementById("continueSeatMapFullscreen")?.remove();
+    document.body.style.overflow = "";
+  }
+
+  function seatCard(seat){
+    const seatNo = seat.seat_no || seat.no || seat.number || "";
+    const fromStop = seat.from_stop || "";
+    const toStop = seat.to_stop || seat.stop || "";
+    const occupied = !!(seat.occupied || seat.full || toStop || fromStop || seat.passenger_name);
+    const cls = occupied ? "occupied" : "empty";
+    const hi = toStop && currentStop() && norm(toStop) === norm(currentStop()) ? "highlight" : "";
+    const label = occupied ? (toStop || fromStop || "Dolu") : "Boş";
+
+    return `
+      <div class="csm-seat ${cls} ${hi}">
+        <b>${esc(seatNo)}</b>
+        <small>${esc(label)}</small>
+      </div>
+    `;
+  }
+
+  function renderSheet(data){
+    closeSeatMap();
+
+    const seats = Array.isArray(data?.seats) ? data.seats : [];
+
+    const host = document.createElement("div");
+    host.id = "continueSeatMapFullscreen";
+    host.innerHTML = `
+      <div class="csm-backdrop"></div>
+      <div class="csm-panel">
+        <button class="csm-close" type="button" aria-label="Kapat">×</button>
+        <div class="csm-onlywrap">
+          <div class="csm-deck">
+            ${seats.map(seatCard).join("") || '<div class="csm-seat empty"><b>—</b><small>Koltuk verisi yok</small></div>'}
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(host);
+    document.body.style.overflow = "hidden";
+
+    host.querySelector(".csm-close")?.addEventListener("click", closeSeatMap);
+    host.querySelector(".csm-backdrop")?.addEventListener("click", closeSeatMap);
+  }
+
+  async function openSeatMap(e){
+    e.preventDefault();
+
+    try{
+      const stop = currentStop();
+      const res = await fetch(`/api/live-seat-map?stop=${encodeURIComponent(stop)}&_=${Date.now()}`, {
+        method: "GET",
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+      const j = await res.json();
+      if(!j || !j.ok) throw new Error((j && (j.error || j.msg)) || "Koltuk planı alınamadı");
+      renderSheet(j);
+    }catch(err){
+      console.error("continue seat map minimal v44 error", err);
+      alert("Koltuk planı açılamadı.");
+    }
+  }
+
+  btn.addEventListener("click", openSeatMap);
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape"){
+      closeSeatMap();
+    }
+  });
+})();
+/* ===== CONTINUE_SEAT_MAP_MINIMAL_V44_END ===== */
+
