@@ -197,7 +197,7 @@
         <span>Yolcular</span>
       </a>
 
-      <a class="dock-item" href="{{ url_for("live_map_page") }}">
+      <a class="dock-item" href="{{ url_for('live_map_page') }}">
         <i>🗺️</i>
         <span>Harita</span>
       </a>
@@ -390,7 +390,7 @@
     liveEmanetCount: {{ (live_current.emanet_count if live_current and live_current.emanet_count is defined else (live_current.consignment_count if live_current and live_current.consignment_count is defined else 0)) | tojson | safe }}
   };
   </script>
-  <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=eta-day-rollover-v70"></script>
+  <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=sync-blank-guard-v72b"></script>
   <script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
   <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
   <script src="{{ url_for('static', filename='continue/continue_live_diagnostics.js') }}?v=live-diag-1"></script>

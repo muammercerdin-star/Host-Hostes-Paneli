@@ -107,9 +107,11 @@
         stopEl.textContent = s.live_stop;
       }
 
-      if(distEl){
-        distEl.textContent = formatGpsKm(s.gps_km);
-      }
+      // SYNC_BLANK_GUARD_V72B
+        // API boş gps_km dönerse ekrandaki doğru mesafeyi "—" ile ezme.
+        if(distEl && s.gps_km){
+          distEl.textContent = formatGpsKm(s.gps_km);
+        }
 
       if(etaEl && s.eta_main){
         etaEl.textContent = s.eta_main;
