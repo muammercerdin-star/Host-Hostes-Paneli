@@ -1,0 +1,113 @@
+/* MUAVIN_PERFORMANCE_LITE_V56 */
+/* Mobil WebView/Chrome için ağır blur, gölge ve animasyonları hafifletir. */
+
+@media (max-width: 820px){
+  html, body{
+    scroll-behavior:auto !important;
+  }
+
+  body,
+  .app,
+  .page,
+  .board,
+  .board-inner,
+  .glass,
+  .card,
+  .route-card,
+  .route-stop,
+  .modal,
+  .sheet-modal,
+  .modal-backdrop,
+  .drive-panel,
+  .quick-action,
+  .quick-card,
+  .tab-panel,
+  .dock,
+  .bottom-nav{
+    -webkit-backdrop-filter:none !important;
+    backdrop-filter:none !important;
+  }
+
+  .glass,
+  .card,
+  .route-card,
+  .route-stop,
+  .modal,
+  .sheet-modal,
+  .quick-action,
+  .quick-card,
+  .seat,
+  .dock,
+  .bottom-nav{
+    transition:none !important;
+    animation:none !important;
+  }
+
+  .seat{
+    will-change:auto !important;
+    contain:layout paint !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.12),
+      0 8px 18px rgba(0,0,0,.20) !important;
+  }
+
+  .route-stop,
+  .route-card{
+    contain:layout paint !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.08),
+      0 8px 18px rgba(0,0,0,.18) !important;
+  }
+
+  button,
+  a,
+  .seat,
+  .route-stop,
+  .quick-action,
+  .quick-card{
+    touch-action:manipulation !important;
+    -webkit-tap-highlight-color:rgba(255,255,255,.08) !important;
+  }
+
+  button:active,
+  a:active,
+  .seat:active,
+  .quick-action:active,
+  .quick-card:active{
+    transform:scale(.985) !important;
+  }
+
+  .modal-backdrop,
+  .route-sheet-backdrop,
+  .trip-guard-backdrop{
+    background:rgba(2,6,23,.62) !important;
+  }
+}
+
+/* Durak Akışı kartları dışarı taşmasın */
+.route-strip-shell,
+.route-strip,
+.route-scroll,
+.route-list,
+.stop-flow,
+.stop-flow-list{
+  max-width:100% !important;
+  overflow-x:auto !important;
+  overflow-y:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+}
+
+.route-stop,
+.route-card{
+  min-width:0 !important;
+  flex-shrink:0 !important;
+}
+
+.route-stop .name,
+.route-stop .meta,
+.route-card .name,
+.route-card .meta{
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+}

@@ -1,0 +1,193 @@
+===== ROUTE COORDS DEEP CHECK V68 =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+===== 1) AKTİF SEFER =====
+active_trip_id: 311
+route: Denizli-İstanbul (Vardön)
+plate: 45KH999
+date: 2026-06-09
+
+===== 2) ROTA DURAK SIRASI get_stops(route) =====
+durak adedi: 41
+01. Denizli
+02. Sarayköy
+03. Buldan
+04. Bozalan
+05. Baraj Yolu
+06. Derbent (Denizli)
+07. Kadıköy
+08. Dindarlı
+09. Dadağlı
+10. Sarıgöl
+11. Afşar
+12. Bereketli
+13. Hacıaliler
+14. Ortahan
+15. Belenyaka
+16. Alaşehir OTOGAR
+17. Alaşehir STADYUM
+18. Akkeçili
+19. Piyadeler
+20. Kavaklıdere
+21. Salihli
+22. Sart
+23. Ahmetli
+24. Gökkaya
+25. Akçapınar
+26. Derbent (Manisa)
+27. Avşar
+28. Turgutlu Garaj
+29. Özdilek AVM
+30. Manisa Otogar
+31. Saruhanlı
+32. Akhisar Garaj
+33. Gelenbe
+34. Balıkesir Otogar
+35. Susurluk
+36. Mustafa Kemal paşa
+37. Karacabey Kavşağı
+38. Bursa Otogar
+39. Gebze Garaj
+40. Alibeyköy
+41. Esenler Otogar
+
+===== 3) route_stop_coords TABLO VAR MI =====
+route_stop_coords var mı: True
+kolonlar: ['route', 'stop', 'lat', 'lng']
+
+===== 4) BU ROTA İÇİN KOORDİNATLAR =====
+koordinat satırı: 41
+01. rowid=28 route_idx=13 ✅ | Hacıaliler | lat=38.272725 lng=28.62342
+02. rowid=29 route_idx=14 ✅ | Ortahan | lat=38.280772 lng=28.609968
+03. rowid=30 route_idx=15 ✅ | Belenyaka | lat=38.318253 lng=28.583179
+04. rowid=31 route_idx=1 ✅ | Denizli | lat=37.785472 lng=29.091351
+05. rowid=32 route_idx=2 ✅ | Sarayköy | lat=37.924993 lng=28.927678
+06. rowid=33 route_idx=3 ✅ | Buldan | lat=38.03818 lng=28.868679
+07. rowid=34 route_idx=4 ✅ | Bozalan | lat=38.076465 lng=28.860289
+08. rowid=36 route_idx=7 ✅ | Kadıköy | lat=38.13443 lng=28.775231
+09. rowid=37 route_idx=8 ✅ | Dindarlı | lat=38.154391 lng=28.702103
+10. rowid=38 route_idx=9 ✅ | Dadağlı | lat=38.18217 lng=28.682759
+11. rowid=39 route_idx=10 ✅ | Sarıgöl | lat=38.245719 lng=28.673369
+12. rowid=40 route_idx=11 ✅ | Afşar | lat=38.26251 lng=28.639184
+13. rowid=41 route_idx=12 ✅ | Bereketli | lat=38.264945 lng=28.633834
+14. rowid=42 route_idx=16 ✅ | Alaşehir OTOGAR | lat=38.3575 lng=28.539438
+15. rowid=43 route_idx=17 ✅ | Alaşehir STADYUM | lat=38.360943 lng=28.520379
+16. rowid=44 route_idx=18 ✅ | Akkeçili | lat=38.380741 lng=28.489092
+17. rowid=45 route_idx=19 ✅ | Piyadeler | lat=38.407401 lng=28.448361
+18. rowid=46 route_idx=20 ✅ | Kavaklıdere | lat=38.448833 lng=28.364036
+19. rowid=47 route_idx=21 ✅ | Salihli | lat=38.487712 lng=28.135255
+20. rowid=48 route_idx=22 ✅ | Sart | lat=38.493718 lng=28.041545
+21. rowid=49 route_idx=23 ✅ | Ahmetli | lat=38.514796 lng=27.942609
+22. rowid=50 route_idx=24 ✅ | Gökkaya | lat=38.499076 lng=27.863051
+23. rowid=51 route_idx=25 ✅ | Akçapınar | lat=38.490094 lng=27.842294
+24. rowid=52 route_idx=27 ✅ | Avşar | lat=38.495473 lng=27.764238
+25. rowid=53 route_idx=28 ✅ | Turgutlu Garaj | lat=38.495032 lng=27.738268
+26. rowid=54 route_idx=29 ✅ | Özdilek AVM | lat=38.491287 lng=27.708098
+27. rowid=55 route_idx=30 ✅ | Manisa Otogar | lat=38.638973 lng=27.445423
+28. rowid=56 route_idx=31 ✅ | Saruhanlı | lat=38.730212 lng=27.581254
+29. rowid=57 route_idx=32 ✅ | Akhisar Garaj | lat=38.934504 lng=27.835506
+30. rowid=58 route_idx=33 ✅ | Gelenbe | lat=39.17592 lng=27.850322
+31. rowid=59 route_idx=34 ✅ | Balıkesir Otogar | lat=39.648288 lng=27.888458
+32. rowid=60 route_idx=35 ✅ | Susurluk | lat=39.916872 lng=28.161948
+33. rowid=61 route_idx=36 ✅ | Mustafa Kemal paşa | lat=40.049493 lng=28.373511
+34. rowid=62 route_idx=37 ✅ | Karacabey Kavşağı | lat=40.182425 lng=28.35823
+35. rowid=63 route_idx=38 ✅ | Bursa Otogar | lat=40.265332 lng=29.053233
+36. rowid=64 route_idx=39 ✅ | Gebze Garaj | lat=40.79539 lng=29.459768
+37. rowid=65 route_idx=40 ✅ | Alibeyköy | lat=41.088091 lng=28.94437
+38. rowid=66 route_idx=41 ✅ | Esenler Otogar | lat=41.039991 lng=28.893702
+39. rowid=106 route_idx=5 ✅ | Baraj Yolu | lat=38.102819 lng=28.836865
+40. rowid=353 route_idx=26 ✅ | Derbent (Manisa) | lat=38.492235 lng=27.786237
+41. rowid=354 route_idx=6 ✅ | Derbent (Denizli) | lat=38.118624499999996 lng=28.806048
+
+===== 5) KOORDİNATI EKSİK ROTA DURAKLARI =====
+✅ Rota duraklarının hepsinde koordinat var gibi görünüyor.
+
+===== 6) ROTA SIRASINA GÖRE KOORDİNAT MESAFELERİ =====
+01->02 Denizli -> Sarayköy = 21.15 km
+02->03 Sarayköy -> Buldan = 13.61 km
+03->04 Buldan -> Bozalan = 4.32 km
+04->05 Bozalan -> Baraj Yolu = 3.58 km
+05->06 Baraj Yolu -> Derbent (Denizli) = 3.22 km
+06->07 Derbent (Denizli) -> Kadıköy = 3.22 km
+07->08 Kadıköy -> Dindarlı = 6.77 km
+08->09 Dindarlı -> Dadağlı = 3.52 km
+09->10 Dadağlı -> Sarıgöl = 7.11 km
+10->11 Sarıgöl -> Afşar = 3.52 km
+11->12 Afşar -> Bereketli = 0.54 km
+12->13 Bereketli -> Hacıaliler = 1.25 km
+13->14 Hacıaliler -> Ortahan = 1.48 km
+14->15 Ortahan -> Belenyaka = 4.78 km
+15->16 Belenyaka -> Alaşehir OTOGAR = 5.80 km
+16->17 Alaşehir OTOGAR -> Alaşehir STADYUM = 1.71 km
+17->18 Alaşehir STADYUM -> Akkeçili = 3.51 km
+18->19 Akkeçili -> Piyadeler = 4.62 km
+19->20 Piyadeler -> Kavaklıdere = 8.67 km
+20->21 Kavaklıdere -> Salihli = 20.38 km
+21->22 Salihli -> Sart = 8.18 km
+22->23 Sart -> Ahmetli = 8.92 km
+23->24 Ahmetli -> Gökkaya = 7.14 km
+24->25 Gökkaya -> Akçapınar = 2.06 km
+25->26 Akçapınar -> Derbent (Manisa) = 4.88 km
+26->27 Derbent (Manisa) -> Avşar = 1.95 km
+27->28 Avşar -> Turgutlu Garaj = 2.26 km
+28->29 Turgutlu Garaj -> Özdilek AVM = 2.66 km
+29->30 Özdilek AVM -> Manisa Otogar = 28.13 km
+30->31 Manisa Otogar -> Saruhanlı = 15.55 km
+31->32 Saruhanlı -> Akhisar Garaj = 31.64 km
+32->33 Akhisar Garaj -> Gelenbe = 26.87 km
+33->34 Gelenbe -> Balıkesir Otogar = 52.63 km
+34->35 Balıkesir Otogar -> Susurluk = 37.92 km
+35->36 Susurluk -> Mustafa Kemal paşa = 23.29 km
+36->37 Mustafa Kemal paşa -> Karacabey Kavşağı = 14.84 km
+37->38 Karacabey Kavşağı -> Bursa Otogar = 59.72 km
+38->39 Bursa Otogar -> Gebze Garaj = 68.22 km
+39->40 Gebze Garaj -> Alibeyköy = 54.16 km
+40->41 Alibeyköy -> Esenler Otogar = 6.83 km
+
+===== 7) live_runtime_state SON DURUM =====
+{'trip_id': 311, 'live_stop': '', 'speed': 2.0, 'gps_km': '', 'eta_main': '', 'eta_sub': 'duplicate-derbent-fixed-v69', 'updated_at': '2026-06-09 18:47:55'}
+
+===== 8) ŞU AN APP.PY'NİN TEMPLATE'E GÖNDERDİĞİ routeCoords SIRASI =====
+01. {'stop': 'Hacıaliler', 'lat': 38.272725, 'lng': 28.62342}
+02. {'stop': 'Ortahan', 'lat': 38.280772, 'lng': 28.609968}
+03. {'stop': 'Belenyaka', 'lat': 38.318253, 'lng': 28.583179}
+04. {'stop': 'Denizli', 'lat': 37.785472, 'lng': 29.091351}
+05. {'stop': 'Sarayköy', 'lat': 37.924993, 'lng': 28.927678}
+06. {'stop': 'Buldan', 'lat': 38.03818, 'lng': 28.868679}
+07. {'stop': 'Bozalan', 'lat': 38.076465, 'lng': 28.860289}
+08. {'stop': 'Kadıköy', 'lat': 38.13443, 'lng': 28.775231}
+09. {'stop': 'Dindarlı', 'lat': 38.154391, 'lng': 28.702103}
+10. {'stop': 'Dadağlı', 'lat': 38.18217, 'lng': 28.682759}
+11. {'stop': 'Sarıgöl', 'lat': 38.245719, 'lng': 28.673369}
+12. {'stop': 'Afşar', 'lat': 38.26251, 'lng': 28.639184}
+13. {'stop': 'Bereketli', 'lat': 38.264945, 'lng': 28.633834}
+14. {'stop': 'Alaşehir OTOGAR', 'lat': 38.3575, 'lng': 28.539438}
+15. {'stop': 'Alaşehir STADYUM', 'lat': 38.360943, 'lng': 28.520379}
+16. {'stop': 'Akkeçili', 'lat': 38.380741, 'lng': 28.489092}
+17. {'stop': 'Piyadeler', 'lat': 38.407401, 'lng': 28.448361}
+18. {'stop': 'Kavaklıdere', 'lat': 38.448833, 'lng': 28.364036}
+19. {'stop': 'Salihli', 'lat': 38.487712, 'lng': 28.135255}
+20. {'stop': 'Sart', 'lat': 38.493718, 'lng': 28.041545}
+21. {'stop': 'Ahmetli', 'lat': 38.514796, 'lng': 27.942609}
+22. {'stop': 'Gökkaya', 'lat': 38.499076, 'lng': 27.863051}
+23. {'stop': 'Akçapınar', 'lat': 38.490094, 'lng': 27.842294}
+24. {'stop': 'Avşar', 'lat': 38.495473, 'lng': 27.764238}
+25. {'stop': 'Turgutlu Garaj', 'lat': 38.495032, 'lng': 27.738268}
+26. {'stop': 'Özdilek AVM', 'lat': 38.491287, 'lng': 27.708098}
+27. {'stop': 'Manisa Otogar', 'lat': 38.638973, 'lng': 27.445423}
+28. {'stop': 'Saruhanlı', 'lat': 38.730212, 'lng': 27.581254}
+29. {'stop': 'Akhisar Garaj', 'lat': 38.934504, 'lng': 27.835506}
+30. {'stop': 'Gelenbe', 'lat': 39.17592, 'lng': 27.850322}
+31. {'stop': 'Balıkesir Otogar', 'lat': 39.648288, 'lng': 27.888458}
+32. {'stop': 'Susurluk', 'lat': 39.916872, 'lng': 28.161948}
+33. {'stop': 'Mustafa Kemal paşa', 'lat': 40.049493, 'lng': 28.373511}
+34. {'stop': 'Karacabey Kavşağı', 'lat': 40.182425, 'lng': 28.35823}
+35. {'stop': 'Bursa Otogar', 'lat': 40.265332, 'lng': 29.053233}
+36. {'stop': 'Gebze Garaj', 'lat': 40.79539, 'lng': 29.459768}
+37. {'stop': 'Alibeyköy', 'lat': 41.088091, 'lng': 28.94437}
+38. {'stop': 'Esenler Otogar', 'lat': 41.039991, 'lng': 28.893702}
+39. {'stop': 'Baraj Yolu', 'lat': 38.102819, 'lng': 28.836865}
+40. {'stop': 'Derbent (Manisa)', 'lat': 38.492235, 'lng': 27.786237}
+41. {'stop': 'Derbent (Denizli)', 'lat': 38.118624499999996, 'lng': 28.806048}
+
+✅ V68 teşhis bitti.

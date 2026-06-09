@@ -1927,7 +1927,7 @@ function renderApproachPanel(stop, seats){
     }, (err) => {
       toast("Konum hatası: " + (err?.message || ""));
     }, {
-      enableHighAccuracy:true,
+      enableHighAccuracy:false,
       timeout:10000,
       maximumAge:2000
     });
@@ -2237,6 +2237,7 @@ function buildEtaModel(){
   const LIVE_FORCE_KM = 1.2;       // Çok yakına girerse beklemeden canlı yap
   const LIVE_STABLE_HITS = 2;      // GPS sapmasına karşı aynı durak kaç kez görülsün
   const LIVE_LOOKAHEAD_STOPS = 4;  // Mevcut canlı duraktan sonra kaç durağa bakılsın
+  const LIVE_CLEAR_KM = 6;        // Canlı durak bu mesafeden uzağa düştüyse eski kabul edilir
 
   let liveDetectCandidate = {
     name: "",
@@ -2360,8 +2361,32 @@ function buildEtaModel(){
           lastAt: 0
         };
 
+          // ROUTE_PROGRESS_V59B_NO_CANDIDATE_CLEAR
+          // Aday yoksa ve mevcut canlı durak artık çok uzakta kaldıysa eski canlıyı temizle.
+          try{
+            if(speedState.liveStop && typeof stopDistanceKmByName === "function"){
+              const liveKm = stopDistanceKmByName(speedState.liveStop);
+
+              if(Number.isFinite(liveKm) && liveKm > LIVE_CLEAR_KM){
+                speedState.liveStop = "";
+                speedState.passedStops = new Set();
+
+                persistVoiceState();
+
+                try{
+                  persistLiveRuntimeStateToServer();
+                }catch(_){}
+
+                renderRouteStrip();
+                renderTimeline();
+                renderAI();
+                updateCompactHeader();
+              }
+            }
+          }catch(_){}
+
         // Mevcut canlı durakta artık işlem yoksa canlıyı boşalt.
-        if(speedState.liveStop && !hasLiveStopOperation(speedState.liveStop)){
+        if(false && speedState.liveStop && !hasLiveStopOperation(speedState.liveStop)){
           speedState.liveStop = "";
           speedState.passedStops = new Set();
 
@@ -2649,7 +2674,7 @@ function buildEtaModel(){
         // GPS çok sık veri gönderirse ağır renderları boğmasın.
         // Timeline / route strip / AI panel en fazla 2.5 saniyede bir yenilenir.
         const nowRender = Date.now();
-        if(!window.__seatsLastSpeedRenderAt || nowRender - window.__seatsLastSpeedRenderAt > 2500){
+        if(!window.__seatsLastSpeedRenderAt || nowRender - window.__seatsLastSpeedRenderAt > 7000){
           window.__seatsLastSpeedRenderAt = nowRender;
           renderTimeline();
           renderRouteStrip();
@@ -2660,9 +2685,9 @@ function buildEtaModel(){
         spLimit.textContent = "GPS kapalı";
         setState("");
       }, {
-        enableHighAccuracy:true,
-        maximumAge:3000,
-        timeout:12000
+        enableHighAccuracy:false,
+        maximumAge:10000,
+        timeout:18000
       });
     }else{
       spLimit.textContent = "GPS yok";

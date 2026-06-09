@@ -32,7 +32,25 @@
     const raw = String(value ?? "").trim();
     if(!raw) return "—";
 
-    const km = parseKmAny(raw);
+    // DISTANCE_FORMAT_FIX_V63B
+    // "439 m" hazır formatlı gelirse 439 km sanma.
+    // "112 m", "50 m", "28.20 km" olduğu gibi gösterilir.
+    const lower = raw.toLocaleLowerCase("tr-TR");
+
+    if(/\bkm\b/.test(lower) || /km\s*$/.test(lower)){
+      return raw;
+    }
+
+    if(/(^|\s|[0-9])m\s*$/.test(lower) && !/km\s*$/.test(lower)){
+      return raw;
+    }
+
+    const cleaned = raw
+      .replace(",", ".")
+      .replace(/[^0-9.\-]/g, "")
+      .trim();
+
+    const km = Number(cleaned);
     if(!Number.isFinite(km)) return raw;
 
     if(km < 0) return "—";
@@ -1760,9 +1778,26 @@
   function minutesDiff(a,b){
     return Math.round((a.getTime() - b.getTime()) / 60000);
   }
-
   function fmtDelay(min){
-    const n = Number(min || 0);
+    // ETA_DAY_ROLLOVER_FIX_V70
+    // Plan saati yanlışlıkla ertesi güne kayınca 1356 dk erken gibi saçma değer çıkıyordu.
+    // Şehirlerarası seferde gecikme/erkenlik hesabını en yakın 24 saat penceresine normalize et.
+    let n = Number(min || 0);
+
+    if(!Number.isFinite(n)){
+      n = 0;
+    }
+
+    while(n <= -720){
+      n += 1440;
+    }
+
+    while(n > 720){
+      n -= 1440;
+    }
+
+    n = Math.round(n);
+
     if(n <= -1) return Math.abs(n) + " dk erken";
     if(n >= 1) return n + " dk geç";
     return "Planında";
@@ -1994,7 +2029,158 @@
     }));
   }
 
-  function writeRuntime(liveName, gpsKm, etaMain){
+    // MIDPOINT_LIVE_STOP_V67
+    // Canlı durak artık "işlem var/yok" veya "6 km geçti" mantığıyla değil,
+    // rota koordinatlarına göre en yakın durakla belirlenir.
+    // İki durak arasında orta nokta geçilince doğal olarak sonraki durak daha yakın olur.
+    let midpointSwitchSigV67 = "";
+    let midpointSwitchAtV67 = 0;
+
+    function isEmptyLiveNameV67(name){
+      const n = norm(name || "");
+      return (
+        !n ||
+        n.includes("bekleniyor") ||
+        n.includes("secilmedi") ||
+        n.includes("seçilmedi") ||
+        n.includes("durak secilmedi") ||
+        n.includes("durak seçilmedi")
+      );
+    }
+
+    function routeCoordItemsV67(){
+      const raw = Array.isArray(BOOT.routeCoords) ? BOOT.routeCoords : [];
+      const out = [];
+
+      raw.forEach((item, arrayIndex) => {
+        const name = String(item.stop || item.name || "").trim();
+        if(!name) return;
+
+        const lat = Number(item.lat ?? item.latitude);
+        const lng = Number(item.lng ?? item.lon ?? item.longitude);
+
+        if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+        let idx = routeIndex(name);
+        if(!Number.isFinite(idx) || idx < 0) idx = arrayIndex;
+
+        out.push({
+          name,
+          lat,
+          lng,
+          idx,
+          arrayIndex
+        });
+      });
+
+      out.sort((a, b) => {
+        if(a.idx !== b.idx) return a.idx - b.idx;
+        return a.arrayIndex - b.arrayIndex;
+      });
+
+      return out;
+    }
+
+    function pickMidpointLiveStopV67(currentName){
+      if(!lastPos) return null;
+
+      const items = routeCoordItemsV67();
+      if(!items.length) return null;
+
+      const emptyCurrent = isEmptyLiveNameV67(currentName);
+      const currentIdx = emptyCurrent ? -1 : routeIndex(currentName);
+
+      let pool = items;
+
+      // Canlı durak belliyse geriye zıplama yapma.
+      // Sadece mevcut durak ve önündeki birkaç durağı karşılaştır.
+      if(currentIdx >= 0){
+        pool = items.filter(x => x.idx >= currentIdx && x.idx <= currentIdx + 6);
+
+        if(!pool.length){
+          pool = items.filter(x => x.idx >= currentIdx);
+        }
+
+        if(!pool.length){
+          pool = items;
+        }
+      }
+
+      let best = null;
+
+      for(const item of pool){
+        const km = distKm(lastPos, { lat:item.lat, lng:item.lng });
+        if(!Number.isFinite(km)) continue;
+
+        if(!best || km < best.km){
+          best = {
+            name:item.name,
+            km,
+            idx:item.idx
+          };
+        }
+      }
+
+      return best;
+    }
+
+    function switchLiveStopMidpointV67(oldName, picked){
+      if(!picked || !picked.name) return false;
+
+      const toName = String(picked.name || "").trim();
+      const fromName = String(oldName || "").trim();
+
+      if(!toName) return false;
+      if(!isEmptyLiveNameV67(fromName) && norm(fromName) === norm(toName)) return false;
+
+      const now = Date.now();
+      const sig = `${tripId}|${fromName}|${toName}|${Math.round(Number(picked.km || 0) * 1000)}`;
+
+      if(sig === midpointSwitchSigV67 && now - midpointSwitchAtV67 < 4000){
+        return false;
+      }
+
+      midpointSwitchSigV67 = sig;
+      midpointSwitchAtV67 = now;
+
+      const displaySpeed = liveDisplaySpeed();
+      const gpsKm = formatKm(Number(picked.km));
+
+      const url =
+        `/api/live-runtime-state?write=1` +
+        `&trip_id=${encodeURIComponent(tripId)}` +
+        `&live_stop=${encodeURIComponent(toName)}` +
+        `&speed=${encodeURIComponent(displaySpeed)}` +
+        `&gps_km=${encodeURIComponent(gpsKm || "")}` +
+        `&eta_main=` +
+        `&eta_sub=${encodeURIComponent("midpoint-live-stop-v67")}` +
+        `&_=${Date.now()}`;
+
+      fetch(url, {
+        method:"GET",
+        credentials:"same-origin",
+        cache:"no-store"
+      }).finally(() => {
+        try{
+          const stopEl = document.getElementById("liveCurrentStopName");
+          const distEl = document.getElementById("liveDistanceValue");
+          const etaEl = document.getElementById("liveEtaValue");
+
+          if(stopEl) stopEl.textContent = toName;
+          if(distEl) distEl.textContent = gpsKm || "—";
+          if(etaEl) etaEl.textContent = "—";
+        }catch(_){}
+
+        setTimeout(() => {
+          try{ location.reload(); }catch(_){}
+        }, 350);
+      });
+
+      return true;
+    }
+    function writeRuntime(liveName, gpsKm, etaMain){
+    // ROUTE_PROGRESS_AUTHORITY_V59_CONTINUE_READONLY
+    // Bu ekran canlı durak seçmez; sadece hız/mesafe/ETA senkronlar.
     const now = Date.now();
     const displaySpeed = liveDisplaySpeed();
     const sig = [liveName, displaySpeed, gpsKm, etaMain].join("|");
@@ -2007,7 +2193,7 @@
     const url =
       `/api/live-runtime-state?write=1` +
       `&trip_id=${encodeURIComponent(tripId)}` +
-      `&live_stop=${encodeURIComponent(liveName || "")}` +
+      `&preserve_live_stop=1` +
       `&speed=${encodeURIComponent(displaySpeed)}` +
       `&gps_km=${encodeURIComponent(gpsKm || "")}` +
       `&eta_main=${encodeURIComponent(etaMain || "")}` +
@@ -2025,6 +2211,20 @@
     if(!lastPos) return;
 
     const liveName = liveStopName();
+
+    // MIDPOINT_LIVE_STOP_V67_HOOK
+    const pickedLiveV67 = pickMidpointLiveStopV67(liveName);
+
+    if(pickedLiveV67){
+      const mustSwitchV67 =
+        isEmptyLiveNameV67(liveName) ||
+        norm(pickedLiveV67.name) !== norm(liveName || "");
+
+      if(mustSwitchV67){
+        switchLiveStopMidpointV67(liveName || "", pickedLiveV67);
+        return;
+      }
+    }
     if(!liveName) return;
 
     const liveCoord = findCoord(liveName);

@@ -1,0 +1,33 @@
+/* STOP_BADGE_VISIBLE_V57 */
+/* V56 performans yaması contain:paint ile dış rozetleri kırpıyordu.
+   Koltuk performansını koruyup zil rozetini görünür yapar. */
+
+.cell,
+.deck,
+.deck-wrap{
+  overflow:visible !important;
+}
+
+.seat{
+  overflow:visible !important;
+}
+
+/* Sadece inecek/zil olan koltuklarda paint clipping'i kaldır */
+.seat.has-stop{
+  contain:layout !important;
+  overflow:visible !important;
+  z-index:5 !important;
+}
+
+.seat.has-stop .stop-badge{
+  display:flex !important;
+  z-index:80 !important;
+  left:-5px !important;
+  bottom:-5px !important;
+  min-width:24px !important;
+  min-height:24px !important;
+  padding:3px 6px !important;
+  box-shadow:
+    0 8px 18px rgba(0,0,0,.28),
+    0 0 0 2px rgba(255,255,255,.18) !important;
+}

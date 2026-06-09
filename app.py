@@ -52,8 +52,6 @@ DEBUG = env_bool("FLASK_DEBUG", True)
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "yusuf")
 
 
-
-
 # =========================================================
 # Admin Profil / İlk Kurulum
 # =========================================================
@@ -889,8 +887,6 @@ def upsert_live_runtime_state(
     db.commit()
 
 
-
-
 # DEV_NO_CACHE_HEADERS_FINAL
 @app.after_request
 def dev_no_cache_headers(response):
@@ -918,7 +914,26 @@ def api_live_runtime_state():
     write_mode = (request.args.get("write") or "").strip() == "1"
 
     if write_mode:
-        live_stop = (request.args.get("live_stop") or "").strip()
+        # ROUTE_PROGRESS_AUTHORITY_V59
+        # Canlı Durak Akışı ekranı live_stop seçicisi değildir.
+        # preserve_live_stop=1 gelirse mevcut canlı durak korunur.
+        preserve_live_stop = (request.args.get("preserve_live_stop") or "").strip() == "1"
+        live_stop_arg_present = "live_stop" in request.args
+
+        if preserve_live_stop and not live_stop_arg_present:
+            try:
+                live_stop = (fetch_live_runtime_state(tid).get("live_stop") or "").strip()
+            except Exception:
+                live_stop = ""
+        else:
+            live_stop = (request.args.get("live_stop") or "").strip()
+
+        if not live_stop:
+            try:
+                session.pop("continue_current_stop", None)
+            except Exception:
+                pass
+
         gps_km = (request.args.get("gps_km") or "").strip()
         eta_main = (request.args.get("eta_main") or "").strip()
         eta_sub = (request.args.get("eta_sub") or "").strip()
@@ -1286,7 +1301,6 @@ def onboarding_page():
     return render_template("onboarding.html")
 
 
-
 # =========================================================
 # Kullanıcı / Panel Sahibi Sıfırlama
 # =========================================================
@@ -1407,7 +1421,6 @@ def trip_start():
         current_route=selected_route,
         all_routes=routes,
     )
-
 
 
 # ===== CONTINUE_LIVE_FLOW_STATE_API_START =====
@@ -1753,25 +1766,20 @@ def continue_trip():
     elif matched_runtime_stop:
         current_stop = matched_runtime_stop
         session["continue_current_stop"] = current_stop
-    elif matched_session_stop:
-        current_stop = matched_session_stop
     else:
-        # Rotadaki sıraya göre, iniş/biniş/bagaj/servis işlemi olan ilk durağı seç.
-        operation_keys = set()
-        operation_keys.update(k for k, v in stop_off_counts.items() if v)
-        operation_keys.update(k for k, v in stop_board_counts.items() if v)
-        operation_keys.update(k for k, v in stop_walkon_counts.items() if v)
-        operation_keys.update(k for k, v in stop_consignment_counts.items() if v)
-        operation_keys.update(k for k, v in stop_bag_counts.items() if v)
-        operation_keys.update(k for k, v in stop_service_counts.items() if v)
-
-        for stop_name in stops:
-            if norm_stop(stop_name) in operation_keys:
-                current_stop = stop_name
-                break
+        # LIVE_STOP_NO_FIRST_FALLBACK_V64
+        # Canlı durak boşsa session/ilk işlem/ilk durak tahmini yapma.
+        # GPS yakalayana kadar ekranda "Canlı durak bekleniyor" göster.
+        current_stop = ""
+        try:
+            session.pop("continue_current_stop", None)
+        except Exception:
+            pass
 
     if not current_stop:
-        current_stop = first_stop
+        # LIVE_STOP_NO_FIRST_FALLBACK_V64
+        # Boş canlı durakta ilk durağa düşme.
+        current_stop = ""
 
     current_index = stops.index(current_stop) if current_stop in stops else 0
 
@@ -1907,10 +1915,6 @@ def continue_trip():
         continue_route_coords=continue_route_coords,
         continue_schedule_items=continue_schedule_items,
     )
-
-
-
-
 
 
 # ===== CONTINUE_SEAT_MAP_FULLSCREEN_V45_API_START =====
@@ -3536,7 +3540,6 @@ def log_trip_stop_event(db, tid, stop_name, event, meta=None, distance_km=None, 
     )
 
 
-
 def _trip_key_from_row(trip_row) -> str:
     if not trip_row:
         return ""
@@ -4040,8 +4043,6 @@ def api_stoplog():
     })
 
 
-
-
 @app.route("/sefer-raporu")
 def trip_report_page():
     return render_template("trip_report.html")
@@ -4153,7 +4154,6 @@ def api_trip_report():
     })
 
 
-
 # =========================================================
 # Raporlar / Olaylar
 # =========================================================
@@ -4216,8 +4216,6 @@ def api_archived_trip_report(base):
     return jsonify(data)
 
 
-
-
 @app.route("/api/report-archive")
 def api_report_archive():
     items = []
@@ -4252,8 +4250,6 @@ def api_report_archive():
         })
 
     return jsonify({"ok": True, "items": items})
-
-
 
 
 @app.route("/sefer-raporu-son")
@@ -4328,7 +4324,6 @@ def report_file_download(base, kind):
         abort(404)
 
     return send_from_directory(str(reports_dir_path()), path.name, as_attachment=True)
-
 
 
 # =========================================================
@@ -4530,9 +4525,6 @@ def end_trip():
 # =========================================================
 
 
-
-
-
 # =========================================================
 # Yedekleme Sistemi
 # =========================================================
@@ -4594,8 +4586,6 @@ register_settings_routes(app, {
 
 
 # Local coords manager modules/coords_panel.py içine taşındı.
-
-
 
 
 @app.route("/rehber")
