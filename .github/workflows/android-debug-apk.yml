@@ -16,7 +16,7 @@ jobs:
         working-directory: android_app
 
     steps:
-      - name: Checkout
+      - name: Checkout project
         uses: actions/checkout@v4
 
       - name: Set up Java 21
@@ -26,23 +26,25 @@ jobs:
           java-version: '21'
           cache: gradle
 
-      - name: Set up Python 3.13
+      - name: Set up Python 3.13 for Chaquopy
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
-      - name: Show versions
+      - name: Show environment
         run: |
+          pwd
+          ls -la
           java -version
+          python --version
+          python3 --version
           python3.13 --version
           gradle -v
-
-      - name: Accept Android licenses
-        run: |
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+          echo "ANDROID_HOME=$ANDROID_HOME"
 
       - name: Install Android SDK packages
         run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
             "platforms;android-35" \
             "build-tools;35.0.0" \
@@ -50,10 +52,18 @@ jobs:
 
       - name: Build debug APK
         run: |
-          gradle :app:assembleDebug --stacktrace
+          gradle :app:assembleDebug --stacktrace --no-daemon
 
-      - name: Upload APK artifact
+      - name: Collect APK
+        if: always()
+        run: |
+          mkdir -p ../apk-out
+          find app/build/outputs/apk -type f -name "*.apk" -print -exec cp {} ../apk-out/ \; || true
+          ls -lh ../apk-out || true
+
+      - name: Upload APK
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: muavin-asistani-v85-debug-apk
-          path: android_app/app/build/outputs/apk/debug/*.apk
+          path: apk-out/*.apk
