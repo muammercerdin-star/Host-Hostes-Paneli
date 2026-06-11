@@ -43,7 +43,7 @@ jobs:
           grep -nE "muavinBuildProfile|compileSdk|targetSdk|muavinCoreVersion|androidx.core|buildPython|abiFilters" android_app/app/build.gradle || true
           echo
           echo "===== bad version search ====="
-          ! grep -R "1.13.11.13.1" -n android_app .github
+          ! grep -R --exclude="*.bak*" -n "1.13.11.13.1" android_app
 
       - name: Build debug APK
         working-directory: android_app
