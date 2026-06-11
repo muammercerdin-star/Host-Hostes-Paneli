@@ -57,7 +57,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        createLockAlarmChannelsV86();
         requestBasicPermissions();
+        requestNotificationPermissionV86();
 
         webView = new WebView(this);
         setContentView(webView);
@@ -86,6 +88,7 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new VoiceBridge(), "AndroidVoice");
         webView.addJavascriptInterface(new TtsBridge(), "AndroidTTS");
         webView.addJavascriptInterface(new PrintBridge(), "PrintBridge");
+        webView.addJavascriptInterface(new LockAlarmBridge(), "AndroidLockAlarm");
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -333,6 +336,69 @@ public class MainActivity extends Activity {
         }
     }
 
+
+    public class LockAlarmBridge {
+        @JavascriptInterface
+        public void updateTarget(String tripId, String stopName, String lat, String lng, String offloadCount, String bagCount) {
+            try {
+                android.content.SharedPreferences prefs = getSharedPreferences("muavin_lock_alarm_v85", MODE_PRIVATE);
+                prefs.edit()
+                        .putString("trip_id", tripId == null ? "active" : tripId.trim())
+                        .putString("stop_name", stopName == null ? "" : stopName.trim())
+                        .putString("target_lat", lat == null ? "" : lat.trim())
+                        .putString("target_lng", lng == null ? "" : lng.trim())
+                        .putString("offload_count", offloadCount == null ? "0" : offloadCount.trim())
+                        .putString("bag_count", bagCount == null ? "0" : bagCount.trim())
+                        .putBoolean("enabled", true)
+                        .apply();
+            } catch (Exception ignored) {}
+        }
+
+        @JavascriptInterface
+        public void start() {
+            runOnUiThread(() -> startLiveStopAlarmService());
+        }
+
+        @JavascriptInterface
+        public void stopAlarm() {
+            runOnUiThread(() -> sendLiveStopAlarmAction(LiveStopAlertService.ACTION_STOP_ALARM));
+        }
+
+        @JavascriptInterface
+        public void stopService() {
+            runOnUiThread(() -> sendLiveStopAlarmAction(LiveStopAlertService.ACTION_STOP_SERVICE));
+        }
+
+        @JavascriptInterface
+        public void reset() {
+            runOnUiThread(() -> sendLiveStopAlarmAction(LiveStopAlertService.ACTION_RESET));
+        }
+    }
+
+    private void startLiveStopAlarmService() {
+        try {
+            Intent i = new Intent(this, LiveStopAlertService.class);
+            i.setAction(LiveStopAlertService.ACTION_START);
+
+            if (android.os.Build.VERSION.SDK_INT >= 26) {
+                startForegroundService(i);
+            } else {
+                startService(i);
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Kilitli ekran alarmı başlatılamadı", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void sendLiveStopAlarmAction(String action) {
+        try {
+            Intent i = new Intent(this, LiveStopAlertService.class);
+            i.setAction(action);
+            startService(i);
+        } catch (Exception ignored) {}
+    }
+
+
     public class VoiceBridge {
         @JavascriptInterface
         public void startVoice() {
@@ -454,6 +520,17 @@ public class MainActivity extends Activity {
     }
 
     private void requestBasicPermissions() {
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            requestPermissions(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.POST_NOTIFICATIONS
+            }, 100);
+            return;
+        }
+
         if (android.os.Build.VERSION.SDK_INT >= 23) {
             requestPermissions(new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION,
@@ -463,6 +540,7 @@ public class MainActivity extends Activity {
             }, 100);
         }
     }
+
 
 
     @Override
