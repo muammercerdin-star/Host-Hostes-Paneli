@@ -568,9 +568,9 @@ public class MainActivity extends Activity {
 
             android.app.NotificationChannel monitor =
                     new android.app.NotificationChannel(
-                            "muavin_live_monitor_v85",
-                            "Canlı durak takip",
-                            android.app.NotificationManager.IMPORTANCE_LOW
+                            "muavin_live_monitor_v88",
+                            "Canlı durak kilit ekranı kartı",
+                            android.app.NotificationManager.IMPORTANCE_DEFAULT
                     );
 
             monitor.setDescription("Canlı durak arka plan takibi");
@@ -578,8 +578,8 @@ public class MainActivity extends Activity {
 
             android.app.NotificationChannel alert =
                     new android.app.NotificationChannel(
-                            "muavin_live_alert_v85",
-                            "Canlı durak alarmı",
+                            "muavin_live_alert_v88",
+                            "Canlı durak alarmı V88",
                             android.app.NotificationManager.IMPORTANCE_HIGH
                     );
 

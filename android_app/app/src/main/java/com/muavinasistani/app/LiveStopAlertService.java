@@ -29,9 +29,12 @@ public class LiveStopAlertService extends Service implements LocationListener {
     public static final String ACTION_STOP_ALARM = "com.muavinasistani.app.LOCK_ALARM_STOP_ALARM";
     public static final String ACTION_RESET = "com.muavinasistani.app.LOCK_ALARM_RESET";
 
-    private static final String CHANNEL_MONITOR = "muavin_live_monitor_v85";
-    private static final String CHANNEL_ALERT = "muavin_live_alert_v85";
-    private static final int NOTIFICATION_ID = 8501;
+    private static final String CHANNEL_MONITOR = "muavin_live_monitor_v88";
+    private static final String CHANNEL_ALERT = "muavin_live_alert_v88";
+
+    private static final int MONITOR_NOTIFICATION_ID = 8801;
+    private static final int ALERT_NOTIFICATION_ID = 8802;
+
     private static final String PREF = "muavin_lock_alarm_v85";
 
     private LocationManager locationManager;
@@ -167,28 +170,10 @@ public class LiveStopAlertService extends Service implements LocationListener {
     }
 
     private void updateForegroundMonitor() {
-        startForegroundSafe(buildNotification(
-                CHANNEL_MONITOR,
-                "Muavin Asistanı canlı takip",
-                monitorBody(),
-                monitorBigText(),
-                false
-        ));
+        startForegroundSafe(buildMonitorNotification());
     }
 
-    private void showAlarmNotification(String message) {
-        startVibration();
-
-        startForegroundSafe(buildNotification(
-                CHANNEL_ALERT,
-                "Canlı durak alarmı",
-                message,
-                "CANLI DURAK ALARMI\n" + stopTitle() + "\n" + message,
-                true
-        ));
-    }
-
-    private Notification buildNotification(String channelId, String title, String body, String bigText, boolean alertMode) {
+    private Notification buildMonitorNotification() {
         Intent openIntent = new Intent(this, MainActivity.class);
         openIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -197,55 +182,87 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         PendingIntent openPi = PendingIntent.getActivity(this, 10, openIntent, piFlags);
 
-        Intent stopAlarmIntent = new Intent(this, LiveStopAlertService.class);
-        stopAlarmIntent.setAction(ACTION_STOP_ALARM);
-        PendingIntent stopAlarmPi = PendingIntent.getService(this, 11, stopAlarmIntent, piFlags);
-
         Intent stopServiceIntent = new Intent(this, LiveStopAlertService.class);
         stopServiceIntent.setAction(ACTION_STOP_SERVICE);
         PendingIntent stopServicePi = PendingIntent.getService(this, 12, stopServiceIntent, piFlags);
 
-        Notification.Builder b = new Notification.Builder(this, channelId)
+        Notification.Builder b = new Notification.Builder(this, CHANNEL_MONITOR)
                 .setSmallIcon(android.R.drawable.ic_dialog_map)
-                .setContentTitle(title)
-                .setContentText(body)
-                .setStyle(new Notification.BigTextStyle().bigText(bigText == null ? body : bigText))
+                .setContentTitle("Muavin Asistanı canlı takip")
+                .setContentText(monitorBody())
+                .setStyle(new Notification.BigTextStyle().bigText(monitorBigText()))
                 .setContentIntent(openPi)
-                .setOngoing(!alertMode)
-                .setOnlyAlertOnce(!alertMode)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
                 .setShowWhen(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setCategory(alertMode ? Notification.CATEGORY_ALARM : Notification.CATEGORY_SERVICE);
+                .setCategory(Notification.CATEGORY_NAVIGATION)
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Takibi kapat", stopServicePi);
 
-        if (Build.VERSION.SDK_INT >= 21) {
-            b.setPriority(alertMode ? Notification.PRIORITY_MAX : Notification.PRIORITY_LOW);
-        }
-
-        if (alertMode) {
-            b.addAction(android.R.drawable.ic_media_pause, "Alarmı durdur", stopAlarmPi);
-            b.addAction(android.R.drawable.ic_menu_view, "Uygulamayı aç", openPi);
-            b.setAutoCancel(false);
-        } else {
-            b.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Takibi kapat", stopServicePi);
-        }
+        b.setPriority(Notification.PRIORITY_DEFAULT);
 
         return b.build();
+    }
+
+    private Notification buildAlertNotification(String message) {
+        Intent openIntent = new Intent(this, MainActivity.class);
+        openIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        int piFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= 23) piFlags |= PendingIntent.FLAG_IMMUTABLE;
+
+        PendingIntent openPi = PendingIntent.getActivity(this, 20, openIntent, piFlags);
+
+        Intent stopAlarmIntent = new Intent(this, LiveStopAlertService.class);
+        stopAlarmIntent.setAction(ACTION_STOP_ALARM);
+        PendingIntent stopAlarmPi = PendingIntent.getService(this, 21, stopAlarmIntent, piFlags);
+
+        String big = "CANLI DURAK ALARMI\n" + stopTitle() + "\n" + message;
+
+        Notification.Builder b = new Notification.Builder(this, CHANNEL_ALERT)
+                .setSmallIcon(android.R.drawable.ic_dialog_map)
+                .setContentTitle("Canlı durak alarmı")
+                .setContentText(message)
+                .setStyle(new Notification.BigTextStyle().bigText(big))
+                .setContentIntent(openPi)
+                .setOngoing(true)
+                .setOnlyAlertOnce(false)
+                .setShowWhen(true)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setCategory(Notification.CATEGORY_ALARM)
+                .addAction(android.R.drawable.ic_media_pause, "Alarmı durdur", stopAlarmPi)
+                .addAction(android.R.drawable.ic_menu_view, "Uygulamayı aç", openPi);
+
+        b.setPriority(Notification.PRIORITY_MAX);
+
+        return b.build();
+    }
+
+    private void showAlarmNotification(String message) {
+        startVibration();
+
+        try {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if (nm != null) {
+                nm.notify(ALERT_NOTIFICATION_ID, buildAlertNotification(message));
+            }
+        } catch (Exception ignored) {}
     }
 
     private void startForegroundSafe(Notification notification) {
         try {
             if (Build.VERSION.SDK_INT >= 29) {
                 startForeground(
-                        NOTIFICATION_ID,
+                        MONITOR_NOTIFICATION_ID,
                         notification,
                         ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
                 );
             } else {
-                startForeground(NOTIFICATION_ID, notification);
+                startForeground(MONITOR_NOTIFICATION_ID, notification);
             }
         } catch (Exception e) {
             try {
-                startForeground(NOTIFICATION_ID, notification);
+                startForeground(MONITOR_NOTIFICATION_ID, notification);
             } catch (Exception ignored) {}
         }
     }
@@ -258,20 +275,20 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         NotificationChannel monitor = new NotificationChannel(
                 CHANNEL_MONITOR,
-                "Canlı durak takip",
-                NotificationManager.IMPORTANCE_LOW
+                "Canlı durak kilit ekranı kartı",
+                NotificationManager.IMPORTANCE_DEFAULT
         );
-        monitor.setDescription("Canlı durak arka plan takibi");
+        monitor.setDescription("Canlı durak, kalan mesafe, yolcu ve bagaj kartı");
         monitor.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
         NotificationChannel alert = new NotificationChannel(
                 CHANNEL_ALERT,
-                "Canlı durak alarmı",
+                "Canlı durak alarmı V88",
                 NotificationManager.IMPORTANCE_HIGH
         );
         alert.setDescription("2 km kala sesli ve titreşimli uyarı");
         alert.enableVibration(true);
-        alert.setVibrationPattern(new long[]{0, 600, 300, 600, 300, 900});
+        alert.setVibrationPattern(new long[]{0, 700, 300, 700, 300, 1000});
         alert.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
         nm.createNotificationChannel(monitor);
@@ -317,6 +334,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         if (location == null) return;
         if (stopName == null || stopName.trim().length() == 0) return;
+
         if (!validCoord()) {
             updateForegroundMonitor();
             return;
@@ -392,7 +410,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
         try {
             if (tts == null) return;
             tts.stop();
-            tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null, "muavin_lock_alarm_v87");
+            tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null, "muavin_lock_alarm_v88");
         } catch (Exception ignored) {}
     }
 
@@ -425,6 +443,11 @@ public class LiveStopAlertService extends Service implements LocationListener {
             if (tts != null) tts.stop();
         } catch (Exception ignored) {}
 
+        try {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if (nm != null) nm.cancel(ALERT_NOTIFICATION_ID);
+        } catch (Exception ignored) {}
+
         updateForegroundMonitor();
     }
 
@@ -444,6 +467,14 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         try {
             stopForeground(true);
+        } catch (Exception ignored) {}
+
+        try {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if (nm != null) {
+                nm.cancel(MONITOR_NOTIFICATION_ID);
+                nm.cancel(ALERT_NOTIFICATION_ID);
+            }
         } catch (Exception ignored) {}
     }
 
