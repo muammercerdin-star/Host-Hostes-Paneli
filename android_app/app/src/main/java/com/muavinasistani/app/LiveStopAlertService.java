@@ -213,6 +213,10 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         PendingIntent openPi = PendingIntent.getActivity(this, 20, openIntent, piFlags);
 
+        Intent alarmScreenIntent = new Intent(this, LockAlarmActivity.class);
+        alarmScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent alarmScreenPi = PendingIntent.getActivity(this, 22, alarmScreenIntent, piFlags);
+
         Intent stopAlarmIntent = new Intent(this, LiveStopAlertService.class);
         stopAlarmIntent.setAction(ACTION_STOP_ALARM);
         PendingIntent stopAlarmPi = PendingIntent.getService(this, 21, stopAlarmIntent, piFlags);
@@ -225,6 +229,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
                 .setContentText(message)
                 .setStyle(new Notification.BigTextStyle().bigText(big))
                 .setContentIntent(openPi)
+                .setFullScreenIntent(alarmScreenPi, true)
                 .setOngoing(true)
                 .setOnlyAlertOnce(false)
                 .setShowWhen(true)
@@ -246,6 +251,17 @@ public class LiveStopAlertService extends Service implements LocationListener {
             if (nm != null) {
                 nm.notify(ALERT_NOTIFICATION_ID, buildAlertNotification(message));
             }
+        } catch (Exception ignored) {}
+
+        launchLockAlarmActivityV89();
+    }
+
+
+    private void launchLockAlarmActivityV89() {
+        try {
+            Intent i = new Intent(this, LockAlarmActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(i);
         } catch (Exception ignored) {}
     }
 
