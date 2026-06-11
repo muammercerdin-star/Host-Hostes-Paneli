@@ -1,11 +1,10 @@
-/* CONTINUE_NATIVE_LOCK_ALARM_V86
-   WebView -> Android kilit ekranı alarm servisi.
+/* CONTINUE_NATIVE_LOCK_ALARM_V87
+   V87: Kilit ekranı canlı durak kartı.
    V82 kuralı: canlı durak GPS ile değişmez.
-   V86: Koordinat eşleşmese bile takip bildirimi başlatılır.
 */
 (function(){
-  if(window.CONTINUE_NATIVE_LOCK_ALARM_V86_READY) return;
-  window.CONTINUE_NATIVE_LOCK_ALARM_V86_READY = true;
+  if(window.CONTINUE_NATIVE_LOCK_ALARM_V87_READY) return;
+  window.CONTINUE_NATIVE_LOCK_ALARM_V87_READY = true;
 
   const BOOT = window.CONTINUE_BOOT || {};
   const tripId = String(BOOT.tripId || BOOT.trip_id || "active");
@@ -30,6 +29,26 @@
   function currentStop(){
     const el = document.getElementById("liveCurrentStopName");
     return clean(el && el.textContent);
+  }
+
+  function distanceText(){
+    const ids = ["liveDistanceValue", "liveDistanceText", "liveKmValue"];
+    for(const id of ids){
+      const el = document.getElementById(id);
+      if(el){
+        const txt = clean(el.textContent);
+        if(txt) return txt;
+      }
+    }
+
+    const card = document.querySelector(".live-current-card, .live-stop-card, .live-panel");
+    if(card){
+      const txt = clean(card.textContent);
+      const m = txt.match(/Kalan mesafe[:\s]*([0-9]+[.,][0-9]+|[0-9]+)\s*km/i);
+      if(m) return m[1].replace(",", ".") + " km";
+    }
+
+    return "";
   }
 
   function offloadCount(){
@@ -76,6 +95,31 @@
     return null;
   }
 
+  function updateBridge(stop, off, bag, c, km){
+    if(!window.AndroidLockAlarm) return;
+
+    try{
+      window.AndroidLockAlarm.updateTargetV87(
+        tripId,
+        stop,
+        c ? String(c.lat) : "",
+        c ? String(c.lng) : "",
+        String(off),
+        String(bag),
+        km || ""
+      );
+    }catch(err){
+      window.AndroidLockAlarm.updateTarget(
+        tripId,
+        stop,
+        c ? String(c.lat) : "",
+        c ? String(c.lng) : "",
+        String(off),
+        String(bag)
+      );
+    }
+  }
+
   function sync(){
     try{
       if(!window.AndroidLockAlarm) return;
@@ -85,35 +129,27 @@
 
       const off = offloadCount();
       const bag = bagCount();
+      const km = distanceText();
       const c = findCoord(stop);
 
-      const sig = [tripId, stop, c ? c.lat : "NO_LAT", c ? c.lng : "NO_LNG", off, bag].join("|");
+      const sig = [tripId, stop, c ? c.lat : "NO_LAT", c ? c.lng : "NO_LNG", off, bag, km].join("|");
 
       if(sig !== lastSig){
         lastSig = sig;
-
-        window.AndroidLockAlarm.updateTarget(
-          tripId,
-          stop,
-          c ? String(c.lat) : "",
-          c ? String(c.lng) : "",
-          String(off),
-          String(bag)
-        );
+        updateBridge(stop, off, bag, c, km);
       }
 
-      // V86: Koordinat yoksa bile servis başlasın, bildirim kanalı canlansın.
       if(!started){
         started = true;
         window.AndroidLockAlarm.start();
       }
 
     }catch(err){
-      console.warn("CONTINUE_NATIVE_LOCK_ALARM_V86 sync error", err);
+      console.warn("CONTINUE_NATIVE_LOCK_ALARM_V87 sync error", err);
     }
   }
 
-  window.continueNativeLockAlarmV86 = {
+  window.continueNativeLockAlarmV87 = {
     sync,
     stopAlarm(){
       try{ if(window.AndroidLockAlarm) window.AndroidLockAlarm.stopAlarm(); }catch(_){}
@@ -139,6 +175,7 @@
   if(window.MutationObserver){
     const targets = [
       document.getElementById("liveCurrentStopName"),
+      document.getElementById("liveDistanceValue"),
       document.getElementById("liveOffloadCount"),
       document.getElementById("liveBagajCount"),
       document.getElementById("liveBagajMetric")

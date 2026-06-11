@@ -354,6 +354,24 @@ public class MainActivity extends Activity {
             } catch (Exception ignored) {}
         }
 
+
+        @JavascriptInterface
+        public void updateTargetV87(String tripId, String stopName, String lat, String lng, String offloadCount, String bagCount, String displayKm) {
+            try {
+                android.content.SharedPreferences prefs = getSharedPreferences("muavin_lock_alarm_v85", MODE_PRIVATE);
+                prefs.edit()
+                        .putString("trip_id", tripId == null ? "active" : tripId.trim())
+                        .putString("stop_name", stopName == null ? "" : stopName.trim())
+                        .putString("target_lat", lat == null ? "" : lat.trim())
+                        .putString("target_lng", lng == null ? "" : lng.trim())
+                        .putString("offload_count", offloadCount == null ? "0" : offloadCount.trim())
+                        .putString("bag_count", bagCount == null ? "0" : bagCount.trim())
+                        .putString("display_km", displayKm == null ? "" : displayKm.trim())
+                        .putBoolean("enabled", true)
+                        .apply();
+            } catch (Exception ignored) {}
+        }
+
         @JavascriptInterface
         public void start() {
             runOnUiThread(() -> startLiveStopAlarmService());

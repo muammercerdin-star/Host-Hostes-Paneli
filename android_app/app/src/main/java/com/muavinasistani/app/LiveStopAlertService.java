@@ -47,8 +47,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
     private double targetLng = Double.NaN;
     private int offloadCount = 0;
     private int bagCount = 0;
-
-    private boolean alarmActive = false;
+    private String displayKm = "";
 
     @Override
     public void onCreate() {
@@ -106,6 +105,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
     private void loadTargetFromPrefs() {
         tripId = prefs.getString("trip_id", "active");
         stopName = prefs.getString("stop_name", "");
+        displayKm = prefs.getString("display_km", "");
 
         try {
             targetLat = Double.parseDouble(prefs.getString("target_lat", ""));
@@ -135,32 +135,60 @@ public class LiveStopAlertService extends Service implements LocationListener {
                 && !Double.isInfinite(targetLng);
     }
 
-    private void updateForegroundMonitor() {
-        String body = stopName != null && stopName.trim().length() > 0
-                ? stopName + " durağı takip ediliyor"
-                : "Canlı durak takip ediliyor";
+    private String stopTitle() {
+        return stopName != null && stopName.trim().length() > 0 ? stopName.trim() : "Canlı durak";
+    }
 
+    private String kmText() {
+        if (displayKm != null && displayKm.trim().length() > 0) {
+            String x = displayKm.trim();
+            return x.toLowerCase(new Locale("tr", "TR")).contains("km") ? x : x + " km";
+        }
+        return "mesafe hesaplanıyor";
+    }
+
+    private String passengerText() {
+        return offloadCount > 0 ? offloadCount + " yolcu inecek" : "İnecek yolcu yok";
+    }
+
+    private String bagText() {
+        return bagCount > 0 ? bagCount + " bagaj var" : "0 bagaj";
+    }
+
+    private String monitorBody() {
+        return stopTitle() + " • " + kmText() + " • " + passengerText() + " • " + bagText();
+    }
+
+    private String monitorBigText() {
+        return "CANLI DURAK\n"
+                + stopTitle()
+                + "\nKalan mesafe: " + kmText()
+                + "\n" + passengerText() + " • " + bagText();
+    }
+
+    private void updateForegroundMonitor() {
         startForegroundSafe(buildNotification(
                 CHANNEL_MONITOR,
                 "Muavin Asistanı canlı takip",
-                body,
+                monitorBody(),
+                monitorBigText(),
                 false
         ));
     }
 
     private void showAlarmNotification(String message) {
-        alarmActive = true;
         startVibration();
 
         startForegroundSafe(buildNotification(
                 CHANNEL_ALERT,
-                "Canlı durak uyarısı",
+                "Canlı durak alarmı",
                 message,
+                "CANLI DURAK ALARMI\n" + stopTitle() + "\n" + message,
                 true
         ));
     }
 
-    private Notification buildNotification(String channelId, String title, String body, boolean alertMode) {
+    private Notification buildNotification(String channelId, String title, String body, String bigText, boolean alertMode) {
         Intent openIntent = new Intent(this, MainActivity.class);
         openIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -181,9 +209,11 @@ public class LiveStopAlertService extends Service implements LocationListener {
                 .setSmallIcon(android.R.drawable.ic_dialog_map)
                 .setContentTitle(title)
                 .setContentText(body)
+                .setStyle(new Notification.BigTextStyle().bigText(bigText == null ? body : bigText))
                 .setContentIntent(openPi)
                 .setOngoing(!alertMode)
-                .setOnlyAlertOnce(false)
+                .setOnlyAlertOnce(!alertMode)
+                .setShowWhen(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setCategory(alertMode ? Notification.CATEGORY_ALARM : Notification.CATEGORY_SERVICE);
 
@@ -232,6 +262,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
                 NotificationManager.IMPORTANCE_LOW
         );
         monitor.setDescription("Canlı durak arka plan takibi");
+        monitor.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
         NotificationChannel alert = new NotificationChannel(
                 CHANNEL_ALERT,
@@ -241,6 +272,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
         alert.setDescription("2 km kala sesli ve titreşimli uyarı");
         alert.enableVibration(true);
         alert.setVibrationPattern(new long[]{0, 600, 300, 600, 300, 900});
+        alert.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
         nm.createNotificationChannel(monitor);
         nm.createNotificationChannel(alert);
@@ -285,7 +317,10 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         if (location == null) return;
         if (stopName == null || stopName.trim().length() == 0) return;
-        if (!validCoord()) return;
+        if (!validCoord()) {
+            updateForegroundMonitor();
+            return;
+        }
 
         float[] result = new float[1];
         Location.distanceBetween(
@@ -297,6 +332,13 @@ public class LiveStopAlertService extends Service implements LocationListener {
         );
 
         double km = result[0] / 1000.0;
+        displayKm = formatKm(km);
+
+        try {
+            prefs.edit().putString("display_km", displayKm).apply();
+        } catch (Exception ignored) {}
+
+        updateForegroundMonitor();
 
         if (km <= 2.05 && km >= 0.05) {
             String key = alertKey();
@@ -310,17 +352,24 @@ public class LiveStopAlertService extends Service implements LocationListener {
         }
     }
 
+    private String formatKm(double km) {
+        try {
+            return String.format(new Locale("tr", "TR"), "%.2f km", km);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     private String buildSpeechMessage() {
         if (offloadCount > 0) {
-            return stopName + " durağına 2 kilometre kaldı. " + offloadCount + " yolcu inecek.";
+            return stopTitle() + " durağına 2 kilometre kaldı. " + offloadCount + " yolcu inecek.";
         }
-        return stopName + " durağına 2 kilometre kaldı. İnecek yolcu yok.";
+        return stopTitle() + " durağına 2 kilometre kaldı. İnecek yolcu yok.";
     }
 
     private String buildLockMessage() {
-        String yolcu = offloadCount > 0 ? offloadCount + " yolcu inecek" : "İnecek yolcu yok";
         String bag = bagCount > 0 ? bagCount + " bagaj var" : "Bagaj yok";
-        return stopName + " • 2 km kaldı • " + yolcu + " • " + bag;
+        return stopTitle() + " • 2 km kaldı • " + passengerText() + " • " + bag;
     }
 
     private String alertKey() {
@@ -343,7 +392,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
         try {
             if (tts == null) return;
             tts.stop();
-            tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null, "muavin_lock_alarm_v85");
+            tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null, "muavin_lock_alarm_v87");
         } catch (Exception ignored) {}
     }
 
@@ -370,8 +419,6 @@ public class LiveStopAlertService extends Service implements LocationListener {
     }
 
     private void stopAlarmOnly() {
-        alarmActive = false;
-
         stopVibration();
 
         try {
