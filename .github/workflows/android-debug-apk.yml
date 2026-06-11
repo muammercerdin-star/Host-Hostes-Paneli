@@ -2,11 +2,13 @@ name: Android Debug APK
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build-debug-apk:
+    name: Build debug APK
     runs-on: ubuntu-latest
 
     steps:
@@ -24,51 +26,37 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Prepare Android build for GitHub runner
+      - name: Prepare Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform
         run: |
-          cd android_app
-
-          echo "===== GitHub CI ayar düzeltme ====="
-
-          # Termux native aapt2 yolu GitHub'da çalışmaz.
-          sed -i '/android.aapt2FromMavenOverride=/d' gradle.properties || true
-          sed -i '/V85H_TERMUX_NATIVE_AAPT2/d' gradle.properties || true
-          sed -i '/V90B_TERMUX_NATIVE_AAPT2/d' gradle.properties || true
-
-          # Termux Python yolu GitHub'da yok. GitHub'daki python3.13 kullanılacak.
-          sed -i 's#buildPython ".*"#buildPython "python3.13"#' app/build.gradle
-
-          # GitHub runner resmi Android SDK kullandığı için compileSdk 35 güvenli.
-          sed -i 's/compileSdk [0-9][0-9]*/compileSdk 35/' app/build.gradle
-          sed -i 's/targetSdk [0-9][0-9]*/targetSdk 35/' app/build.gradle
-
-          # AndroidX core tekrar güncel kalabilir.
-          sed -i 's#androidx.core:core:[0-9.]*#androidx.core:core:1.13.1#' app/build.gradle
-
-          echo
-          echo "===== build.gradle ====="
-          grep -nE "compileSdk|targetSdk|buildPython|version|abiFilters|androidx.core" app/build.gradle
-
-          echo
-          echo "===== gradle.properties ====="
-          cat gradle.properties
+          yes | sdkmanager --licenses || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build debug APK
+      - name: Verify build files
         run: |
-          cd android_app
-          gradle -PmuavinBuildProfile=github :app:assembleDebug --stacktrace --no-daemon
+          echo "===== build.gradle ====="
+          grep -nE "muavinBuildProfile|compileSdk|targetSdk|muavinCoreVersion|androidx.core|buildPython|abiFilters" android_app/app/build.gradle
+          echo
+          echo "===== bad version search ====="
+          ! grep -R "1.13.11.13.1" -n android_app .github
+
+      - name: Build debug APK
+        working-directory: android_app
+        run: gradle -PmuavinBuildProfile=github :app:assembleDebug --stacktrace --no-daemon
 
       - name: Collect APK
         run: |
-          mkdir -p apk-output
-          cp android_app/app/build/outputs/apk/debug/app-debug.apk apk-output/muavin-asistani-debug.apk
-          ls -lh apk-output/
+          mkdir -p artifacts
+          cp android_app/app/build/outputs/apk/debug/app-debug.apk artifacts/muavin-asistani-debug.apk
+          ls -lh artifacts
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: muavin-asistani-debug-apk
-          path: apk-output/muavin-asistani-debug.apk
+          path: artifacts/muavin-asistani-debug.apk
