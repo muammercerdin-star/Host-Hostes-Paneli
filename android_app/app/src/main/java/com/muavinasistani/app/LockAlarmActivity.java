@@ -82,7 +82,7 @@ public class LockAlarmActivity extends Activity {
         ));
 
         TextView stop = new TextView(this);
-        stop.setText(stopName.toLocaleUpperCase(new Locale("tr", "TR")));
+        stop.setText(stopName.toUpperCase(new Locale("tr", "TR")));
         stop.setTextColor(Color.WHITE);
         stop.setTextSize(48);
         stop.setTypeface(Typeface.DEFAULT_BOLD);

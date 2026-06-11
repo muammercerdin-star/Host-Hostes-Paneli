@@ -2127,6 +2127,8 @@
     }
 
     function switchLiveStopMidpointV67(oldName, picked){
+      // LIVE_STOP_LOCK_V82_GUARD
+      return false;
       if(!picked || !picked.name) return false;
 
       const toName = String(picked.name || "").trim();

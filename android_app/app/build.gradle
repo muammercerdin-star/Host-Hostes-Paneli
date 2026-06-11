@@ -3,20 +3,27 @@ plugins {
     id 'com.chaquo.python'
 }
 
+def muavinBuildProfile = (project.findProperty("muavinBuildProfile") ?: System.getenv("MUAVIN_BUILD_PROFILE") ?: "github").toString()
+def isTermuxBuild = muavinBuildProfile.equalsIgnoreCase("termux")
+def muavinCompileSdk = isTermuxBuild ? 33 : 35
+def muavinTargetSdk = isTermuxBuild ? 33 : 35
+def muavinCoreVersion = isTermuxBuild ? "1.10.1" : "1.13.1"
+def muavinBuildPython = isTermuxBuild ? "/data/data/com.termux/files/usr/bin/python3.13" : "python3.13"
+
 android {
     namespace 'com.muavinasistani.app'
-    compileSdk 35
+    compileSdk muavinCompileSdk
 
     defaultConfig {
         applicationId 'com.muavinasistani.app'
         minSdk 26
-        targetSdk 35
+        targetSdk muavinTargetSdk
         versionCode 1
         versionName '0.1-test'
 
         python {
             version "3.13"
-            buildPython "python3.13"
+            buildPython muavinBuildPython
 
             pip {
                 install "flask"
@@ -33,5 +40,5 @@ android {
 }
 
 dependencies {
-    implementation "androidx.core:core:1.13.1"
+    implementation "androidx.core:core:${muavinCoreVersion}"
 }

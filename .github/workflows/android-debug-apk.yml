@@ -59,7 +59,7 @@ jobs:
       - name: Build debug APK
         run: |
           cd android_app
-          gradle :app:assembleDebug --stacktrace --no-daemon
+          gradle -PmuavinBuildProfile=github :app:assembleDebug --stacktrace --no-daemon
 
       - name: Collect APK
         run: |
