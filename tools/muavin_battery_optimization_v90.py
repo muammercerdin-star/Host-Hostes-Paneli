@@ -1,4 +1,22 @@
-package com.muavinasistani.app;
+from pathlib import Path
+from datetime import datetime
+import shutil
+
+ROOT = Path(".").resolve()
+STAMP = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+SERVICE = ROOT / "android_app/app/src/main/java/com/muavinasistani/app/LiveStopAlertService.java"
+
+print("===== V90 PİL OPTİMİZASYONU / AKILLI GPS =====")
+
+if not SERVICE.exists():
+    raise SystemExit("❌ LiveStopAlertService.java yok")
+
+b = SERVICE.with_name(SERVICE.name + f".bak-v90-battery-{STAMP}")
+shutil.copy2(SERVICE, b)
+print("📦 Service yedeği:", b.relative_to(ROOT))
+
+SERVICE_CODE = r'''package com.muavinasistani.app;
 
 import android.Manifest;
 import android.app.Notification;
@@ -620,3 +638,30 @@ public class LiveStopAlertService extends Service implements LocationListener {
         return null;
     }
 }
+'''
+
+SERVICE.write_text(SERVICE_CODE, encoding="utf-8")
+
+print("✅ LiveStopAlertService V90 pil optimizasyonlu yazıldı")
+
+print()
+print("===== KONTROL =====")
+txt = SERVICE.read_text(encoding="utf-8", errors="ignore")
+for i, line in enumerate(txt.splitlines(), 1):
+    if any(k in line for k in [
+        "MODE_FAR",
+        "MODE_MID",
+        "MODE_NEAR",
+        "MODE_ALERT",
+        "MODE_AFTER_ALERT",
+        "applyLocationMode",
+        "gpsMs",
+        "netMs",
+        "maybeUpdateMonitorByKm",
+        "muavin_live_monitor_v90",
+        "muavin_live_alert_v90"
+    ]):
+        print(f"{i}: {line}")
+
+print()
+print("✅ V90 tamam.")
