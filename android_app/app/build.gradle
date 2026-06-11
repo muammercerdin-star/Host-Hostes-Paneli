@@ -5,6 +5,7 @@ plugins {
 
 def muavinBuildProfile = (project.findProperty("muavinBuildProfile") ?: System.getenv("MUAVIN_BUILD_PROFILE") ?: "github").toString()
 def isTermuxBuild = muavinBuildProfile.equalsIgnoreCase("termux")
+
 def muavinCompileSdk = isTermuxBuild ? 33 : 35
 def muavinTargetSdk = isTermuxBuild ? 33 : 35
 def muavinCoreVersion = isTermuxBuild ? "1.10.1" : "1.13.1"
