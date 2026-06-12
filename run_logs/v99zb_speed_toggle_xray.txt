@@ -1,0 +1,508 @@
+===== V99ZB HIZ ANALOG TOGGLE RÖNTGEN =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+TIME: 2026-06-12 19:11:14
+NOT: Bu script dosya değiştirmez.
+
+===== 1) DOSYA DURUMU =====
+WEB_TPL  VAR size=16161    sha=7a488d2e2626 /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/continue_trip.html
+WEB_JS   VAR size=42277    sha=215339187b38 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.js
+WEB_CSS  VAR size=25802    sha=0958417858c4 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.css
+AND_TPL  VAR size=16161    sha=7a488d2e2626 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/templates/continue_trip.html
+AND_JS   VAR size=42277    sha=215339187b38 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_v99_clean.js
+AND_CSS  VAR size=25802    sha=0958417858c4 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_v99_clean.css
+
+===== 2) WEB / ANDROID SENKRON =====
+template   AYNI web=7a488d2e2626 android=7a488d2e2626
+js         AYNI web=215339187b38 android=215339187b38
+css        AYNI web=0958417858c4 android=0958417858c4
+
+===== 3) HIZ TOGGLE MARKER KONTROLÜ =====
+YOK  V99Z_SPEED_ANALOG_TOGGLE_START
+YOK  V99Z_SPEED_ANALOG_TOGGLE_CSS_START
+YOK  V99ZA_SPEED_TOGGLE_START
+YOK  V99ZA_SPEED_TOGGLE_CSS_START
+YOK  MuavinV99SpeedToggle
+YOK  MuavinV99ZASpeedToggle
+YOK  v99z-speed-card
+YOK  v99za-speed-card
+
+SONUÇ: Şu an aktif HIZ analog toggle JS bloğu görünmüyor.
+Rollback çalıştıysa mevcut dosyada analog hızın çalışmaması normal.
+
+===== 4) TEMPLATE SCRIPT CACHE SATIRI =====
+433: <script src="{{ url_for('static', filename='continue/continue_trip_v99_clean.js') }}?v=v99speed-rollback-{{ trip['id'] }}"></script>
+ℹ️ Template rollback cache ile çağırıyor. Bu durumda hız toggle silinmiş olabilir.
+
+===== 5) RENDER HTML TEST =====
+STATUS: 200
+HTML_SIZE: 91299
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99zb_speed_toggle_render.html
+
+SCRIPT SATIRLARI:
+2621: <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+2672: <script src="/static/continue/continue_trip_core.js?v=live-stop-lock-v82"></script>
+2673: <script src="/static/continue/continue_bag_emanet.js?v=bag-emanet-clean-1"></script>
+2674: <script src="/static/continue/continue_flow_refresh.js?v=flow-refresh-1"></script>
+2675: <script src="/static/continue/continue_trip_ui.js?v=js-safe-split-1"></script>
+2676: <script src="/static/continue/continue_refresh_button_v49.js?v=refresh-v49"></script>
+2677: <script src="/static/continue/continue_native_lock_alarm_v85.js?v=native-lock-alarm-v87"></script>
+2678: <script src="/static/continue/continue_trip_v99_clean.js?v=v99speed-rollback-314"></script>
+
+ÜST HIZ / DOLULUK / DURUM BLOĞU:
+46: <div class="v99-gauges">
+47:   <div class="v99-gauge-cell">
+48:     <div class="v99-gauge-label">HIZ</div>
+49:     <div class="v99-gauge-val amber" id="v99SpeedVal">0</div>
+51:     <span class="v99-core-hidden" id="liveSpeedText">— km/sa</span>
+54:   <div class="v99-gauge-cell">
+55:     <div class="v99-gauge-label">DOLULUK</div>
+69:   <div class="v99-gauge-cell">
+70:     <div class="v99-gauge-label">DURUM</div>
+
+===== 6) DOM SEÇİCİ SİMÜLASYONU =====
+v99-gauge-cell regex count: 3
+CELL 1: HIZ 0 km/sa — km/sa
+CELL 2: DOLULUK 3 / 40 ♂ 2 ♀ 1
+CELL 3: DURUM Planında canlı takip
+
+HIZ label var mı: True
+id=v99SpeedVal var mı: True
+id=liveSpeedText var mı: True
+.v99-gauges .v99-gauge-cell yapısı var mı: True
+
+===== 7) JS HIZ BLOĞU / EVENT SIRASI =====
+
+===== JS speed / click / stopImmediatePropagation izleri =====
+HIT_COUNT: 10
+  111:   }
+  112: 
+  113:   function sync(){
+  114:     const km = parseKm(text("#liveDistanceValue"));
+  115:     setRing(km);
+  116: 
+  117:     const speedVisual = q("#v99SpeedVal");
+  118:     if(speedVisual){
+  119:       speedVisual.textContent = cleanSpeed(text("#liveSpeedText"));
+  120:     }
+  121: 
+  122:     const status = text("#liveTopStatusText");
+  123:     const sub = q("#v99StatusSub");
+-----
+  124:     if(sub && status){
+  125:       sub.textContent = /erken|geç/i.test(status) ? "tahmini durum" : "canlı takip";
+-----
+  913:   window.addEventListener("load", protectDistances);
+  914: })();
+  915: /* V99K_DISTANCE_NO_FLICKER_GUARD_END */
+  916: 
+  917: 
+  918: 
+  919: /* V99M_OCCUPANCY_PANEL_START */
+  920: (function(){
+  921:   "use strict";
+  922: 
+  923:   function q(sel, root){
+  924:     return (root || document).querySelector(sel);
+  925:   }
+-----
+ 1020:       </div>
+ 1021:     `;
+ 1022: 
+ 1023:     document.body.appendChild(overlay);
+ 1024:     document.body.appendChild(sheet);
+ 1025: 
+ 1026:     overlay.addEventListener("click", closePanel);
+ 1027:     q("#v99mOccClose").addEventListener("click", closePanel);
+ 1028:     q("#v99mOccRefresh").addEventListener("click", loadPanel);
+ 1029:   }
+ 1030: 
+ 1031:   function openPanel(){
+ 1032:     ensurePanel();
+-----
+ 1033:     q("#v99mOccOverlay").classList.add("open");
+-----
+ 1034:     q("#v99mOccSheet").classList.add("open");
+-----
+ 1093:       }else{
+ 1094:         el.removeAttribute("data-v99u-doluluk-click");
+ 1095:       }
+ 1096:     });
+ 1097:   }
+ 1098: 
+ 1099:   document.addEventListener("click", function(ev){
+ 1100: 
+ 1101:     var el = ev.target;
+ 1102:     while(el && el !== document.body){
+ 1103:       if(isDolulukTarget(el)){
+ 1104:         ev.preventDefault();
+ 1105:         openPanel();
+-----
+ 1106:         return;
+ 1107:       }
+ 1108:       el = el.parentElement;
+ 1109:     }
+ 1110:   }, true);
+-----
+ 1253:           }
+ 1254:         }else{
+ 1255:           cell.classList.add("free");
+ 1256:         }
+ 1257: 
+ 1258:         cell.textContent = no;
+ 1259:         cell.addEventListener("click", function(seat){
+ 1260:           return function(){
+ 1261:             showSeatDetail(seat);
+ 1262:           };
+ 1263:         }(s));
+ 1264: 
+ 1265:         map.appendChild(cell);
+-----
+ 1540:       var seats = Array.isArray(data.seats) ? data.seats : [];
+ 1541: 
+ 1542:       applySeatClasses(seats);
+ 1543:     }catch(e){}
+ 1544:   }
+ 1545: 
+ 1546:   document.addEventListener("click", function(ev){
+ 1547:     var el = ev.target.closest("[data-v99-seat-no], [data-seat-no], [data-seat], .v99-seat-color-cell");
+ 1548: 
+ 1549:     if(!el || !looksLikeSeatElement(el)) return;
+ 1550: 
+ 1551:     var no = String(
+ 1552:       el.getAttribute("data-v99-seat-no") ||
+-----
+
+===== 8) CSS HIZ BLOĞU / GAUGE STİLİ =====
+
+===== CSS gauge / speed analog izleri =====
+HIT_COUNT: 28
+   21: .v99-live-body{
+   22:   background:var(--v99-bg) !important;
+   23:   color:var(--v99-text) !important;
+   24:   font-family:'Rajdhani',system-ui,-apple-system,BlinkMacSystemFont,sans-serif !important;
+   25:   font-size:15px;
+   26:   min-height:100vh;
+   27:   overflow-x:hidden;
+   28:   padding:0 0 92px 0;
+   29: }
+   30: 
+   31: .v99-live-body *,
+   32: .v99-live-body *::before,
+   33: .v99-live-body *::after{
+-----
+   39: }
+   40: 
+   41: .v99-core-hidden{
+   42:   position:absolute !important;
+   43:   width:1px !important;
+   44:   height:1px !important;
+   45:   overflow:hidden !important;
+   46:   clip:rect(0 0 0 0) !important;
+   47:   white-space:nowrap !important;
+   48:   opacity:0 !important;
+   49:   pointer-events:none !important;
+   50: }
+   51: 
+-----
+   52: /* HEADER */
+   53: .v99-hdr{
+   54:   display:flex;
+   55:   align-items:center;
+-----
+  148: @keyframes v99-pulse-red{
+  149:   0%,100%{opacity:1;transform:scale(1);}
+  150:   50%{opacity:.4;transform:scale(.7);}
+  151: }
+  152: 
+  153: /* GAUGES */
+  154: .v99-gauges{
+  155:   display:grid;
+  156:   grid-template-columns:1fr 1fr 1fr;
+  157:   gap:1px;
+  158:   background:var(--v99-border);
+  159:   border-bottom:1px solid var(--v99-border);
+  160: }
+-----
+  161: 
+  162: .v99-gauge-cell{
+  163:   background:var(--v99-panel);
+  164:   padding:14px 12px;
+  165:   display:flex;
+  166:   flex-direction:column;
+  167:   align-items:center;
+  168:   gap:4px;
+-----
+  174:   letter-spacing:2px;
+  175:   color:var(--v99-muted);
+  176:   font-family:'JetBrains Mono',monospace;
+  177:   text-transform:uppercase;
+  178: }
+  179: 
+  180: .v99-gauge-val{
+  181:   font-family:'JetBrains Mono',monospace;
+  182:   font-size:22px;
+  183:   font-weight:700;
+  184:   color:var(--v99-text);
+  185:   line-height:1;
+  186:   white-space:nowrap;
+-----
+  187: }
+  188: 
+  189: .v99-gauge-val.amber{
+  190:   color:var(--v99-amber);
+  191:   text-shadow:0 0 10px #e0882040;
+  192: }
+  193: 
+  194: .v99-gauge-val.green{
+  195:   color:var(--v99-green);
+-----
+  196:   text-shadow:0 0 10px #1db87a40;
+  197: }
+  198: 
+  199: .v99-status-val{
+  200:   font-size:14px !important;
+-----
+  201:   letter-spacing:0;
+  202:   max-width:100%;
+  203:   overflow:hidden;
+  204:   text-overflow:ellipsis;
+  205: }
+  206: 
+  207: .v99-gauge-unit{
+  208:   font-size:10px;
+  209:   color:var(--v99-muted);
+-----
+  210:   letter-spacing:1px;
+-----
+  211:   text-align:center;
+  212: }
+  213: 
+-----
+  214: .v99-occ-bar-track{
+  215:   width:80px;
+  216:   height:4px;
+  217:   background:var(--v99-border);
+  218:   border-radius:2px;
+  219:   overflow:hidden;
+  220:   margin-top:2px;
+  221: }
+  222: 
+  223: .v99-occ-bar-fill{
+  224:   height:100%;
+  225:   background:linear-gradient(90deg,var(--v99-green),var(--v99-amber));
+-----
+  254: .v99-prox-card{
+  255:   background:var(--v99-panel);
+  256:   border:1px solid var(--v99-border);
+  257:   border-radius:16px;
+  258:   padding:20px;
+  259:   position:relative;
+  260:   overflow:hidden;
+  261: }
+  262: 
+  263: .v99-prox-card::before{
+  264:   content:'';
+  265:   position:absolute;
+  266:   inset:0;
+-----
+  268:     0deg,
+  269:     transparent,
+  270:     transparent 3px,
+  271:     rgba(255,255,255,.012) 3px,
+  272:     rgba(255,255,255,.012) 4px
+  273:   );
+  274:   pointer-events:none;
+  275: }
+  276: 
+  277: .v99-prox-top{
+  278:   display:flex;
+  279:   align-items:flex-start;
+  280:   gap:20px;
+-----
+  476:   color:var(--v99-muted);
+  477:   margin-bottom:5px;
+  478: }
+  479: 
+  480: .v99-dist-labels span{
+  481:   min-width:0;
+  482:   overflow:hidden;
+  483:   text-overflow:ellipsis;
+  484:   white-space:nowrap;
+  485: }
+  486: 
+  487: .v99-dist-track{
+  488:   height:6px;
+-----
+  489:   background:var(--v99-border);
+-----
+  490:   border-radius:3px;
+  491:   overflow:hidden;
+  492:   position:relative;
+  493: }
+  494: 
+  495: .v99-dist-fill{
+  496:   height:100%;
+  497:   background:linear-gradient(90deg,var(--v99-red-dim),var(--v99-red));
+-----
+  637: .v99-tl-stop-name{
+  638:   font-size:15px;
+  639:   font-weight:700;
+  640:   color:#fff;
+  641:   letter-spacing:.3px;
+  642:   min-width:0;
+  643:   overflow:hidden;
+  644:   text-overflow:ellipsis;
+  645: }
+  646: 
+  647: .v99-tl-stop-name.muted{
+  648:   color:var(--v99-label);
+  649:   font-weight:500;
+-----
+  650: }
+-----
+  807:   .v99-ring-wrap,
+  808:   .v99-ring-svg{
+  809:     width:96px;
+  810:     height:96px;
+  811:   }
+  812:   .v99-prox-stop-name{font-size:20px;}
+  813:   .v99-gauge-val{font-size:19px;}
+  814:   .v99-tl-metrics{gap:12px;}
+  815: }
+  816: 
+  817: @media (min-width:700px){
+  818:   .v99-main{
+  819:     max-width:760px;
+-----
+  898: .v99m-occ-clickable::after{
+  899:   content:"";
+  900:   position:absolute;
+  901:   inset:7px;
+  902:   border-radius:18px;
+  903:   border:1px solid rgba(58,139,255,.0);
+  904:   pointer-events:none;
+  905:   transition:.2s ease;
+  906: }
+  907: 
+  908: .v99m-occ-clickable:active::after{
+  909:   border-color:rgba(58,139,255,.45);
+  910:   box-shadow:0 0 18px rgba(58,139,255,.22);
+-----
+  915:   inset:0;
+  916:   background:rgba(0,0,0,.62);
+  917:   backdrop-filter:blur(8px);
+  918:   -webkit-backdrop-filter:blur(8px);
+  919:   z-index:99980;
+  920:   opacity:0;
+  921:   pointer-events:none;
+  922:   transition:.22s ease;
+  923: }
+  924: 
+  925: .v99m-occ-overlay.open{
+  926:   opacity:1;
+  927:   pointer-events:auto;
+-----
+  928: }
+  929: 
+  930: .v99m-occ-sheet{
+  931:   position:fixed;
+  932:   left:0;
+  933:   right:0;
+-----
+  934:   bottom:0;
+  935:   z-index:99990;
+  936:   max-height:78vh;
+  937:   overflow:auto;
+  938:   background:
+  939:     radial-gradient(circle at 25% 0%, rgba(58,139,255,.14), transparent 36%),
+  940:     radial-gradient(circle at 80% 12%, rgba(255,43,92,.13), transparent 32%),
+  941:     linear-gradient(180deg, #141923 0%, #0b0f16 100%);
+  942:   border-top:1px solid rgba(160,174,210,.18);
+  943:   border-radius:28px 28px 0 0;
+-----
+ 1058:   display:grid;
+ 1059:   gap:8px;
+ 1060:   padding:14px;
+ 1061:   border-radius:22px;
+ 1062:   border:1px solid rgba(255,255,255,.09);
+ 1063:   background:rgba(4,8,14,.46);
+ 1064:   overflow-x:auto;
+ 1065: }
+ 1066: 
+ 1067: .v99m-seat{
+ 1068:   width:42px;
+ 1069:   height:42px;
+ 1070:   border-radius:13px;
+-----
+ 1102: .v99m-seat.female{
+ 1103:   border-color:rgba(255,93,177,.75);
+ 1104: }
+ 1105: 
+ 1106: .v99m-seat.spacer{
+ 1107:   opacity:0;
+ 1108:   pointer-events:none;
+ 1109: }
+ 1110: 
+ 1111: .v99m-legend{
+ 1112:   display:flex;
+ 1113:   flex-wrap:wrap;
+ 1114:   gap:8px;
+-----
+ 1198:    Kırmızı = cinsiyet bilinmiyor / manuel dolu
+ 1199:    Sarı dış halka = bu durakta inecek
+ 1200: */
+ 1201: 
+ 1202: .v99-seat-color-cell{
+ 1203:   position:relative !important;
+ 1204:   overflow:visible !important;
+ 1205:   transition:
+ 1206:     transform .16s ease,
+ 1207:     box-shadow .16s ease,
+ 1208:     border-color .16s ease,
+ 1209:     filter .16s ease !important;
+ 1210: }
+-----
+ 1373: 
+ 1374: 
+ 1375: 
+ 1376: /* V99P_BAG_BADGE_CLICK_FIX_START */
+ 1377: .v99-seat-bag-dot,
+ 1378: .v99-seat-bag-dot *{
+ 1379:   pointer-events:none !important;
+ 1380: }
+ 1381: /* V99P_BAG_BADGE_CLICK_FIX_END */
+ 1382: 
+-----
+
+===== 9) BACKUPLARDA HIZ TOGGLE VAR MI =====
+- continue_trip_v99_clean.js.bak-before-speed-rollback-20260612-190955 size=45547 sha=83632dc47d6e markers=['V99ZA_SPEED_TOGGLE_START', 'MuavinV99ZASpeedToggle', 'V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99za-speed-toggle-20260612-190853 size=45517 sha=b812801a0dcd markers=['V99Z_SPEED_ANALOG_TOGGLE_START', 'MuavinV99SpeedToggle', 'V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99z-speed-toggle-20260612-185855 size=42278 sha=1af9ce5b2ec6 markers=['V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99y-remove-v99q-20260612-185522 size=42278 sha=1af9ce5b2ec6 markers=['V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99y-remove-v99q-20260612-181323 size=44420 sha=c6301bf83ed2 markers=['V99Q_ONLY_OCCUPANCY_CLICK_START', 'V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-before-v99v-rollback-20260612-174051 size=48930 sha=29fdc99ff7f1 markers=['V99Q_ONLY_OCCUPANCY_CLICK_START', 'V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99v-doluluk-direct-20260612-173937 size=44386 sha=26482d95a8ea markers=['V99Q_ONLY_OCCUPANCY_CLICK_START', 'V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99w-doluluk-real-fix-20260612-174254 size=44386 sha=26482d95a8ea markers=['V99Q_ONLY_OCCUPANCY_CLICK_START', 'V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99u-only-doluluk-20260612-173546 size=43515 sha=8b5e69abc66c markers=['V99Q_ONLY_OCCUPANCY_CLICK_START', 'V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99r-doluluk-gate-20260612-170359 size=43515 sha=8b5e69abc66c markers=['V99Q_ONLY_OCCUPANCY_CLICK_START', 'V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99u-safe-20260612-173658 size=43515 sha=8b5e69abc66c markers=['V99Q_ONLY_OCCUPANCY_CLICK_START', 'V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99q-only-occupancy-20260612-151408 size=41372 sha=ae34d1308d5f markers=['V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99p-bag-click-20260612-150734 size=41333 sha=8e38ea46ea43 markers=['V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99o-seat-popup-20260612-145022 size=34641 sha=b599f44be130 markers=['V99M_OCCUPANCY_PANEL_START']
+- continue_trip_v99_clean.js.bak-v99o-seat-color-20260612-150430 size=34641 sha=b599f44be130 markers=['V99M_OCCUPANCY_PANEL_START']
+
+===== 10) STATİK JS GERÇEKTEN SERVİS EDİLİYOR MU =====
+STATUS: 200
+SIZE: 42119
+YOK  V99Z_SPEED_ANALOG_TOGGLE_START
+YOK  V99ZA_SPEED_TOGGLE_START
+YOK  MuavinV99ZASpeedToggle
+VAR  V99M_OCCUPANCY_PANEL_START
+
+===== 11) JS SYNTAX CHECK =====
+✅ JS syntax OK
+
+===== 12) KISA OTOMATİK YORUM =====
+❌ Aktif JS içinde hız analog toggle bloğu yok. Rollback sonrası normal.
+
+===== RAPOR BİTTİ =====

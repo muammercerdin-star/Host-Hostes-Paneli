@@ -1,0 +1,186 @@
+/* V101_SPEED_WIDGET_START */
+(function(){
+  "use strict";
+
+  var KEY = "muavin_v101_speed_mode";
+
+  function q(sel, root){
+    return (root || document).querySelector(sel);
+  }
+
+  function qa(sel, root){
+    return Array.prototype.slice.call((root || document).querySelectorAll(sel));
+  }
+
+  function norm(v){
+    return String(v || "")
+      .toLocaleUpperCase("tr-TR")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function clamp(n, min, max){
+    return Math.max(min, Math.min(max, n));
+  }
+
+  function parseSpeed(v){
+    var m = String(v || "").replace(",", ".").match(/-?\d+(\.\d+)?/);
+    if(!m) return 0;
+    var n = Number(m[0]);
+    return Number.isFinite(n) ? Math.round(Math.max(0, n)) : 0;
+  }
+
+  function loadMode(){
+    try{
+      return localStorage.getItem(KEY) === "analog" ? "analog" : "digital";
+    }catch(_){
+      return "digital";
+    }
+  }
+
+  function saveMode(mode){
+    try{
+      localStorage.setItem(KEY, mode);
+    }catch(_){}
+  }
+
+  function findSpeedCard(){
+    var cells = qa(".v99-gauge-cell");
+    for(var i=0; i<cells.length; i++){
+      var label = q(".v99-gauge-label", cells[i]);
+      if(norm(label ? label.textContent : "") === "HIZ"){
+        return cells[i];
+      }
+    }
+    return null;
+  }
+
+  function applyMode(card, mode){
+    if(!card) return;
+    card.classList.toggle("v101-mode-analog", mode === "analog");
+    card.classList.toggle("v101-mode-digital", mode !== "analog");
+  }
+
+  function toggleMode(card){
+    if(!card) return;
+    var next = card.classList.contains("v101-mode-analog") ? "digital" : "analog";
+    applyMode(card, next);
+    saveMode(next);
+  }
+
+  function ensureMarkup(card){
+    if(!card || card.dataset.v101Ready === "1") return;
+
+    card.dataset.v101Ready = "1";
+    card.classList.add("v101-speed-card");
+    card.classList.add("v101-mode-" + loadMode());
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-label", "Hız görünümünü değiştir");
+
+    var bar = document.createElement("div");
+    bar.className = "v101-speed-bar";
+    bar.innerHTML = ''
+      + '<div class="v101-speed-bar-track"><div class="v101-speed-bar-fill"></div></div>'
+      + '<div class="v101-speed-bar-scale"><span>0</span><span>70</span><span>140</span></div>';
+
+    var analog = document.createElement("div");
+    analog.className = "v101-analog";
+    analog.innerHTML = ''
+      + '<div class="v101-analog-face">'
+      +   '<div class="v101-scale-0">0</div>'
+      +   '<div class="v101-scale-70">70</div>'
+      +   '<div class="v101-scale-140">140</div>'
+      +   '<div class="v101-arc"></div>'
+      +   '<div class="v101-arc-glow"></div>'
+      +   '<div class="v101-needle-wrap"><div class="v101-needle"></div></div>'
+      +   '<div class="v101-center-dot"></div>'
+      +   '<div class="v101-analog-number">0</div>'
+      +   '<div class="v101-analog-unit">km/sa</div>'
+      + '</div>';
+
+    var hint = document.createElement("div");
+    hint.className = "v101-speed-hint";
+    hint.textContent = "dokun: dijital / analog";
+
+    card.appendChild(bar);
+    card.appendChild(analog);
+    card.appendChild(hint);
+
+    card.addEventListener("click", function(e){
+      e.preventDefault();
+      toggleMode(card);
+    });
+
+    card.addEventListener("keydown", function(e){
+      if(e.key === "Enter" || e.key === " "){
+        e.preventDefault();
+        toggleMode(card);
+      }
+    });
+
+    applyMode(card, loadMode());
+  }
+
+  function sync(){
+    var card = findSpeedCard();
+    if(!card) return;
+
+    ensureMarkup(card);
+
+    var valEl = q("#v99SpeedVal", card) || document.getElementById("v99SpeedVal");
+    var raw = (q("#liveSpeedText") ? q("#liveSpeedText").textContent : "") || (valEl ? valEl.textContent : "0");
+    var speed = clamp(parseSpeed(raw), 0, 140);
+
+    if(valEl){
+      valEl.textContent = String(speed);
+    }
+
+    var fill = q(".v101-speed-bar-fill", card);
+    if(fill){
+      fill.style.width = ((speed / 140) * 100).toFixed(1) + "%";
+    }
+
+    var analogNum = q(".v101-analog-number", card);
+    if(analogNum){
+      analogNum.textContent = String(speed);
+    }
+
+    var needle = q(".v101-needle-wrap", card);
+    if(needle){
+      var deg = -88 + ((speed / 140) * 176);
+      needle.style.transform = "translateX(-50%) rotate(" + deg.toFixed(1) + "deg)";
+    }
+  }
+
+  function start(){
+    sync();
+
+    var liveSpeed = document.getElementById("liveSpeedText");
+    if(liveSpeed && !liveSpeed.dataset.v101Observed){
+      liveSpeed.dataset.v101Observed = "1";
+      try{
+        var mo = new MutationObserver(sync);
+        mo.observe(liveSpeed, { childList:true, subtree:true, characterData:true });
+      }catch(_){}
+    }
+
+    var v = document.getElementById("v99SpeedVal");
+    if(v && !v.dataset.v101Observed){
+      v.dataset.v101Observed = "1";
+      try{
+        var mo2 = new MutationObserver(sync);
+        mo2.observe(v, { childList:true, subtree:true, characterData:true });
+      }catch(_){}
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", start);
+  window.addEventListener("load", start);
+  setInterval(sync, 700);
+
+  window.MuavinV101SpeedWidget = {
+    refresh: sync
+  };
+})();
+/* V101_SPEED_WIDGET_END */

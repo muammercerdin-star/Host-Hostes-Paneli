@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>V97 Canlı Durak Proximity Preview</title>
+  <link rel="stylesheet" href="./v97_proximity_preview.css?v=1">
+</head>
+<body>
+
+<header class="v97-hdr">
+  <div class="v97-brand">
+    <div class="v97-logo">🎙️</div>
+    <div>
+      <div class="v97-title">MUAVİN</div>
+      <div class="v97-sub">ASİSTAN V97</div>
+    </div>
+  </div>
+  <div class="v97-clock" id="clockEl">--:--</div>
+</header>
+
+<section class="v97-route">
+  <b>DENİZLİ → İSTANBUL</b>
+  <span>·</span>
+  <span>45KH999</span>
+  <em><i></i> CANLI</em>
+</section>
+
+<section class="v97-gauges">
+  <div>
+    <small>HIZ</small>
+    <b id="speedVal">86</b>
+    <span>km/sa</span>
+  </div>
+  <div>
+    <small>DOLULUK</small>
+    <b>38/45</b>
+    <div class="v97-occ"><i style="width:84%"></i></div>
+    <span class="v97-gender">♂ 21&nbsp;&nbsp;♀ 17</span>
+  </div>
+  <div>
+    <small>DURUM</small>
+    <b class="green">Planında</b>
+    <span>+0 dk</span>
+  </div>
+</section>
+
+<div class="v97-demo">
+  <small>SİMÜLASYON</small>
+  <button onclick="simKm(48)">48 km</button>
+  <button onclick="simKm(20)">20 km</button>
+  <button onclick="simKm(8)">8 km</button>
+  <button onclick="simKm(2)">2 km</button>
+  <button onclick="simKm(0)">0 km</button>
+  <button onclick="simAuto()">▶ OTO</button>
+</div>
+
+<main class="v97-shell">
+
+  <section class="v97-prox-card">
+    <div class="v97-prox-top">
+      <div class="v97-ring-wrap">
+        <svg class="v97-ring" viewBox="0 0 120 120">
+          <circle class="v97-ring-track" cx="60" cy="60" r="48"></circle>
+          <circle class="v97-ring-fill" id="ringFill" cx="60" cy="60" r="48"></circle>
+        </svg>
+        <div class="v97-ring-center">
+          <b id="ringKm">—</b>
+          <span>KM</span>
+        </div>
+      </div>
+
+      <div class="v97-info">
+        <small>ŞU ANKİ DURAK</small>
+        <h1 id="currentStopName">Uşak</h1>
+        <p><b id="etaVal">14:45</b> <span>TAHMİNİ VARIŞ</span></p>
+        <div class="v97-live-pill"><i></i> CANLI TAKİP</div>
+      </div>
+    </div>
+
+    <div class="v97-mini-grid">
+      <button>
+        <i>🧍</i>
+        <b id="offloadCount">3</b>
+        <span>İNECEK YOLCU</span>
+      </button>
+      <button>
+        <i>🧳</i>
+        <b id="bagajCount">2</b>
+        <span>BAGAJ</span>
+      </button>
+    </div>
+
+    <div class="v97-route-progress">
+      <div>
+        <span>DENİZLİ</span>
+        <b id="routePct">%61 tamamlandı</b>
+        <span>İSTANBUL</span>
+      </div>
+      <div class="v97-progress-track">
+        <i id="routeBar" style="width:61%"></i>
+      </div>
+    </div>
+  </section>
+
+  <section class="v97-timeline-section">
+    <div class="v97-section-title">GÜZERGAH</div>
+    <div class="v97-timeline" id="timeline"></div>
+  </section>
+
+</main>
+
+<nav class="v97-dock">
+  <button class="active">🚌<span>CANLI</span></button>
+  <button>💺<span>KOLTUK</span></button>
+  <button>👥<span>YOLCU</span></button>
+  <button>🗺️<span>HARİTA</span></button>
+  <button>📣<span>ANONS</span></button>
+</nav>
+
+<script src="./v97_proximity_preview.js?v=1"></script>
+</body>
+</html>

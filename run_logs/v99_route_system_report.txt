@@ -1,0 +1,142 @@
+===== MUAVIN V99 ROUTE SYSTEM REPORT =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+TIME: 2026-06-12 13:03:49
+
+===== 1) DOSYA DURUMU =====
+WEB_TEMPLATE       VAR  size=16111    sha=fb1015fa1804  /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/continue_trip.html
+WEB_CSS            VAR  size=14570    sha=0b2442ffcef7  /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.css
+WEB_JS             VAR  size=3929     sha=66adcdebe970  /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.js
+OLD_CSS            VAR  size=912      sha=3f309d22069b  /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip.css
+CORE_JS            VAR  size=75965    sha=969d98ed59a6  /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_core.js
+UI_JS              VAR  size=7476     sha=4e8f7e386c1d  /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_ui.js
+ANDROID_TEMPLATE   VAR  size=16111    sha=fb1015fa1804  /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/templates/continue_trip.html
+ANDROID_CSS        VAR  size=14570    sha=0b2442ffcef7  /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_v99_clean.css
+ANDROID_JS         VAR  size=3929     sha=66adcdebe970  /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_v99_clean.js
+APP                VAR  size=151646   sha=2c5f1cadf88e  /data/data/com.termux/files/home/Host-Hostes-Paneli/app.py
+
+===== 2) WEB / ANDROID SENKRON =====
+TEMPLATE   AYNI  web=fb1015fa1804 android=fb1015fa1804
+CSS        AYNI  web=0b2442ffcef7 android=0b2442ffcef7
+JS         AYNI  web=66adcdebe970 android=66adcdebe970
+
+===== 3) TEMPLATE KRITIK IZLER =====
+VAR  continue_trip_v99_clean.css
+VAR  continue_trip_v99_clean.js
+VAR  v99-prox-card
+VAR  v99-tl
+VAR  v99-tl-node {{ stop.kind }}
+VAR  v99-pill passed
+VAR  v99-pill live
+VAR  v99-pill next
+VAR  liveCurrentStopName
+VAR  liveDistanceValue
+VAR  liveOffloadMetric
+VAR  liveBagajMetric
+VAR  CONTINUE_BOOT
+YOK  v97_proximity_preview.css
+YOK  v97_real_data.css
+YOK  V99B_
+YOK  V99C_
+
+===== 4) CSS / JS MARKER KONTROL =====
+CSS YOK  V99B_
+CSS YOK  V99C_
+CSS VAR  .v99-tl-node.passed
+CSS VAR  .v99-tl-line.passed
+CSS VAR  .v99-pill.passed
+CSS YOK  passed-card
+CSS VAR  .v99-tl-card.live-card
+CSS VAR  .v99-tl-card.next-card
+JS  YOK  V99B_
+JS  YOK  V99C_
+JS  VAR  setRouteProgress
+JS  VAR  setRing
+JS  VAR  MuavinV99CleanSync
+
+===== 5) APP.PY LIVE_STOPS / PASSED IZLERI =====
+ 1430: def continue_trip():
+ 1801:             kind = "next"
+ 1805:             kind = "upcoming"
+ 1809:             kind = "passed"
+ 1838:     selected_stops = stops[show_start:show_start + 4] if stops else []
+ 1839:     if current_stop and current_stop not in selected_stops:
+ 1840:         selected_stops.insert(0, current_stop)
+ 1842:     live_stops = [
+ 1844:         for i, stop_name in enumerate(selected_stops)
+ 1847:     live_current = make_stop_payload(current_stop, current_index) if current_stop else {
+ 1864:             live_current["name"] = runtime_live_stop
+ 1866:             live_current["distance"] = str(live_runtime.get("gps_km") or "").strip()
+ 1868:             live_current["eta"] = str(live_runtime.get("eta_main") or "").strip()
+ 1870:             live_current["speed"] = int(float(live_runtime.get("speed") or 0))
+ 1872:             live_current["speed"] = 0
+ 1874:         live_current["speed"] = 0
+ 1884:         "off_count": live_current.get("off_count", 0),
+ 1885:         "board_count": live_current.get("board_count", 0),
+ 1886:         "bagaj_count": live_current.get("bagaj_count", 0),
+ 1887:         "emanet_count": live_current.get("emanet_count", 0),
+ 1888:         "consignment_count": live_current.get("consignment_count", live_current.get("emanet_count", 0)),
+ 1889:         "service_count": live_current.get("service_count", 0),
+
+===== 6) FLASK RENDER TEST =====
+ACTIVE_TRIP_ID: 314
+ACTIVE_TRIP_ROUTE: Denizli – İstanbul
+ACTIVE_TRIP_PLATE: 
+STATUS: 200
+LOCATION: 
+HTML_SIZE: 26119
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99_route_report_render.html
+
+===== 7) RENDER HTML V99 IZLERI =====
+HTML VAR  v99-prox-card
+HTML VAR  v99-tl-node
+HTML YOK  v99-pill passed
+HTML VAR  v99-pill live
+HTML VAR  v99-pill next
+HTML VAR  v99-pill upcoming
+HTML VAR  liveCurrentStopName
+HTML VAR  liveDistanceValue
+HTML VAR  ringFill
+HTML VAR  CONTINUE_BOOT
+HTML YOK  Traceback
+HTML YOK  UndefinedError
+HTML YOK  Internal Server Error
+
+===== 8) TIMELINE KART ANALIZI =====
+KART_SAYISI: 4
+STATUS_SAYILARI: {'live': 1, 'next': 1, 'upcoming': 2}
+
+ILK_20_KART:
+01. Ortahan                        | live       | ● CANLI
+02. Kardeşler pide salonu          | next       | ⟶ SONRAKİ
+03. Belenyaka                      | upcoming   | Bekliyor
+04. Alaşehir Otogar                | upcoming   | Bekliyor
+
+===== 9) BACKUP OZETI =====
+
+KLASOR: /data/data/com.termux/files/home/Host-Hostes-Paneli/templates
+ - continue_trip.html.bak-v99-clean-20260612-123620
+
+KLASOR: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue
+ - continue_trip_v99_clean.css.bak-v99c-20260612-125314
+ - continue_trip_v99_clean.js.bak-v99c-20260612-125314
+ - continue_trip_v99_clean.css.before-v99b-rollback-20260612-125827
+ - continue_trip_v99_clean.js.before-v99b-rollback-20260612-125827
+ - continue_trip_v99_clean.js
+ - continue_trip_v99_clean.css.bak-v99b-20260612-125059
+ - continue_trip_v99_clean.js.bak-v99b-20260612-125059
+ - continue_trip_v99_clean.css
+
+KLASOR: /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/templates
+ - continue_trip.html.bak-v99-clean-20260612-123620
+
+KLASOR: /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue
+ - continue_trip_v99_clean.css.bak-v99c-20260612-125314
+ - continue_trip_v99_clean.css.before-v99b-rollback-20260612-125827
+ - continue_trip_v99_clean.js.before-v99b-rollback-20260612-125827
+ - continue_trip_v99_clean.js.bak-v99c-20260612-125314
+ - continue_trip_v99_clean.css
+ - continue_trip_v99_clean.js
+ - continue_trip_v99_clean.css.bak-v99b-20260612-125059
+ - continue_trip_v99_clean.js.bak-v99b-20260612-125059
+
+===== RAPOR BITTI =====

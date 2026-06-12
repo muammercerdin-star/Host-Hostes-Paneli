@@ -1,0 +1,126 @@
+/* V105_SPEED_FINAL_POLISH_START */
+
+/*
+  V105 final karar:
+  - Analog yok
+  - Click/toggle yok
+  - Kutu yüksekliği değişmez
+  - Sadece dijital hız + premium alt çizgi + yumuşak ışık
+*/
+
+.v105-speed-card{
+  position:relative !important;
+  overflow:hidden !important;
+  isolation:isolate !important;
+}
+
+.v105-speed-card .v99-gauge-label,
+.v105-speed-card .v99-gauge-val,
+.v105-speed-card .v99-gauge-unit{
+  position:relative !important;
+  z-index:5 !important;
+}
+
+.v105-speed-card .v99-gauge-label{
+  color:rgba(186,198,220,.68) !important;
+}
+
+.v105-speed-card .v99-gauge-val{
+  color:#f1a340 !important;
+  font-weight:800 !important;
+  text-shadow:
+    0 0 12px rgba(241,163,64,.38),
+    0 2px 7px rgba(0,0,0,.82) !important;
+}
+
+.v105-speed-card .v99-gauge-unit{
+  color:rgba(226,234,246,.54) !important;
+  opacity:.78 !important;
+  text-shadow:0 2px 5px rgba(0,0,0,.78) !important;
+}
+
+.v105-speed-card::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:52%;
+  width:92px;
+  height:92px;
+  transform:translate(-50%,-50%);
+  border-radius:999px;
+  background:
+    radial-gradient(circle, rgba(241,163,64,.12) 0%, rgba(241,163,64,.055) 34%, transparent 66%);
+  pointer-events:none;
+  z-index:1;
+}
+
+.v105-speed-card::after{
+  content:"";
+  position:absolute;
+  left:18px;
+  right:18px;
+  bottom:7px;
+  height:1px;
+  border-radius:999px;
+  background:rgba(255,255,255,.06);
+  pointer-events:none;
+  z-index:2;
+}
+
+.v105-speed-track{
+  position:absolute;
+  left:18px;
+  right:18px;
+  bottom:8px;
+  height:3px;
+  border-radius:999px;
+  background:rgba(255,255,255,.075);
+  overflow:hidden;
+  z-index:4;
+  pointer-events:none;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.50);
+}
+
+.v105-speed-fill{
+  height:100%;
+  width:4%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#20bf7d 0%, #e08820 58%, #e03030 100%);
+  box-shadow:0 0 12px rgba(224,136,32,.28);
+  transition:width .26s ease, box-shadow .26s ease;
+}
+
+.v105-speed-dot{
+  position:absolute;
+  top:50%;
+  left:var(--v105-speed-pct, 4%);
+  width:7px;
+  height:7px;
+  border-radius:999px;
+  transform:translate(-50%,-50%);
+  background:#f1a340;
+  box-shadow:
+    0 0 12px rgba(241,163,64,.48),
+    0 0 3px rgba(255,255,255,.28);
+  transition:left .26s ease, background .26s ease, box-shadow .26s ease;
+}
+
+.v105-speed-card.v105-speed-low .v105-speed-fill{
+  box-shadow:0 0 12px rgba(32,191,125,.24);
+}
+
+.v105-speed-card.v105-speed-low .v105-speed-dot{
+  background:#20bf7d;
+  box-shadow:0 0 12px rgba(32,191,125,.42);
+}
+
+.v105-speed-card.v105-speed-high .v105-speed-fill{
+  box-shadow:0 0 14px rgba(224,48,48,.30);
+}
+
+.v105-speed-card.v105-speed-high .v105-speed-dot{
+  background:#e03030;
+  box-shadow:0 0 14px rgba(224,48,48,.48);
+}
+
+/* V105_SPEED_FINAL_POLISH_END */

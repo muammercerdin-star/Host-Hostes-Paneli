@@ -1,0 +1,2680 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Canlı Durak Akışı</title>
+
+  <link rel="stylesheet" href="/static/continue/continue_trip.css?v=refresh-v49">
+  <link rel="stylesheet" href="/static/continue/continue_trip_v99_clean.css?v=v99-clean-314">
+</head>
+
+<body class="v99-live-body">
+
+
+
+
+
+
+
+
+<header class="v99-hdr">
+  <div class="v99-hdr-brand">
+    <div class="v99-hdr-icon">🎙️</div>
+    <div>
+      <div class="v99-hdr-title">MUAVİN</div>
+      <div class="v99-hdr-sub">ASİSTAN V99</div>
+    </div>
+  </div>
+
+  <div class="v99-hdr-clock" id="liveClockText">--:--</div>
+</header>
+
+<div class="v99-route-bar">
+  <span class="v99-route-name">
+    Denizli → İstanbul
+  </span>
+  <span class="v99-route-dot">·</span>
+  <span>45KH999</span>
+
+  <div class="v99-live-badge">
+    <div class="v99-live-dot"></div>
+    CANLI
+  </div>
+</div>
+
+<div class="v99-gauges">
+  <div class="v99-gauge-cell">
+    <div class="v99-gauge-label">HIZ</div>
+    <div class="v99-gauge-val amber" id="v99SpeedVal">0</div>
+    <div class="v99-gauge-unit">km/sa</div>
+    <span class="v99-core-hidden" id="liveSpeedText">— km/sa</span>
+  </div>
+
+  <div class="v99-gauge-cell">
+    <div class="v99-gauge-label">DOLULUK</div>
+    <div class="v99-gauge-val">3 / 40</div>
+
+    <div class="v99-occ-bar-track">
+      <div class="v99-occ-bar-fill" style="width:8.0%"></div>
+    </div>
+
+    <div class="v99-occ-genders">
+      <span class="g-m">♂ 2</span>
+      <span class="g-f">♀ 1</span>
+      
+    </div>
+  </div>
+
+  <div class="v99-gauge-cell">
+    <div class="v99-gauge-label">DURUM</div>
+    <div class="v99-gauge-val green v99-status-val" id="liveTopStatusText">Planında</div>
+    <div class="v99-gauge-unit" id="v99StatusSub">canlı takip</div>
+  </div>
+</div>
+
+<main class="v99-main">
+
+  <section class="v99-prox-section">
+    <div class="v99-prox-card live-summary-trigger" id="liveCurrentCard" role="button" tabindex="0" aria-label="Canlı durak özetini aç">
+
+      <div class="v99-prox-top">
+        <div class="v99-ring-wrap">
+          <svg class="v99-ring-svg" viewBox="0 0 110 110" aria-hidden="true">
+            <circle class="v99-ring-track" cx="55" cy="55" r="44"></circle>
+            <circle class="v99-ring-fill" id="ringFill" cx="55" cy="55" r="44"
+              stroke-dasharray="276.46"
+              stroke-dashoffset="276.46"></circle>
+          </svg>
+
+          <div class="v99-ring-center">
+            <div class="v99-ring-km" id="ringKm">—</div>
+            <div class="v99-ring-km-label">KM</div>
+          </div>
+        </div>
+
+        <div class="v99-prox-info">
+          <div class="v99-prox-kicker">ŞU ANKİ DURAK</div>
+
+          <div class="v99-prox-stop-name" id="liveCurrentStopName">Ortahan</div>
+
+          <div class="v99-prox-eta-row">
+            <span class="v99-prox-eta-val" id="liveEtaValue">382 dk erken</span>
+            <span class="v99-prox-eta-label">TAHMİNİ VARIŞ</span>
+          </div>
+
+          <div class="v99-status-pill">
+            <div class="v99-live-dot"></div>
+            CANLI TAKİP
+          </div>
+
+          <b id="liveDistanceValue"
+             class="v99-core-hidden stop-distance-value"
+             data-stop-name="Ortahan">4.427727237649642</b>
+        </div>
+      </div>
+
+      <div class="v99-prox-metrics">
+        <button class="v99-pm-cell" type="button" id="liveOffloadMetric" data-kind="offload" aria-label="Bu durakta inecek koltukları göster">
+          <div class="v99-pm-icon">🧍</div>
+          <div class="v99-pm-data">
+            <div class="v99-pm-val" id="liveOffloadCount">1</div>
+            <div class="v99-pm-lbl">İNECEK YOLCU</div>
+          </div>
+        </button>
+
+        <button class="v99-pm-cell" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
+          <div class="v99-pm-icon">🧳</div>
+          <div class="v99-pm-data">
+            <div class="v99-pm-val" id="liveBagajCount">0</div>
+            <span id="liveEmanetCount" hidden></span>
+            <div class="v99-pm-lbl">BAGAJ</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="v99-dist-track-wrap">
+        <div class="v99-dist-labels">
+          <span>Denizli otogar</span>
+          <span id="distPct">%0 tamamlandı</span>
+          <span>Esenler Otogar</span>
+        </div>
+
+        <div class="v99-dist-track">
+          <div class="v99-dist-fill" id="routeBar" style="width:0%"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="v99-timeline-section">
+    <div class="v99-section-label">GÜZERGAH</div>
+
+    <div class="v99-tl" id="tlContainer">
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">Denizli otogar</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Denizli otogar">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">Sarayköy</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Sarayköy">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">Buldan</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Buldan">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">Bozalan</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Bozalan">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">Derbent(Denizli)</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Derbent(Denizli)">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">Kadıköy</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Kadıköy">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">İl Sınırı(Manisa)</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="İl Sınırı(Manisa)">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">Dindarlı</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Dindarlı">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">Dadağlı</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Dadağlı">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">Sarıgöl Garaj</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Sarıgöl Garaj">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">Afşar</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Afşar">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">Bereketli</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Bereketli">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node passed"></div>
+          
+            <div class="v99-tl-line passed"></div>
+          
+        </div>
+
+        <div class="v99-tl-card passed-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name muted">Hacıaliler</div>
+
+            
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Geçildi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Hacıaliler">Geçildi</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node live"></div>
+          
+            <div class="v99-tl-line live"></div>
+          
+        </div>
+
+        <div class="v99-tl-card live-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Ortahan</div>
+
+            
+              <div class="v99-pill live">● CANLI</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Şimdi</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Ortahan">0 km</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">1</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node next"></div>
+          
+            <div class="v99-tl-line next"></div>
+          
+        </div>
+
+        <div class="v99-tl-card next-card">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Kardeşler pide salonu</div>
+
+            
+              <div class="v99-pill next">⟶ SONRAKİ</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">Sırada</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Kardeşler pide salonu">1 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">1</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">var</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Belenyaka</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">2 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Belenyaka">2 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Alaşehir Otogar</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">3 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Alaşehir Otogar">3 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">1</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Alaşehir Stadyum</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">4 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Alaşehir Stadyum">4 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Akkeçili</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">5 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Akkeçili">5 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Piyadeler</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">6 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Piyadeler">6 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Kavaklıdere</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">7 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Kavaklıdere">7 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Salihli Garaj</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">8 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Salihli Garaj">8 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Sart</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">9 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Sart">9 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Ahmetli</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">10 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Ahmetli">10 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Avşar Turgutlu(A101)</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">11 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Avşar Turgutlu(A101)">11 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Gökkaya</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">12 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Gökkaya">12 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Akçapınar</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">13 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Akçapınar">13 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Derbent(Turgutlu)</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">14 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Derbent(Turgutlu)">14 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Turgutlu Garaj</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">15 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Turgutlu Garaj">15 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Özdilek(Turgutlu)</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">16 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Özdilek(Turgutlu)">16 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Manisa Otogar</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">17 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Manisa Otogar">17 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Akhisar</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">18 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Akhisar">18 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Saruhanlı</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">19 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Saruhanlı">19 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Soma</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">20 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Soma">20 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Kırkağaç</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">21 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Kırkağaç">21 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Balıkesir</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">22 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Balıkesir">22 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Susurluk</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">23 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Susurluk">23 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Mustafa K.P(Bursa)</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">24 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Mustafa K.P(Bursa)">24 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Bursa Otogar</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">25 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Bursa Otogar">25 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Gebze Garaj</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">26 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Gebze Garaj">26 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Tuzla</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">27 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Tuzla">27 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Güzel yalı</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">28 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Güzel yalı">28 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">İçmeler Köprüsü</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">29 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="İçmeler Köprüsü">29 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Kaynarca</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">30 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Kaynarca">30 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Pendik</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">31 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Pendik">31 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Kartal köprüsü</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">32 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Kartal köprüsü">32 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">70 Evler</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">33 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="70 Evler">33 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Cevizli</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">34 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Cevizli">34 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Maltepe</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">35 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Maltepe">35 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Zümrütevler (Huzur Evi)</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">36 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Zümrütevler (Huzur Evi)">36 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Küçükyalı</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">37 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Küçükyalı">37 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Bostancı</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">38 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Bostancı">38 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Göztepe köprüsü</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">39 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Göztepe köprüsü">39 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Harem</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">40 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Harem">40 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+            <div class="v99-tl-line upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Alibeyköy</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">41 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Alibeyköy">41 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node upcoming"></div>
+          
+        </div>
+
+        <div class="v99-tl-card ">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name ">Esenler Otogar</div>
+
+            
+              <div class="v99-pill upcoming">Bekliyor</div>
+            
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">42 durak sonra</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="Esenler Otogar">42 durak</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">0</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">yok</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </section>
+
+  <section class="v99-end-wrap danger-zone">
+    <form id="endTripForm" method="post" action="/end_trip">
+      
+        <input type="hidden" name="csrf_token" value="2Oe4LLlK7ALjcuZtWyc1_WvgR06l-Pjda_1Wk--taro">
+      
+      <button class="v99-end-btn danger-btn" type="submit">⛔ &nbsp;SEFERİ BİTİR</button>
+    </form>
+  </section>
+
+</main>
+
+<div class="live-sheet-overlay" id="liveStopSheetOverlay"></div>
+
+<section class="live-stop-sheet" id="liveStopSheet" aria-hidden="true">
+  <div class="sheet-grip"></div>
+
+  <div class="sheet-head">
+    <div>
+      <div class="sheet-kicker" id="liveStopSheetKicker">Canlı durak</div>
+      <h2 class="sheet-title" id="liveStopSheetTitle">Durak detayı</h2>
+      <p class="sheet-sub" id="liveStopSheetSub">Yükleniyor...</p>
+    </div>
+
+    <button class="sheet-close" type="button" id="liveStopSheetClose" aria-label="Kapat">×</button>
+  </div>
+
+  <div class="sheet-body" id="liveStopSheetBody">
+    <div class="sheet-empty">Yükleniyor...</div>
+  </div>
+</section>
+
+<nav class="v99-dock dock">
+  <a class="v99-dock-btn active dock-item" href="/continue-trip">
+    <i>🚌</i><span>CANLI</span>
+  </a>
+
+  <a class="v99-dock-btn dock-item" id="continueSeatMapBtn" href="/seats">
+    <i>💺</i><span>KOLTUK</span>
+  </a>
+
+  <a class="v99-dock-btn dock-item" href="/yolcu-kontrol">
+    <i>👥</i><span>YOLCU</span>
+  </a>
+
+  <a class="v99-dock-btn dock-item" href="/canli-harita">
+    <i>🗺️</i><span>HARİTA</span>
+  </a>
+
+  <button class="v99-dock-btn dock-item" type="button">
+    <i>📣</i><span>ANONS</span>
+  </button>
+</nav>
+
+<div class="end-trip-overlay" id="endTripOverlay" aria-hidden="true">
+  <div class="end-trip-box" role="dialog" aria-modal="true" aria-labelledby="endTripTitle">
+    <div class="end-trip-top">
+      <div class="end-trip-mark">⛔</div>
+      <div>
+        <h2 class="end-trip-title" id="endTripTitle">Seferi bitirelim mi?</h2>
+        <p class="end-trip-small">Aktif sefer sonlandırılacak.</p>
+      </div>
+    </div>
+
+    <div class="end-trip-content">
+      <p class="end-trip-text">
+        Sefer tamamlandıysa işlemi bitirebilirsin. Emin değilsen iptal edip ekrana dönebilirsin.
+      </p>
+      <div class="end-trip-note">
+        Bitirilen sefer aktif ekrandan kalkar, raporlardan görüntülenir.
+      </div>
+    </div>
+
+    <div class="end-trip-actions">
+      <button type="button" class="end-trip-btn end-trip-cancel" id="endTripCancel">İptal</button>
+      <button type="button" class="end-trip-btn end-trip-ok" id="endTripOk">Seferi Bitir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const form = document.getElementById("endTripForm");
+  const overlay = document.getElementById("endTripOverlay");
+  const cancel = document.getElementById("endTripCancel");
+  const ok = document.getElementById("endTripOk");
+
+  if(!form || !overlay || !cancel || !ok) return;
+
+  let confirmed = false;
+
+  function openModal(){
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal(){
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  form.addEventListener("submit", function(e){
+    if(confirmed) return;
+    e.preventDefault();
+    openModal();
+  });
+
+  cancel.addEventListener("click", closeModal);
+
+  overlay.addEventListener("click", function(e){
+    if(e.target === overlay) closeModal();
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && overlay.classList.contains("show")){
+      closeModal();
+    }
+  });
+
+  function clearTripLocalMemory(){
+    try{
+      const tripKey = "Denizli_\u2013_\u0130stanbul|";
+
+      const exactKeys = [
+        "liveStop:" + tripKey,
+        "passedStops:" + tripKey,
+        "boardsMap:" + tripKey,
+        "standingTotals:" + tripKey,
+        "standingItems:" + tripKey,
+        "continueTripStop:" + tripKey,
+        "continueTripStop:last",
+        "stopFlowSummary:" + tripKey,
+        "stopFlowLiveEvents:" + tripKey
+      ];
+
+      exactKeys.forEach(k => localStorage.removeItem(k));
+
+      Object.keys(localStorage).forEach(k => {
+        if(
+          k.includes(tripKey) &&
+          (
+            k.startsWith("liveStop:") ||
+            k.startsWith("passedStops:") ||
+            k.startsWith("boardsMap:") ||
+            k.startsWith("standingTotals:") ||
+            k.startsWith("standingItems:") ||
+            k.startsWith("continueTripStop:") ||
+            k.startsWith("stopFlowSummary:") ||
+            k.startsWith("stopFlowLiveEvents:")
+          )
+        ){
+          localStorage.removeItem(k);
+        }
+      });
+    }catch(_){}
+  }
+
+  ok.addEventListener("click", function(){
+    confirmed = true;
+    clearTripLocalMemory();
+    closeModal();
+    form.submit();
+  });
+})();
+</script>
+
+<!-- CONTINUE_TTS_BRIDGE_START -->
+<script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+<!-- CONTINUE_TTS_BRIDGE_END -->
+
+<div class="bag-photo-viewer" id="bagPhotoViewer" aria-hidden="true">
+  <div class="bag-viewer-top">
+    <div class="bag-viewer-title">
+      <div class="bag-viewer-kicker">Bagaj fotoğrafı</div>
+      <div class="bag-viewer-name" id="bagViewerTitle">Fotoğraf</div>
+    </div>
+
+    <button class="bag-viewer-close" type="button" id="bagViewerClose" aria-label="Kapat">×</button>
+  </div>
+
+  <div class="bag-viewer-stage">
+    <div class="bag-viewer-img-wrap">
+      <img class="bag-viewer-img" id="bagViewerImg" src="" alt="Bagaj fotoğrafı">
+    </div>
+  </div>
+
+  <div class="bag-viewer-bottom">
+    <div class="bag-viewer-caption" id="bagViewerCaption">—</div>
+
+    <div class="bag-viewer-actions">
+      <button class="bag-viewer-btn" type="button" id="bagViewerPrev">← Önceki</button>
+      <button class="bag-viewer-btn" type="button" id="bagViewerNext">Sonraki →</button>
+    </div>
+  </div>
+</div>
+
+<script id="continue-boot-data">
+window.CONTINUE_BOOT = {
+  tripId: 314,
+  tripDate: "2026-06-12",
+  tripKey: "Denizli_\u2013_\u0130stanbul|",
+
+  runtimeGpsKm: "4.427727237649642",
+  runtimeSpeed: 0,
+  runtimeStop: "Ortahan",
+  runtimeEta: "382 dk erken",
+
+  routeStops: ["Denizli otogar", "Sarayk\u00f6y", "Buldan", "Bozalan", "Derbent(Denizli)", "Kad\u0131k\u00f6y", "\u0130l S\u0131n\u0131r\u0131(Manisa)", "Dindarl\u0131", "Dada\u011fl\u0131", "Sar\u0131g\u00f6l Garaj", "Af\u015far", "Bereketli", "Hac\u0131aliler", "Ortahan", "Karde\u015fler pide salonu", "Belenyaka", "Ala\u015fehir Otogar", "Ala\u015fehir Stadyum", "Akke\u00e7ili", "Piyadeler", "Kavakl\u0131dere", "Salihli Garaj", "Sart", "Ahmetli", "Av\u015far Turgutlu(A101)", "G\u00f6kkaya", "Ak\u00e7ap\u0131nar", "Derbent(Turgutlu)", "Turgutlu Garaj", "\u00d6zdilek(Turgutlu)", "Manisa Otogar", "Akhisar", "Saruhanl\u0131", "Soma", "K\u0131rka\u011fa\u00e7", "Bal\u0131kesir", "Susurluk", "Mustafa K.P(Bursa)", "Bursa Otogar", "Gebze Garaj", "Tuzla", "G\u00fczel yal\u0131", "\u0130\u00e7meler K\u00f6pr\u00fcs\u00fc", "Kaynarca", "Pendik", "Kartal k\u00f6pr\u00fcs\u00fc", "70 Evler", "Cevizli", "Maltepe", "Z\u00fcmr\u00fctevler (Huzur Evi)", "K\u00fc\u00e7\u00fckyal\u0131", "Bostanc\u0131", "G\u00f6ztepe k\u00f6pr\u00fcs\u00fc", "Harem", "Alibeyk\u00f6y", "Esenler Otogar"],
+  csrfToken: "2Oe4LLlK7ALjcuZtWyc1_WvgR06l-Pjda_1Wk--taro",
+
+  routeCoords: [{"lat": 38.358861, "lng": 28.537634, "stop": "Ala\u015fehir Otogar"}, {"lat": 38.27295, "lng": 28.623459, "stop": "Hac\u0131aliler"}, {"lat": 38.280548, "lng": 28.610403, "stop": "Ortahan"}, {"lat": 38.314604, "lng": 28.584589, "stop": "Belenyaka"}, {"lat": 38.361657, "lng": 28.520611, "stop": "Ala\u015fehir Stadyum"}, {"lat": 38.407839, "lng": 28.447477, "stop": "Piyadeler"}, {"lat": 41.040447, "lng": 28.894613, "stop": "Esenler Otogar"}, {"lat": 38.488544, "lng": 28.134453, "stop": "Salihli Garaj"}, {"lat": 41.088083, "lng": 28.914371, "stop": "Alibeyk\u00f6y"}, {"lat": 38.2455, "lng": 28.674519, "stop": "Sar\u0131g\u00f6l Garaj"}, {"lat": 37.78553, "lng": 29.091607, "stop": "Denizli otogar"}, {"lat": 40.265217, "lng": 29.053399, "stop": "Bursa Otogar"}, {"lat": 39.648314, "lng": 27.888663, "stop": "Bal\u0131kesir"}, {"lat": 37.925274, "lng": 28.927738, "stop": "Sarayk\u00f6y"}, {"lat": 38.037889, "lng": 28.868921, "stop": "Buldan"}, {"lat": 38.24745, "lng": 28.582739, "stop": "Girelli"}, {"lat": 38.618766, "lng": 27.422066, "stop": "Manisa Otogar"}, {"lat": 38.934504, "lng": 27.835506, "stop": "Akhisar"}, {"lat": 38.730147, "lng": 27.580537, "stop": "Saruhanl\u0131"}, {"lat": 39.916646, "lng": 28.160757, "stop": "Susurluk"}, {"lat": 38.278601, "lng": 28.615327, "stop": "Karde\u015fler pide salonu"}, {"lat": 38.076465, "lng": 28.860289, "stop": "Bozalan"}, {"lat": 38.13443, "lng": 28.775231, "stop": "Kad\u0131k\u00f6y"}, {"lat": 38.154391, "lng": 28.702103, "stop": "Dindarl\u0131"}, {"lat": 38.18217, "lng": 28.682759, "stop": "Dada\u011fl\u0131"}, {"lat": 38.26251, "lng": 28.639184, "stop": "Af\u015far"}, {"lat": 38.264945, "lng": 28.633834, "stop": "Bereketli"}, {"lat": 38.380741, "lng": 28.489092, "stop": "Akke\u00e7ili"}, {"lat": 38.448833, "lng": 28.364036, "stop": "Kavakl\u0131dere"}, {"lat": 38.493718, "lng": 28.041545, "stop": "Sart"}, {"lat": 38.514796, "lng": 27.942609, "stop": "Ahmetli"}, {"lat": 38.499076, "lng": 27.863051, "stop": "G\u00f6kkaya"}, {"lat": 38.490094, "lng": 27.842294, "stop": "Ak\u00e7ap\u0131nar"}, {"lat": 38.495032, "lng": 27.738268, "stop": "Turgutlu Garaj"}, {"lat": 40.79539, "lng": 29.459768, "stop": "Gebze Garaj"}, {"lat": 40.8752422, "lng": 29.2552958, "stop": "Kaynarca"}, {"lat": 40.8768715, "lng": 29.2349672, "stop": "Pendik"}, {"lat": 40.9131929, "lng": 29.1687352, "stop": "Cevizli"}, {"lat": 40.83433, "lng": 29.327991, "stop": "Tuzla"}, {"lat": 40.947511, "lng": 29.1075847, "stop": "K\u00fc\u00e7\u00fckyal\u0131"}, {"lat": 40.965209, "lng": 29.1044971, "stop": "Bostanc\u0131"}, {"lat": 41.01082, "lng": 29.011485, "stop": "Harem"}, {"lat": 38.495473, "lng": 27.764238, "stop": "Av\u015far Turgutlu(A101)"}, {"lat": 38.492235, "lng": 27.786237, "stop": "Derbent(Turgutlu)"}, {"lat": 38.491287, "lng": 27.708098, "stop": "\u00d6zdilek(Turgutlu)"}, {"lat": 40.049493, "lng": 28.373511, "stop": "Mustafa K.P(Bursa)"}, {"lat": 40.93562, "lng": 29.1387105, "stop": "Maltepe"}, {"lat": 40.9061467, "lng": 29.211044, "stop": "Kartal k\u00f6pr\u00fcs\u00fc"}, {"lat": 40.92484, "lng": 29.0734032, "stop": "G\u00f6ztepe k\u00f6pr\u00fcs\u00fc"}, {"lat": 40.8605709, "lng": 29.2821813, "stop": "G\u00fczel yal\u0131"}, {"lat": 40.849515, "lng": 29.2974917, "stop": "\u0130\u00e7meler K\u00f6pr\u00fcs\u00fc"}],
+  scheduleItems: [{"is_timed": 1, "segment_km": "", "sort_order": 0, "stop": "Denizli otogar", "time": "19:15"}, {"is_timed": 1, "segment_km": 23.0, "sort_order": 1, "stop": "Sarayk\u00f6y", "time": "19:45"}, {"is_timed": 1, "segment_km": 18.0, "sort_order": 2, "stop": "Buldan", "time": "20:00"}, {"is_timed": 1, "segment_km": "", "sort_order": 3, "stop": "Bozalan", "time": "20:10"}, {"is_timed": 0, "segment_km": "", "sort_order": 4, "stop": "Derbent(Denizli)", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 5, "stop": "Kad\u0131k\u00f6y", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 6, "stop": "\u0130l S\u0131n\u0131r\u0131(Manisa)", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 7, "stop": "Dindarl\u0131", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 8, "stop": "Dada\u011fl\u0131", "time": ""}, {"is_timed": 1, "segment_km": 36.0, "sort_order": 9, "stop": "Sar\u0131g\u00f6l Garaj", "time": "20:45"}, {"is_timed": 0, "segment_km": "", "sort_order": 10, "stop": "Af\u015far", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 11, "stop": "Bereketli", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 12, "stop": "Hac\u0131aliler", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 13, "stop": "Ortahan", "time": ""}, {"is_timed": 1, "segment_km": "", "sort_order": 14, "stop": "Karde\u015fler pide salonu", "time": "20:55"}, {"is_timed": 0, "segment_km": "", "sort_order": 15, "stop": "Belenyaka", "time": ""}, {"is_timed": 1, "segment_km": 23.0, "sort_order": 16, "stop": "Ala\u015fehir Otogar", "time": "21:00"}, {"is_timed": 0, "segment_km": "", "sort_order": 17, "stop": "Ala\u015fehir Stadyum", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 18, "stop": "Akke\u00e7ili", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 19, "stop": "Piyadeler", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 20, "stop": "Kavakl\u0131dere", "time": ""}, {"is_timed": 1, "segment_km": 41.0, "sort_order": 21, "stop": "Salihli Garaj", "time": "22:00"}, {"is_timed": 0, "segment_km": "", "sort_order": 22, "stop": "Sart", "time": ""}, {"is_timed": 1, "segment_km": 19.0, "sort_order": 23, "stop": "Ahmetli", "time": "22:15"}, {"is_timed": 0, "segment_km": "", "sort_order": 24, "stop": "Av\u015far Turgutlu(A101)", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 25, "stop": "G\u00f6kkaya", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 26, "stop": "Ak\u00e7ap\u0131nar", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 27, "stop": "Derbent(Turgutlu)", "time": ""}, {"is_timed": 1, "segment_km": "", "sort_order": 28, "stop": "Turgutlu Garaj", "time": "23:00"}, {"is_timed": 0, "segment_km": "", "sort_order": 29, "stop": "\u00d6zdilek(Turgutlu)", "time": ""}, {"is_timed": 1, "segment_km": "", "sort_order": 30, "stop": "Manisa Otogar", "time": "23:40"}, {"is_timed": 1, "segment_km": "", "sort_order": 31, "stop": "Akhisar", "time": "00:30"}, {"is_timed": 0, "segment_km": "", "sort_order": 32, "stop": "Saruhanl\u0131", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 33, "stop": "Soma", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 34, "stop": "K\u0131rka\u011fa\u00e7", "time": ""}, {"is_timed": 1, "segment_km": "", "sort_order": 35, "stop": "Bal\u0131kesir", "time": "01:30"}, {"is_timed": 1, "segment_km": "", "sort_order": 36, "stop": "Susurluk", "time": "02:15"}, {"is_timed": 1, "segment_km": "", "sort_order": 37, "stop": "Mustafa K.P(Bursa)", "time": "03:00"}, {"is_timed": 1, "segment_km": "", "sort_order": 38, "stop": "Bursa Otogar", "time": "03:50"}, {"is_timed": 1, "segment_km": "", "sort_order": 39, "stop": "Gebze Garaj", "time": "05:00"}, {"is_timed": 0, "segment_km": "", "sort_order": 40, "stop": "Kaynarca", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 41, "stop": "Pendik", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 42, "stop": "Maltepe", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 43, "stop": "Cevizli", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 44, "stop": "Tuzla", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 45, "stop": "Kartal k\u00f6pr\u00fcs\u00fc", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 46, "stop": "70 Evler", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 47, "stop": "K\u00fc\u00e7\u00fckyal\u0131", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 48, "stop": "G\u00f6ztepe k\u00f6pr\u00fcs\u00fc", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 49, "stop": "Bostanc\u0131", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 50, "stop": "Z\u00fcmr\u00fctevler (Huzur Evi)", "time": ""}, {"is_timed": 0, "segment_km": "", "sort_order": 51, "stop": "G\u00fczel yal\u0131", "time": ""}, {"is_timed": 1, "segment_km": "", "sort_order": 52, "stop": "Harem", "time": "05:45"}, {"is_timed": 1, "segment_km": "", "sort_order": 53, "stop": "Alibeyk\u00f6y", "time": "06:15"}, {"is_timed": 1, "segment_km": "", "sort_order": 54, "stop": "Esenler Otogar", "time": "06:30"}],
+
+  liveBagajCount: 0,
+  liveEmanetCount: 1
+};
+</script>
+
+<script src="/static/continue/continue_trip_core.js?v=live-stop-lock-v82"></script>
+<script src="/static/continue/continue_bag_emanet.js?v=bag-emanet-clean-1"></script>
+<script src="/static/continue/continue_flow_refresh.js?v=flow-refresh-1"></script>
+<script src="/static/continue/continue_trip_ui.js?v=js-safe-split-1"></script>
+<script src="/static/continue/continue_refresh_button_v49.js?v=refresh-v49"></script>
+<script src="/static/continue/continue_native_lock_alarm_v85.js?v=native-lock-alarm-v87"></script>
+<script src="/static/continue/continue_trip_v99_clean.js?v=v99g-314'id'] }}'id'] }}'id'] }}"></script>
+</body>
+</html>

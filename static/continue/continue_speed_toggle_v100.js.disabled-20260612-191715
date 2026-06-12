@@ -1,0 +1,219 @@
+/* V100_SPEED_TOGGLE_ISOLATED_START */
+(function(){
+  "use strict";
+
+  if(window.__MUAVIN_V100_SPEED_TOGGLE__) return;
+  window.__MUAVIN_V100_SPEED_TOGGLE__ = true;
+
+  var STORAGE_KEY = "muavin.v100.speed.mode";
+
+  function q(sel, root){
+    return (root || document).querySelector(sel);
+  }
+
+  function qa(sel, root){
+    return Array.prototype.slice.call((root || document).querySelectorAll(sel));
+  }
+
+  function text(el){
+    return el ? String(el.textContent || "").trim() : "";
+  }
+
+  function norm(s){
+    return String(s || "")
+      .toLocaleUpperCase("tr-TR")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function findSpeedCard(){
+    var cells = qa(".v99-gauges .v99-gauge-cell");
+
+    for(var i = 0; i < cells.length; i++){
+      var label = q(".v99-gauge-label", cells[i]);
+      if(norm(text(label)) === "HIZ"){
+        return cells[i];
+      }
+    }
+
+    return null;
+  }
+
+  function readSpeed(){
+    var visible = q("#v99SpeedVal");
+    var hidden = q("#liveSpeedText");
+
+    var raw = text(visible);
+    if(!raw || raw === "—"){
+      raw = text(hidden);
+    }
+
+    raw = String(raw || "")
+      .replace(",", ".")
+      .replace(/km\/sa|km\/h|kmh|km|sa/gi, "")
+      .replace(/[^\d.]/g, "")
+      .trim();
+
+    var n = Number(raw);
+    if(!Number.isFinite(n)) n = 0;
+    if(n < 0) n = 0;
+    if(n > 180) n = 180;
+
+    return n;
+  }
+
+  function ensureUi(card){
+    if(!card) return;
+
+    card.classList.add("v100-speed-card");
+    card.setAttribute("data-v100-speed-toggle", "1");
+    card.setAttribute("title", "Hız görünümünü değiştir");
+
+    if(q(".v100-speed-analog", card)) return;
+
+    var box = document.createElement("div");
+    box.className = "v100-speed-analog";
+    box.innerHTML = ''
+      + '<div class="v100-speed-dial">'
+      + '  <div class="v100-speed-scale"></div>'
+      + '  <div class="v100-speed-mark m0">0</div>'
+      + '  <div class="v100-speed-mark m70">70</div>'
+      + '  <div class="v100-speed-mark m140">140</div>'
+      + '  <div class="v100-speed-needle"></div>'
+      + '  <div class="v100-speed-center"></div>'
+      + '  <div class="v100-speed-num">0</div>'
+      + '</div>'
+      + '<div class="v100-speed-sub">km/sa</div>';
+
+    card.appendChild(box);
+  }
+
+  function setMode(card, mode){
+    if(!card) return;
+
+    if(mode === "analog"){
+      card.classList.add("v100-speed-analog-on");
+    }else{
+      card.classList.remove("v100-speed-analog-on");
+    }
+
+    try{
+      localStorage.setItem(STORAGE_KEY, mode === "analog" ? "analog" : "digital");
+    }catch(_){}
+
+    paint();
+  }
+
+  function currentMode(card){
+    if(!card) return "digital";
+    return card.classList.contains("v100-speed-analog-on") ? "analog" : "digital";
+  }
+
+  function paint(){
+    var card = findSpeedCard();
+    if(!card) return;
+
+    ensureUi(card);
+
+    var speed = readSpeed();
+    var capped = Math.max(0, Math.min(speed, 140));
+    var deg = -120 + ((capped / 140) * 240);
+
+    card.style.setProperty("--v100-speed-deg", deg.toFixed(1) + "deg");
+
+    var num = q(".v100-speed-num", card);
+    if(num){
+      num.textContent = String(Math.round(speed));
+    }
+
+    card.classList.toggle("v100-speed-low", speed < 50);
+    card.classList.toggle("v100-speed-mid", speed >= 50 && speed < 95);
+    card.classList.toggle("v100-speed-high", speed >= 95);
+  }
+
+  function bind(){
+    var card = findSpeedCard();
+    if(!card) return false;
+
+    ensureUi(card);
+
+    if(!card.dataset.v100SpeedInitialMode){
+      card.dataset.v100SpeedInitialMode = "1";
+
+      var saved = "digital";
+      try{
+        saved = localStorage.getItem(STORAGE_KEY) || "digital";
+      }catch(_){}
+
+      if(saved === "analog"){
+        card.classList.add("v100-speed-analog-on");
+      }
+    }
+
+    if(card.dataset.v100SpeedBound === "1"){
+      paint();
+      return true;
+    }
+
+    card.dataset.v100SpeedBound = "1";
+
+    card.addEventListener("click", function(ev){
+      /*
+        Sadece HIZ kartına bağlı.
+        DOLULUK paneli ve DURUM kartına karışmaz.
+      */
+      ev.preventDefault();
+      ev.stopPropagation();
+
+      var next = currentMode(card) === "analog" ? "digital" : "analog";
+      setMode(card, next);
+    }, true);
+
+    paint();
+    return true;
+  }
+
+  function boot(){
+    bind();
+    paint();
+
+    try{
+      var speedEl = q("#v99SpeedVal");
+      if(speedEl && !speedEl.dataset.v100SpeedObserved){
+        speedEl.dataset.v100SpeedObserved = "1";
+        new MutationObserver(function(){
+          paint();
+        }).observe(speedEl, {
+          childList:true,
+          subtree:true,
+          characterData:true
+        });
+      }
+    }catch(_){}
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
+
+  window.addEventListener("load", boot);
+  document.addEventListener("continueEtaUpdated", paint);
+
+  var tries = 80;
+  var timer = setInterval(function(){
+    boot();
+    tries--;
+    if(tries <= 0) clearInterval(timer);
+  }, 500);
+
+  window.MuavinV100SpeedToggle = {
+    boot: boot,
+    paint: paint,
+    mode: function(){
+      return currentMode(findSpeedCard());
+    }
+  };
+})();
+/* V100_SPEED_TOGGLE_ISOLATED_END */

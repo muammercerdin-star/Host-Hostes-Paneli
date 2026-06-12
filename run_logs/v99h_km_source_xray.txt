@@ -1,0 +1,214 @@
+===== V99H KM SOURCE XRAY =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+TIME: 2026-06-12 14:00:25
+
+===== 1) AKTIF SEFER / CANLI DURUM =====
+ACTIVE_TRIP_ID: 314
+ROUTE: Denizli – İstanbul
+PLATE: 
+DATE: 2026-06-12
+LIVE_STOP: Ortahan
+RUNTIME_GPS_KM: 4.426911710845269
+ETA_MAIN: 491 dk erken
+ETA_SUB: Kardeşler pide salonu · plan 20:55 · ETA 12:44 · 4.5 km · 70 km/h · GPS/km hesabı
+
+===== 2) TABLO ÖZETİ =====
+route_schedule_profiles  rows=7 cols=['id', 'route_name', 'title', 'direction', 'is_default', 'note', 'created_at', 'updated_at']
+route_schedule_items     rows=295 cols=['id', 'profile_id', 'stop_name', 'planned_time', 'segment_km', 'is_timed', 'sort_order', 'note', 'created_at', 'updated_at']
+route_segments           rows=274 cols=['route', 'from_stop', 'to_stop', 'sort_order', 'distance_m', 'duration_s', 'geometry_json', 'provider', 'updated_at']
+route_profile_segments   rows=40 cols=['route', 'profile_key', 'from_stop', 'to_stop', 'sort_order', 'distance_m', 'duration_s', 'geometry_json', 'provider', 'updated_at']
+route_stop_coords        rows=302 cols=['route', 'stop', 'lat', 'lng']
+stop_logs                rows=37 cols=['id', 'trip_id', 'stop_name', 'event', 'distance_km', 'seats_for_stop', 'meta_json', 'ts']
+
+===== 3) RENDER CONTINUE_BOOT =====
+HTML_SIZE: 91311
+OUT_HTML: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99h_km_xray_render.html
+BOOT routeStops: 56
+BOOT scheduleItems: 55
+BOOT routeCoords: 51
+
+İLK 12 routeStops:
+01. Denizli otogar
+02. Sarayköy
+03. Buldan
+04. Bozalan
+05. Derbent(Denizli)
+06. Kadıköy
+07. İl Sınırı(Manisa)
+08. Dindarlı
+09. Dadağlı
+10. Sarıgöl Garaj
+11. Afşar
+12. Bereketli
+
+===== 4) SCHEDULE PROFIL / ITEM =====
+PROFILE: {'id': 1, 'route_name': 'Denizli – İstanbul', 'title': 'Varsayılan', 'direction': 'gidis', 'is_default': 0}
+DB schedule_items: 55
+İLK 18 schedule item:
+  0 | Denizli otogar               | time=19:15  | segment_km=0.0
+  1 | Sarayköy                     | time=19:45  | segment_km=23.0
+  2 | Buldan                       | time=20:00  | segment_km=18.0
+  3 | Bozalan                      | time=20:10  | segment_km=None
+  4 | Derbent(Denizli)             | time=-      | segment_km=None
+  5 | Kadıköy                      | time=-      | segment_km=None
+  6 | İl Sınırı(Manisa)            | time=-      | segment_km=None
+  7 | Dindarlı                     | time=-      | segment_km=None
+  8 | Dadağlı                      | time=-      | segment_km=None
+  9 | Sarıgöl Garaj                | time=20:45  | segment_km=36.0
+ 10 | Afşar                        | time=-      | segment_km=None
+ 11 | Bereketli                    | time=-      | segment_km=None
+ 12 | Hacıaliler                   | time=-      | segment_km=None
+ 13 | Ortahan                      | time=-      | segment_km=None
+ 14 | Kardeşler pide salonu        | time=20:55  | segment_km=None
+ 15 | Belenyaka                    | time=-      | segment_km=None
+ 16 | Alaşehir Otogar              | time=21:00  | segment_km=23.0
+ 17 | Alaşehir Stadyum             | time=-      | segment_km=None
+
+===== 5) ROUTE SEGMENT KAYNAKLARI =====
+route_segments matched route: Denizli – İstanbul count: 49
+route_profile_segments matched route: Denizli-İstanbul (Vardön) count: 40
+
+İLK 18 route_segments:
+  0 | Denizli otogar             -> Sarayköy                   | 24 km
+  1 | Sarayköy                   -> Buldan                     | 30 km
+  2 | Buldan                     -> Bozalan                    | 17 km
+  3 | Bozalan                    -> Kadıköy                    | 11 km
+  4 | Kadıköy                    -> Dindarlı                   | 7.0 km
+  5 | Dindarlı                   -> Dadağlı                    | 3.9 km
+  6 | Dadağlı                    -> Sarıgöl Garaj              | 9.1 km
+  7 | Sarıgöl Garaj              -> Afşar                      | 3.7 km
+  8 | Afşar                      -> Bereketli                  | 0.5 km
+  9 | Bereketli                  -> Hacıaliler                 | 1.3 km
+ 10 | Hacıaliler                 -> Ortahan                    | 1.5 km
+ 11 | Ortahan                    -> Kardeşler pide salonu      | 2.7 km
+ 12 | Kardeşler pide salonu      -> Belenyaka                  | 5.0 km
+ 13 | Belenyaka                  -> Alaşehir Otogar            | 6.6 km
+ 14 | Alaşehir Otogar            -> Alaşehir Stadyum           | 3.5 km
+ 15 | Alaşehir Stadyum           -> Akkeçili                   | 3.7 km
+ 16 | Akkeçili                   -> Piyadeler                  | 4.7 km
+ 17 | Piyadeler                  -> Kavaklıdere                | 8.7 km
+
+İLK 18 route_profile_segments:
+  0 | Denizli                    -> Sarayköy                   | 24 km
+  1 | Sarayköy                   -> Buldan                     | 30 km
+  2 | Buldan                     -> Bozalan                    | 17 km
+  3 | Bozalan                    -> Baraj Yolu                 | 4.1 km
+  4 | Baraj Yolu                 -> Derbent                    | 117 km
+  5 | Derbent                    -> Kadıköy                    | 110 km
+  6 | Kadıköy                    -> Dindarlı                   | 7.0 km
+  7 | Dindarlı                   -> Dadağlı                    | 3.9 km
+  8 | Dadağlı                    -> Sarıgöl                    | 9.2 km
+  9 | Sarıgöl                    -> Afşar                      | 3.8 km
+ 10 | Afşar                      -> Bereketli                  | 0.5 km
+ 11 | Bereketli                  -> Hacıaliler                 | 1.3 km
+ 12 | Hacıaliler                 -> Ortahan                    | 1.5 km
+ 13 | Ortahan                    -> Belenyaka                  | 4.8 km
+ 14 | Belenyaka                  -> Alaşehir OTOGAR            | 6.6 km
+ 15 | Alaşehir OTOGAR            -> Alaşehir STADYUM           | 3.5 km
+ 16 | Alaşehir STADYUM           -> Akkeçili                   | 3.7 km
+ 17 | Akkeçili                   -> Piyadeler                  | 4.7 km
+
+AKTIF KM KAYNAĞI: route_segments segment_count: 49
+
+===== 6) DURAK BAZLI KM HESAP RÖNTGENİ =====
+STOP_COUNT: 56
+LIVE_STOP: Ortahan
+LIVE_INDEX: 13
+RUNTIME_KM: 4.4
+
+İLK 18 DURAK HESABI:
+NO | DURAK                         | SAAT  | SEG_KM | SEG_SRC              | TOPLAM_KM | CANLIYE_GORE
+01 | Denizli otogar                | -     |      0 | start                |        0 |          -
+02 | Sarayköy                      | -     |     24 | route_segments       |       24 |          -
+03 | Buldan                        | -     |     30 | route_segments       |       54 |          -
+04 | Bozalan                       | -     |     17 | route_segments       |       71 |          -
+05 | Derbent(Denizli)              | -     |      - | MISSING              |        - |          -
+06 | Kadıköy                       | -     |      - | MISSING              |        - |          -
+07 | İl Sınırı(Manisa)             | -     |      - | MISSING              |        - |          -
+08 | Dindarlı                      | -     |      - | MISSING              |        - |          -
+09 | Dadağlı                       | -     |    3.9 | route_segments       |       74 |          -
+10 | Sarıgöl Garaj                 | -     |    9.1 | route_segments       |       84 |          -
+11 | Afşar                         | -     |    3.7 | route_segments       |       87 |          -
+12 | Bereketli                     | -     |    0.5 | route_segments       |       88 |          -
+13 | Hacıaliler                    | -     |    1.3 | route_segments       |       89 |          -
+14 | Ortahan                       | -     |    1.5 | route_segments       |       91 |        4.4
+15 | Kardeşler pide salonu         | -     |    2.7 | route_segments       |       93 |        7.2
+16 | Belenyaka                     | -     |    5.0 | route_segments       |       98 |         12
+17 | Alaşehir Otogar               | -     |    6.6 | route_segments       |      105 |         19
+18 | Alaşehir Stadyum              | -     |    3.5 | route_segments       |      108 |         22
+
+CANLI ÇEVRESİ DURAK HESABI:
+NO | DURAK                         | SAAT  | SEG_KM | SEG_SRC              | TOPLAM_KM | CANLIYE_GORE
+06 | Kadıköy                       | -     |      - | MISSING              |        - |          -
+07 | İl Sınırı(Manisa)             | -     |      - | MISSING              |        - |          -
+08 | Dindarlı                      | -     |      - | MISSING              |        - |          -
+09 | Dadağlı                       | -     |    3.9 | route_segments       |       74 |          -
+10 | Sarıgöl Garaj                 | -     |    9.1 | route_segments       |       84 |          -
+11 | Afşar                         | -     |    3.7 | route_segments       |       87 |          -
+12 | Bereketli                     | -     |    0.5 | route_segments       |       88 |          -
+13 | Hacıaliler                    | -     |    1.3 | route_segments       |       89 |          -
+14 | Ortahan                       | -     |    1.5 | route_segments       |       91 |        4.4 <-- CANLI
+15 | Kardeşler pide salonu         | -     |    2.7 | route_segments       |       93 |        7.2
+16 | Belenyaka                     | -     |    5.0 | route_segments       |       98 |         12
+17 | Alaşehir Otogar               | -     |    6.6 | route_segments       |      105 |         19
+18 | Alaşehir Stadyum              | -     |    3.5 | route_segments       |      108 |         22
+19 | Akkeçili                      | -     |    3.7 | route_segments       |      112 |         26
+20 | Piyadeler                     | -     |    4.7 | route_segments       |      117 |         31
+21 | Kavaklıdere                   | -     |    8.7 | route_segments       |      126 |         39
+22 | Salihli Garaj                 | -     |     22 | route_segments       |      147 |         61
+23 | Sart                          | -     |    9.1 | route_segments       |      157 |         70
+
+SON 8 DURAK HESABI:
+NO | DURAK                         | SAAT  | SEG_KM | SEG_SRC              | TOPLAM_KM | CANLIYE_GORE
+49 | Maltepe                       | -     |    5.0 | route_segments       |      637 |        551
+50 | Zümrütevler (Huzur Evi)       | -     |      - | MISSING              |        - |          -
+51 | Küçükyalı                     | -     |      - | MISSING              |        - |          -
+52 | Bostancı                      | -     |    8.6 | route_segments       |      645 |        559
+53 | Göztepe köprüsü               | -     |    3.3 | route_segments       |      649 |        563
+54 | Harem                         | -     |     13 | route_segments       |      662 |        576
+55 | Alibeyköy                     | -     |     25 | route_segments       |      687 |        601
+56 | Esenler Otogar                | -     |     17 | route_segments       |      704 |        617
+
+===== 7) EKSİK SEGMENTLER =====
+MISSING_COUNT: 11
+01. Bozalan -> Derbent(Denizli)
+02. Derbent(Denizli) -> Kadıköy
+03. Kadıköy -> İl Sınırı(Manisa)
+04. İl Sınırı(Manisa) -> Dindarlı
+05. Saruhanlı -> Soma
+06. Soma -> Kırkağaç
+07. Kırkağaç -> Balıkesir
+08. Kartal köprüsü -> 70 Evler
+09. 70 Evler -> Cevizli
+10. Maltepe -> Zümrütevler (Huzur Evi)
+11. Zümrütevler (Huzur Evi) -> Küçükyalı
+
+===== 8) MEVCUT HTML KART DEĞERLERİ =====
+HTML_CARD_COUNT: 56
+01. Denizli otogar               | passed    | ✓ GEÇİLDİ    | 
+02. Sarayköy                     | passed    | ✓ GEÇİLDİ    | 
+03. Buldan                       | passed    | ✓ GEÇİLDİ    | 
+04. Bozalan                      | passed    | ✓ GEÇİLDİ    | 
+05. Derbent(Denizli)             | passed    | ✓ GEÇİLDİ    | 
+06. Kadıköy                      | passed    | ✓ GEÇİLDİ    | 
+07. İl Sınırı(Manisa)            | passed    | ✓ GEÇİLDİ    | 
+08. Dindarlı                     | passed    | ✓ GEÇİLDİ    | 
+09. Dadağlı                      | passed    | ✓ GEÇİLDİ    | 
+10. Sarıgöl Garaj                | passed    | ✓ GEÇİLDİ    | 
+11. Afşar                        | passed    | ✓ GEÇİLDİ    | 
+12. Bereketli                    | passed    | ✓ GEÇİLDİ    | 
+13. Hacıaliler                   | passed    | ✓ GEÇİLDİ    | 
+14. Ortahan                      | live      | ● CANLI      | 
+15. Kardeşler pide salonu        | next      | ⟶ SONRAKİ    | 
+16. Belenyaka                    | upcoming  | Bekliyor     | 
+17. Alaşehir Otogar              | upcoming  | Bekliyor     | 
+18. Alaşehir Stadyum             | upcoming  | Bekliyor     | 
+19. Akkeçili                     | upcoming  | Bekliyor     | 
+20. Piyadeler                    | upcoming  | Bekliyor     | 
+21. Kavaklıdere                  | upcoming  | Bekliyor     | 
+22. Salihli Garaj                | upcoming  | Bekliyor     | 
+23. Sart                         | upcoming  | Bekliyor     | 
+24. Ahmetli                      | upcoming  | Bekliyor     | 
+25. Avşar Turgutlu(A101)         | upcoming  | Bekliyor     | 
+
+===== RAPOR BITTI =====

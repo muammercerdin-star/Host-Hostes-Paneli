@@ -1,0 +1,622 @@
+===== V99U DOLULUK CLICK RÖNTGEN =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+TIME: 2026-06-12 17:34:01
+
+===== 1) DOSYA DURUMU =====
+VAR  /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/continue_trip.html size= 16172
+VAR  /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/templates/continue_trip.html size= 16172
+VAR  /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.js size= 43515
+VAR  /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.css size= 25801
+YOK  /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_doluluk_click_guard_v99t.js size= -
+VAR  /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_v99_clean.js size= 43515
+VAR  /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_v99_clean.css size= 25801
+YOK  /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_doluluk_click_guard_v99t.js size= -
+
+===== 2) TEMPLATE SCRIPT SIRASI =====
+  376: <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+  427: <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=live-stop-lock-v82"></script>
+  428: <script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
+  429: <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
+  430: <script src="{{ url_for('static', filename='continue/continue_trip_ui.js') }}?v=js-safe-split-1"></script>
+  431: <script src="{{ url_for('static', filename='continue/continue_refresh_button_v49.js') }}?v=refresh-v49"></script>
+  432: <script src="{{ url_for('static', filename='continue/continue_native_lock_alarm_v85.js') }}?v=native-lock-alarm-v87"></script>
+  433: <script src="{{ url_for('static', filename='continue/continue_trip_v99_clean.js') }}?v=v99g-{{ trip['id'] }}'id'] }}'id'] }}'id'] }}"></script>
+
+===== 3) TEMPLATE ÜST KUTU / DOLULUK / PANEL SATIRLARI =====
+   14: {% set occ_total = live_summary.total_seats or 1 %}
+   48:     <div class="v99-gauge-label">HIZ</div>
+   55:     <div class="v99-gauge-label">DOLULUK</div>
+   56:     <div class="v99-gauge-val">{{ live_summary.passenger_count }} / {{ live_summary.total_seats }}</div>
+   72:     <div class="v99-gauge-label">DURUM</div>
+   73:     <div class="v99-gauge-val green v99-status-val" id="liveTopStatusText">Planında</div>
+  108:           <div class="v99-status-pill">
+  115:              data-stop-name="{{ current_stop_name }}">{{ current_distance }}</b>
+  119:       <div class="v99-prox-metrics">
+  120:         <button class="v99-pm-cell" type="button" id="liveOffloadMetric" data-kind="offload" aria-label="Bu durakta inecek koltukları göster">
+  128:         <button class="v99-pm-cell" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
+  181:           <div class="v99-tl-metrics">
+  182:             <div class="v99-tl-metric">
+  187:             <div class="v99-tl-metric">
+  188:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="{{ stop.name }}">{{ stop.distance }}</div>
+  192:             <div class="v99-tl-metric">
+  197:             <div class="v99-tl-metric">
+  244:   <a class="v99-dock-btn dock-item" id="continueSeatMapBtn" href="{{ url_for('seats_page') }}">
+  245:     <i>💺</i><span>KOLTUK</span>
+  376: <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+
+===== 4) STATIC/CONTINUE JS DOSYALARINDA CLICK ARAMA =====
+
+JS: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_live_diagnostics.js size= 7939
+   90:     const head = box.querySelector(".diag-head");
+   91:     const caret = box.querySelector("#diagCaret");
+  111:       document.querySelector(".timeline") ||
+  112:       document.querySelector("main") ||
+  158:     const head = box.querySelector(".diag-head");
+  161:       head.addEventListener("click", function(){
+  288:     document.addEventListener("DOMContentLoaded", poll);
+  295:   document.addEventListener("visibilitychange", function(){
+
+JS: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_refresh_button_v49.js size= 1198
+    8:       document.addEventListener("DOMContentLoaded", fn);
+   35:     btn.addEventListener("click", function(e){
+
+JS: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_core.js size= 75965
+  124:     document.addEventListener("DOMContentLoaded", function(){
+  256:       cancelBtn.addEventListener("click", function(){
+  263:       saveBtn.addEventListener("click", saveDestinationChange);
+  370:         cancelBtn.addEventListener("click", function(){
+  378:         okBtn.addEventListener("click", function(){
+  495:         cancelBtn.addEventListener("click", function(){
+  502:         okBtn.addEventListener("click", function(){
+  692:         backBtn.addEventListener("click", function(){
+  745:         cancelBtn.addEventListener("click", function(){
+  752:         okBtn.addEventListener("click", function(){
+  880:         backBtn.addEventListener("click", function(){
+ 1343:         document.getElementById("completeBackSummary")?.addEventListener("click", () => {
+ 1347:         document.getElementById("completeCloseSheet")?.addEventListener("click", () => {
+ 1397:       document.getElementById("pendingPassengersBtn")?.addEventListener("click", () => {
+ 1405:       document.getElementById("pendingBagsBtn")?.addEventListener("click", () => {
+ 1506:       speakBtn.addEventListener("click", function(){
+ 1512:       completeBtn.addEventListener("click", function(){
+ 1518:       passengerBtn.addEventListener("click", function(){
+ 1528:       bagBtn2.addEventListener("click", function(){
+ 1650:     liveCard.addEventListener("click", function(e){
+ 1651:       if(e.target.closest("button, a, .metric-action, .status-pill")) return;
+ 1655:     liveCard.addEventListener("keydown", function(e){
+ 1665:     offBtn.addEventListener("click", function(){
+ 1671:     bagBtn.addEventListener("click", function(){
+ 1677:     bodyEl.addEventListener("click", function(e){
+ 1678:       const cargoDetailBtn = e.target.closest("[data-cargo-detail]");
+ 1685:       const cargoDeliverBtn = e.target.closest("[data-cargo-deliver]");
+ 1692:       const bagDetailBtn = e.target.closest("[data-bag-seat]");
+ 1699:       const bulkBtn = e.target.closest("#sheetBulkOffloadBtn");
+ 1705:       const offloadBtn = e.target.closest("[data-offload-seat]");
+ 1712:       const btn = e.target.closest("[data-change-seat]");
+ 1722:   if(closeBtn) closeBtn.addEventListener("click", closeSheet);
+ 1723:   if(overlay) overlay.addEventListener("click", closeSheet);
+ 1725:   document.addEventListener("keydown", function(e){
+ 1752:   function q(sel){ return document.querySelector(sel); }
+ 2013:     document.querySelectorAll(".stop-distance-value[data-stop-name]").forEach(el => {
+ 2309:     document.addEventListener("DOMContentLoaded", start);
+ 2378:     host.querySelector(".v45-seatmap-close").addEventListener("click", close);
+ 2380:     const page = host.querySelector(".v45-seatmap-page");
+ 2441:     loading.querySelector(".v45-seatmap-close").addEventListener("click", close);
+ 2444:       const res = await fetch(`/api/live-seat-map?_=${Date.now()}`, {
+ 2464:   btn.addEventListener("click", open, true);
+ 2466:   document.addEventListener("keydown", function(e){
+
+JS: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_ui.js size= 7476
+   44:     return Array.from(document.querySelectorAll(".sheet-bag-photo, .sheet-cargo-photo")).map((el, i) => {
+   45:       const badge = el.querySelector(".sheet-bag-photo-badge");
+   46:       const side = el.querySelector(".sheet-bag-photo-side");
+   47:       const image = el.querySelector("img");
+   96:   document.addEventListener("click", function(e){
+   97:     const photo = e.target.closest(".sheet-bag-photo, .sheet-cargo-photo");
+  102:     const currentList = Array.from(document.querySelectorAll(".sheet-bag-photo, .sheet-cargo-photo"));
+  108:   if(closeBtn) closeBtn.addEventListener("click", closeViewer);
+  111:     prevBtn.addEventListener("click", function(){
+  117:     nextBtn.addEventListener("click", function(){
+  122:   viewer.addEventListener("click", function(e){
+  126:   document.addEventListener("keydown", function(e){
+  139:   function q(sel){ return document.querySelector(sel); }
+  147:     const label = card.querySelector(".card-label");
+  158:       const head = card.querySelector(".card-head");
+  159:       const grid = card.querySelector(".metric-grid");
+  186:     document.addEventListener("DOMContentLoaded", ensureV2);
+  241:     document.addEventListener("DOMContentLoaded", render);
+
+JS: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.js size= 43515
+    8:     return document.querySelector(sel);
+  137:   document.addEventListener("continueEtaUpdated", sync);
+  138:   window.addEventListener("storage", sync);
+  158:     return (root || document).querySelector(sel);
+  162:     return Array.prototype.slice.call((root || document).querySelectorAll(sel));
+  265:   function closestScheduleItem(schedule, stopName){
+  372:     var item = closestScheduleItem(schedule, to);
+  452:       var item = closestScheduleItem(schedule, stopName);
+  500:   document.addEventListener("continueEtaUpdated", hydrateTimeline);
+  512:     return Array.prototype.slice.call((root || document).querySelectorAll(sel));
+  516:     return (root || document).querySelector(sel);
+  561:   document.addEventListener("continueEtaUpdated", cleanTimelineArrivalValues);
+  576:     var metrics = card.querySelectorAll(".v99-tl-metric");
+  578:       var lbl = metrics[i].querySelector(".v99-tl-m-lbl");
+  579:       var val = metrics[i].querySelector(".v99-tl-m-val");
+  591:     var cards = document.querySelectorAll(".v99-tl-card");
+  593:       var nameEl = card.querySelector(".v99-tl-stop-name");
+  612:     document.addEventListener("DOMContentLoaded", bindDistanceCells);
+  615:   window.addEventListener("load", bindDistanceCells);
+  616:   document.addEventListener("continueEtaUpdated", bindDistanceCells);
+  643:     return document.querySelector(sel);
+  728:     var metrics = card.querySelectorAll(".v99-tl-metric");
+  732:       var lbl = metrics[i].querySelector(".v99-tl-m-lbl");
+  733:       var val = metrics[i].querySelector(".v99-tl-m-val");
+  745:     document.querySelectorAll(".v99-tl-card").forEach(function(card){
+  746:       var nameEl = card.querySelector(".v99-tl-stop-name");
+  781:     document.querySelectorAll(".v99-tl-card").forEach(function(card){
+  782:       var nameEl = card.querySelector(".v99-tl-stop-name");
+  836:   document.addEventListener("continueEtaUpdated", hydrateGpsDistances);
+  837:   window.addEventListener("load", hydrateGpsDistances);
+  863:     var metrics = card.querySelectorAll(".v99-tl-metric");
+  865:       var lbl = metrics[i].querySelector(".v99-tl-m-lbl");
+  866:       var val = metrics[i].querySelector(".v99-tl-m-val");
+  879:     document.querySelectorAll(".v99-tl-card").forEach(function(card){
+  912:   document.addEventListener("continueEtaUpdated", protectDistances);
+  913:   window.addEventListener("load", protectDistances);
+  919: /* V99M_OCCUPANCY_PANEL_START */
+  924:     return (root || document).querySelector(sel);
+  928:     return Array.prototype.slice.call((root || document).querySelectorAll(sel));
+  988:           <div class="v99m-kicker">DOLULUK PANELİ</div>
+  989:           <h3 class="v99m-title">Koltuk Haritası</h3>
+  998:         <div class="v99m-stat"><div class="v">—</div><div class="l">DOLULUK</div></div>
+ 1026:     overlay.addEventListener("click", closePanel);
+ 1027:     q("#v99mOccClose").addEventListener("click", closePanel);
+ 1028:     q("#v99mOccRefresh").addEventListener("click", loadPanel);
+ 1045:   function isDolulukTarget(el){
+ 1049:     if(t.indexOf("DOLULUK") < 0) return false;
+ 1059:   function markDolulukCards(){
+ 1061:       if(isDolulukTarget(el)){
+ 1062:         el.classList.add("v99m-occ-clickable");
+ 1067:   document.addEventListener("click", function(ev){
+ 1070:       if(isDolulukTarget(el)){
+ 1119:           <div class="l">DOLULUK</div>
+ 1226:         cell.addEventListener("click", function(seat){
+ 1268:       var res = await fetch("/api/live-seat-map?_=" + Date.now(), {
+ 1284:         impact.innerHTML = `<b>Doluluk verisi alınamadı.</b><br><span class="v99m-muted">${String(err && err.message || err)}</span>`;
+ 1289:   markDolulukCards();
+ 1290:   setInterval(markDolulukCards, 1500);
+ 1292:   window.MuavinV99OccupancyPanel = {
+ 1298: /* V99M_OCCUPANCY_PANEL_END */
+ 1307:     return document.querySelector(sel);
+ 1311:     return Array.from((root || document).querySelectorAll(sel));
+ 1377:     if(el.closest(".v99-dock, .v99-bottom-dock, nav, .bottom-nav, .v99-top, .v99-stats, .v99-tl-card, .v99-prox-card")){
+ 1401:     var old = el.querySelector(":scope > .v99-seat-bag-dot");
+ 1480:     var host = seatEls[seatEls.length - 1].closest(".v99-seat-map, .v99-seat-grid, .v99-bus-map, .v99-seat-plan, .v99-occupancy-panel, .v99-seat-shell");
+ 1499:       var res = await fetch("/api/live-seat-map?_v=v99o_" + Date.now(), {
+ 1513:   document.addEventListener("click", function(ev){
+ 1514:     var el = ev.target.closest("[data-v99-seat-no], [data-seat-no], [data-seat], .v99-seat-color-cell");
+ 1542:     document.addEventListener("DOMContentLoaded", refreshSeatColors);
+ 1545:   window.addEventListener("load", refreshSeatColors);
+ 1546:   document.addEventListener("continueEtaUpdated", refreshSeatColors);
+ 1557: /* V99Q_ONLY_OCCUPANCY_CLICK_START */
+ 1575:       target.closest &&
+ 1576:       target.closest(".v99-seat-panel, .v99-seat-sheet, .v99-seat-modal, .v99-occupancy-panel, .v99-panel, .v99-doluluk-panel")
+ 1585:       // Üstteki küçük bilgi kartları: SAAT / HIZ / DOLULUK / DURUM
+ 1587:         t.indexOf("doluluk") >= 0 ||
+ 1599:   function isDolulukCard(card){
+ 1601:     return norm(txt(card)).indexOf("doluluk") >= 0;
+ 1605:     if(!target || !target.closest) return false;
+ 1607:     if(target.closest("#liveClockText")) return true;
+ 1608:     if(target.closest(".v99-clock")) return true;
+ 1609:     if(target.closest(".v97-clock")) return true;
+ 1619:   document.addEventListener("click", function(e){
+ 1636:     // Sadece DOLULUK kartı serbest
+ 1637:     if(isDolulukCard(card)) return;
+ 1639:     // SAAT / HIZ / DURUM kartlarında doluluk paneli açılmasın
+ 1643:   window.MuavinV99OnlyOccupancyClick = true;
+ 1645: /* V99Q_ONLY_OCCUPANCY_CLICK_END */
+
+===== 5) ÖZEL: DOLULUK PANELİ AÇAN FONKSİYON ADAYLARI =====
+FUNC_ADAY_COUNT: 17
+- function offloadSeatFromSheet(seatNo)
+- function renderSeatBagDetail(seatNo)
+- function isDolulukTarget(el)
+- function markDolulukCards()
+- function seatGenderClass(s)
+- function renderSeatMap(data, seats)
+- function showSeatDetail(s)
+- var seats =
+- var selectedSeatNo =
+- function isSeatNumberText(t)
+- function looksLikeSeatElement(el)
+- function findSeatEls()
+- function applySeatClasses(seats)
+- var seatEls =
+- function refreshSeatColors()
+- var seats =
+- function isDolulukCard(card)
+
+===== 6) CLICK HANDLER BAĞLANDIĞI SELECTOR ADAYLARI =====
+SELECTOR_HIT_COUNT: 24
+- querySelector(".status-pill")
+- querySelectorAll(".metric b")
+- querySelectorAll(".metric b")
+- querySelector(".live-current-card, .live-stop-card, .live-panel")
+- closest("button, a, .metric-action, .status-pill")
+- closest("[data-bag-seat]")
+- closest("[data-offload-seat]")
+- closest("[data-change-seat]")
+- querySelectorAll(".stop-distance-value[data-stop-name]")
+- querySelector(".v45-seatmap-close")
+- querySelector(".v45-seatmap-page")
+- querySelector(".v45-seatmap-close")
+- querySelector(".metric-grid")
+- querySelectorAll(".v99-tl-metric")
+- querySelector(".v99-tl-stop-name")
+- querySelectorAll(".v99-tl-metric")
+- querySelector(".v99-tl-stop-name")
+- querySelector(".v99-tl-stop-name")
+- querySelectorAll(".v99-tl-metric")
+- closest(".v99-dock, .v99-bottom-dock, nav, .bottom-nav, .v99-top, .v99-stats, .v99-tl-card, .v99-prox-card")
+- querySelector(":scope > .v99-seat-bag-dot")
+- closest(".v99-seat-map, .v99-seat-grid, .v99-bus-map, .v99-seat-plan, .v99-occupancy-panel, .v99-seat-shell")
+- closest("[data-v99-seat-no], [data-seat-no], [data-seat], .v99-seat-color-cell")
+- closest(".v99-seat-panel, .v99-seat-sheet, .v99-seat-modal, .v99-occupancy-panel, .v99-panel, .v99-doluluk-panel")
+
+===== 7) RENDER HTML KONTROL =====
+STATUS: 200
+HTML_SIZE: 91310
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99u_doluluk_click_render.html
+
+HTML içinde üst stat / doluluk adayları:
+   48:     <div class="v99-gauge-label">HIZ</div>
+   55:     <div class="v99-gauge-label">DOLULUK</div>
+   70:     <div class="v99-gauge-label">DURUM</div>
+   71:     <div class="v99-gauge-val green v99-status-val" id="liveTopStatusText">Planında</div>
+  106:           <div class="v99-status-pill">
+  113:              data-stop-name="Ortahan">4.427727237649642</b>
+  117:       <div class="v99-prox-metrics">
+  118:         <button class="v99-pm-cell" type="button" id="liveOffloadMetric" data-kind="offload" aria-label="Bu durakta inecek koltukları göster">
+  126:         <button class="v99-pm-cell" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
+  173:           <div class="v99-tl-metrics">
+  174:             <div class="v99-tl-metric">
+  179:             <div class="v99-tl-metric">
+  180:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Denizli otogar">Geçildi</div>
+  184:             <div class="v99-tl-metric">
+  189:             <div class="v99-tl-metric">
+  214:           <div class="v99-tl-metrics">
+  215:             <div class="v99-tl-metric">
+  220:             <div class="v99-tl-metric">
+  221:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Sarayköy">Geçildi</div>
+  225:             <div class="v99-tl-metric">
+  230:             <div class="v99-tl-metric">
+  255:           <div class="v99-tl-metrics">
+  256:             <div class="v99-tl-metric">
+  261:             <div class="v99-tl-metric">
+  262:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Buldan">Geçildi</div>
+  266:             <div class="v99-tl-metric">
+  271:             <div class="v99-tl-metric">
+  296:           <div class="v99-tl-metrics">
+  297:             <div class="v99-tl-metric">
+  302:             <div class="v99-tl-metric">
+  303:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Bozalan">Geçildi</div>
+  307:             <div class="v99-tl-metric">
+  312:             <div class="v99-tl-metric">
+  337:           <div class="v99-tl-metrics">
+  338:             <div class="v99-tl-metric">
+  343:             <div class="v99-tl-metric">
+  344:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Derbent(Denizli)">Geçildi</div>
+  348:             <div class="v99-tl-metric">
+  353:             <div class="v99-tl-metric">
+  378:           <div class="v99-tl-metrics">
+  379:             <div class="v99-tl-metric">
+  384:             <div class="v99-tl-metric">
+  385:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Kadıköy">Geçildi</div>
+  389:             <div class="v99-tl-metric">
+  394:             <div class="v99-tl-metric">
+  419:           <div class="v99-tl-metrics">
+  420:             <div class="v99-tl-metric">
+  425:             <div class="v99-tl-metric">
+  426:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="İl Sınırı(Manisa)">Geçildi</div>
+  430:             <div class="v99-tl-metric">
+  435:             <div class="v99-tl-metric">
+  460:           <div class="v99-tl-metrics">
+  461:             <div class="v99-tl-metric">
+  466:             <div class="v99-tl-metric">
+  467:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Dindarlı">Geçildi</div>
+  471:             <div class="v99-tl-metric">
+  476:             <div class="v99-tl-metric">
+  501:           <div class="v99-tl-metrics">
+  502:             <div class="v99-tl-metric">
+  507:             <div class="v99-tl-metric">
+  508:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Dadağlı">Geçildi</div>
+  512:             <div class="v99-tl-metric">
+  517:             <div class="v99-tl-metric">
+  542:           <div class="v99-tl-metrics">
+  543:             <div class="v99-tl-metric">
+  548:             <div class="v99-tl-metric">
+  549:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Sarıgöl Garaj">Geçildi</div>
+  553:             <div class="v99-tl-metric">
+  558:             <div class="v99-tl-metric">
+  583:           <div class="v99-tl-metrics">
+  584:             <div class="v99-tl-metric">
+  589:             <div class="v99-tl-metric">
+  590:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Afşar">Geçildi</div>
+  594:             <div class="v99-tl-metric">
+  599:             <div class="v99-tl-metric">
+  624:           <div class="v99-tl-metrics">
+  625:             <div class="v99-tl-metric">
+  630:             <div class="v99-tl-metric">
+  631:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Bereketli">Geçildi</div>
+  635:             <div class="v99-tl-metric">
+  640:             <div class="v99-tl-metric">
+  665:           <div class="v99-tl-metrics">
+  666:             <div class="v99-tl-metric">
+  671:             <div class="v99-tl-metric">
+  672:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Hacıaliler">Geçildi</div>
+  676:             <div class="v99-tl-metric">
+  681:             <div class="v99-tl-metric">
+  706:           <div class="v99-tl-metrics">
+  707:             <div class="v99-tl-metric">
+  712:             <div class="v99-tl-metric">
+  713:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Ortahan">0 km</div>
+  717:             <div class="v99-tl-metric">
+  722:             <div class="v99-tl-metric">
+  747:           <div class="v99-tl-metrics">
+  748:             <div class="v99-tl-metric">
+  753:             <div class="v99-tl-metric">
+  754:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Kardeşler pide salonu">1 durak</div>
+  758:             <div class="v99-tl-metric">
+  763:             <div class="v99-tl-metric">
+  788:           <div class="v99-tl-metrics">
+  789:             <div class="v99-tl-metric">
+  794:             <div class="v99-tl-metric">
+  795:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Belenyaka">2 durak</div>
+  799:             <div class="v99-tl-metric">
+  804:             <div class="v99-tl-metric">
+  829:           <div class="v99-tl-metrics">
+  830:             <div class="v99-tl-metric">
+  835:             <div class="v99-tl-metric">
+  836:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Alaşehir Otogar">3 durak</div>
+  840:             <div class="v99-tl-metric">
+  845:             <div class="v99-tl-metric">
+  870:           <div class="v99-tl-metrics">
+  871:             <div class="v99-tl-metric">
+  876:             <div class="v99-tl-metric">
+  877:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Alaşehir Stadyum">4 durak</div>
+  881:             <div class="v99-tl-metric">
+  886:             <div class="v99-tl-metric">
+  911:           <div class="v99-tl-metrics">
+  912:             <div class="v99-tl-metric">
+  917:             <div class="v99-tl-metric">
+  918:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Akkeçili">5 durak</div>
+  922:             <div class="v99-tl-metric">
+  927:             <div class="v99-tl-metric">
+  952:           <div class="v99-tl-metrics">
+  953:             <div class="v99-tl-metric">
+  958:             <div class="v99-tl-metric">
+  959:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Piyadeler">6 durak</div>
+  963:             <div class="v99-tl-metric">
+  968:             <div class="v99-tl-metric">
+  993:           <div class="v99-tl-metrics">
+  994:             <div class="v99-tl-metric">
+  999:             <div class="v99-tl-metric">
+ 1000:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Kavaklıdere">7 durak</div>
+ 1004:             <div class="v99-tl-metric">
+ 1009:             <div class="v99-tl-metric">
+ 1034:           <div class="v99-tl-metrics">
+ 1035:             <div class="v99-tl-metric">
+ 1040:             <div class="v99-tl-metric">
+ 1041:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Salihli Garaj">8 durak</div>
+ 1045:             <div class="v99-tl-metric">
+ 1050:             <div class="v99-tl-metric">
+ 1075:           <div class="v99-tl-metrics">
+ 1076:             <div class="v99-tl-metric">
+ 1081:             <div class="v99-tl-metric">
+ 1082:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Sart">9 durak</div>
+ 1086:             <div class="v99-tl-metric">
+ 1091:             <div class="v99-tl-metric">
+ 1116:           <div class="v99-tl-metrics">
+ 1117:             <div class="v99-tl-metric">
+ 1122:             <div class="v99-tl-metric">
+ 1123:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Ahmetli">10 durak</div>
+ 1127:             <div class="v99-tl-metric">
+ 1132:             <div class="v99-tl-metric">
+ 1157:           <div class="v99-tl-metrics">
+ 1158:             <div class="v99-tl-metric">
+ 1163:             <div class="v99-tl-metric">
+ 1164:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Avşar Turgutlu(A101)">11 durak</div>
+ 1168:             <div class="v99-tl-metric">
+ 1173:             <div class="v99-tl-metric">
+ 1198:           <div class="v99-tl-metrics">
+ 1199:             <div class="v99-tl-metric">
+ 1204:             <div class="v99-tl-metric">
+ 1205:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Gökkaya">12 durak</div>
+ 1209:             <div class="v99-tl-metric">
+ 1214:             <div class="v99-tl-metric">
+ 1239:           <div class="v99-tl-metrics">
+ 1240:             <div class="v99-tl-metric">
+ 1245:             <div class="v99-tl-metric">
+ 1246:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Akçapınar">13 durak</div>
+ 1250:             <div class="v99-tl-metric">
+ 1255:             <div class="v99-tl-metric">
+ 1280:           <div class="v99-tl-metrics">
+ 1281:             <div class="v99-tl-metric">
+ 1286:             <div class="v99-tl-metric">
+ 1287:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Derbent(Turgutlu)">14 durak</div>
+ 1291:             <div class="v99-tl-metric">
+ 1296:             <div class="v99-tl-metric">
+ 1321:           <div class="v99-tl-metrics">
+ 1322:             <div class="v99-tl-metric">
+ 1327:             <div class="v99-tl-metric">
+ 1328:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Turgutlu Garaj">15 durak</div>
+ 1332:             <div class="v99-tl-metric">
+ 1337:             <div class="v99-tl-metric">
+ 1362:           <div class="v99-tl-metrics">
+ 1363:             <div class="v99-tl-metric">
+ 1368:             <div class="v99-tl-metric">
+ 1369:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Özdilek(Turgutlu)">16 durak</div>
+ 1373:             <div class="v99-tl-metric">
+ 1378:             <div class="v99-tl-metric">
+ 1403:           <div class="v99-tl-metrics">
+ 1404:             <div class="v99-tl-metric">
+ 1409:             <div class="v99-tl-metric">
+ 1410:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Manisa Otogar">17 durak</div>
+ 1414:             <div class="v99-tl-metric">
+ 1419:             <div class="v99-tl-metric">
+ 1444:           <div class="v99-tl-metrics">
+ 1445:             <div class="v99-tl-metric">
+ 1450:             <div class="v99-tl-metric">
+ 1451:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Akhisar">18 durak</div>
+ 1455:             <div class="v99-tl-metric">
+ 1460:             <div class="v99-tl-metric">
+ 1485:           <div class="v99-tl-metrics">
+ 1486:             <div class="v99-tl-metric">
+ 1491:             <div class="v99-tl-metric">
+ 1492:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Saruhanlı">19 durak</div>
+ 1496:             <div class="v99-tl-metric">
+ 1501:             <div class="v99-tl-metric">
+ 1526:           <div class="v99-tl-metrics">
+ 1527:             <div class="v99-tl-metric">
+ 1532:             <div class="v99-tl-metric">
+ 1533:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Soma">20 durak</div>
+ 1537:             <div class="v99-tl-metric">
+ 1542:             <div class="v99-tl-metric">
+ 1567:           <div class="v99-tl-metrics">
+ 1568:             <div class="v99-tl-metric">
+ 1573:             <div class="v99-tl-metric">
+ 1574:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Kırkağaç">21 durak</div>
+ 1578:             <div class="v99-tl-metric">
+ 1583:             <div class="v99-tl-metric">
+ 1608:           <div class="v99-tl-metrics">
+ 1609:             <div class="v99-tl-metric">
+ 1614:             <div class="v99-tl-metric">
+ 1615:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Balıkesir">22 durak</div>
+ 1619:             <div class="v99-tl-metric">
+ 1624:             <div class="v99-tl-metric">
+ 1649:           <div class="v99-tl-metrics">
+ 1650:             <div class="v99-tl-metric">
+ 1655:             <div class="v99-tl-metric">
+ 1656:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Susurluk">23 durak</div>
+ 1660:             <div class="v99-tl-metric">
+ 1665:             <div class="v99-tl-metric">
+ 1690:           <div class="v99-tl-metrics">
+ 1691:             <div class="v99-tl-metric">
+ 1696:             <div class="v99-tl-metric">
+ 1697:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Mustafa K.P(Bursa)">24 durak</div>
+ 1701:             <div class="v99-tl-metric">
+ 1706:             <div class="v99-tl-metric">
+ 1731:           <div class="v99-tl-metrics">
+ 1732:             <div class="v99-tl-metric">
+ 1737:             <div class="v99-tl-metric">
+ 1738:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Bursa Otogar">25 durak</div>
+ 1742:             <div class="v99-tl-metric">
+ 1747:             <div class="v99-tl-metric">
+ 1772:           <div class="v99-tl-metrics">
+ 1773:             <div class="v99-tl-metric">
+ 1778:             <div class="v99-tl-metric">
+ 1779:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Gebze Garaj">26 durak</div>
+ 1783:             <div class="v99-tl-metric">
+ 1788:             <div class="v99-tl-metric">
+ 1813:           <div class="v99-tl-metrics">
+ 1814:             <div class="v99-tl-metric">
+ 1819:             <div class="v99-tl-metric">
+ 1820:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Tuzla">27 durak</div>
+ 1824:             <div class="v99-tl-metric">
+ 1829:             <div class="v99-tl-metric">
+ 1854:           <div class="v99-tl-metrics">
+ 1855:             <div class="v99-tl-metric">
+ 1860:             <div class="v99-tl-metric">
+ 1861:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Güzel yalı">28 durak</div>
+ 1865:             <div class="v99-tl-metric">
+ 1870:             <div class="v99-tl-metric">
+ 1895:           <div class="v99-tl-metrics">
+ 1896:             <div class="v99-tl-metric">
+ 1901:             <div class="v99-tl-metric">
+ 1902:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="İçmeler Köprüsü">29 durak</div>
+ 1906:             <div class="v99-tl-metric">
+ 1911:             <div class="v99-tl-metric">
+ 1936:           <div class="v99-tl-metrics">
+ 1937:             <div class="v99-tl-metric">
+ 1942:             <div class="v99-tl-metric">
+ 1943:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Kaynarca">30 durak</div>
+ 1947:             <div class="v99-tl-metric">
+ 1952:             <div class="v99-tl-metric">
+ 1977:           <div class="v99-tl-metrics">
+ 1978:             <div class="v99-tl-metric">
+ 1983:             <div class="v99-tl-metric">
+ 1984:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Pendik">31 durak</div>
+ 1988:             <div class="v99-tl-metric">
+ 1993:             <div class="v99-tl-metric">
+ 2018:           <div class="v99-tl-metrics">
+ 2019:             <div class="v99-tl-metric">
+ 2024:             <div class="v99-tl-metric">
+ 2025:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Kartal köprüsü">32 durak</div>
+ 2029:             <div class="v99-tl-metric">
+ 2034:             <div class="v99-tl-metric">
+ 2059:           <div class="v99-tl-metrics">
+ 2060:             <div class="v99-tl-metric">
+ 2065:             <div class="v99-tl-metric">
+ 2066:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="70 Evler">33 durak</div>
+ 2070:             <div class="v99-tl-metric">
+ 2075:             <div class="v99-tl-metric">
+ 2100:           <div class="v99-tl-metrics">
+ 2101:             <div class="v99-tl-metric">
+ 2106:             <div class="v99-tl-metric">
+ 2107:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Cevizli">34 durak</div>
+ 2111:             <div class="v99-tl-metric">
+ 2116:             <div class="v99-tl-metric">
+ 2141:           <div class="v99-tl-metrics">
+ 2142:             <div class="v99-tl-metric">
+ 2147:             <div class="v99-tl-metric">
+ 2148:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Maltepe">35 durak</div>
+ 2152:             <div class="v99-tl-metric">
+ 2157:             <div class="v99-tl-metric">
+ 2182:           <div class="v99-tl-metrics">
+ 2183:             <div class="v99-tl-metric">
+ 2188:             <div class="v99-tl-metric">
+ 2189:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Zümrütevler (Huzur Evi)">36 durak</div>
+ 2193:             <div class="v99-tl-metric">
+ 2198:             <div class="v99-tl-metric">
+ 2223:           <div class="v99-tl-metrics">
+ 2224:             <div class="v99-tl-metric">
+ 2229:             <div class="v99-tl-metric">
+ 2230:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Küçükyalı">37 durak</div>
+ 2234:             <div class="v99-tl-metric">
+ 2239:             <div class="v99-tl-metric">
+ 2264:           <div class="v99-tl-metrics">
+ 2265:             <div class="v99-tl-metric">
+ 2270:             <div class="v99-tl-metric">
+ 2271:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Bostancı">38 durak</div>
+ 2275:             <div class="v99-tl-metric">
+ 2280:             <div class="v99-tl-metric">
+ 2305:           <div class="v99-tl-metrics">
+ 2306:             <div class="v99-tl-metric">
+ 2311:             <div class="v99-tl-metric">
+ 2312:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Göztepe köprüsü">39 durak</div>
+ 2316:             <div class="v99-tl-metric">
+ 2321:             <div class="v99-tl-metric">
+ 2346:           <div class="v99-tl-metrics">
+ 2347:             <div class="v99-tl-metric">
+ 2352:             <div class="v99-tl-metric">
+ 2353:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Harem">40 durak</div>
+ 2357:             <div class="v99-tl-metric">
+ 2362:             <div class="v99-tl-metric">
+ 2387:           <div class="v99-tl-metrics">
+ 2388:             <div class="v99-tl-metric">
+ 2393:             <div class="v99-tl-metric">
+ 2394:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Alibeyköy">41 durak</div>
+ 2398:             <div class="v99-tl-metric">
+ 2403:             <div class="v99-tl-metric">
+ 2426:           <div class="v99-tl-metrics">
+ 2427:             <div class="v99-tl-metric">
+ 2432:             <div class="v99-tl-metric">
+ 2433:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="Esenler Otogar">42 durak</div>
+ 2437:             <div class="v99-tl-metric">
+ 2442:             <div class="v99-tl-metric">
+
+===== 8) SONUÇ OKUMA REHBERİ =====
+Eğer click handler .v99-stat-grid / .v99-stats / üst satır parent elemana bağlıysa sorun bu.
+Doğru hedef sadece DOLULUK kutusunun kendi class/id'si olmalı.
+Bu röntgen dosyaya dokunmadı.
+
+===== RAPOR BİTTİ =====

@@ -1,0 +1,181 @@
+===== V99L MEVCUT RING / RENK / PULSE RÖNTGEN =====
+TIME: 2026-06-12 14:30:01
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+===== 1) DOSYA DURUMU =====
+WEB_TEMPLATE       VAR size=16173    sha=fae2a3803409 /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/continue_trip.html
+WEB_CSS            VAR size=15009    sha=cdfb5d3f8759 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.css
+WEB_JS             VAR size=23840    sha=27613854810c /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.js
+ANDROID_TEMPLATE   VAR size=16173    sha=fae2a3803409 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/templates/continue_trip.html
+ANDROID_CSS        VAR size=15009    sha=cdfb5d3f8759 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_v99_clean.css
+ANDROID_JS         VAR size=23840    sha=27613854810c /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_v99_clean.js
+
+===== 2) WEB / ANDROID SENKRON =====
+TEMPLATE   AYNI web=fae2a3803409 android=fae2a3803409
+CSS        AYNI web=cdfb5d3f8759 android=cdfb5d3f8759
+JS         AYNI web=27613854810c android=27613854810c
+
+===== 3) TEMPLATE RING ID / CLASS KONTROL =====
+TPL VAR  id="ringFill"
+TPL VAR  id="ringKm"
+TPL YOK  class="ring-fill"
+TPL VAR  class="v99-ring-fill"
+TPL YOK  class="ring-wrap"
+TPL VAR  class="v99-ring-wrap"
+TPL YOK  class="ring-svg"
+TPL VAR  class="v99-ring-svg"
+TPL YOK  id="ring"
+TPL VAR  v99-prox-card
+
+===== 4) CSS RING / ANIMATION / GLOW KONTROL =====
+CSS VAR  ring-fill
+CSS VAR  v99-ring-fill
+CSS VAR  ring-wrap
+CSS VAR  v99-ring-wrap
+CSS VAR  ring-pulse
+CSS VAR  pulse
+CSS VAR  @keyframes
+CSS VAR  box-shadow
+CSS VAR  drop-shadow
+CSS VAR  filter
+CSS VAR  animation
+CSS VAR  urgent
+CSS VAR  stroke
+
+===== 5) JS RING RENK MOTORU KONTROL =====
+JS VAR   function setRing
+JS VAR   setRing(km)
+JS VAR   ringFill
+JS VAR   ringKm
+JS VAR   safeKm <= 5
+JS VAR   safeKm <= 15
+JS VAR   #e03030
+JS VAR   #e08820
+JS VAR   #3a8bff
+JS VAR   textShadow
+JS VAR   drop-shadow
+JS VAR   classList.add
+JS VAR   urgent
+
+===== 6) TEMPLATE RING SATIRLARI =====
+  84:         <div class="v99-ring-wrap">
+  85:           <svg class="v99-ring-svg" viewBox="0 0 110 110" aria-hidden="true">
+  86:             <circle class="v99-ring-track" cx="55" cy="55" r="44"></circle>
+  87:             <circle class="v99-ring-fill" id="ringFill" cx="55" cy="55" r="44"
+  89:               stroke-dashoffset="276.46"></circle>
+  90:           </svg>
+  92:           <div class="v99-ring-center">
+  93:             <div class="v99-ring-km" id="ringKm">—</div>
+  94:             <div class="v99-ring-km-label">KM</div>
+
+===== 7) CSS RING / PULSE SATIRLARI =====
+  76:   box-shadow:0 0 12px #e0303055;
+ 144:   animation:v99-pulse-red 1.4s ease-in-out infinite;
+ 145:   box-shadow:0 0 6px var(--v99-red);
+ 148: @keyframes v99-pulse-red{
+ 285: .v99-ring-wrap{
+ 292: .v99-ring-svg{
+ 298: .v99-ring-track{
+ 304: .v99-ring-fill{
+ 309:   filter:drop-shadow(0 0 6px var(--v99-red));
+ 313: .v99-ring-center{
+ 322: .v99-ring-km{
+ 332: .v99-ring-km-label{
+ 340: @keyframes v99-ring-pulse{
+ 341:   0%,100%{filter:drop-shadow(0 0 6px var(--v99-red));}
+ 342:   50%{filter:drop-shadow(0 0 18px var(--v99-red)) drop-shadow(0 0 30px var(--v99-red));}
+ 345: .v99-ring-fill.urgent{
+ 346:   animation:v99-ring-pulse 1s ease-in-out infinite;
+ 512:   box-shadow:0 0 8px var(--v99-red);
+ 573:   box-shadow:0 0 10px var(--v99-red);
+ 574:   animation:v99-pulse-red 1.4s ease-in-out infinite;
+ 807:   .v99-ring-wrap,
+ 808:   .v99-ring-svg{
+
+===== 8) JS setRing BLOĞU =====
+  22:   }
+  23: 
+  24:   function cleanSpeed(raw){
+  25:     const n = parseKm(raw);
+  26:     if(n === null) return "0";
+  27:     return String(Math.max(0, Math.round(n)));
+  28:   }
+  29: 
+  30:   function setRing(km){
+  31:     const ring = q("#ringFill");
+  32:     const ringKm = q("#ringKm");
+  33:     if(!ring || !ringKm) return;
+  34: 
+  35:     let display = km;
+  36:     if(km === null){
+  37:       display = null;
+  38:     }
+  39: 
+  40:     let safeKm = display === null ? MAX_KM : Math.max(0, display);
+  41:     let ratio = Math.max(0, Math.min(1, 1 - safeKm / MAX_KM));
+  42:     let offset = CIRC * (1 - ratio);
+  43: 
+  44:     ring.style.strokeDashoffset = String(offset);
+  45: 
+  46:     if(display === null){
+  47:       ringKm.textContent = "—";
+  48:       ring.style.stroke = "#5a6478";
+  49:       ring.style.filter = "drop-shadow(0 0 4px #5a6478)";
+  50:       ring.classList.remove("urgent");
+  51:       ringKm.style.color = "#5a6478";
+  52:       ringKm.style.textShadow = "none";
+  53:       return;
+  54:     }
+  55: 
+  56:     let label = safeKm <= 0 ? "0" : (safeKm % 1 === 0 ? String(safeKm) : safeKm.toFixed(1));
+  57:     ringKm.textContent = label;
+  58: 
+  59:     if(safeKm <= 5){
+  60:       ring.style.stroke = "#e03030";
+  61:       ring.style.filter = "drop-shadow(0 0 8px #e03030)";
+  62:       ring.classList.add("urgent");
+  63:       ringKm.style.color = "#e03030";
+  64:       ringKm.style.textShadow = "0 0 18px #e03030";
+  65:     }else if(safeKm <= 15){
+  66:       ring.style.stroke = "#e08820";
+  67:       ring.style.filter = "drop-shadow(0 0 8px #e08820)";
+  68:       ring.classList.remove("urgent");
+  69:       ringKm.style.color = "#e08820";
+  70:       ringKm.style.textShadow = "0 0 12px #e08820";
+  71:     }else{
+  72:       ring.style.stroke = "#3a8bff";
+  73:       ring.style.filter = "drop-shadow(0 0 6px #3a8bff)";
+  74:       ring.classList.remove("urgent");
+  75:       ringKm.style.color = "#3a8bff";
+  76:       ringKm.style.textShadow = "0 0 10px #3a8bff";
+  77:     }
+  78:   }
+  79: 
+  80:   function setRouteProgress(){
+  81:     const boot = window.CONTINUE_BOOT || {};
+  82:     const stops = Array.isArray(boot.routeStops) ? boot.routeStops : [];
+  83:     const current = text("#liveCurrentStopName");
+  84:     const bar = q("#routeBar");
+  85:     const pctEl = q("#distPct");
+  86: 
+  87:     if(!bar || !pctEl || !stops.length || !current){
+  88:       return;
+  89:     }
+  90: 
+  91:     let idx = stops.findIndex(s => String(s || "").trim().toLowerCase() === current.trim().toLowerCase());
+  92: 
+  93:     if(idx < 0){
+  94:       idx = stops.findIndex(s => String(s || "").trim().toLowerCase().includes(current.trim().toLowerCase()));
+  95:     }
+  96: 
+  97:     if(idx < 0) return;
+  98: 
+  99:     const pct = stops.length <= 1 ? 0 : Math.round((idx / (stops.length - 1)) * 100);
+ 100:     bar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+
+===== 9) SONUÇ NOTU =====
+RING_ID_ADAYI: ringFill
+RENK_DEGISIM_MANTIGI: VAR
+PULSE_ANIMATION: VAR
+
+✅ RÖNTGEN BİTTİ - dosyaya dokunulmadı

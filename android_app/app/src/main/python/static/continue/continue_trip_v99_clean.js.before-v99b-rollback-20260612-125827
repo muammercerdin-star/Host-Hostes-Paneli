@@ -1,0 +1,174 @@
+(function(){
+  "use strict";
+
+  const CIRC = 276.46;
+  const MAX_KM = 48;
+
+  function q(sel){
+    return document.querySelector(sel);
+  }
+
+  function text(sel){
+    const el = q(sel);
+    return el ? (el.textContent || "").trim() : "";
+  }
+
+  function parseKm(raw){
+    raw = String(raw || "").replace(",", ".").trim();
+    const m = raw.match(/-?\d+(?:\.\d+)?/);
+    if(!m) return null;
+    const n = Number(m[0]);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function cleanSpeed(raw){
+    const n = parseKm(raw);
+    if(n === null) return "0";
+    return String(Math.max(0, Math.round(n)));
+  }
+
+  function setRing(km){
+    const ring = q("#ringFill");
+    const ringKm = q("#ringKm");
+    if(!ring || !ringKm) return;
+
+    let display = km;
+    if(km === null){
+      display = null;
+    }
+
+    let safeKm = display === null ? MAX_KM : Math.max(0, display);
+    let ratio = Math.max(0, Math.min(1, 1 - safeKm / MAX_KM));
+    let offset = CIRC * (1 - ratio);
+
+    ring.style.strokeDashoffset = String(offset);
+
+    if(display === null){
+      ringKm.textContent = "—";
+      ring.style.stroke = "#5a6478";
+      ring.style.filter = "drop-shadow(0 0 4px #5a6478)";
+      ring.classList.remove("urgent");
+      ringKm.style.color = "#5a6478";
+      ringKm.style.textShadow = "none";
+      return;
+    }
+
+    let label = safeKm <= 0 ? "0" : (safeKm % 1 === 0 ? String(safeKm) : safeKm.toFixed(1));
+    ringKm.textContent = label;
+
+    if(safeKm <= 5){
+      ring.style.stroke = "#e03030";
+      ring.style.filter = "drop-shadow(0 0 8px #e03030)";
+      ring.classList.add("urgent");
+      ringKm.style.color = "#e03030";
+      ringKm.style.textShadow = "0 0 18px #e03030";
+    }else if(safeKm <= 15){
+      ring.style.stroke = "#e08820";
+      ring.style.filter = "drop-shadow(0 0 8px #e08820)";
+      ring.classList.remove("urgent");
+      ringKm.style.color = "#e08820";
+      ringKm.style.textShadow = "0 0 12px #e08820";
+    }else{
+      ring.style.stroke = "#3a8bff";
+      ring.style.filter = "drop-shadow(0 0 6px #3a8bff)";
+      ring.classList.remove("urgent");
+      ringKm.style.color = "#3a8bff";
+      ringKm.style.textShadow = "0 0 10px #3a8bff";
+    }
+  }
+
+  function setRouteProgress(){
+    const boot = window.CONTINUE_BOOT || {};
+    const stops = Array.isArray(boot.routeStops) ? boot.routeStops : [];
+    const current = text("#liveCurrentStopName");
+    const bar = q("#routeBar");
+    const pctEl = q("#distPct");
+
+    if(!bar || !pctEl || !stops.length || !current){
+      return;
+    }
+
+    let idx = stops.findIndex(s => String(s || "").trim().toLowerCase() === current.trim().toLowerCase());
+
+    if(idx < 0){
+      idx = stops.findIndex(s => String(s || "").trim().toLowerCase().includes(current.trim().toLowerCase()));
+    }
+
+    if(idx < 0) return;
+
+    const pct = stops.length <= 1 ? 0 : Math.round((idx / (stops.length - 1)) * 100);
+    bar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+    pctEl.textContent = "%" + pct + " tamamlandı";
+  }
+
+  function setClock(){
+    const el = q("#liveClockText");
+    if(!el) return;
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, "0");
+    const m = String(now.getMinutes()).padStart(2, "0");
+    el.textContent = h + ":" + m;
+  }
+
+  function sync(){
+    const km = parseKm(text("#liveDistanceValue"));
+    setRing(km);
+
+    const speedVisual = q("#v99SpeedVal");
+    if(speedVisual){
+      speedVisual.textContent = cleanSpeed(text("#liveSpeedText"));
+    }
+
+    const status = text("#liveTopStatusText");
+    const sub = q("#v99StatusSub");
+    if(sub && status){
+      sub.textContent = /erken|geç/i.test(status) ? "tahmini durum" : "canlı takip";
+    }
+
+    setRouteProgress();
+  }
+
+  setClock();
+  sync();
+
+  setInterval(setClock, 10000);
+  setInterval(sync, 700);
+
+  document.addEventListener("continueEtaUpdated", sync);
+  window.addEventListener("storage", sync);
+  window.MuavinV99CleanSync = sync;
+})();
+
+
+/* V99B_COUNT_CLEANUP_START */
+(function(){
+  "use strict";
+
+  function onlyCount(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+
+    var t = String(el.textContent || "").trim();
+    if(!t) return;
+
+    var m = t.match(/\d+/);
+    if(m){
+      el.textContent = m[0];
+      return;
+    }
+
+    if(/yok|none|boş/i.test(t)){
+      el.textContent = "0";
+    }
+  }
+
+  function cleanCounts(){
+    onlyCount("liveOffloadCount");
+    onlyCount("liveBagajCount");
+  }
+
+  cleanCounts();
+  setInterval(cleanCounts, 500);
+  document.addEventListener("continueEtaUpdated", cleanCounts);
+})();
+ /* V99B_COUNT_CLEANUP_END */

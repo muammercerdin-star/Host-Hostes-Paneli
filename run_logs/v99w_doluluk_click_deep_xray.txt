@@ -1,0 +1,915 @@
+===== V99W DOLULUK CLICK DEEP RÖNTGEN =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+TIME: 2026-06-12 17:41:49
+
+===== 1) DOSYA DURUMU / SENKRON =====
+WEB_TEMPLATE       VAR size=16172    sha=de6e24072d05 /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/continue_trip.html
+WEB_JS             VAR size=44386    sha=26482d95a8ea /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.js
+WEB_CSS            VAR size=25801    sha=f9c4fd2f6922 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.css
+ANDROID_TEMPLATE   VAR size=16172    sha=de6e24072d05 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/templates/continue_trip.html
+ANDROID_JS         VAR size=44386    sha=26482d95a8ea /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_v99_clean.js
+ANDROID_CSS        VAR size=25801    sha=f9c4fd2f6922 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_v99_clean.css
+
+===== 2) WEB / ANDROID AYNI MI =====
+TEMPLATE   AYNI web=de6e24072d05 android=de6e24072d05
+JS         AYNI web=26482d95a8ea android=26482d95a8ea
+CSS        AYNI web=f9c4fd2f6922 android=f9c4fd2f6922
+
+===== 3) TEMPLATE KRİTİK İZLER =====
+VAR  continue_trip_v99_clean.js
+VAR  v99-gauge-label
+VAR  DOLULUK
+VAR  HIZ
+VAR  DURUM
+VAR  v99-gauges
+YOK  v99m
+VAR  v99g-{{ trip['id'] }}'id']
+VAR  }}'id']
+
+===== 4) JS BLOK MARKER KONTROL =====
+VAR  V99M_OCCUPANCY_PANEL_START
+VAR  V99M_OCCUPANCY_PANEL_END
+VAR  V99Q_ONLY_OCCUPANCY_CLICK_START
+VAR  V99Q_ONLY_OCCUPANCY_CLICK_END
+VAR  V99U
+YOK  V99V_DOLULUK_DIRECT_CLICK_START
+YOK  V99V_DOLULUK_DIRECT_CLICK_END
+VAR  isDolulukTarget
+VAR  markDolulukCards
+VAR  openPanel
+VAR  closePanel
+VAR  v99mOccOverlay
+VAR  MuavinV99OccupancyPanel
+
+===== 5) CSS DOLULUK / PANEL İZLERİ =====
+YOK  v99m-overlay
+YOK  v99m-panel
+VAR  v99m-occ-clickable
+VAR  pointer-events
+VAR  z-index
+YOK  display:none
+YOK  visibility:hidden
+
+===== 6) TEMPLATE SCRIPT SATIRLARI =====
+HIT_COUNT: 10
+  285: </div>
+  286: 
+  287: <script>
+  288: (function(){
+  289:   const form = document.getElementById("endTripForm");
+-----
+  374: 
+  375: <!-- CONTINUE_TTS_BRIDGE_START -->
+  376: <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+  377: <!-- CONTINUE_TTS_BRIDGE_END -->
+  378: 
+-----
+  403: </div>
+  404: 
+  405: <script id="continue-boot-data">
+  406: window.CONTINUE_BOOT = {
+  407:   tripId: {{ trip['id'] | tojson | safe }},
+-----
+  425: </script>
+  426: 
+  427: <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=live-stop-lock-v82"></script>
+  428: <script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
+  429: <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
+-----
+  430: <script src="{{ url_for('static', filename='continue/continue_trip_ui.js') }}?v=js-safe-split-1"></script>
+-----
+  431: <script src="{{ url_for('static', filename='continue/continue_refresh_button_v49.js') }}?v=refresh-v49"></script>
+-----
+  432: <script src="{{ url_for('static', filename='continue/continue_native_lock_alarm_v85.js') }}?v=native-lock-alarm-v87"></script>
+-----
+  433: <script src="{{ url_for('static', filename='continue/continue_trip_v99_clean.js') }}?v=v99g-{{ trip['id'] }}'id'] }}'id'] }}'id'] }}"></script>
+-----
+  434: </body>
+-----
+  435: </html>
+-----
+
+===== 7) TEMPLATE ÜST HIZ/DOLULUK/DURUM BLOĞU =====
+HIT_COUNT: 12
+   40:   <div class="v99-live-badge">
+   41:     <div class="v99-live-dot"></div>
+   42:     CANLI
+   43:   </div>
+   44: </div>
+   45: 
+   46: <div class="v99-gauges">
+   47:   <div class="v99-gauge-cell">
+   48:     <div class="v99-gauge-label">HIZ</div>
+   49:     <div class="v99-gauge-val amber" id="v99SpeedVal">0</div>
+   50:     <div class="v99-gauge-unit">km/sa</div>
+   51:     <span class="v99-core-hidden" id="liveSpeedText">— km/sa</span>
+   52:   </div>
+-----
+   53: 
+-----
+   54:   <div class="v99-gauge-cell">
+-----
+   55:     <div class="v99-gauge-label">DOLULUK</div>
+-----
+   56:     <div class="v99-gauge-val">{{ live_summary.passenger_count }} / {{ live_summary.total_seats }}</div>
+-----
+   57: 
+   58:     <div class="v99-occ-bar-track">
+   59:       <div class="v99-occ-bar-fill" style="width:{{ occ_pct }}%"></div>
+   60:     </div>
+-----
+   61: 
+-----
+   62:     <div class="v99-occ-genders">
+-----
+   65:       {% if live_summary.unknown_gender_count %}
+   66:         <span class="g-u">? {{ live_summary.unknown_gender_count }}</span>
+   67:       {% endif %}
+   68:     </div>
+   69:   </div>
+   70: 
+   71:   <div class="v99-gauge-cell">
+   72:     <div class="v99-gauge-label">DURUM</div>
+   73:     <div class="v99-gauge-val green v99-status-val" id="liveTopStatusText">Planında</div>
+   74:     <div class="v99-gauge-unit" id="v99StatusSub">canlı takip</div>
+   75:   </div>
+   76: </div>
+   77: 
+-----
+   78: <main class="v99-main">
+-----
+   79: 
+-----
+   80:   <section class="v99-prox-section">
+-----
+
+===== 8) JS DOLULUK PANEL BLOĞU VE CLICK HANDLER =====
+HIT_COUNT: 21
+  907:       characterData: true
+  908:     });
+  909:   }catch(_){}
+  910: 
+  911:   setInterval(protectDistances, 300);
+  912:   document.addEventListener("continueEtaUpdated", protectDistances);
+  913:   window.addEventListener("load", protectDistances);
+  914: })();
+  915: /* V99K_DISTANCE_NO_FLICKER_GUARD_END */
+  916: 
+  917: 
+  918: 
+  919: /* V99M_OCCUPANCY_PANEL_START */
+  920: (function(){
+  921:   "use strict";
+  922: 
+  923:   function q(sel, root){
+  924:     return (root || document).querySelector(sel);
+  925:   }
+  926: 
+  927:   function qa(sel, root){
+  928:     return Array.prototype.slice.call((root || document).querySelectorAll(sel));
+  929:   }
+  930: 
+  931:   function text(el){
+-----
+  965:       var pill = text(q(".v99-pill", cards[i]));
+  966:       if(/sonraki|sonraki|sonra/i.test(pill)){
+  967:         return text(q(".v99-tl-stop-name", cards[i]));
+  968:       }
+  969:     }
+  970:     return "";
+  971:   }
+  972: 
+  973:   function ensurePanel(){
+  974:     if(q("#v99mOccSheet")) return;
+  975: 
+  976:     var overlay = document.createElement("div");
+  977:     overlay.id = "v99mOccOverlay";
+  978:     overlay.className = "v99m-occ-overlay";
+  979: 
+  980:     var sheet = document.createElement("section");
+  981:     sheet.id = "v99mOccSheet";
+  982:     sheet.className = "v99m-occ-sheet";
+  983:     sheet.innerHTML = `
+  984:       <div class="v99m-handle"></div>
+  985: 
+  986:       <div class="v99m-head">
+  987:         <div>
+  988:           <div class="v99m-kicker">DOLULUK PANELİ</div>
+  989:           <h3 class="v99m-title">Koltuk Haritası</h3>
+-----
+ 1019:         Koltuğa basınca detay burada görünür.
+ 1020:       </div>
+ 1021:     `;
+ 1022: 
+ 1023:     document.body.appendChild(overlay);
+ 1024:     document.body.appendChild(sheet);
+ 1025: 
+ 1026:     overlay.addEventListener("click", closePanel);
+ 1027:     q("#v99mOccClose").addEventListener("click", closePanel);
+ 1028:     q("#v99mOccRefresh").addEventListener("click", loadPanel);
+ 1029:   }
+ 1030: 
+ 1031:   function openPanel(){
+ 1032:     ensurePanel();
+ 1033:     q("#v99mOccOverlay").classList.add("open");
+ 1034:     q("#v99mOccSheet").classList.add("open");
+ 1035:     loadPanel();
+ 1036:   }
+ 1037: 
+ 1038:   function closePanel(){
+ 1039:     var overlay = q("#v99mOccOverlay");
+ 1040:     var sheet = q("#v99mOccSheet");
+ 1041:     if(overlay) overlay.classList.remove("open");
+ 1042:     if(sheet) sheet.classList.remove("open");
+ 1043:   }
+-----
+ 1044: 
+ 1045:   
+-----
+ 1046:   function v99uNormText(v){
+ 1047:     return String(v || "")
+ 1048:       .toLocaleUpperCase("tr-TR")
+ 1049:       .replace(/\s+/g, " ")
+ 1050:       .trim();
+ 1051:   }
+-----
+ 1055: 
+ 1056:     /*
+ 1057:       V99U SAFE:
+ 1058:       Sadece üstteki küçük bilgi kartının kendisini yakala.
+ 1059:       Ortak satır/container yakalanırsa HIZ ve DURUM da yanlışlıkla
+ 1060:       DOLULUK panelini açıyor.
+ 1061:     */
+ 1062:     return el.closest(
+ 1063:       ".v99-gauge, .v99-stat, .v99-top-stat, .v99-info-cell, .v99-stat-card"
+ 1064:     );
+ 1065:   }
+ 1066: 
+ 1067:   function isDolulukTarget(el){
+ 1068:     var card = v99uNearestTopCard(el);
+ 1069:     if(!card) return false;
+ 1070: 
+ 1071:     if(card.closest(".v99m-overlay, .v99m-panel, .v99-prox-card, .v99-tl-card, .v99-dock, nav")){
+ 1072:       return false;
+ 1073:     }
+ 1074: 
+ 1075:     var label = card.querySelector(
+ 1076:       ".v99-gauge-label, .v99-stat-label, .v99-info-label, .card-label, .label, .l"
+ 1077:     );
+ 1078: 
+ 1079:     var labelText = v99uNormText(label ? label.textContent : "");
+-----
+ 1080: 
+ 1081:     return labelText === "DOLULUK";
+ 1082:   }
+ 1083: 
+ 1084:   function markDolulukCards(){
+ 1085:     all(".v99m-occ-clickable").forEach(function(el){
+ 1086:       el.classList.remove("v99m-occ-clickable");
+ 1087:     });
+ 1088: 
+ 1089:     all(".v99-gauge, .v99-stat, .v99-top-stat, .v99-info-cell, .v99-stat-card").forEach(function(el){
+ 1090:       if(isDolulukTarget(el)){
+ 1091:         el.classList.add("v99m-occ-clickable");
+ 1092:         el.setAttribute("data-v99u-doluluk-click", "1");
+ 1093:       }else{
+ 1094:         el.removeAttribute("data-v99u-doluluk-click");
+ 1095:       }
+ 1096:     });
+-----
+ 1097:   }
+-----
+ 1098: 
+-----
+ 1099:   document.addEventListener("click", function(ev){
+ 1100: 
+ 1101:     var el = ev.target;
+ 1102:     while(el && el !== document.body){
+-----
+ 1103:       if(isDolulukTarget(el)){
+-----
+ 1104:         ev.preventDefault();
+ 1105:         openPanel();
+ 1106:         return;
+ 1107:       }
+ 1108:       el = el.parentElement;
+ 1109:     }
+ 1110:   }, true);
+ 1111: 
+-----
+ 1112:   function num(v){
+ 1113:     var n = Number(v);
+ 1114:     return Number.isFinite(n) ? n : 0;
+ 1115:   }
+-----
+ 1116: 
+ 1117:   function seatGenderClass(s){
+-----
+ 1310: 
+ 1311:       var seats = Array.isArray(data.seats) ? data.seats : [];
+ 1312:       renderSummary(data, seats);
+ 1313:       renderSeatMap(data, seats);
+ 1314: 
+ 1315:     }catch(err){
+ 1316:       if(impact){
+ 1317:         impact.innerHTML = `<b>Doluluk verisi alınamadı.</b><br><span class="v99m-muted">${String(err && err.message || err)}</span>`;
+ 1318:       }
+ 1319:     }
+ 1320:   }
+ 1321: 
+ 1322:   markDolulukCards();
+ 1323:   setInterval(markDolulukCards, 1500);
+ 1324: 
+ 1325:   window.MuavinV99OccupancyPanel = {
+ 1326:     open: openPanel,
+ 1327:     close: closePanel,
+ 1328:     reload: loadPanel
+ 1329:   };
+ 1330: })();
+ 1331: /* V99M_OCCUPANCY_PANEL_END */
+ 1332: 
+ 1333: /* V99O_SEAT_GENDER_SELECTED_JS_START */
+ 1334: (function(){
+-----
+ 1335:   "use strict";
+-----
+ 1336: 
+ 1337:   var selectedSeatNo = "";
+-----
+ 1338: 
+-----
+ 1339:   function q(sel){
+ 1340:     return document.querySelector(sel);
+ 1341:   }
+ 1342: 
+ 1343:   function qa(sel, root){
+-----
+ 1534:         cache:"no-store"
+ 1535:       });
+ 1536: 
+ 1537:       if(!res.ok) return;
+ 1538: 
+ 1539:       var data = await res.json();
+ 1540:       var seats = Array.isArray(data.seats) ? data.seats : [];
+ 1541: 
+ 1542:       applySeatClasses(seats);
+ 1543:     }catch(e){}
+ 1544:   }
+ 1545: 
+ 1546:   document.addEventListener("click", function(ev){
+ 1547:     var el = ev.target.closest("[data-v99-seat-no], [data-seat-no], [data-seat], .v99-seat-color-cell");
+ 1548: 
+ 1549:     if(!el || !looksLikeSeatElement(el)) return;
+ 1550: 
+ 1551:     var no = String(
+ 1552:       el.getAttribute("data-v99-seat-no") ||
+ 1553:       el.getAttribute("data-seat-no") ||
+ 1554:       el.getAttribute("data-seat") ||
+ 1555:       el.dataset.seatNo ||
+ 1556:       text(el)
+ 1557:     ).trim();
+ 1558: 
+-----
+ 1640:     if(target.closest("#liveClockText")) return true;
+ 1641:     if(target.closest(".v99-clock")) return true;
+ 1642:     if(target.closest(".v97-clock")) return true;
+ 1643: 
+ 1644:     var t = norm(txt(target));
+ 1645:     if(/^\d{1,2}:\d{2}$/.test(t) || /^\d{1,2}:\d{2}:\d{2}$/.test(t)){
+ 1646:       return true;
+ 1647:     }
+ 1648: 
+ 1649:     return false;
+ 1650:   }
+ 1651: 
+ 1652:   document.addEventListener("click", function(e){
+ 1653:     var target = e.target;
+ 1654:     if(!target) return;
+ 1655: 
+ 1656:     // Panelin içindeki tıklamalara karışma
+ 1657:     if(insidePanel(target)) return;
+ 1658: 
+ 1659:     // Header saatine basınca panel açılmasın
+ 1660:     if(isHeaderClock(target)){
+ 1661:       e.stopImmediatePropagation();
+ 1662:       return;
+ 1663:     }
+ 1664: 
+-----
+
+===== 9) JS ONLY DOLULUK / GUARD / ROLLBACK BLOKLARI =====
+HIT_COUNT: 14
+ 1034:     q("#v99mOccSheet").classList.add("open");
+ 1035:     loadPanel();
+ 1036:   }
+ 1037: 
+ 1038:   function closePanel(){
+ 1039:     var overlay = q("#v99mOccOverlay");
+ 1040:     var sheet = q("#v99mOccSheet");
+ 1041:     if(overlay) overlay.classList.remove("open");
+ 1042:     if(sheet) sheet.classList.remove("open");
+ 1043:   }
+ 1044: 
+ 1045:   
+ 1046:   function v99uNormText(v){
+ 1047:     return String(v || "")
+ 1048:       .toLocaleUpperCase("tr-TR")
+ 1049:       .replace(/\s+/g, " ")
+ 1050:       .trim();
+ 1051:   }
+ 1052: 
+ 1053:   function v99uNearestTopCard(el){
+ 1054:     if(!el || !el.closest) return null;
+ 1055: 
+ 1056:     /*
+ 1057:       V99U SAFE:
+ 1058:       Sadece üstteki küçük bilgi kartının kendisini yakala.
+-----
+ 1059:       Ortak satır/container yakalanırsa HIZ ve DURUM da yanlışlıkla
+ 1060:       DOLULUK panelini açıyor.
+ 1061:     */
+ 1062:     return el.closest(
+ 1063:       ".v99-gauge, .v99-stat, .v99-top-stat, .v99-info-cell, .v99-stat-card"
+ 1064:     );
+ 1065:   }
+-----
+ 1066: 
+ 1067:   function isDolulukTarget(el){
+ 1068:     var card = v99uNearestTopCard(el);
+ 1069:     if(!card) return false;
+-----
+ 1070: 
+ 1071:     if(card.closest(".v99m-overlay, .v99m-panel, .v99-prox-card, .v99-tl-card, .v99-dock, nav")){
+ 1072:       return false;
+ 1073:     }
+ 1074: 
+ 1075:     var label = card.querySelector(
+ 1076:       ".v99-gauge-label, .v99-stat-label, .v99-info-label, .card-label, .label, .l"
+ 1077:     );
+ 1078: 
+ 1079:     var labelText = v99uNormText(label ? label.textContent : "");
+ 1080: 
+-----
+ 1081:     return labelText === "DOLULUK";
+ 1082:   }
+ 1083: 
+ 1084:   function markDolulukCards(){
+ 1085:     all(".v99m-occ-clickable").forEach(function(el){
+ 1086:       el.classList.remove("v99m-occ-clickable");
+ 1087:     });
+ 1088: 
+ 1089:     all(".v99-gauge, .v99-stat, .v99-top-stat, .v99-info-cell, .v99-stat-card").forEach(function(el){
+ 1090:       if(isDolulukTarget(el)){
+ 1091:         el.classList.add("v99m-occ-clickable");
+-----
+ 1092:         el.setAttribute("data-v99u-doluluk-click", "1");
+ 1093:       }else{
+ 1094:         el.removeAttribute("data-v99u-doluluk-click");
+ 1095:       }
+ 1096:     });
+ 1097:   }
+ 1098: 
+ 1099:   document.addEventListener("click", function(ev){
+ 1100: 
+ 1101:     var el = ev.target;
+ 1102:     while(el && el !== document.body){
+ 1103:       if(isDolulukTarget(el)){
+ 1104:         ev.preventDefault();
+-----
+ 1105:         openPanel();
+ 1106:         return;
+-----
+ 1107:       }
+ 1108:       el = el.parentElement;
+ 1109:     }
+ 1110:   }, true);
+ 1111: 
+ 1112:   function num(v){
+ 1113:     var n = Number(v);
+ 1114:     return Number.isFinite(n) ? n : 0;
+ 1115:   }
+ 1116: 
+-----
+ 1578:   window.addEventListener("load", refreshSeatColors);
+ 1579:   document.addEventListener("continueEtaUpdated", refreshSeatColors);
+ 1580: 
+ 1581:   var left = 40;
+ 1582:   var timer = setInterval(function(){
+ 1583:     refreshSeatColors();
+ 1584:     left--;
+ 1585:     if(left <= 0) clearInterval(timer);
+ 1586:   }, 900);
+ 1587: })();
+ 1588: /* V99O_SEAT_GENDER_SELECTED_JS_END */
+ 1589: 
+ 1590: /* V99Q_ONLY_OCCUPANCY_CLICK_START */
+ 1591: (function(){
+ 1592:   "use strict";
+ 1593: 
+ 1594:   function txt(el){
+ 1595:     return el ? String(el.textContent || "").trim() : "";
+ 1596:   }
+ 1597: 
+ 1598:   function norm(s){
+ 1599:     return String(s || "")
+ 1600:       .toLocaleLowerCase("tr-TR")
+ 1601:       .replace(/\s+/g, " ")
+ 1602:       .trim();
+-----
+ 1620:         t.indexOf("doluluk") >= 0 ||
+ 1621:         t.indexOf("hiz") >= 0 ||
+ 1622:         t.indexOf("hız") >= 0 ||
+ 1623:         t.indexOf("durum") >= 0 ||
+ 1624:         t.indexOf("saat") >= 0
+ 1625:       ){
+ 1626:         return el;
+ 1627:       }
+ 1628:     }
+ 1629:     return null;
+ 1630:   }
+ 1631: 
+ 1632:   function isDolulukCard(card){
+ 1633:     if(!card) return false;
+ 1634:     return norm(txt(card)).indexOf("doluluk") >= 0;
+ 1635:   }
+ 1636: 
+ 1637:   function isHeaderClock(target){
+ 1638:     if(!target || !target.closest) return false;
+ 1639: 
+ 1640:     if(target.closest("#liveClockText")) return true;
+ 1641:     if(target.closest(".v99-clock")) return true;
+ 1642:     if(target.closest(".v97-clock")) return true;
+ 1643: 
+ 1644:     var t = norm(txt(target));
+-----
+ 1649:     return false;
+ 1650:   }
+ 1651: 
+ 1652:   document.addEventListener("click", function(e){
+ 1653:     var target = e.target;
+ 1654:     if(!target) return;
+ 1655: 
+ 1656:     // Panelin içindeki tıklamalara karışma
+ 1657:     if(insidePanel(target)) return;
+ 1658: 
+ 1659:     // Header saatine basınca panel açılmasın
+ 1660:     if(isHeaderClock(target)){
+ 1661:       e.stopImmediatePropagation();
+ 1662:       return;
+ 1663:     }
+ 1664: 
+ 1665:     var card = climbForTopCard(target);
+ 1666: 
+ 1667:     if(!card) return;
+ 1668: 
+ 1669:     // Sadece DOLULUK kartı serbest
+ 1670:     if(isDolulukCard(card)) return;
+ 1671: 
+ 1672:     // SAAT / HIZ / DURUM kartlarında doluluk paneli açılmasın
+ 1673:     e.stopImmediatePropagation();
+-----
+ 1674:   }, true);
+ 1675: 
+ 1676:   window.MuavinV99OnlyOccupancyClick = true;
+ 1677: })();
+ 1678: /* V99Q_ONLY_OCCUPANCY_CLICK_END */
+ 1679: 
+-----
+-----
+-----
+
+===== 10) CSS PANEL / CLICKABLE SATIRLARI =====
+HIT_COUNT: 20
+   41: .v99-core-hidden{
+   42:   position:absolute !important;
+   43:   width:1px !important;
+   44:   height:1px !important;
+   45:   overflow:hidden !important;
+   46:   clip:rect(0 0 0 0) !important;
+   47:   white-space:nowrap !important;
+   48:   opacity:0 !important;
+   49:   pointer-events:none !important;
+   50: }
+   51: 
+   52: /* HEADER */
+   53: .v99-hdr{
+   54:   display:flex;
+   55:   align-items:center;
+   56:   justify-content:space-between;
+   57:   padding:14px 20px;
+-----
+  266:   inset:0;
+  267:   background:repeating-linear-gradient(
+  268:     0deg,
+  269:     transparent,
+  270:     transparent 3px,
+  271:     rgba(255,255,255,.012) 3px,
+  272:     rgba(255,255,255,.012) 4px
+  273:   );
+  274:   pointer-events:none;
+  275: }
+  276: 
+  277: .v99-prox-top{
+  278:   display:flex;
+  279:   align-items:flex-start;
+  280:   gap:20px;
+  281:   position:relative;
+  282:   z-index:1;
+-----
+  283: }
+  284: 
+  285: .v99-ring-wrap{
+  286:   flex-shrink:0;
+  287:   position:relative;
+  288:   width:110px;
+  289:   height:110px;
+  290: }
+-----
+  348: 
+  349: .v99-prox-info{
+  350:   flex:1;
+  351:   display:flex;
+  352:   flex-direction:column;
+  353:   gap:8px;
+  354:   min-width:0;
+  355:   position:relative;
+  356:   z-index:1;
+  357: }
+  358: 
+  359: .v99-prox-kicker{
+  360:   font-size:10px;
+  361:   letter-spacing:3px;
+  362:   color:var(--v99-muted);
+  363:   font-family:'JetBrains Mono',monospace;
+  364:   text-transform:uppercase;
+-----
+  412: }
+  413: 
+  414: .v99-prox-metrics{
+  415:   display:grid;
+  416:   grid-template-columns:1fr 1fr;
+  417:   gap:10px;
+  418:   margin-top:16px;
+  419:   position:relative;
+  420:   z-index:1;
+  421: }
+  422: 
+  423: .v99-pm-cell{
+  424:   background:var(--v99-panel2);
+  425:   border:1px solid var(--v99-border);
+  426:   border-radius:10px;
+  427:   padding:12px 14px;
+  428:   display:flex;
+-----
+  459:   color:var(--v99-muted);
+  460:   letter-spacing:1.5px;
+  461:   margin-top:2px;
+  462: }
+  463: 
+  464: .v99-dist-track-wrap{
+  465:   margin-top:14px;
+  466:   position:relative;
+  467:   z-index:1;
+  468: }
+  469: 
+  470: .v99-dist-labels{
+  471:   display:flex;
+  472:   justify-content:space-between;
+  473:   gap:8px;
+  474:   font-size:10px;
+  475:   font-family:'JetBrains Mono',monospace;
+-----
+  558: 
+  559: .v99-tl-node{
+  560:   width:14px;
+  561:   height:14px;
+  562:   border-radius:50%;
+  563:   border:2px solid var(--v99-muted);
+  564:   background:var(--v99-bg);
+  565:   flex-shrink:0;
+  566:   z-index:1;
+  567:   margin-top:14px;
+  568: }
+  569: 
+  570: .v99-tl-node.live{
+  571:   border-color:var(--v99-red);
+  572:   background:var(--v99-red);
+  573:   box-shadow:0 0 10px var(--v99-red);
+  574:   animation:v99-pulse-red 1.4s ease-in-out infinite;
+-----
+  714:   position:fixed !important;
+  715:   bottom:0 !important;
+  716:   left:0 !important;
+  717:   right:0 !important;
+  718:   background:var(--v99-panel) !important;
+  719:   border-top:1px solid var(--v99-border) !important;
+  720:   display:flex !important;
+  721:   padding:8px 0 max(env(safe-area-inset-bottom), 8px) !important;
+  722:   z-index:100 !important;
+  723:   height:auto !important;
+  724:   min-height:74px !important;
+  725: }
+  726: 
+  727: .v99-dock-btn{
+  728:   flex:1;
+  729:   display:flex !important;
+  730:   flex-direction:column;
+-----
+  885:   animation:none !important;
+  886: }
+  887: 
+  888: /* V99L_RING_LINE_PULSE_END */
+  889: 
+  890: 
+  891: /* V99M_OCCUPANCY_PANEL_START */
+  892: 
+  893: .v99m-occ-clickable{
+  894:   cursor:pointer !important;
+  895:   position:relative !important;
+  896: }
+  897: 
+  898: .v99m-occ-clickable::after{
+  899:   content:"";
+  900:   position:absolute;
+  901:   inset:7px;
+-----
+  902:   border-radius:18px;
+  903:   border:1px solid rgba(58,139,255,.0);
+  904:   pointer-events:none;
+  905:   transition:.2s ease;
+  906: }
+-----
+  907: 
+  908: .v99m-occ-clickable:active::after{
+  909:   border-color:rgba(58,139,255,.45);
+  910:   box-shadow:0 0 18px rgba(58,139,255,.22);
+  911: }
+  912: 
+-----
+  913: .v99m-occ-overlay{
+  914:   position:fixed;
+  915:   inset:0;
+  916:   background:rgba(0,0,0,.62);
+-----
+  917:   backdrop-filter:blur(8px);
+  918:   -webkit-backdrop-filter:blur(8px);
+  919:   z-index:99980;
+  920:   opacity:0;
+  921:   pointer-events:none;
+  922:   transition:.22s ease;
+  923: }
+  924: 
+  925: .v99m-occ-overlay.open{
+  926:   opacity:1;
+  927:   pointer-events:auto;
+-----
+  928: }
+  929: 
+-----
+  930: .v99m-occ-sheet{
+  931:   position:fixed;
+  932:   left:0;
+  933:   right:0;
+  934:   bottom:0;
+  935:   z-index:99990;
+-----
+  936:   max-height:78vh;
+  937:   overflow:auto;
+  938:   background:
+  939:     radial-gradient(circle at 25% 0%, rgba(58,139,255,.14), transparent 36%),
+  940:     radial-gradient(circle at 80% 12%, rgba(255,43,92,.13), transparent 32%),
+  941:     linear-gradient(180deg, #141923 0%, #0b0f16 100%);
+  942:   border-top:1px solid rgba(160,174,210,.18);
+  943:   border-radius:28px 28px 0 0;
+-----
+ 1100: }
+ 1101: 
+ 1102: .v99m-seat.female{
+ 1103:   border-color:rgba(255,93,177,.75);
+ 1104: }
+ 1105: 
+ 1106: .v99m-seat.spacer{
+ 1107:   opacity:0;
+ 1108:   pointer-events:none;
+ 1109: }
+ 1110: 
+ 1111: .v99m-legend{
+ 1112:   display:flex;
+ 1113:   flex-wrap:wrap;
+ 1114:   gap:8px;
+ 1115:   margin:12px 0 4px;
+ 1116: }
+-----
+ 1264:     0 0 0 3px rgba(255,191,46,.80),
+ 1265:     0 0 18px rgba(255,191,46,.58),
+ 1266:     0 0 32px rgba(255,191,46,.28) !important;
+ 1267: }
+ 1268: 
+ 1269: /* Seçili koltuk */
+ 1270: .v99-seat-color-cell.v99-seat-selected{
+ 1271:   transform:scale(1.075) !important;
+ 1272:   z-index:12 !important;
+ 1273:   border-color:#ffffff !important;
+ 1274:   box-shadow:
+ 1275:     inset 0 1px 0 rgba(255,255,255,.45),
+ 1276:     0 0 0 3px rgba(255,255,255,.95),
+ 1277:     0 0 0 6px rgba(58,139,255,.45),
+ 1278:     0 0 28px rgba(58,139,255,.70),
+ 1279:     0 12px 28px rgba(0,0,0,.46) !important;
+ 1280:   filter:saturate(1.12) brightness(1.07) !important;
+-----
+ 1310:   display:flex;
+ 1311:   align-items:center;
+ 1312:   justify-content:center;
+ 1313:   font-size:13px;
+ 1314:   line-height:1;
+ 1315:   background:linear-gradient(180deg,#1d2634 0%,#101722 100%);
+ 1316:   border:1px solid rgba(255,255,255,.22);
+ 1317:   box-shadow:0 0 12px rgba(0,0,0,.55);
+ 1318:   z-index:15;
+ 1319: }
+ 1320: 
+ 1321: .v99-seat-bag-dot b{
+ 1322:   margin-left:2px;
+ 1323:   font-size:11px;
+ 1324:   color:#fff;
+ 1325: }
+ 1326: 
+-----
+ 1371: 
+ 1372: /* V99O_SEAT_GENDER_SELECTED_CSS_END */
+ 1373: 
+ 1374: 
+ 1375: 
+ 1376: /* V99P_BAG_BADGE_CLICK_FIX_START */
+ 1377: .v99-seat-bag-dot,
+ 1378: .v99-seat-bag-dot *{
+ 1379:   pointer-events:none !important;
+ 1380: }
+ 1381: /* V99P_BAG_BADGE_CLICK_FIX_END */
+-----
+
+===== 11) JS BACKUP DOSYALARI VE İÇİNDEKİ MARKERLAR =====
+- continue_trip_v99_clean.js.bak-before-v99v-rollback-20260612-174051 size=48930 sha=29fdc99ff7f1 markers=['V99M_OCCUPANCY_PANEL_START', 'V99Q_ONLY_OCCUPANCY_CLICK_START', 'V99U', 'V99V_DOLULUK_DIRECT_CLICK_START', 'isDolulukTarget', 'MuavinV99OccupancyPanel']
+- continue_trip_v99_clean.js.bak-v99v-doluluk-direct-20260612-173937 size=44386 sha=26482d95a8ea markers=['V99M_OCCUPANCY_PANEL_START', 'V99Q_ONLY_OCCUPANCY_CLICK_START', 'V99U', 'isDolulukTarget', 'MuavinV99OccupancyPanel']
+- continue_trip_v99_clean.js.bak-v99u-only-doluluk-20260612-173546 size=43515 sha=8b5e69abc66c markers=['V99M_OCCUPANCY_PANEL_START', 'V99Q_ONLY_OCCUPANCY_CLICK_START', 'isDolulukTarget', 'MuavinV99OccupancyPanel']
+- continue_trip_v99_clean.js.bak-v99r-doluluk-gate-20260612-170359 size=43515 sha=8b5e69abc66c markers=['V99M_OCCUPANCY_PANEL_START', 'V99Q_ONLY_OCCUPANCY_CLICK_START', 'isDolulukTarget', 'MuavinV99OccupancyPanel']
+- continue_trip_v99_clean.js.bak-v99u-safe-20260612-173658 size=43515 sha=8b5e69abc66c markers=['V99M_OCCUPANCY_PANEL_START', 'V99Q_ONLY_OCCUPANCY_CLICK_START', 'isDolulukTarget', 'MuavinV99OccupancyPanel']
+- continue_trip_v99_clean.js.bak-v99q-only-occupancy-20260612-151408 size=41372 sha=ae34d1308d5f markers=['V99M_OCCUPANCY_PANEL_START', 'isDolulukTarget', 'MuavinV99OccupancyPanel']
+- continue_trip_v99_clean.js.bak-v99p-bag-click-20260612-150734 size=41333 sha=8e38ea46ea43 markers=['V99M_OCCUPANCY_PANEL_START', 'isDolulukTarget', 'MuavinV99OccupancyPanel']
+- continue_trip_v99_clean.js.bak-v99o-seat-popup-20260612-145022 size=34641 sha=b599f44be130 markers=['V99M_OCCUPANCY_PANEL_START', 'isDolulukTarget', 'MuavinV99OccupancyPanel']
+- continue_trip_v99_clean.js.bak-v99o-seat-color-20260612-150430 size=34641 sha=b599f44be130 markers=['V99M_OCCUPANCY_PANEL_START', 'isDolulukTarget', 'MuavinV99OccupancyPanel']
+- continue_trip_v99_clean.js.bak-v99m-20260612-144237 size=23744 sha=14c6d0c078c6 markers=[]
+- continue_trip_v99_clean.js.bak-v99l-20260612-143054 size=23840 sha=27613854810c markers=[]
+- continue_trip_v99_clean.js.bak-v99k-20260612-141615 size=22047 sha=d8f68c26d11d markers=[]
+- continue_trip_v99_clean.js.bak-v99j-20260612-141312 size=16377 sha=d919bcc8cb8e markers=[]
+- continue_trip_v99_clean.js.bak-v99i-20260612-140734 size=14666 sha=252cbe7566d2 markers=[]
+- continue_trip_v99_clean.js.bak-v99g-20260612-135300 size=13307 sha=f36ae9d87619 markers=[]
+- continue_trip_v99_clean.js.bak-v99f-real-km-20260612-134830 size=11326 sha=d2c46420e4df markers=[]
+- continue_trip_v99_clean.js.bak-v99c-20260612-125314 size=4561 sha=c67155929c12 markers=[]
+- continue_trip_v99_clean.js.bak-v99b-20260612-125059 size=3929 sha=66adcdebe970 markers=[]
+- continue_trip_v99_clean.js.bak-v99e-20260612-134444 size=3929 sha=66adcdebe970 markers=[]
+
+===== 12) RENDER TEST / HTML GERÇEK ÇIKTI =====
+STATUS: 200
+HTML_SIZE: 91310
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99w_doluluk_click_render.html
+
+HTML SCRIPT SATIRLARI:
+ 2621: <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+ 2672: <script src="/static/continue/continue_trip_core.js?v=live-stop-lock-v82"></script>
+ 2673: <script src="/static/continue/continue_bag_emanet.js?v=bag-emanet-clean-1"></script>
+ 2674: <script src="/static/continue/continue_flow_refresh.js?v=flow-refresh-1"></script>
+ 2675: <script src="/static/continue/continue_trip_ui.js?v=js-safe-split-1"></script>
+ 2676: <script src="/static/continue/continue_refresh_button_v49.js?v=refresh-v49"></script>
+ 2677: <script src="/static/continue/continue_native_lock_alarm_v85.js?v=native-lock-alarm-v87"></script>
+ 2678: <script src="/static/continue/continue_trip_v99_clean.js?v=v99g-314'id'] }}'id'] }}'id'] }}"></script>
+
+HTML ÜST GAUGE SATIRLARI:
+   46: <div class="v99-gauges">
+   47:   <div class="v99-gauge-cell">
+   48:     <div class="v99-gauge-label">HIZ</div>
+   49:     <div class="v99-gauge-val amber" id="v99SpeedVal">0</div>
+   50:     <div class="v99-gauge-unit">km/sa</div>
+   54:   <div class="v99-gauge-cell">
+   55:     <div class="v99-gauge-label">DOLULUK</div>
+   56:     <div class="v99-gauge-val">3 / 40</div>
+   69:   <div class="v99-gauge-cell">
+   70:     <div class="v99-gauge-label">DURUM</div>
+   71:     <div class="v99-gauge-val green v99-status-val" id="liveTopStatusText">Planında</div>
+   72:     <div class="v99-gauge-unit" id="v99StatusSub">canlı takip</div>
+
+HTML HATA İZLERİ:
+YOK  Traceback
+YOK  UndefinedError
+YOK  Internal Server Error
+YOK  TemplateSyntaxError
+
+===== 13) KISA YORUM =====
+Bu röntgen dosyaya dokunmadı.
+Çıktıda özellikle şu üç yere bakacağız:
+1) Template script satırı bozulmuş mu?
+2) V99M panel bloğu duruyor mu?
+3) V99Q/V99U/V99V guard blokları panel clickini engelliyor mu?
+
+===== RAPOR BİTTİ =====

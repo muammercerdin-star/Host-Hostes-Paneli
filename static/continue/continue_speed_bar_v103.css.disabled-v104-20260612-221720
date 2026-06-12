@@ -1,0 +1,71 @@
+/* V103_SPEED_BAR_CLEAN_START */
+
+.v103-speed-card{
+  position:relative !important;
+  overflow:hidden !important;
+  cursor:default !important;
+}
+
+.v103-speed-card .v99-gauge-label,
+.v103-speed-card .v99-gauge-val,
+.v103-speed-card .v99-gauge-unit{
+  position:relative !important;
+  z-index:5 !important;
+}
+
+.v103-speed-card .v99-gauge-val{
+  color:#f1a340 !important;
+  text-shadow:
+    0 0 10px rgba(241,163,64,.36),
+    0 2px 6px rgba(0,0,0,.75) !important;
+}
+
+.v103-speed-card .v99-gauge-unit{
+  opacity:.72 !important;
+}
+
+.v103-speed-card::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:86px;
+  height:86px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(241,163,64,.08), transparent 62%);
+  pointer-events:none;
+  z-index:1;
+}
+
+.v103-speed-track{
+  position:absolute;
+  left:18px;
+  right:18px;
+  bottom:8px;
+  height:3px;
+  border-radius:999px;
+  background:rgba(255,255,255,.09);
+  overflow:hidden;
+  z-index:4;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.45);
+}
+
+.v103-speed-fill{
+  width:0%;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#1db87a 0%, #e08820 58%, #e03030 100%);
+  box-shadow:0 0 12px rgba(224,136,32,.26);
+  transition:width .24s ease;
+}
+
+.v103-speed-card.v103-speed-low .v103-speed-fill{
+  box-shadow:0 0 12px rgba(29,184,122,.24);
+}
+
+.v103-speed-card.v103-speed-high .v103-speed-fill{
+  box-shadow:0 0 12px rgba(224,48,48,.28);
+}
+
+/* V103_SPEED_BAR_CLEAN_END */

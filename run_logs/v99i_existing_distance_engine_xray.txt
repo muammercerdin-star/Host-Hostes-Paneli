@@ -1,0 +1,56 @@
+===== V99I MEVCUT MESAFE MOTORU RONTGEN =====
+TIME: 2026-06-12 14:04:40
+
+===== 1) DOSYA DURUMU =====
+VAR  /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/continue_trip.html size= 16173
+VAR  /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_core.js size= 75965
+VAR  /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.js size= 14666
+
+===== 2) CORE MESAFE MOTORU IZLERI =====
+CORE VAR  stop-distance-value
+CORE VAR  data-stop-name
+CORE VAR  updateAllDistances
+CORE VAR  liveDistanceValue
+CORE VAR  routeCoords
+CORE VAR  runtimeGpsKm
+CORE VAR  formatKm
+CORE VAR  distance
+CORE YOK  haversine
+CORE VAR  compute
+
+===== 3) TEMPLATE V99 MESAFE BAGLANTI IZLERI =====
+TPL VAR   v99-tl-m-val
+TPL VAR   v99-tl-m-lbl
+TPL VAR   stop-distance-value
+TPL VAR   data-stop-name
+TPL VAR   liveDistanceValue
+TPL VAR   liveCurrentStopName
+
+===== 4) V99 JS MESAFE IZLERI =====
+V99JS VAR stop-distance-value
+V99JS YOK data-stop-name
+V99JS YOK setDistance
+V99JS VAR setRouteProgress
+V99JS VAR segment
+V99JS VAR distance
+V99JS VAR km
+
+===== 5) TEMPLATE ICINDE MESAFE SATIRLARI =====
+ 113:           <b id="liveDistanceValue"
+ 114:              class="v99-core-hidden stop-distance-value"
+ 183:               <div class="v99-tl-m-val">{{ stop.eta }}</div>
+ 188:               <div class="v99-tl-m-val stop-distance-value" data-stop-name="{{ stop.name }}">{{ stop.distance }}</div>
+ 189:               <div class="v99-tl-m-lbl">MESAFE</div>
+ 193:               <div class="v99-tl-m-val">{{ stop.off_count }}</div>
+ 198:               <div class="v99-tl-m-val">{{ stop.bagaj_label }}</div>
+
+===== 6) CORE stop-distance-value KULLANIM SATIRLARI =====
+  64:     const distEl  = document.getElementById("liveDistanceValue");
+  98:       const distEl  = document.getElementById("liveDistanceValue");
+2010:   function updateAllDistances(){
+2013:     document.querySelectorAll(".stop-distance-value[data-stop-name]").forEach(el => {
+2170:           const distEl = document.getElementById("liveDistanceValue");
+2240:       setText("#liveDistanceValue", gpsKm);
+2243:     updateAllDistances();
+
+===== RAPOR BITTI =====

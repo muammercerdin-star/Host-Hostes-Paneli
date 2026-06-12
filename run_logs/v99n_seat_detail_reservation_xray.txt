@@ -1,0 +1,360 @@
+===== V99N KOLTUK DETAY / REZERVASYON RÖNTGEN =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+TIME: 2026-06-12 14:47:02
+
+===== 1) AKTİF SEFER =====
+ACTIVE_TRIP_ID: 314
+ROUTE: Denizli – İstanbul
+PLATE: 
+DATE: 2026-06-12
+
+===== 2) KOLTUK / BİLET / REZERVASYON TABLOLARI =====
+
+TABLO: consignment_photos rows= 59
+COLS: ['id', 'consignment_id', 'role', 'file_path', 'mime', 'size_bytes', 'created_at']
+  {'id': 1, 'consignment_id': 1, 'role': 'pickup', 'file_path': 'c1_1757538169.jpg', 'mime': 'image/jpeg', 'size_bytes': 2964908, 'created_at': '2025-09-11 00:02:49'}
+  {'id': 2, 'consignment_id': 2, 'role': 'pickup', 'file_path': 'c2_1757568100.jpg', 'mime': 'image/jpeg', 'size_bytes': 2272023, 'created_at': '2025-09-11 08:21:40'}
+  {'id': 3, 'consignment_id': 3, 'role': 'pickup', 'file_path': 'c3_1757595850.jpg', 'mime': 'image/jpeg', 'size_bytes': 3838389, 'created_at': '2025-09-11 16:04:10'}
+  {'id': 4, 'consignment_id': 4, 'role': 'pickup', 'file_path': 'c4_1757766898.jpg', 'mime': 'image/jpeg', 'size_bytes': 6772585, 'created_at': '2025-09-13 15:34:58'}
+  {'id': 5, 'consignment_id': 5, 'role': 'pickup', 'file_path': 'c5_1757870229.jpg', 'mime': 'image/jpeg', 'size_bytes': 3102414, 'created_at': '2025-09-14 20:17:09'}
+  {'id': 6, 'consignment_id': 6, 'role': 'pickup', 'file_path': 'c6_1758018950.jpg', 'mime': 'image/jpeg', 'size_bytes': 3798382, 'created_at': '2025-09-16 13:35:50'}
+  {'id': 7, 'consignment_id': 10, 'role': 'pickup', 'file_path': 'c10_1758132603.jpg', 'mime': 'image/jpeg', 'size_bytes': 1958635, 'created_at': '2025-09-17 21:10:03'}
+  {'id': 8, 'consignment_id': 36, 'role': 'pickup', 'file_path': 'c36_1758818600.jpg', 'mime': 'image/jpeg', 'size_bytes': 2631228, 'created_at': '2025-09-25 19:43:20'}
+
+TABLO: consignments rows= 116
+COLS: ['id', 'trip_id', 'code', 'item_name', 'item_type', 'from_name', 'from_phone', 'to_name', 'to_phone', 'from_stop', 'to_stop', 'amount', 'payment', 'status', 'notes', 'created_at', 'updated_at', 'delivered_at']
+  {'id': 1, 'trip_id': 89, 'code': '3A92E3', 'item_name': 'Çiğ köfte', 'item_type': '', 'from_name': 'Süleyman Çelebi', 'from_phone': '', 'to_name': 'Muammer Çerdin', 'to_phone': '', 'from_stop': 'Denizli otogar', 'to_stop': 'Alaşehir Otogar', 'amount': 340.0, 'payment': 'nakit', 'status': 'yüklendi', 'notes': None, 'created_at': '2025-09-11 00:02:18', 'updated_at': None, 'delivered_at': None}
+  {'id': 2, 'trip_id': 89, 'code': '06BA80', 'item_name': 'ÇAY BARDAĞI', 'item_type': '', 'from_name': 'Mustafa Çerdin', 'from_phone': '', 'to_name': 'Muammer Çerdin', 'to_phone': '', 'from_stop': 'Denizli otogar', 'to_stop': 'Hacıaliler', 'amount': 100.0, 'payment': 'nakit', 'status': 'bekliyor', 'notes': None, 'created_at': '2025-09-11 08:21:20', 'updated_at': None, 'delivered_at': None}
+  {'id': 3, 'trip_id': 90, 'code': '554E5B', 'item_name': 'Cep Telefonu', 'item_type': '', 'from_name': 'Muammer Çerdin', 'from_phone': '', 'to_name': 'Ethem Eryılmaz', 'to_phone': '', 'from_stop': 'Denizli otogar', 'to_stop': 'Piyadeler', 'amount': 175.0, 'payment': 'nakit', 'status': 'bekliyor', 'notes': None, 'created_at': '2025-09-11 16:03:59', 'updated_at': None, 'delivered_at': None}
+  {'id': 4, 'trip_id': 92, 'code': 'CC03E7', 'item_name': 'Motosiklet', 'item_type': '', 'from_name': 'Muammer Çerdin', 'from_phone': '', 'to_name': 'Ethem Eryılmaz', 'to_phone': '', 'from_stop': 'Bozalan', 'to_stop': 'Sarıgöl Garaj', 'amount': 200.0, 'payment': 'nakit', 'status': 'teslim', 'notes': None, 'created_at': '2025-09-11 16:07:47', 'updated_at': None, 'delivered_at': '2025-09-13 15:34:43'}
+  {'id': 5, 'trip_id': 94, 'code': '1D4CEF', 'item_name': 'Cep Telefonu', 'item_type': '', 'from_name': 'Muammer Çerdin', 'from_phone': '', 'to_name': 'Muammer Çerdin', 'to_phone': '', 'from_stop': 'İzmir Otogar', 'to_stop': 'Salihli Garaj', 'amount': 320.0, 'payment': 'nakit', 'status': 'bekliyor', 'notes': None, 'created_at': '2025-09-14 20:17:00', 'updated_at': None, 'delivered_at': None}
+  {'id': 6, 'trip_id': 98, 'code': 'FB0CB1', 'item_name': 'Cep Telefonu', 'item_type': '', 'from_name': 'Muammer Çerdin', 'from_phone': '', 'to_name': 'Ethem Eryılmaz', 'to_phone': '', 'from_stop': 'Denizli otogar', 'to_stop': 'İzmir Otogar', 'amount': 350.0, 'payment': 'nakit', 'status': 'bekliyor', 'notes': None, 'created_at': '2025-09-16 13:35:35', 'updated_at': None, 'delivered_at': None}
+  {'id': 8, 'trip_id': 99, 'code': '0A3A2E', 'item_name': 'Zeytinyağı', 'item_type': '', 'from_name': 'Mehmet Ekiz', 'from_phone': '', 'to_name': 'Ahmet ekiz', 'to_phone': '', 'from_stop': 'Turgutlu Garaj', 'to_stop': 'Esenler Otogar', 'amount': 400.0, 'payment': 'nakit', 'status': 'bekliyor', 'notes': None, 'created_at': '2025-09-17 15:09:03', 'updated_at': None, 'delivered_at': None}
+  {'id': 9, 'trip_id': 99, 'code': 'FF388C', 'item_name': 'Zarf', 'item_type': '', 'from_name': 'Koreli', 'from_phone': '', 'to_name': 'Güney Kore', 'to_phone': '', 'from_stop': 'Turgutlu Garaj', 'to_stop': 'Esenler Otogar', 'amount': 600.0, 'payment': 'nakit', 'status': 'bekliyor', 'notes': None, 'created_at': '2025-09-17 15:09:33', 'updated_at': None, 'delivered_at': None}
+
+TABLO: seats rows= 310
+COLS: ['trip_id', 'seat_no', 'stop', 'ticket_type', 'payment', 'amount', 'gender', 'pair_ok', 'service', 'service_note', 'from_stop', 'to_stop', 'passenger_name', 'passenger_phone']
+  {'trip_id': 7, 'seat_no': 4, 'stop': 'Sarayköy', 'ticket_type': 'biletli', 'payment': 'nakit', 'amount': 0.0, 'gender': '', 'pair_ok': 0, 'service': 0, 'service_note': None, 'from_stop': '', 'to_stop': 'Sarayköy', 'passenger_name': '', 'passenger_phone': ''}
+  {'trip_id': 8, 'seat_no': 1, 'stop': 'Çanakkale', 'ticket_type': 'biletli', 'payment': 'nakit', 'amount': 0.0, 'gender': '', 'pair_ok': 0, 'service': 0, 'service_note': None, 'from_stop': '', 'to_stop': 'Çanakkale', 'passenger_name': '', 'passenger_phone': ''}
+  {'trip_id': 8, 'seat_no': 3, 'stop': 'Alaşehir', 'ticket_type': 'biletli', 'payment': 'nakit', 'amount': 0.0, 'gender': '', 'pair_ok': 0, 'service': 0, 'service_note': None, 'from_stop': '', 'to_stop': 'Alaşehir', 'passenger_name': '', 'passenger_phone': ''}
+  {'trip_id': 8, 'seat_no': 4, 'stop': 'Ortahan', 'ticket_type': 'biletli', 'payment': 'nakit', 'amount': 0.0, 'gender': '', 'pair_ok': 0, 'service': 0, 'service_note': None, 'from_stop': '', 'to_stop': 'Ortahan', 'passenger_name': '', 'passenger_phone': ''}
+  {'trip_id': 8, 'seat_no': 11, 'stop': 'Hacıaliler', 'ticket_type': 'biletli', 'payment': 'nakit', 'amount': 250.0, 'gender': '', 'pair_ok': 0, 'service': 0, 'service_note': None, 'from_stop': '', 'to_stop': 'Hacıaliler', 'passenger_name': '', 'passenger_phone': ''}
+  {'trip_id': 9, 'seat_no': 3, 'stop': 'Ferda', 'ticket_type': 'biletli', 'payment': 'nakit', 'amount': 0.0, 'gender': '', 'pair_ok': 0, 'service': 0, 'service_note': None, 'from_stop': '', 'to_stop': 'Ferda', 'passenger_name': '', 'passenger_phone': ''}
+  {'trip_id': 10, 'seat_no': 3, 'stop': 'kaynarca', 'ticket_type': 'biletli', 'payment': 'nakit', 'amount': 0.0, 'gender': '', 'pair_ok': 0, 'service': 0, 'service_note': None, 'from_stop': '', 'to_stop': 'kaynarca', 'passenger_name': '', 'passenger_phone': ''}
+  {'trip_id': 10, 'seat_no': 4, 'stop': 'izmir', 'ticket_type': 'biletli', 'payment': 'nakit', 'amount': 0.0, 'gender': '', 'pair_ok': 0, 'service': 0, 'service_note': None, 'from_stop': '', 'to_stop': 'izmir', 'passenger_name': '', 'passenger_phone': ''}
+
+===== 3) AKTİF SEFERE GÖRE KOLTUK VERİSİ =====
+
+TABLO: consignments
+  {'id': 165, 'trip_id': 314, 'code': '65D37F', 'item_name': 'Koli 1', 'item_type': '', 'from_name': 'Esenler otogar', 'from_phone': '', 'to_name': 'Alaşehir', 'to_phone': '', 'from_stop': 'Denizli otogar', 'to_stop': 'Ortahan', 'amount': 0.0, 'payment': 'nakit', 'status': 'bekliyor', 'notes': None, 'created_at': '2026-06-12 13:57:05', 'updated_at': None, 'delivered_at': None}
+
+TABLO: seats
+  {'trip_id': 314, 'seat_no': 1, 'stop': None, 'ticket_type': 'biletsiz', 'payment': 'nakit', 'amount': 0.0, 'gender': 'bay', 'pair_ok': 0, 'service': 0, 'service_note': '', 'from_stop': 'Denizli otogar', 'to_stop': 'Ortahan', 'passenger_name': '', 'passenger_phone': ''}
+  {'trip_id': 314, 'seat_no': 5, 'stop': None, 'ticket_type': 'biletsiz', 'payment': 'nakit', 'amount': 0.0, 'gender': 'bayan', 'pair_ok': 0, 'service': 0, 'service_note': '', 'from_stop': 'Denizli otogar', 'to_stop': 'Kardeşler pide salonu', 'passenger_name': '', 'passenger_phone': ''}
+  {'trip_id': 314, 'seat_no': 3, 'stop': None, 'ticket_type': 'biletsiz', 'payment': 'nakit', 'amount': 0.0, 'gender': 'bay', 'pair_ok': 0, 'service': 0, 'service_note': '', 'from_stop': 'Denizli otogar', 'to_stop': 'Alaşehir Otogar', 'passenger_name': '', 'passenger_phone': ''}
+
+===== 4) FLASK ROUTE / API KONTROL =====
+/api/bags/meta                                          GET        -> api_bags_meta
+/api/live-consignment-deliver/<int:cid>                 POST       -> api_live_consignment_deliver
+/api/live-consignment-detail/<int:cid>                  GET        -> api_live_consignment_detail
+/api/live-runtime-state                                 GET        -> api_live_runtime_state
+/api/live-seat-bag-detail                               GET        -> api_live_seat_bag_detail
+/api/live-seat-destination                              POST       -> api_live_seat_destination
+/api/live-seat-map                                      GET        -> api_live_seat_map_v45
+/api/live-seat-offload                                  POST       -> api_live_seat_offload
+/api/live-stop-complete                                 POST       -> api_live_stop_complete_v92c
+/api/live-stop-detail                                   GET        -> api_live_stop_detail
+/api/live-stop-offload                                  POST       -> api_live_stop_offload
+/api/report/seat-stats                                  GET        -> api_report_seat_stats
+/api/seat                                               DELETE,POST -> api_seat
+/api/seats/bulk                                         DELETE,POST -> api_seats_bulk
+/api/seats/gender                                       POST       -> api_seats_gender
+/api/seats/list                                         GET        -> api_seats_list
+/api/seats/offload                                      POST       -> api_seats_offload
+/api/seats/service                                      POST       -> api_seats_service
+/bags                                                   GET,POST   -> bags.gallery
+/bags/capture                                           GET,POST   -> bags.capture
+/bags/clear                                             DELETE     -> bags.clear_bags
+/bags/clear                                             DELETE     -> bags_clear_alias
+/bags/delete-one                                        POST       -> bags.delete_one
+/bags/raw/<trip>/<seat>/<path:filename>                 GET        -> bags.raw
+/bags/thumb/<trip>/<seat>/<path:filename>               GET        -> bags.thumb
+/seats                                                  GET        -> seats_page
+
+===== 5) API /api/live-seat-map ÖRNEK =====
+STATUS: 200
+SIZE: 5402
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99n_live_seat_map.json
+SEAT_COUNT: 40
+  {'bag_count': 0, 'from_stop': 'Denizli otogar', 'gender': 'bay', 'occupied': True, 'passenger_name': '', 'seat_no': '1', 'service': 0, 'to_stop': 'Ortahan'}
+  {'bag_count': 0, 'from_stop': 'Denizli otogar', 'gender': 'bay', 'occupied': True, 'passenger_name': '', 'seat_no': '3', 'service': 0, 'to_stop': 'Alaşehir Otogar'}
+  {'bag_count': 0, 'from_stop': '', 'gender': '', 'occupied': False, 'passenger_name': '', 'seat_no': '4', 'service': 0, 'to_stop': ''}
+  {'bag_count': 1, 'from_stop': 'Denizli otogar', 'gender': 'bayan', 'occupied': True, 'passenger_name': '', 'seat_no': '5', 'service': 0, 'to_stop': 'Kardeşler pide salonu'}
+  {'bag_count': 0, 'from_stop': '', 'gender': '', 'occupied': False, 'passenger_name': '', 'seat_no': '7', 'service': 0, 'to_stop': ''}
+  {'bag_count': 0, 'from_stop': '', 'gender': '', 'occupied': False, 'passenger_name': '', 'seat_no': '8', 'service': 0, 'to_stop': ''}
+  {'bag_count': 0, 'from_stop': '', 'gender': '', 'occupied': False, 'passenger_name': '', 'seat_no': '9', 'service': 0, 'to_stop': ''}
+  {'bag_count': 0, 'from_stop': '', 'gender': '', 'occupied': False, 'passenger_name': '', 'seat_no': '11', 'service': 0, 'to_stop': ''}
+  {'bag_count': 0, 'from_stop': '', 'gender': '', 'occupied': False, 'passenger_name': '', 'seat_no': '12', 'service': 0, 'to_stop': ''}
+  {'bag_count': 0, 'from_stop': '', 'gender': '', 'occupied': False, 'passenger_name': '', 'seat_no': '13', 'service': 0, 'to_stop': ''}
+  {'bag_count': 0, 'from_stop': '', 'gender': '', 'occupied': False, 'passenger_name': '', 'seat_no': '15', 'service': 0, 'to_stop': ''}
+  {'bag_count': 0, 'from_stop': '', 'gender': '', 'occupied': False, 'passenger_name': '', 'seat_no': '16', 'service': 0, 'to_stop': ''}
+
+===== 6) KODDA KOLTUK KAYIT / API SATIRLARI =====
+
+DOSYA: /data/data/com.termux/files/home/Host-Hostes-Paneli/app.py
+  284: TICKET_TYPES = {"biletli", "biletsiz", "ucretsiz"}
+  312: def norm_ticket_type(val: str) -> str:
+  314:     return v if v in TICKET_TYPES else "biletsiz"
+  379:     to_stop: Optional[str] = None,
+  403:     elif to_stop:
+  405:             "SELECT id FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
+  406:             (trip_id, to_stop),
+  472:             from_stop TEXT DEFAULT '',
+  473:             to_stop TEXT DEFAULT '',
+  474:             ticket_type TEXT DEFAULT 'biletsiz',
+  481:             passenger_name TEXT DEFAULT '',
+  488:         CREATE INDEX IF NOT EXISTS idx_seats_trip_to_stop ON seats(trip_id, to_stop);
+  489:         CREATE INDEX IF NOT EXISTS idx_seats_trip_from_stop ON seats(trip_id, from_stop);
+  495:             from_stop TEXT NOT NULL,
+  496:             to_stop TEXT NOT NULL,
+  540:             from_stop TEXT,
+  541:             to_stop TEXT,
+  568:             from_stop TEXT NOT NULL,
+  569:             to_stop TEXT NOT NULL,
+  572:             PRIMARY KEY(route, from_stop, to_stop)
+  657:         "from_stop": "ALTER TABLE seats ADD COLUMN from_stop TEXT DEFAULT ''",
+  658:         "to_stop": "ALTER TABLE seats ADD COLUMN to_stop TEXT DEFAULT ''",
+  663:         "passenger_name": "ALTER TABLE seats ADD COLUMN passenger_name TEXT DEFAULT ''",
+  919:         # preserve_live_stop=1 gelirse mevcut canlı durak korunur.
+  920:         preserve_live_stop = (request.args.get("preserve_live_stop") or "").strip() == "1"
+  923:         if preserve_live_stop and not live_stop_arg_present:
+ 1610:             SELECT COALESCE(from_stop,'') AS from_stop,
+ 1611:                    COALESCE(to_stop,'') AS to_stop,
+ 1620:             fs = (r["from_stop"] or "").strip()
+ 1621:             ts = (r["to_stop"] or "").strip()
+ 1640:             SELECT COALESCE(to_stop,'') AS to_stop,
+ 1644:             GROUP BY to_stop
+ 1650:             ts = (r["to_stop"] or "").strip()
+ 1658:     stop_bag_counts = {}
+ 1666:         for candidate in ["to_stop", "delivery_stop", "to_stop_name", "stop_name", "target_stop"]:
+ 1695:     def _bag_count_from_meta(meta):
+ 1723:             SELECT seat_no, COALESCE(to_stop,'') AS to_stop
+ 1725:             WHERE trip_id=? AND COALESCE(to_stop,'') <> ''
+ 1732:             to_stop = (r["to_stop"] or "").strip()
+ 1733:             if not to_stop:
+ 1741:             cnt = _bag_count_from_meta(meta)
+ 1743:                 key = norm_stop(to_stop)
+ 1744:                 stop_bag_counts[key] = int(stop_bag_counts.get(key, 0) or 0) + cnt
+ 1793:         bagaj_count = int(stop_bag_counts.get(key, 0) or 0)
+ 1926: @app.route("/api/live-seat-map")
+ 1939:     def bag_count_for(seat_no):
+ 1965:                COALESCE(from_stop,'') AS from_stop,
+ 1966:                COALESCE(to_stop,'') AS to_stop,
+ 1967:                COALESCE(passenger_name,'') AS passenger_name,
+ 1982:             "occupied": True,
+ 1983:             "from_stop": r["from_stop"] or "",
+ 1984:             "to_stop": r["to_stop"] or "",
+ 1985:             "passenger_name": r["passenger_name"] or "",
+ 1988:             "bag_count": bag_count_for(no),
+ 1999:                 "occupied": False,
+ 2000:                 "from_stop": "",
+ 2001:                 "to_stop": "",
+ 2002:                 "passenger_name": "",
+ 2005:                 "bag_count": 0,
+ 2039:                COALESCE(from_stop,'') AS from_stop,
+ 2040:                COALESCE(to_stop,'') AS to_stop,
+ 2041:                COALESCE(passenger_name,'') AS passenger_name
+ 2111:         "from_stop": row["from_stop"] or "",
+ 2112:         "to_stop": row["to_stop"] or "",
+ 2113:         "passenger_name": row["passenger_name"] or "",
+ 2160:         WHERE trip_id=? AND COALESCE(to_stop,'') <> ''
+ 2168:         if norm_stop(r["to_stop"] or "") == stop_key:
+ 2185:         if (r["to_stop"] or "").strip():
+ 2189:                 r["to_stop"],
+ 2277:     old_to_stop = (row["to_stop"] or "").strip()
+ 2281:     if stop_raw and old_to_stop and norm_stop(stop_raw) != norm_stop(old_to_stop):
+ 2284:             "error": f"Koltuk {seat_no} şu an {old_to_stop} durağına kayıtlı görünüyor."
+ 2287:     if old_to_stop:
+ 2291:             old_to_stop,
+ 2328:         "from_stop": row["from_stop"] or "",
+ 2329:         "to_stop": old_to_stop,
+ 2344:     new_to_stop_raw = str(data.get("to_stop") or "").strip()
+ 2349:     if not new_to_stop_raw:
+ 2389:     new_to_stop = find_route_stop(new_to_stop_raw)
+ 2390:     if not new_to_stop:
+ 2399:                COALESCE(from_stop,'') AS from_stop,
+ 2400:                COALESCE(to_stop,'') AS to_stop
+ 2413:     old_to_stop = row["to_stop"] or ""
+ 2418:         SET to_stop=?
+ 2421:         (new_to_stop, tid, seat_no),
+ 2426:         if (old_to_stop or "").strip() != (new_to_stop or "").strip():
+ 2436:                     new_to_stop,
+ 2440:                         "old_from_stop": row["from_stop"] or "",
+ 2441:                         "old_to_stop": old_to_stop or "",
+ 2442:                         "new_from_stop": row["from_stop"] or "",
+ 2443:                         "new_to_stop": new_to_stop or "",
+ 2453:         "from_stop": row["from_stop"] or "",
+ 2454:         "old_to_stop": old_to_stop,
+ 2455:         "new_to_stop": new_to_stop,
+ 2456:         "message": f"Koltuk {seat_no} iniş durağı {new_to_stop} olarak güncellendi."
+ 2522:             "from_stop": row["from_stop"] or "",
+ 2523:             "to_stop": row["to_stop"] or "",
+ 2575:         if (row["to_stop"] or "").strip():
+ 2579:                 row["to_stop"],
+ 2601:         "to_stop": row["to_stop"] or "",
+ 2707:                 SELECT to_stop
+ 2710:                   AND lower(trim(from_stop)) = lower(trim(?))
+ 2714:             if row and norm(row["to_stop"]):
+ 2715:                 return norm(row["to_stop"])
+ 2721:                 SELECT to_stop
+ 2724:                   AND lower(trim(from_stop)) = lower(trim(?))
+ 2728:             if row and norm(row["to_stop"]):
+ 2729:                 return norm(row["to_stop"])
+ 2783:                    COALESCE(from_stop,'') AS from_stop,
+ 2784:                    COALESCE(to_stop,'') AS to_stop,
+ 2785:                    COALESCE(ticket_type,'') AS ticket_type,
+ 2791:                    COALESCE(passenger_name,'') AS passenger_name,
+ 2796:                     lower(trim(to_stop)) = lower(trim(?))
+ 2808:                     "from_stop": sr["from_stop"] or "",
+ 2809:                     "to_stop": sr["to_stop"] or stop,
+ 2810:                     "ticket_type": sr["ticket_type"] or "",
+ 2816:                     "passenger_name": sr["passenger_name"] or "",
+ 2836:                     lower(trim(to_stop)) = lower(trim(?))
+ 2847:                        COALESCE(from_stop,'') AS from_stop,
+ 2848:                        COALESCE(to_stop,'') AS to_stop,
+ 2857:                   AND lower(trim(to_stop)) = lower(trim(?))
+ 2870:                         "from_stop": wr["from_stop"] or "",
+ 2871:                         "to_stop": wr["to_stop"] or stop,
+ 2895:                   AND lower(trim(to_stop)) = lower(trim(?))
+ 2910:                   AND lower(trim(to_stop)) = lower(trim(?))
+ 3041:     def _bag_count_from_meta(meta):
+ 3069:                    COALESCE(from_stop,'') AS from_stop,
+ 3070:                    COALESCE(to_stop,'') AS to_stop,
+ 3071:                    COALESCE(passenger_name,'') AS passenger_name,
+ 3073:                    COALESCE(ticket_type,'') AS ticket_type,
+ 3086:             to_stop = (r["to_stop"] or "").strip()
+ 3087:             if norm_stop(to_stop) != stop_key:
+ 3114:             bag_count = int(bag_right or 0) + int(bag_left_front or 0) + int(bag_left_back or 0)
+ 3115:             if bag_count <= 0:
+ 3116:                 bag_count = _bag_count_from_meta(meta)
+ 3135:                 "from_stop": r["from_stop"] or "",
+ 3136:                 "to_stop": to_stop,
+ 3137:                 "passenger_name": r["passenger_name"] or "",
+ 3139:                 "ticket_type": r["ticket_type"] or "",
+ 3144:                 "bag_count": int(bag_count or 0),
+ 3161:         for candidate in ["to_stop", "delivery_stop", "to_stop_name", "stop_name", "target_stop"]:
+ 3247:     seat_bag_total = sum(int(x.get("bag_count") or 0) for x in passengers)
+ 3334:             SELECT COALESCE(from_stop,'') AS from_stop,
+ 3335:                    COALESCE(to_stop,'') AS to_stop,
+ 3344:             fs = (r["from_stop"] or "").strip()
+ 3345:             ts = (r["to_stop"] or "").strip()
+ 3358:     bag_counts = {}
+ 3360:     def _bag_count_from_meta(meta):
+ 3388:             SELECT seat_no, COALESCE(to_stop,'') AS to_stop
+ 3391:               AND COALESCE(to_stop,'') <> ''
+ 3398:             to_stop = (r["to_stop"] or "").strip()
+ 3399:             if not to_stop:
+ 3407:             cnt = _bag_count_from_meta(meta)
+ 3410:                 k = norm_stop(to_stop)
+ 3411:                 bag_counts[k] = bag_counts.get(k, 0) + int(cnt)
+ 3421:             SELECT COALESCE(to_stop,'') AS to_stop,
+ 3429:             GROUP BY to_stop
+ 3435:             ts = (r["to_stop"] or "").strip()
+ 3453:         bag_c = int(bag_counts.get(key, 0) or 0)
+ 3472:             "bag_count": bag_c,
+ 3503:             SELECT route, from_stop, to_stop, sort_order,
+ 3520:                 "from_stop": r["from_stop"],
+ 3521:                 "to_stop": r["to_stop"],
+ 3624:     "norm_ticket_type": norm_ticket_type,
+ 3679:         "from_stop": d.get("from_stop") or "",
+ 3680:         "to_stop": d.get("to_stop") or "",
+ 3681:         "ticket_type": d.get("ticket_type") or "",
+ 3687:         "passenger_name": d.get("passenger_name") or "",
+ 3700:         "from_stop": d.get("from_stop") or "",
+ 3701:         "to_stop": d.get("to_stop") or "",
+ 3792:     "norm_ticket_type": norm_ticket_type,
+ 3852:         from_stop = (data.get("from_stop") or data.get("from") or "").strip()
+ 3853:         to_stop = (data.get("to_stop") or data.get("to") or "").strip()
+ 3855:         if not to_stop:
+ 3858:         if from_stop and not validate_stop_for_active_trip(from_stop):
+ 3859:             return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {from_stop}"}), 400
+ 3860:         if to_stop and not validate_stop_for_active_trip(to_stop):
+ 3861:             return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
+ 3874:             INSERT INTO walk_on_sales(trip_id, from_stop, to_stop, pax, unit_price, total_amount, payment, note)
+ 3877:             (tid, from_stop, to_stop, pax, unit_price, total_amount, payment, note),
+ 3881:         if from_stop:
+ 3890:                 from_stop,
+ 3906:     to_param = (request.args.get("to_stop") or request.args.get("to") or "").strip()
+ 3913:         return jsonify({"ok": False, "msg": "id, ids, to/to_stop veya all gerekli"}), 400
+ 3930:             "SELECT * FROM walk_on_sales WHERE trip_id=? AND lower(to_stop)=lower(?)",
+ 3944:         to_stop=to_param or None,
+ 3949:         if r["id"] in deleted_ids and (r["to_stop"] or "").strip():
+ 3953:                 r["to_stop"],
+ 3994:         from_stop = (data.get("from_stop") or data.get("from") or "").strip()
+ 3995:         to_stop = (data.get("to_stop") or data.get("to") or "").strip()
+ 3997:         if not to_stop:
+ 4000:         if from_stop and not validate_stop_for_active_trip(from_stop):
+ 4001:             return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {from_stop}"}), 400
+ 4002:         if to_stop and not validate_stop_for_active_trip(to_stop):
+ 4003:             return jsonify({"ok": False, "msg": f"Durak hat üzerinde değil: {to_stop}"}), 400
+ 4016:             INSERT INTO walk_on_sales(trip_id, from_stop, to_stop, pax, unit_price, total_amount, payment, note)
+ 4019:             (tid, from_stop, to_stop, pax, unit_price, total_amount, payment, note),
+ 4033:     to_param = (request.args.get("to_stop") or request.args.get("to") or "").strip()
+ 4040:         return jsonify({"ok": False, "msg": "id, ids, to/to_stop veya all gerekli"}), 400
+ 4047:         to_stop=to_param or None,
+ 4066:         SELECT id, from_stop, to_stop, pax, unit_price, total_amount, payment, note, created_at
+ 4076:         "from": r["from_stop"],
+ 4077:         "to": r["to_stop"],
+ 4139:         "seats_reserved": int(seat_row["c"] or 0),
+ 4155:         "SELECT COUNT(*) AS c FROM seats WHERE trip_id=? AND to_stop=?",
+ 4872:                         SELECT from_stop, to_stop, sort_order, distance_m, duration_s, provider
+ 4883:                     frm = str(row_get(row, "from_stop", "") or "").strip()
+ 4884:                     to = str(row_get(row, "to_stop", "") or "").strip()
+ 4903:                         "from_stop": frm,
+ 4904:                         "to_stop": to,
+
+DOSYA: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/seats/seats.js
+  872:       Number(rec.bag || rec.bag_count || rec.live_bag || 0),
+ 1401:     const ticket = document.querySelector('input[name="ticket"][value="biletsiz"]');
+ 1402:     if(ticket) ticket.checked = true;
+ 1432:     const ticket = document.querySelector('input[name="ticket"]:checked')?.value || "biletsiz";
+ 1441:       const j = await safeJsonFetch("/api/seat", {
+ 1448:           ticket_type: ticket,
+ 1519:       const j = await safeJsonFetch("/api/seat?seat_no=" + currentSeat, {
+ 1597:     const ticketVal = document.querySelector('input[name="bulkTicket"]:checked')?.value || "biletsiz";
+ 1633:         const j = await safeJsonFetch("/api/seats/bulk", {
+ 1640:             ticket_type: ticketVal,
+ 1649:           await safeJsonFetch("/api/seat", {
+ 1656:               ticket_type:ticketVal,
+ 1784:         const j = await safeJsonFetch("/api/seats/offload", {
+ 1794:           const j = await safeJsonFetch("/api/seat?seat_no=" + n, {
+ 2733:     const url = `/bags/capture?trip_code=${encodeURIComponent(BAG_TRIP)}&seat=${encodeURIComponent(seat)}&to_stop=${encodeURIComponent(drop)}&next=${encodeURIComponent(next)}`;
+
+DOSYA: /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/seats.html
+   18: <link rel="stylesheet" href="/static/seats/patches/manual-ticket-system.css?v=1">
+  388: <script src="/static/seats/patches/manual-ticket-system.js?v=1"></script>
+
+DOSYA: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.js
+  332:     var from = seg.from_stop || seg.from || "";
+  333:     var to = seg.to_stop || seg.to || "";
+  355:       var sf = norm(seg.from_stop || "");
+  356:       var st = norm(seg.to_stop || "");
+ 1093:     var occupied = seats.filter(function(s){ return !!s.occupied; }).length;
+ 1094:     var free = Math.max(0, total - occupied);
+ 1096:     var male = seats.filter(function(s){ return !!s.occupied && seatGenderClass(s) === "male"; }).length;
+ 1097:     var female = seats.filter(function(s){ return !!s.occupied && seatGenderClass(s) === "female"; }).length;
+ 1103:       return !!s.occupied && sameStop(s.to_stop, live);
+ 1107:       return !!s.occupied && sameStop(s.to_stop, next);
+ 1111:       return a + num(s.bag_count || s.bag_total || s.bagaj_count);
+ 1118:           <div class="v">${occupied} / ${total}</div>
+ 1144:     var afterLive = Math.max(0, occupied - offLive);
+ 1208:         var s = byNo[no] || { seat_no:no, occupied:false };
+ 1213:         if(s.occupied){
+ 1218:           if(sameStop(s.to_stop, live)){
+ 1241:     if(!s || !s.occupied){
+ 1247:     var from = s.from_stop || "—";
+ 1248:     var to = s.to_stop || "—";
+ 1249:     var bag = num(s.bag_count || s.bag_total || s.bagaj_count);
+ 1268:       var res = await fetch("/api/live-seat-map?_=" + Date.now(), {
+
+===== RAPOR BİTTİ =====

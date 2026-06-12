@@ -1,0 +1,163 @@
+/* V100_SPEED_TOGGLE_ISOLATED_CSS_START */
+
+.v100-speed-card{
+  cursor:pointer !important;
+  user-select:none !important;
+  -webkit-user-select:none !important;
+  touch-action:manipulation !important;
+  position:relative !important;
+}
+
+.v100-speed-card::after{
+  content:"";
+  position:absolute;
+  inset:7px;
+  border-radius:18px;
+  border:1px solid rgba(224,136,32,0);
+  pointer-events:none;
+  transition:.16s ease;
+}
+
+.v100-speed-card:active::after{
+  border-color:rgba(224,136,32,.45);
+  box-shadow:0 0 18px rgba(224,136,32,.22);
+}
+
+.v100-speed-analog{
+  display:none;
+  margin-top:4px;
+  width:100%;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+}
+
+.v100-speed-card.v100-speed-analog-on #v99SpeedVal,
+.v100-speed-card.v100-speed-analog-on .v99-gauge-unit,
+.v100-speed-card.v100-speed-analog-on #liveSpeedText{
+  display:none !important;
+}
+
+.v100-speed-card.v100-speed-analog-on .v100-speed-analog{
+  display:flex !important;
+}
+
+.v100-speed-dial{
+  position:relative;
+  width:86px;
+  height:49px;
+  margin:0 auto;
+  overflow:visible;
+}
+
+.v100-speed-scale{
+  position:absolute;
+  left:6px;
+  right:6px;
+  bottom:-30px;
+  height:72px;
+  border-radius:80px 80px 0 0;
+  border:4px solid rgba(224,136,32,.68);
+  border-bottom:0;
+  background:
+    radial-gradient(circle at 50% 100%, rgba(224,136,32,.14), transparent 56%),
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0));
+  box-shadow:
+    0 0 15px rgba(224,136,32,.28),
+    inset 0 0 18px rgba(224,136,32,.08);
+}
+
+.v100-speed-needle{
+  position:absolute;
+  left:50%;
+  bottom:5px;
+  width:3px;
+  height:36px;
+  border-radius:4px;
+  background:linear-gradient(180deg,#fff1bf,#e08820);
+  transform-origin:50% calc(100% - 2px);
+  transform:translateX(-50%) rotate(var(--v100-speed-deg, -120deg));
+  box-shadow:0 0 12px rgba(224,136,32,.72);
+  transition:transform .25s ease;
+}
+
+.v100-speed-center{
+  position:absolute;
+  left:50%;
+  bottom:0;
+  width:13px;
+  height:13px;
+  border-radius:50%;
+  transform:translateX(-50%);
+  background:#ffe0a5;
+  box-shadow:0 0 12px rgba(255,224,165,.6);
+}
+
+.v100-speed-num{
+  position:absolute;
+  left:50%;
+  bottom:15px;
+  transform:translateX(-50%);
+  font-family:'JetBrains Mono', monospace;
+  font-size:13px;
+  font-weight:900;
+  color:#e08820;
+  line-height:1;
+  text-shadow:0 0 12px rgba(224,136,32,.52);
+}
+
+.v100-speed-sub{
+  margin-top:0;
+  font-family:'JetBrains Mono', monospace;
+  font-size:9px;
+  letter-spacing:1.8px;
+  color:var(--v99-muted);
+  text-transform:uppercase;
+}
+
+.v100-speed-mark{
+  position:absolute;
+  font-family:'JetBrains Mono', monospace;
+  font-size:7px;
+  color:rgba(232,238,248,.55);
+  line-height:1;
+  pointer-events:none;
+}
+
+.v100-speed-mark.m0{
+  left:1px;
+  bottom:4px;
+}
+
+.v100-speed-mark.m70{
+  left:50%;
+  top:0;
+  transform:translateX(-50%);
+}
+
+.v100-speed-mark.m140{
+  right:0;
+  bottom:4px;
+}
+
+.v100-speed-card.v100-speed-low .v100-speed-scale{
+  border-color:rgba(29,184,122,.72);
+  box-shadow:0 0 15px rgba(29,184,122,.28);
+}
+
+.v100-speed-card.v100-speed-low .v100-speed-num{
+  color:var(--v99-green);
+  text-shadow:0 0 12px rgba(29,184,122,.48);
+}
+
+.v100-speed-card.v100-speed-high .v100-speed-scale{
+  border-color:rgba(224,48,48,.76);
+  box-shadow:0 0 15px rgba(224,48,48,.34);
+}
+
+.v100-speed-card.v100-speed-high .v100-speed-num{
+  color:var(--v99-red);
+  text-shadow:0 0 12px rgba(224,48,48,.58);
+}
+
+/* V100_SPEED_TOGGLE_ISOLATED_CSS_END */

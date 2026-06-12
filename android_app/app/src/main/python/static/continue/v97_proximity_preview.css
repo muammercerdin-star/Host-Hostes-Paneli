@@ -1,0 +1,1654 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+:root{
+  --bg:#080b10;
+  --panel:#11151c;
+  --panel2:#171c25;
+  --line:#222938;
+  --text:#e8edf7;
+  --muted:#7b8496;
+  --red:#ff304f;
+  --amber:#f0a229;
+  --green:#22c982;
+  --blue:#3a8bff;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at top right,rgba(30,80,170,.20),transparent 38%),
+    linear-gradient(180deg,#070a0f,#0a0d13 45%,#07090d);
+  color:var(--text);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  padding-bottom:92px;
+}
+
+.v97-hdr{
+  height:78px;
+  padding:16px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:#10141b;
+  border-bottom:1px solid var(--line);
+}
+
+.v97-brand{display:flex;align-items:center;gap:12px}
+.v97-logo{
+  width:48px;height:48px;
+  border-radius:14px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#ff304f,#a70f22);
+  box-shadow:0 0 24px rgba(255,48,79,.30);
+}
+.v97-title{
+  font-size:25px;
+  letter-spacing:8px;
+  font-weight:900;
+}
+.v97-sub{
+  font-size:12px;
+  color:var(--muted);
+  letter-spacing:6px;
+}
+.v97-clock{
+  font-size:32px;
+  color:var(--amber);
+  font-family:monospace;
+  font-weight:900;
+  letter-spacing:5px;
+}
+
+.v97-route{
+  height:54px;
+  padding:0 20px;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  background:#141922;
+  border-bottom:1px solid var(--line);
+  color:var(--muted);
+}
+.v97-route b{
+  color:var(--text);
+  letter-spacing:3px;
+  font-size:20px;
+}
+.v97-route em{
+  margin-left:auto;
+  color:var(--red);
+  font-style:normal;
+  letter-spacing:3px;
+  font-weight:900;
+}
+.v97-route em i,
+.v97-live-pill i{
+  display:inline-block;
+  width:8px;height:8px;
+  border-radius:50%;
+  background:var(--red);
+  box-shadow:0 0 14px var(--red);
+  margin-right:8px;
+  animation:v97Blink 1.2s ease-in-out infinite;
+}
+
+@keyframes v97Blink{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.35;transform:scale(.72)}
+}
+
+.v97-gauges{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  border-bottom:1px solid var(--line);
+  background:var(--line);
+  gap:1px;
+}
+.v97-gauges > div{
+  min-height:98px;
+  background:#10141b;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+}
+.v97-gauges small{
+  color:var(--muted);
+  letter-spacing:5px;
+  font-weight:800;
+}
+.v97-gauges b{
+  font-size:36px;
+  line-height:1;
+}
+.v97-gauges b.green{
+  font-size:23px;
+  color:var(--green);
+}
+.v97-gauges span{
+  color:var(--muted);
+  font-size:14px;
+}
+.v97-occ{
+  width:110px;height:7px;
+  background:#252b38;
+  border-radius:99px;
+  overflow:hidden;
+}
+.v97-occ i{
+  display:block;
+  height:100%;
+  background:linear-gradient(90deg,var(--green),var(--amber));
+  border-radius:99px;
+}
+.v97-gender{color:#79a8ff !important}
+
+.v97-shell{
+  padding:22px 20px;
+}
+
+.v97-prox-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:28px;
+  padding:26px 22px;
+  background:
+    repeating-linear-gradient(0deg,transparent,transparent 4px,rgba(255,255,255,.018) 5px),
+    linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),
+    #11151c;
+  box-shadow:0 20px 50px rgba(0,0,0,.35);
+}
+
+.v97-prox-card:before{
+  content:"";
+  position:absolute;
+  width:180px;height:180px;
+  left:-40px;top:20px;
+  background:radial-gradient(circle,rgba(255,48,79,.25),transparent 66%);
+  pointer-events:none;
+}
+
+.v97-prox-top{
+  position:relative;
+  display:flex;
+  gap:25px;
+  align-items:center;
+}
+
+.v97-ring-wrap{
+  position:relative;
+  width:126px;height:126px;
+  flex:0 0 auto;
+}
+.v97-ring{
+  width:126px;height:126px;
+  transform:rotate(-90deg);
+}
+.v97-ring-track{
+  fill:none;
+  stroke:rgba(255,255,255,.08);
+  stroke-width:9;
+}
+.v97-ring-fill{
+  fill:none;
+  stroke:var(--blue);
+  stroke-width:9;
+  stroke-linecap:round;
+  stroke-dasharray:301.59;
+  stroke-dashoffset:301.59;
+  filter:drop-shadow(0 0 10px var(--blue));
+  transition:stroke-dashoffset .9s ease, stroke .3s ease, filter .3s ease;
+}
+.v97-ring-center{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  align-content:center;
+}
+.v97-ring-center b{
+  font-family:monospace;
+  font-size:36px;
+  color:var(--blue);
+  text-shadow:0 0 18px var(--blue);
+}
+.v97-ring-center span{
+  color:var(--muted);
+  letter-spacing:4px;
+  font-weight:800;
+  font-size:13px;
+}
+
+.v97-info small{
+  color:var(--muted);
+  letter-spacing:7px;
+  font-weight:900;
+}
+.v97-info h1{
+  margin-top:10px;
+  font-size:42px;
+  line-height:1;
+  color:white;
+}
+.v97-info p{
+  margin-top:14px;
+}
+.v97-info p b{
+  color:var(--amber);
+  font-size:30px;
+  font-family:monospace;
+}
+.v97-info p span{
+  color:var(--muted);
+  letter-spacing:3px;
+  margin-left:8px;
+}
+.v97-live-pill{
+  margin-top:18px;
+  display:inline-flex;
+  align-items:center;
+  padding:8px 22px;
+  border-radius:99px;
+  background:rgba(255,48,79,.14);
+  border:1px solid rgba(255,48,79,.35);
+  color:#ff687d;
+  letter-spacing:5px;
+  font-weight:900;
+}
+
+.v97-mini-grid{
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-top:24px;
+}
+.v97-mini-grid button{
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:var(--panel2);
+  color:var(--text);
+  min-height:92px;
+  display:grid;
+  grid-template-columns:50px 1fr;
+  grid-template-rows:1fr 1fr;
+  align-items:center;
+  padding:15px;
+}
+.v97-mini-grid i{
+  grid-row:1/3;
+  font-style:normal;
+  font-size:30px;
+}
+.v97-mini-grid b{
+  font-size:33px;
+  justify-self:start;
+}
+.v97-mini-grid span{
+  color:var(--muted);
+  letter-spacing:3px;
+  font-weight:800;
+  justify-self:start;
+}
+
+.v97-route-progress{
+  margin-top:25px;
+}
+.v97-route-progress > div:first-child{
+  display:flex;
+  justify-content:space-between;
+  color:var(--muted);
+  letter-spacing:3px;
+  font-family:monospace;
+  margin-bottom:8px;
+}
+.v97-route-progress b{font-weight:400}
+.v97-progress-track{
+  height:8px;
+  border-radius:99px;
+  background:#242a36;
+  overflow:hidden;
+}
+.v97-progress-track i{
+  display:block;
+  height:100%;
+  background:linear-gradient(90deg,#5b0e16,var(--red));
+  border-radius:99px;
+  box-shadow:0 0 12px rgba(255,48,79,.55);
+}
+
+.v97-timeline-section{
+  margin-top:34px;
+}
+.v97-section-title{
+  color:var(--muted);
+  letter-spacing:8px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:22px;
+}
+.v97-section-title:after{
+  content:"";
+  height:1px;
+  background:var(--line);
+  flex:1;
+}
+
+.v97-timeline{
+  display:flex;
+  flex-direction:column;
+}
+.v97-tl-item{
+  display:grid;
+  grid-template-columns:40px 1fr;
+  gap:15px;
+}
+.v97-spine{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.v97-node{
+  width:24px;height:24px;
+  border-radius:50%;
+  border:4px solid #293142;
+  background:#0b0d10;
+  margin-top:16px;
+  box-shadow:0 0 0 transparent;
+}
+.v97-node.passed{
+  background:var(--green);
+  border-color:var(--green);
+}
+.v97-node.live{
+  background:var(--red);
+  border-color:var(--red);
+  box-shadow:0 0 18px var(--red);
+}
+.v97-node.next{
+  border-color:var(--amber);
+}
+.v97-line{
+  width:2px;
+  flex:1;
+  min-height:70px;
+  background:#293142;
+}
+.v97-line.passed{background:rgba(34,201,130,.55)}
+.v97-line.live{background:linear-gradient(var(--red),#293142)}
+
+.v97-stop-card{
+  margin-bottom:14px;
+  padding:20px 24px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:var(--panel);
+}
+.v97-stop-card.live{
+  border-color:rgba(255,48,79,.38);
+  background:#12100f;
+}
+.v97-stop-card.next{
+  border-color:rgba(240,162,41,.42);
+}
+.v97-stop-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.v97-stop-head h3{
+  font-size:29px;
+  color:white;
+}
+.v97-pill{
+  padding:8px 15px;
+  border-radius:99px;
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:4px;
+}
+.v97-pill.passed{color:var(--green);border:1px solid rgba(34,201,130,.35);background:rgba(34,201,130,.12)}
+.v97-pill.live{color:#ff687d;border:1px solid rgba(255,48,79,.38);background:rgba(255,48,79,.15)}
+.v97-pill.next{color:var(--amber);border:1px solid rgba(240,162,41,.42);background:rgba(240,162,41,.12)}
+.v97-pill.upcoming{color:var(--muted);background:#1a1f2a}
+
+.v97-stop-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  margin-top:18px;
+  gap:12px;
+}
+.v97-stop-metrics b{
+  font-size:26px;
+}
+.v97-stop-metrics span{
+  display:block;
+  color:var(--muted);
+  letter-spacing:3px;
+  font-size:12px;
+  font-weight:800;
+}
+
+.v97-dock{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  min-height:82px;
+  background:#11151c;
+  border-top:1px solid var(--line);
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  z-index:100;
+}
+.v97-dock button{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  font-size:25px;
+}
+.v97-dock button span{
+  font-size:12px;
+  letter-spacing:3px;
+}
+.v97-dock button.active{
+  color:var(--red);
+}
+
+.v97-demo{
+  position:fixed;
+  top:135px;
+  right:12px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  z-index:120;
+}
+.v97-demo small{
+  color:var(--muted);
+  letter-spacing:3px;
+  text-align:center;
+}
+.v97-demo button{
+  min-width:92px;
+  padding:10px 12px;
+  border-radius:11px;
+  background:#171c25;
+  border:1px solid #2a3242;
+  color:#b9c1d0;
+  font-weight:800;
+}
+
+@media(max-width:420px){
+  .v97-info h1{font-size:35px}
+  .v97-ring-wrap,.v97-ring{width:112px;height:112px}
+  .v97-prox-top{gap:16px}
+  .v97-demo{right:8px}
+}
+
+
+/* V97B_MOBILE_FIT
+   Preview ekranını dar Android Chrome ekranına sığdırır.
+   Mevcut canlı durak sistemine dokunmaz.
+*/
+
+body{
+  overflow-x:hidden !important;
+}
+
+.v97-hdr{
+  height:70px !important;
+  padding:12px 16px !important;
+}
+
+.v97-logo{
+  width:42px !important;
+  height:42px !important;
+  border-radius:12px !important;
+}
+
+.v97-title{
+  font-size:22px !important;
+  letter-spacing:7px !important;
+}
+
+.v97-sub{
+  font-size:11px !important;
+  letter-spacing:5px !important;
+}
+
+.v97-clock{
+  font-size:28px !important;
+  letter-spacing:4px !important;
+}
+
+.v97-route{
+  height:auto !important;
+  min-height:58px !important;
+  padding:9px 16px !important;
+  flex-wrap:wrap !important;
+  gap:8px 12px !important;
+}
+
+.v97-route b{
+  font-size:25px !important;
+  line-height:1.12 !important;
+  letter-spacing:5px !important;
+  max-width:230px !important;
+}
+
+.v97-route em{
+  margin-left:0 !important;
+  font-size:20px !important;
+  letter-spacing:5px !important;
+}
+
+.v97-gauges > div{
+  min-height:88px !important;
+}
+
+.v97-gauges small{
+  letter-spacing:4px !important;
+  font-size:13px !important;
+}
+
+.v97-gauges b{
+  font-size:42px !important;
+}
+
+.v97-gauges b.green{
+  font-size:25px !important;
+}
+
+.v97-shell{
+  padding:18px 14px !important;
+}
+
+.v97-prox-card{
+  width:100% !important;
+  max-width:100% !important;
+  padding:22px 18px !important;
+  border-radius:24px !important;
+}
+
+.v97-prox-top{
+  gap:18px !important;
+  align-items:center !important;
+}
+
+.v97-ring-wrap,
+.v97-ring{
+  width:118px !important;
+  height:118px !important;
+}
+
+.v97-ring-center b{
+  font-size:35px !important;
+}
+
+.v97-info small{
+  letter-spacing:7px !important;
+  line-height:1.25 !important;
+}
+
+.v97-info h1{
+  font-size:38px !important;
+}
+
+.v97-info p b{
+  font-size:31px !important;
+}
+
+.v97-info p span{
+  display:block !important;
+  margin-left:0 !important;
+  margin-top:2px !important;
+  letter-spacing:4px !important;
+}
+
+.v97-live-pill{
+  padding:8px 18px !important;
+  letter-spacing:5px !important;
+  font-size:20px !important;
+}
+
+.v97-mini-grid{
+  gap:14px !important;
+}
+
+.v97-mini-grid button{
+  min-height:106px !important;
+  border-radius:20px !important;
+  grid-template-columns:54px 1fr !important;
+}
+
+.v97-mini-grid i{
+  font-size:33px !important;
+}
+
+.v97-mini-grid b{
+  font-size:42px !important;
+}
+
+.v97-mini-grid span{
+  font-size:19px !important;
+  letter-spacing:5px !important;
+}
+
+.v97-route-progress > div:first-child{
+  letter-spacing:4px !important;
+  font-size:18px !important;
+  text-align:center !important;
+}
+
+.v97-timeline-section{
+  margin-top:28px !important;
+}
+
+.v97-stop-card{
+  padding:18px 18px !important;
+  border-radius:20px !important;
+}
+
+.v97-stop-head h3{
+  font-size:28px !important;
+}
+
+.v97-stop-metrics{
+  grid-template-columns:repeat(4, minmax(0, 1fr)) !important;
+  gap:8px !important;
+}
+
+.v97-stop-metrics b{
+  font-size:24px !important;
+}
+
+.v97-stop-metrics span{
+  font-size:11px !important;
+  letter-spacing:2px !important;
+}
+
+/* Simülasyon paneli ekrana binmesin: dar ekranda alta yatay al */
+.v97-demo{
+  top:auto !important;
+  right:8px !important;
+  left:8px !important;
+  bottom:90px !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:6px !important;
+  background:rgba(8,11,16,.82) !important;
+  backdrop-filter:blur(10px) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+  border-radius:16px !important;
+  padding:8px !important;
+}
+
+.v97-demo small{
+  display:none !important;
+}
+
+.v97-demo button{
+  min-width:auto !important;
+  flex:1 !important;
+  padding:8px 5px !important;
+  font-size:13px !important;
+  border-radius:10px !important;
+}
+
+.v97-dock{
+  min-height:78px !important;
+}
+
+@media(max-width:380px){
+  .v97-title{
+    font-size:20px !important;
+    letter-spacing:6px !important;
+  }
+
+  .v97-clock{
+    font-size:25px !important;
+  }
+
+  .v97-ring-wrap,
+  .v97-ring{
+    width:104px !important;
+    height:104px !important;
+  }
+
+  .v97-info h1{
+    font-size:34px !important;
+  }
+
+  .v97-live-pill{
+    font-size:17px !important;
+    letter-spacing:4px !important;
+  }
+}
+
+
+/* V97C_SIMBAR_FLOW_FIX
+   Simülasyon butonları artık kartın üstüne binmez.
+   Preview içindir; gerçek canlı durak ekranına dokunmaz.
+*/
+.v97-demo{
+  position:relative !important;
+  top:auto !important;
+  right:auto !important;
+  left:auto !important;
+  bottom:auto !important;
+  z-index:20 !important;
+
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+
+  margin:0 !important;
+  padding:10px 10px !important;
+
+  background:#0f141d !important;
+  border-top:1px solid rgba(255,255,255,.06) !important;
+  border-bottom:1px solid rgba(255,255,255,.06) !important;
+  border-left:0 !important;
+  border-right:0 !important;
+  border-radius:0 !important;
+  backdrop-filter:none !important;
+}
+
+.v97-demo small{
+  display:none !important;
+}
+
+.v97-demo button{
+  flex:1 1 0 !important;
+  min-width:0 !important;
+  max-width:98px !important;
+  padding:10px 5px !important;
+  border-radius:13px !important;
+  font-size:16px !important;
+  line-height:1.1 !important;
+}
+
+.v97-shell{
+  padding-top:20px !important;
+}
+
+/* Kart alt metrikleri sim bar yüzünden kesilmesin */
+.v97-prox-card{
+  padding-bottom:24px !important;
+}
+
+.v97-mini-grid{
+  margin-top:24px !important;
+  position:relative !important;
+  z-index:5 !important;
+}
+
+/* Dock ile içerik arasında daha rahat boşluk */
+body{
+  padding-bottom:96px !important;
+}
+
+
+/* V97D_CARD_INNER_FIT
+   Kart içi sağ taşmayı düzeltir.
+   Bagaj / yolcu kutuları, progress etiketleri ve sağ kolon mobilde kesilmez.
+   Sadece preview dosyasına uygulanır.
+*/
+
+html,
+body{
+  max-width:100vw !important;
+  overflow-x:hidden !important;
+}
+
+.v97-shell,
+.v97-prox-card,
+.v97-timeline-section,
+.v97-stop-card{
+  max-width:100% !important;
+  overflow-x:hidden !important;
+}
+
+.v97-prox-card{
+  padding-left:16px !important;
+  padding-right:16px !important;
+}
+
+.v97-prox-top{
+  display:grid !important;
+  grid-template-columns:116px minmax(0, 1fr) !important;
+  gap:16px !important;
+  width:100% !important;
+}
+
+.v97-ring-wrap,
+.v97-ring{
+  width:108px !important;
+  height:108px !important;
+}
+
+.v97-ring-center b{
+  font-size:32px !important;
+}
+
+.v97-ring-center span{
+  font-size:12px !important;
+  letter-spacing:3px !important;
+}
+
+.v97-info{
+  min-width:0 !important;
+  max-width:100% !important;
+}
+
+.v97-info small{
+  display:block !important;
+  letter-spacing:6px !important;
+  font-size:16px !important;
+  line-height:1.2 !important;
+  word-break:normal !important;
+}
+
+.v97-info h1{
+  font-size:36px !important;
+  max-width:100% !important;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+}
+
+.v97-info p b{
+  font-size:30px !important;
+}
+
+.v97-info p span{
+  font-size:17px !important;
+  letter-spacing:3px !important;
+}
+
+.v97-live-pill{
+  max-width:100% !important;
+  padding:8px 16px !important;
+  font-size:19px !important;
+  letter-spacing:4px !important;
+  justify-content:center !important;
+}
+
+/* İnecek / Bagaj kutuları kesilmesin */
+.v97-mini-grid{
+  grid-template-columns:minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap:12px !important;
+  width:100% !important;
+}
+
+.v97-mini-grid button{
+  min-width:0 !important;
+  width:100% !important;
+  overflow:hidden !important;
+  padding:12px 10px !important;
+  grid-template-columns:42px minmax(0, 1fr) !important;
+  min-height:96px !important;
+}
+
+.v97-mini-grid i{
+  font-size:29px !important;
+}
+
+.v97-mini-grid b{
+  font-size:36px !important;
+  min-width:0 !important;
+}
+
+.v97-mini-grid span{
+  font-size:16px !important;
+  letter-spacing:3px !important;
+  line-height:1.15 !important;
+  white-space:normal !important;
+  word-break:normal !important;
+}
+
+/* Alt progress yazıları taşmasın */
+.v97-route-progress > div:first-child{
+  display:grid !important;
+  grid-template-columns:1fr auto 1fr !important;
+  gap:6px !important;
+  align-items:center !important;
+  font-size:14px !important;
+  letter-spacing:2px !important;
+}
+
+.v97-route-progress > div:first-child span:first-child{
+  text-align:left !important;
+}
+
+.v97-route-progress > div:first-child span:last-child{
+  text-align:right !important;
+}
+
+.v97-route-progress b{
+  font-size:14px !important;
+  letter-spacing:1px !important;
+  white-space:normal !important;
+  text-align:center !important;
+}
+
+/* Timeline kart içi dört kolon sıkışınca taşmasın */
+.v97-stop-metrics{
+  grid-template-columns:repeat(4, minmax(0, 1fr)) !important;
+}
+
+.v97-stop-metrics > div{
+  min-width:0 !important;
+}
+
+.v97-stop-metrics b{
+  font-size:22px !important;
+  white-space:normal !important;
+}
+
+.v97-stop-metrics span{
+  font-size:10px !important;
+  letter-spacing:1.5px !important;
+}
+
+/* Demo bar mobilde biraz daha ince */
+.v97-demo{
+  padding:7px 8px !important;
+  gap:6px !important;
+}
+
+.v97-demo button{
+  font-size:15px !important;
+  padding:9px 4px !important;
+}
+
+/* Çok dar ekran ekstra sıkıştırma */
+@media(max-width:380px){
+  .v97-prox-top{
+    grid-template-columns:100px minmax(0, 1fr) !important;
+    gap:12px !important;
+  }
+
+  .v97-ring-wrap,
+  .v97-ring{
+    width:96px !important;
+    height:96px !important;
+  }
+
+  .v97-ring-center b{
+    font-size:28px !important;
+  }
+
+  .v97-info h1{
+    font-size:31px !important;
+  }
+
+  .v97-info small{
+    font-size:14px !important;
+    letter-spacing:5px !important;
+  }
+
+  .v97-live-pill{
+    font-size:16px !important;
+    letter-spacing:3px !important;
+    padding:7px 12px !important;
+  }
+
+  .v97-mini-grid button{
+    grid-template-columns:34px minmax(0, 1fr) !important;
+    padding:10px 8px !important;
+  }
+
+  .v97-mini-grid b{
+    font-size:32px !important;
+  }
+
+  .v97-mini-grid span{
+    font-size:14px !important;
+    letter-spacing:2.5px !important;
+  }
+}
+
+
+/* V97E_ORIGINAL_COMPACT_STYLE
+   Kullanıcının attığı canli_durak.html tasarımındaki:
+   - Rajdhani + JetBrains Mono yazı karakteri
+   - koyu endüstriyel panel
+   - kırmızı / amber / yeşil / mavi renk paleti
+   - küçük, kibar, sade ölçüler
+   preview ekranına uygulanır.
+*/
+
+:root{
+  --bg:#0b0d10 !important;
+  --panel:#12151a !important;
+  --panel2:#181c23 !important;
+  --border:#1f2530 !important;
+  --red:#e03030 !important;
+  --red-dim:#3a1010 !important;
+  --amber:#e08820 !important;
+  --amber-dim:#2c1f08 !important;
+  --green:#1db87a !important;
+  --green-dim:#0a2418 !important;
+  --blue:#3a8bff !important;
+  --blue-dim:#0d1e38 !important;
+  --text:#d8dde8 !important;
+  --muted:#5a6478 !important;
+  --label:#8a95a8 !important;
+}
+
+*,
+*::before,
+*::after{
+  box-sizing:border-box !important;
+}
+
+html,
+body{
+  background:var(--bg) !important;
+  color:var(--text) !important;
+  font-family:'Rajdhani',system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
+  font-size:15px !important;
+  overflow-x:hidden !important;
+}
+
+/* HEADER — eski kibar ölçü */
+.v97-hdr{
+  height:auto !important;
+  min-height:64px !important;
+  padding:14px 20px !important;
+  background:var(--panel) !important;
+  border-bottom:1px solid var(--border) !important;
+}
+
+.v97-brand{
+  gap:10px !important;
+}
+
+.v97-logo{
+  width:34px !important;
+  height:34px !important;
+  border-radius:8px !important;
+  font-size:16px !important;
+  background:var(--red) !important;
+  box-shadow:0 0 12px #e0303055 !important;
+}
+
+.v97-title{
+  font-size:18px !important;
+  font-weight:700 !important;
+  letter-spacing:3px !important;
+  color:#fff !important;
+  line-height:1.05 !important;
+}
+
+.v97-sub{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:2px !important;
+  color:var(--muted) !important;
+}
+
+.v97-clock{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:22px !important;
+  font-weight:700 !important;
+  color:var(--amber) !important;
+  text-shadow:0 0 16px #e0882055 !important;
+  letter-spacing:2px !important;
+}
+
+/* ROUTE BAR — ince ve sade */
+.v97-route{
+  min-height:42px !important;
+  height:auto !important;
+  padding:10px 20px !important;
+  background:var(--panel2) !important;
+  border-bottom:1px solid var(--border) !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:12px !important;
+  flex-wrap:nowrap !important;
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:12px !important;
+  color:var(--label) !important;
+}
+
+.v97-route b{
+  color:var(--text) !important;
+  font-size:13px !important;
+  font-weight:700 !important;
+  letter-spacing:1px !important;
+  line-height:1.1 !important;
+  max-width:none !important;
+}
+
+.v97-route em{
+  margin-left:auto !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:6px !important;
+  color:var(--red) !important;
+  font-size:11px !important;
+  letter-spacing:1px !important;
+  font-weight:700 !important;
+}
+
+/* GAUGES — attığın koddaki kompakt ölçü */
+.v97-gauges{
+  display:grid !important;
+  grid-template-columns:1fr 1fr 1fr !important;
+  gap:1px !important;
+  background:var(--border) !important;
+  border-bottom:1px solid var(--border) !important;
+}
+
+.v97-gauges > div{
+  min-height:86px !important;
+  background:var(--panel) !important;
+  padding:14px 12px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:4px !important;
+}
+
+.v97-gauges small{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:2px !important;
+  color:var(--muted) !important;
+  font-weight:700 !important;
+}
+
+.v97-gauges b{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:22px !important;
+  font-weight:700 !important;
+  color:var(--text) !important;
+  line-height:1 !important;
+}
+
+.v97-gauges b.green{
+  font-size:14px !important;
+  letter-spacing:0 !important;
+  color:var(--green) !important;
+  text-shadow:0 0 10px #1db87a40 !important;
+}
+
+.v97-gauges span{
+  font-size:10px !important;
+  color:var(--muted) !important;
+  letter-spacing:1px !important;
+}
+
+.v97-occ{
+  width:80px !important;
+  height:4px !important;
+  background:var(--border) !important;
+  border-radius:2px !important;
+  margin-top:2px !important;
+}
+
+.v97-occ i{
+  background:linear-gradient(90deg,var(--green),var(--amber)) !important;
+}
+
+.v97-gender{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:10px !important;
+  color:#3a8bff !important;
+}
+
+/* Simülasyon butonları — eski koddaki sağ ince bar */
+.v97-demo{
+  position:fixed !important;
+  top:70px !important;
+  right:12px !important;
+  left:auto !important;
+  bottom:auto !important;
+  z-index:200 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:6px !important;
+  background:transparent !important;
+  border:0 !important;
+  padding:0 !important;
+  border-radius:0 !important;
+  backdrop-filter:none !important;
+}
+
+.v97-demo small{
+  display:block !important;
+  font-size:9px !important;
+  color:var(--muted) !important;
+  text-align:center !important;
+  letter-spacing:1px !important;
+}
+
+.v97-demo button{
+  min-width:76px !important;
+  max-width:92px !important;
+  flex:none !important;
+  padding:6px 12px !important;
+  background:var(--panel2) !important;
+  border:1px solid var(--border) !important;
+  border-radius:6px !important;
+  color:var(--label) !important;
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:10px !important;
+  line-height:1.1 !important;
+  font-weight:700 !important;
+}
+
+/* PROXIMITY CARD — kibar, sıkı, endüstriyel */
+.v97-shell{
+  padding:20px 20px 0 !important;
+}
+
+.v97-prox-card{
+  background:var(--panel) !important;
+  border:1px solid var(--border) !important;
+  border-radius:16px !important;
+  padding:20px !important;
+  position:relative !important;
+  overflow:hidden !important;
+  box-shadow:none !important;
+}
+
+.v97-prox-card::before{
+  content:'' !important;
+  position:absolute !important;
+  inset:0 !important;
+  width:auto !important;
+  height:auto !important;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(255,255,255,.012) 3px,
+    rgba(255,255,255,.012) 4px
+  ) !important;
+  pointer-events:none !important;
+}
+
+.v97-prox-top{
+  position:relative !important;
+  display:flex !important;
+  grid-template-columns:none !important;
+  align-items:flex-start !important;
+  gap:20px !important;
+}
+
+/* Halka ölçüsü eski kod */
+.v97-ring-wrap,
+.v97-ring{
+  width:110px !important;
+  height:110px !important;
+  flex-shrink:0 !important;
+}
+
+.v97-ring{
+  transform:rotate(-90deg) !important;
+}
+
+.v97-ring-track{
+  fill:none !important;
+  stroke:var(--red-dim) !important;
+  stroke-width:6 !important;
+}
+
+.v97-ring-fill{
+  fill:none !important;
+  stroke:var(--red) !important;
+  stroke-width:6 !important;
+  stroke-linecap:round !important;
+  filter:drop-shadow(0 0 6px var(--red)) !important;
+}
+
+.v97-ring-center b{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:24px !important;
+  font-weight:700 !important;
+  color:var(--red) !important;
+  text-shadow:0 0 14px var(--red) !important;
+  line-height:1 !important;
+}
+
+.v97-ring-center span{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:2px !important;
+  color:var(--muted) !important;
+  margin-top:2px !important;
+}
+
+/* Sağ bilgi bloğu */
+.v97-info{
+  flex:1 !important;
+  min-width:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+}
+
+.v97-info small{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:3px !important;
+  color:var(--muted) !important;
+  text-transform:uppercase !important;
+  line-height:1.2 !important;
+}
+
+.v97-info h1{
+  font-size:22px !important;
+  font-weight:700 !important;
+  color:#fff !important;
+  line-height:1.1 !important;
+  letter-spacing:.5px !important;
+  margin:0 !important;
+}
+
+.v97-info p{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  margin:0 !important;
+}
+
+.v97-info p b{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:18px !important;
+  font-weight:700 !important;
+  color:var(--amber) !important;
+}
+
+.v97-info p span{
+  display:inline !important;
+  margin:0 !important;
+  font-size:11px !important;
+  color:var(--muted) !important;
+  letter-spacing:1px !important;
+}
+
+.v97-live-pill{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:5px !important;
+  width:fit-content !important;
+  max-width:100% !important;
+  margin-top:4px !important;
+  padding:4px 10px !important;
+  border-radius:20px !important;
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:11px !important;
+  font-weight:700 !important;
+  letter-spacing:1.5px !important;
+  text-transform:uppercase !important;
+  background:var(--red-dim) !important;
+  color:var(--red) !important;
+  border:1px solid #e0303033 !important;
+}
+
+/* İnecek / bagaj kutuları — daha kibar */
+.v97-mini-grid{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:10px !important;
+  margin-top:16px !important;
+}
+
+.v97-mini-grid button{
+  min-height:70px !important;
+  background:var(--panel2) !important;
+  border:1px solid var(--border) !important;
+  border-radius:10px !important;
+  padding:12px 14px !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:12px !important;
+  color:var(--text) !important;
+}
+
+.v97-mini-grid i{
+  font-size:20px !important;
+  line-height:1 !important;
+}
+
+.v97-mini-grid b{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:18px !important;
+  font-weight:700 !important;
+  color:var(--text) !important;
+  line-height:1 !important;
+}
+
+.v97-mini-grid span{
+  font-size:10px !important;
+  color:var(--muted) !important;
+  letter-spacing:1.5px !important;
+  margin-top:2px !important;
+  line-height:1.1 !important;
+}
+
+/* Progress bar eski sadelik */
+.v97-route-progress{
+  margin-top:14px !important;
+}
+
+.v97-route-progress > div:first-child{
+  display:flex !important;
+  justify-content:space-between !important;
+  gap:8px !important;
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:0 !important;
+  color:var(--muted) !important;
+  margin-bottom:5px !important;
+}
+
+.v97-route-progress b{
+  font-size:10px !important;
+  font-weight:400 !important;
+  letter-spacing:0 !important;
+  color:var(--muted) !important;
+}
+
+.v97-progress-track{
+  height:6px !important;
+  background:var(--border) !important;
+  border-radius:3px !important;
+}
+
+.v97-progress-track i{
+  background:linear-gradient(90deg,var(--red-dim),var(--red)) !important;
+  border-radius:3px !important;
+}
+
+/* Timeline — attığın kod gibi kompakt */
+.v97-timeline-section{
+  padding:20px 0 0 !important;
+  margin-top:0 !important;
+}
+
+.v97-section-title{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:3px !important;
+  color:var(--muted) !important;
+  margin-bottom:14px !important;
+  gap:8px !important;
+}
+
+.v97-tl-item{
+  display:flex !important;
+  gap:14px !important;
+  position:relative !important;
+}
+
+.v97-spine{
+  width:20px !important;
+  flex-shrink:0 !important;
+}
+
+.v97-node{
+  width:14px !important;
+  height:14px !important;
+  border-radius:50% !important;
+  border:2px solid var(--muted) !important;
+  background:var(--bg) !important;
+  margin-top:14px !important;
+}
+
+.v97-node.live{
+  border-color:var(--red) !important;
+  background:var(--red) !important;
+  box-shadow:0 0 10px var(--red) !important;
+}
+
+.v97-node.next{
+  border-color:var(--amber) !important;
+  background:transparent !important;
+}
+
+.v97-node.passed{
+  border-color:var(--green) !important;
+  background:var(--green) !important;
+  opacity:.7 !important;
+}
+
+.v97-line{
+  width:1px !important;
+  background:var(--border) !important;
+  flex:1 !important;
+}
+
+.v97-line.live{
+  background:linear-gradient(var(--red),var(--border)) !important;
+}
+
+.v97-line.passed{
+  background:var(--green) !important;
+  opacity:.4 !important;
+}
+
+.v97-stop-card{
+  flex:1 !important;
+  background:var(--panel) !important;
+  border:1px solid var(--border) !important;
+  border-radius:10px !important;
+  padding:12px 14px !important;
+  margin-bottom:10px !important;
+}
+
+.v97-stop-card.live{
+  border-color:#e0303044 !important;
+  background:#12100e !important;
+}
+
+.v97-stop-card.next{
+  border-color:#e0882033 !important;
+}
+
+.v97-stop-head h3{
+  font-size:15px !important;
+  font-weight:700 !important;
+  color:#fff !important;
+  letter-spacing:.3px !important;
+}
+
+.v97-pill{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:9px !important;
+  font-weight:700 !important;
+  letter-spacing:1.5px !important;
+  padding:3px 8px !important;
+  border-radius:20px !important;
+}
+
+.v97-stop-metrics{
+  display:flex !important;
+  grid-template-columns:none !important;
+  gap:16px !important;
+  margin-top:8px !important;
+}
+
+.v97-stop-metrics b{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:14px !important;
+  font-weight:700 !important;
+}
+
+.v97-stop-metrics span{
+  font-size:9px !important;
+  color:var(--muted) !important;
+  letter-spacing:1px !important;
+}
+
+/* Dock eski küçük tip */
+.v97-dock{
+  background:var(--panel) !important;
+  border-top:1px solid var(--border) !important;
+  min-height:72px !important;
+  padding:8px 0 env(safe-area-inset-bottom,8px) !important;
+}
+
+.v97-dock button{
+  font-family:'Rajdhani',sans-serif !important;
+  font-size:20px !important;
+  color:var(--muted) !important;
+  gap:4px !important;
+}
+
+.v97-dock button span{
+  font-size:11px !important;
+  letter-spacing:1px !important;
+}
+
+.v97-dock button.active{
+  color:var(--red) !important;
+}
+
+/* Dar ekran ince ayar */
+@media(max-width:420px){
+  .v97-shell{
+    padding-left:20px !important;
+    padding-right:20px !important;
+  }
+
+  .v97-route{
+    overflow:hidden !important;
+  }
+
+  .v97-route b{
+    font-size:13px !important;
+    white-space:nowrap !important;
+  }
+
+  .v97-ring-wrap,
+  .v97-ring{
+    width:110px !important;
+    height:110px !important;
+  }
+
+  .v97-info h1{
+    font-size:22px !important;
+  }
+
+  .v97-stop-metrics{
+    gap:13px !important;
+  }
+}
+

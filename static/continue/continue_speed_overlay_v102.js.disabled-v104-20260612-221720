@@ -1,0 +1,194 @@
+/* V102_SPEED_OVERLAY_START */
+(function(){
+  "use strict";
+
+  if(window.__MUAVIN_V102_SPEED_OVERLAY__) return;
+  window.__MUAVIN_V102_SPEED_OVERLAY__ = true;
+
+  var STORE_KEY = "muavin.v102.speed.overlay.mode";
+
+  function q(sel, root){
+    return (root || document).querySelector(sel);
+  }
+
+  function qa(sel, root){
+    return Array.prototype.slice.call((root || document).querySelectorAll(sel));
+  }
+
+  function norm(v){
+    return String(v || "")
+      .toLocaleUpperCase("tr-TR")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function text(el){
+    return el ? String(el.textContent || "").trim() : "";
+  }
+
+  function findSpeedCard(){
+    var cells = qa(".v99-gauges .v99-gauge-cell");
+    for(var i = 0; i < cells.length; i++){
+      var label = q(".v99-gauge-label", cells[i]);
+      if(norm(text(label)) === "HIZ"){
+        return cells[i];
+      }
+    }
+    return null;
+  }
+
+  function parseSpeed(v){
+    var raw = String(v || "")
+      .replace(",", ".")
+      .replace(/km\/sa|km\/h|kmh|km|sa/gi, " ")
+      .trim();
+
+    var m = raw.match(/-?\d+(\.\d+)?/);
+    if(!m) return 0;
+
+    var n = Number(m[0]);
+    if(!Number.isFinite(n)) n = 0;
+    if(n < 0) n = 0;
+    if(n > 180) n = 180;
+    return n;
+  }
+
+  function readSpeed(){
+    var visible = q("#v99SpeedVal");
+    var hidden = q("#liveSpeedText");
+
+    var n = parseSpeed(text(visible));
+    if(!n && hidden){
+      n = parseSpeed(text(hidden));
+    }
+
+    return n;
+  }
+
+  function savedMode(){
+    try{
+      return localStorage.getItem(STORE_KEY) === "analog" ? "analog" : "digital";
+    }catch(_){
+      return "digital";
+    }
+  }
+
+  function saveMode(mode){
+    try{
+      localStorage.setItem(STORE_KEY, mode);
+    }catch(_){}
+  }
+
+  function ensureOverlay(card){
+    if(!card) return;
+
+    card.classList.add("v102-speed-card");
+
+    if(!q(".v102-speed-overlay", card)){
+      var overlay = document.createElement("div");
+      overlay.className = "v102-speed-overlay";
+      overlay.setAttribute("aria-hidden", "true");
+      overlay.innerHTML = ''
+        + '<div class="v102-speed-arc"></div>'
+        + '<div class="v102-speed-needle"></div>'
+        + '<div class="v102-speed-dot"></div>'
+        + '<div class="v102-speed-bar"><div class="v102-speed-fill"></div></div>';
+      card.appendChild(overlay);
+    }
+
+    if(!card.dataset.v102ModeReady){
+      card.dataset.v102ModeReady = "1";
+      if(savedMode() === "analog"){
+        card.classList.add("v102-speed-analog-on");
+      }
+    }
+
+    if(!card.dataset.v102Bound){
+      card.dataset.v102Bound = "1";
+
+      card.addEventListener("click", function(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        card.classList.toggle("v102-speed-analog-on");
+        saveMode(card.classList.contains("v102-speed-analog-on") ? "analog" : "digital");
+        paint();
+      }, true);
+    }
+  }
+
+  function paint(){
+    var card = findSpeedCard();
+    if(!card) return;
+
+    ensureOverlay(card);
+
+    var speed = readSpeed();
+    var capped = Math.max(0, Math.min(speed, 140));
+    var pct = capped / 140;
+    var deg = -115 + (pct * 230);
+
+    card.style.setProperty("--v102-speed-deg", deg.toFixed(1) + "deg");
+
+    var fill = q(".v102-speed-fill", card);
+    if(fill){
+      fill.style.width = (pct * 100).toFixed(1) + "%";
+    }
+
+    card.classList.toggle("v102-low", speed < 50);
+    card.classList.toggle("v102-high", speed >= 95);
+  }
+
+  function boot(){
+    var card = findSpeedCard();
+    if(card){
+      ensureOverlay(card);
+      paint();
+    }
+
+    try{
+      var a = q("#v99SpeedVal");
+      if(a && !a.dataset.v102Observed){
+        a.dataset.v102Observed = "1";
+        new MutationObserver(paint).observe(a, {
+          childList:true,
+          subtree:true,
+          characterData:true
+        });
+      }
+
+      var b = q("#liveSpeedText");
+      if(b && !b.dataset.v102Observed){
+        b.dataset.v102Observed = "1";
+        new MutationObserver(paint).observe(b, {
+          childList:true,
+          subtree:true,
+          characterData:true
+        });
+      }
+    }catch(_){}
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
+
+  window.addEventListener("load", boot);
+  document.addEventListener("continueEtaUpdated", paint);
+
+  var tries = 80;
+  var timer = setInterval(function(){
+    boot();
+    paint();
+    tries--;
+    if(tries <= 0) clearInterval(timer);
+  }, 500);
+
+  window.MuavinV102SpeedOverlay = {
+    boot: boot,
+    paint: paint
+  };
+})();
+/* V102_SPEED_OVERLAY_END */

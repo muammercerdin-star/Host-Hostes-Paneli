@@ -5,340 +5,377 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Canlı Durak Akışı</title>
 
-
   <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip.css') }}?v=refresh-v49">
+  <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip_v99_clean.css') }}?v=v99-clean-{{ trip['id'] }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_speed_final_v105.css') }}?v=v105-{{ trip['id'] }}">
 </head>
 
-<body>
-  <main class="shell">
+<body class="v99-live-body">
 
-    <header class="top-brand">
-      <div class="brand-left">
-        <div class="brand-logo">🎙️</div>
-        <div class="brand-text">
-          <h1 class="brand-title">MUAVİN</h1>
-          <div class="brand-sub">ASİSTANI</div>
-        </div>
-      </div>
+{% set occ_total = live_summary.total_seats or 1 %}
+{% set occ_count = live_summary.passenger_count or 0 %}
+{% set occ_pct = ((occ_count * 100) / occ_total) | round(0) %}
+{% set current_stop_name = (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or "Durak seçilmedi" %}
+{% set current_eta = (live_runtime.eta_main if live_runtime and live_runtime.eta_main else live_current.eta) or "-" %}
+{% set current_distance = (live_runtime.gps_km if live_runtime and live_runtime.gps_km else live_current.distance) or "-" %}
 
-      <a class="brand-action" href="{{ url_for('seats_page') }}?drive=1" aria-label="Sesli komut">
-        📣
-      </a>
-    </header>
-
-    <section class="hero">
-      <img class="hero-bus-img" src="{{ url_for('static', filename='img/live-hero-bus.png', v='1') }}" alt="Canlı durak otobüs görseli">
-      <span class="hero-bus-shade"></span>
-
-      <h1 class="hero-title">Canlı Durak Akışı</h1>
-
-      <div class="hero-meta">
-        <div class="hero-meta-line">
-          <span class="icon">⌘</span>
-          <span>{{ trip["route"] or "Denizli–İstanbul (Vardön)" }}</span>
-        </div>
-        <div class="hero-meta-line">
-          <span class="icon">🚌</span>
-          <span>Araç {{ trip["plate"] or "45KH999" }}</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="stats-row">
-      <div class="stat-box">
-        <small>Saat</small>
-        <b id="liveClockText">--:--</b>
-      </div>
-
-      <div class="stat-box">
-        <small>Hız</small>
-        <b id="liveSpeedText">— km/sa</b>
-      </div>
-
-      <div class="stat-box occupancy-box">
-        <small>Doluluk</small>
-        <b>{{ live_summary.passenger_count }} / {{ live_summary.total_seats }}</b>
-        <span class="live-gender-mini">
-          <span class="male">Bay {{ live_summary.male_count or 0 }}</span>
-          <span class="female">Bayan {{ live_summary.female_count or 0 }}</span>
-          {% if live_summary.unknown_gender_count %}
-            <span class="unknown">? {{ live_summary.unknown_gender_count }}</span>
-          {% endif %}
-        </span>
-      </div>
-
-      <div class="stat-box status">
-        <small>Durum</small>
-        <b id="liveTopStatusText">Planında</b>
-      </div>
-    </section>
-
-    <section class="timeline">
-      <div class="timeline-line"></div>
-
-      <article class="journey-card">
-        <div class="node live"></div>
-
-        <div class="card live live-summary-trigger" id="liveCurrentCard" role="button" tabindex="0" aria-label="Canlı durak özetini aç">
-          <div class="card-head">
-            <div>
-              <span class="card-label">Şu anki durak</span>
-              <h2 class="card-title" id="liveCurrentStopName">{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or "Durak seçilmedi" }}</h2>
-            </div>
-
-            <span class="status-pill live">{{ live_current.status or "Canlı" }}</span>
-          </div>
-
-          <div class="metric-grid">
-            <div class="metric">
-              <small>Tahmini<br>varış</small>
-              <b id="liveEtaValue">{{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else live_current.eta) or "-" }}</b>
-            </div>
-
-            <div class="metric">
-              <small>Kalan<br>mesafe</small>
-              <b id="liveDistanceValue" class="stop-distance-value" data-stop-name="{{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or '' }}">{{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else live_current.distance) or "-" }}</b>
-            </div>
-
-            <button class="metric metric-action" type="button" id="liveOffloadMetric" data-kind="offload" aria-label="Bu durakta inecek koltukları göster">
-              <small>İnecek</small>
-              <b id="liveOffloadCount">{{ live_current.off_count or 0 }} yolcu</b>
-              <span class="metric-hint">Liste</span>
-            </button>
-
-            <button class="metric metric-action" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
-              <small>Bagaj</small>
-              <b id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</b>
-              <span id="liveEmanetCount" hidden></span>
-              <span class="metric-hint">Detay</span>
-            </button>
-          </div>
-        </div>
-      </article>
-
-      {% for stop in live_stops[1:] %}
-      <article class="journey-card">
-        <div class="node {{ stop.kind }}"></div>
-
-        <div class="card regular {% if stop.kind == "next" %}next-card{% endif %}">
-          <div class="card-head">
-            <div>
-              <h3 class="card-title">{{ stop.name }}</h3>
-            </div>
-
-            {% if stop.kind == "next" %}
-              <span class="status-pill next">{{ stop.status }}</span>
-            {% elif stop.kind == "upcoming" %}
-              <span class="status-pill upcoming">{{ stop.status }}</span>
-            {% elif stop.kind == "passed" %}
-              <span class="status-pill passed">{{ stop.status }}</span>
-            {% else %}
-              <span class="status-pill live">{{ stop.status }}</span>
-            {% endif %}
-          </div>
-
-          <div class="metric-grid">
-            <div class="metric">
-              <small>Tahmini<br>varış</small>
-              <b>{{ stop.eta }}</b>
-            </div>
-
-            <div class="metric">
-              <small>Kalan<br>mesafe</small>
-              <b class="stop-distance-value" data-stop-name="{{ stop.name }}">{{ stop.distance }}</b>
-            </div>
-
-            <div class="metric">
-              <small>İnecek</small>
-              <b>{{ stop.off_count }}</b>
-            </div>
-
-            <div class="metric">
-              <small>Bagaj</small>
-              <b>{{ stop.bagaj_label }}</b>
-            </div>
-          </div>
-        </div>
-      </article>
-      {% endfor %}
-    </section>
-
-
-    <div class="live-sheet-overlay" id="liveStopSheetOverlay"></div>
-
-    <section class="live-stop-sheet" id="liveStopSheet" aria-hidden="true">
-      <div class="sheet-grip"></div>
-
-      <div class="sheet-head">
-        <div>
-          <div class="sheet-kicker" id="liveStopSheetKicker">Canlı durak</div>
-          <h2 class="sheet-title" id="liveStopSheetTitle">Durak detayı</h2>
-          <p class="sheet-sub" id="liveStopSheetSub">Yükleniyor...</p>
-        </div>
-
-        <button class="sheet-close" type="button" id="liveStopSheetClose" aria-label="Kapat">×</button>
-      </div>
-
-      <div class="sheet-body" id="liveStopSheetBody">
-        <div class="sheet-empty">Yükleniyor...</div>
-      </div>
-    </section>
-
-    <nav class="dock">
-      <a class="dock-item" id="continueSeatMapBtn" href="{{ url_for('seats_page') }}">
-        <i>💺</i>
-        <span>Koltuklar</span>
-      </a>
-
-      <a class="dock-item" href="{{ url_for('passenger_control') }}">
-        <i>👥</i>
-        <span>Yolcular</span>
-      </a>
-
-      <a class="dock-item" href="{{ url_for('live_map_page') }}">
-        <i>🗺️</i>
-        <span>Harita</span>
-      </a>
-
-      <button class="dock-item" type="button">
-        <i>📣</i>
-        <span>Anons</span>
-      </button>
-    </nav>
-
-    <section class="danger-zone">
-      <form id="endTripForm" method="post" action="{{ url_for('end_trip') }}">
-        {% if csrf_token is defined %}
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        {% endif %}
-        <button class="danger-btn" type="submit">⛔ Seferi Bitir</button>
-      </form>
-    </section>
-
-    <a class="bottom-home" href="/">← Ana ekrana dön</a>
-  </main>
-
-  <div class="end-trip-overlay" id="endTripOverlay" aria-hidden="true">
-    <div class="end-trip-box" role="dialog" aria-modal="true" aria-labelledby="endTripTitle">
-      <div class="end-trip-top">
-        <div class="end-trip-mark">⛔</div>
-        <div>
-          <h2 class="end-trip-title" id="endTripTitle">Seferi bitirelim mi?</h2>
-          <p class="end-trip-small">Aktif sefer sonlandırılacak.</p>
-        </div>
-      </div>
-
-      <div class="end-trip-content">
-        <p class="end-trip-text">
-          Sefer tamamlandıysa işlemi bitirebilirsin. Emin değilsen iptal edip ekrana dönebilirsin.
-        </p>
-        <div class="end-trip-note">
-          Bitirilen sefer aktif ekrandan kalkar, raporlardan görüntülenir.
-        </div>
-      </div>
-
-      <div class="end-trip-actions">
-        <button type="button" class="end-trip-btn end-trip-cancel" id="endTripCancel">İptal</button>
-        <button type="button" class="end-trip-btn end-trip-ok" id="endTripOk">Seferi Bitir</button>
-      </div>
+<header class="v99-hdr">
+  <div class="v99-hdr-brand">
+    <div class="v99-hdr-icon">🎙️</div>
+    <div>
+      <div class="v99-hdr-title">MUAVİN</div>
+      <div class="v99-hdr-sub">ASİSTAN V99</div>
     </div>
   </div>
 
-  <script>
-    (function(){
-      const form = document.getElementById("endTripForm");
-      const overlay = document.getElementById("endTripOverlay");
-      const cancel = document.getElementById("endTripCancel");
-      const ok = document.getElementById("endTripOk");
+  <div class="v99-hdr-clock" id="liveClockText">--:--</div>
+</header>
 
-      if(!form || !overlay || !cancel || !ok) return;
+<div class="v99-route-bar">
+  <span class="v99-route-name">
+    {{ (trip["route"] or "Denizli – İstanbul") | replace(" – ", " → ") | replace("–", " → ") | replace("-", " → ") }}
+  </span>
+  <span class="v99-route-dot">·</span>
+  <span>{{ trip["plate"] or "45KH999" }}</span>
 
-      let confirmed = false;
+  <div class="v99-live-badge">
+    <div class="v99-live-dot"></div>
+    CANLI
+  </div>
+</div>
 
-      function openModal(){
-        overlay.classList.add("show");
-        overlay.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
-      }
+<div class="v99-gauges">
+  <div class="v99-gauge-cell">
+    <div class="v99-gauge-label">HIZ</div>
+    <div class="v99-gauge-val amber" id="v99SpeedVal">0</div>
+    <div class="v99-gauge-unit">km/sa</div>
+    <span class="v99-core-hidden" id="liveSpeedText">— km/sa</span>
+  </div>
 
-      function closeModal(){
-        overlay.classList.remove("show");
-        overlay.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-      }
+  <div class="v99-gauge-cell">
+    <div class="v99-gauge-label">DOLULUK</div>
+    <div class="v99-gauge-val">{{ live_summary.passenger_count }} / {{ live_summary.total_seats }}</div>
 
-      form.addEventListener("submit", function(e){
-        if(confirmed) return;
-        e.preventDefault();
-        openModal();
-      });
+    <div class="v99-occ-bar-track">
+      <div class="v99-occ-bar-fill" style="width:{{ occ_pct }}%"></div>
+    </div>
 
-      cancel.addEventListener("click", closeModal);
+    <div class="v99-occ-genders">
+      <span class="g-m">♂ {{ live_summary.male_count or 0 }}</span>
+      <span class="g-f">♀ {{ live_summary.female_count or 0 }}</span>
+      {% if live_summary.unknown_gender_count %}
+        <span class="g-u">? {{ live_summary.unknown_gender_count }}</span>
+      {% endif %}
+    </div>
+  </div>
 
-      overlay.addEventListener("click", function(e){
-        if(e.target === overlay) closeModal();
-      });
+  <div class="v99-gauge-cell">
+    <div class="v99-gauge-label">DURUM</div>
+    <div class="v99-gauge-val green v99-status-val" id="liveTopStatusText">Planında</div>
+    <div class="v99-gauge-unit" id="v99StatusSub">canlı takip</div>
+  </div>
+</div>
 
-      document.addEventListener("keydown", function(e){
-        if(e.key === "Escape" && overlay.classList.contains("show")){
-          closeModal();
+<main class="v99-main">
+
+  <section class="v99-prox-section">
+    <div class="v99-prox-card live-summary-trigger" id="liveCurrentCard" role="button" tabindex="0" aria-label="Canlı durak özetini aç">
+
+      <div class="v99-prox-top">
+        <div class="v99-ring-wrap">
+          <svg class="v99-ring-svg" viewBox="0 0 110 110" aria-hidden="true">
+            <circle class="v99-ring-track" cx="55" cy="55" r="44"></circle>
+            <circle class="v99-ring-fill" id="ringFill" cx="55" cy="55" r="44"
+              stroke-dasharray="276.46"
+              stroke-dashoffset="276.46"></circle>
+          </svg>
+
+          <div class="v99-ring-center">
+            <div class="v99-ring-km" id="ringKm">—</div>
+            <div class="v99-ring-km-label">KM</div>
+          </div>
+        </div>
+
+        <div class="v99-prox-info">
+          <div class="v99-prox-kicker">ŞU ANKİ DURAK</div>
+
+          <div class="v99-prox-stop-name" id="liveCurrentStopName">{{ current_stop_name }}</div>
+
+          <div class="v99-prox-eta-row">
+            <span class="v99-prox-eta-val" id="liveEtaValue">{{ current_eta }}</span>
+            <span class="v99-prox-eta-label">TAHMİNİ VARIŞ</span>
+          </div>
+
+          <div class="v99-status-pill">
+            <div class="v99-live-dot"></div>
+            CANLI TAKİP
+          </div>
+
+          <b id="liveDistanceValue"
+             class="v99-core-hidden stop-distance-value"
+             data-stop-name="{{ current_stop_name }}">{{ current_distance }}</b>
+        </div>
+      </div>
+
+      <div class="v99-prox-metrics">
+        <button class="v99-pm-cell" type="button" id="liveOffloadMetric" data-kind="offload" aria-label="Bu durakta inecek koltukları göster">
+          <div class="v99-pm-icon">🧍</div>
+          <div class="v99-pm-data">
+            <div class="v99-pm-val" id="liveOffloadCount">{{ live_current.off_count or 0 }}</div>
+            <div class="v99-pm-lbl">İNECEK YOLCU</div>
+          </div>
+        </button>
+
+        <button class="v99-pm-cell" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
+          <div class="v99-pm-icon">🧳</div>
+          <div class="v99-pm-data">
+            <div class="v99-pm-val" id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</div>
+            <span id="liveEmanetCount" hidden></span>
+            <div class="v99-pm-lbl">BAGAJ</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="v99-dist-track-wrap">
+        <div class="v99-dist-labels">
+          <span>{{ stops[0] if stops else "DENİZLİ" }}</span>
+          <span id="distPct">%0 tamamlandı</span>
+          <span>{{ stops[-1] if stops else "İSTANBUL" }}</span>
+        </div>
+
+        <div class="v99-dist-track">
+          <div class="v99-dist-fill" id="routeBar" style="width:0%"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="v99-timeline-section">
+    <div class="v99-section-label">GÜZERGAH</div>
+
+    <div class="v99-tl" id="tlContainer">
+      {% for stop in live_stops %}
+      <div class="v99-tl-item">
+        <div class="v99-tl-spine">
+          <div class="v99-tl-node {{ stop.kind }}"></div>
+          {% if not loop.last %}
+            <div class="v99-tl-line {{ stop.kind }}"></div>
+          {% endif %}
+        </div>
+
+        <div class="v99-tl-card {% if stop.kind == "live" %}live-card{% elif stop.kind == "next" %}next-card{% elif stop.kind == "passed" %}passed-card{% endif %}">
+          <div class="v99-tl-card-head">
+            <div class="v99-tl-stop-name {% if stop.kind == "passed" %}muted{% endif %}">{{ stop.name }}</div>
+
+            {% if stop.kind == "live" %}
+              <div class="v99-pill live">● CANLI</div>
+            {% elif stop.kind == "next" %}
+              <div class="v99-pill next">⟶ SONRAKİ</div>
+            {% elif stop.kind == "passed" %}
+              <div class="v99-pill passed">✓ GEÇİLDİ</div>
+            {% else %}
+              <div class="v99-pill upcoming">{{ stop.status or stop.eta }}</div>
+            {% endif %}
+          </div>
+
+          <div class="v99-tl-metrics">
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">{{ stop.eta }}</div>
+              <div class="v99-tl-m-lbl">VARIŞ</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val stop-distance-value" data-stop-name="{{ stop.name }}">{{ stop.distance }}</div>
+              <div class="v99-tl-m-lbl">MESAFE</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">{{ stop.off_count }}</div>
+              <div class="v99-tl-m-lbl">İNECEK</div>
+            </div>
+
+            <div class="v99-tl-metric">
+              <div class="v99-tl-m-val">{{ stop.bagaj_label }}</div>
+              <div class="v99-tl-m-lbl">BAGAJ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="v99-end-wrap danger-zone">
+    <form id="endTripForm" method="post" action="{{ url_for('end_trip') }}">
+      {% if csrf_token is defined %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      {% endif %}
+      <button class="v99-end-btn danger-btn" type="submit">⛔ &nbsp;SEFERİ BİTİR</button>
+    </form>
+  </section>
+
+</main>
+
+<div class="live-sheet-overlay" id="liveStopSheetOverlay"></div>
+
+<section class="live-stop-sheet" id="liveStopSheet" aria-hidden="true">
+  <div class="sheet-grip"></div>
+
+  <div class="sheet-head">
+    <div>
+      <div class="sheet-kicker" id="liveStopSheetKicker">Canlı durak</div>
+      <h2 class="sheet-title" id="liveStopSheetTitle">Durak detayı</h2>
+      <p class="sheet-sub" id="liveStopSheetSub">Yükleniyor...</p>
+    </div>
+
+    <button class="sheet-close" type="button" id="liveStopSheetClose" aria-label="Kapat">×</button>
+  </div>
+
+  <div class="sheet-body" id="liveStopSheetBody">
+    <div class="sheet-empty">Yükleniyor...</div>
+  </div>
+</section>
+
+<nav class="v99-dock dock">
+  <a class="v99-dock-btn active dock-item" href="{{ url_for('continue_trip') }}">
+    <i>🚌</i><span>CANLI</span>
+  </a>
+
+  <a class="v99-dock-btn dock-item" id="continueSeatMapBtn" href="{{ url_for('seats_page') }}">
+    <i>💺</i><span>KOLTUK</span>
+  </a>
+
+  <a class="v99-dock-btn dock-item" href="{{ url_for('passenger_control') }}">
+    <i>👥</i><span>YOLCU</span>
+  </a>
+
+  <a class="v99-dock-btn dock-item" href="{{ url_for('live_map_page') }}">
+    <i>🗺️</i><span>HARİTA</span>
+  </a>
+
+  <button class="v99-dock-btn dock-item" type="button">
+    <i>📣</i><span>ANONS</span>
+  </button>
+</nav>
+
+<div class="end-trip-overlay" id="endTripOverlay" aria-hidden="true">
+  <div class="end-trip-box" role="dialog" aria-modal="true" aria-labelledby="endTripTitle">
+    <div class="end-trip-top">
+      <div class="end-trip-mark">⛔</div>
+      <div>
+        <h2 class="end-trip-title" id="endTripTitle">Seferi bitirelim mi?</h2>
+        <p class="end-trip-small">Aktif sefer sonlandırılacak.</p>
+      </div>
+    </div>
+
+    <div class="end-trip-content">
+      <p class="end-trip-text">
+        Sefer tamamlandıysa işlemi bitirebilirsin. Emin değilsen iptal edip ekrana dönebilirsin.
+      </p>
+      <div class="end-trip-note">
+        Bitirilen sefer aktif ekrandan kalkar, raporlardan görüntülenir.
+      </div>
+    </div>
+
+    <div class="end-trip-actions">
+      <button type="button" class="end-trip-btn end-trip-cancel" id="endTripCancel">İptal</button>
+      <button type="button" class="end-trip-btn end-trip-ok" id="endTripOk">Seferi Bitir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const form = document.getElementById("endTripForm");
+  const overlay = document.getElementById("endTripOverlay");
+  const cancel = document.getElementById("endTripCancel");
+  const ok = document.getElementById("endTripOk");
+
+  if(!form || !overlay || !cancel || !ok) return;
+
+  let confirmed = false;
+
+  function openModal(){
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal(){
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  form.addEventListener("submit", function(e){
+    if(confirmed) return;
+    e.preventDefault();
+    openModal();
+  });
+
+  cancel.addEventListener("click", closeModal);
+
+  overlay.addEventListener("click", function(e){
+    if(e.target === overlay) closeModal();
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && overlay.classList.contains("show")){
+      closeModal();
+    }
+  });
+
+  function clearTripLocalMemory(){
+    try{
+      const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
+
+      const exactKeys = [
+        "liveStop:" + tripKey,
+        "passedStops:" + tripKey,
+        "boardsMap:" + tripKey,
+        "standingTotals:" + tripKey,
+        "standingItems:" + tripKey,
+        "continueTripStop:" + tripKey,
+        "continueTripStop:last",
+        "stopFlowSummary:" + tripKey,
+        "stopFlowLiveEvents:" + tripKey
+      ];
+
+      exactKeys.forEach(k => localStorage.removeItem(k));
+
+      Object.keys(localStorage).forEach(k => {
+        if(
+          k.includes(tripKey) &&
+          (
+            k.startsWith("liveStop:") ||
+            k.startsWith("passedStops:") ||
+            k.startsWith("boardsMap:") ||
+            k.startsWith("standingTotals:") ||
+            k.startsWith("standingItems:") ||
+            k.startsWith("continueTripStop:") ||
+            k.startsWith("stopFlowSummary:") ||
+            k.startsWith("stopFlowLiveEvents:")
+          )
+        ){
+          localStorage.removeItem(k);
         }
       });
+    }catch(_){}
+  }
 
-
-      function clearTripLocalMemory(){
-        try{
-          const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
-
-          const exactKeys = [
-            "liveStop:" + tripKey,
-            "passedStops:" + tripKey,
-            "boardsMap:" + tripKey,
-            "standingTotals:" + tripKey,
-            "standingItems:" + tripKey,
-            "continueTripStop:" + tripKey,
-            "continueTripStop:last",
-            "stopFlowSummary:" + tripKey,
-            "stopFlowLiveEvents:" + tripKey
-          ];
-
-          exactKeys.forEach(k => localStorage.removeItem(k));
-
-          Object.keys(localStorage).forEach(k => {
-            if(
-              k.includes(tripKey) &&
-              (
-                k.startsWith("liveStop:") ||
-                k.startsWith("passedStops:") ||
-                k.startsWith("boardsMap:") ||
-                k.startsWith("standingTotals:") ||
-                k.startsWith("standingItems:") ||
-                k.startsWith("continueTripStop:") ||
-                k.startsWith("stopFlowSummary:") ||
-                k.startsWith("stopFlowLiveEvents:")
-              )
-            ){
-              localStorage.removeItem(k);
-            }
-          });
-        }catch(_){}
-      }
-
-
-      ok.addEventListener("click", function(){
-        confirmed = true;
-        clearTripLocalMemory();
-        closeModal();
-        form.submit();
-      });
-    })();
-  </script>
-
+  ok.addEventListener("click", function(){
+    confirmed = true;
+    clearTripLocalMemory();
+    closeModal();
+    form.submit();
+  });
+})();
+</script>
 
 <!-- CONTINUE_TTS_BRIDGE_START -->
 <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
 <!-- CONTINUE_TTS_BRIDGE_END -->
-
 
 <div class="bag-photo-viewer" id="bagPhotoViewer" aria-hidden="true">
   <div class="bag-viewer-top">
@@ -366,33 +403,35 @@
   </div>
 </div>
 
+<script id="continue-boot-data">
+window.CONTINUE_BOOT = {
+  tripId: {{ trip['id'] | tojson | safe }},
+  tripDate: {{ (trip['date'] or '') | tojson | safe }},
+  tripKey: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
 
-  <script id="continue-boot-data">
-  window.CONTINUE_BOOT = {
-    tripId: {{ trip['id'] | tojson | safe }},
-    tripDate: {{ (trip['date'] or '') | tojson | safe }},
-    tripKey: {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }},
+  runtimeGpsKm: {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }},
+  runtimeSpeed: {{ (live_runtime.speed if live_runtime else 0) | tojson | safe }},
+  runtimeStop: {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }},
+  runtimeEta: {{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else "") | tojson | safe }},
 
-    runtimeGpsKm: {{ (live_runtime.gps_km if live_runtime and live_runtime.gps_km else "") | tojson | safe }},
-    runtimeSpeed: {{ (live_runtime.speed if live_runtime else 0) | tojson | safe }},
-    runtimeStop: {{ (live_runtime.live_stop if live_runtime and live_runtime.live_stop else "") | tojson | safe }},
-    runtimeEta: {{ (live_runtime.eta_main if live_runtime and live_runtime.eta_main else "") | tojson | safe }},
+  routeStops: {{ stops | tojson | safe }},
+  csrfToken: {{ (csrf_token if csrf_token is defined else "") | tojson | safe }},
 
-    routeStops: {{ stops | tojson | safe }},
-    csrfToken: {{ (csrf_token if csrf_token is defined else "") | tojson | safe }},
+  routeCoords: {{ continue_route_coords | default([]) | tojson | safe }},
+  scheduleItems: {{ continue_schedule_items | default([]) | tojson | safe }},
 
-    routeCoords: {{ continue_route_coords | default([]) | tojson | safe }},
-    scheduleItems: {{ continue_schedule_items | default([]) | tojson | safe }},
+  liveBagajCount: {{ (live_current.bagaj_count if live_current and live_current.bagaj_count is defined else 0) | tojson | safe }},
+  liveEmanetCount: {{ (live_current.emanet_count if live_current and live_current.emanet_count is defined else (live_current.consignment_count if live_current and live_current.consignment_count is defined else 0)) | tojson | safe }}
+};
+</script>
 
-    liveBagajCount: {{ (live_current.bagaj_count if live_current and live_current.bagaj_count is defined else 0) | tojson | safe }},
-    liveEmanetCount: {{ (live_current.emanet_count if live_current and live_current.emanet_count is defined else (live_current.consignment_count if live_current and live_current.consignment_count is defined else 0)) | tojson | safe }}
-  };
-  </script>
-  <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=live-stop-lock-v82"></script>
-  <script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
-  <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
-  <script src="{{ url_for('static', filename='continue/continue_trip_ui.js') }}?v=js-safe-split-1"></script>
-  <script src="{{ url_for('static', filename='continue/continue_refresh_button_v49.js') }}?v=refresh-v49"></script>
+<script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=live-stop-lock-v82"></script>
+<script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
+<script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
+<script src="{{ url_for('static', filename='continue/continue_trip_ui.js') }}?v=js-safe-split-1"></script>
+<script src="{{ url_for('static', filename='continue/continue_refresh_button_v49.js') }}?v=refresh-v49"></script>
 <script src="{{ url_for('static', filename='continue/continue_native_lock_alarm_v85.js') }}?v=native-lock-alarm-v87"></script>
+<script src="{{ url_for('static', filename='continue/continue_trip_v99_clean.js') }}?v=v105-final-{{ trip['id'] }}"></script>
+<script src="{{ url_for('static', filename='continue/continue_speed_final_v105.js') }}?v=v105-{{ trip['id'] }}"></script>
 </body>
 </html>

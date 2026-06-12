@@ -1,0 +1,1 @@
+{"ok":true,"state":{"eta_main":"401 dk erken","eta_sub":"Karde\u015fler pide salonu \u00b7 plan 20:55 \u00b7 ETA 14:13 \u00b7 4.7 km \u00b7 70 km/h \u00b7 GPS/km hesab\u0131","gps_km":"4.553244402186148","live_stop":"Ortahan","speed":0,"trip_id":314,"updated_at":"2026-06-12 14:09:41"}}

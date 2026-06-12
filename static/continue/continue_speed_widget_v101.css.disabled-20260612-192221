@@ -1,0 +1,219 @@
+/* V101_SPEED_WIDGET_START */
+.v101-speed-card{
+  position:relative !important;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  overflow:hidden;
+}
+
+.v101-speed-card .v99-gauge-label{
+  position:relative;
+  z-index:2;
+}
+
+.v101-speed-card .v99-gauge-val,
+.v101-speed-card .v99-gauge-unit{
+  position:relative;
+  z-index:2;
+}
+
+.v101-speed-card .v99-gauge-val{
+  transition:.18s ease;
+}
+
+.v101-speed-card .v101-speed-bar{
+  width:100%;
+  max-width:92px;
+  margin-top:2px;
+  position:relative;
+  z-index:2;
+}
+
+.v101-speed-card .v101-speed-bar-track{
+  width:100%;
+  height:5px;
+  border-radius:999px;
+  background:rgba(255,255,255,.10);
+  overflow:hidden;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.35);
+}
+
+.v101-speed-card .v101-speed-bar-fill{
+  width:0%;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#1db87a 0%, #e6a23c 58%, #ff6b57 100%);
+  box-shadow:0 0 12px rgba(230,162,60,.22);
+  transition:width .22s ease;
+}
+
+.v101-speed-card .v101-speed-bar-scale{
+  margin-top:3px;
+  display:flex;
+  justify-content:space-between;
+  font-size:8px;
+  letter-spacing:.7px;
+  color:rgba(255,255,255,.38);
+  font-family:'JetBrains Mono',monospace;
+}
+
+.v101-speed-card .v101-speed-hint{
+  margin-top:2px;
+  font-size:8px;
+  color:rgba(255,255,255,.32);
+  letter-spacing:.8px;
+  line-height:1;
+  position:relative;
+  z-index:2;
+}
+
+.v101-speed-card .v101-analog{
+  display:none;
+  width:100%;
+  height:70px;
+  position:relative;
+  margin-top:2px;
+  z-index:2;
+  pointer-events:none;
+}
+
+.v101-speed-card .v101-analog-face{
+  width:100%;
+  height:100%;
+  position:relative;
+}
+
+.v101-speed-card .v101-arc{
+  position:absolute;
+  left:50%;
+  top:4px;
+  width:78px;
+  height:39px;
+  transform:translateX(-50%);
+  border:4px solid rgba(255,255,255,.10);
+  border-bottom:none;
+  border-radius:78px 78px 0 0;
+  box-sizing:border-box;
+}
+
+.v101-speed-card .v101-arc-glow{
+  position:absolute;
+  left:50%;
+  top:4px;
+  width:78px;
+  height:39px;
+  transform:translateX(-50%);
+  border:4px solid transparent;
+  border-bottom:none;
+  border-radius:78px 78px 0 0;
+  box-sizing:border-box;
+  border-top-color:rgba(29,184,122,.85);
+  border-left-color:rgba(29,184,122,.85);
+  border-right-color:rgba(230,162,60,.85);
+  filter:drop-shadow(0 0 8px rgba(29,184,122,.20));
+  opacity:.92;
+}
+
+.v101-speed-card .v101-needle-wrap{
+  position:absolute;
+  left:50%;
+  top:43px;
+  width:0;
+  height:0;
+  transform:translateX(-50%) rotate(-88deg);
+  transform-origin:center center;
+  transition:transform .22s ease;
+}
+
+.v101-speed-card .v101-needle{
+  position:absolute;
+  left:-2px;
+  top:-2px;
+  width:3px;
+  height:29px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#ffe3a0 0%, #f0a33f 100%);
+  transform:translateY(-27px);
+  box-shadow:0 0 10px rgba(240,163,63,.35);
+}
+
+.v101-speed-card .v101-center-dot{
+  position:absolute;
+  left:50%;
+  top:39px;
+  width:12px;
+  height:12px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:#f5d49a;
+  box-shadow:0 0 10px rgba(245,212,154,.28);
+}
+
+.v101-speed-card .v101-analog-number{
+  position:absolute;
+  left:50%;
+  top:24px;
+  transform:translateX(-50%);
+  font-family:'JetBrains Mono',monospace;
+  font-size:18px;
+  font-weight:700;
+  color:#f0b548;
+  line-height:1;
+  text-shadow:0 0 10px rgba(240,181,72,.20);
+}
+
+.v101-speed-card .v101-analog-unit{
+  position:absolute;
+  left:50%;
+  top:46px;
+  transform:translateX(-50%);
+  font-size:8px;
+  color:rgba(255,255,255,.46);
+  letter-spacing:1.2px;
+  font-family:'JetBrains Mono',monospace;
+}
+
+.v101-speed-card .v101-scale-0,
+.v101-speed-card .v101-scale-70,
+.v101-speed-card .v101-scale-140{
+  position:absolute;
+  top:10px;
+  font-size:9px;
+  color:rgba(255,255,255,.50);
+  font-family:'JetBrains Mono',monospace;
+  line-height:1;
+}
+
+.v101-speed-card .v101-scale-0{ left:18px; }
+.v101-speed-card .v101-scale-70{ left:50%; transform:translateX(-50%); }
+.v101-speed-card .v101-scale-140{ right:18px; }
+
+.v101-speed-card.v101-mode-analog{
+  padding-top:10px !important;
+  padding-bottom:10px !important;
+  gap:1px !important;
+}
+
+.v101-speed-card.v101-mode-analog .v99-gauge-val,
+.v101-speed-card.v101-mode-analog .v99-gauge-unit,
+.v101-speed-card.v101-mode-analog .v101-speed-bar{
+  display:none !important;
+}
+
+.v101-speed-card.v101-mode-analog .v101-analog{
+  display:block !important;
+}
+
+.v101-speed-card.v101-mode-analog .v101-speed-hint{
+  margin-top:0;
+}
+
+.v101-speed-card.v101-mode-digital .v101-analog{
+  display:none !important;
+}
+
+.v101-speed-card.v101-mode-digital .v101-speed-bar{
+  display:block !important;
+}
+/* V101_SPEED_WIDGET_END */

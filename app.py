@@ -1835,7 +1835,12 @@ def continue_trip():
 
     # Ekranda canlı durak + sonraki 3 durak göster
     show_start = max(current_index, 0)
-    selected_stops = stops[show_start:show_start + 4] if stops else []
+    # V99D_FULL_ROUTE_TIMELINE_START
+    # Güzergah timeline artık kırpılmaz.
+    # Bütün duraklar kart olarak görünür:
+    # geçmiş = yeşil, canlı = kırmızı, sonraki = sarı, bekleyen = koyu.
+    selected_stops = list(stops) if stops else []
+    # V99D_FULL_ROUTE_TIMELINE_END
     if current_stop and current_stop not in selected_stops:
         selected_stops.insert(0, current_stop)
 
@@ -1960,6 +1965,10 @@ def api_live_seat_map_v45():
                COALESCE(from_stop,'') AS from_stop,
                COALESCE(to_stop,'') AS to_stop,
                COALESCE(passenger_name,'') AS passenger_name,
+               COALESCE(passenger_phone,'') AS passenger_phone,
+               COALESCE(ticket_type,'') AS ticket_type,
+               COALESCE(payment,'') AS payment,
+               COALESCE(amount,0) AS amount,
                COALESCE(gender,'') AS gender,
                COALESCE(service,0) AS service
         FROM seats
@@ -1978,6 +1987,10 @@ def api_live_seat_map_v45():
             "from_stop": r["from_stop"] or "",
             "to_stop": r["to_stop"] or "",
             "passenger_name": r["passenger_name"] or "",
+            "passenger_phone": r["passenger_phone"] or "",
+            "ticket_type": r["ticket_type"] or "",
+            "payment": r["payment"] or "",
+            "amount": float(r["amount"] or 0),
             "gender": r["gender"] or "",
             "service": int(r["service"] or 0),
             "bag_count": bag_count_for(no),
@@ -1995,6 +2008,10 @@ def api_live_seat_map_v45():
                 "from_stop": "",
                 "to_stop": "",
                 "passenger_name": "",
+                    "passenger_phone": "",
+                    "ticket_type": "",
+                    "payment": "",
+                    "amount": 0,
                 "gender": "",
                 "service": 0,
                 "bag_count": 0,
@@ -4796,6 +4813,130 @@ register_settings_routes(app, {
 @app.route("/rehber")
 def rehber_page():
     return render_template("rehber.html")
+
+
+
+# V99F_ROUTE_SEGMENT_API_START
+@app.route("/api/v99-route-segments")
+def api_v99_route_segments():
+    from flask import jsonify, session
+
+    def norm_route(x):
+        return (
+            str(x or "")
+            .replace("–", "-")
+            .replace("—", "-")
+            .replace(" ", "")
+            .lower()
+            .strip()
+        )
+
+    def row_get(row, key, default=None):
+        try:
+            return row[key]
+        except Exception:
+            return default
+
+    try:
+        if not session.get("auth_ok"):
+            return jsonify({"ok": False, "error": "unauthorized", "segments": []}), 401
+    except Exception:
+        pass
+
+    try:
+        db = get_db()
+        trip = get_active_trip_row()
+        route = ""
+        if trip:
+            try:
+                route = trip["route"] or ""
+            except Exception:
+                route = ""
+
+        wanted = norm_route(route)
+
+        def candidate_routes(table):
+            out = []
+            try:
+                rows = db.execute(f"SELECT DISTINCT route FROM {table}").fetchall()
+                for r in rows:
+                    rt = row_get(r, "route", "")
+                    if norm_route(rt) == wanted:
+                        out.append(rt)
+            except Exception:
+                pass
+
+            if route and route not in out:
+                out.insert(0, route)
+
+            return out
+
+        segments = []
+        seen = set()
+
+        def add_from_table(table):
+            nonlocal segments, seen
+
+            for rt in candidate_routes(table):
+                try:
+                    rows = db.execute(
+                        f"""
+                        SELECT from_stop, to_stop, sort_order, distance_m, duration_s, provider
+                        FROM {table}
+                        WHERE route=?
+                        ORDER BY sort_order ASC
+                        """,
+                        (rt,)
+                    ).fetchall()
+                except Exception:
+                    rows = []
+
+                for row in rows:
+                    frm = str(row_get(row, "from_stop", "") or "").strip()
+                    to = str(row_get(row, "to_stop", "") or "").strip()
+                    if not frm or not to:
+                        continue
+
+                    try:
+                        m = float(row_get(row, "distance_m", 0) or 0)
+                    except Exception:
+                        m = 0
+
+                    if m <= 0:
+                        continue
+
+                    key = (frm.lower(), to.lower())
+                    if key in seen:
+                        continue
+
+                    seen.add(key)
+
+                    segments.append({
+                        "from_stop": frm,
+                        "to_stop": to,
+                        "sort_order": row_get(row, "sort_order", 0),
+                        "distance_m": m,
+                        "km": round(m / 1000.0, 3),
+                        "duration_s": row_get(row, "duration_s", None),
+                        "provider": row_get(row, "provider", ""),
+                        "source_table": table,
+                    })
+
+        add_from_table("route_segments")
+
+        if not segments:
+            add_from_table("route_profile_segments")
+
+        return jsonify({
+            "ok": True,
+            "route": route,
+            "count": len(segments),
+            "segments": segments
+        })
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": repr(e), "segments": []}), 500
+# V99F_ROUTE_SEGMENT_API_END
 
 
 if __name__ == "__main__":

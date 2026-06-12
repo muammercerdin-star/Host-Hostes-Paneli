@@ -1,0 +1,24 @@
+HTTP/1.1 302 FOUND
+Server: Werkzeug/3.1.6 Python/3.13.13
+Date: Fri, 12 Jun 2026 09:22:00 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 239
+Location: /login?next=/continue-trip
+Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+Pragma: no-cache
+Expires: 0
+Vary: Cookie
+Connection: close
+
+HTTP/1.1 200 OK
+Server: Werkzeug/3.1.6 Python/3.13.13
+Date: Fri, 12 Jun 2026 09:22:00 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 9662
+Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+Pragma: no-cache
+Expires: 0
+Vary: Cookie
+Set-Cookie: session=eyJjc3JmX3Rva2VuIjoiekI5SUZPR2dwTzlBLWltYjcwTXp6WFZacEw2eE9hck5pdmt3ZUxaSHp4YyJ9.aivPuA.zYQHlPSJOdMaIbHp2KEl1e5vRnQ; HttpOnly; Path=/
+Connection: close
+

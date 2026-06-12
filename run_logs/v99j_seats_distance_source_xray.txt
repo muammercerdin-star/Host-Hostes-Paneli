@@ -1,0 +1,712 @@
+===== V99J SEATS GERCEK KM KAYNAGI RONTGEN =====
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+TIME: 2026-06-12 14:11:43
+
+===== 1) AKTIF SEFER =====
+ACTIVE_TRIP_ID: 314
+ROUTE: Denizli – İstanbul
+PLATE: 
+DATE: 2026-06-12
+
+===== 2) FLASK API RULES LIVE / SEAT / STOP =====
+/api/live-consignment-deliver/<int:cid>                 -> api_live_consignment_deliver
+/api/live-consignment-detail/<int:cid>                  -> api_live_consignment_detail
+/api/live-runtime-state                                 -> api_live_runtime_state
+/api/live-seat-bag-detail                               -> api_live_seat_bag_detail
+/api/live-seat-destination                              -> api_live_seat_destination
+/api/live-seat-map                                      -> api_live_seat_map_v45
+/api/live-seat-offload                                  -> api_live_seat_offload
+/api/live-stop-complete                                 -> api_live_stop_complete_v92c
+/api/live-stop-detail                                   -> api_live_stop_detail
+/api/live-stop-offload                                  -> api_live_stop_offload
+/api/report/seat-stats                                  -> api_report_seat_stats
+/api/route-schedule                                     -> api_route_schedule
+/api/routes/<int:rid>/coord-save-manual                 -> api_route_coord_save_manual
+/api/routes/<int:rid>/coord-status                      -> api_route_coord_status
+/api/seat                                               -> api_seat
+/api/seats/bulk                                         -> api_seats_bulk
+/api/seats/gender                                       -> api_seats_gender
+/api/seats/list                                         -> api_seats_list
+/api/seats/offload                                      -> api_seats_offload
+/api/seats/service                                      -> api_seats_service
+/api/stoplog                                            -> api_stoplog
+/api/stops                                              -> api_stops
+/api/v99-route-segments                                 -> api_v99_route_segments
+/bags/raw/<trip>/<seat>/<path:filename>                 -> bags.raw
+/bags/thumb/<trip>/<seat>/<path:filename>               -> bags.thumb
+/seats                                                  -> seats_page
+/set-route                                              -> set_route
+
+===== 3) API CEVAPLARI ICINDE 12.5 / ALAŞEHIR / KM ARAMA =====
+
+URL: /api/live-seat-map
+STATUS: 200 SIZE: 5402 TYPE: application/json
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_seat_map.txt
+
+===== API HIT: /api/live-seat-map =====
+HIT_COUNT: 7
+PATH: root
+KEYS: ['ok', 'seat_positions', 'seats', 'total_seats']
+VAL : {"ok": true, "seat_positions": {"1": [1, 1], "11": [3, 3], "12": [3, 4], "13": [4, 1], "15": [4, 3], "16": [4, 4], "17": [5, 1], "19": [5, 3], "20": [5, 4], "21": [6, 1], "23": [6, 3], "24": [6, 4], "25": [7, 1], "27": [8, 3], "28": [8, 4], "29": [8, 1], "3": [1, 3], "31": [9, 1], "33": [9, 3], "34": [9, 4], "35": [10, 1], "37": [10, 3], "38": [10, 4], "39": [11, 1], "4": [1, 4], "41": [11, 3], "42": [11, 4], "43": [
+PATH: root.seats[0]
+KEYS: ['bag_count', 'from_stop', 'gender', 'occupied', 'passenger_name', 'seat_no', 'service', 'to_stop']
+VAL : {"bag_count": 0, "from_stop": "Denizli otogar", "gender": "bay", "occupied": true, "passenger_name": "", "seat_no": "1", "service": 0, "to_stop": "Ortahan"}
+PATH: root.seats[0].to_stop = Ortahan
+PATH: root.seats[1]
+KEYS: ['bag_count', 'from_stop', 'gender', 'occupied', 'passenger_name', 'seat_no', 'service', 'to_stop']
+VAL : {"bag_count": 0, "from_stop": "Denizli otogar", "gender": "bay", "occupied": true, "passenger_name": "", "seat_no": "3", "service": 0, "to_stop": "Alaşehir Otogar"}
+PATH: root.seats[1].to_stop = Alaşehir Otogar
+PATH: root.seats[3]
+KEYS: ['bag_count', 'from_stop', 'gender', 'occupied', 'passenger_name', 'seat_no', 'service', 'to_stop']
+VAL : {"bag_count": 0, "from_stop": "Denizli otogar", "gender": "bayan", "occupied": true, "passenger_name": "", "seat_no": "5", "service": 0, "to_stop": "Kardeşler pide salonu"}
+PATH: root.seats[3].to_stop = Kardeşler pide salonu
+
+URL: /api/live-seat-map?trip_id=314
+STATUS: 200 SIZE: 5402 TYPE: application/json
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_seat_map_trip_id_314.txt
+
+===== API HIT: /api/live-seat-map?trip_id=314 =====
+HIT_COUNT: 7
+PATH: root
+KEYS: ['ok', 'seat_positions', 'seats', 'total_seats']
+VAL : {"ok": true, "seat_positions": {"1": [1, 1], "11": [3, 3], "12": [3, 4], "13": [4, 1], "15": [4, 3], "16": [4, 4], "17": [5, 1], "19": [5, 3], "20": [5, 4], "21": [6, 1], "23": [6, 3], "24": [6, 4], "25": [7, 1], "27": [8, 3], "28": [8, 4], "29": [8, 1], "3": [1, 3], "31": [9, 1], "33": [9, 3], "34": [9, 4], "35": [10, 1], "37": [10, 3], "38": [10, 4], "39": [11, 1], "4": [1, 4], "41": [11, 3], "42": [11, 4], "43": [
+PATH: root.seats[0]
+KEYS: ['bag_count', 'from_stop', 'gender', 'occupied', 'passenger_name', 'seat_no', 'service', 'to_stop']
+VAL : {"bag_count": 0, "from_stop": "Denizli otogar", "gender": "bay", "occupied": true, "passenger_name": "", "seat_no": "1", "service": 0, "to_stop": "Ortahan"}
+PATH: root.seats[0].to_stop = Ortahan
+PATH: root.seats[1]
+KEYS: ['bag_count', 'from_stop', 'gender', 'occupied', 'passenger_name', 'seat_no', 'service', 'to_stop']
+VAL : {"bag_count": 0, "from_stop": "Denizli otogar", "gender": "bay", "occupied": true, "passenger_name": "", "seat_no": "3", "service": 0, "to_stop": "Alaşehir Otogar"}
+PATH: root.seats[1].to_stop = Alaşehir Otogar
+PATH: root.seats[3]
+KEYS: ['bag_count', 'from_stop', 'gender', 'occupied', 'passenger_name', 'seat_no', 'service', 'to_stop']
+VAL : {"bag_count": 0, "from_stop": "Denizli otogar", "gender": "bayan", "occupied": true, "passenger_name": "", "seat_no": "5", "service": 0, "to_stop": "Kardeşler pide salonu"}
+PATH: root.seats[3].to_stop = Kardeşler pide salonu
+
+URL: /api/live-runtime-state?trip_id=314
+STATUS: 200 SIZE: 287 TYPE: application/json
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_runtime_state_trip_id_314.txt
+
+===== API HIT: /api/live-runtime-state?trip_id=314 =====
+HIT_COUNT: 4
+PATH: root
+KEYS: ['ok', 'state']
+VAL : {"ok": true, "state": {"eta_main": "401 dk erken", "eta_sub": "Kardeşler pide salonu · plan 20:55 · ETA 14:13 · 4.7 km · 70 km/h · GPS/km hesabı", "gps_km": "4.553244402186148", "live_stop": "Ortahan", "speed": 0, "trip_id": 314, "updated_at": "2026-06-12 14:09:41"}}
+PATH: root.state
+KEYS: ['eta_main', 'eta_sub', 'gps_km', 'live_stop', 'speed', 'trip_id', 'updated_at']
+VAL : {"eta_main": "401 dk erken", "eta_sub": "Kardeşler pide salonu · plan 20:55 · ETA 14:13 · 4.7 km · 70 km/h · GPS/km hesabı", "gps_km": "4.553244402186148", "live_stop": "Ortahan", "speed": 0, "trip_id": 314, "updated_at": "2026-06-12 14:09:41"}
+PATH: root.state.eta_sub = Kardeşler pide salonu · plan 20:55 · ETA 14:13 · 4.7 km · 70 km/h · GPS/km hesabı
+PATH: root.state.live_stop = Ortahan
+
+URL: /api/live-stop-detail?stop=Ortahan
+STATUS: 200 SIZE: 682 TYPE: application/json
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_stop_detail_stop_Ortahan.txt
+
+===== API HIT: /api/live-stop-detail?stop=Ortahan =====
+HIT_COUNT: 6
+PATH: root
+KEYS: ['bag_total', 'consignment_count', 'consignments', 'off_count', 'ok', 'passengers', 'seat_bag_total', 'stop']
+VAL : {"bag_total": 1, "consignment_count": 1, "consignments": [{"amount": 0.0, "code": "65D37F", "delivered_at": "", "from_name": "Esenler otogar", "from_phone": "", "id": 165, "item_label": "Koli 1", "item_type": "", "notes": "", "payment": "nakit", "receiver": "Alaşehir", "status": "bekliyor", "stop_name": "Ortahan", "to_name": "Alaşehir", "to_phone": ""}], "off_count": 1, "ok": true, "passengers": [{"amount": 0.0, "bag
+PATH: root.consignments[0]
+KEYS: ['amount', 'code', 'delivered_at', 'from_name', 'from_phone', 'id', 'item_label', 'item_type', 'notes', 'payment', 'receiver', 'status', 'stop_name', 'to_name', 'to_phone']
+VAL : {"amount": 0.0, "code": "65D37F", "delivered_at": "", "from_name": "Esenler otogar", "from_phone": "", "id": 165, "item_label": "Koli 1", "item_type": "", "notes": "", "payment": "nakit", "receiver": "Alaşehir", "status": "bekliyor", "stop_name": "Ortahan", "to_name": "Alaşehir", "to_phone": ""}
+PATH: root.consignments[0].stop_name = Ortahan
+PATH: root.passengers[0]
+KEYS: ['amount', 'bag_count', 'bag_left_back', 'bag_left_front', 'bag_photo_count', 'bag_right', 'from_stop', 'gender', 'passenger_name', 'passenger_phone', 'payment', 'seat_no', 'service', 'ticket_type', 'to_stop']
+VAL : {"amount": 0.0, "bag_count": 0, "bag_left_back": 0, "bag_left_front": 0, "bag_photo_count": 0, "bag_right": 0, "from_stop": "Denizli otogar", "gender": "bay", "passenger_name": "", "passenger_phone": "", "payment": "nakit", "seat_no": "1", "service": 0, "ticket_type": "biletsiz", "to_stop": "Ortahan"}
+PATH: root.passengers[0].to_stop = Ortahan
+PATH: root.stop = Ortahan
+
+URL: /api/live-seat-destination?stop=Ortahan
+STATUS: 405 SIZE: 153 TYPE: text/html; charset=utf-8
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_seat_destination_stop_Ortahan.txt
+JSON değil / hedef iz yok
+
+URL: /api/live-stop-offload?stop=Ortahan
+STATUS: 405 SIZE: 153 TYPE: text/html; charset=utf-8
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_stop_offload_stop_Ortahan.txt
+JSON değil / hedef iz yok
+
+URL: /api/live-stop-detail?stop=Karde%C5%9Fler%20pide%20salonu
+STATUS: 200 SIZE: 445 TYPE: application/json
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_stop_detail_stop_Karde_C5_9Fler_20pide_20salonu.txt
+
+===== API HIT: /api/live-stop-detail?stop=Karde%C5%9Fler%20pide%20salonu =====
+HIT_COUNT: 4
+PATH: root
+KEYS: ['bag_total', 'consignment_count', 'consignments', 'off_count', 'ok', 'passengers', 'seat_bag_total', 'stop']
+VAL : {"bag_total": 0, "consignment_count": 0, "consignments": [], "off_count": 1, "ok": true, "passengers": [{"amount": 0.0, "bag_count": 0, "bag_left_back": 0, "bag_left_front": 0, "bag_photo_count": 0, "bag_right": 0, "from_stop": "Denizli otogar", "gender": "bayan", "passenger_name": "", "passenger_phone": "", "payment": "nakit", "seat_no": "5", "service": 0, "ticket_type": "biletsiz", "to_stop": "Kardeşler pide salonu
+PATH: root.passengers[0]
+KEYS: ['amount', 'bag_count', 'bag_left_back', 'bag_left_front', 'bag_photo_count', 'bag_right', 'from_stop', 'gender', 'passenger_name', 'passenger_phone', 'payment', 'seat_no', 'service', 'ticket_type', 'to_stop']
+VAL : {"amount": 0.0, "bag_count": 0, "bag_left_back": 0, "bag_left_front": 0, "bag_photo_count": 0, "bag_right": 0, "from_stop": "Denizli otogar", "gender": "bayan", "passenger_name": "", "passenger_phone": "", "payment": "nakit", "seat_no": "5", "service": 0, "ticket_type": "biletsiz", "to_stop": "Kardeşler pide salonu"}
+PATH: root.passengers[0].to_stop = Kardeşler pide salonu
+PATH: root.stop = Kardeşler pide salonu
+
+URL: /api/live-seat-destination?stop=Karde%C5%9Fler%20pide%20salonu
+STATUS: 405 SIZE: 153 TYPE: text/html; charset=utf-8
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_seat_destination_stop_Karde_C5_9Fler_20pide_20salonu.txt
+JSON değil / hedef iz yok
+
+URL: /api/live-stop-offload?stop=Karde%C5%9Fler%20pide%20salonu
+STATUS: 405 SIZE: 153 TYPE: text/html; charset=utf-8
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_stop_offload_stop_Karde_C5_9Fler_20pide_20salonu.txt
+JSON değil / hedef iz yok
+
+URL: /api/live-stop-detail?stop=Belenyaka
+STATUS: 200 SIZE: 134 TYPE: application/json
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_stop_detail_stop_Belenyaka.txt
+
+===== API HIT: /api/live-stop-detail?stop=Belenyaka =====
+HIT_COUNT: 2
+PATH: root
+KEYS: ['bag_total', 'consignment_count', 'consignments', 'off_count', 'ok', 'passengers', 'seat_bag_total', 'stop']
+VAL : {"bag_total": 0, "consignment_count": 0, "consignments": [], "off_count": 0, "ok": true, "passengers": [], "seat_bag_total": 0, "stop": "Belenyaka"}
+PATH: root.stop = Belenyaka
+
+URL: /api/live-seat-destination?stop=Belenyaka
+STATUS: 405 SIZE: 153 TYPE: text/html; charset=utf-8
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_seat_destination_stop_Belenyaka.txt
+JSON değil / hedef iz yok
+
+URL: /api/live-stop-offload?stop=Belenyaka
+STATUS: 405 SIZE: 153 TYPE: text/html; charset=utf-8
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_stop_offload_stop_Belenyaka.txt
+JSON değil / hedef iz yok
+
+URL: /api/live-stop-detail?stop=Ala%C5%9Fehir%20Otogar
+STATUS: 200 SIZE: 431 TYPE: application/json
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_stop_detail_stop_Ala_C5_9Fehir_20Otogar.txt
+
+===== API HIT: /api/live-stop-detail?stop=Ala%C5%9Fehir%20Otogar =====
+HIT_COUNT: 4
+PATH: root
+KEYS: ['bag_total', 'consignment_count', 'consignments', 'off_count', 'ok', 'passengers', 'seat_bag_total', 'stop']
+VAL : {"bag_total": 0, "consignment_count": 0, "consignments": [], "off_count": 1, "ok": true, "passengers": [{"amount": 0.0, "bag_count": 0, "bag_left_back": 0, "bag_left_front": 0, "bag_photo_count": 0, "bag_right": 0, "from_stop": "Denizli otogar", "gender": "bay", "passenger_name": "", "passenger_phone": "", "payment": "nakit", "seat_no": "3", "service": 0, "ticket_type": "biletsiz", "to_stop": "Alaşehir Otogar"}], "se
+PATH: root.passengers[0]
+KEYS: ['amount', 'bag_count', 'bag_left_back', 'bag_left_front', 'bag_photo_count', 'bag_right', 'from_stop', 'gender', 'passenger_name', 'passenger_phone', 'payment', 'seat_no', 'service', 'ticket_type', 'to_stop']
+VAL : {"amount": 0.0, "bag_count": 0, "bag_left_back": 0, "bag_left_front": 0, "bag_photo_count": 0, "bag_right": 0, "from_stop": "Denizli otogar", "gender": "bay", "passenger_name": "", "passenger_phone": "", "payment": "nakit", "seat_no": "3", "service": 0, "ticket_type": "biletsiz", "to_stop": "Alaşehir Otogar"}
+PATH: root.passengers[0].to_stop = Alaşehir Otogar
+PATH: root.stop = Alaşehir Otogar
+
+URL: /api/live-seat-destination?stop=Ala%C5%9Fehir%20Otogar
+STATUS: 405 SIZE: 153 TYPE: text/html; charset=utf-8
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_seat_destination_stop_Ala_C5_9Fehir_20Otogar.txt
+JSON değil / hedef iz yok
+
+URL: /api/live-stop-offload?stop=Ala%C5%9Fehir%20Otogar
+STATUS: 405 SIZE: 153 TYPE: text/html; charset=utf-8
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_stop_offload_stop_Ala_C5_9Fehir_20Otogar.txt
+JSON değil / hedef iz yok
+
+URL: /api/live-stop-detail?stop=Salihli%20Garaj
+STATUS: 200 SIZE: 138 TYPE: application/json
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_stop_detail_stop_Salihli_20Garaj.txt
+
+===== API HIT: /api/live-stop-detail?stop=Salihli%20Garaj =====
+HIT_COUNT: 2
+PATH: root
+KEYS: ['bag_total', 'consignment_count', 'consignments', 'off_count', 'ok', 'passengers', 'seat_bag_total', 'stop']
+VAL : {"bag_total": 0, "consignment_count": 0, "consignments": [], "off_count": 0, "ok": true, "passengers": [], "seat_bag_total": 0, "stop": "Salihli Garaj"}
+PATH: root.stop = Salihli Garaj
+
+URL: /api/live-seat-destination?stop=Salihli%20Garaj
+STATUS: 405 SIZE: 153 TYPE: text/html; charset=utf-8
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_seat_destination_stop_Salihli_20Garaj.txt
+JSON değil / hedef iz yok
+
+URL: /api/live-stop-offload?stop=Salihli%20Garaj
+STATUS: 405 SIZE: 153 TYPE: text/html; charset=utf-8
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_stop_offload_stop_Salihli_20Garaj.txt
+JSON değil / hedef iz yok
+
+URL: /api/live-stop-detail?stop=Sart
+STATUS: 200 SIZE: 129 TYPE: application/json
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_stop_detail_stop_Sart.txt
+
+===== API HIT: /api/live-stop-detail?stop=Sart =====
+HIT_COUNT: 2
+PATH: root
+KEYS: ['bag_total', 'consignment_count', 'consignments', 'off_count', 'ok', 'passengers', 'seat_bag_total', 'stop']
+VAL : {"bag_total": 0, "consignment_count": 0, "consignments": [], "off_count": 0, "ok": true, "passengers": [], "seat_bag_total": 0, "stop": "Sart"}
+PATH: root.stop = Sart
+
+URL: /api/live-seat-destination?stop=Sart
+STATUS: 405 SIZE: 153 TYPE: text/html; charset=utf-8
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_seat_destination_stop_Sart.txt
+JSON değil / hedef iz yok
+
+URL: /api/live-stop-offload?stop=Sart
+STATUS: 405 SIZE: 153 TYPE: text/html; charset=utf-8
+OUT: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/v99j_api_live_stop_offload_stop_Sart.txt
+JSON değil / hedef iz yok
+
+===== 4) KOLTUK EKRANI JS / TEMPLATE KAYNAK TARAMA =====
+
+DOSYA: /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/seats.html
+HIT: 27
+   13: <link rel="stylesheet" href="/static/seats/patches/stop-flow-focus-patch.css?v=1">
+   14: <link rel="stylesheet" href="/static/seats/patches/stop-flow-compact-mobile.css?v=1">
+   45:               <span>km/h</span>
+   64:             <div class="selected-stop-chip">🎯 Seçili durak: <b id="selectedStopBadge">—</b></div>
+  108:         {% include "seats_parts/route_flow.html" %}
+  152:             <div class="clock-big" id="clockMain">--:--:--</div>
+  168:                 <div class="speed-value"><b id="spVal">0</b><span>km/h</span></div>
+  216:                   <span>Eşik (km)</span>
+  306:               <button class="btn dark" type="button" id="btnOpenRouteTab">Durak Sekmesi</button>
+  385: <script src="/static/seats/patches/stop-flow-focus-patch.js?v=simple-scope-1"></script>
+  668:   overflow:hidden !important;
+  702:   overflow:hidden !important;
+  703:   text-overflow:ellipsis !important;
+  732:   overflow:hidden !important;
+  753:   overflow:hidden !important;
+  754:   text-overflow:ellipsis !important;
+  761:   overflow:hidden !important;
+  762:   text-overflow:ellipsis !important;
+  770:   overflow:hidden !important;
+  771:   text-overflow:ellipsis !important;
+  968:   function markManualOff(){
+ 1008:         if(!isDriveOn()) markManualOff();
+ 1012:         if(!isDriveOn()) markManualOff();
+ 1030:         markManualOff();
+ 1205:           const flow = q("#routeStrip") || q(".route-strip-shell") || q(".route-flow-shell");
+ 1206:           if(flow && flow.scrollIntoView){
+ 1207:             flow.scrollIntoView({ behavior:"smooth", block:"center" });
+
+DOSYA: /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/seats.htm
+HIT: 17
+  152:     .clock-actions{overflow-x:auto; -webkit-overflow-scrolling:touch}
+  208:   #standingPopover .who{flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  279:       <div class="time" id="clockMain"></div>
+  342:       <span>Eşik (km)</span>
+  400:     <div id="approachList" class="list" style="max-height:240px; overflow:auto; margin-top:8px"></div>
+  594: function distKm(a,b){ const R=6371, toRad=d=>d*Math.PI/180; const dLat=toRad(b.lat-a.lat), dLon=toRad(b.lng-a.lng); const la1=toRad(a.lat), la2=toRad(b.lat); const h = Math.sin(dLat/2)**2 + Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2; return 2*R*Math.asin(
+  619: function getSelectedStopName(){
+  647:   // 2) Teşekkür mesajı (kısa gecikmeyle)
+  674: function setSelectedStop(name, {silent=false} = {}){
+  710:   const cur = getSelectedStopName();
+  715:     setSelectedStop('', {silent:true});
+  718:   setSelectedStop(next, {silent});
+  792: (function(){ const t=$('#clockMain'), d=$('#clockSub'); if(!t||!d) return;
+ 1137:   const radiusKm=parseFloat($('#alertRadius')?.value||'3'); const hint0=$('#geoHint'); if(hint0) hint0.textContent='Mesafe: hesaplanıyor…';
+ 1138:   geoWatchId=navigator.geolocation.watchPosition((pos)=>{ const p={lat:pos.coords.latitude,lng:pos.coords.longitude}; const d=distKm(p,{lat:s.lat,lng:s.lng}); const h=$('#geoHint'); if(h) h.textContent=`Mesafe: ${d.toFixed(2)} km (eşik ${radiusKm} km)`; if(d<=
+ 1386:   const a = getSelectedStopName?.() || '';
+ 1388:   if(a && $('#bulkModal')?.style.display === 'block' && $('#bulkTo')) $('#bulkTo').value = a;
+
+DOSYA: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/seats/seats.js
+HIT: 171
+   21:    ONE TIME STOP FLOW HARD CLEAN
+   24: (function hardCleanOldStopFlowOnce(){
+   28:     const key = "hardCleanStopFlowOnce:" + TRIP_KEY;
+   34:       "stopFlowSummary:" + TRIP_KEY,
+  125:    geçildi bilgisi ve durak akışı özeti taşınmasın.
+  139:     const memorySchemaVersion = "v2-stop-flow-clean-20260512";
+  144:     // Hem trip_id değişince hem de hafıza şeması değişince eski durak akışı silinsin.
+  161:       "stopFlowSummary:"
+  342:   function distKm(a, b){
+  353: function nearestStopByGps(maxKm = 15){
+  361:     const km = distKm(currentCoords, {
+  366:     if(!best || km < best.km){
+  369:         km
+  377:   if(best.km > maxKm) return "";
+  403:     const km = stopDistanceKmByName(live);
+  405:     if(Number.isFinite(km) && km > 5.5){
+  421: function stopDistanceKmByName(name){
+  427:   return distKm(currentCoords, {
+  468:         segment_km: x.segment_km,
+  545:   function getSelectedStopName(){
+  646:   const STOP_FLOW_SUMMARY_KEY = "stopFlowSummary:" + TRIP_KEY;
+  647:   const STOP_FLOW_EVENT_KEY = "stopFlowLiveEvents:" + TRIP_KEY;
+  648:   let stopFlowSummary = {};
+  650:   function readStopFlowLiveEvents(){
+  652:       const raw = localStorage.getItem(STOP_FLOW_EVENT_KEY) || "{}";
+  660:   function writeStopFlowLiveEvents(obj){
+  662:       localStorage.setItem(STOP_FLOW_EVENT_KEY, JSON.stringify(obj || {}));
+  666:   function loadStopFlowSummary(){
+  668:       const raw = localStorage.getItem(STOP_FLOW_SUMMARY_KEY) || "{}";
+  670:       stopFlowSummary = obj && typeof obj === "object" ? obj : {};
+  672:       stopFlowSummary = {};
+  677:   function clearStaleStopFlowIfTripEmpty(){
+  681:       // Yeni sefer açılmış ve koltuk yoksa eski durak akışı özetini taşıma.
+  685:         "stopFlowSummary:" + TRIP_KEY,
+  697:       stopFlowSummary = {};
+  711:   setTimeout(clearStaleStopFlowIfTripEmpty, 0);
+  713:   function persistStopFlowSummary(){
+  715:       localStorage.setItem(STOP_FLOW_SUMMARY_KEY, JSON.stringify(stopFlowSummary || {}));
+  771:   function recordStopFlowEvent(stopName, delta = {}){
+  776:       const liveEvents = readStopFlowLiveEvents();
+  791:       writeStopFlowLiveEvents(liveEvents);
+  794:       stopFlowSummary[key] = {
+  795:         ...(stopFlowSummary[key] || {}),
+  802:       persistStopFlowSummary();
+  806:       console.log("recordStopFlowEvent error", err);
+  811:   function snapshotStopFlowSummary(stopName, data = {}){
+  815:     const old = stopFlowSummary[key] || {};
+  829:     stopFlowSummary[key] = {
+  836:     persistStopFlowSummary();
+  839:   function stopFlowSummaryLine(stopName){
+  841:     const rec = stopFlowSummary[key] || {};
+  842:     const liveRec = readStopFlowLiveEvents()[key] || {};
+  932:     const stop = getSelectedStopName();
+ 1048:     setSelectedStop(canonical, { silent:!voice, voiceReply:voice });
+ 1089:   const selected = getSelectedStopName();
+ 1094:   const liveKm = stopDistanceKmByName(live);
+ 1095:   const liveDangerOn = Number.isFinite(liveKm) && liveKm <= 5;
+ 1096:   // if(liveDangerOn){maybeSpeakApproachStop(live, liveKm);}
+ 1124:     const isFlowGreen = liveDangerOn && !!greenNorm && norm(stop) === greenNorm;
+ 1128:     let kmText = "";
+ 1131:       const km = distKm(currentCoords, {
+ 1135:       kmText = `${km.toFixed(1)} km`;
+ 1145:     const flowLine = stopFlowSummaryLine(stop);
+ 1147:     if(flowLine && flowLine !== "İşlem yok"){
+ 1148:       metaLine2 = flowLine;
+ 1159:     if(kmText) extraBits.push(kmText);
+ 1163:     item.className = `route-stop ${isActive || isLive ? "active" : ""} ${isDone ? "done has-flow-summary" : ""} ${liveDangerOn && isLive ? "live-danger" : ""} ${isNextWarn ? "next-warning" : ""} ${isFlowGreen ? "flow-green" : ""}`;
+ 1170:     const kmValue = kmText || (etaItem && Number.isFinite(etaItem.km) ? `${etaItem.km.toFixed(1)} km` : "—");
+ 1173:     const statusText = delayText ? `${kmValue} · ${delayText}` : kmValue;
+ 1180:       <span class="extra-k">Plan/ETA</span>
+ 1191:   setSelectedStop(stop, { silent:false, voiceReply:true });
+ 1218:     const selected = getSelectedStopName();
+ 1223:     setText("#topSpeed", `${Math.round(Number(speedState.current || 0))} km/h`);
+ 1224:     setText("#selectedStopBadge", selected || "—");
+ 1274:   function setSelectedStop(name, { silent=false, voiceReply=true } = {}){
+ 1323:       snapshotStopFlowSummary(list[i]);
+ 1346:     const cur = getSelectedStopName();
+ 1351:       setSelectedStop("", { silent:true, voiceReply:false });
+ 1355:     setSelectedStop(next, { silent, voiceReply: !silent });
+ 1362:     const stopName = getSelectedStopName();
+ 1395:     setValue("#pickup", boardsMap[String(seatNo)] || getSelectedStopName() || "");
+ 1430:     const from = $("#pickup")?.value || getSelectedStopName() || "";
+ 1468:         recordStopFlowEvent(from, { board: 1 });
+ 1516:     const offStop = stopsMap[String(currentSeat)] || getSelectedStopName() || "";
+ 1527:         recordStopFlowEvent(offStop, { offload: 1 });
+ 1579:       const selected = getSelectedStopName() || "";
+ 1585:       openModal("#bulkBackdrop", "#bulkModal");
+ 1590:     closeModal("#bulkBackdrop", "#bulkModal");
+ 1594:     const from = $("#bulkFrom")?.value || speedState.liveStop || getSelectedStopName() || "";
+ 1774:       const st = stopsMap[String(n)] || getSelectedStopName() || "";
+ 1803:         recordStopFlowEvent(stopName, { offload: count });
+ 1826:     const stop = getSelectedStopName();
+ 1843:   async function offloadSelectedStop(){
+ 1844:     const stop = getSelectedStopName();
+ 1863:     snapshotStopFlowSummary(stop, {
+ 1894:     const stopName = getSelectedStopName();
+ 1906:     const radiusKm = parseFloat($("#alertRadius")?.value || "3");
+ 1912:       const d = distKm(p, { lat:Number(s.lat), lng:Number(s.lng) });
+ 1913:       setText("#geoHint", `Mesafe: ${d.toFixed(2)} km (eşik ${radiusKm} km)`);
+ 1918:       if(d <= radiusKm){
+ 1940:       const stop = (getSelectedStopName() || $("#coordStopName")?.value || "").trim();
+ 1994:     const selectedIdx = indexOfStopByName(getSelectedStopName());
+ 2008:     function effectiveEtaSpeedKmh(){
+ 2054:       const activeName = getSelectedStopName() || liveName;
+ 2073:         km: NaN,
+ 2074:         speedKmh: NaN,
+ 2080:     // Asıl akıllı hesap: sıradaki saatli durağa kalan km + efektif hız.
+ 2081:     const nextTimedForDistance = model.find(x => !x.passed) || model[model.length - 1];
+ 2083:     if(nextTimedForDistance && currentCoords && !nextTimedForDistance.passed){
+ 2084:       const km = stopDistanceKmByName(nextTimedForDistance.stop);
+ 2086:       if(Number.isFinite(km)){
+ 2087:         const speedKmh = effectiveEtaSpeedKmh();
+ 2088:         const travelMin = Math.max(1, Math.round((km / speedKmh) * 60));
+ 2090:         const delayMin = minutesDiff(etaDate, nextTimedForDistance.planDate);
+ 2092:         nextTimedForDistance.km = km;
+ 2093:         nextTimedForDistance.speedKmh = speedKmh;
+ 2094:         nextTimedForDistance.travelMin = travelMin;
+ 2095:         nextTimedForDistance.etaDate = etaDate;
+ 2096:         nextTimedForDistance.delayMin = delayMin;
+ 2097:         nextTimedForDistance.etaMode = "gps-distance";
+ 2099:         applyEtaBadge(nextTimedForDistance);
+ 2110:     const kmInfo = nextTimed && Number.isFinite(nextTimed.km)
+ 2111:       ? ` · ${nextTimed.km.toFixed(1)} km`
+ 2114:     const speedInfo = nextTimed && Number.isFinite(nextTimed.speedKmh)
+ 2115:       ? ` · ${Math.round(nextTimed.speedKmh)} km/h`
+ 2121:         ? `Plan ${nextTimed.plan} · ETA ${fmtHour(nextTimed.etaDate)}${kmInfo}`
+ 2132:       const modeText = nextTimed.etaMode === "gps-distance"
+ 2133:         ? "GPS/km hesabı"
+ 2138:         `${nextTimed.stop} · plan ${nextTimed.plan} · ETA ${fmtHour(nextTimed.etaDate)}${kmInfo}${speedInfo} · ${modeText}`
+ 2177:       row.addEventListener("click", () => setSelectedStop(item.stop, { silent:true, voiceReply:false }));
+ 2183:     const stop = getSelectedStopName();
+ 2236:   const LIVE_DETECT_KM = 5;        // Muavin hazırlık/canlı durak eşiği
+ 2237:   const LIVE_FORCE_KM = 1.2;       // Çok yakına girerse beklemeden canlı yap
+ 2240:   const LIVE_CLEAR_KM = 6;        // Canlı durak bu mesafeden uzağa düştüyse eski kabul edilir
+ 2343:         const km = distKm(coords, {
+ 2348:         if(Number.isFinite(km) && km <= LIVE_DETECT_KM){
+ 2351:             km,
+ 2367:             if(speedState.liveStop && typeof stopDistanceKmByName === "function"){
+ 2368:               const liveKm = stopDistanceKmByName(speedState.liveStop);
+ 2370:               if(Number.isFinite(liveKm) && liveKm > LIVE_CLEAR_KM){
+ 2416:           return a.km - b.km;
+ 2419:         if(a.km !== b.km) return a.km - b.km;
+ 2452:       const forceNow = Number(best.km) <= LIVE_FORCE_KM;
+ 2651:         const kmh = (typeof rawSpeed === "number" && !isNaN(rawSpeed)) ? rawSpeed * 3.6 : 0;
+ 2653:         speedState.current = kmh;
+ 2655:         speedState.history.push(kmh);
+ 2658:         spVal.textContent = Math.round(kmh);
+ 2664:           spLimit.textContent = `Limit: ${lim.limit} km/h${lim.highway ? " · " + trHighway(lim.highway) : ""}`;
+ 2665:           if(kmh <= lim.limit) setState("limit-ok");
+ 2666:           else if(kmh <= lim.limit + 10) setState("limit-warn");
+ 2668:           maybeSpeak(kmh, lim.limit);
+ 2790:   onClick("#btnOffloadNow", offloadSelectedStop);
+ 2791:   onClick("#btnOffloadNowPane", offloadSelectedStop);
+ 2805:     snapshotStopFlowSummary(stop, {
+ 2828:     const a = getSelectedStopName() || "";
+ 2830:     if(a && $("#bulkModal")?.style.display === "block") setValue("#bulkTo", a);
+ 2860:       const selected = getSelectedStopName();
+ 2877:       loadStopFlowSummary();
+ 2905:       if(next) setSelectedStop(next, { silent:true, voiceReply:false });
+ 2906:       else if(serverStops?.length) setSelectedStop(serverStops[0], { silent:true, voiceReply:false });
+ 2928:     // getDisplayLiveStop() içindeki 15 km fallback burada kullanılmaz.
+ 2935:       if(liveStop && typeof stopDistanceKmByName === "function"){
+ 2936:         const liveKmCheck = stopDistanceKmByName(liveStop);
+ 2937:         if(Number.isFinite(liveKmCheck) && liveKmCheck > 5.5){
+ 2945:     let gpsKm = "";
+ 2947:       if(liveStop && typeof stopDistanceKmByName === "function"){
+ 2948:         const km = stopDistanceKmByName(liveStop);
+ 2949:         if(Number.isFinite(km)){
+ 2950:           gpsKm = String(km);
+ 2963:       `&gps_km=${encodeURIComponent(gpsKm)}` +
+ 2965:       `&eta_sub=${encodeURIComponent(etaSub)}`;
+
+DOSYA: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_core.js
+HIT: 89
+   12:     const runtimeGpsKm = BOOT.runtimeGpsKm || "";
+   17:   function parseKmAny(value){
+   22:       .replace(/km/gi, "")
+   31:   function formatGpsKm(value){
+   35:     // DISTANCE_FORMAT_FIX_V63B
+   36:     // "439 m" hazır formatlı gelirse 439 km sanma.
+   37:     // "112 m", "50 m", "28.20 km" olduğu gibi gösterilir.
+   40:     if(/\bkm\b/.test(lower) || /km\s*$/.test(lower)){
+   44:     if(/(^|\s|[0-9])m\s*$/.test(lower) && !/km\s*$/.test(lower)){
+   53:     const km = Number(cleaned);
+   54:     if(!Number.isFinite(km)) return raw;
+   56:     if(km < 0) return "—";
+   57:     if(km < 1) return `${Math.round(km * 1000)} m`;
+   58:     return `${km.toFixed(2)} km`;
+   64:     const distEl  = document.getElementById("liveDistanceValue");
+   69:       speedEl.textContent = `${n} km/sa`;
+   76:     if(distEl && runtimeGpsKm){
+   77:       distEl.textContent = formatGpsKm(runtimeGpsKm);
+   98:       const distEl  = document.getElementById("liveDistanceValue");
+  103:         speedEl.textContent = `${n} km/sa`;
+  111:         // API boş gps_km dönerse ekrandaki doğru mesafeyi "—" ile ezme.
+  112:         if(distEl && s.gps_km){
+  113:           distEl.textContent = formatGpsKm(s.gps_km);
+  182:     document.body.style.overflow = "hidden";
+  191:     document.body.style.overflow = "";
+  291:       const res = await fetch("/api/live-seat-destination", {
+ 1558:       const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stop)}&_=${Date.now()}`, {
+ 1600:       const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stop)}&_=${Date.now()}`, {
+ 1742:     const routeCoords = BOOT.routeCoords || [];
+ 1747:   let lastMeasuredSpeedKmh = NaN;
+ 1786:     // Şehirlerarası seferde gecikme/erkenlik hesabını en yakın 24 saat penceresine normalize et.
+ 1808:   function formatKm(km){
+ 1809:     if(!Number.isFinite(km) || km < 0) return "—";
+ 1810:     if(km < 1) return Math.round(km * 1000) + " m";
+ 1811:     return km.toFixed(2) + " km";
+ 1814:   function distKm(a,b){
+ 1838:     if(!n || !Array.isArray(routeCoords)) return null;
+ 1840:     const item = routeCoords.find(x => norm(x.stop) === n);
+ 1905:     if(!Number.isFinite(lastMeasuredSpeedKmh)) return 0;
+ 1906:     if(lastMeasuredSpeedKmh < 3) return 0;
+ 1907:     return Math.round(lastMeasuredSpeedKmh);
+ 1911:     setText("#liveSpeedText", liveDisplaySpeed() + " km/sa");
+ 1914:   function acceptSpeed(kmh){
+ 1915:     if(!Number.isFinite(kmh)) return;
+ 1917:     if(kmh < 3) kmh = 0;
+ 1918:     if(kmh > 160) return;
+ 1920:     if(!Number.isFinite(lastMeasuredSpeedKmh)){
+ 1921:       lastMeasuredSpeedKmh = kmh;
+ 1923:       lastMeasuredSpeedKmh = (lastMeasuredSpeedKmh * 0.55) + (kmh * 0.45);
+ 1926:     if(lastMeasuredSpeedKmh < 3) lastMeasuredSpeedKmh = 0;
+ 1954:     const km = distKm(lastGpsPoint, point);
+ 1955:     const meters = km * 1000;
+ 1965:     const kmh = km / (dt / 3600);
+ 1966:     acceptSpeed(kmh);
+ 1969:   function etaSpeedKmh(){
+ 2010:   function updateAllDistances(){
+ 2013:     document.querySelectorAll(".stop-distance-value[data-stop-name]").forEach(el => {
+ 2018:       el.textContent = formatKm(distKm(lastPos, c));
+ 2035:     // Canlı durak artık "işlem var/yok" veya "6 km geçti" mantığıyla değil,
+ 2054:       const raw = Array.isArray(BOOT.routeCoords) ? BOOT.routeCoords : [];
+ 2086:     function pickMidpointLiveStopV67(currentName){
+ 2114:         const km = distKm(lastPos, { lat:item.lat, lng:item.lng });
+ 2115:         if(!Number.isFinite(km)) continue;
+ 2117:         if(!best || km < best.km){
+ 2120:             km,
+ 2141:       const sig = `${tripId}|${fromName}|${toName}|${Math.round(Number(picked.km || 0) * 1000)}`;
+ 2151:       const gpsKm = formatKm(Number(picked.km));
+ 2158:         `&gps_km=${encodeURIComponent(gpsKm || "")}` +
+ 2160:         `&eta_sub=${encodeURIComponent("midpoint-live-stop-v67")}` +
+ 2170:           const distEl = document.getElementById("liveDistanceValue");
+ 2174:           if(distEl) distEl.textContent = gpsKm || "—";
+ 2185:     function writeRuntime(liveName, gpsKm, etaMain){
+ 2190:     const sig = [liveName, displaySpeed, gpsKm, etaMain].join("|");
+ 2202:       `&gps_km=${encodeURIComponent(gpsKm || "")}` +
+ 2204:       `&eta_sub=${encodeURIComponent("continue-live-speed-engine")}` +
+ 2220:     const pickedLiveV67 = pickMidpointLiveStopV67(liveName);
+ 2235:     let gpsKm = "—";
+ 2238:       const liveKm = distKm(lastPos, liveCoord);
+ 2239:       gpsKm = formatKm(liveKm);
+ 2240:       setText("#liveDistanceValue", gpsKm);
+ 2243:     updateAllDistances();
+ 2253:     const km = distKm(lastPos, targetCoord);
+ 2254:     const speed = etaSpeedKmh();
+ 2255:     const travelMin = Math.max(1, Math.round((km / speed) * 60));
+ 2261:     writeRuntime(liveName, gpsKm, etaMain);
+ 2353:     document.body.style.overflow = "";
+ 2376:     document.body.style.overflow = "hidden";
+ 2440:     document.body.style.overflow = "hidden";
+ 2444:       const res = await fetch(`/api/live-seat-map?_=${Date.now()}`, {
+
+DOSYA: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.js
+HIT: 79
+    5:   const MAX_KM = 48;
+   16:   function parseKm(raw){
+   25:     const n = parseKm(raw);
+   30:   function setRing(km){
+   32:     const ringKm = q("#ringKm");
+   33:     if(!ring || !ringKm) return;
+   35:     let display = km;
+   36:     if(km === null){
+   40:     let safeKm = display === null ? MAX_KM : Math.max(0, display);
+   41:     let ratio = Math.max(0, Math.min(1, 1 - safeKm / MAX_KM));
+   47:       ringKm.textContent = "—";
+   51:       ringKm.style.color = "#5a6478";
+   52:       ringKm.style.textShadow = "none";
+   56:     let label = safeKm <= 0 ? "0" : (safeKm % 1 === 0 ? String(safeKm) : safeKm.toFixed(1));
+   57:     ringKm.textContent = label;
+   59:     if(safeKm <= 5){
+   63:       ringKm.style.color = "#e03030";
+   64:       ringKm.style.textShadow = "0 0 18px #e03030";
+   65:     }else if(safeKm <= 15){
+   69:       ringKm.style.color = "#e08820";
+   70:       ringKm.style.textShadow = "0 0 12px #e08820";
+   75:       ringKm.style.color = "#3a8bff";
+   76:       ringKm.style.textShadow = "0 0 10px #3a8bff";
+  114:     const km = parseKm(text("#liveDistanceValue"));
+  115:     setRing(km);
+  146: /* V99F_REAL_ROUTE_KM_START */
+  191:   function formatKm(n){
+  195:     if(n >= 10) return String(Math.round(n)) + " km";
+  196:     if(n === 0) return "0 km";
+  198:     return n.toFixed(1).replace(".", ".") + " km";
+  228:   function getSegmentKmFromSchedule(item){
+  230:     return parseNum(item.segment_km || item.km || item.distance || item.mesafe);
+  334:     var km = parseNum(seg.km);
+  336:     if(km === null){
+  337:       var m = parseNum(seg.distance_m);
+  338:       if(m !== null) km = m / 1000;
+  341:     if(!from || !to || km === null || km <= 0) return;
+  343:     routeSegState.map[pairKey(from, to)] = km;
+  346:   function segmentKmBetween(from, to, schedule){
+  362:         var km = parseNum(seg.km);
+  363:         if(km === null){
+  364:           var m = parseNum(seg.distance_m);
+  365:           if(m !== null) km = m / 1000;
+  367:         if(km !== null && km > 0) return km;
+  371:     /* Son çare: schedule'daki segment_km hedef durağın önceki segmenti ise onu kullan. */
+  373:     var fallback = getSegmentKmFromSchedule(item);
+  379:   function computeDistance(names, currentIdx, targetIdx, runtimeKm, schedule){
+  382:     if(targetIdx === currentIdx) return runtimeKm !== null ? runtimeKm : 0;
+  384:     var sum = runtimeKm !== null ? runtimeKm : 0;
+  388:       var segKm = segmentKmBetween(names[i], names[i+1], schedule);
+  390:       if(segKm === null){
+  395:       sum += segKm;
+  439:     var runtimeKm = parseNum((q("#liveDistanceValue") || {}).textContent);
+  440:     if(runtimeKm === null){
+  441:       runtimeKm = parseNum((window.CONTINUE_BOOT || {}).runtimeGpsKm);
+  456:       var distanceVal = findMetricVal(card, "MESAFE");
+  462:       if(!distanceVal) return;
+  464:       distanceVal.classList.add("stop-distance-value");
+  465:       distanceVal.classList.add("v99-timeline-distance-value");
+  467:       distanceVal.classList.add("stop-distance-value");
+  468:       if(stopName) distanceVal.setAttribute("data-stop-name", stopName);
+  471:         distanceVal.textContent = "—";
+  478:         distanceVal.textContent = runtimeKm !== null ? formatKm(runtimeKm) : "0 km";
+  482:       var dist = computeDistance(names, currentIdx, targetIdx, runtimeKm, schedule);
+  485:         distanceVal.textContent = formatKm(dist);
+  487:         distanceVal.textContent = "—";
+  502:   window.MuavinV99RealKmHydrate = hydrateTimeline;
+  504: /* V99F_REAL_ROUTE_KM_END */
+  565: /* V99I_EXISTING_DISTANCE_ENGINE_BRIDGE_START */
+  573:   function findDistanceVal(card){
+  590:   function bindDistanceCells(){
+  594:       var val = findDistanceVal(card);
+  599:       val.classList.add("stop-distance-value");
+  609:   bindDistanceCells();
+  612:     document.addEventListener("DOMContentLoaded", bindDistanceCells);
+  615:   window.addEventListener("load", bindDistanceCells);
+  616:   document.addEventListener("continueEtaUpdated", bindDistanceCells);
+  620:     bindDistanceCells();
+  625: /* V99I_EXISTING_DISTANCE_ENGINE_BRIDGE_END */
+
+DOSYA: /data/data/com.termux/files/home/Host-Hostes-Paneli/app.py
+HIT: 62
+  521:             distance_km REAL,
+  635:             segment_km REAL DEFAULT NULL,
+  814:             gps_km TEXT DEFAULT '',
+  816:             eta_sub TEXT DEFAULT '',
+  828:         SELECT trip_id, live_stop, speed, gps_km, eta_main, eta_sub, updated_at
+  839:             "gps_km": "",
+  841:             "eta_sub": "",
+  848:         "gps_km": row["gps_km"] or "",
+  850:         "eta_sub": row["eta_sub"] or "",
+  860:     gps_km: str = "",
+  862:     eta_sub: str = "",
+  868:         INSERT INTO live_runtime_state(trip_id, live_stop, speed, gps_km, eta_main, eta_sub, updated_at)
+  873:             gps_km=excluded.gps_km,
+  875:             eta_sub=excluded.eta_sub,
+  882:             (gps_km or "").strip(),
+  884:             (eta_sub or "").strip(),
+  918:         # Canlı Durak Akışı ekranı live_stop seçicisi değildir.
+  937:         gps_km = (request.args.get("gps_km") or "").strip()
+  939:         eta_sub = (request.args.get("eta_sub") or "").strip()
+  951:             gps_km=gps_km,
+  953:             eta_sub=eta_sub,
+ 1038:         SELECT id, profile_id, stop_name, planned_time, segment_km, is_timed, sort_order, note
+ 1062:             "segment_km": item.get("segment_km", None),
+ 1426: # ===== CONTINUE_LIVE_FLOW_STATE_API_START =====
+ 1502:     # Canlı Durak Akışı ekranında anlık GPS/ETA hesabı için veri
+ 1542:                 SELECT stop_name, planned_time, segment_km, is_timed, sort_order
+ 1554:                     "segment_km": r["segment_km"] or "",
+ 1815:             distance = "0 km"
+ 1817:             distance = f"{idx - current_index} durak"
+ 1819:             distance = "Geçildi"
+ 1826:             "distance": distance,
+ 1857:         "distance": "-",
+ 1870:         if str(live_runtime.get("gps_km") or "").strip():
+ 1871:             live_current["distance"] = str(live_runtime.get("gps_km") or "").strip()
+ 1926: @app.route("/api/live-seat-map")
+ 2335: @app.route("/api/live-seat-destination", methods=["POST"])
+ 2826:                     (trip_id, stop_name, event, distance_km, seats_for_stop, meta_json)
+ 2886:                         (trip_id, stop_name, event, distance_km, seats_for_stop, meta_json)
+ 2924:                     gps_km = '',
+ 2926:                     eta_sub = 'v92c-complete-next-stop',
+ 2934:                     (trip_id, live_stop, speed, gps_km, eta_main, eta_sub, updated_at)
+ 2963:                 (trip_id, stop_name, event, distance_km, seats_for_stop, meta_json)
+ 3015: @app.route("/api/live-stop-detail")
+ 3504:                    distance_m, duration_s, geometry_json, provider, updated_at
+ 3523:                 "distance_m": float(r["distance_m"] or 0),
+ 3714: def log_trip_stop_event(db, tid, stop_name, event, meta=None, distance_km=None, seats_for_stop=None):
+ 3739:         INSERT INTO stop_logs(trip_id, stop_name, event, distance_km, seats_for_stop, meta_json)
+ 3742:         (tid, stop_name, event, distance_km, seats_for_stop, meta_json),
+ 4172:             SELECT id, trip_id, stop_name, event, distance_km, seats_for_stop, meta_json, ts
+ 4192:                 "distance_km": r["distance_km"],
+ 4218:     distance_km = data.get("distance_km")
+ 4219:     if distance_km is not None:
+ 4220:         distance_km = parse_float(distance_km, None)
+ 4221:         if distance_km is None:
+ 4222:             return jsonify({"ok": False, "msg": "distance_km geçersiz"}), 400
+ 4233:         INSERT INTO stop_logs(trip_id, stop_name, event, distance_km, seats_for_stop, meta_json)
+ 4236:         (tid, stop_name, event, distance_km, seats_for_stop, meta_json),
+ 4244:         "distance_km": distance_km,
+ 4872:                         SELECT from_stop, to_stop, sort_order, distance_m, duration_s, provider
+ 4889:                         m = float(row_get(row, "distance_m", 0) or 0)
+ 4906:                         "distance_m": m,
+ 4907:                         "km": round(m / 1000.0, 3),
+
+===== 5) OZEL: 12.5 / 46.7 DOSYA ARAMA =====
+BULUNDU: /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/seats.html
+  812:     font-size:12.5px !important;
+
+===== RAPOR BITTI =====
