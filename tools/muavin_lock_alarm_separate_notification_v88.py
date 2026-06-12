@@ -1,4 +1,24 @@
-package com.muavinasistani.app;
+from pathlib import Path
+from datetime import datetime
+import shutil
+import re
+
+ROOT = Path(".").resolve()
+STAMP = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+SERVICE = ROOT / "android_app/app/src/main/java/com/muavinasistani/app/LiveStopAlertService.java"
+MAIN = ROOT / "android_app/app/src/main/java/com/muavinasistani/app/MainActivity.java"
+
+print("===== V88 AYRI TAKİP + AYRI ALARM BİLDİRİMİ =====")
+
+if not SERVICE.exists():
+    raise SystemExit("❌ LiveStopAlertService.java yok")
+
+b = SERVICE.with_name(SERVICE.name + f".bak-v88-{STAMP}")
+shutil.copy2(SERVICE, b)
+print("📦 Service yedeği:", b.relative_to(ROOT))
+
+SERVICE_CODE = r'''package com.muavinasistani.app;
 
 import android.Manifest;
 import android.app.Notification;
@@ -29,20 +49,13 @@ public class LiveStopAlertService extends Service implements LocationListener {
     public static final String ACTION_STOP_ALARM = "com.muavinasistani.app.LOCK_ALARM_STOP_ALARM";
     public static final String ACTION_RESET = "com.muavinasistani.app.LOCK_ALARM_RESET";
 
-    private static final String CHANNEL_MONITOR = "muavin_live_monitor_v90";
-    private static final String CHANNEL_ALERT = "muavin_live_alert_v90";
+    private static final String CHANNEL_MONITOR = "muavin_live_monitor_v88";
+    private static final String CHANNEL_ALERT = "muavin_live_alert_v88";
 
-    private static final int MONITOR_NOTIFICATION_ID = 9001;
-    private static final int ALERT_NOTIFICATION_ID = 9002;
+    private static final int MONITOR_NOTIFICATION_ID = 8801;
+    private static final int ALERT_NOTIFICATION_ID = 8802;
 
     private static final String PREF = "muavin_lock_alarm_v85";
-
-    private static final int MODE_NONE = 0;
-    private static final int MODE_FAR = 1;        // 15 km üstü
-    private static final int MODE_MID = 2;        // 5-15 km
-    private static final int MODE_NEAR = 3;       // 2.2-5 km
-    private static final int MODE_ALERT = 4;      // 2.2 km altı
-    private static final int MODE_AFTER_ALERT = 5;
 
     private LocationManager locationManager;
     private TextToSpeech tts;
@@ -58,11 +71,6 @@ public class LiveStopAlertService extends Service implements LocationListener {
     private int offloadCount = 0;
     private int bagCount = 0;
     private String displayKm = "";
-
-    private int currentMode = MODE_NONE;
-    private long lastMonitorUpdateMs = 0;
-    private double lastMonitorKm = -999;
-    private boolean alarmActive = false;
 
     @Override
     public void onCreate() {
@@ -105,13 +113,13 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         if (ACTION_RESET.equals(action)) {
             resetAlertMemory();
-            updateForegroundMonitor(true);
+            updateForegroundMonitor();
             return START_STICKY;
         }
 
         loadTargetFromPrefs();
-        updateForegroundMonitor(true);
-        applyLocationMode(MODE_FAR);
+        updateForegroundMonitor();
+        startLocationUpdates();
         checkLastKnownLocation();
 
         return START_STICKY;
@@ -170,15 +178,6 @@ public class LiveStopAlertService extends Service implements LocationListener {
         return bagCount > 0 ? bagCount + " bagaj var" : "0 bagaj";
     }
 
-    private String batteryModeText() {
-        if (currentMode == MODE_FAR) return "pil koruma";
-        if (currentMode == MODE_MID) return "normal takip";
-        if (currentMode == MODE_NEAR) return "yakın takip";
-        if (currentMode == MODE_ALERT) return "alarm bölgesi";
-        if (currentMode == MODE_AFTER_ALERT) return "alarm sonrası";
-        return "takip";
-    }
-
     private String monitorBody() {
         return stopTitle() + " • " + kmText() + " • " + passengerText() + " • " + bagText();
     }
@@ -187,36 +186,11 @@ public class LiveStopAlertService extends Service implements LocationListener {
         return "CANLI DURAK\n"
                 + stopTitle()
                 + "\nKalan mesafe: " + kmText()
-                + "\n" + passengerText() + " • " + bagText()
-                + "\nMod: " + batteryModeText();
+                + "\n" + passengerText() + " • " + bagText();
     }
 
-    private void updateForegroundMonitor(boolean force) {
-        long now = System.currentTimeMillis();
-
-        long minGap = 30000;
-        if (currentMode == MODE_NEAR || currentMode == MODE_ALERT) minGap = 10000;
-        if (currentMode == MODE_AFTER_ALERT) minGap = 30000;
-
-        if (!force && now - lastMonitorUpdateMs < minGap) return;
-
-        lastMonitorUpdateMs = now;
+    private void updateForegroundMonitor() {
         startForegroundSafe(buildMonitorNotification());
-    }
-
-    private void maybeUpdateMonitorByKm(double km) {
-        long now = System.currentTimeMillis();
-
-        double diff = Math.abs(km - lastMonitorKm);
-        long minGap = 30000;
-
-        if (km <= 5.0) minGap = 10000;
-        if (km <= 2.2) minGap = 7000;
-
-        if (lastMonitorKm < -900 || diff >= 0.10 || now - lastMonitorUpdateMs >= minGap) {
-            lastMonitorKm = km;
-            updateForegroundMonitor(true);
-        }
     }
 
     private Notification buildMonitorNotification() {
@@ -233,7 +207,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
         PendingIntent stopServicePi = PendingIntent.getService(this, 12, stopServiceIntent, piFlags);
 
         Notification.Builder b = new Notification.Builder(this, CHANNEL_MONITOR)
-                .setSmallIcon(R.drawable.ic_muavin_notify)
+                .setSmallIcon(android.R.drawable.ic_dialog_map)
                 .setContentTitle("Muavin Asistanı canlı takip")
                 .setContentText(monitorBody())
                 .setStyle(new Notification.BigTextStyle().bigText(monitorBigText()))
@@ -266,7 +240,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
         String big = "CANLI DURAK ALARMI\n" + stopTitle() + "\n" + message;
 
         Notification.Builder b = new Notification.Builder(this, CHANNEL_ALERT)
-                .setSmallIcon(R.drawable.ic_muavin_notify)
+                .setSmallIcon(android.R.drawable.ic_dialog_map)
                 .setContentTitle("Canlı durak alarmı")
                 .setContentText(message)
                 .setStyle(new Notification.BigTextStyle().bigText(big))
@@ -285,7 +259,6 @@ public class LiveStopAlertService extends Service implements LocationListener {
     }
 
     private void showAlarmNotification(String message) {
-        alarmActive = true;
         startVibration();
 
         try {
@@ -293,18 +266,6 @@ public class LiveStopAlertService extends Service implements LocationListener {
             if (nm != null) {
                 nm.notify(ALERT_NOTIFICATION_ID, buildAlertNotification(message));
             }
-        } catch (Exception ignored) {}
-
-        launchLockAlarmActivityIfAvailable();
-        applyLocationMode(MODE_AFTER_ALERT);
-    }
-
-    private void launchLockAlarmActivityIfAvailable() {
-        try {
-            Intent i = new Intent();
-            i.setClassName(getPackageName(), getPackageName() + ".LockAlarmActivity");
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(i);
         } catch (Exception ignored) {}
     }
 
@@ -334,7 +295,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         NotificationChannel monitor = new NotificationChannel(
                 CHANNEL_MONITOR,
-                "Canlı durak pil korumalı takip",
+                "Canlı durak kilit ekranı kartı",
                 NotificationManager.IMPORTANCE_DEFAULT
         );
         monitor.setDescription("Canlı durak, kalan mesafe, yolcu ve bagaj kartı");
@@ -342,7 +303,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         NotificationChannel alert = new NotificationChannel(
                 CHANNEL_ALERT,
-                "Canlı durak alarmı V90",
+                "Canlı durak alarmı V88",
                 NotificationManager.IMPORTANCE_HIGH
         );
         alert.setDescription("2 km kala sesli ve titreşimli uyarı");
@@ -359,66 +320,17 @@ public class LiveStopAlertService extends Service implements LocationListener {
                 || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private int modeForKm(double km) {
-        if (alarmActive) return MODE_AFTER_ALERT;
-        if (km <= 2.20) return MODE_ALERT;
-        if (km <= 5.00) return MODE_NEAR;
-        if (km <= 15.00) return MODE_MID;
-        return MODE_FAR;
-    }
-
-    private void applyLocationMode(int newMode) {
-        if (newMode == currentMode && newMode != MODE_NONE) return;
+    private void startLocationUpdates() {
         if (!hasLocationPermission()) return;
         if (locationManager == null) return;
 
-        currentMode = newMode;
-
         try {
-            locationManager.removeUpdates(this);
-        } catch (Exception ignored) {}
-
-        long gpsMs = 60000;
-        float gpsM = 150f;
-        long netMs = 45000;
-        float netM = 150f;
-
-        if (newMode == MODE_FAR) {
-            gpsMs = 60000;
-            gpsM = 150f;
-            netMs = 45000;
-            netM = 150f;
-        } else if (newMode == MODE_MID) {
-            gpsMs = 30000;
-            gpsM = 70f;
-            netMs = 30000;
-            netM = 70f;
-        } else if (newMode == MODE_NEAR) {
-            gpsMs = 10000;
-            gpsM = 25f;
-            netMs = 15000;
-            netM = 40f;
-        } else if (newMode == MODE_ALERT) {
-            gpsMs = 5000;
-            gpsM = 10f;
-            netMs = 7000;
-            netM = 20f;
-        } else if (newMode == MODE_AFTER_ALERT) {
-            gpsMs = 30000;
-            gpsM = 80f;
-            netMs = 30000;
-            netM = 80f;
-        }
-
-        try {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, netMs, netM, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
         } catch (Exception ignored) {}
 
         try {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, gpsMs, gpsM, this);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 7000, 20, this);
         } catch (Exception ignored) {}
-
-        updateForegroundMonitor(true);
     }
 
     private void checkLastKnownLocation() {
@@ -444,7 +356,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
         if (stopName == null || stopName.trim().length() == 0) return;
 
         if (!validCoord()) {
-            updateForegroundMonitor(false);
+            updateForegroundMonitor();
             return;
         }
 
@@ -464,8 +376,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
             prefs.edit().putString("display_km", displayKm).apply();
         } catch (Exception ignored) {}
 
-        applyLocationMode(modeForKm(km));
-        maybeUpdateMonitorByKm(km);
+        updateForegroundMonitor();
 
         if (km <= 2.05 && km >= 0.05) {
             String key = alertKey();
@@ -519,7 +430,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
         try {
             if (tts == null) return;
             tts.stop();
-            tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null, "muavin_lock_alarm_v90");
+            tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null, "muavin_lock_alarm_v88");
         } catch (Exception ignored) {}
     }
 
@@ -546,8 +457,6 @@ public class LiveStopAlertService extends Service implements LocationListener {
     }
 
     private void stopAlarmOnly() {
-        alarmActive = false;
-
         stopVibration();
 
         try {
@@ -559,8 +468,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
             if (nm != null) nm.cancel(ALERT_NOTIFICATION_ID);
         } catch (Exception ignored) {}
 
-        applyLocationMode(MODE_AFTER_ALERT);
-        updateForegroundMonitor(true);
+        updateForegroundMonitor();
     }
 
     private void stopEverything() {
@@ -620,3 +528,43 @@ public class LiveStopAlertService extends Service implements LocationListener {
         return null;
     }
 }
+'''
+
+SERVICE.write_text(SERVICE_CODE, encoding="utf-8")
+print("✅ Service V88 yazıldı")
+
+# MainActivity içindeki kanal oluşturma metodunu V88 kanallarıyla güncelle.
+if MAIN.exists():
+    b2 = MAIN.with_name(MAIN.name + f".bak-v88-{STAMP}")
+    shutil.copy2(MAIN, b2)
+    s = MAIN.read_text(encoding="utf-8", errors="ignore")
+
+    s = s.replace("muavin_live_monitor_v85", "muavin_live_monitor_v88")
+    s = s.replace("muavin_live_alert_v85", "muavin_live_alert_v88")
+    s = s.replace('"Canlı durak takip"', '"Canlı durak kilit ekranı kartı"')
+    s = s.replace('"Canlı durak alarmı"', '"Canlı durak alarmı V88"')
+    s = s.replace("android.app.NotificationManager.IMPORTANCE_LOW", "android.app.NotificationManager.IMPORTANCE_DEFAULT")
+
+    MAIN.write_text(s, encoding="utf-8")
+    print("✅ MainActivity kanal ID V88 güncellendi")
+
+print()
+print("===== KONTROL =====")
+for p in [SERVICE, MAIN]:
+    if not p.exists():
+        continue
+    txt = p.read_text(encoding="utf-8", errors="ignore")
+    for i, line in enumerate(txt.splitlines(), 1):
+        if any(k in line for k in [
+            "muavin_live_monitor_v88",
+            "muavin_live_alert_v88",
+            "MONITOR_NOTIFICATION_ID",
+            "ALERT_NOTIFICATION_ID",
+            "Alarmı durdur",
+            "Takibi kapat",
+            "Canlı durak kilit ekranı kartı"
+        ]):
+            print(f"{p.relative_to(ROOT)}:{i}: {line}")
+
+print()
+print("✅ V88 tamam.")

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/muavinNotifyRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="12dp"
+    android:background="@drawable/bg_muavin_notify_card_v93b">
+
+    <TextView
+        android:id="@+id/muavinNotifyMiniIcon"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:gravity="center"
+        android:text="🚌"
+        android:textSize="24sp"
+        android:background="@drawable/bg_muavin_notify_metric_v93b" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingLeft="12dp"
+        android:paddingRight="8dp">
+
+        <TextView
+            android:id="@+id/muavinNotifyKickerSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="● CANLI DURAK"
+            android:textColor="#ff2f63"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:letterSpacing="0.12" />
+
+        <TextView
+            android:id="@+id/muavinNotifyStopSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ortahan"
+            android:textColor="#ffffff"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/muavinNotifySubSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="4.42 km • 2 yolcu • 0 bagaj"
+            android:textColor="#c9d3e4"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+</LinearLayout>

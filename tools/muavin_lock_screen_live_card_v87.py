@@ -1,4 +1,27 @@
-package com.muavinasistani.app;
+from pathlib import Path
+from datetime import datetime
+import shutil
+import re
+
+ROOT = Path(".").resolve()
+STAMP = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+SERVICE = ROOT / "android_app/app/src/main/java/com/muavinasistani/app/LiveStopAlertService.java"
+MAIN = ROOT / "android_app/app/src/main/java/com/muavinasistani/app/MainActivity.java"
+
+JS_FILES = [
+    ROOT / "static/continue/continue_native_lock_alarm_v85.js",
+    ROOT / "android_app/app/src/main/python/static/continue/continue_native_lock_alarm_v85.js",
+]
+
+TPLS = [
+    ROOT / "templates/continue_trip.html",
+    ROOT / "android_app/app/src/main/python/templates/continue_trip.html",
+]
+
+print("===== V87 KİLİT EKRANI CANLI DURAK KARTI =====")
+
+SERVICE_CODE = r'''package com.muavinasistani.app;
 
 import android.Manifest;
 import android.app.Notification;
@@ -29,20 +52,10 @@ public class LiveStopAlertService extends Service implements LocationListener {
     public static final String ACTION_STOP_ALARM = "com.muavinasistani.app.LOCK_ALARM_STOP_ALARM";
     public static final String ACTION_RESET = "com.muavinasistani.app.LOCK_ALARM_RESET";
 
-    private static final String CHANNEL_MONITOR = "muavin_live_monitor_v90";
-    private static final String CHANNEL_ALERT = "muavin_live_alert_v90";
-
-    private static final int MONITOR_NOTIFICATION_ID = 9001;
-    private static final int ALERT_NOTIFICATION_ID = 9002;
-
+    private static final String CHANNEL_MONITOR = "muavin_live_monitor_v85";
+    private static final String CHANNEL_ALERT = "muavin_live_alert_v85";
+    private static final int NOTIFICATION_ID = 8501;
     private static final String PREF = "muavin_lock_alarm_v85";
-
-    private static final int MODE_NONE = 0;
-    private static final int MODE_FAR = 1;        // 15 km üstü
-    private static final int MODE_MID = 2;        // 5-15 km
-    private static final int MODE_NEAR = 3;       // 2.2-5 km
-    private static final int MODE_ALERT = 4;      // 2.2 km altı
-    private static final int MODE_AFTER_ALERT = 5;
 
     private LocationManager locationManager;
     private TextToSpeech tts;
@@ -58,11 +71,6 @@ public class LiveStopAlertService extends Service implements LocationListener {
     private int offloadCount = 0;
     private int bagCount = 0;
     private String displayKm = "";
-
-    private int currentMode = MODE_NONE;
-    private long lastMonitorUpdateMs = 0;
-    private double lastMonitorKm = -999;
-    private boolean alarmActive = false;
 
     @Override
     public void onCreate() {
@@ -105,13 +113,13 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         if (ACTION_RESET.equals(action)) {
             resetAlertMemory();
-            updateForegroundMonitor(true);
+            updateForegroundMonitor();
             return START_STICKY;
         }
 
         loadTargetFromPrefs();
-        updateForegroundMonitor(true);
-        applyLocationMode(MODE_FAR);
+        updateForegroundMonitor();
+        startLocationUpdates();
         checkLastKnownLocation();
 
         return START_STICKY;
@@ -170,15 +178,6 @@ public class LiveStopAlertService extends Service implements LocationListener {
         return bagCount > 0 ? bagCount + " bagaj var" : "0 bagaj";
     }
 
-    private String batteryModeText() {
-        if (currentMode == MODE_FAR) return "pil koruma";
-        if (currentMode == MODE_MID) return "normal takip";
-        if (currentMode == MODE_NEAR) return "yakın takip";
-        if (currentMode == MODE_ALERT) return "alarm bölgesi";
-        if (currentMode == MODE_AFTER_ALERT) return "alarm sonrası";
-        return "takip";
-    }
-
     private String monitorBody() {
         return stopTitle() + " • " + kmText() + " • " + passengerText() + " • " + bagText();
     }
@@ -187,39 +186,32 @@ public class LiveStopAlertService extends Service implements LocationListener {
         return "CANLI DURAK\n"
                 + stopTitle()
                 + "\nKalan mesafe: " + kmText()
-                + "\n" + passengerText() + " • " + bagText()
-                + "\nMod: " + batteryModeText();
+                + "\n" + passengerText() + " • " + bagText();
     }
 
-    private void updateForegroundMonitor(boolean force) {
-        long now = System.currentTimeMillis();
-
-        long minGap = 30000;
-        if (currentMode == MODE_NEAR || currentMode == MODE_ALERT) minGap = 10000;
-        if (currentMode == MODE_AFTER_ALERT) minGap = 30000;
-
-        if (!force && now - lastMonitorUpdateMs < minGap) return;
-
-        lastMonitorUpdateMs = now;
-        startForegroundSafe(buildMonitorNotification());
+    private void updateForegroundMonitor() {
+        startForegroundSafe(buildNotification(
+                CHANNEL_MONITOR,
+                "Muavin Asistanı canlı takip",
+                monitorBody(),
+                monitorBigText(),
+                false
+        ));
     }
 
-    private void maybeUpdateMonitorByKm(double km) {
-        long now = System.currentTimeMillis();
+    private void showAlarmNotification(String message) {
+        startVibration();
 
-        double diff = Math.abs(km - lastMonitorKm);
-        long minGap = 30000;
-
-        if (km <= 5.0) minGap = 10000;
-        if (km <= 2.2) minGap = 7000;
-
-        if (lastMonitorKm < -900 || diff >= 0.10 || now - lastMonitorUpdateMs >= minGap) {
-            lastMonitorKm = km;
-            updateForegroundMonitor(true);
-        }
+        startForegroundSafe(buildNotification(
+                CHANNEL_ALERT,
+                "Canlı durak alarmı",
+                message,
+                "CANLI DURAK ALARMI\n" + stopTitle() + "\n" + message,
+                true
+        ));
     }
 
-    private Notification buildMonitorNotification() {
+    private Notification buildNotification(String channelId, String title, String body, String bigText, boolean alertMode) {
         Intent openIntent = new Intent(this, MainActivity.class);
         openIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -228,100 +220,55 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         PendingIntent openPi = PendingIntent.getActivity(this, 10, openIntent, piFlags);
 
+        Intent stopAlarmIntent = new Intent(this, LiveStopAlertService.class);
+        stopAlarmIntent.setAction(ACTION_STOP_ALARM);
+        PendingIntent stopAlarmPi = PendingIntent.getService(this, 11, stopAlarmIntent, piFlags);
+
         Intent stopServiceIntent = new Intent(this, LiveStopAlertService.class);
         stopServiceIntent.setAction(ACTION_STOP_SERVICE);
         PendingIntent stopServicePi = PendingIntent.getService(this, 12, stopServiceIntent, piFlags);
 
-        Notification.Builder b = new Notification.Builder(this, CHANNEL_MONITOR)
-                .setSmallIcon(R.drawable.ic_muavin_notify)
-                .setContentTitle("Muavin Asistanı canlı takip")
-                .setContentText(monitorBody())
-                .setStyle(new Notification.BigTextStyle().bigText(monitorBigText()))
+        Notification.Builder b = new Notification.Builder(this, channelId)
+                .setSmallIcon(android.R.drawable.ic_dialog_map)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setStyle(new Notification.BigTextStyle().bigText(bigText == null ? body : bigText))
                 .setContentIntent(openPi)
-                .setOngoing(true)
-                .setOnlyAlertOnce(true)
+                .setOngoing(!alertMode)
+                .setOnlyAlertOnce(!alertMode)
                 .setShowWhen(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setCategory(Notification.CATEGORY_NAVIGATION)
-                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Takibi kapat", stopServicePi);
+                .setCategory(alertMode ? Notification.CATEGORY_ALARM : Notification.CATEGORY_SERVICE);
 
-        b.setPriority(Notification.PRIORITY_DEFAULT);
+        if (Build.VERSION.SDK_INT >= 21) {
+            b.setPriority(alertMode ? Notification.PRIORITY_MAX : Notification.PRIORITY_LOW);
+        }
 
-        return b.build();
-    }
-
-    private Notification buildAlertNotification(String message) {
-        Intent openIntent = new Intent(this, MainActivity.class);
-        openIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-        int piFlags = PendingIntent.FLAG_UPDATE_CURRENT;
-        if (Build.VERSION.SDK_INT >= 23) piFlags |= PendingIntent.FLAG_IMMUTABLE;
-
-        PendingIntent openPi = PendingIntent.getActivity(this, 20, openIntent, piFlags);
-
-        Intent stopAlarmIntent = new Intent(this, LiveStopAlertService.class);
-        stopAlarmIntent.setAction(ACTION_STOP_ALARM);
-        PendingIntent stopAlarmPi = PendingIntent.getService(this, 21, stopAlarmIntent, piFlags);
-
-        String big = "CANLI DURAK ALARMI\n" + stopTitle() + "\n" + message;
-
-        Notification.Builder b = new Notification.Builder(this, CHANNEL_ALERT)
-                .setSmallIcon(R.drawable.ic_muavin_notify)
-                .setContentTitle("Canlı durak alarmı")
-                .setContentText(message)
-                .setStyle(new Notification.BigTextStyle().bigText(big))
-                .setContentIntent(openPi)
-                .setOngoing(true)
-                .setOnlyAlertOnce(false)
-                .setShowWhen(true)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setCategory(Notification.CATEGORY_ALARM)
-                .addAction(android.R.drawable.ic_media_pause, "Alarmı durdur", stopAlarmPi)
-                .addAction(android.R.drawable.ic_menu_view, "Uygulamayı aç", openPi);
-
-        b.setPriority(Notification.PRIORITY_MAX);
+        if (alertMode) {
+            b.addAction(android.R.drawable.ic_media_pause, "Alarmı durdur", stopAlarmPi);
+            b.addAction(android.R.drawable.ic_menu_view, "Uygulamayı aç", openPi);
+            b.setAutoCancel(false);
+        } else {
+            b.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Takibi kapat", stopServicePi);
+        }
 
         return b.build();
-    }
-
-    private void showAlarmNotification(String message) {
-        alarmActive = true;
-        startVibration();
-
-        try {
-            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            if (nm != null) {
-                nm.notify(ALERT_NOTIFICATION_ID, buildAlertNotification(message));
-            }
-        } catch (Exception ignored) {}
-
-        launchLockAlarmActivityIfAvailable();
-        applyLocationMode(MODE_AFTER_ALERT);
-    }
-
-    private void launchLockAlarmActivityIfAvailable() {
-        try {
-            Intent i = new Intent();
-            i.setClassName(getPackageName(), getPackageName() + ".LockAlarmActivity");
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(i);
-        } catch (Exception ignored) {}
     }
 
     private void startForegroundSafe(Notification notification) {
         try {
             if (Build.VERSION.SDK_INT >= 29) {
                 startForeground(
-                        MONITOR_NOTIFICATION_ID,
+                        NOTIFICATION_ID,
                         notification,
                         ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
                 );
             } else {
-                startForeground(MONITOR_NOTIFICATION_ID, notification);
+                startForeground(NOTIFICATION_ID, notification);
             }
         } catch (Exception e) {
             try {
-                startForeground(MONITOR_NOTIFICATION_ID, notification);
+                startForeground(NOTIFICATION_ID, notification);
             } catch (Exception ignored) {}
         }
     }
@@ -334,20 +281,20 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         NotificationChannel monitor = new NotificationChannel(
                 CHANNEL_MONITOR,
-                "Canlı durak pil korumalı takip",
-                NotificationManager.IMPORTANCE_DEFAULT
+                "Canlı durak takip",
+                NotificationManager.IMPORTANCE_LOW
         );
-        monitor.setDescription("Canlı durak, kalan mesafe, yolcu ve bagaj kartı");
+        monitor.setDescription("Canlı durak arka plan takibi");
         monitor.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
         NotificationChannel alert = new NotificationChannel(
                 CHANNEL_ALERT,
-                "Canlı durak alarmı V90",
+                "Canlı durak alarmı",
                 NotificationManager.IMPORTANCE_HIGH
         );
         alert.setDescription("2 km kala sesli ve titreşimli uyarı");
         alert.enableVibration(true);
-        alert.setVibrationPattern(new long[]{0, 700, 300, 700, 300, 1000});
+        alert.setVibrationPattern(new long[]{0, 600, 300, 600, 300, 900});
         alert.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
         nm.createNotificationChannel(monitor);
@@ -359,66 +306,17 @@ public class LiveStopAlertService extends Service implements LocationListener {
                 || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private int modeForKm(double km) {
-        if (alarmActive) return MODE_AFTER_ALERT;
-        if (km <= 2.20) return MODE_ALERT;
-        if (km <= 5.00) return MODE_NEAR;
-        if (km <= 15.00) return MODE_MID;
-        return MODE_FAR;
-    }
-
-    private void applyLocationMode(int newMode) {
-        if (newMode == currentMode && newMode != MODE_NONE) return;
+    private void startLocationUpdates() {
         if (!hasLocationPermission()) return;
         if (locationManager == null) return;
 
-        currentMode = newMode;
-
         try {
-            locationManager.removeUpdates(this);
-        } catch (Exception ignored) {}
-
-        long gpsMs = 60000;
-        float gpsM = 150f;
-        long netMs = 45000;
-        float netM = 150f;
-
-        if (newMode == MODE_FAR) {
-            gpsMs = 60000;
-            gpsM = 150f;
-            netMs = 45000;
-            netM = 150f;
-        } else if (newMode == MODE_MID) {
-            gpsMs = 30000;
-            gpsM = 70f;
-            netMs = 30000;
-            netM = 70f;
-        } else if (newMode == MODE_NEAR) {
-            gpsMs = 10000;
-            gpsM = 25f;
-            netMs = 15000;
-            netM = 40f;
-        } else if (newMode == MODE_ALERT) {
-            gpsMs = 5000;
-            gpsM = 10f;
-            netMs = 7000;
-            netM = 20f;
-        } else if (newMode == MODE_AFTER_ALERT) {
-            gpsMs = 30000;
-            gpsM = 80f;
-            netMs = 30000;
-            netM = 80f;
-        }
-
-        try {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, netMs, netM, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
         } catch (Exception ignored) {}
 
         try {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, gpsMs, gpsM, this);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 7000, 20, this);
         } catch (Exception ignored) {}
-
-        updateForegroundMonitor(true);
     }
 
     private void checkLastKnownLocation() {
@@ -442,9 +340,8 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         if (location == null) return;
         if (stopName == null || stopName.trim().length() == 0) return;
-
         if (!validCoord()) {
-            updateForegroundMonitor(false);
+            updateForegroundMonitor();
             return;
         }
 
@@ -464,8 +361,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
             prefs.edit().putString("display_km", displayKm).apply();
         } catch (Exception ignored) {}
 
-        applyLocationMode(modeForKm(km));
-        maybeUpdateMonitorByKm(km);
+        updateForegroundMonitor();
 
         if (km <= 2.05 && km >= 0.05) {
             String key = alertKey();
@@ -519,7 +415,7 @@ public class LiveStopAlertService extends Service implements LocationListener {
         try {
             if (tts == null) return;
             tts.stop();
-            tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null, "muavin_lock_alarm_v90");
+            tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null, "muavin_lock_alarm_v87");
         } catch (Exception ignored) {}
     }
 
@@ -546,21 +442,13 @@ public class LiveStopAlertService extends Service implements LocationListener {
     }
 
     private void stopAlarmOnly() {
-        alarmActive = false;
-
         stopVibration();
 
         try {
             if (tts != null) tts.stop();
         } catch (Exception ignored) {}
 
-        try {
-            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            if (nm != null) nm.cancel(ALERT_NOTIFICATION_ID);
-        } catch (Exception ignored) {}
-
-        applyLocationMode(MODE_AFTER_ALERT);
-        updateForegroundMonitor(true);
+        updateForegroundMonitor();
     }
 
     private void stopEverything() {
@@ -579,14 +467,6 @@ public class LiveStopAlertService extends Service implements LocationListener {
 
         try {
             stopForeground(true);
-        } catch (Exception ignored) {}
-
-        try {
-            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            if (nm != null) {
-                nm.cancel(MONITOR_NOTIFICATION_ID);
-                nm.cancel(ALERT_NOTIFICATION_ID);
-            }
         } catch (Exception ignored) {}
     }
 
@@ -620,3 +500,279 @@ public class LiveStopAlertService extends Service implements LocationListener {
         return null;
     }
 }
+'''
+
+if not SERVICE.parent.exists():
+    SERVICE.parent.mkdir(parents=True, exist_ok=True)
+
+if SERVICE.exists():
+    b = SERVICE.with_name(SERVICE.name + f".bak-v87-{STAMP}")
+    shutil.copy2(SERVICE, b)
+    print("📦 Service yedeği:", b.relative_to(ROOT))
+
+SERVICE.write_text(SERVICE_CODE, encoding="utf-8")
+print("✅ Service V87 yazıldı:", SERVICE.relative_to(ROOT))
+
+# MainActivity bridge'e updateTargetV87 ekle.
+if not MAIN.exists():
+    raise SystemExit("❌ MainActivity.java yok")
+
+b = MAIN.with_name(MAIN.name + f".bak-v87-{STAMP}")
+shutil.copy2(MAIN, b)
+print("📦 MainActivity yedeği:", b.relative_to(ROOT))
+
+s = MAIN.read_text(encoding="utf-8", errors="ignore")
+
+if "public void updateTargetV87(" not in s:
+    insert = r'''
+        @JavascriptInterface
+        public void updateTargetV87(String tripId, String stopName, String lat, String lng, String offloadCount, String bagCount, String displayKm) {
+            try {
+                android.content.SharedPreferences prefs = getSharedPreferences("muavin_lock_alarm_v85", MODE_PRIVATE);
+                prefs.edit()
+                        .putString("trip_id", tripId == null ? "active" : tripId.trim())
+                        .putString("stop_name", stopName == null ? "" : stopName.trim())
+                        .putString("target_lat", lat == null ? "" : lat.trim())
+                        .putString("target_lng", lng == null ? "" : lng.trim())
+                        .putString("offload_count", offloadCount == null ? "0" : offloadCount.trim())
+                        .putString("bag_count", bagCount == null ? "0" : bagCount.trim())
+                        .putString("display_km", displayKm == null ? "" : displayKm.trim())
+                        .putBoolean("enabled", true)
+                        .apply();
+            } catch (Exception ignored) {}
+        }
+
+'''
+    marker = "        @JavascriptInterface\n        public void start()"
+    if marker not in s:
+        raise SystemExit("❌ LockAlarmBridge start marker bulunamadı")
+    s = s.replace(marker, insert + marker, 1)
+    print("✅ MainActivity updateTargetV87 eklendi")
+else:
+    print("ℹ️ updateTargetV87 zaten var")
+
+MAIN.write_text(s, encoding="utf-8")
+
+JS_CODE = r'''/* CONTINUE_NATIVE_LOCK_ALARM_V87
+   V87: Kilit ekranı canlı durak kartı.
+   V82 kuralı: canlı durak GPS ile değişmez.
+*/
+(function(){
+  if(window.CONTINUE_NATIVE_LOCK_ALARM_V87_READY) return;
+  window.CONTINUE_NATIVE_LOCK_ALARM_V87_READY = true;
+
+  const BOOT = window.CONTINUE_BOOT || {};
+  const tripId = String(BOOT.tripId || BOOT.trip_id || "active");
+  const routeCoords = Array.isArray(BOOT.routeCoords) ? BOOT.routeCoords : [];
+
+  let started = false;
+  let lastSig = "";
+
+  function clean(v){
+    return String(v == null ? "" : v).replace(/\s+/g, " ").trim();
+  }
+
+  function norm(v){
+    return clean(v).toLocaleLowerCase("tr-TR");
+  }
+
+  function numFromText(v){
+    const m = clean(v).match(/\d+/);
+    return m ? Number(m[0]) : 0;
+  }
+
+  function currentStop(){
+    const el = document.getElementById("liveCurrentStopName");
+    return clean(el && el.textContent);
+  }
+
+  function distanceText(){
+    const ids = ["liveDistanceValue", "liveDistanceText", "liveKmValue"];
+    for(const id of ids){
+      const el = document.getElementById(id);
+      if(el){
+        const txt = clean(el.textContent);
+        if(txt) return txt;
+      }
+    }
+
+    const card = document.querySelector(".live-current-card, .live-stop-card, .live-panel");
+    if(card){
+      const txt = clean(card.textContent);
+      const m = txt.match(/Kalan mesafe[:\s]*([0-9]+[.,][0-9]+|[0-9]+)\s*km/i);
+      if(m) return m[1].replace(",", ".") + " km";
+    }
+
+    return "";
+  }
+
+  function offloadCount(){
+    const el = document.getElementById("liveOffloadCount");
+    return numFromText(el && el.textContent);
+  }
+
+  function bagCount(){
+    const selectors = [
+      "#liveBagajCount",
+      "#liveBagCount",
+      "#liveBagajMetric",
+      "#liveBagMetric",
+      "[data-live-bag-count]"
+    ];
+
+    for(const sel of selectors){
+      const el = document.querySelector(sel);
+      if(el){
+        const n = numFromText(el.textContent);
+        if(Number.isFinite(n)) return n;
+      }
+    }
+
+    return 0;
+  }
+
+  function findCoord(stop){
+    const key = norm(stop);
+    if(!key) return null;
+
+    for(const item of routeCoords){
+      const name = clean(item.stop || item.name || item.title || item.durak || "");
+      if(norm(name) !== key) continue;
+
+      const lat = Number(item.lat ?? item.latitude ?? item.enlem);
+      const lng = Number(item.lng ?? item.lon ?? item.longitude ?? item.boylam);
+
+      if(Number.isFinite(lat) && Number.isFinite(lng)){
+        return { lat, lng };
+      }
+    }
+
+    return null;
+  }
+
+  function updateBridge(stop, off, bag, c, km){
+    if(!window.AndroidLockAlarm) return;
+
+    try{
+      window.AndroidLockAlarm.updateTargetV87(
+        tripId,
+        stop,
+        c ? String(c.lat) : "",
+        c ? String(c.lng) : "",
+        String(off),
+        String(bag),
+        km || ""
+      );
+    }catch(err){
+      window.AndroidLockAlarm.updateTarget(
+        tripId,
+        stop,
+        c ? String(c.lat) : "",
+        c ? String(c.lng) : "",
+        String(off),
+        String(bag)
+      );
+    }
+  }
+
+  function sync(){
+    try{
+      if(!window.AndroidLockAlarm) return;
+
+      const stop = currentStop();
+      if(!stop) return;
+
+      const off = offloadCount();
+      const bag = bagCount();
+      const km = distanceText();
+      const c = findCoord(stop);
+
+      const sig = [tripId, stop, c ? c.lat : "NO_LAT", c ? c.lng : "NO_LNG", off, bag, km].join("|");
+
+      if(sig !== lastSig){
+        lastSig = sig;
+        updateBridge(stop, off, bag, c, km);
+      }
+
+      if(!started){
+        started = true;
+        window.AndroidLockAlarm.start();
+      }
+
+    }catch(err){
+      console.warn("CONTINUE_NATIVE_LOCK_ALARM_V87 sync error", err);
+    }
+  }
+
+  window.continueNativeLockAlarmV87 = {
+    sync,
+    stopAlarm(){
+      try{ if(window.AndroidLockAlarm) window.AndroidLockAlarm.stopAlarm(); }catch(_){}
+    },
+    stopService(){
+      try{ if(window.AndroidLockAlarm) window.AndroidLockAlarm.stopService(); }catch(_){}
+    },
+    reset(){
+      try{ if(window.AndroidLockAlarm) window.AndroidLockAlarm.reset(); }catch(_){}
+    }
+  };
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", sync);
+  }else{
+    sync();
+  }
+
+  setTimeout(sync, 800);
+  setTimeout(sync, 2000);
+  setInterval(sync, 3000);
+
+  if(window.MutationObserver){
+    const targets = [
+      document.getElementById("liveCurrentStopName"),
+      document.getElementById("liveDistanceValue"),
+      document.getElementById("liveOffloadCount"),
+      document.getElementById("liveBagajCount"),
+      document.getElementById("liveBagajMetric")
+    ].filter(Boolean);
+
+    const obs = new MutationObserver(sync);
+    targets.forEach(el => obs.observe(el, { childList:true, characterData:true, subtree:true }));
+  }
+})();
+'''
+
+for p in JS_FILES:
+    if not p.exists():
+        raise SystemExit(f"❌ JS yok: {p}")
+    b = p.with_name(p.name + f".bak-v87-{STAMP}")
+    shutil.copy2(p, b)
+    p.write_text(JS_CODE, encoding="utf-8")
+    print("✅ JS V87 yazıldı:", p.relative_to(ROOT))
+
+for p in TPLS:
+    if not p.exists():
+        print("⚠️ Template yok:", p.relative_to(ROOT))
+        continue
+
+    b = p.with_name(p.name + f".bak-v87-{STAMP}")
+    shutil.copy2(p, b)
+
+    t = p.read_text(encoding="utf-8", errors="ignore")
+    t = re.sub(r'\?v=native-lock-alarm-v8[0-9]', '?v=native-lock-alarm-v87', t)
+
+    p.write_text(t, encoding="utf-8")
+    print("✅ Template cache V87:", p.relative_to(ROOT))
+
+print()
+print("===== KONTROL =====")
+for p in [SERVICE, MAIN] + JS_FILES + TPLS:
+    txt = p.read_text(encoding="utf-8", errors="ignore")
+    for i, line in enumerate(txt.splitlines(), 1):
+        if any(k in line for k in [
+            "V87", "updateTargetV87", "display_km", "Kalan mesafe", "monitorBody", "native-lock-alarm-v87"
+        ]):
+            print(f"{p.relative_to(ROOT)}:{i}: {line}")
+
+print()
+print("✅ V87 tamam.")
