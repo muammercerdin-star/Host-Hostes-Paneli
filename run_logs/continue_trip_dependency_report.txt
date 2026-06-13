@@ -1,0 +1,110 @@
+===== CONTINUE_TRIP BAĞIMLILIK RAPORU =====
+TIME: 2026-06-12 22:48:35
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+===== 1) TEMPLATE =====
+WEB:     /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/continue_trip.html lines=437 nonempty=362 size=16406 sha=77734b05f51b
+ANDROID: /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/templates/continue_trip.html lines=437 nonempty=362 size=16406 sha=77734b05f51b
+SYNC:    AYNI ✅
+
+===== 2) TEMPLATE İÇİ JINJA İSKELET =====
+{{ değişken }} sayısı: 60
+{% blok %} sayısı:      25
+Inline <script> sayısı:   2
+Static ref sayısı:        12
+
+===== 3) DIŞARIDAN GELEN CSS / JS DOSYALARI =====
+CSS continue/continue_trip.css                              VAR lines=18    nonempty=17    size=912     sha=3f309d22069b
+CSS continue/continue_trip_v99_clean.css                    VAR lines=1382  nonempty=1202  size=25802   sha=0958417858c4
+CSS continue/continue_speed_final_v105.css                  VAR lines=126   nonempty=110   size=2744    sha=72cff9c60e43
+JS  continue/continue_trip_core.js                          VAR lines=2471  nonempty=1977  size=75965   sha=969d98ed59a6
+JS  continue/continue_bag_emanet.js                         VAR lines=128   nonempty=102   size=3525    sha=0ff3a3abf6a9
+JS  continue/continue_flow_refresh.js                       VAR lines=418   nonempty=329   size=10839   sha=f41dbb50eee2
+JS  continue/continue_trip_ui.js                            VAR lines=250   nonempty=195   size=7476    sha=4e8f7e386c1d
+JS  continue/continue_refresh_button_v49.js                 VAR lines=44    nonempty=38    size=1198    sha=584a712684e2
+JS  continue/continue_native_lock_alarm_v85.js              VAR lines=187   nonempty=155   size=4780    sha=0613bc352539
+JS  continue/continue_trip_v99_clean.js                     VAR lines=1589  nonempty=1252  size=42277   sha=215339187b38
+JS  continue/continue_speed_final_v105.js                   VAR lines=148   nonempty=120   size=3308    sha=1edd1a915040
+JS  seats/voice-tts.js                                      VAR lines=159   nonempty=128   size=3944    sha=dacbfcc0d6f5
+
+===== 4) TOPLAM GERÇEK EKRAN YÜKÜ =====
+Template satırı:      437
+Dış CSS/JS satırı:    6920
+Yaklaşık toplam satır:7357
+Yaklaşık dolu satır:  5987
+Yaklaşık toplam size: 199176 byte
+
+===== 5) APP.PY / ROUTE ARAMA =====
+
+--- continue_trip hit=2 ---
+1430: def continue_trip():
+1912: "continue_trip.html",
+
+--- render_template('continue_trip.html' hit=0 ---
+
+--- render_template("continue_trip.html" hit=0 ---
+
+--- CONTINUE_BOOT hit=0 ---
+
+--- live_summary hit=2 ---
+1881: live_summary = {
+1918: live_summary=live_summary,
+
+--- live_runtime hit=33 ---
+806: def ensure_live_runtime_state_table() -> None:
+810: CREATE TABLE IF NOT EXISTS live_runtime_state(
+824: def fetch_live_runtime_state(trip_id: int) -> dict:
+825: ensure_live_runtime_state_table()
+829: FROM live_runtime_state
+855: def upsert_live_runtime_state(
+864: ensure_live_runtime_state_table()
+868: INSERT INTO live_runtime_state(trip_id, live_stop, speed, gps_km, eta_main, eta_sub, updated_at)
+904: def api_live_runtime_state():
+925: live_stop = (fetch_live_runtime_state(tid).get("live_stop") or "").strip()
+947: upsert_live_runtime_state(
+955: return jsonify({"ok": True, "state": fetch_live_runtime_state(tid)})
+957: return jsonify({"ok": True, "state": fetch_live_runtime_state(tid)})
+1500: live_runtime = fetch_live_runtime_state(tid)
+1562: runtime_live_stop = find_route_stop((live_runtime.get("live_stop") or "").strip())
+1564: runtime_live_stop = (live_runtime.get("live_stop") or "").strip()
+1867: if live_runtime:
+1870: if str(live_runtime.get("gps_km") or "").strip():
+1871: live_current["distance"] = str(live_runtime.get("gps_km") or "").strip()
+1872: if str(live_runtime.get("eta_main") or "").strip():
+1873: live_current["eta"] = str(live_runtime.get("eta_main") or "").strip()
+1875: live_current["speed"] = int(float(live_runtime.get("speed") or 0))
+1919: live_runtime=live_runtime,
+2688: row = cur.execute("SELECT trip_id FROM live_runtime_state ORDER BY updated_at DESC LIMIT 1").fetchone()
+2703: row = cur.execute("SELECT live_stop FROM live_runtime_state WHERE trip_id=?", (trip_id,)).fetchone()
+2934: UPDATE live_runtime_state
+2945: INSERT INTO live_runtime_state
+3288: live_runtime = fetch_live_runtime_state(tid)
+3454: live_stop = (live_runtime.get("live_stop") or "").strip()
+3571: "live_runtime": live_runtime,
+3642: "fetch_live_runtime_state": fetch_live_runtime_state,
+4695: ensure_live_runtime_state_table()
+4696: db.execute("DELETE FROM live_runtime_state WHERE trip_id=?", (tid,))
+
+--- live_stops hit=3 ---
+1847: live_stops = [
+1908: "next_stop": live_stops[1]["name"] if len(live_stops) > 1 else current_stop,
+1917: live_stops=live_stops,
+
+--- continue_route_coords hit=4 ---
+1503: continue_route_coords = []
+1516: continue_route_coords.append({
+1524: continue_route_coords = []
+1920: continue_route_coords=continue_route_coords,
+
+--- continue_schedule_items hit=4 ---
+1526: continue_schedule_items = []
+1551: continue_schedule_items.append({
+1559: continue_schedule_items = []
+1921: continue_schedule_items=continue_schedule_items,
+
+===== 6) KISA YORUM =====
+continue_trip.html görünen iskelet dosyasıdır.
+Asıl davranışların büyük kısmı static/continue/*.js dosyalarından gelir.
+Asıl görünümün büyük kısmı static/continue/*.css dosyalarından gelir.
+Durak, hız, bagaj, rota gibi canlı veriler app.py tarafından Jinja değişkenleriyle basılır.
+Bu yüzden refactor yapacaksak sadece template değil, bağlı JS/CSS dosyalarını da beraber haritalamak gerekir.

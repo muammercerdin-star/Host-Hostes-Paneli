@@ -1,0 +1,1134 @@
+===== MUAVİN CONTINUE STEP-1 DAVRANIŞ HARİTASI =====
+TIME: 2026-06-12 22:52:55
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+NOT: Bu script dosya değiştirmez.
+
+
+===== 1) DOSYA BOYUTLARI =====
+TPL WEB     VAR lines=437   nonempty=362   size=16406   sha=77734b05f51b /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/continue_trip.html
+TPL ANDROID VAR lines=437   nonempty=362   size=16406   sha=77734b05f51b /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/templates/continue_trip.html
+CSS WEB     VAR lines=18    nonempty=17    size=912     sha=3f309d22069b /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip.css
+CSS WEB     VAR lines=1382  nonempty=1202  size=25802   sha=0958417858c4 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.css
+CSS WEB     VAR lines=126   nonempty=110   size=2744    sha=72cff9c60e43 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_speed_final_v105.css
+CSS ANDROID VAR lines=18    nonempty=17    size=912     sha=3f309d22069b /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip.css
+CSS ANDROID VAR lines=1382  nonempty=1202  size=25802   sha=0958417858c4 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_v99_clean.css
+CSS ANDROID VAR lines=126   nonempty=110   size=2744    sha=72cff9c60e43 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_speed_final_v105.css
+JS  WEB     VAR lines=2471  nonempty=1977  size=75965   sha=969d98ed59a6 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_core.js
+JS  WEB     VAR lines=128   nonempty=102   size=3525    sha=0ff3a3abf6a9 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_bag_emanet.js
+JS  WEB     VAR lines=418   nonempty=329   size=10839   sha=f41dbb50eee2 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_flow_refresh.js
+JS  WEB     VAR lines=250   nonempty=195   size=7476    sha=4e8f7e386c1d /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_ui.js
+JS  WEB     VAR lines=44    nonempty=38    size=1198    sha=584a712684e2 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_refresh_button_v49.js
+JS  WEB     VAR lines=187   nonempty=155   size=4780    sha=0613bc352539 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_native_lock_alarm_v85.js
+JS  WEB     VAR lines=1589  nonempty=1252  size=42277   sha=215339187b38 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.js
+JS  WEB     VAR lines=148   nonempty=120   size=3308    sha=1edd1a915040 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_speed_final_v105.js
+JS  WEB     VAR lines=159   nonempty=128   size=3944    sha=dacbfcc0d6f5 /data/data/com.termux/files/home/Host-Hostes-Paneli/static/seats/voice-tts.js
+JS  ANDROID VAR lines=2471  nonempty=1977  size=75965   sha=969d98ed59a6 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_core.js
+JS  ANDROID VAR lines=128   nonempty=102   size=3525    sha=0ff3a3abf6a9 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_bag_emanet.js
+JS  ANDROID VAR lines=418   nonempty=329   size=10839   sha=f41dbb50eee2 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_flow_refresh.js
+JS  ANDROID VAR lines=250   nonempty=195   size=7476    sha=4e8f7e386c1d /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_ui.js
+JS  ANDROID VAR lines=44    nonempty=38    size=1198    sha=584a712684e2 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_refresh_button_v49.js
+JS  ANDROID VAR lines=187   nonempty=155   size=4780    sha=0613bc352539 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_native_lock_alarm_v85.js
+JS  ANDROID VAR lines=1589  nonempty=1252  size=42277   sha=215339187b38 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_trip_v99_clean.js
+JS  ANDROID VAR lines=148   nonempty=120   size=3308    sha=1edd1a915040 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/continue/continue_speed_final_v105.js
+JS  ANDROID VAR lines=159   nonempty=128   size=3944    sha=dacbfcc0d6f5 /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/static/seats/voice-tts.js
+
+WEB tarafı yaklaşık toplam satır: 7357
+
+===== 2) WEB / ANDROID SENKRON =====
+template               AYNI ✅ web=77734b05f51b android=77734b05f51b
+continue_trip.css      AYNI ✅ web=3f309d22069b android=3f309d22069b
+v99 css                AYNI ✅ web=0958417858c4 android=0958417858c4
+v105 css               AYNI ✅ web=72cff9c60e43 android=72cff9c60e43
+core js                AYNI ✅ web=969d98ed59a6 android=969d98ed59a6
+bag emanet js          AYNI ✅ web=0ff3a3abf6a9 android=0ff3a3abf6a9
+flow refresh js        AYNI ✅ web=f41dbb50eee2 android=f41dbb50eee2
+ui js                  AYNI ✅ web=4e8f7e386c1d android=4e8f7e386c1d
+refresh button js      AYNI ✅ web=584a712684e2 android=584a712684e2
+native alarm js        AYNI ✅ web=0613bc352539 android=0613bc352539
+v99 js                 AYNI ✅ web=215339187b38 android=215339187b38
+v105 js                AYNI ✅ web=1edd1a915040 android=1edd1a915040
+
+===== 3) TEMPLATE HARİTASI =====
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/continue_trip.html
+EXISTS: YES lines=437 nonempty=362 size=16406 sha=77734b05f51b
+html_ids=40 duplicate_ids=0
+jinja_vars=60 jinja_blocks=25
+inline_scripts=2
+CSS/JS ORDER:
+  8: <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip.css') }}?v=refresh-v49">
+  9: <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip_v99_clean.css') }}?v=v99-clean-{{ trip['id'] }}">
+  10: <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_speed_final_v105.css') }}?v=v105-{{ trip['id'] }}">
+  288: <script>
+  377: <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+  406: <script id="continue-boot-data">
+  428: <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=live-stop-lock-v82"></script>
+  429: <script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
+  430: <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
+  431: <script src="{{ url_for('static', filename='continue/continue_trip_ui.js') }}?v=js-safe-split-1"></script>
+  432: <script src="{{ url_for('static', filename='continue/continue_refresh_button_v49.js') }}?v=refresh-v49"></script>
+  433: <script src="{{ url_for('static', filename='continue/continue_native_lock_alarm_v85.js') }}?v=native-lock-alarm-v87"></script>
+  434: <script src="{{ url_for('static', filename='continue/continue_trip_v99_clean.js') }}?v=v105-final-{{ trip['id'] }}"></script>
+  435: <script src="{{ url_for('static', filename='continue/continue_speed_final_v105.js') }}?v=v105-{{ trip['id'] }}"></script>
+IMPORTANT BLOCK LINES:
+  v99-gauges                         lines=[47]
+  v99SpeedVal                        lines=[50]
+  DOLULUK                            lines=[56]
+  liveCurrentCard                    lines=[82]
+  tlContainer                        lines=[157]
+  endTripForm                        lines=[210, 290]
+  continue-boot-data                 lines=[406]
+  CONTINUE_BOOT                      lines=[407]
+  continue_trip_v99_clean.js         lines=[434]
+  continue_speed_final_v105.js       lines=[435]
+
+===== 4) JS HARİTALARI =====
+
+----- JS MAP: continue_trip_core.js -----
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_core.js
+EXISTS: YES lines=2471 nonempty=1977 size=75965 sha=969d98ed59a6
+markers=0 unique_marker_bases=0
+functions_detected=80
+  FN 17: parseKmAny :: function parseKmAny(value){
+  FN 31: formatGpsKm :: function formatGpsKm(value){
+  FN 61: setInitial :: function setInitial(){
+  FN 85: sync :: function sync(){
+  FN 159: text :: function text(v){
+  FN 163: escapeHtml :: function escapeHtml(v){
+  FN 172: currentStopName :: function currentStopName(){
+  FN 176: openSheet :: function openSheet(){
+  FN 185: closeSheet :: function closeSheet(){
+  FN 194: renderEmpty :: function renderEmpty(message){
+  FN 198: routeOptions :: function routeOptions(currentToStop){
+  FN 207: findPassenger :: function findPassenger(seatNo){
+  FN 215: renderChangeDestinationForm :: function renderChangeDestinationForm(passenger){
+  FN 267: saveDestinationChange :: async function saveDestinationChange(){
+  FN 333: askLiveOffloadConfirm :: function askLiveOffloadConfirm(passenger){
+  FN 386: offloadSeatFromSheet :: async function offloadSeatFromSheet(seatNo){
+  FN 457: askBulkOffloadConfirm :: function askBulkOffloadConfirm(data){
+  FN 509: bulkOffloadCurrentStop :: async function bulkOffloadCurrentStop(){
+  FN 583: renderBagPhotoGallery :: function renderBagPhotoGallery(photos){
+  FN 621: renderConsignmentDetail :: async function renderConsignmentDetail(cid){
+  FN 705: askConsignmentDeliverConfirm :: function askConsignmentDeliverConfirm(cid){
+  FN 759: deliverConsignmentFromSheet :: async function deliverConsignmentFromSheet(cid){
+  FN 822: renderSeatBagDetail :: async function renderSeatBagDetail(seatNo){
+  FN 895: sheetGenderClass :: function sheetGenderClass(p){
+  FN 909: sheetGenderLabel :: function sheetGenderLabel(p){
+  FN 923: sheetGenderChip :: function sheetGenderChip(p){
+  FN 929: renderPassengers :: function renderPassengers(data){
+  FN 977: renderBags :: function renderBags(data){
+  FN 996: locLine :: function locLine(p){
+  FN 1128: stopSummaryBagLocationText :: function stopSummaryBagLocationText(p){
+  FN 1142: stopSummaryBagSpeechText :: function stopSummaryBagSpeechText(p){
+  FN 1157: passengerGenderCounts :: function passengerGenderCounts(passengers){
+  FN 1173: buildStopSummarySentence :: function buildStopSummarySentence(data){
+  FN 1213: speakStopSummary :: function speakStopSummary(data){
+  FN 1216: setSpeakState :: function setSpeakState(text){
+  FN 1289: completeStopFromSummary :: async function completeStopFromSummary(data){
+  FN 1421: renderStopSummary :: function renderStopSummary(data){
+  FN 1538: loadStopSummary :: async function loadStopSummary(){
+  FN 1580: loadDetail :: async function loadDetail(kind){
+  FN 1629: refreshMetricState :: function refreshMetricState(){
+  FN 1752: q :: function q(sel){ return document.querySelector(sel); }
+  FN 1754: setText :: function setText(sel, val){
+  FN 1759: norm :: function norm(v){
+  FN 1767: pad :: function pad(n){ return String(n).padStart(2, "0"); }
+  FN 1769: fmtHour :: function fmtHour(d){
+  FN 1774: parseTime :: function parseTime(t){
+  FN 1780: minutesDiff :: function minutesDiff(a,b){
+  FN 1783: fmtDelay :: function fmtDelay(min){
+  FN 1808: formatKm :: function formatKm(km){
+  FN 1814: distKm :: function distKm(a,b){
+  FN 1816: toRad :: const toRad = x => x * Math.PI / 180;
+  FN 1830: routeIndex :: function routeIndex(name){
+  FN 1836: findCoord :: function findCoord(name){
+  FN 1850: baseDate :: function baseDate(){
+  FN 1860: buildSchedule :: function buildSchedule(){
+  FN 1900: liveStopName :: function liveStopName(){
+  FN 1904: liveDisplaySpeed :: function liveDisplaySpeed(){
+  FN 1910: updateSpeedDisplay :: function updateSpeedDisplay(){
+  FN 1914: acceptSpeed :: function acceptSpeed(kmh){
+  FN 1938: measureSpeedFromGps :: function measureSpeedFromGps(coords, point){
+  FN 1969: etaSpeedKmh :: function etaSpeedKmh(){
+  FN 1986: pickTarget :: function pickTarget(schedule, liveName){
+  FN 2010: updateAllDistances :: function updateAllDistances(){
+  FN 2022: updateStatus :: function updateStatus(etaMain){
+  FN 2041: isEmptyLiveNameV67 :: function isEmptyLiveNameV67(name){
+  FN 2053: routeCoordItemsV67 :: function routeCoordItemsV67(){
+  FN 2086: pickMidpointLiveStopV67 :: function pickMidpointLiveStopV67(currentName){
+  FN 2129: switchLiveStopMidpointV67 :: function switchLiveStopMidpointV67(oldName, picked){
+  FN 2185: writeRuntime :: function writeRuntime(liveName, gpsKm, etaMain){
+  FN 2214: compute :: function compute(){
+  FN 2264: onPosition :: function onPosition(pos){
+  FN 2288: start :: function start(){
+  FN 2322: esc :: function esc(v){
+  FN 2331: norm :: function norm(v){
+  FN 2339: currentStop :: function currentStop(){
+  FN 2344: short :: function short(v, n){
+  FN 2350: close :: function close(){
+  FN 2356: genderClass :: function genderClass(g){
+  FN 2363: render :: function render(data){
+  FN 2427: open :: async function open(e){
+event_listeners=32
+  EVT 124: document.addEventListener("DOMContentLoaded", function(){
+  EVT 256: cancelBtn.addEventListener("click", function(){
+  EVT 263: saveBtn.addEventListener("click", saveDestinationChange);
+  EVT 370: cancelBtn.addEventListener("click", function(){
+  EVT 378: okBtn.addEventListener("click", function(){
+  EVT 495: cancelBtn.addEventListener("click", function(){
+  EVT 502: okBtn.addEventListener("click", function(){
+  EVT 692: backBtn.addEventListener("click", function(){
+  EVT 745: cancelBtn.addEventListener("click", function(){
+  EVT 752: okBtn.addEventListener("click", function(){
+  EVT 880: backBtn.addEventListener("click", function(){
+  EVT 1343: document.getElementById("completeBackSummary")?.addEventListener("click", () => {
+  EVT 1347: document.getElementById("completeCloseSheet")?.addEventListener("click", () => {
+  EVT 1397: document.getElementById("pendingPassengersBtn")?.addEventListener("click", () => {
+  EVT 1405: document.getElementById("pendingBagsBtn")?.addEventListener("click", () => {
+  EVT 1506: speakBtn.addEventListener("click", function(){
+  EVT 1512: completeBtn.addEventListener("click", function(){
+  EVT 1518: passengerBtn.addEventListener("click", function(){
+  EVT 1528: bagBtn2.addEventListener("click", function(){
+  EVT 1650: liveCard.addEventListener("click", function(e){
+  EVT 1655: liveCard.addEventListener("keydown", function(e){
+  EVT 1665: offBtn.addEventListener("click", function(){
+  EVT 1671: bagBtn.addEventListener("click", function(){
+  EVT 1677: bodyEl.addEventListener("click", function(e){
+  EVT 1722: if(closeBtn) closeBtn.addEventListener("click", closeSheet);
+  EVT 1723: if(overlay) overlay.addEventListener("click", closeSheet);
+  EVT 1725: document.addEventListener("keydown", function(e){
+  EVT 2309: document.addEventListener("DOMContentLoaded", start);
+  EVT 2378: host.querySelector(".v45-seatmap-close").addEventListener("click", close);
+  EVT 2441: loading.querySelector(".v45-seatmap-close").addEventListener("click", close);
+  EVT 2464: btn.addEventListener("click", open, true);
+  EVT 2466: document.addEventListener("keydown", function(e){
+window_globals=2
+  WIN 1240: if(window.SeatsSpeak && typeof window.SeatsSpeak === "function"){
+  WIN 1736: window.CONTINUE_LIVE_SPEED_ENGINE_ACTIVE = true;
+storage_lines=0
+api_fetch_lines=15
+  API 86: fetch(`/api/live-runtime-state?trip_id=${encodeURIComponent(tripId)}&_=${Date.now()}`, {
+  API 291: const res = await fetch("/api/live-seat-destination", {
+  API 413: const res = await fetch("/api/live-seat-offload", {
+  API 537: const res = await fetch("/api/live-stop-offload", {
+  API 633: const res = await fetch(`/api/live-consignment-detail/${encodeURIComponent(cid)}?_=${Date.now()}`, {
+  API 784: const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+  API 834: const res = await fetch(`/api/live-seat-bag-detail?seat_no=${encodeURIComponent(seatNo)}&_=${Date.now()}`, {
+  API 1313: const res = await fetch("/api/live-stop-complete", {
+  API 1558: const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stop)}&_=${Date.now()}`, {
+  API 1600: const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stop)}&_=${Date.now()}`, {
+  API 2154: `/api/live-runtime-state?write=1` +
+  API 2163: fetch(url, {
+  API 2198: `/api/live-runtime-state?write=1` +
+  API 2207: fetch(url, {
+  API 2444: const res = await fetch(`/api/live-seat-map?_=${Date.now()}`, {
+risk_attention_lines=43
+  RISK 133: setInterval(sync, 1500);
+  RISK 195: bodyEl.innerHTML = `<div class="sheet-empty">${escapeHtml(message)}</div>`;
+  RISK 225: bodyEl.innerHTML = `
+  RISK 311: bodyEl.innerHTML = `
+  RISK 319: setTimeout(function(){
+  RISK 320: window.location.reload();
+  RISK 343: bodyEl.innerHTML = `
+  RISK 411: bodyEl.innerHTML = '<div class="sheet-empty">Koltuk indiriliyor...</div>';
+  RISK 434: bodyEl.innerHTML = `
+  RISK 443: setTimeout(function(){
+  RISK 444: window.location.reload();
+  RISK 468: bodyEl.innerHTML = `
+  RISK 535: bodyEl.innerHTML = '<div class="sheet-empty">Yolcular indiriliyor...</div>';
+  RISK 557: bodyEl.innerHTML = `
+  RISK 568: setTimeout(function(){
+  RISK 569: window.location.reload();
+  RISK 630: bodyEl.innerHTML = '<div class="sheet-empty">Yükleniyor...</div>';
+  RISK 653: bodyEl.innerHTML = `
+  RISK 717: bodyEl.innerHTML = `
+  RISK 782: bodyEl.innerHTML = '<div class="sheet-empty">Emanet teslim ediliyor...</div>';
+  RISK 801: bodyEl.innerHTML = `
+  RISK 809: setTimeout(function(){
+  RISK 810: window.location.reload();
+  RISK 831: bodyEl.innerHTML = '<div class="sheet-empty">Bagaj bilgisi alınıyor...</div>';
+  RISK 849: bodyEl.innerHTML = `
+  RISK 938: bodyEl.innerHTML = `
+  RISK 1082: bodyEl.innerHTML = `
+  RISK 1227: setTimeout(function(){
+  RISK 1300: bodyEl.innerHTML = '<div class="sheet-empty">Durak işlemleri kontrol ediliyor...</div>';
+  RISK 1332: bodyEl.innerHTML = `
+  RISK 1349: setTimeout(() => window.location.reload(), 250);
+  RISK 1361: bodyEl.innerHTML = `
+  RISK 1446: bodyEl.innerHTML = `
+  RISK 1555: bodyEl.innerHTML = '<div class="sheet-empty">Durak özeti hazırlanıyor...</div>';
+  RISK 1597: bodyEl.innerHTML = '<div class="sheet-empty">Yükleniyor...</div>';
+  RISK 1657: e.preventDefault();
+  RISK 2178: setTimeout(() => {
+  RISK 2179: try{ location.reload(); }catch(_){}
+  RISK 2305: setInterval(compute, 1500);
+  RISK 2368: host.innerHTML = `
+  RISK 2419: page.innerHTML = `
+  RISK 2428: e.preventDefault();
+  RISK 2435: loading.innerHTML = `
+dom_id_refs=37
+  IDREF #liveCurrentStopName count=5
+  IDREF #liveDistanceValue count=3
+  IDREF #liveEtaValue count=3
+  IDREF #liveSpeedText count=2
+  IDREF #sheetSummarySpeak count=2
+  IDREF #liveOffloadMetric count=1
+  IDREF #liveBagajMetric count=1
+  IDREF #liveStopSheetOverlay count=1
+  IDREF #liveStopSheet count=1
+  IDREF #liveStopSheetClose count=1
+  IDREF #liveStopSheetTitle count=1
+  IDREF #liveStopSheetSub count=1
+  IDREF #liveStopSheetBody count=1
+  IDREF #liveStopSheetKicker count=1
+  IDREF #sheetCancelChange count=1
+  IDREF #sheetSaveChange count=1
+  IDREF #sheetNewToStop count=1
+  IDREF #sheetConfirmCancel count=1
+  IDREF #sheetConfirmOk count=1
+  IDREF #sheetBulkCancel count=1
+  IDREF #sheetBulkOk count=1
+  IDREF #sheetCargoBackBtn count=1
+  IDREF #sheetCargoCancel count=1
+  IDREF #sheetCargoOk count=1
+  IDREF #sheetBagBackBtn count=1
+  IDREF #completeBackSummary count=1
+  IDREF #completeCloseSheet count=1
+  IDREF #pendingPassengersBtn count=1
+  IDREF #pendingBagsBtn count=1
+  IDREF #sheetSummaryComplete count=1
+  IDREF #sheetSummaryPassengers count=1
+  IDREF #sheetSummaryBags count=1
+  IDREF #liveOffloadCount count=1
+  IDREF #liveBagajCount count=1
+  IDREF #liveCurrentCard count=1
+  IDREF #continueSeatMapBtn count=1
+  IDREF #continueSeatMapFullscreenV45 count=1
+classList_refs=3
+  CLASS open count=4
+  CLASS has-work count=2
+  CLASS is-empty count=2
+
+----- JS MAP: continue_bag_emanet.js -----
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_bag_emanet.js
+EXISTS: YES lines=128 nonempty=102 size=3525 sha=0ff3a3abf6a9
+markers=0 unique_marker_bases=0
+functions_detected=8
+  FN 8: boot :: function boot(){
+  FN 12: numberValue :: function numberValue(v, fallback){
+  FN 17: getBagValue :: function getBagValue(data){
+  FN 27: getEmanetValue :: function getEmanetValue(data){
+  FN 37: ensureMini :: function ensureMini(metric){
+  FN 51: removeOldMiniDuplicates :: function removeOldMiniDuplicates(metric){
+  FN 64: apply :: function apply(data){
+  FN 100: applyBoot :: function applyBoot(){
+event_listeners=2
+  EVT 108: document.addEventListener("DOMContentLoaded", applyBoot);
+  EVT 117: document.addEventListener("continueLiveFlowUpdated", function(e){
+window_globals=1
+  WIN 96: window.ContinueBagEmanet = {
+storage_lines=0
+api_fetch_lines=0
+risk_attention_lines=0
+dom_id_refs=3
+  IDREF #liveEmanetMini count=1
+  IDREF #liveBagajMetric count=1
+  IDREF #liveBagajCount count=1
+classList_refs=2
+  CLASS has-work count=1
+  CLASS is-empty count=1
+
+----- JS MAP: continue_flow_refresh.js -----
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_flow_refresh.js
+EXISTS: YES lines=418 nonempty=329 size=10839 sha=f41dbb50eee2
+markers=0 unique_marker_bases=0
+functions_detected=20
+  FN 24: text :: function text(v){
+  FN 28: norm :: function norm(v){
+  FN 36: distKm :: function distKm(a, b){
+  FN 38: toRad :: const toRad = d => d * Math.PI / 180;
+  FN 50: coordForStop :: function coordForStop(stopName){
+  FN 65: stopDistanceLabel :: function stopDistanceLabel(stopName){
+  FN 82: startGeoWatch :: function startGeoWatch(){
+  FN 107: routeIndex :: function routeIndex(name){
+  FN 113: currentStopName :: function currentStopName(){
+  FN 118: statusByOffset :: function statusByOffset(offset){
+  FN 135: makeFlow :: function makeFlow(currentIndex){
+  FN 146: regularCards :: function regularCards(){
+  FN 150: setText :: function setText(el, value){
+  FN 154: setFutureCardBase :: function setFutureCardBase(card, item){
+  FN 218: countsFromDetail :: function countsFromDetail(data){
+  FN 261: fetchStopDetail :: async function fetchStopDetail(stopName){
+  FN 280: applyCurrentDetail :: function applyCurrentDetail(data){
+  FN 313: applyFutureDetail :: function applyFutureDetail(card, data){
+  FN 334: refreshDetails :: async function refreshDetails(flow){
+  FN 371: refreshFlow :: function refreshFlow(){
+event_listeners=3
+  EVT 397: document.addEventListener("DOMContentLoaded", function(){
+  EVT 408: document.addEventListener("visibilitychange", function(){
+  EVT 415: window.addEventListener("continueEtaUpdated", function(){
+window_globals=1
+  WIN 392: window.ContinueFlowRefresh = {
+storage_lines=0
+api_fetch_lines=1
+  API 264: const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stopName)}&_=${Date.now()}`, {
+risk_attention_lines=1
+  RISK 406: setInterval(refreshFlow, POLL_MS);
+dom_id_refs=3
+  IDREF #liveCurrentStopName count=1
+  IDREF #liveOffloadCount count=1
+  IDREF #liveBagajCount count=1
+classList_refs=3
+  CLASS next-card count=2
+  CLASS upcoming-card count=1
+  CLASS stop-distance-value count=1
+
+----- JS MAP: continue_trip_ui.js -----
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_ui.js
+EXISTS: YES lines=250 nonempty=195 size=7476 sha=4e8f7e386c1d
+markers=0 unique_marker_bases=0
+functions_detected=13
+  FN 13: pad :: function pad(n){
+  FN 17: updateClock :: function updateClock(){
+  FN 43: getPhotoItems :: function getPhotoItems(){
+  FN 58: showPhoto :: function showPhoto(i){
+  FN 72: openViewer :: function openViewer(startIndex){
+  FN 84: closeViewer :: function closeViewer(){
+  FN 139: q :: function q(sel){ return document.querySelector(sel); }
+  FN 141: ensureV2 :: function ensureV2(){
+  FN 169: syncV2Texts :: function syncV2Texts(){
+  FN 200: esc :: function esc(v){
+  FN 206: clean :: function clean(v){
+  FN 212: splitStatus :: function splitStatus(v){
+  FN 221: render :: function render(){
+event_listeners=8
+  EVT 96: document.addEventListener("click", function(e){
+  EVT 108: if(closeBtn) closeBtn.addEventListener("click", closeViewer);
+  EVT 111: prevBtn.addEventListener("click", function(){
+  EVT 117: nextBtn.addEventListener("click", function(){
+  EVT 122: viewer.addEventListener("click", function(e){
+  EVT 126: document.addEventListener("keydown", function(e){
+  EVT 186: document.addEventListener("DOMContentLoaded", ensureV2);
+  EVT 241: document.addEventListener("DOMContentLoaded", render);
+window_globals=0
+storage_lines=0
+api_fetch_lines=0
+risk_attention_lines=11
+  RISK 23: setInterval(updateClock, 1000);
+  RISK 100: e.preventDefault();
+  RISK 150: label.innerHTML = '<span class="continue-v2-dot"></span> CANLI';
+  RISK 156: line.innerHTML = 'Kalan mesafe: <span id="continueLiveV2Distance">—</span>';
+  RISK 191: setTimeout(ensureV2, 150);
+  RISK 192: setTimeout(ensureV2, 800);
+  RISK 193: setInterval(syncV2Texts, 700);
+  RISK 231: top.innerHTML = html;
+  RISK 246: setTimeout(render, 150);
+  RISK 247: setTimeout(render, 800);
+  RISK 248: setInterval(render, 700);
+dom_id_refs=11
+  IDREF #liveClockText count=1
+  IDREF #bagPhotoViewer count=1
+  IDREF #bagViewerImg count=1
+  IDREF #bagViewerTitle count=1
+  IDREF #bagViewerCaption count=1
+  IDREF #bagViewerClose count=1
+  IDREF #bagViewerPrev count=1
+  IDREF #bagViewerNext count=1
+  IDREF #liveStopSheet count=1
+  IDREF #liveTopStatusText count=1
+  IDREF #liveEtaValue count=1
+classList_refs=5
+  CLASS open count=4
+  CLASS continue-live-v2 count=1
+  CLASS status-early count=1
+  CLASS status-late count=1
+  CLASS status-plan count=1
+
+----- JS MAP: continue_refresh_button_v49.js -----
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_refresh_button_v49.js
+EXISTS: YES lines=44 nonempty=38 size=1198 sha=584a712684e2
+markers=0 unique_marker_bases=0
+functions_detected=2
+  FN 6: ready :: function ready(fn){
+  FN 14: hardRefresh :: function hardRefresh(){
+event_listeners=2
+  EVT 8: document.addEventListener("DOMContentLoaded", fn);
+  EVT 35: btn.addEventListener("click", function(e){
+window_globals=1
+  WIN 4: window.CONTINUE_REFRESH_BUTTON_V49_READY = true;
+storage_lines=0
+api_fetch_lines=0
+risk_attention_lines=3
+  RISK 20: window.location.reload();
+  RISK 33: btn.innerHTML = '<span class="refresh-ico">↻</span>';
+  RISK 36: e.preventDefault();
+dom_id_refs=1
+  IDREF #continueRefreshBtnV49 count=1
+classList_refs=1
+  CLASS is-refreshing count=1
+
+----- JS MAP: continue_native_lock_alarm_v85.js -----
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_native_lock_alarm_v85.js
+EXISTS: YES lines=187 nonempty=155 size=4780 sha=0613bc352539
+markers=0 unique_marker_bases=0
+functions_detected=10
+  FN 16: clean :: function clean(v){
+  FN 20: norm :: function norm(v){
+  FN 24: numFromText :: function numFromText(v){
+  FN 29: currentStop :: function currentStop(){
+  FN 34: distanceText :: function distanceText(){
+  FN 54: offloadCount :: function offloadCount(){
+  FN 59: bagCount :: function bagCount(){
+  FN 79: findCoord :: function findCoord(stop){
+  FN 98: updateBridge :: function updateBridge(stop, off, bag, c, km){
+  FN 123: sync :: function sync(){
+event_listeners=1
+  EVT 166: document.addEventListener("DOMContentLoaded", sync);
+window_globals=2
+  WIN 7: window.CONTINUE_NATIVE_LOCK_ALARM_V87_READY = true;
+  WIN 152: window.continueNativeLockAlarmV87 = {
+storage_lines=0
+api_fetch_lines=0
+risk_attention_lines=5
+  RISK 171: setTimeout(sync, 800);
+  RISK 172: setTimeout(sync, 2000);
+  RISK 173: setInterval(sync, 3000);
+  RISK 175: if(window.MutationObserver){
+  RISK 184: const obs = new MutationObserver(sync);
+dom_id_refs=5
+  IDREF #liveCurrentStopName count=2
+  IDREF #liveOffloadCount count=2
+  IDREF #liveDistanceValue count=1
+  IDREF #liveBagajCount count=1
+  IDREF #liveBagajMetric count=1
+classList_refs=0
+
+----- JS MAP: continue_trip_v99_clean.js -----
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.js
+EXISTS: YES lines=1589 nonempty=1252 size=42277 sha=215339187b38
+markers=14 unique_marker_bases=7
+  MARKER V99F_REAL_ROUTE_KM count=2
+  MARKER V99G_TIMELINE_VALUE_CLEAN count=2
+  MARKER V99I_EXISTING_DISTANCE_ENGINE_BRIDGE count=2
+  MARKER V99J_DIRECT_GPS_DISTANCE count=2
+  MARKER V99K_DISTANCE_NO_FLICKER_GUARD count=2
+  MARKER V99M_OCCUPANCY_PANEL count=2
+  MARKER V99O_SEAT_GENDER_SELECTED_JS count=2
+functions_detected=89
+  FN 7: q :: function q(sel){
+  FN 11: text :: function text(sel){
+  FN 16: parseKm :: function parseKm(raw){
+  FN 24: cleanSpeed :: function cleanSpeed(raw){
+  FN 30: setRing :: function setRing(km){
+  FN 80: setRouteProgress :: function setRouteProgress(){
+  FN 104: setClock :: function setClock(){
+  FN 113: sync :: function sync(){
+  FN 157: q :: function q(sel, root){
+  FN 161: qa :: function qa(sel, root){
+  FN 165: norm :: function norm(s){
+  FN 179: pairKey :: function pairKey(a, b){
+  FN 183: parseNum :: function parseNum(v){
+  FN 191: formatKm :: function formatKm(n){
+  FN 201: getBootArray :: function getBootArray(key){
+  FN 217: getStopNameFromItem :: function getStopNameFromItem(item){
+  FN 223: getPlannedTime :: function getPlannedTime(item){
+  FN 228: getSegmentKmFromSchedule :: function getSegmentKmFromSchedule(item){
+  FN 233: buildSchedule :: function buildSchedule(){
+  FN 265: closestScheduleItem :: function closestScheduleItem(schedule, stopName){
+  FN 280: findMetricVal :: function findMetricVal(card, label){
+  FN 297: statusOfCard :: function statusOfCard(card){
+  FN 309: cardNames :: function cardNames(){
+  FN 316: indexOfName :: function indexOfName(names, stopName){
+  FN 331: addSegmentToMap :: function addSegmentToMap(seg){
+  FN 346: segmentKmBetween :: function segmentKmBetween(from, to, schedule){
+  FN 379: computeDistance :: function computeDistance(names, currentIdx, targetIdx, runtimeKm, schedule){
+  FN 401: loadSegments :: function loadSegments(){
+  FN 429: hydrateTimeline :: function hydrateTimeline(){
+  FN 511: qa :: function qa(sel, root){
+  FN 515: q :: function q(sel, root){
+  FN 519: norm :: function norm(s){
+  FN 526: isBadArrivalText :: function isBadArrivalText(t){
+  FN 540: cleanTimelineArrivalValues :: function cleanTimelineArrivalValues(){
+  FN 569: text :: function text(el){
+  FN 573: findDistanceVal :: function findDistanceVal(card){
+  FN 590: bindDistanceCells :: function bindDistanceCells(){
+  FN 642: q :: function q(sel){
+  FN 646: text :: function text(el){
+  FN 650: norm :: function norm(s){
+  FN 665: findCoord :: function findCoord(stopName){
+  FN 698: distKm :: function distKm(a, b){
+  FN 702: toRad :: var toRad = function(d){ return d * Math.PI / 180; };
+  FN 717: fmtKm :: function fmtKm(km){
+  FN 725: findMetricVal :: function findMetricVal(card, wanted){
+  FN 744: bindCells :: function bindCells(){
+  FN 758: updateRingForLive :: function updateRingForLive(km){
+  FN 769: hydrateGpsDistances :: function hydrateGpsDistances(){
+  FN 794: onPos :: function onPos(pos){
+  FN 847: text :: function text(el){
+  FN 851: isRealKm :: function isRealKm(t){
+  FN 855: isBlankDistance :: function isBlankDistance(t){
+  FN 860: findDistanceVal :: function findDistanceVal(card){
+  FN 878: protectDistances :: function protectDistances(){
+  FN 923: q :: function q(sel, root){
+  FN 927: qa :: function qa(sel, root){
+  FN 931: text :: function text(el){
+  FN 935: norm :: function norm(s){
+  FN 948: sameStop :: function sameStop(a,b){
+  FN 955: liveStopName :: function liveStopName(){
+  FN 959: nextStopName :: function nextStopName(){
+  FN 973: ensurePanel :: function ensurePanel(){
+  FN 1031: openPanel :: function openPanel(){
+  FN 1038: closePanel :: function closePanel(){
+  FN 1046: v99uNormText :: function v99uNormText(v){
+  FN 1053: v99uNearestTopCard :: function v99uNearestTopCard(el){
+  FN 1067: isDolulukTarget :: function isDolulukTarget(el){
+  FN 1084: markDolulukCards :: function markDolulukCards(){
+  FN 1112: num :: function num(v){
+  FN 1117: seatGenderClass :: function seatGenderClass(s){
+  FN 1124: renderSummary :: function renderSummary(data, seats){
+  FN 1192: renderSeatMap :: function renderSeatMap(data, seats){
+  FN 1270: showSeatDetail :: function showSeatDetail(s){
+  FN 1291: loadPanel :: async function loadPanel(){
+  FN 1339: q :: function q(sel){
+  FN 1343: qa :: function qa(sel, root){
+  FN 1347: text :: function text(el){
+  FN 1351: norm :: function norm(s){
+  FN 1366: sameStop :: function sameStop(a,b){
+  FN 1373: getLiveStop :: function getLiveStop(){
+  FN 1377: genderClass :: function genderClass(seat){
+  FN 1391: num :: function num(x){
+  FN 1396: isSeatNumberText :: function isSeatNumberText(t){
+  FN 1402: looksLikeSeatElement :: function looksLikeSeatElement(el){
+  FN 1423: findSeatEls :: function findSeatEls(){
+  FN 1433: ensureBagDot :: function ensureBagDot(el, count){
+  FN 1449: applySeatClasses :: function applySeatClasses(seats){
+  FN 1507: ensureLegend :: function ensureLegend(){
+  FN 1530: refreshSeatColors :: async function refreshSeatColors(){
+event_listeners=20
+  EVT 137: document.addEventListener("continueEtaUpdated", sync);
+  EVT 138: window.addEventListener("storage", sync);
+  EVT 500: document.addEventListener("continueEtaUpdated", hydrateTimeline);
+  EVT 561: document.addEventListener("continueEtaUpdated", cleanTimelineArrivalValues);
+  EVT 612: document.addEventListener("DOMContentLoaded", bindDistanceCells);
+  EVT 615: window.addEventListener("load", bindDistanceCells);
+  EVT 616: document.addEventListener("continueEtaUpdated", bindDistanceCells);
+  EVT 836: document.addEventListener("continueEtaUpdated", hydrateGpsDistances);
+  EVT 837: window.addEventListener("load", hydrateGpsDistances);
+  EVT 912: document.addEventListener("continueEtaUpdated", protectDistances);
+  EVT 913: window.addEventListener("load", protectDistances);
+  EVT 1026: overlay.addEventListener("click", closePanel);
+  EVT 1027: q("#v99mOccClose").addEventListener("click", closePanel);
+  EVT 1028: q("#v99mOccRefresh").addEventListener("click", loadPanel);
+  EVT 1099: document.addEventListener("click", function(ev){
+  EVT 1259: cell.addEventListener("click", function(seat){
+  EVT 1546: document.addEventListener("click", function(ev){
+  EVT 1575: document.addEventListener("DOMContentLoaded", refreshSeatColors);
+  EVT 1578: window.addEventListener("load", refreshSeatColors);
+  EVT 1579: document.addEventListener("continueEtaUpdated", refreshSeatColors);
+window_globals=6
+  WIN 139: window.MuavinV99CleanSync = sync;
+  WIN 502: window.MuavinV99RealKmHydrate = hydrateTimeline;
+  WIN 764: if(typeof window.MuavinV99CleanSync === "function"){
+  WIN 839: window.MuavinV99DirectGpsDistance = hydrateGpsDistances;
+  WIN 1325: window.MuavinV99OccupancyPanel = {
+  WIN 1570: window.MuavinV99SeatColorRefresh = refreshSeatColors;
+storage_lines=0
+api_fetch_lines=3
+  API 406: fetch("/api/v99-route-segments?v=" + Date.now(), {
+  API 1301: var res = await fetch("/api/live-seat-map?_=" + Date.now(), {
+  API 1532: var res = await fetch("/api/live-seat-map?_v=v99o_" + Date.now(), {
+risk_attention_lines=21
+  RISK 134: setInterval(setClock, 10000);
+  RISK 135: setInterval(sync, 700);
+  RISK 495: setInterval(function(){
+  RISK 560: setInterval(cleanTimelineArrivalValues, 400);
+  RISK 619: var timer = setInterval(function(){
+  RISK 835: setInterval(hydrateGpsDistances, 900);
+  RISK 899: var obs = new MutationObserver(function(){
+  RISK 911: setInterval(protectDistances, 300);
+  RISK 983: sheet.innerHTML = `
+  RISK 1104: ev.preventDefault();
+  RISK 1149: summary.innerHTML = `
+  RISK 1182: impact.innerHTML = `
+  RISK 1226: map.innerHTML = "";
+  RISK 1275: box.innerHTML = `<b>Koltuk ${s && s.seat_no ? s.seat_no : "—"}</b> boş görünüyor.`;
+  RISK 1284: box.innerHTML = `
+  RISK 1298: if(map) map.innerHTML = "";
+  RISK 1317: impact.innerHTML = `<b>Doluluk verisi alınamadı.</b><br><span class="v99m-muted">${String(err && err.message || err)}</span>`;
+  RISK 1323: setInterval(markDolulukCards, 1500);
+  RISK 1446: old.innerHTML = "🧳" + (count > 1 ? "<b>" + count + "</b>" : "");
+  RISK 1522: legend.innerHTML =
+  RISK 1582: var timer = setInterval(function(){
+dom_id_refs=2
+  IDREF #liveDistanceValue count=1
+  IDREF #liveCurrentStopName count=1
+classList_refs=17
+  CLASS urgent count=4
+  CLASS stop-distance-value count=4
+  CLASS open count=4
+  CLASS v99-seat-selected count=3
+  CLASS v99-timeline-distance-value count=2
+  CLASS v99m-occ-clickable count=2
+  CLASS passed count=1
+  CLASS live count=1
+  CLASS next count=1
+  CLASS upcoming count=1
+  CLASS occ count=1
+  CLASS off count=1
+  CLASS free count=1
+  CLASS v99-seat-color-cell count=1
+  CLASS v99-seat-free count=1
+  CLASS v99-seat-off-here count=1
+  CLASS v99-seat-has-bag count=1
+
+----- JS MAP: continue_speed_final_v105.js -----
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_speed_final_v105.js
+EXISTS: YES lines=148 nonempty=120 size=3308 sha=1edd1a915040
+markers=2 unique_marker_bases=1
+  MARKER V105_SPEED_FINAL_POLISH count=2
+functions_detected=10
+  FN 8: q :: function q(sel, root){
+  FN 12: qa :: function qa(sel, root){
+  FN 16: norm :: function norm(v){
+  FN 23: text :: function text(el){
+  FN 27: findSpeedCard :: function findSpeedCard(){
+  FN 38: parseSpeed :: function parseSpeed(v){
+  FN 54: readSpeed :: function readSpeed(){
+  FN 66: ensure :: function ensure(card){
+  FN 79: paint :: function paint(){
+  FN 101: boot :: function boot(){
+event_listeners=2
+  EVT 128: document.addEventListener("DOMContentLoaded", boot);
+  EVT 133: window.addEventListener("load", boot);
+window_globals=2
+  WIN 6: window.__MUAVIN_V105_SPEED_FINAL__ = true;
+  WIN 143: window.MuavinV105SpeedFinal = {
+storage_lines=0
+api_fetch_lines=0
+risk_attention_lines=4
+  RISK 74: track.innerHTML = '<div class="v105-speed-fill"></div><div class="v105-speed-dot"></div>';
+  RISK 108: new MutationObserver(paint).observe(a, {
+  RISK 118: new MutationObserver(paint).observe(b, {
+  RISK 136: var timer = setInterval(function(){
+dom_id_refs=0
+classList_refs=3
+  CLASS v105-speed-card count=1
+  CLASS v105-speed-low count=1
+  CLASS v105-speed-high count=1
+
+----- JS MAP: voice-tts.js -----
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/seats/voice-tts.js
+EXISTS: YES lines=159 nonempty=128 size=3944 sha=dacbfcc0d6f5
+markers=0 unique_marker_bases=0
+functions_detected=7
+  FN 13: isEnabled :: function isEnabled(){
+  FN 21: setEnabled :: function setEnabled(value){
+  FN 35: stop :: function stop(){
+  FN 45: speak :: function speak(text, opts = {}){
+  FN 84: syncButtons :: function syncButtons(){
+  FN 104: cleanText :: function cleanText(x){
+  FN 143: boot :: function boot(){
+event_listeners=2
+  EVT 126: document.addEventListener("click", function(e){
+  EVT 155: document.addEventListener("DOMContentLoaded", boot);
+window_globals=4
+  WIN 9: window.__SeatsVoiceUnifiedReady = true;
+  WIN 111: window.SeatsSpeak = speak;
+  WIN 112: window.SeatsStopVoice = stop;
+  WIN 116: window.SeatsVoice = Object.assign(window.SeatsVoice || {}, {
+storage_lines=2
+  STO 15: return (localStorage.getItem(KEY) ?? "1") === "1";
+  STO 23: localStorage.setItem(KEY, value ? "1" : "0");
+api_fetch_lines=0
+risk_attention_lines=3
+  RISK 92: nightBtn.innerHTML = on
+  RISK 130: e.preventDefault();
+  RISK 147: const timer = setInterval(function(){
+dom_id_refs=2
+  IDREF #nightVoiceToggle count=1
+  IDREF #ttsToggle count=1
+classList_refs=2
+  CLASS is-off count=1
+  CLASS muted count=1
+
+===== 5) CSS HARİTALARI =====
+
+----- CSS MAP: continue_trip.css -----
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip.css
+EXISTS: YES lines=18 nonempty=17 size=912 sha=3f309d22069b
+markers=0 unique_marker_bases=0
+important_count=0
+media_queries=0
+keyframes=0
+selectors_approx=0
+css_attention_lines=0
+
+----- CSS MAP: continue_trip_v99_clean.css -----
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_trip_v99_clean.css
+EXISTS: YES lines=1382 nonempty=1202 size=25802 sha=0958417858c4
+markers=10 unique_marker_bases=5
+  MARKER V99_PASSED_CARD_STYLE count=2
+  MARKER V99L_RING_LINE_PULSE count=2
+  MARKER V99M_OCCUPANCY_PANEL count=2
+  MARKER V99O_SEAT_GENDER_SELECTED_CSS count=2
+  MARKER V99P_BAG_BADGE_CLICK_FIX count=2
+important_count=69
+media_queries=3
+keyframes=3
+selectors_approx=187
+  SEL 3: :root{
+  SEL 21: .v99-live-body{
+  SEL 33: .v99-live-body *::after{
+  SEL 37: .v99-live-body a{
+  SEL 41: .v99-core-hidden{
+  SEL 53: .v99-hdr{
+  SEL 62: .v99-hdr-brand{
+  SEL 68: .v99-hdr-icon{
+  SEL 79: .v99-hdr-title{
+  SEL 87: .v99-hdr-sub{
+  SEL 95: .v99-hdr-clock{
+  SEL 105: .v99-route-bar{
+  SEL 117: .v99-route-name{
+  SEL 124: .v99-route-dot{
+  SEL 128: .v99-live-badge{
+  SEL 139: .v99-live-dot{
+  SEL 149: 0%,100%{opacity:1;transform:scale(1);}
+  SEL 150: 50%{opacity:.4;transform:scale(.7);}
+  SEL 154: .v99-gauges{
+  SEL 162: .v99-gauge-cell{
+  SEL 172: .v99-gauge-label{
+  SEL 180: .v99-gauge-val{
+  SEL 189: .v99-gauge-val.amber{
+  SEL 194: .v99-gauge-val.green{
+  SEL 199: .v99-status-val{
+  SEL 207: .v99-gauge-unit{
+  SEL 214: .v99-occ-bar-track{
+  SEL 223: .v99-occ-bar-fill{
+  SEL 230: .v99-occ-genders{
+  SEL 238: .g-m{color:var(--v99-blue);}
+  SEL 239: .g-f{color:#e060c0;}
+  SEL 240: .g-u{color:var(--v99-muted);}
+  SEL 243: .v99-main{
+  SEL 250: .v99-prox-section{
+  SEL 254: .v99-prox-card{
+  SEL 263: .v99-prox-card::before{
+  SEL 277: .v99-prox-top{
+  SEL 285: .v99-ring-wrap{
+  SEL 292: .v99-ring-svg{
+  SEL 298: .v99-ring-track{
+  SEL 304: .v99-ring-fill{
+  SEL 313: .v99-ring-center{
+  SEL 322: .v99-ring-km{
+  SEL 332: .v99-ring-km-label{
+  SEL 341: 0%,100%{filter:drop-shadow(0 0 6px var(--v99-red));}
+  SEL 342: 50%{filter:drop-shadow(0 0 18px var(--v99-red)) drop-shadow(0 0 30px var(--v99-red));}
+  SEL 345: .v99-ring-fill.urgent{
+  SEL 349: .v99-prox-info{
+  SEL 359: .v99-prox-kicker{
+  SEL 367: .v99-prox-stop-name{
+  SEL 376: .v99-prox-eta-row{
+  SEL 383: .v99-prox-eta-val{
+  SEL 390: .v99-prox-eta-label{
+  SEL 396: .v99-status-pill{
+  SEL 414: .v99-prox-metrics{
+  SEL 423: .v99-pm-cell{
+  SEL 439: .v99-pm-cell:hover{
+  SEL 444: .v99-pm-icon{
+  SEL 449: .v99-pm-val{
+  SEL 457: .v99-pm-lbl{
+  SEL 464: .v99-dist-track-wrap{
+  SEL 470: .v99-dist-labels{
+  SEL 480: .v99-dist-labels span{
+  SEL 487: .v99-dist-track{
+  SEL 495: .v99-dist-fill{
+  SEL 503: .v99-dist-fill::after{
+  SEL 516: .v99-timeline-section{
+  SEL 520: .v99-section-label{
+  SEL 531: .v99-section-label::after{
+  SEL 538: .v99-tl{
+  SEL 545: .v99-tl-item{
+  SEL 551: .v99-tl-spine{
+  SEL 559: .v99-tl-node{
+  SEL 570: .v99-tl-node.live{
+  SEL 577: .v99-tl-node.next{
+  SEL 582: .v99-tl-node.passed{
+  SEL 588: .v99-tl-node.upcoming{
+  SEL 593: .v99-tl-line{
+  SEL 600: .v99-tl-line.live{
+  SEL 604: .v99-tl-line.passed{
+  SEL 609: .v99-tl-card{
+  SEL 620: .v99-tl-card.live-card{
+  SEL 625: .v99-tl-card.next-card{
+  SEL 629: .v99-tl-card-head{
+  SEL 637: .v99-tl-stop-name{
+  SEL 647: .v99-tl-stop-name.muted{
+  SEL 652: .v99-pill{
+  SEL 662: .v99-pill.live{
+  SEL 668: .v99-pill.next{
+  SEL 674: .v99-pill.passed{
+  SEL 680: .v99-pill.upcoming{
+  SEL 686: .v99-tl-metrics{
+  SEL 692: .v99-tl-metric{
+  SEL 699: .v99-tl-m-val{
+  SEL 706: .v99-tl-m-lbl{
+  SEL 713: .v99-dock{
+  SEL 727: .v99-dock-btn{
+  SEL 747: .v99-dock-btn.active{
+  SEL 751: .v99-dock-btn:hover{
+  SEL 755: .v99-dock-btn i{
+  SEL 761: .v99-dock-btn span{
+  SEL 766: .v99-end-wrap{
+  SEL 771: .v99-end-btn{
+  SEL 786: .v99-end-btn:hover{
+  SEL 796: .v99-live-body .metric-grid{
+  SEL 801: .v99-hdr{padding:12px 16px;}
+  SEL 802: .v99-route-bar{padding:9px 16px;font-size:11px;}
+  SEL 803: .v99-prox-section{padding:16px 16px 0;}
+  SEL 804: .v99-timeline-section{padding:18px 16px 0;}
+  SEL 805: .v99-prox-card{padding:16px;}
+  SEL 806: .v99-prox-top{gap:14px;}
+  SEL 808: .v99-ring-svg{
+  SEL 812: .v99-prox-stop-name{font-size:20px;}
+  SEL 813: .v99-gauge-val{font-size:19px;}
+  SEL 814: .v99-tl-metrics{gap:12px;}
+  SEL 818: .v99-main{
+  SEL 825: .v99-tl-card.passed-card{
+  SEL 830: .v99-tl-card.passed-card .v99-tl-stop-name{
+  SEL 834: .v99-tl-card.passed-card .v99-tl-m-val{
+  SEL 838: .v99-tl-card.passed-card .v99-tl-m-lbl{
+  SEL 849: .v99-ring-center{
+  SEL 855: .v99-ring-fill{
+  SEL 866: .v99-ring-fill.urgent{
+  SEL 872: 0%,100%{
+  SEL 876: 50%{
+  SEL 884: #ringKm{
+  SEL 893: .v99m-occ-clickable{
+  SEL 898: .v99m-occ-clickable::after{
+  SEL 908: .v99m-occ-clickable:active::after{
+  SEL 913: .v99m-occ-overlay{
+  SEL 925: .v99m-occ-overlay.open{
+  SEL 930: .v99m-occ-sheet{
+  SEL 952: .v99m-occ-sheet.open{
+  SEL 956: .v99m-handle{
+  SEL 964: .v99m-head{
+  SEL 972: .v99m-kicker{
+  SEL 979: .v99m-title{
+  SEL 987: .v99m-close{
+  SEL 998: .v99m-refresh{
+  SEL 1008: .v99m-summary-grid{
+  SEL 1015: .v99m-stat{
+  SEL 1024: .v99m-stat .v{
+  SEL 1031: .v99m-stat .l{
+  SEL 1039: .v99m-stat.good .v{ color:#20d07b; }
+  SEL 1040: .v99m-stat.warn .v{ color:#f4b13c; }
+  SEL 1041: .v99m-stat.danger .v{ color:#ff2b5c; }
+  SEL 1042: .v99m-stat.blue .v{ color:#3a8bff; }
+  SEL 1043: .v99m-stat.pink .v{ color:#ff5db1; }
+  SEL 1045: .v99m-section-title{
+  SEL 1057: .v99m-map{
+  SEL 1067: .v99m-seat{
+  SEL 1082: .v99m-seat.free{
+  SEL 1087: .v99m-seat.occ{
+  SEL 1092: .v99m-seat.off{
+  SEL 1098: .v99m-seat.male{
+  SEL 1102: .v99m-seat.female{
+  SEL 1106: .v99m-seat.spacer{
+  SEL 1111: .v99m-legend{
+  SEL 1118: .v99m-legend span{
+  SEL 1131: .v99m-dot{
+  ... selectors kesildi
+css_attention_lines=90
+  CSSRISK 22: background:var(--v99-bg) !important;
+  CSSRISK 23: color:var(--v99-text) !important;
+  CSSRISK 24: font-family:'Rajdhani',system-ui,-apple-system,BlinkMacSystemFont,sans-serif !important;
+  CSSRISK 42: position:absolute !important;
+  CSSRISK 43: width:1px !important;
+  CSSRISK 44: height:1px !important;
+  CSSRISK 45: overflow:hidden !important;
+  CSSRISK 46: clip:rect(0 0 0 0) !important;
+  CSSRISK 47: white-space:nowrap !important;
+  CSSRISK 48: opacity:0 !important;
+  CSSRISK 49: pointer-events:none !important;
+  CSSRISK 200: font-size:14px !important;
+  CSSRISK 203: overflow:hidden;
+  CSSRISK 219: overflow:hidden;
+  CSSRISK 260: overflow:hidden;
+  CSSRISK 274: pointer-events:none;
+  CSSRISK 282: z-index:1;
+  CSSRISK 356: z-index:1;
+  CSSRISK 420: z-index:1;
+  CSSRISK 467: z-index:1;
+  CSSRISK 482: overflow:hidden;
+  CSSRISK 491: overflow:hidden;
+  CSSRISK 566: z-index:1;
+  CSSRISK 643: overflow:hidden;
+  CSSRISK 714: position:fixed !important;
+  CSSRISK 715: bottom:0 !important;
+  CSSRISK 716: left:0 !important;
+  CSSRISK 717: right:0 !important;
+  CSSRISK 718: background:var(--v99-panel) !important;
+  CSSRISK 719: border-top:1px solid var(--v99-border) !important;
+  CSSRISK 720: display:flex !important;
+  CSSRISK 721: padding:8px 0 max(env(safe-area-inset-bottom), 8px) !important;
+  CSSRISK 722: z-index:100 !important;
+  CSSRISK 723: height:auto !important;
+  CSSRISK 724: min-height:74px !important;
+  CSSRISK 729: display:flex !important;
+  CSSRISK 737: color:var(--v99-muted) !important;
+  CSSRISK 748: color:var(--v99-red) !important;
+  CSSRISK 752: color:var(--v99-text) !important;
+  CSSRISK 826: border-color:#1db87a55 !important;
+  CSSRISK 827: background:linear-gradient(180deg, rgba(10,36,24,.42), rgba(18,21,26,.92)) !important;
+  CSSRISK 831: color:#dceee7 !important;
+  CSSRISK 835: color:#d8eee5 !important;
+  CSSRISK 839: color:#658d7d !important;
+  CSSRISK 850: filter:none !important;
+  CSSRISK 851: box-shadow:none !important;
+  CSSRISK 856: filter:none !important;
+  CSSRISK 857: transform-origin:center !important;
+  CSSRISK 862: opacity .25s ease !important;
+  CSSRISK 867: filter:none !important;
+  CSSRISK 868: animation:v99l-ring-line-pulse 1.05s ease-in-out infinite !important;
+  CSSRISK 885: animation:none !important;
+  CSSRISK 894: cursor:pointer !important;
+  CSSRISK 895: position:relative !important;
+  CSSRISK 904: pointer-events:none;
+  CSSRISK 914: position:fixed;
+  CSSRISK 919: z-index:99980;
+  CSSRISK 921: pointer-events:none;
+  CSSRISK 927: pointer-events:auto;
+  CSSRISK 931: position:fixed;
+  CSSRISK 935: z-index:99990;
+  CSSRISK 1108: pointer-events:none;
+  CSSRISK 1203: position:relative !important;
+  CSSRISK 1204: overflow:visible !important;
+  CSSRISK 1209: filter .16s ease !important;
+  CSSRISK 1214: background:linear-gradient(180deg,#23e875 0%,#0eaa52 100%) !important;
+  CSSRISK 1215: color:#06150c !important;
+  CSSRISK 1216: border-color:#41ff95 !important;
+  CSSRISK 1220: 0 0 0 1px rgba(53,255,138,.22) !important;
+  CSSRISK 1225: background:linear-gradient(180deg,#3a8bff 0%,#095ed6 100%) !important;
+  CSSRISK 1226: color:#eef6ff !important;
+  CSSRISK 1227: border-color:#73adff !important;
+  CSSRISK 1232: 0 0 14px rgba(58,139,255,.20) !important;
+  CSSRISK 1237: background:linear-gradient(180deg,#ff5ab1 0%,#d41467 100%) !important;
+  CSSRISK 1238: color:#fff1f8 !important;
+  CSSRISK 1239: border-color:#ff8ccd !important;
+  CSSRISK 1244: 0 0 14px rgba(255,90,177,.20) !important;
+  CSSRISK 1249: background:linear-gradient(180deg,#ff365f 0%,#b70f31 100%) !important;
+  CSSRISK 1250: color:#fff !important;
+  CSSRISK 1251: border-color:#ff6d88 !important;
+  CSSRISK 1255: 0 0 0 1px rgba(255,40,80,.25) !important;
+  CSSRISK 1260: border-color:#ffbf2e !important;
+  CSSRISK 1266: 0 0 32px rgba(255,191,46,.28) !important;
+  CSSRISK 1271: transform:scale(1.075) !important;
+  CSSRISK 1272: z-index:12 !important;
+  CSSRISK 1273: border-color:#ffffff !important;
+  CSSRISK 1279: 0 12px 28px rgba(0,0,0,.46) !important;
+  CSSRISK 1280: filter:saturate(1.12) brightness(1.07) !important;
+  CSSRISK 1318: z-index:15;
+  CSSRISK 1379: pointer-events:none !important;
+
+----- CSS MAP: continue_speed_final_v105.css -----
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/static/continue/continue_speed_final_v105.css
+EXISTS: YES lines=126 nonempty=110 size=2744 sha=72cff9c60e43
+markers=2 unique_marker_bases=1
+  MARKER V105_SPEED_FINAL_POLISH count=2
+important_count=12
+media_queries=0
+keyframes=0
+selectors_approx=14
+  SEL 11: .v105-speed-card{
+  SEL 19: .v105-speed-card .v99-gauge-unit{
+  SEL 24: .v105-speed-card .v99-gauge-label{
+  SEL 28: .v105-speed-card .v99-gauge-val{
+  SEL 36: .v105-speed-card .v99-gauge-unit{
+  SEL 42: .v105-speed-card::before{
+  SEL 57: .v105-speed-card::after{
+  SEL 70: .v105-speed-track{
+  SEL 84: .v105-speed-fill{
+  SEL 93: .v105-speed-dot{
+  SEL 108: .v105-speed-card.v105-speed-low .v105-speed-fill{
+  SEL 112: .v105-speed-card.v105-speed-low .v105-speed-dot{
+  SEL 117: .v105-speed-card.v105-speed-high .v105-speed-fill{
+  SEL 121: .v105-speed-card.v105-speed-high .v105-speed-dot{
+css_attention_lines=19
+  CSSRISK 12: position:relative !important;
+  CSSRISK 13: overflow:hidden !important;
+  CSSRISK 14: isolation:isolate !important;
+  CSSRISK 20: position:relative !important;
+  CSSRISK 21: z-index:5 !important;
+  CSSRISK 25: color:rgba(186,198,220,.68) !important;
+  CSSRISK 29: color:#f1a340 !important;
+  CSSRISK 30: font-weight:800 !important;
+  CSSRISK 33: 0 2px 7px rgba(0,0,0,.82) !important;
+  CSSRISK 37: color:rgba(226,234,246,.54) !important;
+  CSSRISK 38: opacity:.78 !important;
+  CSSRISK 39: text-shadow:0 2px 5px rgba(0,0,0,.78) !important;
+  CSSRISK 53: pointer-events:none;
+  CSSRISK 54: z-index:1;
+  CSSRISK 66: pointer-events:none;
+  CSSRISK 67: z-index:2;
+  CSSRISK 78: overflow:hidden;
+  CSSRISK 79: z-index:4;
+  CSSRISK 80: pointer-events:none;
+
+===== 6) APP.PY CONTINUE ROUTE HARİTASI =====
+FILE: /data/data/com.termux/files/home/Host-Hostes-Paneli/app.py
+EXISTS: YES lines=4947 size=156011 sha=09d1c311538f
+continue_trip function approx: 1430-1565 lines=136
+  APP 1430: def continue_trip():
+  APP 1431: tid = get_active_trip()
+  APP 1433: return redirect(url_for("trip_start"))
+  APP 1436: trip = db.execute("SELECT * FROM trips WHERE id=?", (tid,)).fetchone()
+  APP 1438: if not trip:
+  APP 1439: set_active_trip(None)
+  APP 1440: return redirect(url_for("trip_start"))
+  APP 1444: "SELECT COUNT(*) FROM seats WHERE trip_id=?",
+  APP 1453: WHERE trip_id=?
+  APP 1463: g = (gr["gender"] or "").strip().lower()
+  APP 1480: "SELECT COALESCE(SUM(COALESCE(amount,0)),0) FROM seats WHERE trip_id=?",
+  APP 1488: "SELECT COALESCE(SUM(COALESCE(total_amount,0)),0) FROM walk_on_sales WHERE trip_id=?",
+  APP 1496: stops = get_stops(trip["route"])
+  APP 1497: first_stop = stops[0] if stops else ""
+  APP 1498: last_stop = stops[-1] if stops else ""
+  APP 1500: live_runtime = fetch_live_runtime_state(tid)
+  APP 1503: continue_route_coords = []
+  APP 1511: (trip["route"],),
+  APP 1516: continue_route_coords.append({
+  APP 1524: continue_route_coords = []
+  APP 1526: continue_schedule_items = []
+  APP 1536: (trip["route"],),
+  APP 1551: continue_schedule_items.append({
+  APP 1559: continue_schedule_items = []
+  APP 1562: runtime_live_stop = find_route_stop((live_runtime.get("live_stop") or "").strip())
+  APP 1564: runtime_live_stop = (live_runtime.get("live_stop") or "").strip()
+ROUTES/API containing live/continue:
+  ROUTE 903: @app.route("/api/live-runtime-state")
+  DEF 904: def api_live_runtime_state():
+  ROUTE 1429: @app.route("/continue-trip")
+  DEF 1430: def continue_trip():
+  ROUTE 1926: @app.route("/api/live-seat-map")
+  DEF 1927: def api_live_seat_map_v45():
+  ROUTE 2032: @app.route("/api/live-seat-bag-detail")
+  DEF 2033: def api_live_seat_bag_detail():
+  ROUTE 2142: @app.route("/api/live-stop-offload", methods=["POST"])
+  DEF 2143: def api_live_stop_offload():
+  ROUTE 2244: @app.route("/api/live-seat-offload", methods=["POST"])
+  DEF 2245: def api_live_seat_offload():
+  ROUTE 2347: @app.route("/api/live-seat-destination", methods=["POST"])
+  DEF 2348: def api_live_seat_destination():
+  ROUTE 2472: @app.route("/api/live-consignment-detail/<int:cid>")
+  DEF 2473: def api_live_consignment_detail(cid):
+  ROUTE 2549: @app.route("/api/live-consignment-deliver/<int:cid>", methods=["POST"])
+  DEF 2550: def api_live_consignment_deliver(cid):
+  ROUTE 2618: @app.route("/api/live-stop-complete", methods=["POST"])
+  DEF 2619: def api_live_stop_complete_v92c():
+  ROUTE 3027: @app.route("/api/live-stop-detail")
+  DEF 3028: def api_live_stop_detail():
+
+===== 7) KISA SONUÇ =====
+Bu rapor düzeltme yapmadı.
+Bir sonraki adımda bu rapora göre core/v99/js/css modülleme planı çıkarılmalı.
+Öncelik: continue_trip_core.js ve continue_trip_v99_clean.js içindeki event/localStorage/API görevlerini ayırmak.
+
+✅ Rapor kaydedildi: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/continue_step1_behavior_map.txt

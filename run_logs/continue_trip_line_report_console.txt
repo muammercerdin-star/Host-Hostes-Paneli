@@ -1,0 +1,77 @@
+===== CONTINUE_TRIP.HTML SATIR RAPORU =====
+TIME: 2026-06-12 22:44:35
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+
+===== 1) DOSYA DURUMU =====
+WEB:     VAR size=16406 sha=77734b05f51b /data/data/com.termux/files/home/Host-Hostes-Paneli/templates/continue_trip.html
+ANDROID: VAR size=16406 sha=77734b05f51b /data/data/com.termux/files/home/Host-Hostes-Paneli/android_app/app/src/main/python/templates/continue_trip.html
+SENKRON: AYNI ✅
+
+===== 2) SATIR ÖZETİ =====
+Toplam satır:       437
+Dolu satır:         362
+Boş satır:          75
+Karakter sayısı:    16280
+
+===== 3) JINJA / HTML YOĞUNLUK =====
+{{ ... }} sayısı: 60
+{% ... %} sayısı: 25
+if kullanımı:       0
+for kullanımı:      0
+set kullanımı:      0
+
+===== 4) SCRIPT / CSS REFERANSLARI =====
+CSS/link satırı:    3
+8: <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip.css') }}?v=refresh-v49">
+9: <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip_v99_clean.css') }}?v=v99-clean-{{ trip['id'] }}">
+10: <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_speed_final_v105.css') }}?v=v105-{{ trip['id'] }}">
+
+Script satırı:      11
+288: <script>
+377: <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+406: <script id="continue-boot-data">
+428: <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=live-stop-lock-v82"></script>
+429: <script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
+430: <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>
+431: <script src="{{ url_for('static', filename='continue/continue_trip_ui.js') }}?v=js-safe-split-1"></script>
+432: <script src="{{ url_for('static', filename='continue/continue_refresh_button_v49.js') }}?v=refresh-v49"></script>
+433: <script src="{{ url_for('static', filename='continue/continue_native_lock_alarm_v85.js') }}?v=native-lock-alarm-v87"></script>
+434: <script src="{{ url_for('static', filename='continue/continue_trip_v99_clean.js') }}?v=v105-final-{{ trip['id'] }}"></script>
+435: <script src="{{ url_for('static', filename='continue/continue_speed_final_v105.js') }}?v=v105-{{ trip['id'] }}"></script>
+
+===== 5) ANA BÖLÜM SATIR ARALIKLARI =====
+HEAD             başlangıç=3    bitiş=11   satır=9
+HEADER           başlangıç=22   bitiş=32   satır=11
+ROUTE BAR        başlangıç=34   bitiş=42   satır=9
+GAUGES           başlangıç=47   bitiş=49   satır=3
+MAIN             başlangıç=79   bitiş=218  satır=140
+BOTTOM NAV       başlangıç=240  bitiş=260  satır=21
+END TRIP MODAL   başlangıç=262  bitiş=265  satır=4
+BOOT DATA        başlangıç=406  bitiş=426  satır=21
+
+===== 6) ÖNEMLİ ID / BLOK KONUMU =====
+v99SpeedVal                      line=50
+liveSpeedText                    line=52
+DOLULUK                          line=56
+liveCurrentCard                  line=82
+liveOffloadMetric                line=121
+liveBagajMetric                  line=129
+tlContainer                      line=157
+endTripForm                      line=210
+continue-boot-data               line=406
+continue_trip_v99_clean.js       line=434
+continue_speed_final_v105.js     line=435
+
+===== 7) HIZ YAMA TEMİZLİĞİ KONTROL =====
+YOK  continue_speed_toggle_v100
+YOK  continue_speed_widget_v101
+YOK  continue_speed_overlay_v102
+YOK  continue_speed_bar_v103
+VAR  continue_speed_final_v105
+
+===== 8) KISA YORUM =====
+Durum: Orta boy. Şimdilik yönetilir ama parçalama planı iyi olur.
+Hız tarafında aktif görünen son paket: V105 final polish.
+Web ve Android template birebir aynı.
+
+✅ Rapor kaydedildi: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/continue_trip_line_report.txt

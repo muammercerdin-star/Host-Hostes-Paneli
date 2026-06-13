@@ -285,94 +285,6 @@
   </div>
 </div>
 
-<script>
-(function(){
-  const form = document.getElementById("endTripForm");
-  const overlay = document.getElementById("endTripOverlay");
-  const cancel = document.getElementById("endTripCancel");
-  const ok = document.getElementById("endTripOk");
-
-  if(!form || !overlay || !cancel || !ok) return;
-
-  let confirmed = false;
-
-  function openModal(){
-    overlay.classList.add("show");
-    overlay.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeModal(){
-    overlay.classList.remove("show");
-    overlay.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  }
-
-  form.addEventListener("submit", function(e){
-    if(confirmed) return;
-    e.preventDefault();
-    openModal();
-  });
-
-  cancel.addEventListener("click", closeModal);
-
-  overlay.addEventListener("click", function(e){
-    if(e.target === overlay) closeModal();
-  });
-
-  document.addEventListener("keydown", function(e){
-    if(e.key === "Escape" && overlay.classList.contains("show")){
-      closeModal();
-    }
-  });
-
-  function clearTripLocalMemory(){
-    try{
-      const tripKey = {{ ((trip['route'] ~ '|' ~ trip['plate'])|replace(' ','_')) | tojson | safe }};
-
-      const exactKeys = [
-        "liveStop:" + tripKey,
-        "passedStops:" + tripKey,
-        "boardsMap:" + tripKey,
-        "standingTotals:" + tripKey,
-        "standingItems:" + tripKey,
-        "continueTripStop:" + tripKey,
-        "continueTripStop:last",
-        "stopFlowSummary:" + tripKey,
-        "stopFlowLiveEvents:" + tripKey
-      ];
-
-      exactKeys.forEach(k => localStorage.removeItem(k));
-
-      Object.keys(localStorage).forEach(k => {
-        if(
-          k.includes(tripKey) &&
-          (
-            k.startsWith("liveStop:") ||
-            k.startsWith("passedStops:") ||
-            k.startsWith("boardsMap:") ||
-            k.startsWith("standingTotals:") ||
-            k.startsWith("standingItems:") ||
-            k.startsWith("continueTripStop:") ||
-            k.startsWith("stopFlowSummary:") ||
-            k.startsWith("stopFlowLiveEvents:")
-          )
-        ){
-          localStorage.removeItem(k);
-        }
-      });
-    }catch(_){}
-  }
-
-  ok.addEventListener("click", function(){
-    confirmed = true;
-    clearTripLocalMemory();
-    closeModal();
-    form.submit();
-  });
-})();
-</script>
-
 <!-- CONTINUE_TTS_BRIDGE_START -->
 <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
 <!-- CONTINUE_TTS_BRIDGE_END -->
@@ -425,6 +337,7 @@ window.CONTINUE_BOOT = {
 };
 </script>
 
+<script src="{{ url_for('static', filename='continue/continue_end_trip_modal_v106.js') }}?v=v106-{{ trip['id'] }}"></script>
 <script src="{{ url_for('static', filename='continue/continue_trip_core.js') }}?v=live-stop-lock-v82"></script>
 <script src="{{ url_for('static', filename='continue/continue_bag_emanet.js') }}?v=bag-emanet-clean-1"></script>
 <script src="{{ url_for('static', filename='continue/continue_flow_refresh.js') }}?v=flow-refresh-1"></script>

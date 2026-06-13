@@ -1,0 +1,614 @@
+===== CONTINUE STEP-2 ÇAKIŞMA HARİTASI =====
+TIME: 2026-06-12 22:56:24
+ROOT: /data/data/com.termux/files/home/Host-Hostes-Paneli
+NOT: Bu script dosya değiştirmez.
+
+===== 1) DOSYA ÖZETİ =====
+TPL VAR lines=437   size=16406   sha=77734b05f51b templates/continue_trip.html
+JS  VAR lines=2471  size=75965   sha=969d98ed59a6 static/continue/continue_trip_core.js
+JS  VAR lines=128   size=3525    sha=0ff3a3abf6a9 static/continue/continue_bag_emanet.js
+JS  VAR lines=418   size=10839   sha=f41dbb50eee2 static/continue/continue_flow_refresh.js
+JS  VAR lines=250   size=7476    sha=4e8f7e386c1d static/continue/continue_trip_ui.js
+JS  VAR lines=44    size=1198    sha=584a712684e2 static/continue/continue_refresh_button_v49.js
+JS  VAR lines=187   size=4780    sha=0613bc352539 static/continue/continue_native_lock_alarm_v85.js
+JS  VAR lines=1589  size=42277   sha=215339187b38 static/continue/continue_trip_v99_clean.js
+JS  VAR lines=148   size=3308    sha=1edd1a915040 static/continue/continue_speed_final_v105.js
+JS  VAR lines=159   size=3944    sha=dacbfcc0d6f5 static/seats/voice-tts.js
+CSS VAR lines=1382  size=25802   sha=0958417858c4 static/continue/continue_trip_v99_clean.css
+CSS VAR lines=126   size=2744    sha=72cff9c60e43 static/continue/continue_speed_final_v105.css
+
+===== 2) TEKRAR EDEN FONKSİYON İSİMLERİ =====
+norm                             count=10  static/continue/continue_trip_core.js:1759, static/continue/continue_trip_core.js:2331, static/continue/continue_flow_refresh.js:28, static/continue/continue_native_lock_alarm_v85.js:20, static/continue/continue_trip_v99_clean.js:165, static/continue/continue_trip_v99_clean.js:519, static/continue/continue_trip_v99_clean.js:650, static/continue/continue_trip_v99_clean.js:935, static/continue/continue_trip_v99_clean.js:1351, static/continue/continue_speed_final_v105.js:16
+q                                count=9   static/continue/continue_trip_core.js:1752, static/continue/continue_trip_ui.js:139, static/continue/continue_trip_v99_clean.js:7, static/continue/continue_trip_v99_clean.js:157, static/continue/continue_trip_v99_clean.js:515, static/continue/continue_trip_v99_clean.js:642, static/continue/continue_trip_v99_clean.js:923, static/continue/continue_trip_v99_clean.js:1339, static/continue/continue_speed_final_v105.js:8
+text                             count=9   static/continue/continue_trip_core.js:159, static/continue/continue_flow_refresh.js:24, static/continue/continue_trip_v99_clean.js:11, static/continue/continue_trip_v99_clean.js:569, static/continue/continue_trip_v99_clean.js:646, static/continue/continue_trip_v99_clean.js:847, static/continue/continue_trip_v99_clean.js:931, static/continue/continue_trip_v99_clean.js:1347, static/continue/continue_speed_final_v105.js:23
+qa                               count=5   static/continue/continue_trip_v99_clean.js:161, static/continue/continue_trip_v99_clean.js:511, static/continue/continue_trip_v99_clean.js:927, static/continue/continue_trip_v99_clean.js:1343, static/continue/continue_speed_final_v105.js:12
+boot                             count=3   static/continue/continue_bag_emanet.js:8, static/continue/continue_speed_final_v105.js:101, static/seats/voice-tts.js:143
+distKm                           count=3   static/continue/continue_trip_core.js:1814, static/continue/continue_flow_refresh.js:36, static/continue/continue_trip_v99_clean.js:698
+findCoord                        count=3   static/continue/continue_trip_core.js:1836, static/continue/continue_native_lock_alarm_v85.js:79, static/continue/continue_trip_v99_clean.js:665
+sync                             count=3   static/continue/continue_trip_core.js:85, static/continue/continue_native_lock_alarm_v85.js:123, static/continue/continue_trip_v99_clean.js:113
+toRad                            count=3   static/continue/continue_trip_core.js:1816, static/continue/continue_flow_refresh.js:38, static/continue/continue_trip_v99_clean.js:702
+buildSchedule                    count=2   static/continue/continue_trip_core.js:1860, static/continue/continue_trip_v99_clean.js:233
+clean                            count=2   static/continue/continue_trip_ui.js:206, static/continue/continue_native_lock_alarm_v85.js:16
+currentStop                      count=2   static/continue/continue_trip_core.js:2339, static/continue/continue_native_lock_alarm_v85.js:29
+currentStopName                  count=2   static/continue/continue_trip_core.js:172, static/continue/continue_flow_refresh.js:113
+esc                              count=2   static/continue/continue_trip_core.js:2322, static/continue/continue_trip_ui.js:200
+findDistanceVal                  count=2   static/continue/continue_trip_v99_clean.js:573, static/continue/continue_trip_v99_clean.js:860
+findMetricVal                    count=2   static/continue/continue_trip_v99_clean.js:280, static/continue/continue_trip_v99_clean.js:725
+formatKm                         count=2   static/continue/continue_trip_core.js:1808, static/continue/continue_trip_v99_clean.js:191
+genderClass                      count=2   static/continue/continue_trip_core.js:2356, static/continue/continue_trip_v99_clean.js:1377
+liveStopName                     count=2   static/continue/continue_trip_core.js:1900, static/continue/continue_trip_v99_clean.js:955
+num                              count=2   static/continue/continue_trip_v99_clean.js:1112, static/continue/continue_trip_v99_clean.js:1391
+pad                              count=2   static/continue/continue_trip_core.js:1767, static/continue/continue_trip_ui.js:13
+render                           count=2   static/continue/continue_trip_core.js:2363, static/continue/continue_trip_ui.js:221
+routeIndex                       count=2   static/continue/continue_trip_core.js:1830, static/continue/continue_flow_refresh.js:107
+sameStop                         count=2   static/continue/continue_trip_v99_clean.js:948, static/continue/continue_trip_v99_clean.js:1366
+setText                          count=2   static/continue/continue_trip_core.js:1754, static/continue/continue_flow_refresh.js:150
+
+===== 3) AYNI ID'YE DOKUNAN DOSYALAR =====
+#liveBagajCount                   refs=5   files=5
+  templates/continue_trip.html:132: <div class="v99-pm-val" id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</div>
+  static/continue/continue_trip_core.js:1631: const bagCountEl = document.getElementById("liveBagajCount");
+  static/continue/continue_bag_emanet.js:66: const bagEl = document.getElementById("liveBagajCount");
+  static/continue/continue_flow_refresh.js:295: const bagEl = document.getElementById("liveBagajCount");
+  static/continue/continue_native_lock_alarm_v85.js:180: document.getElementById("liveBagajCount"),
+#liveCurrentStopName              refs=10  files=5
+  templates/continue_trip.html:102: <div class="v99-prox-stop-name" id="liveCurrentStopName">{{ current_stop_name }}</div>
+  static/continue/continue_trip_core.js:63: const stopEl  = document.getElementById("liveCurrentStopName");
+  static/continue/continue_trip_core.js:97: const stopEl  = document.getElementById("liveCurrentStopName");
+  static/continue/continue_trip_core.js:142: const stopNameEl = document.getElementById("liveCurrentStopName");
+  static/continue/continue_trip_core.js:2169: const stopEl = document.getElementById("liveCurrentStopName");
+  static/continue/continue_trip_core.js:2340: const el = document.getElementById("liveCurrentStopName");
+  static/continue/continue_flow_refresh.js:114: const el = document.getElementById("liveCurrentStopName");
+  static/continue/continue_native_lock_alarm_v85.js:30: const el = document.getElementById("liveCurrentStopName");
+  static/continue/continue_native_lock_alarm_v85.js:177: document.getElementById("liveCurrentStopName"),
+  static/continue/continue_trip_v99_clean.js:774: var currentName = text(document.getElementById("liveCurrentStopName"));
+#liveBagajMetric                  refs=4   files=4
+  templates/continue_trip.html:129: <button class="v99-pm-cell" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
+  static/continue/continue_trip_core.js:141: const bagBtn = document.getElementById("liveBagajMetric");
+  static/continue/continue_bag_emanet.js:65: const metric = document.getElementById("liveBagajMetric");
+  static/continue/continue_native_lock_alarm_v85.js:181: document.getElementById("liveBagajMetric")
+#liveDistanceValue                refs=6   files=4
+  templates/continue_trip.html:114: <b id="liveDistanceValue"
+  static/continue/continue_trip_core.js:64: const distEl  = document.getElementById("liveDistanceValue");
+  static/continue/continue_trip_core.js:98: const distEl  = document.getElementById("liveDistanceValue");
+  static/continue/continue_trip_core.js:2170: const distEl = document.getElementById("liveDistanceValue");
+  static/continue/continue_native_lock_alarm_v85.js:178: document.getElementById("liveDistanceValue"),
+  static/continue/continue_trip_v99_clean.js:759: var liveDist = document.getElementById("liveDistanceValue");
+#liveOffloadCount                 refs=5   files=4
+  templates/continue_trip.html:124: <div class="v99-pm-val" id="liveOffloadCount">{{ live_current.off_count or 0 }}</div>
+  static/continue/continue_trip_core.js:1630: const offCountEl = document.getElementById("liveOffloadCount");
+  static/continue/continue_flow_refresh.js:283: const offEl = document.getElementById("liveOffloadCount");
+  static/continue/continue_native_lock_alarm_v85.js:55: const el = document.getElementById("liveOffloadCount");
+  static/continue/continue_native_lock_alarm_v85.js:179: document.getElementById("liveOffloadCount"),
+#liveEtaValue                     refs=5   files=3
+  templates/continue_trip.html:105: <span class="v99-prox-eta-val" id="liveEtaValue">{{ current_eta }}</span>
+  static/continue/continue_trip_core.js:65: const etaEl   = document.getElementById("liveEtaValue");
+  static/continue/continue_trip_core.js:99: const etaEl   = document.getElementById("liveEtaValue");
+  static/continue/continue_trip_core.js:2171: const etaEl = document.getElementById("liveEtaValue");
+  static/continue/continue_trip_ui.js:223: const eta = document.getElementById("liveEtaValue");
+#liveStopSheet                    refs=3   files=3
+  templates/continue_trip.html:222: <section class="live-stop-sheet" id="liveStopSheet" aria-hidden="true">
+  static/continue/continue_trip_core.js:145: const sheet = document.getElementById("liveStopSheet");
+  static/continue/continue_trip_ui.js:90: const liveSheet = document.getElementById("liveStopSheet");
+#bagPhotoViewer                   refs=2   files=2
+  templates/continue_trip.html:380: <div class="bag-photo-viewer" id="bagPhotoViewer" aria-hidden="true">
+  static/continue/continue_trip_ui.js:30: const viewer = document.getElementById("bagPhotoViewer");
+#bagViewerCaption                 refs=2   files=2
+  templates/continue_trip.html:397: <div class="bag-viewer-caption" id="bagViewerCaption">—</div>
+  static/continue/continue_trip_ui.js:33: const caption = document.getElementById("bagViewerCaption");
+#bagViewerClose                   refs=2   files=2
+  templates/continue_trip.html:387: <button class="bag-viewer-close" type="button" id="bagViewerClose" aria-label="Kapat">×</button>
+  static/continue/continue_trip_ui.js:34: const closeBtn = document.getElementById("bagViewerClose");
+#bagViewerImg                     refs=2   files=2
+  templates/continue_trip.html:392: <img class="bag-viewer-img" id="bagViewerImg" src="" alt="Bagaj fotoğrafı">
+  static/continue/continue_trip_ui.js:31: const img = document.getElementById("bagViewerImg");
+#bagViewerNext                    refs=2   files=2
+  templates/continue_trip.html:401: <button class="bag-viewer-btn" type="button" id="bagViewerNext">Sonraki →</button>
+  static/continue/continue_trip_ui.js:36: const nextBtn = document.getElementById("bagViewerNext");
+#bagViewerPrev                    refs=2   files=2
+  templates/continue_trip.html:400: <button class="bag-viewer-btn" type="button" id="bagViewerPrev">← Önceki</button>
+  static/continue/continue_trip_ui.js:35: const prevBtn = document.getElementById("bagViewerPrev");
+#bagViewerTitle                   refs=2   files=2
+  templates/continue_trip.html:384: <div class="bag-viewer-name" id="bagViewerTitle">Fotoğraf</div>
+  static/continue/continue_trip_ui.js:32: const title = document.getElementById("bagViewerTitle");
+#continueSeatMapBtn               refs=2   files=2
+  templates/continue_trip.html:245: <a class="v99-dock-btn dock-item" id="continueSeatMapBtn" href="{{ url_for('seats_page') }}">
+  static/continue/continue_trip_core.js:2319: const btn = document.getElementById("continueSeatMapBtn");
+#liveClockText                    refs=2   files=2
+  templates/continue_trip.html:31: <div class="v99-hdr-clock" id="liveClockText">--:--</div>
+  static/continue/continue_trip_ui.js:10: const el = document.getElementById("liveClockText");
+#liveCurrentCard                  refs=2   files=2
+  templates/continue_trip.html:82: <div class="v99-prox-card live-summary-trigger" id="liveCurrentCard" role="button" tabindex="0" aria-label="Canlı durak özetini aç">
+  static/continue/continue_trip_core.js:1648: const liveCard = document.getElementById("liveCurrentCard");
+#liveOffloadMetric                refs=2   files=2
+  templates/continue_trip.html:121: <button class="v99-pm-cell" type="button" id="liveOffloadMetric" data-kind="offload" aria-label="Bu durakta inecek koltukları göster">
+  static/continue/continue_trip_core.js:140: const offBtn = document.getElementById("liveOffloadMetric");
+#liveSpeedText                    refs=3   files=2
+  templates/continue_trip.html:52: <span class="v99-core-hidden" id="liveSpeedText">— km/sa</span>
+  static/continue/continue_trip_core.js:62: const speedEl = document.getElementById("liveSpeedText");
+  static/continue/continue_trip_core.js:96: const speedEl = document.getElementById("liveSpeedText");
+#liveStopSheetBody                refs=2   files=2
+  templates/continue_trip.html:235: <div class="sheet-body" id="liveStopSheetBody">
+  static/continue/continue_trip_core.js:149: const bodyEl = document.getElementById("liveStopSheetBody");
+#liveStopSheetClose               refs=2   files=2
+  templates/continue_trip.html:232: <button class="sheet-close" type="button" id="liveStopSheetClose" aria-label="Kapat">×</button>
+  static/continue/continue_trip_core.js:146: const closeBtn = document.getElementById("liveStopSheetClose");
+#liveStopSheetKicker              refs=2   files=2
+  templates/continue_trip.html:227: <div class="sheet-kicker" id="liveStopSheetKicker">Canlı durak</div>
+  static/continue/continue_trip_core.js:150: const kickerEl = document.getElementById("liveStopSheetKicker");
+#liveStopSheetOverlay             refs=2   files=2
+  templates/continue_trip.html:220: <div class="live-sheet-overlay" id="liveStopSheetOverlay"></div>
+  static/continue/continue_trip_core.js:144: const overlay = document.getElementById("liveStopSheetOverlay");
+#liveStopSheetSub                 refs=2   files=2
+  templates/continue_trip.html:229: <p class="sheet-sub" id="liveStopSheetSub">Yükleniyor...</p>
+  static/continue/continue_trip_core.js:148: const subEl = document.getElementById("liveStopSheetSub");
+#liveStopSheetTitle               refs=2   files=2
+  templates/continue_trip.html:228: <h2 class="sheet-title" id="liveStopSheetTitle">Durak detayı</h2>
+  static/continue/continue_trip_core.js:147: const titleEl = document.getElementById("liveStopSheetTitle");
+#liveTopStatusText                refs=2   files=2
+  templates/continue_trip.html:74: <div class="v99-gauge-val green v99-status-val" id="liveTopStatusText">Planında</div>
+  static/continue/continue_trip_ui.js:222: const top = document.getElementById("liveTopStatusText");
+#sheetSummarySpeak                refs=3   files=1
+  static/continue/continue_trip_core.js:1218: const btn = document.getElementById("sheetSummarySpeak");
+  static/continue/continue_trip_core.js:1493: <button class="sheet-summary-action speak" type="button" id="sheetSummarySpeak">Sesli Oku</button>
+  static/continue/continue_trip_core.js:1500: const speakBtn = document.getElementById("sheetSummarySpeak");
+
+===== 4) AYNI CLASS'A DOKUNAN DOSYALAR =====
+.open                             refs=12  files=3 -> static/continue/continue_trip_core.js, static/continue/continue_trip_ui.js, static/continue/continue_trip_v99_clean.js
+.stop-distance-value              refs=7   files=3 -> static/continue/continue_flow_refresh.js, static/continue/continue_trip_v99_clean.js, templates/continue_trip.html
+.?                                refs=6   files=2 -> static/continue/continue_trip_core.js, static/continue/continue_trip_v99_clean.js
+.female                           refs=2   files=2 -> static/continue/continue_trip_core.js, static/continue/continue_trip_v99_clean.js
+.has-work                         refs=3   files=2 -> static/continue/continue_bag_emanet.js, static/continue/continue_trip_core.js
+.is-empty                         refs=3   files=2 -> static/continue/continue_bag_emanet.js, static/continue/continue_trip_core.js
+.live                             refs=2   files=2 -> static/continue/continue_trip_v99_clean.js, templates/continue_trip.html
+.next                             refs=2   files=2 -> static/continue/continue_trip_v99_clean.js, templates/continue_trip.html
+.passed                           refs=2   files=2 -> static/continue/continue_trip_v99_clean.js, templates/continue_trip.html
+.sheet-bag-photo-badge            refs=3   files=2 -> static/continue/continue_trip_core.js, static/continue/continue_trip_ui.js
+.sheet-bag-photo-side             refs=3   files=2 -> static/continue/continue_trip_core.js, static/continue/continue_trip_ui.js
+.sheet-empty                      refs=14  files=2 -> static/continue/continue_trip_core.js, templates/continue_trip.html
+.sheet-kicker                     refs=2   files=2 -> static/continue/continue_trip_core.js, templates/continue_trip.html
+.upcoming                         refs=2   files=2 -> static/continue/continue_trip_v99_clean.js, templates/continue_trip.html
+.v99-tl-card                      refs=5   files=2 -> static/continue/continue_trip_v99_clean.js, templates/continue_trip.html
+.v99-tl-m-lbl                     refs=7   files=2 -> static/continue/continue_trip_v99_clean.js, templates/continue_trip.html
+.v99-tl-m-val                     refs=7   files=2 -> static/continue/continue_trip_v99_clean.js, templates/continue_trip.html
+.v99-tl-metric                    refs=7   files=2 -> static/continue/continue_trip_v99_clean.js, templates/continue_trip.html
+.v99-tl-stop-name                 refs=4   files=2 -> static/continue/continue_trip_v99_clean.js, templates/continue_trip.html
+
+===== 5) API / FETCH ÇAĞRILARI =====
+/api/live-stop-detail?stop=${encodeURIComponent         refs=3   files=2
+  static/continue/continue_trip_core.js:1558: const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stop)}&_=${Date.now()}`, {
+  static/continue/continue_trip_core.js:1600: const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stop)}&_=${Date.now()}`, {
+  static/continue/continue_flow_refresh.js:264: const res = await fetch(`/api/live-stop-detail?stop=${encodeURIComponent(stopName)}&_=${Date.now()}`, {
+/api/live-runtime-state?write=1`                        refs=2   files=1
+  static/continue/continue_trip_core.js:2154: `/api/live-runtime-state?write=1` +
+  static/continue/continue_trip_core.js:2198: `/api/live-runtime-state?write=1` +
+/api/live-consignment-deliver/${encodeURIComponent      refs=1   files=1
+  static/continue/continue_trip_core.js:784: const res = await fetch(`/api/live-consignment-deliver/${encodeURIComponent(cid)}`, {
+/api/live-consignment-detail/${encodeURIComponent       refs=1   files=1
+  static/continue/continue_trip_core.js:633: const res = await fetch(`/api/live-consignment-detail/${encodeURIComponent(cid)}?_=${Date.now()}`, {
+/api/live-runtime-state?trip_id=${encodeURIComponent    refs=1   files=1
+  static/continue/continue_trip_core.js:86: fetch(`/api/live-runtime-state?trip_id=${encodeURIComponent(tripId)}&_=${Date.now()}`, {
+/api/live-seat-bag-detail?seat_no=${encodeURIComponent  refs=1   files=1
+  static/continue/continue_trip_core.js:834: const res = await fetch(`/api/live-seat-bag-detail?seat_no=${encodeURIComponent(seatNo)}&_=${Date.now()}`, {
+/api/live-seat-destination                              refs=1   files=1
+  static/continue/continue_trip_core.js:291: const res = await fetch("/api/live-seat-destination", {
+/api/live-seat-map?_=                                   refs=1   files=1
+  static/continue/continue_trip_v99_clean.js:1301: var res = await fetch("/api/live-seat-map?_=" + Date.now(), {
+/api/live-seat-map?_=${Date.now                         refs=1   files=1
+  static/continue/continue_trip_core.js:2444: const res = await fetch(`/api/live-seat-map?_=${Date.now()}`, {
+/api/live-seat-map?_v=v99o_                             refs=1   files=1
+  static/continue/continue_trip_v99_clean.js:1532: var res = await fetch("/api/live-seat-map?_v=v99o_" + Date.now(), {
+/api/live-seat-offload                                  refs=1   files=1
+  static/continue/continue_trip_core.js:413: const res = await fetch("/api/live-seat-offload", {
+/api/live-stop-complete                                 refs=1   files=1
+  static/continue/continue_trip_core.js:1313: const res = await fetch("/api/live-stop-complete", {
+/api/live-stop-offload                                  refs=1   files=1
+  static/continue/continue_trip_core.js:537: const res = await fetch("/api/live-stop-offload", {
+/api/v99-route-segments?v=                              refs=1   files=1
+  static/continue/continue_trip_v99_clean.js:406: fetch("/api/v99-route-segments?v=" + Date.now(), {
+
+===== 6) EVENT LISTENER DAĞILIMI =====
+click                    count=43
+  templates/continue_trip.html:317: cancel.addEventListener("click", closeModal);
+  templates/continue_trip.html:319: overlay.addEventListener("click", function(e){
+  templates/continue_trip.html:367: ok.addEventListener("click", function(){
+  static/continue/continue_trip_core.js:256: cancelBtn.addEventListener("click", function(){
+  static/continue/continue_trip_core.js:263: saveBtn.addEventListener("click", saveDestinationChange);
+  static/continue/continue_trip_core.js:370: cancelBtn.addEventListener("click", function(){
+  static/continue/continue_trip_core.js:378: okBtn.addEventListener("click", function(){
+  static/continue/continue_trip_core.js:495: cancelBtn.addEventListener("click", function(){
+  static/continue/continue_trip_core.js:502: okBtn.addEventListener("click", function(){
+  static/continue/continue_trip_core.js:692: backBtn.addEventListener("click", function(){
+  static/continue/continue_trip_core.js:745: cancelBtn.addEventListener("click", function(){
+  static/continue/continue_trip_core.js:752: okBtn.addEventListener("click", function(){
+  static/continue/continue_trip_core.js:880: backBtn.addEventListener("click", function(){
+  static/continue/continue_trip_core.js:1343: document.getElementById("completeBackSummary")?.addEventListener("click", () => {
+  static/continue/continue_trip_core.js:1347: document.getElementById("completeCloseSheet")?.addEventListener("click", () => {
+  static/continue/continue_trip_core.js:1397: document.getElementById("pendingPassengersBtn")?.addEventListener("click", () => {
+DOMContentLoaded         count=12
+  static/continue/continue_trip_core.js:124: document.addEventListener("DOMContentLoaded", function(){
+  static/continue/continue_trip_core.js:2309: document.addEventListener("DOMContentLoaded", start);
+  static/continue/continue_bag_emanet.js:108: document.addEventListener("DOMContentLoaded", applyBoot);
+  static/continue/continue_flow_refresh.js:397: document.addEventListener("DOMContentLoaded", function(){
+  static/continue/continue_trip_ui.js:186: document.addEventListener("DOMContentLoaded", ensureV2);
+  static/continue/continue_trip_ui.js:241: document.addEventListener("DOMContentLoaded", render);
+  static/continue/continue_refresh_button_v49.js:8: document.addEventListener("DOMContentLoaded", fn);
+  static/continue/continue_native_lock_alarm_v85.js:166: document.addEventListener("DOMContentLoaded", sync);
+  static/continue/continue_trip_v99_clean.js:612: document.addEventListener("DOMContentLoaded", bindDistanceCells);
+  static/continue/continue_trip_v99_clean.js:1575: document.addEventListener("DOMContentLoaded", refreshSeatColors);
+  static/continue/continue_speed_final_v105.js:128: document.addEventListener("DOMContentLoaded", boot);
+  static/seats/voice-tts.js:155: document.addEventListener("DOMContentLoaded", boot);
+continueEtaUpdated       count=8
+  static/continue/continue_flow_refresh.js:415: window.addEventListener("continueEtaUpdated", function(){
+  static/continue/continue_trip_v99_clean.js:137: document.addEventListener("continueEtaUpdated", sync);
+  static/continue/continue_trip_v99_clean.js:500: document.addEventListener("continueEtaUpdated", hydrateTimeline);
+  static/continue/continue_trip_v99_clean.js:561: document.addEventListener("continueEtaUpdated", cleanTimelineArrivalValues);
+  static/continue/continue_trip_v99_clean.js:616: document.addEventListener("continueEtaUpdated", bindDistanceCells);
+  static/continue/continue_trip_v99_clean.js:836: document.addEventListener("continueEtaUpdated", hydrateGpsDistances);
+  static/continue/continue_trip_v99_clean.js:912: document.addEventListener("continueEtaUpdated", protectDistances);
+  static/continue/continue_trip_v99_clean.js:1579: document.addEventListener("continueEtaUpdated", refreshSeatColors);
+keydown                  count=5
+  templates/continue_trip.html:323: document.addEventListener("keydown", function(e){
+  static/continue/continue_trip_core.js:1655: liveCard.addEventListener("keydown", function(e){
+  static/continue/continue_trip_core.js:1725: document.addEventListener("keydown", function(e){
+  static/continue/continue_trip_core.js:2466: document.addEventListener("keydown", function(e){
+  static/continue/continue_trip_ui.js:126: document.addEventListener("keydown", function(e){
+load                     count=5
+  static/continue/continue_trip_v99_clean.js:615: window.addEventListener("load", bindDistanceCells);
+  static/continue/continue_trip_v99_clean.js:837: window.addEventListener("load", hydrateGpsDistances);
+  static/continue/continue_trip_v99_clean.js:913: window.addEventListener("load", protectDistances);
+  static/continue/continue_trip_v99_clean.js:1578: window.addEventListener("load", refreshSeatColors);
+  static/continue/continue_speed_final_v105.js:133: window.addEventListener("load", boot);
+continueLiveFlowUpdated  count=1
+  static/continue/continue_bag_emanet.js:117: document.addEventListener("continueLiveFlowUpdated", function(e){
+storage                  count=1
+  static/continue/continue_trip_v99_clean.js:138: window.addEventListener("storage", sync);
+submit                   count=1
+  templates/continue_trip.html:311: form.addEventListener("submit", function(e){
+visibilitychange         count=1
+  static/continue/continue_flow_refresh.js:408: document.addEventListener("visibilitychange", function(){
+
+===== 7) TIMER / OBSERVER DAĞILIMI =====
+static/continue/continue_trip_v99_clean.js                        count=10
+  134: setInterval(setClock, 10000);
+  135: setInterval(sync, 700);
+  495: setInterval(function(){
+  560: setInterval(cleanTimelineArrivalValues, 400);
+  619: var timer = setInterval(function(){
+  835: setInterval(hydrateGpsDistances, 900);
+  899: var obs = new MutationObserver(function(){
+  911: setInterval(protectDistances, 300);
+  1323: setInterval(markDolulukCards, 1500);
+  1582: var timer = setInterval(function(){
+static/continue/continue_trip_core.js                             count=9
+  133: setInterval(sync, 1500);
+  319: setTimeout(function(){
+  443: setTimeout(function(){
+  568: setTimeout(function(){
+  809: setTimeout(function(){
+  1227: setTimeout(function(){
+  1349: setTimeout(() => window.location.reload(), 250);
+  2178: setTimeout(() => {
+  2305: setInterval(compute, 1500);
+static/continue/continue_trip_ui.js                               count=7
+  23: setInterval(updateClock, 1000);
+  191: setTimeout(ensureV2, 150);
+  192: setTimeout(ensureV2, 800);
+  193: setInterval(syncV2Texts, 700);
+  246: setTimeout(render, 150);
+  247: setTimeout(render, 800);
+  248: setInterval(render, 700);
+static/continue/continue_native_lock_alarm_v85.js                 count=5
+  171: setTimeout(sync, 800);
+  172: setTimeout(sync, 2000);
+  173: setInterval(sync, 3000);
+  175: if(window.MutationObserver){
+  184: const obs = new MutationObserver(sync);
+static/continue/continue_speed_final_v105.js                      count=3
+  108: new MutationObserver(paint).observe(a, {
+  118: new MutationObserver(paint).observe(b, {
+  136: var timer = setInterval(function(){
+static/continue/continue_flow_refresh.js                          count=1
+  406: setInterval(refreshFlow, POLL_MS);
+static/seats/voice-tts.js                                         count=1
+  147: const timer = setInterval(function(){
+
+===== 8) GÖREV ALANINA GÖRE DOSYA YOĞUNLUĞU =====
+
+--- HIZ / SPEED ---
+static/continue/continue_trip_core.js                        hits=94
+  13: const runtimeSpeed = BOOT.runtimeSpeed || 0;
+  62: const speedEl = document.getElementById("liveSpeedText");
+  67: if(speedEl && !window.CONTINUE_LIVE_SPEED_ENGINE_ACTIVE){
+  68: const n = parseInt(runtimeSpeed || 0, 10) || 0;
+static/continue/continue_speed_final_v105.js                 hits=34
+  1: /* V105_SPEED_FINAL_POLISH_START */
+  5: if(window.__MUAVIN_V105_SPEED_FINAL__) return;
+  6: window.__MUAVIN_V105_SPEED_FINAL__ = true;
+  27: function findSpeedCard(){
+static/continue/continue_speed_final_v105.css                hits=28
+  1: /* V105_SPEED_FINAL_POLISH_START */
+  8: - Sadece dijital hız + premium alt çizgi + yumuşak ışık
+  11: .v105-speed-card{
+  17: .v105-speed-card .v99-gauge-label,
+templates/continue_trip.html                                 hits=10
+  10: <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_speed_final_v105.css') }}?v=v105-{{ trip['id'] }}">
+  50: <div class="v99-gauge-val amber" id="v99SpeedVal">0</div>
+  51: <div class="v99-gauge-unit">km/sa</div>
+  52: <span class="v99-core-hidden" id="liveSpeedText">— km/sa</span>
+static/continue/continue_trip_v99_clean.js                   hits=10
+  24: function cleanSpeed(raw){
+  117: const speedVisual = q("#v99SpeedVal");
+  118: if(speedVisual){
+  119: speedVisual.textContent = cleanSpeed(text("#liveSpeedText"));
+
+--- KM / DISTANCE ---
+static/continue/continue_trip_v99_clean.js                   hits=93
+  32: const ringKm = q("#ringKm");
+  33: if(!ring || !ringKm) return;
+  47: ringKm.textContent = "—";
+  51: ringKm.style.color = "#5a6478";
+static/continue/continue_trip_core.js                        hits=20
+  35: // DISTANCE_FORMAT_FIX_V63B
+  64: const distEl  = document.getElementById("liveDistanceValue");
+  98: const distEl  = document.getElementById("liveDistanceValue");
+  111: // API boş gps_km dönerse ekrandaki doğru mesafeyi "—" ile ezme.
+templates/continue_trip.html                                 hits=16
+  20: {% set current_distance = (live_runtime.gps_km if live_runtime and live_runtime.gps_km else live_current.distance) or "-" %}
+  94: <div class="v99-ring-km" id="ringKm">—</div>
+  114: <b id="liveDistanceValue"
+  115: class="v99-core-hidden stop-distance-value"
+static/continue/continue_trip_ui.js                          hits=13
+  153: if(!q("#continueLiveV2Distance")){
+  155: line.className = "continue-v2-distance-line";
+  156: line.innerHTML = 'Kalan mesafe: <span id="continueLiveV2Distance">—</span>';
+  171: const distance = q("#liveDistanceValue");
+static/continue/continue_flow_refresh.js                     hits=10
+  4: Alt kartlarda kalan mesafeyi GPS + durak koordinatına göre km gösterir.
+  65: function stopDistanceLabel(stopName){
+  120: return { kind:"live", status:"Canlı", eta:"Şimdi", fallbackDistance:"—" };
+  124: return { kind:"next", status:"Sıradaki", eta:"Sırada", fallbackDistance:"—" };
+static/continue/continue_native_lock_alarm_v85.js            hits=8
+  34: function distanceText(){
+  35: const ids = ["liveDistanceValue", "liveDistanceText", "liveKmValue"];
+  47: const m = txt.match(/Kalan mesafe[:\s]*([0-9]+[.,][0-9]+|[0-9]+)\s*km/i);
+  132: const km = distanceText();
+static/continue/continue_trip_v99_clean.css                  hits=2
+  865: /* Yakın mesafe pulse: çizginin kendisi nefes alsın */
+  884: #ringKm{
+
+--- ETA / STATUS ---
+static/continue/continue_trip_core.js                        hits=128
+  15: const runtimeEta = BOOT.runtimeEta || "";
+  65: const etaEl   = document.getElementById("liveEtaValue");
+  80: if(etaEl && runtimeEta){
+  81: etaEl.textContent = runtimeEta;
+static/continue/continue_trip_v99_clean.js                   hits=50
+  122: const status = text("#liveTopStatusText");
+  137: document.addEventListener("continueEtaUpdated", sync);
+  225: return String(item.planned_time || item.time || item.eta || item.saat || "").trim();
+  455: var arrivalVal = findMetricVal(card, "VARIŞ");
+static/continue/continue_flow_refresh.js                     hits=37
+  13: const DETAIL_REFRESH_MS = 2500;
+  16: let lastDetailAt = 0;
+  17: let detailSeq = 0;
+  18: let detailBusy = false;
+templates/continue_trip.html                                 hits=21
+  4: <meta charset="utf-8">
+  5: <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  19: {% set current_eta = (live_runtime.eta_main if live_runtime and live_runtime.eta_main else live_current.eta) or "-" %}
+  74: <div class="v99-gauge-val green v99-status-val" id="liveTopStatusText">Planında</div>
+static/continue/continue_trip_ui.js                          hits=17
+  50: url: el.getAttribute("href") || (image ? image.getAttribute("src") : ""),
+  51: thumb: image ? image.getAttribute("src") : "",
+  78: viewer.setAttribute("aria-hidden", "false");
+  86: viewer.setAttribute("aria-hidden", "true");
+static/continue/continue_bag_emanet.js                       hits=5
+  118: const detail = e && e.detail ? e.detail : {};
+  119: const current = detail.current || detail;
+static/continue/continue_trip_v99_clean.css                  hits=4
+  376: .v99-prox-eta-row{
+  383: .v99-prox-eta-val{
+  390: .v99-prox-eta-label{
+  1152: .v99m-detail{
+static/continue/continue_refresh_button_v49.js               hits=2
+  31: btn.setAttribute("aria-label", "Sayfayı yenile");
+  32: btn.setAttribute("title", "Sayfayı yenile");
+static/continue/continue_native_lock_alarm_v85.js            hits=2
+  102: window.AndroidLockAlarm.updateTargetV87(
+  112: window.AndroidLockAlarm.updateTarget(
+static/seats/voice-tts.js                                    hits=1
+  30: detail:{ enabled: !!value }
+
+--- DOLULUK ---
+static/continue/continue_trip_v99_clean.js                   hits=78
+  919: /* V99M_OCCUPANCY_PANEL_START */
+  974: if(q("#v99mOccSheet")) return;
+  977: overlay.id = "v99mOccOverlay";
+  978: overlay.className = "v99m-occ-overlay";
+static/continue/continue_trip_v99_clean.css                  hits=48
+  891: /* V99M_OCCUPANCY_PANEL_START */
+  893: .v99m-occ-clickable{
+  898: .v99m-occ-clickable::after{
+  908: .v99m-occ-clickable:active::after{
+templates/continue_trip.html                                 hits=6
+  16: {% set occ_count = live_summary.passenger_count or 0 %}
+  56: <div class="v99-gauge-label">DOLULUK</div>
+  57: <div class="v99-gauge-val">{{ live_summary.passenger_count }} / {{ live_summary.total_seats }}</div>
+  64: <span class="g-m">♂ {{ live_summary.male_count or 0 }}</span>
+
+--- KOLTUK ---
+static/continue/continue_trip_v99_clean.js                   hits=202
+  634: koltuk ekranındaki mantık gibi mevcut GPS konumu -> durak koordinatı
+  989: <h3 class="v99m-title">Koltuk Haritası</h3>
+  1006: <span>GÖRSEL KOLTUK PLANI</span>
+  1010: <div class="v99m-map" id="v99mSeatMap"></div>
+static/continue/continue_trip_core.js                        hits=185
+  207: function findPassenger(seatNo){
+  212: return passengers.find(p => text(p.seat_no) === text(seatNo));
+  217: renderEmpty("Koltuk bilgisi bulunamadı.");
+  222: titleEl.textContent = `Koltuk ${passenger.seat_no}`;
+static/continue/continue_trip_v99_clean.css                  hits=62
+  1067: .v99m-seat{
+  1082: .v99m-seat.free{
+  1087: .v99m-seat.occ{
+  1092: .v99m-seat.off{
+static/continue/continue_flow_refresh.js                     hits=8
+  225: Bagaj hesabında ana kaynak yolcu/koltuk bagajıdır.
+  227: önce passengers içinden gerçek koltuk bagajını topluyoruz.
+  229: let seatBagTotal = passengers.reduce((sum, p) => {
+  239: let bagTotal = seatBagTotal;
+static/seats/voice-tts.js                                    hits=8
+  2: SEATS UNIFIED VOICE MODULE
+  8: if(window.__SeatsVoiceUnifiedReady) return;
+  9: window.__SeatsVoiceUnifiedReady = true;
+  111: window.SeatsSpeak = speak;
+templates/continue_trip.html                                 hits=7
+  15: {% set occ_total = live_summary.total_seats or 1 %}
+  57: <div class="v99-gauge-val">{{ live_summary.passenger_count }} / {{ live_summary.total_seats }}</div>
+  121: <button class="v99-pm-cell" type="button" id="liveOffloadMetric" data-kind="offload" aria-label="Bu durakta inecek koltukları göster">
+  245: <a class="v99-dock-btn dock-item" id="continueSeatMapBtn" href="{{ url_for('seats_page') }}">
+static/continue/continue_bag_emanet.js                       hits=4
+  20: if(data && data.seat_bag_count !== undefined) return numberValue(data.seat_bag_count, 0);
+  122: seat_bag_count: current.seat_bag_count,
+
+--- BAGAJ / EMANET ---
+static/continue/continue_trip_core.js                        hits=167
+  141: const bagBtn = document.getElementById("liveBagajMetric");
+  242: Kaydedince koltuğun iniş durağı değişir. Koltuğa bağlı bagaj bilgisi de yeni durağın bagaj listesinde görünür.
+  257: if(lastKind === "bagaj") renderBags(lastDetailData || {});
+  350: ${bag > 0 ? `🧳 ${bag} bagaj teslim edildi sayılıp temizlenecek.` : "🧳 Bagaj yok."}
+static/continue/continue_bag_emanet.js                       hits=58
+  2: continue_bag_emanet.js
+  3: Bagaj / emanet görünüm yöneticisi
+  4: Not: Bagaj sayısını artık 500 ms'de bir zorla ezmez.
+  21: if(data && data.bagaj_count !== undefined) return numberValue(data.bagaj_count, 0);
+templates/continue_trip.html                                 hits=26
+  129: <button class="v99-pm-cell" type="button" id="liveBagajMetric" data-kind="bagaj" aria-label="Bu durakta indirilecek bagajları göster">
+  132: <div class="v99-pm-val" id="liveBagajCount">{{ live_current.bagaj_count or 0 }}</div>
+  133: <span id="liveEmanetCount" hidden></span>
+  134: <div class="v99-pm-lbl">BAGAJ</div>
+static/continue/continue_flow_refresh.js                     hits=24
+  222: const consignments = Array.isArray(data.consignments) ? data.consignments : [];
+  225: Bagaj hesabında ana kaynak yolcu/koltuk bagajıdır.
+  226: data.bag_total bazı eski hesaplarda emanetle birleşebildiği için
+  227: önce passengers içinden gerçek koltuk bagajını topluyoruz.
+static/continue/continue_native_lock_alarm_v85.js            hits=8
+  61: "#liveBagajCount",
+  63: "#liveBagajMetric",
+  180: document.getElementById("liveBagajCount"),
+  181: document.getElementById("liveBagajMetric")
+static/continue/continue_trip_v99_clean.js                   hits=5
+  1144: return a + num(s.bag_count || s.bag_total || s.bagaj_count);
+  1172: <div class="l">BAGAJ</div>
+  1282: var bag = num(s.bag_count || s.bag_total || s.bagaj_count);
+  1287: Bagaj: <b>${bag}</b>
+static/continue/continue_trip_ui.js                          hits=3
+  44: return Array.from(document.querySelectorAll(".sheet-bag-photo, .sheet-cargo-photo")).map((el, i) => {
+  97: const photo = e.target.closest(".sheet-bag-photo, .sheet-cargo-photo");
+  102: const currentList = Array.from(document.querySelectorAll(".sheet-bag-photo, .sheet-cargo-photo"));
+static/continue/continue_trip_v99_clean.css                  hits=1
+  1301: /* Bagaj rozeti */
+
+--- CANLI DURAK ---
+static/continue/continue_trip_core.js                        hits=75
+  8: /* ===== SCRIPT BLOCK: continue-trip-runtime-sync ===== */
+  12: const runtimeGpsKm = BOOT.runtimeGpsKm || "";
+  13: const runtimeSpeed = BOOT.runtimeSpeed || 0;
+  14: const runtimeStop = BOOT.runtimeStop || "";
+templates/continue_trip.html                                 hits=40
+  18: {% set current_stop_name = (live_runtime.live_stop if live_runtime and live_runtime.live_stop else live_current.name) or "Durak seçilmedi" %}
+  19: {% set current_eta = (live_runtime.eta_main if live_runtime and live_runtime.eta_main else live_current.eta) or "-" %}
+  20: {% set current_distance = (live_runtime.gps_km if live_runtime and live_runtime.gps_km else live_current.distance) or "-" %}
+  102: <div class="v99-prox-stop-name" id="liveCurrentStopName">{{ current_stop_name }}</div>
+static/continue/continue_trip_v99_clean.js                   hits=27
+  83: const current = text("#liveCurrentStopName");
+  379: function computeDistance(names, currentIdx, targetIdx, runtimeKm, schedule){
+  382: if(targetIdx === currentIdx) return runtimeKm !== null ? runtimeKm : 0;
+  384: var sum = runtimeKm !== null ? runtimeKm : 0;
+static/continue/continue_native_lock_alarm_v85.js            hits=6
+  29: function currentStop(){
+  30: const el = document.getElementById("liveCurrentStopName");
+  127: const stop = currentStop();
+  177: document.getElementById("liveCurrentStopName"),
+static/continue/continue_flow_refresh.js                     hits=5
+  113: function currentStopName(){
+  114: const el = document.getElementById("liveCurrentStopName");
+  302: name: data.stop || currentStopName(),
+  374: const current = currentStopName();
+static/continue/continue_trip_ui.js                          hits=1
+  90: const liveSheet = document.getElementById("liveStopSheet");
+
+--- TIMELINE ---
+static/continue/continue_trip_v99_clean.js                   hits=50
+  84: const bar = q("#routeBar");
+  85: const pctEl = q("#distPct");
+  282: var metrics = qa(".v99-tl-metric", card);
+  285: var lbl = q(".v99-tl-m-lbl", metrics[i]);
+static/continue/continue_trip_v99_clean.css                  hits=33
+  515: /* TIMELINE */
+  516: .v99-timeline-section{
+  538: .v99-tl{
+  545: .v99-tl-item{
+templates/continue_trip.html                                 hits=25
+  142: <span id="distPct">%0 tamamlandı</span>
+  147: <div class="v99-dist-fill" id="routeBar" style="width:0%"></div>
+  154: <section class="v99-timeline-section">
+  157: <div class="v99-tl" id="tlContainer">
+static/continue/continue_flow_refresh.js                     hits=1
+  147: return Array.from(document.querySelectorAll(".timeline .journey-card .card.regular"));
+
+--- SHEET / MODAL ---
+static/continue/continue_trip_core.js                        hits=253
+  138: /* ===== SCRIPT BLOCK: live-stop-sheet-script ===== */
+  144: const overlay = document.getElementById("liveStopSheetOverlay");
+  145: const sheet = document.getElementById("liveStopSheet");
+  146: const closeBtn = document.getElementById("liveStopSheetClose");
+templates/continue_trip.html                                 hits=51
+  8: <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip.css') }}?v=refresh-v49">
+  9: <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_trip_v99_clean.css') }}?v=v99-clean-{{ trip['id'] }}">
+  10: <link rel="stylesheet" href="{{ url_for('static', filename='continue/continue_speed_final_v105.css') }}?v=v105-{{ trip['id'] }}">
+  220: <div class="live-sheet-overlay" id="liveStopSheetOverlay"></div>
+static/continue/continue_trip_v99_clean.js                   hits=26
+  974: if(q("#v99mOccSheet")) return;
+  976: var overlay = document.createElement("div");
+  977: overlay.id = "v99mOccOverlay";
+  978: overlay.className = "v99m-occ-overlay";
+static/continue/continue_trip_ui.js                          hits=14
+  44: return Array.from(document.querySelectorAll(".sheet-bag-photo, .sheet-cargo-photo")).map((el, i) => {
+  45: const badge = el.querySelector(".sheet-bag-photo-badge");
+  46: const side = el.querySelector(".sheet-bag-photo-side");
+  89: // Canlı durak sheet açıksa body kilidi kalsın; yoksa serbest bırak.
+static/continue/continue_trip_v99_clean.css                  hits=5
+  913: .v99m-occ-overlay{
+  925: .v99m-occ-overlay.open{
+  930: .v99m-occ-sheet{
+  952: .v99m-occ-sheet.open{
+
+--- TTS / SES ---
+static/seats/voice-tts.js                                    hits=44
+  2: SEATS UNIFIED VOICE MODULE
+  4: Tarayıcıda speechSynthesis, APK’da AndroidTTS kullanır.
+  8: if(window.__SeatsVoiceUnifiedReady) return;
+  9: window.__SeatsVoiceUnifiedReady = true;
+static/continue/continue_trip_core.js                        hits=43
+  1213: function speakStopSummary(data){
+  1216: function setSpeakState(text){
+  1218: const btn = document.getElementById("sheetSummarySpeak");
+  1234: setSpeakState("Metin yok");
+templates/continue_trip.html                                 hits=6
+  258: <i>📣</i><span>ANONS</span>
+  376: <!-- CONTINUE_TTS_BRIDGE_START -->
+  377: <script src="/static/seats/voice-tts.js?v=continue-tts-bridge-1"></script>
+  378: <!-- CONTINUE_TTS_BRIDGE_END -->
+
+===== 9) OTOMATİK REFACTOR ÖNERİSİ =====
+1) continue_trip_core.js çok fazla iş yapıyor: canlı sheet, offload, emanet, GPS, ETA, seat map aynı dosyada.
+2) continue_trip_v99_clean.js içinde hem görsel sync hem km engine hem doluluk paneli hem koltuk renklendirme var.
+3) Hız/KM/ETA tarafı core.js + v99_clean.js + flow_refresh.js + v105.js arasında paylaşılıyor. Yeni yama burada çakışma üretir.
+4) İlk güvenli refactor düzeltme değil, modül çıkarma olmalı: önce bağımsız küçük dosyaları ayırmak.
+5) En güvenli ilk taşıma adayı: template içindeki end-trip inline script. Çünkü ekran davranışlarından izole.
+6) İkinci aday: continue_speed_final_v105 zaten ayrı dosya; bu haliyle kalsın, ana dosyaya gömülmesin.
+7) Üçüncü aday: continue_trip_core.js içindeki canlı sheet/offload/emanet işleri ayrı modüle bölünmeli ama bu daha riskli.
+
+✅ Rapor kaydedildi: /data/data/com.termux/files/home/Host-Hostes-Paneli/run_logs/continue_step2_overlap_map.txt
